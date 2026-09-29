@@ -6,10 +6,12 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 struct SDL_Window;
 struct SDL_Renderer;
+struct SDL_Gamepad;
 
 namespace luna::platform {
 
@@ -31,7 +33,8 @@ public:
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
 
-    // Appends everything that happened since the last call to `events`.
+    // Appends everything that happened since the last call to `events`. Also opens
+    // gamepads when they are plugged in and closes them when they are removed.
     void pollEvents(std::vector<Event>& events);
 
     void clear(int red, int green, int blue);
@@ -48,9 +51,14 @@ private:
     struct RendererDeleter {
         void operator()(SDL_Renderer* renderer) const;
     };
+    struct GamepadDeleter {
+        void operator()(SDL_Gamepad* gamepad) const;
+    };
+    using GamepadHandle = std::unique_ptr<SDL_Gamepad, GamepadDeleter>;
 
     std::unique_ptr<SDL_Window, WindowDeleter> window_;
     std::unique_ptr<SDL_Renderer, RendererDeleter> renderer_;
+    std::vector<std::pair<int, GamepadHandle>> gamepads_; // (gamepad id, open gamepad)
     bool vsync_ = false;
 };
 

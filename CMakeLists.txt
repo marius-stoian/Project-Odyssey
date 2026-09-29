@@ -63,6 +63,7 @@ odysseus_apply_settings(odysseus_core)
 
 add_library(luna_platform STATIC
     src/luna/platform/layer.cpp
+    src/luna/platform/sdl_events.cpp
     src/luna/platform/system.cpp
     src/luna/platform/user_paths.cpp
     src/luna/platform/window.cpp)
@@ -76,7 +77,8 @@ add_library(luna_engine STATIC
     src/luna/engine/layer.cpp
     src/luna/engine/application.cpp
     src/luna/engine/fixed_step_clock.cpp
-    src/luna/engine/frame_stats.cpp)
+    src/luna/engine/frame_stats.cpp
+    src/luna/engine/input.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
@@ -144,6 +146,7 @@ endforeach()
 # --- Luna tests: headless unit tests with the Engine identity (Engine, Platform, Core) ---
 add_executable(luna_tests
     tests/main.cpp
+    tests/luna/input_test.cpp
     tests/luna/loop_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
@@ -155,3 +158,17 @@ add_test(NAME "US-020 Open and close"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us020 -DQUIT_AFTER=3
             -P "${PROJECT_SOURCE_DIR}/tests/luna/run_game_window.cmake")
 set_tests_properties("US-020 Open and close" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- Platform tests: Platform identity, may use SDL3 (US-021 event translation) ---
+add_executable(luna_platform_tests
+    tests/main.cpp
+    tests/luna/sdl_events_test.cpp)
+target_link_libraries(luna_platform_tests PRIVATE luna_platform SDL3::SDL3 doctest::doctest)
+target_compile_definitions(luna_platform_tests PRIVATE ODYSSEUS_LAYER_PLATFORM)
+odysseus_apply_settings(luna_platform_tests)
+add_test(NAME luna_platform_tests COMMAND luna_platform_tests)
+
+# --- US-021: Game code reads intents only (ARC-03) ---
+add_test(NAME "US-021 Game reads only intents"
+    COMMAND "${CMAKE_COMMAND}" -DSOURCE_DIR=${PROJECT_SOURCE_DIR}
+            -P "${PROJECT_SOURCE_DIR}/tests/luna/check_game_reads_intents.cmake")

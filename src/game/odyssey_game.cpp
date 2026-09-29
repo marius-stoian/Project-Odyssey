@@ -6,8 +6,8 @@
 
 namespace odysseus::game {
 
-void OdysseyGame::update() {
-    ++ticks_;
+void OdysseyGame::update(const luna::engine::Intents& /*intents*/) {
+    ++ticks_; // US-024 moves the character with the intents
 }
 
 void OdysseyGame::render(double /*alpha*/) {
