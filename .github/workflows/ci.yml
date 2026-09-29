@@ -1,0 +1,52 @@
+# Builds Debug and Release and runs every test on each push (US-002, ADR-014).
+# It uses the same CMake presets as the owner's PC, so "works on my machine" means "works in CI".
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows-x64:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out Odysseus
+        uses: actions/checkout@v7
+
+      - name: Read the vcpkg baseline from vcpkg.json
+        id: baseline
+        shell: pwsh
+        run: |
+          $baseline = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
+          "sha=$baseline" >> $env:GITHUB_OUTPUT
+
+      - name: Check out vcpkg at that baseline
+        uses: actions/checkout@v7
+        with:
+          repository: microsoft/vcpkg
+          ref: ${{ steps.baseline.outputs.sha }}
+          path: vcpkg
+          fetch-depth: 0
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: |
+          ./vcpkg/bootstrap-vcpkg.bat -disableMetrics
+          "VCPKG_ROOT=$env:GITHUB_WORKSPACE\vcpkg" >> $env:GITHUB_ENV
+
+      - name: Configure
+        run: cmake --preset windows-x64-debug
+
+      - name: Build Debug
+        run: cmake --build --preset windows-x64-debug
+
+      - name: Build Release
+        run: cmake --build --preset windows-x64-release
+
+      - name: Test Debug
+        run: ctest --preset windows-x64-debug
+
+      - name: Test Release
+        run: ctest --preset windows-x64-release
