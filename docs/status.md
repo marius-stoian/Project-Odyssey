@@ -4,7 +4,7 @@ Codex v1.1. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
-| P-000 | - | - | Blocked (D-12: toolchain missing; steps 1-7 and 9 done, re-run step 8) | 2026-09-29 |
+| P-000 | - | - | Done | 2026-09-29 |
 | K-M0 | - | M0 | To do |  |
 | S-US-001 | US-001 | M0 | To do |  |
 | S-US-002 | US-002 | M0 | To do |  |

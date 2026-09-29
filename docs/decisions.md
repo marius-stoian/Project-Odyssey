@@ -15,7 +15,7 @@ The only way agents learn a decision. The owner answers in the last column and s
 | D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Proposed |  |
 | D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Proposed |  |
 | D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Open |  |
-| D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Open |  |
+| D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided | 2026-09-29, installed by Mraw at the owner's request: Visual Studio Community 2026 (C++ desktop workload + AddressSanitizer), CMake 4.4.3, vcpkg at C:\dev\vcpkg (VCPKG_ROOT set), GitHub CLI 2.101.0. GitHub account marius-stoian; private repo marius-stoian/Project-Odyssey. |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Open |  |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |  |
 | D-15 | Technical chain: M0 > M1 > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |  |
