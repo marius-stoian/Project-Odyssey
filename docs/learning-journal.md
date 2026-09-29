@@ -131,3 +131,22 @@ class WindowRenderer final : public Renderer { ... };  // one way to keep it
 **Try it (15 minutes).** In `placeholder_art.cpp`, change `kTunic` to your favourite colour. Run the game with `odysseus.exe --quit-after 3 --screenshot hero.bmp` and open `hero.bmp`. Then resize the game window while it runs and watch the log report the new scale.
 
 **Check yourself.** Why can the game's drawing code be tested without opening a window?
+
+## US-023: Show a tile map with a following camera (2026-09-30)
+
+**What we built.** A 64 x 64 world of grass, paths, rocks and a pond around the hero, seen through a camera that glides after its target and stops at the edges of the world. Only the roughly 135 tiles on screen are drawn, not all 4096.
+
+**The idea: a 2D grid stored in a 1D vector.** A map feels two-dimensional, but memory is one long line. So we store row after row in one `std::vector` and compute where cell (x, y) lives:
+
+```cpp
+// row y starts after y full rows of `width` cells, then step x along it
+return tiles_[y * width_ + x];
+```
+
+One allocation instead of 64 separate rows, and neighbours sit next to each other in memory, which is fast. The same trick is used for images (4 bytes per pixel, row after row).
+
+**Where to look.** [src/luna/engine/tile_map.cpp](../src/luna/engine/tile_map.cpp) (`at()` and `visibleTiles()`), [src/luna/engine/camera.cpp](../src/luna/engine/camera.cpp) (`follow()`: a quarter of the way per tick), [src/game/test_map.cpp](../src/game/test_map.cpp) (how the valley is laid out).
+
+**Try it (15 minutes).** In `test_map.cpp`, make the pond bigger (change `20` to `40` in the pond formula) and move it next to the crossing. Run the game with `--quit-after 2 --screenshot map.bmp` and look.
+
+**Check yourself.** In a map 64 cells wide, at which index does cell (3, 2) live?

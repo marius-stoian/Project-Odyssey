@@ -2,13 +2,26 @@
 
 #include "core/version.h"
 #include "game/placeholder_art.h"
+#include "game/test_map.h"
 
 #include <string>
 
 namespace odysseus::game {
 
+namespace {
+constexpr int kVirtualWidth = 480;
+constexpr int kVirtualHeight = 270;
+} // namespace
+
+OdysseyGame::OdysseyGame()
+    : map_(makeTestMap()), camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
+      heroX_(map_.pixelWidth() / 2.0 + kTileSize / 2.0), heroY_(map_.pixelHeight() / 2.0 + kTileSize / 2.0) {
+    camera_.centreOn(heroX_, heroY_);
+}
+
 void OdysseyGame::update(const luna::engine::Intents& /*intents*/) {
-    ++ticks_; // US-024 moves the character with the intents
+    ++ticks_;
+    camera_.follow(heroX_, heroY_); // US-024 moves the hero with the intents
 }
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {
@@ -16,11 +29,13 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     tiles_ = renderer.createTexture(makeTileSheet());
 }
 
-void OdysseyGame::render(luna::engine::Renderer& renderer, double /*alpha*/) {
-    // US-022: the hero, idle and facing the player, in the middle of the 480x270 screen.
-    // US-023 adds the map around them, US-024 makes them walk.
+void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
+    map_.draw(renderer, tiles_, camera_, alpha);
+    // The hero, idle and facing the player; their feet at (heroX_, heroY_).
+    const luna::engine::Rect view = camera_.view(alpha);
     const luna::engine::Rect idleSouth{0, 0, kCharacterWidth, kCharacterHeight};
-    renderer.draw(characters_, idleSouth, {(480 - kCharacterWidth) / 2, (270 - kCharacterHeight) / 2});
+    renderer.draw(characters_, idleSouth,
+                  {static_cast<int>(heroX_) - kCharacterWidth / 2 - view.x, static_cast<int>(heroY_) - kCharacterHeight - view.y});
 }
 
 std::uint64_t OdysseyGame::ticks() const {

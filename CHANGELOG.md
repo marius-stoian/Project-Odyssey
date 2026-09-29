@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-023 / S-US-023: Show a tile map with a following camera (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Engine: `TileMap` (2D grid in one vector, solid tiles, `visibleTiles`, draws only what the camera sees), `Camera` (smooth follow, interpolation, whole pixels, clamped to the world).
+- Game: the 64x64 test valley (`test_map.cpp`); the map drawn through the camera with the hero on top.
+- Tests: `US-023 Only visible tiles are drawn`, `US-023 Camera follows and stops at the map edges`, TileMap grid test.
+- Verification: 0 warnings; ctest 10/10 Debug and Release; screenshot `docs/evidence/US-023/game-map.png`.
+
 ## US-022 / S-US-022: Draw sprites with crisp pixels (Claude) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.

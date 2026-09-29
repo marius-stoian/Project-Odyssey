@@ -79,7 +79,9 @@ add_library(luna_engine STATIC
     src/luna/engine/fixed_step_clock.cpp
     src/luna/engine/frame_stats.cpp
     src/luna/engine/input.cpp
-    src/luna/engine/renderer.cpp)
+    src/luna/engine/renderer.cpp
+    src/luna/engine/camera.cpp
+    src/luna/engine/tile_map.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
@@ -92,7 +94,8 @@ odysseus_apply_settings(odysseus_sim)
 add_library(odysseus_game STATIC
     src/game/layer.cpp
     src/game/odyssey_game.cpp
-    src/game/placeholder_art.cpp)
+    src/game/placeholder_art.cpp
+    src/game/test_map.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
@@ -150,7 +153,8 @@ add_executable(luna_tests
     tests/main.cpp
     tests/luna/input_test.cpp
     tests/luna/loop_test.cpp
-    tests/luna/pixel_scale_test.cpp)
+    tests/luna/pixel_scale_test.cpp
+    tests/luna/tile_map_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
