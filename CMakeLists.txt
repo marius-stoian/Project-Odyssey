@@ -84,7 +84,8 @@ add_library(luna_physics STATIC
     src/luna/physics/vec3.cpp
     src/luna/physics/quat.cpp
     src/luna/physics/shapes.cpp
-    src/luna/physics/spatial_grid.cpp)
+    src/luna/physics/spatial_grid.cpp
+    src/luna/physics/ballistics.cpp)
 target_link_libraries(luna_physics PUBLIC odysseus_core)
 odysseus_register_layer(luna_physics physics luna/physics)
 odysseus_apply_settings(luna_physics)
@@ -179,7 +180,8 @@ add_executable(luna_physics_tests
     tests/physics/fixed_test.cpp
     tests/physics/rotation_test.cpp
     tests/physics/determinism_test.cpp
-    tests/physics/shapes_test.cpp)
+    tests/physics/shapes_test.cpp
+    tests/physics/ballistics_test.cpp)
 target_link_libraries(luna_physics_tests PRIVATE luna_physics doctest::doctest)
 target_compile_definitions(luna_physics_tests PRIVATE ODYSSEUS_LAYER_PHYSICS)
 odysseus_apply_settings(luna_physics_tests)
