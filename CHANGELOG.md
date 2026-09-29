@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Codex v1.5 and K-M1b (Anima, Mraw) — 2026-09-30
+
+**State:** On `qa`.
+
+- Codex v1.5 (Anima): Limit.md and `tools/verify.ps1` are state files; L-01 continues paused story branches, verifies with `verify.ps1`, updates Limit.md; the Charter says how to stop safely at usage limits; section 0: Dominus designs, implements and tests, Anima alone writes the Codex; continuous assembly; P-004.
+- K-M1b: `docs/plans/M1b-physics-design.md` (fixed-point 32.32 with portable 128-bit arithmetic, Vec3 and quaternions, shapes and swept tests, spatial grid, integrator, ballistics and aim solver, rigid bodies, materials, top-down drawing of 3D).
+- Session end: Milestone-10.md (AP-011), Limit.md points the next chat at S-US-025.
+
 ## Luna Physics added to the requirements and the Codex (Dominus, Anima) — 2026-09-30
 
 **State:** On `qa`. Owner decisions of 2026-09-30: Luna gets its own physics, core in the MVP, full 3D math, built right after M1.
