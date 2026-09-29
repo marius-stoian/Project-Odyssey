@@ -246,3 +246,21 @@ Units keep us honest: velocity (m/s) x dt (s) gives metres, so both sides of `po
 **Try it (15 minutes).** In `tests/physics/ballistics_test.cpp`, change the crosswind in `US-027 Drag and wind` from 5 to 10 m/s and read the MESSAGE lines: does the drift double? Then set `kProjectileSubsteps` to 1 and watch the range error in `US-027 Arc` grow.
 
 **Check yourself.** Why does air drag make the aim solver choose a slightly higher angle than the vacuum formula?
+
+## US-028: Push and bounce bodies (2026-09-30)
+
+**What we built.** Things in the world have mass now. A shove changes a body's velocity by impulse / mass, a dropped ball bounces to a quarter of its height each time (restitution 0.5) and then lies still, and a crate sliding on grass stops exactly where the friction formula says.
+
+**The idea: classes with invariants, and fixed-timestep integration.** An invariant is a rule that must always be true, such as "the mass is positive". `RigidBody` keeps its data `private` and checks the rules once, in the constructor:
+
+```cpp
+ODYSSEUS_ASSERT(mass > kFixedZero, "a rigid body needs a positive mass");
+```
+
+After that, the only way to change a body is through its member functions (`applyImpulse`, `step`), which keep the rules. Each `step` advances time by a fixed amount (1/20 s). Inside the step we use the exact formula for constant acceleration, x += v t + a t^2 / 2, and we work out the exact moment the ball touches the ground, so the bounce heights come out right to five digits.
+
+**Where to look.** [src/luna/physics/rigid_body.cpp:93](../src/luna/physics/rigid_body.cpp) (`step`: flying, bouncing, sliding, sleeping), [src/luna/physics/rigid_body.cpp:57](../src/luna/physics/rigid_body.cpp) (`flyFor`).
+
+**Try it (15 minutes).** In `tests/physics/rigid_body_test.cpp`, give the ball restitution 0.8 and change the expected ratio to 0.64 (e^2). Run `luna_physics_tests.exe --test-case="US-028 Bounce*"` and read the bounce heights.
+
+**Check yourself.** What would go wrong if `mass_` were a public member that any code could set to 0?
