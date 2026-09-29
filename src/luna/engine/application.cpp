@@ -4,6 +4,7 @@
 #include "luna/engine/fixed_step_clock.h"
 #include "luna/engine/frame_stats.h"
 #include "luna/engine/input.h"
+#include "luna/engine/renderer.h"
 #include "luna/platform/system.h"
 #include "luna/platform/window.h"
 
@@ -33,6 +34,15 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
                         config.windowHeight, config.virtualWidth, config.virtualHeight,
                         window.vsyncEnabled() ? "on" : "off"));
 
+    WindowRenderer renderer(window);
+    const auto logScale = [&](int width, int height) {
+        const PixelScale pixels = integerScale(width, height, config.virtualWidth, config.virtualHeight);
+        logInfo(std::format("Window {}x{}: pixel art scaled x{}, picture {}x{} at ({}, {})", width, height, pixels.scale,
+                            pixels.area.width, pixels.area.height, pixels.area.x, pixels.area.y));
+    };
+    logScale(config.windowWidth, config.windowHeight);
+    game.start(renderer);
+
     FixedStepClock clock(config.ticksPerSecond);
     FrameStats stats;
     InputMap input;
@@ -57,6 +67,8 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
                 logInfo(std::format("Gamepad {} connected", event.gamepad));
             } else if (event.type == platform::EventType::GamepadRemoved) {
                 logInfo(std::format("Gamepad {} disconnected", event.gamepad));
+            } else if (event.type == platform::EventType::WindowResized) {
+                logScale(event.width, event.height);
             }
             input.handle(event);
         }
@@ -67,7 +79,11 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
         }
 
         window.clear(config.clearRed, config.clearGreen, config.clearBlue);
-        game.render(clock.alpha());
+        game.render(renderer, clock.alpha());
+        if (!running && !options.screenshot.empty()) {
+            window.saveScreenshot(options.screenshot); // the last frame, just before closing
+            logInfo(std::format("Screenshot saved: {}", options.screenshot.string()));
+        }
         window.present();
 
         if (firstFrame) {

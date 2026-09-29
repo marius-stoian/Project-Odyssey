@@ -41,7 +41,7 @@ The programs land in `build\windows-x64\bin\Debug\` and `build\windows-x64\bin\R
 | `odysseus_tests.exe` | All automated tests. |
 
 ## Run
-The programs are console programs for now, so start them from a terminal (a double-click opens and closes a window instantly):
+`odysseus.exe` opens the game window (1280 x 720, resizable). Options: `--quit-after <seconds>` closes it automatically, `--screenshot <file.bmp>` saves the last frame, `--log-dir <folder>` writes the log elsewhere.
 
 ```powershell
 .\build\windows-x64\bin\Release\odysseus.exe

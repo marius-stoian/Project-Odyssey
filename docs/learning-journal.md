@@ -108,3 +108,26 @@ if (intents.held(Intent::MoveUp)) { /* walk */ }   // no keys here
 **Try it (15 minutes).** Add a binding so that the key Q also means `OpenMenu`: add `Q` to `Key` in `events.h`, map `SDL_SCANCODE_Q` in `sdl_events.cpp`, and add it to `keyBinding()`. Then add a check to `tests/luna/input_test.cpp` and run `luna_tests`.
 
 **Check yourself.** Why does Luna use `SDL_SCANCODE_W` (a key's position) instead of the letter W?
+
+## US-022: Draw sprites with crisp pixels (2026-09-30)
+
+**What we built.** The hero appears on screen as sharp pixel art. Everything is drawn on a small 480 x 270 "virtual screen" and scaled up by a whole number (x2, x3, x4...), with black bars for the leftover space, so pixels never blur.
+
+**The idea: interfaces with virtual functions.** `Renderer` is an *interface*: a list of promises (`createTexture`, `draw`) with no code. `WindowRenderer` keeps the promises by drawing into the real window; `RecordingRenderer` keeps them by just writing down what was asked, which is perfect for tests. The game only knows `Renderer&`, so it works with either:
+
+```cpp
+class Renderer {                       // the promise
+public:
+    virtual ~Renderer() = default;
+    virtual void draw(const Texture& texture, const Rect& source, Point at) = 0;
+};
+class WindowRenderer final : public Renderer { ... };  // one way to keep it
+```
+
+`virtual` means "decide at run time which version to call". When we switch to SDL_GPU later (ADR-003), only one new class is written; the game does not change.
+
+**Where to look.** [src/luna/engine/renderer.h](../src/luna/engine/renderer.h), [src/game/placeholder_art.cpp](../src/game/placeholder_art.cpp) (the hero is drawn with rectangles), [tests/luna/pixels_window_test.cpp](../tests/luna/pixels_window_test.cpp) (how we prove "no blur").
+
+**Try it (15 minutes).** In `placeholder_art.cpp`, change `kTunic` to your favourite colour. Run the game with `odysseus.exe --quit-after 3 --screenshot hero.bmp` and open `hero.bmp`. Then resize the game window while it runs and watch the log report the new scale.
+
+**Check yourself.** Why can the game's drawing code be tested without opening a window?

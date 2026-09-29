@@ -16,7 +16,7 @@ Codex v1.3. Edited only by mraw-orchestrator.
 | K-M1 | - | M1 | Done | 2026-09-30 |
 | S-US-020 | US-020 | M1 | Done | 2026-09-30 |
 | S-US-021 | US-021 | M1 | Done | 2026-09-30 |
-| S-US-022 | US-022 | M1 | To do |  |
+| S-US-022 | US-022 | M1 | Done | 2026-09-30 |
 | S-US-023 | US-023 | M1 | To do |  |
 | S-US-024 | US-024 | M1 | To do |  |
 | X-M1 | - | M1 | To do |  |
