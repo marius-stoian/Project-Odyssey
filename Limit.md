@@ -2,12 +2,12 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-021 (Milestone-5.md, AP-006).
+**Last updated:** 2026-09-30, after US-022 (Milestone-6.md, AP-007).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
-- Codex v1.3, requirements v1.4. Done: P-000..P-002, all of M0 (tagged `m0-done` on `main`), K-M1, US-020, US-021.
-- **Next prompt: S-US-022** (crisp pixel-art sprites), then US-023 (tile map + camera), US-024 (walking character), X-M1.
+- Codex v1.3, requirements v1.4. Done: P-000..P-002, all of M0 (tagged `m0-done` on `main`), K-M1, US-020, US-021, US-022.
+- **Next prompt: S-US-023** (tile map + camera), then US-024 (walking character), X-M1.
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue
