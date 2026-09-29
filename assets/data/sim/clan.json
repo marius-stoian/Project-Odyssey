@@ -1,0 +1,5 @@
+{
+  "startingPeople": 20,
+  "startingAgeYears": { "minimum": 2, "maximum": 45 },
+  "startingFood": 300
+}
