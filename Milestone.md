@@ -48,7 +48,7 @@ Also done outside the Codex, at the owner's request: Codex sync from Google Driv
 | D-04 sprites 32x48 px, 8 directions · D-12 toolchain and GitHub · D-13 libraries from vcpkg | D-01 time model, D-02 Side Characters interview, D-03 needs set: all for M2 |
 
 ### Codex issues
-CI-001, CI-002, CI-003 resolved in Codex v1.2. None open.
+CI-001, CI-002, CI-003 resolved in Codex v1.2. Open: CI-004 (make Milestone.md an official state file, so every session adds a snapshot); take it to Anima with A-002.
 
 ### Next
 1. S-US-003: build targets for all five layers, and the build rejects forbidden includes (including game code inside Luna).
