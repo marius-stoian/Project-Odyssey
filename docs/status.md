@@ -5,8 +5,8 @@ Codex v1.1. Edited only by mraw-orchestrator.
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
 | P-000 | - | - | Done | 2026-09-29 |
-| K-M0 | - | M0 | To do |  |
-| S-US-001 | US-001 | M0 | To do |  |
+| K-M0 | - | M0 | Done | 2026-09-29 |
+| S-US-001 | US-001 | M0 | In progress | 2026-09-29 |
 | S-US-002 | US-002 | M0 | To do |  |
 | S-US-003 | US-003 | M0 | To do |  |
 | S-US-004 | US-004 | M0 | To do |  |

@@ -1,0 +1,7 @@
+# Build output (CMake presets put everything here)
+/build/
+/out/
+
+# Visual Studio's per-user cache
+/.vs/
+*.user
