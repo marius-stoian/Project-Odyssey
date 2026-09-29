@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-010 / S-US-010: Advance a seeded world clock (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M2 (console clan simulator).
+
+- Core: `Pcg32` random streams, `Hasher` (FNV-1a 64).
+- Simulation: `DataError`, JSON content loading (nlohmann-json 3.12, D-13), `Calendar` (2400 ticks/day, 7 days/season), `GameClock` (pause/1x/2x/4x), `World` (ticks, daily weather, `hash()`).
+- `assets/data/sim/calendar.json`; `odysseus_headless --seed --days --data`.
+- Tests: `odysseus_sim_tests` (new, Simulation identity): Calendar, Determinism, Speed control, data validation. `tools/verify.ps1`: the tester's standard build-and-test run with evidence.
+- Verification: 0 warnings; ctest 13/13 Debug and Release.
+
 ## US-024 / S-US-024: Walk the character around the map (Claude) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Completes M1 (Luna walking skeleton).

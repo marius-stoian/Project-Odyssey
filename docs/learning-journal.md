@@ -170,3 +170,21 @@ The rules stay simple and deterministic (ticks), while the picture stays smooth 
 **Try it (15 minutes).** In `src/game/hero.h`, change `speedPixelsPerSecond` from 96 to 160 and play. Then run `ctest --preset windows-x64-debug`: `US-024 Walk right` still passes (it reads the speed from the config), but `US-024 Walk to the rock` too? Find out why.
 
 **Check yourself.** Why does the hero's position change 20 times per second while the picture changes 60 times per second?
+
+## US-010: Advance a seeded world clock (2026-09-30)
+
+**What we built.** The simulation has its own clock and calendar: 20 ticks per game second, days, four seasons, years, a daily weather roll, and speed control (pause, 1x, 2x, 4x). The same seed always gives the same world, down to one 64-bit "world hash".
+
+**The idea: the accumulator, and integers versus floats.** The clock collects real time and pays it out in whole ticks; the leftover waits for the next frame. We use whole nanoseconds (integers), not seconds as decimals (floats), because floats round: `0.1 + 0.2` is not exactly `0.3`, and tiny errors add up over 6 million ticks and differ between computers. Integers never drift, so two computers always agree:
+
+```cpp
+accumulated_ += realNanoseconds * speed;           // whole numbers only
+const std::uint64_t ticks = accumulated_ / kNanosecondsPerTick;
+accumulated_ %= kNanosecondsPerTick;               // keep the remainder for next time
+```
+
+**Where to look.** [src/sim/game_clock.cpp](../src/sim/game_clock.cpp), [src/core/random.cpp](../src/core/random.cpp) (PCG32), [assets/data/sim/calendar.json](../assets/data/sim/calendar.json) (the year length is data).
+
+**Try it (15 minutes).** Change `daysPerSeason` in `calendar.json` to 10 and run `odysseus_headless.exe --days 40`. Then break the file on purpose (write `"ten"`) and read the error: it names the file and the field.
+
+**Check yourself.** Why would `double seconds += 0.05` twenty times per second eventually give two computers different worlds?

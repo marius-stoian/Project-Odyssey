@@ -26,6 +26,10 @@ endforeach()
 # with a message that names the library.
 find_package(doctest CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+
+# Content (JSON, sprites) lives in assets/; programs find it here during development.
+set(ODYSSEUS_DATA_DIR "${PROJECT_SOURCE_DIR}/assets/data")
 
 # The AddressSanitizer runtime DLL sits next to the compiler. Debug programs need it
 # beside them to start outside Visual Studio (double-click, ctest).
@@ -56,7 +60,8 @@ include(cmake/LayerRules.cmake)
 add_library(odysseus_core STATIC
     src/core/version.cpp
     src/core/log.cpp
-    src/core/assertions.cpp)
+    src/core/assertions.cpp
+    src/core/random.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
@@ -87,8 +92,15 @@ target_link_libraries(luna_engine PUBLIC luna_platform)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
 
-add_library(odysseus_sim STATIC src/sim/layer.cpp)
+add_library(odysseus_sim STATIC
+    src/sim/layer.cpp
+    src/sim/calendar.cpp
+    src/sim/game_clock.cpp
+    src/sim/json_data.cpp
+    src/sim/world.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core)
+# PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
+target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_sim sim sim)
 odysseus_apply_settings(odysseus_sim)
 
@@ -110,7 +122,7 @@ odysseus_apply_settings(odysseus)
 
 add_executable(odysseus_headless apps/headless/main.cpp)
 target_link_libraries(odysseus_headless PRIVATE odysseus_sim)
-target_compile_definitions(odysseus_headless PRIVATE ODYSSEUS_LAYER_SIM)
+target_compile_definitions(odysseus_headless PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_headless)
 
 # Visual Studio: F5 starts the game.
@@ -207,3 +219,12 @@ add_test(NAME "US-024 Walk to the rock"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_walk_to_rock.cmake")
 set_tests_properties("US-024 Walk to the rock" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- Simulation tests: Simulation identity, headless (M2) ---
+add_executable(odysseus_sim_tests
+    tests/main.cpp
+    tests/sim/world_test.cpp)
+target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest)
+target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
+odysseus_apply_settings(odysseus_sim_tests)
+add_test(NAME odysseus_sim_tests COMMAND odysseus_sim_tests)
