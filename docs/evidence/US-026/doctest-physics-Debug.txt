@@ -1,0 +1,9 @@
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\shapes_test.cpp(177): MESSAGE: pairs tested: 114 of 499500; contacts: 9
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\shapes_test.cpp(203): MESSAGE: one step with 1,000 bodies: 3.211 ms
+
+===============================================================================
+[doctest] test cases:  5 |  5 passed | 0 failed | 6 skipped
+[doctest] assertions: 84 | 84 passed | 0 failed |
+[doctest] Status: SUCCESS!
