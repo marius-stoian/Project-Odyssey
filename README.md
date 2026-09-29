@@ -7,13 +7,13 @@ Codename **Odysseus**: a 2D pixel-art life and civilization simulation in C++20 
 Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), written by Anima. Progress: [Milestone.md](Milestone.md) (snapshot per session, AP-###) and [docs/status.md](docs/status.md) (every prompt). Owner decisions: [docs/decisions.md](docs/decisions.md). Learning notes: [docs/learning-journal.md](docs/learning-journal.md).
 
 ## Anima's Codex
-`docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When Claude Code starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and Claude commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
+`docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When an AI coding session starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and the session commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
 
 ## Project documents
 The requirements (source of truth), backlog, diagrams and archive live in [docs/project/](docs/project/README.md). Their masters are on Google Drive; [tools/sync-workspace.ps1](tools/sync-workspace.ps1) mirrors any changed file into the repo at session start.
 
 ## Team skills
-The Dominus skill (all hats; the full team is Mraw) and the Anima skill (Prompt Architect, writes the Codex) live in [.claude/skills/](.claude/skills/), so every Claude Code session opened in this repo has them, on any machine. They are copies of the owner's personal skills; when those change, copy them in again.
+The Dominus skill (all hats; the full team is Mraw) and the Anima skill (Prompt Architect, writes the Codex) live in [.claude/skills/](.claude/skills/), so every AI coding session opened in this repo has them, on any machine. They are copies of the owner's personal skills; when those change, copy them in again.
 
 ## What you need
 - Visual Studio 2026 (or 2022) with the "Desktop development with C++" workload and "C++ AddressSanitizer"

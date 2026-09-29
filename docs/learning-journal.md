@@ -39,7 +39,7 @@ git push -u origin story/US-002   # send to GitHub, CI starts
 
 ## US-003: Enforce the layer rules in the build (2026-09-30)
 
-*Built by ChatGPT, verified on Windows by Claude.*
+*Built by ChatGPT, verified on Windows by Mraw.*
 
 **What we built.** Five library targets now represent our five layers, with explicit downward dependencies. Header checks and a validator reject forbidden includes, including shortcuts through relative paths.
 

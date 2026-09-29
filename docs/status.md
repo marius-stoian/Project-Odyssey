@@ -76,4 +76,4 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | X-M6 | - | M6 | To do |  |
 
 
-US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Claude on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).
+US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Mraw on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).

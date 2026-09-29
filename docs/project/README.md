@@ -2,7 +2,7 @@
 
 Everything written about Project Odyssey outside the code: the requirements, Anima's Codex material, diagrams and the superseded discovery files.
 
-**Masters live on Google Drive** (`My Drive/~gamerrr/Project Odysseus/`), where Dominus and Anima write them. The files here are mirrored copies: when Claude Code starts in this repo, [tools/sync-workspace.ps1](../../tools/sync-workspace.ps1) copies any Drive file that changed into this folder, and Claude commits it. Edit the Drive file, not the copy here, or the next sync will overwrite your change.
+**Masters live on Google Drive** (`My Drive/~gamerrr/Project Odysseus/`), where Dominus and Anima write them. The files here are mirrored copies: when an AI coding session starts in this repo, [tools/sync-workspace.ps1](../../tools/sync-workspace.ps1) copies any Drive file that changed into this folder, and the session commits it. Edit the Drive file, not the copy here, or the next sync will overwrite your change.
 
 ## requirements/
 
@@ -19,7 +19,7 @@ The Codex itself is [docs/Codex.md](../Codex.md) (source of truth for HOW and OR
 |---|---|---|
 | [Project Odyssey - Mraw Build Codex.docx](codex/Project%20Odyssey%20-%20Mraw%20Build%20Codex.docx) | Anima's analysis behind the Codex: brief, delivery format, prompt design | Written for Codex v1.1; does not cover Luna (v1.2 changes are in the Codex amendment log) |
 | [Anima Prompt Catalog (pending upload).html](codex/Anima%20Prompt%20Catalog%20(pending%20upload).html) | Anima's prompt catalog, ready to become a Google Doc | Pending: the Drive connector could not create the Doc on 2026-09-29 |
-| [anima-SKILL (upload to claude.ai).md](codex/anima-SKILL%20(upload%20to%20claude.ai).md) | The Anima skill, prepared for upload to claude.ai | Same text as [.claude/skills/anima/SKILL.md](../../.claude/skills/anima/SKILL.md) |
+| [anima-SKILL (upload to claude.ai).md](codex/anima-SKILL%20(upload%20to%20claude.ai).md) | The Anima skill, prepared for upload to the AI assistant's website | Same text as [.claude/skills/anima/SKILL.md](../../.claude/skills/anima/SKILL.md) |
 
 ## diagrams/
 

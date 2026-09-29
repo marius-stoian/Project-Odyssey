@@ -21,7 +21,7 @@ its PR changes rather than leaving an outdated description.
 - Codex v1.4 (Anima): Charter rules 1, 3, 9 and new rule 10 (deterministic fixed-point physics, SI units, 1 tile = 1 m); K-M1b, S-US-025..S-US-029, X-M1b; P-003.
 - Repo: `docs/adr/ADR-017-luna-physics.md`, ADR index, README layer tables, status (M1b next; US-011 paused on its branch), decisions (D-15), design-doc note.
 
-## US-010 / S-US-010: Advance a seeded world clock (Claude) — 2026-09-30
+## US-010 / S-US-010: Advance a seeded world clock (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2 (console clan simulator).
 
@@ -31,7 +31,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `odysseus_sim_tests` (new, Simulation identity): Calendar, Determinism, Speed control, data validation. `tools/verify.ps1`: the tester's standard build-and-test run with evidence.
 - Verification: 0 warnings; ctest 13/13 Debug and Release.
 
-## US-024 / S-US-024: Walk the character around the map (Claude) — 2026-09-30
+## US-024 / S-US-024: Walk the character around the map (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Completes M1 (Luna walking skeleton).
 
@@ -41,7 +41,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `odysseus_game_tests` (new, Game identity: `US-024 Walk right`, `Stop at a rock`, `Stop and face the last direction`, diagonal speed), Luna collision tests, end to end `US-024 Walk to the rock` (label `window`).
 - Verification: 0 warnings; ctest 12/12 Debug and Release; real window: hero stops at x 1142.0 facing East.
 
-## US-023 / S-US-023: Show a tile map with a following camera (Claude) — 2026-09-30
+## US-023 / S-US-023: Show a tile map with a following camera (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -50,7 +50,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `US-023 Only visible tiles are drawn`, `US-023 Camera follows and stops at the map edges`, TileMap grid test.
 - Verification: 0 warnings; ctest 10/10 Debug and Release; screenshot `docs/evidence/US-023/game-map.png`.
 
-## US-022 / S-US-022: Draw sprites with crisp pixels (Claude) — 2026-09-30
+## US-022 / S-US-022: Draw sprites with crisp pixels (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -61,7 +61,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `US-022 Whole-number scale`, `luna_window_tests` (`US-022 Crisp pixels`, label `window`: real hidden window, pixel readback).
 - Verification: 0 warnings; ctest 10/10 Debug and Release; 1920x1080 x4 with 0 wrong pixels; 1366x768 x2 letterboxed at (203, 114).
 
-## US-021 / S-US-021: Control the game through intents (Claude) — 2026-09-30
+## US-021 / S-US-021: Control the game through intents (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -70,7 +70,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `luna_platform_tests` (new, Platform identity), `US-021 Default bindings`, `US-021 Gamepad`, `US-021 Game reads only intents` (automated review).
 - Verification: 0 warnings; ctest 9/9 Debug and Release. No physical gamepad available: proven with synthetic SDL events.
 
-## US-020 / S-US-020: Open a window with a steady game loop (Claude) — 2026-09-30
+## US-020 / S-US-020: Open a window with a steady game loop (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M1 (Luna engine).
 
@@ -81,7 +81,7 @@ its PR changes rather than leaving an outdated description.
 - Docs: `docs/plans/M1-luna-design.md`, `docs/plans/US-020.md`, evidence, teach-back; delegated decisions D-16 (32x32 tiles), D-17 (8-way movement).
 - Verification: 0 warnings; ctest 7/7 Debug and Release; 60-second run: 60.0 FPS, 1200 ticks, first frame 279 ms.
 
-## US-004 / S-US-004: Log what happens and stop on broken assumptions (Claude) — 2026-09-30
+## US-004 / S-US-004: Log what happens and stop on broken assumptions (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -94,7 +94,7 @@ its PR changes rather than leaving an outdated description.
 - Docs: plan, evidence (`docs/evidence/US-004/`), teach-back, README "Logs".
 - Verification: Debug and Release 0 warnings; ctest 5/5 both; US-004 doctest 3 cases / 24 assertions; end to end: 7 runs leave 5 logs; cdb stops at `assert_probe.cpp @ 13`.
 
-## QA integration of ChatGPT's work (Claude) — 2026-09-30 — branch `qa`
+## QA integration of ChatGPT's work (Mraw) — 2026-09-30 — branch `qa`
 
 **State:** Merged into `qa`; GitHub CI green on `qa` ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). `qa` merges into `main` at the M0 exit review.
 
