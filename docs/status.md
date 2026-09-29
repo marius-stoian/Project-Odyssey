@@ -25,7 +25,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | K-M1b | - | M1b | Done | 2026-09-30 |
 | S-US-025 | US-025 | M1b | Done | 2026-09-30 |
 | S-US-026 | US-026 | M1b | Done | 2026-09-30 |
-| S-US-027 | US-027 | M1b | To do |  |
+| S-US-027 | US-027 | M1b | Done | 2026-09-30 |
 | S-US-028 | US-028 | M1b | To do |  |
 | S-US-029 | US-029 | M1b | To do |  |
 | X-M1b | - | M1b | To do |  |
