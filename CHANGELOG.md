@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-027 / S-US-027: Fly projectiles with real ballistics (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Physics: `atan2`; `ballistics.{h,cpp}`: `Air` (density, wind, gravity), `Projectile` (mass, Cd*A), quadratic drag against the air's motion, semi-implicit Euler at 10 sub-steps per tick, `flyTick` (swept collisions per sub-step), `flyUntilLanding`, `launchAngleWithoutDrag` (textbook low arc), `aimLaunchAngle` (secant refinement with drag), `launchVelocity`.
+- Tests: `US-027 Arc` (40.704 m vs v^2/g = 40.775 m), `US-027 Drag and wind` (within 1% of an independent Runge-Kutta solution of the drag equation; 1.20 m drift in a 5 m/s crosswind), `US-027 Aim` (25 m target hit after 33 ticks), atan2 accuracy.
+- Docs: plan `docs/plans/US-027.md`, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
 ## US-026 / S-US-026: Detect hits between shapes (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
