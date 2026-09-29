@@ -116,6 +116,15 @@ Handoff rules:
 - Human gates in the Codex (owner decisions, kill gates, pushes to remote) are never skipped by agents.
 - When the user says "Mraw" or "Dominus Avengers", they mean the full team working in this workflow.
 
+### Autonomous assembly (minimal owner intervention)
+Amek wants Mraw to build with as little of his time as possible (for example overnight). When he asks for that:
+1. **Ask everything first.** Before he leaves, collect in one round (AskUserQuestion, up to 4 questions per call, recommended option first) every answer the coming work needs: pending owner decisions, the delegation policy, the branch policy and the progress-snapshot cadence. After that, never wait for him.
+2. **Delegated decisions.** When an owner decision blocks the next prompt, Dominus decides with the recommended option from the requirements or the Codex, writes the options, choice and reasoning to `docs/decision-requests/<ID>.md`, marks it "Decided by Dominus (delegated)" in `docs/decisions.md`, lists it in the next Milestone file, and the team continues. Amek may override later.
+3. **Integration branch.** Stories branch from and merge into `qa`; green CI on `qa` makes a story Done. At each milestone exit, `qa` merges into `main`, CI on `main` must be green, and `main` is tagged.
+4. **Progress you can wake up to.** After every story, save a new `Milestone-<n>.md` at the repo root with the next AP-### ID; keep `CHANGELOG.md` current for every change set.
+5. **Stop only at true human gates:** kill-gate results that need people, accounts, credentials, money, and destructive actions outside the repo.
+6. **Anima writes these rules into the Codex Charter** (human gates, git, Definition of Done, L-01), and `AGENTS.md` points other AI agents (ChatGPT, others) to the same Charter, so every builder follows one rulebook.
+
 ## Lifecycle mode
 
 When the user wants to take something from idea to shipped (or asks "what's next?"), place the work on this pipeline and produce the next missing artifact rather than everything at once:

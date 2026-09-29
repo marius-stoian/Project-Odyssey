@@ -1,4 +1,4 @@
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.2)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.3)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -33,28 +33,34 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 - Headers (.h) declare, sources (.cpp) define. One class or small cluster per file.
 - Warnings as errors on our code; AddressSanitizer in Debug.
 - Comments explain WHY, briefly, in plain English the owner can learn from.
+- Every project header starts with `#pragma once` followed by `#include "boundary.h"`, and all code lives in one of the five layer folders (src/core, src/luna/platform, src/luna/engine, src/sim, src/game). The build rejects anything else (ADR-016).
 </coding_standards>
 
 <definition_of_done>
 - Code compiles with zero warnings in Debug and Release (x64).
 - All acceptance criteria verified; automated tests written where the story is testable headless.
-- CI is green on the main branch (from US-002 on, when CI exists).
+- CI is green on the qa branch after the merge (from US-002 on, when CI exists); main is checked at milestone exits.
 - No layer rule broken (Simulation does not include Engine, Platform or SDL3; Luna does not include Simulation or Game).
 - Determinism test still passes (from US-010 on, when the simulation exists).
 - Code reviewed with Dominus; anything unclear explained in the learning journal.
 - Requirements document updated if behaviour differs from what it says.
 - Teach-back entry appended to docs/learning-journal.md.
-- docs/status.md updated.
+- CHANGELOG.md updated with the story's full change set before it is pushed or merged.
+- docs/status.md updated and a Milestone-<n>.md progress snapshot saved.
 </definition_of_done>
 
 <human_gates>
-Stop and ask the owner ONLY for owner design decisions: any dependency D-xx in docs/decisions.md whose status is not Decided, or any question whose answer changes game design, scope or the source of truth. To ask: write docs/decision-requests/<ID>.md (question, 2-4 options with a recommendation first, impact, blocked stories), set the story to Blocked in docs/status.md, continue with the next unblocked prompt if there is one, otherwise end the session with the assembly report.
-Everything else (kill-gate evidence, git push, new libraries) the team handles itself and reports.
-Safety: never create accounts or type credentials. If git push needs authentication that is not already configured, stop and ask.
+The owner wants minimal intervention (standing instructions in docs/decisions.md, 2026-09-30). Only these stop the team:
+1. Kill-gate results that need people (X-M2 readers, X-M6 playtesters): write docs/decision-requests/D-GATE-Mx.md, end the session with the assembly report and a Milestone file, and do not start the next milestone until the owner answers.
+2. Anything that needs accounts, credentials, money, other people, or destructive actions outside this repository. Never create accounts or type credentials. If git push needs authentication that is not already configured, stop and ask.
+Everything else the team decides and records:
+- Design decisions (a D-xx that is not Decided, or any question that changes design or scope): Dominus decides using the recommended option in the source of truth or this Codex. Write docs/decision-requests/<ID>.md with the question, 2-4 options, the choice and why; set the decision in docs/decisions.md to "Decided by Dominus (delegated)" with a one-line answer; list it in the next Milestone file; continue. The owner may override later; an override is a new decision.
+- If the source of truth must change because of a delegated decision, update the requirements document on Google Drive (bump its version, add a resolution-log line) and raise a codex issue so Anima can follow.
+- Kill-gate evidence agents can measure, git push, new libraries: handle and report.
 </human_gates>
 
 <git>
-Branch per story: story/US-xxx. Commits: "US-xxx: <imperative summary>". Merge to main when the story is Done, then push. Tag each finished milestone: m0-done ... m6-done.
+Branch per story: story/US-xxx from qa. Commits: "US-xxx: <imperative summary>". When the story is accepted: update CHANGELOG.md, merge into qa (--no-ff), push, and wait for CI on qa; green CI makes the story Done. At each milestone exit review (X-Mx): merge qa into main, push, confirm CI on main is green, tag mx-done and push the tag. main only ever receives milestone-complete, CI-green work.
 </git>
 
 <report_format>
@@ -66,6 +72,7 @@ Every session ends with an assembly report:
 - Build and tests: warnings, tests passed/failed, determinism hash test result
 - Decisions requested: IDs or none
 - Codex issues found: IDs or none
+- Milestone file: Milestone-<n>.md (AP-###)
 - Next prompt: <ID>
 </report_format>
 

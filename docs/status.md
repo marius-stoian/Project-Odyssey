@@ -1,17 +1,18 @@
 # Assembly status
 
-Codex v1.2. Edited only by mraw-orchestrator.
+Codex v1.3. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
 | P-000 | - | - | Done | 2026-09-29 |
 | P-001 | - | - | Done | 2026-09-29 |
+| P-002 | - | - | Done | 2026-09-30 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
-| S-US-003 | US-003 | M0 | To do |  |
-| S-US-004 | US-004 | M0 | To do |  |
-| X-M0 | - | M0 | To do |  |
+| S-US-003 | US-003 | M0 | Done | 2026-09-30 |
+| S-US-004 | US-004 | M0 | Done | 2026-09-30 |
+| X-M0 | - | M0 | Done | 2026-09-30 |
 | K-M1 | - | M1 | To do |  |
 | S-US-020 | US-020 | M1 | To do |  |
 | S-US-021 | US-021 | M1 | To do |  |
@@ -64,3 +65,6 @@ Codex v1.2. Edited only by mraw-orchestrator.
 | S-US-091 | US-091 | M6 | To do |  |
 | S-US-092 | US-092 | M6 | To do |  |
 | X-M6 | - | M6 | To do |  |
+
+
+US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Claude on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).

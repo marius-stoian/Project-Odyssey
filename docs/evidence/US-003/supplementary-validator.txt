@@ -1,0 +1,94 @@
+Clean control: exit 0
+Built target check
+
+
+Unguarded header after configure: exit 2
+
+CMake Error at /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:27 (message):
+  Architecture include error:
+  /tmp/odyssey-us003-local/build/architecture-validator/src/sim/unguarded.h
+  includes boundary.h: every project header must check its own boundary first
+Call Stack (most recent call first):
+  /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:59 (odysseus_include_error)
+
+
+gmake[2]: *** [CMakeFiles/check.dir/build.make:70: CMakeFiles/check] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/check.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+
+Simulation SDL3 include after configure: exit 2
+
+CMake Error at /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:27 (message):
+  Architecture include error:
+  /tmp/odyssey-us003-local/build/architecture-validator/src/sim/violation.cpp
+  includes SDL3/SDL.h: only Platform may include SDL3
+Call Stack (most recent call first):
+  /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:82 (odysseus_include_error)
+
+
+gmake[2]: *** [CMakeFiles/check.dir/build.make:70: CMakeFiles/check] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/check.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+
+Simulation relative Engine include: exit 2
+
+CMake Error at /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:27 (message):
+  Architecture include error:
+  /tmp/odyssey-us003-local/build/architecture-validator/src/sim/violation.cpp
+  includes ../luna/engine/layer.h: sim may not include engine
+Call Stack (most recent call first):
+  /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:101 (odysseus_include_error)
+
+
+gmake[2]: *** [CMakeFiles/check.dir/build.make:70: CMakeFiles/check] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/check.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+
+Simulation absolute Engine include: exit 2
+
+CMake Error at /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:27 (message):
+  Architecture include error:
+  /tmp/odyssey-us003-local/build/architecture-validator/src/sim/violation.cpp
+  includes
+  /tmp/odyssey-us003-local/build/architecture-validator/src/luna/engine/layer.h:
+  sim may not include engine
+Call Stack (most recent call first):
+  /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:101 (odysseus_include_error)
+
+
+gmake[2]: *** [CMakeFiles/check.dir/build.make:70: CMakeFiles/check] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/check.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+
+Macro expanded include: exit 2
+
+CMake Error at /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:27 (message):
+  Architecture include error:
+  /tmp/odyssey-us003-local/build/architecture-validator/src/sim/violation.cpp
+  includes HEADER: macro-expanded or malformed includes cannot be checked
+Call Stack (most recent call first):
+  /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:77 (odysseus_include_error)
+
+
+gmake[2]: *** [CMakeFiles/check.dir/build.make:70: CMakeFiles/check] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/check.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+
+Luna relative Simulation include: exit 2
+
+CMake Error at /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:27 (message):
+  Architecture include error:
+  /tmp/odyssey-us003-local/build/architecture-validator/src/luna/engine/violation.cpp
+  includes ../../sim/layer.h: engine may not include sim
+Call Stack (most recent call first):
+  /workspace/scratch/0324d54f3676/Project-Odyssey/cmake/ValidateLayerIncludes.cmake:101 (odysseus_include_error)
+
+
+gmake[2]: *** [CMakeFiles/check.dir/build.make:70: CMakeFiles/check] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:87: CMakeFiles/check.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2
+
+Restored clean control: exit 0
+Built target check
+
+

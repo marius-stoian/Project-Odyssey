@@ -36,3 +36,41 @@ git push -u origin story/US-002   # send to GitHub, CI starts
 **Try it (15 minutes).** Create a branch `practice/red-ci`, add `CHECK(false);` to the test in `tests/core/version_test.cpp`, commit and push. Watch the run go red on GitHub and find the test name in the log. Then delete the branch: `git push origin --delete practice/red-ci`.
 
 **Check yourself.** Why do we build each story on its own branch instead of committing straight to `main`?
+
+## US-003: Enforce the layer rules in the build (2026-09-30)
+
+*Built by ChatGPT, verified on Windows by Claude.*
+
+**What we built.** Five library targets now represent our five layers, with explicit downward dependencies. Header checks and a validator reject forbidden includes, including shortcuts through relative paths.
+
+**The idea: CMake targets and `target_link_libraries`.** A target is a named thing CMake builds, such as a library or executable. `add_library` lists the source files belonging to a library; `target_link_libraries` connects it to libraries it needs. `PUBLIC` means both this target and its callers receive the dependency's build requirements, including public header paths. `PRIVATE` applies the dependency only to the target itself. Simulation links Core, so it can use Core's headers without receiving Engine's headers. A link is a dependency declaration, not a complete include barrier: a relative path could bypass header search paths. Our boundary checks and build validator close that accidental loophole.
+
+```cmake
+add_library(odysseus_sim STATIC src/sim/layer.cpp)
+target_link_libraries(odysseus_sim PUBLIC odysseus_core)
+```
+
+**Where to look.** [CMakeLists.txt:71](../CMakeLists.txt) (Simulation's target), [CMakeLists.txt:76](../CMakeLists.txt) (Game's dependencies), [cmake/LayerRules.cmake:2](../cmake/LayerRules.cmake) (target registration), [src/luna/engine/boundary.h](../src/luna/engine/boundary.h) (include boundary).
+
+**Try it (15 minutes).** On a practice branch, add `#include "../luna/engine/layer.h"` to `src/sim/layer.cpp`. Build Debug and read the include error naming the forbidden layer. Replace it with `#include "core/version.h"`, build again and compare; then restore the original file.
+
+**Check yourself.** Why does Game receive Core's public headers through its dependencies, while Simulation still cannot include Engine through a relative path?
+
+**Bonus lesson from verification.** The same test passed on Linux and failed on Windows, only because Visual Studio words its error message differently (`fatal  error C1083`, with two spaces). Tests that read compiler output should match the stable part, the error code, not the wording.
+
+## US-004: Log what happens and stop on broken assumptions (2026-09-30)
+
+**What we built.** Every run of the game now writes a log file in your user folder (`%APPDATA%\Project Odyssey\Odysseus\logs`), keeping the last five runs. And `ODYSSEUS_ASSERT` stops a Debug build the moment an assumption is false, after writing the file and line to the log.
+
+**The idea: header and source files, namespaces, macros.** A *header* (`log.h`) is the promise: it declares what exists (`class LogSession`, `logInfo`). A *source file* (`log.cpp`) keeps the promise: it defines how it works. Other files include only the header, so they compile without seeing the details. A *namespace* (`odysseus::core`) is a surname for names: our `logInfo` can never clash with someone else's. A *macro* is text the preprocessor pastes in before compiling. We use one for the assert because only a macro can capture the *caller's* `__FILE__` and `__LINE__`:
+
+```cpp
+ODYSSEUS_ASSERT(health > 0, "a hero cannot act when dead");
+// becomes: if (!(health > 0)) { reportAssertionFailure("health > 0", ..., __FILE__, __LINE__); __debugbreak(); }
+```
+
+**Where to look.** [src/core/log.h](../src/core/log.h) (the promise), [src/core/log.cpp](../src/core/log.cpp) (how rotation works), [src/core/assertions.h](../src/core/assertions.h) (the macro, Debug and Release versions), [apps/odysseus/main.cpp](../apps/odysseus/main.cpp) (one `LogSession` for the whole run).
+
+**Try it (15 minutes).** In `apps/odysseus/main.cpp`, add `ODYSSEUS_ASSERT(version.empty(), "testing my first assert");` after the version line (and `#include "core/assertions.h"`). Press F5 in Visual Studio: it stops on your line. Open the newest file in the logs folder and find the file and line. Then build Release and run it: nothing happens, because asserts vanish in Release. Remove the line.
+
+**Check yourself.** Why is `ODYSSEUS_ASSERT` a macro while `logInfo` is a normal function?

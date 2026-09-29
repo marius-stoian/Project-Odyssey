@@ -25,6 +25,7 @@ endforeach()
 # Libraries come from vcpkg.json. If one is missing there, find_package stops here
 # with a message that names the library.
 find_package(doctest CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
 
 # The AddressSanitizer runtime DLL sits next to the compiler. Debug programs need it
 # beside them to start outside Visual Studio (double-click, ctest).
@@ -41,7 +42,6 @@ function(odysseus_apply_settings target)
     target_compile_options(${target} PRIVATE
         /W4 /WX /permissive- /utf-8
         $<$<CONFIG:Debug>:/fsanitize=address>)
-    target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/src")
     get_target_property(target_type ${target} TYPE)
     if(target_type STREQUAL "EXECUTABLE")
         add_custom_command(TARGET ${target} POST_BUILD
@@ -51,20 +51,49 @@ function(odysseus_apply_settings target)
     endif()
 endfunction()
 
-# --- Core: logging, asserts, math, random, ids (layer rules arrive in US-003) ---
+# --- Five layers: dependency arrows point down only (ADR-004, ADR-016). ---
+include(cmake/LayerRules.cmake)
 add_library(odysseus_core STATIC
-    src/core/version.cpp)
-target_include_directories(odysseus_core PUBLIC "${PROJECT_SOURCE_DIR}/src")
+    src/core/version.cpp
+    src/core/log.cpp
+    src/core/assertions.cpp)
+odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
 
+add_library(luna_platform STATIC
+    src/luna/platform/layer.cpp
+    src/luna/platform/user_paths.cpp)
+target_link_libraries(luna_platform PUBLIC odysseus_core)
+# PRIVATE: only Platform sees SDL3 headers (Charter rule 2); callers still link it.
+target_link_libraries(luna_platform PRIVATE SDL3::SDL3)
+odysseus_register_layer(luna_platform platform luna/platform)
+odysseus_apply_settings(luna_platform)
+
+add_library(luna_engine STATIC src/luna/engine/layer.cpp)
+target_link_libraries(luna_engine PUBLIC luna_platform)
+odysseus_register_layer(luna_engine engine luna/engine)
+odysseus_apply_settings(luna_engine)
+
+add_library(odysseus_sim STATIC src/sim/layer.cpp)
+target_link_libraries(odysseus_sim PUBLIC odysseus_core)
+odysseus_register_layer(odysseus_sim sim sim)
+odysseus_apply_settings(odysseus_sim)
+
+add_library(odysseus_game STATIC src/game/layer.cpp)
+target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
+odysseus_register_layer(odysseus_game game game)
+odysseus_apply_settings(odysseus_game)
+
 # --- Programs ---
 add_executable(odysseus apps/odysseus/main.cpp)
-target_link_libraries(odysseus PRIVATE odysseus_core)
+target_link_libraries(odysseus PRIVATE odysseus_game)
+target_compile_definitions(odysseus PRIVATE ODYSSEUS_LAYER_GAME)
 odysseus_apply_settings(odysseus)
 
 add_executable(odysseus_headless apps/headless/main.cpp)
-target_link_libraries(odysseus_headless PRIVATE odysseus_core)
+target_link_libraries(odysseus_headless PRIVATE odysseus_sim)
+target_compile_definitions(odysseus_headless PRIVATE ODYSSEUS_LAYER_SIM)
 odysseus_apply_settings(odysseus_headless)
 
 # Visual Studio: F5 starts the game.
@@ -74,7 +103,32 @@ set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT odysseus)
 enable_testing()
 add_executable(odysseus_tests
     tests/main.cpp
-    tests/core/version_test.cpp)
+    tests/core/version_test.cpp
+    tests/core/log_test.cpp
+    tests/architecture/layer_rules_test.cpp)
 target_link_libraries(odysseus_tests PRIVATE odysseus_core doctest::doctest)
+target_compile_definitions(odysseus_tests PRIVATE
+    ODYSSEUS_LAYER_CORE
+    ODYSSEUS_BUILD_DIR="${CMAKE_BINARY_DIR}"
+    ODYSSEUS_TEST_CONFIGURATION="$<CONFIG>"
+    ODYSSEUS_PROBE_SCRIPT="${PROJECT_SOURCE_DIR}/tests/architecture/run_probe.cmake"
+    ODYSSEUS_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
+    ODYSSEUS_VALIDATOR_SCRIPT="${PROJECT_SOURCE_DIR}/tests/architecture/run_validator.cmake"
+    ODYSSEUS_ASSERT_PROBE="$<TARGET_FILE:us004_assert_probe>"
+    ODYSSEUS_ASSERT_PROBE_LINE=13)
 odysseus_apply_settings(odysseus_tests)
-add_test(NAME odysseus_tests COMMAND odysseus_tests)
+
+# US-004: a tiny program that fires a false assert on purpose (line 13 of assert_probe.cpp).
+add_executable(us004_assert_probe tests/core/assert_probe.cpp)
+target_link_libraries(us004_assert_probe PRIVATE odysseus_core)
+target_compile_definitions(us004_assert_probe PRIVATE ODYSSEUS_LAYER_CORE)
+odysseus_apply_settings(us004_assert_probe)
+add_dependencies(odysseus_tests us004_assert_probe)
+add_subdirectory(tests/architecture)
+# Architecture scenarios invoke the build, so serialize them even under ctest -j.
+add_test(NAME odysseus_tests COMMAND odysseus_tests "--test-case-exclude=US-003*")
+foreach(scenario IN ITEMS "Allowed use" "Forbidden use" "Luna stays game-agnostic" "Guard completeness")
+    set(test_name "US-003 ${scenario}")
+    add_test(NAME "${test_name}" COMMAND odysseus_tests "--test-case=${test_name}")
+    set_tests_properties("${test_name}" PROPERTIES RESOURCE_LOCK architecture_build)
+endforeach()

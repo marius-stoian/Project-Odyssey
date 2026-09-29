@@ -1,0 +1,6 @@
+Allowed use original baseline: exit 1
+/tmp/odyssey-us003-baseline-ld99y731/game.cpp:1:10: fatal error: luna/engine/layer.h: No such file or directory
+    1 | #include "luna/engine/layer.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+Forbidden use baseline global-src exposure: exit 0 (unexpected compile success)
