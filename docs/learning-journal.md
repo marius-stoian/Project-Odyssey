@@ -18,3 +18,21 @@ target_link_libraries(odysseus PRIVATE odysseus_core)  // then link Core into it
 **Try it (15 minutes).** In `CMakeLists.txt` change `project(Odysseus VERSION 0.1.0 ...)` to `0.2.0`, rebuild Debug and run `odysseus.exe`. Then comment out line 63 (`target_link_libraries(odysseus ...)`), rebuild and read the error: it says "unresolved external symbol". Put the line back.
 
 **Check yourself.** When you commented out `target_link_libraries`, why did the compiler still succeed and only the linker fail?
+
+## US-002: Run the build and tests on every push (2026-09-29)
+
+**What we built.** Every time code reaches GitHub, a Windows machine in the cloud builds the game and runs all tests. If something breaks, the run turns red and names the failing test, even if we forgot to test on our PC.
+
+**The idea: commit, branch, push.** A *commit* is a saved snapshot of the whole project with a message saying why it changed. A *branch* is a separate line of commits, so a story can be built without disturbing `main`, the version that always works. *Push* sends your commits to GitHub; that push is what wakes up CI. When the story is accepted, we *merge* its branch into `main`.
+
+```powershell
+git checkout -b story/US-002      # new branch for the story
+git commit -am "US-002: ..."      # snapshot with a message
+git push -u origin story/US-002   # send to GitHub, CI starts
+```
+
+**Where to look.** [.github/workflows/ci.yml](../.github/workflows/ci.yml) (the CI recipe), the Actions tab on GitHub, `git log --oneline --graph` in the repo folder.
+
+**Try it (15 minutes).** Create a branch `practice/red-ci`, add `CHECK(false);` to the test in `tests/core/version_test.cpp`, commit and push. Watch the run go red on GitHub and find the test name in the log. Then delete the branch: `git push origin --delete practice/red-ci`.
+
+**Check yourself.** Why do we build each story on its own branch instead of committing straight to `main`?

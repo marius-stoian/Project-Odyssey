@@ -1,5 +1,7 @@
 # Project Odyssey
 
+[![CI](https://github.com/marius-stoian/Project-Odyssey/actions/workflows/ci.yml/badge.svg)](https://github.com/marius-stoian/Project-Odyssey/actions/workflows/ci.yml)
+
 Codename **Odysseus**: a 2D pixel-art life and civilization simulation in C++20 on SDL3. Windows x64 first; Android and iOS later.
 
 Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), written by Anima. Progress: [docs/status.md](docs/status.md). Owner decisions: [docs/decisions.md](docs/decisions.md). Learning notes: [docs/learning-journal.md](docs/learning-journal.md).
@@ -40,6 +42,9 @@ The programs are console programs for now, so start them from a terminal (a doub
 ```powershell
 ctest --preset windows-x64-debug
 ```
+
+## Continuous integration
+Every push to GitHub, on any branch, builds Debug and Release on a Windows machine and runs all tests ([.github/workflows/ci.yml](.github/workflows/ci.yml)). A red run names the failing test in its log. Keep `main` green.
 
 ## Debug in Visual Studio
 1. File > Open > Folder, choose this folder.
