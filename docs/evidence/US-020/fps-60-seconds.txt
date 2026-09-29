@@ -1,0 +1,11 @@
+US-020 Steady: 60-second run of odysseus.exe (Release) on the owner's PC, 2026-09-30
+GPU: AMD Radeon RX 7900 XTX, monitor refresh 60 Hz. Command: odysseus.exe --quit-after 60
+
+2026-09-29 22:08:14.301Z [INFO] Log session started
+2026-09-29 22:08:14.301Z [INFO] Project Odyssey 0.1.0 started
+2026-09-29 22:08:14.575Z [INFO] Window opened: 1280x720, virtual screen 480x270, VSync on
+2026-09-29 22:08:14.578Z [INFO] First frame after 279 ms
+2026-09-29 22:09:14.605Z [INFO] Average frame rate: 60.0 FPS over 60.0 s (3599 frames); 1200 simulation ticks
+2026-09-29 22:09:14.605Z [INFO] Window closed by the player
+2026-09-29 22:09:14.628Z [INFO] Shutting down
+2026-09-29 22:09:14.628Z [INFO] Log session ended

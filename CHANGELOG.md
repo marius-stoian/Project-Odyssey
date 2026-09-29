@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-020 / S-US-020: Open a window with a steady game loop (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M1 (Luna engine).
+
+- Luna Platform: `System` (SDL start/stop), `Window` (SDL_Window + SDL_Renderer, VSync, 480x270 integer-scaled virtual screen), clock, `requestQuit`, Luna events.
+- Luna Engine: `FixedStepClock` (20 ticks/s, capped catch-up, interpolation alpha), `FrameStats`, `Game` interface, `run()` loop with logging.
+- Game: `OdysseyGame` and its window settings. `odysseus.exe` opens the window; `--quit-after <s>`, `--log-dir <folder>`.
+- Tests: `luna_tests` (Engine identity, `US-020 Steady`), end-to-end `US-020 Open and close` (label `window`).
+- Docs: `docs/plans/M1-luna-design.md`, `docs/plans/US-020.md`, evidence, teach-back; delegated decisions D-16 (32x32 tiles), D-17 (8-way movement).
+- Verification: 0 warnings; ctest 7/7 Debug and Release; 60-second run: 60.0 FPS, 1200 ticks, first frame 279 ms.
+
 ## US-004 / S-US-004: Log what happens and stop on broken assumptions (Claude) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.

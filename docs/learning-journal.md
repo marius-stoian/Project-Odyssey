@@ -74,3 +74,20 @@ ODYSSEUS_ASSERT(health > 0, "a hero cannot act when dead");
 **Try it (15 minutes).** In `apps/odysseus/main.cpp`, add `ODYSSEUS_ASSERT(version.empty(), "testing my first assert");` after the version line (and `#include "core/assertions.h"`). Press F5 in Visual Studio: it stops on your line. Open the newest file in the logs folder and find the file and line. Then build Release and run it: nothing happens, because asserts vanish in Release. Remove the line.
 
 **Check yourself.** Why is `ODYSSEUS_ASSERT` a macro while `logInfo` is a normal function?
+
+## US-020: Open a window with a steady game loop (2026-09-30)
+
+**What we built.** Project Odyssey now opens a real 1280 x 720 window through our own engine, Luna, and runs a game loop: 60 frames per second on your screen, while the world ticks exactly 20 times per second whatever the monitor.
+
+**The idea: an RAII wrapper around SDL_Window, with unique_ptr and a custom deleter.** SDL is a C library: you create a window with `SDL_CreateWindow` and must remember to call `SDL_DestroyWindow`. Forget it, or return early by mistake, and it leaks. `std::unique_ptr` normally calls `delete`; we give it a *deleter* that calls SDL's function instead. Now the window is destroyed automatically when the `Window` object goes away, even if an error is thrown.
+
+```cpp
+struct WindowDeleter { void operator()(SDL_Window* w) const { SDL_DestroyWindow(w); } };
+std::unique_ptr<SDL_Window, WindowDeleter> window_;   // destroys itself
+```
+
+**Where to look.** [src/luna/platform/window.h](../src/luna/platform/window.h) (the deleters), [src/luna/engine/fixed_step_clock.cpp](../src/luna/engine/fixed_step_clock.cpp) (why the world speed does not depend on the monitor), [src/luna/engine/application.cpp](../src/luna/engine/application.cpp) (the loop).
+
+**Try it (15 minutes).** In `src/game/odyssey_game.cpp`, change the three `clear...` numbers to your favourite colour and run the game. Then run `odysseus.exe --quit-after 10` from a terminal and read the "Average frame rate" line in the log.
+
+**Check yourself.** Why does the game loop count *ticks* separately from *frames*?
