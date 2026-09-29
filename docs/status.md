@@ -1,10 +1,11 @@
 # Assembly status
 
-Codex v1.1. Edited only by mraw-orchestrator.
+Codex v1.2. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
 | P-000 | - | - | Done | 2026-09-29 |
+| P-001 | - | - | Done | 2026-09-29 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -12,20 +13,20 @@ Codex v1.1. Edited only by mraw-orchestrator.
 | S-US-004 | US-004 | M0 | To do |  |
 | X-M0 | - | M0 | To do |  |
 | K-M1 | - | M1 | To do |  |
-| S-US-010 | US-010 | M1 | To do |  |
-| S-US-011 | US-011 | M1 | To do |  |
-| S-US-012 | US-012 | M1 | To do |  |
-| S-US-013 | US-013 | M1 | To do |  |
-| S-US-014 | US-014 | M1 | To do |  |
-| S-US-015 | US-015 | M1 | To do |  |
-| S-US-016 | US-016 | M1 | To do |  |
+| S-US-020 | US-020 | M1 | To do |  |
+| S-US-021 | US-021 | M1 | To do |  |
+| S-US-022 | US-022 | M1 | To do |  |
+| S-US-023 | US-023 | M1 | To do |  |
+| S-US-024 | US-024 | M1 | To do |  |
 | X-M1 | - | M1 | To do |  |
 | K-M2 | - | M2 | To do |  |
-| S-US-020 | US-020 | M2 | To do |  |
-| S-US-021 | US-021 | M2 | To do |  |
-| S-US-022 | US-022 | M2 | To do |  |
-| S-US-023 | US-023 | M2 | To do |  |
-| S-US-024 | US-024 | M2 | To do |  |
+| S-US-010 | US-010 | M2 | To do |  |
+| S-US-011 | US-011 | M2 | To do |  |
+| S-US-012 | US-012 | M2 | To do |  |
+| S-US-013 | US-013 | M2 | To do |  |
+| S-US-014 | US-014 | M2 | To do |  |
+| S-US-015 | US-015 | M2 | To do |  |
+| S-US-016 | US-016 | M2 | To do |  |
 | X-M2 | - | M2 | To do |  |
 | K-M3 | - | M3 | To do |  |
 | S-US-030 | US-030 | M3 | To do |  |

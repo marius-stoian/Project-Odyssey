@@ -19,3 +19,5 @@ From Project Odyssey.docx v1.3, section 7.5. New ADRs get their own file here (A
 | ADR-013 | Four simulation LOD tiers (ARC-05). |
 | ADR-014 | Git + GitHub (private repo) + GitHub Actions: build and test on every push (Windows runner). |
 | ADR-015 | Debug safety net: warnings as errors, AddressSanitizer, asserts. |
+
+Luna (ARC-09): the Platform and Engine layers form our game-agnostic engine in src/luna/.
