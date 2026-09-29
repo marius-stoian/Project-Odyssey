@@ -14,7 +14,8 @@ else()
         message(FATAL_ERROR "Forbidden include unexpectedly compiled: ${PROBE}")
     endif()
     # A failed compiler launch, linker or configuration is never negative-test evidence.
-    if(NOT log MATCHES "(fatal error C1083|error C1189|fatal error:.*No such file|#error)")
+    # MSBuild prints "fatal  error C1083" (two spaces), so match the error code, not the prefix.
+    if(NOT log MATCHES "(error C1083|error C1189|fatal error:.*No such file|#error)")
         message(FATAL_ERROR "Failure was not a compiler include error:\n${log}")
     endif()
     if(NOT log MATCHES "${EXPECTED_HEADER}")
