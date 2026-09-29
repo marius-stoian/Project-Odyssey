@@ -109,6 +109,10 @@ Fixed sqrt(Fixed value);
 Fixed sin(Fixed radians);
 Fixed cos(Fixed radians);
 
+// The angle of the point (x, y) seen from the origin, in radians from -pi to pi
+// (atan2(1, 1) is pi/4). Accurate to about 1e-9. atan2(0, 0) is 0.
+Fixed atan2(Fixed y, Fixed x);
+
 // An angle given in whole degrees, in radians: degrees(90) is pi/2.
 Fixed degrees(std::int64_t wholeDegrees);
 

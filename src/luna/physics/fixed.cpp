@@ -236,6 +236,47 @@ Fixed cos(Fixed radians) {
     return sin(Fixed::fromRaw(turn) + kHalfPi);
 }
 
+namespace {
+
+// atan t = t - t^3/3 + t^5/5 - ... for |t| <= tan(pi/8) = 0.414, where 16 terms leave an
+// error far below 1e-10.
+Fixed atanSmall(Fixed t) {
+    const Fixed tSquared = t * t;
+    Fixed power = t;
+    Fixed sum = t;
+    for (std::int64_t n = 1; n <= 16; ++n) {
+        power = -(power * tSquared);
+        sum += power / (2 * n + 1);
+    }
+    return sum;
+}
+
+// atan t for 0 <= t <= 1. Above tan(pi/8), atan t = pi/4 + atan((t - 1) / (t + 1)) brings
+// the argument back near 0, where the series converges fast.
+Fixed atanUnit(Fixed t) {
+    const Fixed tanEighthPi = Fixed::fromRaw(1'779'033'704); // 0.41421356...
+    if (t <= tanEighthPi) {
+        return atanSmall(t);
+    }
+    return kHalfPi / 2 + atanSmall((t - kFixedOne) / (t + kFixedOne));
+}
+
+} // namespace
+
+Fixed atan2(Fixed y, Fixed x) {
+    if (x == kFixedZero && y == kFixedZero) {
+        return kFixedZero;
+    }
+    // Fold into the first octant (0 to 45 degrees), then unfold with symmetry.
+    const Fixed ax = abs(x);
+    const Fixed ay = abs(y);
+    Fixed angle = ay <= ax ? atanUnit(ay / ax) : kHalfPi - atanUnit(ax / ay);
+    if (x < kFixedZero) {
+        angle = kPi - angle;
+    }
+    return y < kFixedZero ? -angle : angle;
+}
+
 Fixed degrees(std::int64_t wholeDegrees) {
     return kPi * wholeDegrees / 180;
 }

@@ -227,3 +227,22 @@ The geometry lives in pure functions such as `overlap(a, b)`: same inputs, same 
 **Try it (15 minutes).** In `tests/physics/shapes_test.cpp`, change the grid's cell size in `US-026 Many bodies` from 2 to 64 metres and run the test in Release: watch "pairs tested" and the time grow. Then try 0.5 m.
 
 **Check yourself.** Why does checking only where the spear is at each tick miss the target, and how does sweeping fix it?
+
+## US-027: Fly projectiles with real ballistics (2026-09-30)
+
+**What we built.** Spears and darts fly in true arcs: gravity pulls them down, air drag slows them (more the faster they go), and wind pushes them sideways. An aim solver finds the launch angle that hits a target 25 m away, and the throw really hits it.
+
+**The idea: numerical integration, and units.** Physics formulas describe change: velocity changes by acceleration, position by velocity. A computer cannot do "continuous", so it takes many tiny steps (here 200 per second) and adds up the changes. Semi-implicit Euler first updates the velocity, then moves with the new velocity:
+
+```cpp
+projectile.velocity += projectileAcceleration(projectile, air) * dt;
+projectile.position += projectile.velocity * dt;
+```
+
+Units keep us honest: velocity (m/s) x dt (s) gives metres, so both sides of `position += ...` are metres. If the units of a formula do not match, the formula is wrong. We checked the result against the textbook: 20 m/s at 45 degrees lands 40.7 m away, v^2/g = 40.8 m.
+
+**Where to look.** [src/luna/physics/ballistics.cpp](../src/luna/physics/ballistics.cpp) (`projectileAcceleration`: the drag equation; `aimLaunchAngle`: the secant method).
+
+**Try it (15 minutes).** In `tests/physics/ballistics_test.cpp`, change the crosswind in `US-027 Drag and wind` from 5 to 10 m/s and read the MESSAGE lines: does the drift double? Then set `kProjectileSubsteps` to 1 and watch the range error in `US-027 Arc` grow.
+
+**Check yourself.** Why does air drag make the aim solver choose a slightly higher angle than the vacuum formula?
