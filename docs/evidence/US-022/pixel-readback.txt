@@ -1,0 +1,29 @@
+[doctest] doctest version is "2.5.3"
+[doctest] run with "--help" for options
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\luna\pixels_window_test.cpp(94):
+TEST CASE:  US-022 Crisp pixels
+  1920 x 1080: exactly 4 times bigger, no blurred pixels
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\luna\pixels_window_test.cpp(55): MESSAGE: requested 1920x1080, drawing surface 1920x1080
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\luna\pixels_window_test.cpp(89): MESSAGE: window 1920x1080: scale x4, picture at (0, 0), 1024 pixels checked, 0 wrong
+  logged: window pixels: 1920 x 1080
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\luna\pixels_window_test.cpp(94):
+TEST CASE:  US-022 Crisp pixels
+  1366 x 768: largest whole-number scale, letterboxed
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\luna\pixels_window_test.cpp(55): MESSAGE: requested 1366x768, drawing surface 1366x768
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\luna\pixels_window_test.cpp(89): MESSAGE: window 1366x768: scale x2, picture at (203, 114), 256 pixels checked, 0 wrong
+  logged: window pixels: 1366 x 768
+
+===============================================================================
+[doctest] test cases: 1 | 1 passed | 0 failed | 0 skipped
+[doctest] assertions: 7 | 7 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] test cases: 1 | 1 passed | 0 failed | 3 skipped
+[doctest] assertions: 9 | 9 passed | 0 failed |
+[doctest] Status: SUCCESS!

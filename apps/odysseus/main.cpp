@@ -1,6 +1,7 @@
 // odysseus.exe: the game. Opens the window and runs Project Odyssey on the Luna engine.
 //   --quit-after <seconds>   close by itself after that long, exactly like the close button
 //   --log-dir <folder>       write the session log there instead of the per-user folder
+//   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
 #include "core/log.h"
 #include "core/version.h"
 #include "game/odyssey_game.h"
@@ -20,6 +21,7 @@ namespace {
 struct Arguments {
     double quitAfterSeconds = 0.0;
     std::filesystem::path logDirectory;
+    std::filesystem::path screenshot;
 };
 
 Arguments parseArguments(int argc, char* argv[]) {
@@ -30,6 +32,8 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.quitAfterSeconds = std::stod(argv[++i]);
         } else if (name == "--log-dir") {
             arguments.logDirectory = argv[++i];
+        } else if (name == "--screenshot") {
+            arguments.screenshot = argv[++i];
         }
     }
     return arguments;
@@ -51,7 +55,7 @@ int main(int argc, char* argv[]) {
     try {
         odysseus::game::OdysseyGame game;
         const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
-                                               {start, arguments.quitAfterSeconds});
+                                               {start, arguments.quitAfterSeconds, arguments.screenshot});
         odysseus::core::logInfo("Shutting down");
         return exitCode;
     } catch (const std::exception& error) {

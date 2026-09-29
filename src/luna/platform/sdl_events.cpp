@@ -85,6 +85,11 @@ std::optional<Event> translateEvent(const SDL_Event& event) {
         out.type = EventType::GamepadRemoved;
         out.gamepad = static_cast<int>(event.gdevice.which);
         return out;
+    case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+        out.type = EventType::WindowResized;
+        out.width = event.window.data1;
+        out.height = event.window.data2;
+        return out;
     default:
         return std::nullopt;
     }

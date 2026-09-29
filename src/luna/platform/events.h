@@ -14,6 +14,7 @@ enum class EventType {
     GamepadAxisMoved,
     GamepadAdded,
     GamepadRemoved,
+    WindowResized,     // the drawable size changed (width, height in real pixels)
 };
 
 // Physical key positions: W is "the key where W is on a US keyboard", so WASD also works
@@ -33,6 +34,8 @@ struct Event {
     GamepadAxis axis = GamepadAxis::Unknown;
     float axisValue = 0.0F;                  // -1 (left/up) .. +1 (right/down)
     int gamepad = 0;                         // which gamepad sent it
+    int width = 0;                           // WindowResized
+    int height = 0;
 };
 
 } // namespace luna::platform

@@ -5,6 +5,7 @@
 #include "game.h"
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
 
 namespace luna::engine {
@@ -24,6 +25,7 @@ struct AppConfig {
 struct RunOptions {
     std::uint64_t startNanoseconds = 0; // when the program started, to time the first frame
     double quitAfterSeconds = 0.0;      // > 0: close by itself, like pressing the close button
+    std::filesystem::path screenshot;   // not empty: save the last frame there (.bmp)
 };
 
 // Opens the window and runs the loop until the player closes it. Logs the window size,
