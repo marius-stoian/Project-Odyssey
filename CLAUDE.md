@@ -1,4 +1,4 @@
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.4)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.5)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -58,6 +58,7 @@ Everything else the team decides and records:
 - Design decisions (a D-xx that is not Decided, or any question that changes design or scope): Dominus decides using the recommended option in the source of truth or this Codex. Write docs/decision-requests/<ID>.md with the question, 2-4 options, the choice and why; set the decision in docs/decisions.md to "Decided by Dominus (delegated)" with a one-line answer; list it in the next Milestone file; continue. The owner may override later; an override is a new decision.
 - If the source of truth must change because of a delegated decision, update the requirements document on Google Drive (bump its version, add a resolution-log line) and raise a codex issue so Anima can follow.
 - Kill-gate evidence agents can measure, git push, new libraries: handle and report.
+Sessions end without warning (usage limits, crashes), so work must always be resumable: Limit.md at the repository root is kept current after every story. When a session is told it is near its limit, or the owner asks for a break: finish the current step, commit work in progress to its story branch with a "work in progress" message, push the branch, and update Limit.md with exactly what is done and what is left. Never leave uncommitted work.
 </human_gates>
 
 <git>

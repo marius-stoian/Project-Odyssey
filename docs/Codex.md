@@ -1,4 +1,4 @@
-# Project Odyssey Codex v1.4
+# Project Odyssey Codex v1.5
 
 Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-29 | Source of truth: Project Odyssey.docx v1.5 (chapter 12: MVP; chapter 7: architecture) | Executor: Claude Code autonomous agents (target model: Opus 5.5 for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are delegated to Dominus
 
@@ -8,6 +8,8 @@ Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus A
 - Start: put this file in an empty folder `odysseus/`, open Claude Code there, paste **A-000**. Every later session: paste **A-001**.
 - P-000 turns the Charter into `CLAUDE.md` and the role prompts into `.claude/agents/`, so every agent loads them automatically.
 - One story in progress at a time. Every session ends with an assembly report.
+- Who does what (owner instruction, 2026-09-30): Dominus, wearing every Mraw hat, designs, implements and tests the game; Anima alone writes and amends this Codex. Mraw never edits docs/Codex.md; problems go to Anima as codex issues.
+- Continuous assembly: the owner wants the MVP as fast as quality allows, engine first. After each prompt, continue with the next one in Codex order without waiting, until a Charter human gate or the end of the session.
 - Autonomous by default (owner instruction, 2026-09-30): the owner wants the game built with minimal intervention. Design decisions are delegated to Dominus, stories integrate through the `qa` branch, and a Milestone-<n>.md progress snapshot is saved after every story, so the owner can review everything later. The owner answers questions up front (before leaving the team to work), not during the run.
 - Blocked, wrong or ambiguous prompts become codex issues; the owner takes them to Anima with **A-002**; Anima issues a new Codex version.
 
@@ -19,7 +21,7 @@ Hybrid: **stage gates** at milestones M0-M6 (with kill gates at M2 and M6) and *
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.4)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.5)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -79,6 +81,7 @@ Everything else the team decides and records:
 - Design decisions (a D-xx that is not Decided, or any question that changes design or scope): Dominus decides using the recommended option in the source of truth or this Codex. Write docs/decision-requests/<ID>.md with the question, 2-4 options, the choice and why; set the decision in docs/decisions.md to "Decided by Dominus (delegated)" with a one-line answer; list it in the next Milestone file; continue. The owner may override later; an override is a new decision.
 - If the source of truth must change because of a delegated decision, update the requirements document on Google Drive (bump its version, add a resolution-log line) and raise a codex issue so Anima can follow.
 - Kill-gate evidence agents can measure, git push, new libraries: handle and report.
+Sessions end without warning (usage limits, crashes), so work must always be resumable: Limit.md at the repository root is kept current after every story. When a session is told it is near its limit, or the owner asks for a break: finish the current step, commit work in progress to its story branch with a "work in progress" message, push the branch, and update Limit.md with exactly what is done and what is left. Never leave uncommitted work.
 </human_gates>
 
 <git>
@@ -185,22 +188,22 @@ You are the Mraw designer. You write content only as data files in assets/data/ 
 
 ## 4. Build loop (L-01)
 ```xml
-<prompt id="L-01" codex="1.4" name="Mraw build loop">
+<prompt id="L-01" codex="1.5" name="Mraw build loop">
 <context>
 Used by mraw-orchestrator for every story prompt S-US-xxx. The Charter (CLAUDE.md) is already loaded.
 </context>
 <instructions>
 1. Readiness: for each D-xx in the story's <dependencies>, read docs/decisions.md. If any is not Decided, follow the Charter's human_gates: Dominus decides it (delegated), records it, and the story continues. For each US-xxx dependency, confirm it is Done in docs/status.md.
-2. Branch: create story/US-xxx from qa.
+2. Branch: create story/US-xxx from qa. If that branch already exists with paused work (Limit.md says so), continue on it instead: merge the latest qa into it first, then finish what Limit.md lists as left.
 3. Plan: delegate to mraw-architect -> docs/plans/US-xxx.md.
 4. Tests first: delegate to mraw-tester -> failing tests for every headless-testable scenario; manual checks for the rest.
 5. Content (only if the story needs data): delegate to mraw-designer.
 6. Implement: delegate to mraw-programmer until tests pass with zero warnings.
-7. Verify: delegate to mraw-tester -> full Debug and Release builds, all tests, determinism test.
+7. Verify: delegate to mraw-tester -> run `pwsh tools/verify.ps1 -Story US-xxx` (configure, Debug and Release builds with zero warning lines, every test in both, results saved to docs/evidence/US-xxx/); add story-specific evidence (end-to-end runs, screenshots via `odysseus.exe --screenshot`, measurements) to the same folder.
 8. Accept: delegate to mraw-acceptor. On REJECT, return to step 6 with the reasons. After 3 rejections, mark the story Failed, write a codex issue, and stop this story.
 9. Document and teach: delegate to mraw-writer -> docs + teach-back entry.
 10. Integrate: update CHANGELOG.md, commit, merge into qa, push; when CI on qa is green, set the story to Done in docs/status.md.
-11. Snapshot and report: save the next Milestone-<n>.md at the repository root (next AP-### ID: what changed, milestone table, delegated decisions, codex issues, next prompts), commit it to qa, write the assembly report (Charter report_format) to docs/reports/US-xxx-<date>.md. Then continue with the next prompt in the Codex, unless the session is getting long; in that case end with the report so the next session starts fresh with A-001.
+11. Snapshot and report: update Limit.md (next prompt, anything paused, how to resume), save the next Milestone-<n>.md at the repository root (next AP-### ID: what changed, milestone table, delegated decisions, codex issues, next prompts), commit it to qa, write the assembly report (Charter report_format) to docs/reports/US-xxx-<date>.md. Then continue with the next prompt in the Codex, unless the session is getting long; in that case end with the report so the next session starts fresh with A-001.
 </instructions>
 <stop_conditions>
 A human gate in the Charter (step 1 only for kill gates, accounts, credentials, money); 3 acceptance rejections (step 8); a codex issue that affects this story; git push needs authentication that is not configured.
@@ -235,7 +238,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.4 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.5 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -243,7 +246,7 @@ Stop only where the Charter's human_gates say so. End every session with an asse
 ### A-001 Continue assembly (owner pastes this to start each new session)
 ```text
 Mraw, continue assembly.
-Read CLAUDE.md, docs/Codex.md and docs/status.md. Check docs/decisions.md for decisions the owner has answered since the last session and unblock those stories. Then continue with the first prompt in Codex order that is To do or newly unblocked, through the build loop L-01, without waiting for the owner except at the Charter's human gates. Save a Milestone-<n>.md after every story. End with an assembly report.
+Read CLAUDE.md, Limit.md, docs/Codex.md and docs/status.md. Check docs/decisions.md for decisions the owner has answered since the last session and unblock those stories. Then continue with the first prompt in Codex order that is To do or newly unblocked, through the build loop L-01, without waiting for the owner except at the Charter's human gates. Save a Milestone-<n>.md after every story. End with an assembly report.
 ```
 
 ### A-002 Take codex issues to Anima (owner pastes this in a Dominus session)
@@ -255,7 +258,7 @@ Read docs/Codex.md and docs/codex-issues.md. For each open issue: decide the fix
 ## 7. Prompts by milestone
 ### P-000 Bootstrap
 ```xml
-<prompt id="P-000" codex="1.4" name="Bootstrap the Mraw workspace">
+<prompt id="P-000" codex="1.5" name="Bootstrap the Mraw workspace">
 <context>
 Runs once, in an empty folder named odysseus/ that contains only Codex.md. Creates the files every later prompt relies on.
 </context>
@@ -277,7 +280,7 @@ Runs once, in an empty folder named odysseus/ that contains only Codex.md. Creat
 
 ### P-001 Adopt Codex v1.2 (Luna first)
 ```xml
-<prompt id="P-001" codex="1.4" name="Adopt Codex v1.2 in an existing workspace">
+<prompt id="P-001" codex="1.5" name="Adopt Codex v1.2 in an existing workspace">
 <context>
 Codex v1.2 builds the Luna engine first (source of truth v1.4, ARC-09): M1 is now the Luna engine walking skeleton and M2 the console clan simulator with Kill Gate 1. Workspaces bootstrapped with Codex v1.1 still have the old folders and prompt order. A workspace bootstrapped with v1.2 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -296,7 +299,7 @@ Codex v1.2 builds the Luna engine first (source of truth v1.4, ARC-09): M1 is no
 
 ### P-002 Adopt Codex v1.3 (autonomous assembly)
 ```xml
-<prompt id="P-002" codex="1.4" name="Adopt Codex v1.3 in an existing workspace">
+<prompt id="P-002" codex="1.5" name="Adopt Codex v1.3 in an existing workspace">
 <context>
 Codex v1.3 writes the owner's standing instructions of 2026-09-30 into the Charter: delegated design decisions, the qa integration branch, CHANGELOG.md per change set, and a Milestone-<n>.md snapshot after every story. A workspace bootstrapped with v1.3 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -313,7 +316,7 @@ Codex v1.3 writes the owner's standing instructions of 2026-09-30 into the Chart
 
 ### P-003 Adopt Codex v1.4 (Luna Physics)
 ```xml
-<prompt id="P-003" codex="1.4" name="Adopt Codex v1.4 in an existing workspace">
+<prompt id="P-003" codex="1.5" name="Adopt Codex v1.4 in an existing workspace">
 <context>
 Codex v1.4 adds milestone M1b Luna Physics (requirements v1.5: PHY-01..PHY-06, ARC-10, ADR-017) right after M1, before the rest of M2. A workspace bootstrapped with v1.4 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -327,11 +330,26 @@ Codex v1.4 adds milestone M1b Luna Physics (requirements v1.5: PHY-01..PHY-06, A
 </prompt>
 ```
 
+### P-004 Adopt Codex v1.5 (assembly instructions)
+```xml
+<prompt id="P-004" codex="1.5" name="Adopt Codex v1.5 in an existing workspace">
+<context>
+Codex v1.5 writes down how the team already works: Limit.md as the resume point, tools/verify.ps1 as the standard verification, continuing paused story branches, continuous assembly, and who does what. A workspace bootstrapped with v1.5 needs nothing: mark this prompt Done with the note "not needed".
+</context>
+<instructions>
+1. Make sure Limit.md and tools/verify.ps1 exist; create them from the descriptions in section 8 if not.
+2. docs/status.md: add P-004 after P-003 and set it Done.
+3. Commit on qa "P-004: adopt Codex v1.5 (assembly instructions)" and push.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
 ### M0 Tooling ready
 Exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 
 ```xml
-<prompt id="K-M0" codex="1.4" name="Kick off M0 Tooling ready">
+<prompt id="K-M0" codex="1.5" name="Kick off M0 Tooling ready">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-12) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -344,7 +362,7 @@ Exit criteria: A clean checkout builds in Visual Studio; you pause the program o
 
 #### S-US-001 Build and debug from a clean checkout
 ```xml
-<prompt id="S-US-001" codex="1.4" milestone="M0" story="US-001" priority="Must" size="S">
+<prompt id="S-US-001" codex="1.5" milestone="M0" story="US-001" priority="Must" size="S">
 <context>
 Story US-001: Build and debug from a clean checkout.
 As a developer, I want to clone the repository and build every target with one CMake preset, so that I can start working in minutes and never fight the build.
@@ -393,7 +411,7 @@ Manual checks in docs/plans/US-001.md done, with results recorded there.
 
 #### S-US-002 Run the build and tests on every push
 ```xml
-<prompt id="S-US-002" codex="1.4" milestone="M0" story="US-002" priority="Must" size="S">
+<prompt id="S-US-002" codex="1.5" milestone="M0" story="US-002" priority="Must" size="S">
 <context>
 Story US-002: Run the build and tests on every push.
 As a developer, I want GitHub Actions to build and test every push on a Windows runner, so that mistakes are caught automatically, even when I forget to run tests.
@@ -437,7 +455,7 @@ Manual checks in docs/plans/US-002.md done, with results recorded there.
 
 #### S-US-003 Enforce the layer rules in the build
 ```xml
-<prompt id="S-US-003" codex="1.4" milestone="M0" story="US-003" priority="Must" size="S">
+<prompt id="S-US-003" codex="1.5" milestone="M0" story="US-003" priority="Must" size="S">
 <context>
 Story US-003: Enforce the layer rules in the build.
 As a developer, I want the build to reject code that breaks the five-layer rule or pulls game code into Luna, so that the architecture cannot rot by accident.
@@ -486,7 +504,7 @@ Manual checks in docs/plans/US-003.md done, with results recorded there.
 
 #### S-US-004 Log what happens and stop on broken assumptions
 ```xml
-<prompt id="S-US-004" codex="1.4" milestone="M0" story="US-004" priority="Must" size="S">
+<prompt id="S-US-004" codex="1.5" milestone="M0" story="US-004" priority="Must" size="S">
 <context>
 Story US-004: Log what happens and stop on broken assumptions.
 As a developer, I want a logging system and asserts in Core, so that I can see what the game did before a problem.
@@ -534,7 +552,7 @@ Manual checks in docs/plans/US-004.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M0" codex="1.4" name="Exit review M0">
+<prompt id="X-M0" codex="1.5" name="Exit review M0">
 <instructions>
 1. Demonstrate the exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M0.md, one section per criterion, each marked met or not met.
@@ -548,7 +566,7 @@ Manual checks in docs/plans/US-004.md done, with results recorded there.
 Exit criteria: Luna opens a window; a demo character walks around a tile map at 60 FPS with crisp pixels at any window size; the build proves Luna contains no Odysseus code.
 
 ```xml
-<prompt id="K-M1" codex="1.4" name="Kick off M1 Luna engine: walking skeleton">
+<prompt id="K-M1" codex="1.5" name="Kick off M1 Luna engine: walking skeleton">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -561,7 +579,7 @@ Exit criteria: Luna opens a window; a demo character walks around a tile map at 
 
 #### S-US-020 Open a window with a steady game loop
 ```xml
-<prompt id="S-US-020" codex="1.4" milestone="M1" story="US-020" priority="Must" size="M">
+<prompt id="S-US-020" codex="1.5" milestone="M1" story="US-020" priority="Must" size="M">
 <context>
 Story US-020: Open a window with a steady game loop.
 As a player, I want the game to open a window that runs smoothly and closes cleanly, so that the game feels solid from the first second.
@@ -610,7 +628,7 @@ Manual checks in docs/plans/US-020.md done, with results recorded there.
 
 #### S-US-021 Control the game through intents
 ```xml
-<prompt id="S-US-021" codex="1.4" milestone="M1" story="US-021" priority="Must" size="S">
+<prompt id="S-US-021" codex="1.5" milestone="M1" story="US-021" priority="Must" size="S">
 <context>
 Story US-021: Control the game through intents.
 As a player, I want keyboard, mouse and gamepad to control the same actions, so that I can play the way I like, and touch can be added later.
@@ -659,7 +677,7 @@ Manual checks in docs/plans/US-021.md done, with results recorded there.
 
 #### S-US-022 Draw sprites with crisp pixels
 ```xml
-<prompt id="S-US-022" codex="1.4" milestone="M1" story="US-022" priority="Must" size="M">
+<prompt id="S-US-022" codex="1.5" milestone="M1" story="US-022" priority="Must" size="M">
 <context>
 Story US-022: Draw sprites with crisp pixels.
 As a player, I want pixel art to stay sharp at every window size, so that the game looks right on any screen.
@@ -703,7 +721,7 @@ Manual checks in docs/plans/US-022.md done, with results recorded there.
 
 #### S-US-023 Show a tile map with a following camera
 ```xml
-<prompt id="S-US-023" codex="1.4" milestone="M1" story="US-023" priority="Must" size="M">
+<prompt id="S-US-023" codex="1.5" milestone="M1" story="US-023" priority="Must" size="M">
 <context>
 Story US-023: Show a tile map with a following camera.
 As a player, I want to see the world around my character, with the camera following me, so that I always know where I am.
@@ -747,7 +765,7 @@ Manual checks in docs/plans/US-023.md done, with results recorded there.
 
 #### S-US-024 Walk the character around the map
 ```xml
-<prompt id="S-US-024" codex="1.4" milestone="M1" story="US-024" priority="Must" size="M">
+<prompt id="S-US-024" codex="1.5" milestone="M1" story="US-024" priority="Must" size="M">
 <context>
 Story US-024: Walk the character around the map.
 As a player, I want to move my character in four directions with animation, so that I feel in control of a person in the world.
@@ -795,7 +813,7 @@ Manual checks in docs/plans/US-024.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M1" codex="1.4" name="Exit review M1">
+<prompt id="X-M1" codex="1.5" name="Exit review M1">
 <instructions>
 1. Demonstrate the exit criteria: Luna opens a window; a demo character walks around a tile map at 60 FPS with crisp pixels at any window size; the build proves Luna contains no Odysseus code. For the last criterion, show the US-003 "Luna stays game-agnostic" check passing on the current code.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M1.md, one section per criterion, each marked met or not met.
@@ -809,7 +827,7 @@ Manual checks in docs/plans/US-024.md done, with results recorded there.
 Exit criteria: Luna Physics passes its math, hit-detection, ballistics and rigid-body tests identically on every build; in the demo the hero throws a spear that flies in an arc with a shadow and hits a target.
 
 ```xml
-<prompt id="K-M1b" codex="1.4" name="Kick off M1b Luna Physics">
+<prompt id="K-M1b" codex="1.5" name="Kick off M1b Luna Physics">
 <instructions>
 1. Confirm the previous milestone's exit review (docs/gates/M1.md) exists and passed.
 2. Read docs/decisions.md. This milestone needs no open owner decision; design questions that come up are delegated to Dominus (Charter human_gates).
@@ -823,7 +841,7 @@ Exit criteria: Luna Physics passes its math, hit-detection, ballistics and rigid
 
 #### S-US-025 Build deterministic 3D math
 ```xml
-<prompt id="S-US-025" codex="1.4" milestone="M1b" story="US-025" priority="Must" size="M">
+<prompt id="S-US-025" codex="1.5" milestone="M1b" story="US-025" priority="Must" size="M">
 <context>
 Story US-025: Build deterministic 3D math.
 As a developer, I want fixed-point numbers, 3D vectors and rotations in Luna Physics, so that physics gives identical results on every computer and every run.
@@ -872,7 +890,7 @@ Manual checks in docs/plans/US-025.md done, with results recorded there.
 
 #### S-US-026 Detect hits between shapes
 ```xml
-<prompt id="S-US-026" codex="1.4" milestone="M1b" story="US-026" priority="Must" size="L">
+<prompt id="S-US-026" codex="1.5" milestone="M1b" story="US-026" priority="Must" size="L">
 <context>
 Story US-026: Detect hits between shapes.
 As a developer, I want spheres, capsules and boxes to report overlaps, ray hits and swept hits, so that every hit is found and a fast spear never passes through its target.
@@ -921,7 +939,7 @@ Manual checks in docs/plans/US-026.md done, with results recorded there.
 
 #### S-US-027 Fly projectiles with real ballistics
 ```xml
-<prompt id="S-US-027" codex="1.4" milestone="M1b" story="US-027" priority="Must" size="M">
+<prompt id="S-US-027" codex="1.5" milestone="M1b" story="US-027" priority="Must" size="M">
 <context>
 Story US-027: Fly projectiles with real ballistics.
 As a hunter, I want thrown spears and darts to fly in true arcs under gravity, drag and wind, so that aim, strength and distance matter.
@@ -970,7 +988,7 @@ Manual checks in docs/plans/US-027.md done, with results recorded there.
 
 #### S-US-028 Push and bounce bodies
 ```xml
-<prompt id="S-US-028" codex="1.4" milestone="M1b" story="US-028" priority="Must" size="M">
+<prompt id="S-US-028" codex="1.5" milestone="M1b" story="US-028" priority="Must" size="M">
 <context>
 Story US-028: Push and bounce bodies.
 As a player, I want bodies to have mass, be pushed, slide, bounce and come to rest, so that knockback and thrown or falling objects feel physical.
@@ -1019,7 +1037,7 @@ Manual checks in docs/plans/US-028.md done, with results recorded there.
 
 #### S-US-029 Throw a spear in the demo
 ```xml
-<prompt id="S-US-029" codex="1.4" milestone="M1b" story="US-029" priority="Must" size="M">
+<prompt id="S-US-029" codex="1.5" milestone="M1b" story="US-029" priority="Must" size="M">
 <context>
 Story US-029: Throw a spear in the demo.
 As a player, I want to throw a spear at a target in the walking skeleton, so that Luna Physics is proven end to end in the real game.
@@ -1067,7 +1085,7 @@ Manual checks in docs/plans/US-029.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M1b" codex="1.4" name="Exit review M1b">
+<prompt id="X-M1b" codex="1.5" name="Exit review M1b">
 <instructions>
 1. Demonstrate the exit criteria: Luna Physics passes its math, hit-detection, ballistics and rigid-body tests identically on every build; in the demo the hero throws a spear that flies in an arc with a shadow and hits a target. Include the textbook comparisons (range, bounce heights, friction distance) and a screenshot of the spear in flight.
 2. Collect evidence into docs/gates/M1b.md, one section per criterion, each marked met or not met.
@@ -1081,7 +1099,7 @@ Manual checks in docs/plans/US-029.md done, with results recorded there.
 Exit criteria: The headless runner simulates a 20-person clan for 100 years without crashing; the printed chronicle is shown to 3 people and at least 2 find a story in it; the determinism test passes.
 
 ```xml
-<prompt id="K-M2" codex="1.4" name="Kick off M2 Console clan simulator (KILL GATE 1)">
+<prompt id="K-M2" codex="1.5" name="Kick off M2 Console clan simulator (KILL GATE 1)">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-01, D-02, D-03, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1094,7 +1112,7 @@ Exit criteria: The headless runner simulates a 20-person clan for 100 years with
 
 #### S-US-010 Advance a seeded world clock
 ```xml
-<prompt id="S-US-010" codex="1.4" milestone="M2" story="US-010" priority="Must" size="M">
+<prompt id="S-US-010" codex="1.5" milestone="M2" story="US-010" priority="Must" size="M">
 <context>
 Story US-010: Advance a seeded world clock.
 As a developer, I want the simulation to tick 20 times per second of game time with a calendar of days and seasons, so that everything in the world happens on one reliable clock.
@@ -1143,7 +1161,7 @@ Manual checks in docs/plans/US-010.md done, with results recorded there.
 
 #### S-US-011 Give every person needs that change over time
 ```xml
-<prompt id="S-US-011" codex="1.4" milestone="M2" story="US-011" priority="Must" size="M">
+<prompt id="S-US-011" codex="1.5" milestone="M2" story="US-011" priority="Must" size="M">
 <context>
 Story US-011: Give every person needs that change over time.
 As a player, I want clan members to get hungry, tired, cold and lonely, so that the world feels alive and people have reasons to act.
@@ -1192,7 +1210,7 @@ Manual checks in docs/plans/US-011.md done, with results recorded there.
 
 #### S-US-012 Let people choose what to do (utility AI)
 ```xml
-<prompt id="S-US-012" codex="1.4" milestone="M2" story="US-012" priority="Must" size="L">
+<prompt id="S-US-012" codex="1.5" milestone="M2" story="US-012" priority="Must" size="L">
 <context>
 Story US-012: Let people choose what to do (utility AI).
 As a player, I want each clan member to pick sensible actions based on their needs and skills, so that the clan survives without me micromanaging it.
@@ -1241,7 +1259,7 @@ Manual checks in docs/plans/US-012.md done, with results recorded there.
 
 #### S-US-013 Remember events and spread gossip
 ```xml
-<prompt id="S-US-013" codex="1.4" milestone="M2" story="US-013" priority="Must" size="M">
+<prompt id="S-US-013" codex="1.5" milestone="M2" story="US-013" priority="Must" size="M">
 <context>
 Story US-013: Remember events and spread gossip.
 As a player, I want people to remember important events and tell others, so that reputations form and stories travel through the clan.
@@ -1290,7 +1308,7 @@ Manual checks in docs/plans/US-013.md done, with results recorded there.
 
 #### S-US-014 Write a readable chronicle
 ```xml
-<prompt id="S-US-014" codex="1.4" milestone="M2" story="US-014" priority="Must" size="M">
+<prompt id="S-US-014" codex="1.5" milestone="M2" story="US-014" priority="Must" size="M">
 <context>
 Story US-014: Write a readable chronicle.
 As a player, I want notable events recorded as short sentences, so that I can read the clan's story and share it.
@@ -1334,7 +1352,7 @@ Manual checks in docs/plans/US-014.md done, with results recorded there.
 
 #### S-US-015 Soak-test the simulation from the command line
 ```xml
-<prompt id="S-US-015" codex="1.4" milestone="M2" story="US-015" priority="Must" size="S">
+<prompt id="S-US-015" codex="1.5" milestone="M2" story="US-015" priority="Must" size="S">
 <context>
 Story US-015: Soak-test the simulation from the command line.
 As a developer, I want to run the headless simulation for N years with a seed and get a report, so that I can check stability and balance in seconds.
@@ -1378,7 +1396,7 @@ Manual checks in docs/plans/US-015.md done, with results recorded there.
 
 #### S-US-016 Save and load the simulation
 ```xml
-<prompt id="S-US-016" codex="1.4" milestone="M2" story="US-016" priority="Must" size="M">
+<prompt id="S-US-016" codex="1.5" milestone="M2" story="US-016" priority="Must" size="M">
 <context>
 Story US-016: Save and load the simulation.
 As a player, I want to save the world and load it later exactly as it was, so that I never lose my progress.
@@ -1426,7 +1444,7 @@ Manual checks in docs/plans/US-016.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M2" codex="1.4" name="Exit review M2">
+<prompt id="X-M2" codex="1.5" name="Exit review M2">
 <instructions>
 1. Demonstrate the exit criteria: The headless runner simulates a 20-person clan for 100 years without crashing; the printed chronicle is shown to 3 people and at least 2 find a story in it; the determinism test passes.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M2.md, one section per criterion, each marked met or not met.
@@ -1444,7 +1462,7 @@ Manual checks in docs/plans/US-016.md done, with results recorded there.
 Exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
 
 ```xml
-<prompt id="K-M3" codex="1.4" name="Kick off M3 Living clan on screen">
+<prompt id="K-M3" codex="1.5" name="Kick off M3 Living clan on screen">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-05) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1457,7 +1475,7 @@ Exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed 
 
 #### S-US-030 Compose characters from layers
 ```xml
-<prompt id="S-US-030" codex="1.4" milestone="M3" story="US-030" priority="Must" size="M">
+<prompt id="S-US-030" codex="1.5" milestone="M3" story="US-030" priority="Must" size="M">
 <context>
 Story US-030: Compose characters from layers.
 As a player, I want characters built from body, hair, outfit and held-item layers with colour variants, so that every person looks different and outfits can grow with progression.
@@ -1506,7 +1524,7 @@ Manual checks in docs/plans/US-030.md done, with results recorded there.
 
 #### S-US-032 See the simulated clan on screen
 ```xml
-<prompt id="S-US-032" codex="1.4" milestone="M3" story="US-032" priority="Must" size="L">
+<prompt id="S-US-032" codex="1.5" milestone="M3" story="US-032" priority="Must" size="L">
 <context>
 Story US-032: See the simulated clan on screen.
 As a player, I want clan members from the simulation to appear and act in the world, so that I watch the clan live its life.
@@ -1555,7 +1573,7 @@ Manual checks in docs/plans/US-032.md done, with results recorded there.
 
 #### S-US-031 Read people's state at a glance
 ```xml
-<prompt id="S-US-031" codex="1.4" milestone="M3" story="US-031" priority="Should" size="S">
+<prompt id="S-US-031" codex="1.5" milestone="M3" story="US-031" priority="Should" size="S">
 <context>
 Story US-031: Read people's state at a glance.
 As a player, I want to see how people feel from their posture and small emote icons, so that I understand the clan without opening menus.
@@ -1598,7 +1616,7 @@ Manual checks in docs/plans/US-031.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M3" codex="1.4" name="Exit review M3">
+<prompt id="X-M3" codex="1.5" name="Exit review M3">
 <instructions>
 1. Demonstrate the exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M3.md, one section per criterion, each marked met or not met.
@@ -1612,7 +1630,7 @@ Manual checks in docs/plans/US-031.md done, with results recorded there.
 Exit criteria: A region is generated from a seed with biomes, resources and two rival clans; any NPC can be inspected; the game saves and loads.
 
 ```xml
-<prompt id="K-M4" codex="1.4" name="Kick off M4 Region, tools and saves">
+<prompt id="K-M4" codex="1.5" name="Kick off M4 Region, tools and saves">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1625,7 +1643,7 @@ Exit criteria: A region is generated from a seed with biomes, resources and two 
 
 #### S-US-040 Generate a region from a seed
 ```xml
-<prompt id="S-US-040" codex="1.4" milestone="M4" story="US-040" priority="Must" size="L">
+<prompt id="S-US-040" codex="1.5" milestone="M4" story="US-040" priority="Must" size="L">
 <context>
 Story US-040: Generate a region from a seed.
 As a player, I want each new game to create a different region with steppe, forest, river and caves, so that every playthrough feels new.
@@ -1674,7 +1692,7 @@ Manual checks in docs/plans/US-040.md done, with results recorded there.
 
 #### S-US-041 Place resources by biome
 ```xml
-<prompt id="S-US-041" codex="1.4" milestone="M4" story="US-041" priority="Must" size="M">
+<prompt id="S-US-041" codex="1.5" milestone="M4" story="US-041" priority="Must" size="M">
 <context>
 Story US-041: Place resources by biome.
 As a player, I want flint, wood, berries and animals placed where they make sense, so that exploring the land matters.
@@ -1718,7 +1736,7 @@ Manual checks in docs/plans/US-041.md done, with results recorded there.
 
 #### S-US-042 Spawn rival clans
 ```xml
-<prompt id="S-US-042" codex="1.4" milestone="M4" story="US-042" priority="Must" size="M">
+<prompt id="S-US-042" codex="1.5" milestone="M4" story="US-042" priority="Must" size="M">
 <context>
 Story US-042: Spawn rival clans.
 As a player, I want two AI clans living elsewhere in the region, so that there are others to trade with, convert, or compete against.
@@ -1767,7 +1785,7 @@ Manual checks in docs/plans/US-042.md done, with results recorded there.
 
 #### S-US-043 Stream chunks and save only changes
 ```xml
-<prompt id="S-US-043" codex="1.4" milestone="M4" story="US-043" priority="Should" size="M">
+<prompt id="S-US-043" codex="1.5" milestone="M4" story="US-043" priority="Should" size="M">
 <context>
 Story US-043: Stream chunks and save only changes.
 As a developer, I want the region stored as a seed plus changed chunks, so that saves stay small and loading is fast.
@@ -1811,7 +1829,7 @@ Manual checks in docs/plans/US-043.md done, with results recorded there.
 
 #### S-US-080 Autosave and keep backups
 ```xml
-<prompt id="S-US-080" codex="1.4" milestone="M4" story="US-080" priority="Must" size="M">
+<prompt id="S-US-080" codex="1.5" milestone="M4" story="US-080" priority="Must" size="M">
 <context>
 Story US-080: Autosave and keep backups.
 As a player, I want the game to autosave and keep backups, so that I never lose more than a few minutes.
@@ -1860,7 +1878,7 @@ Manual checks in docs/plans/US-080.md done, with results recorded there.
 
 #### S-US-083 Inspect and control the world with dev tools
 ```xml
-<prompt id="S-US-083" codex="1.4" milestone="M4" story="US-083" priority="Should" size="M">
+<prompt id="S-US-083" codex="1.5" milestone="M4" story="US-083" priority="Should" size="M">
 <context>
 Story US-083: Inspect and control the world with dev tools.
 As a developer, I want Dear ImGui panels to inspect any person and control time, so that I can understand and tune the simulation live.
@@ -1908,7 +1926,7 @@ Manual checks in docs/plans/US-083.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M4" codex="1.4" name="Exit review M4">
+<prompt id="X-M4" codex="1.5" name="Exit review M4">
 <instructions>
 1. Demonstrate the exit criteria: A region is generated from a seed with biomes, resources and two rival clans; any NPC can be inspected; the game saves and loads.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M4.md, one section per criterion, each marked met or not met.
@@ -1922,7 +1940,7 @@ Manual checks in docs/plans/US-083.md done, with results recorded there.
 Exit criteria: A player can start a new game, live the Growing Period, take a profession, pursue Trade or Religion, and win or lose.
 
 ```xml
-<prompt id="K-M5" codex="1.4" name="Kick off M5 Vertical slice feature-complete">
+<prompt id="K-M5" codex="1.5" name="Kick off M5 Vertical slice feature-complete">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-06, D-07, D-08, D-09, D-10, D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1935,7 +1953,7 @@ Exit criteria: A player can start a new game, live the Growing Period, take a pr
 
 #### S-US-050 Start a new game
 ```xml
-<prompt id="S-US-050" codex="1.4" milestone="M5" story="US-050" priority="Must" size="M">
+<prompt id="S-US-050" codex="1.5" milestone="M5" story="US-050" priority="Must" size="M">
 <context>
 Story US-050: Start a new game.
 As a player, I want to choose a seed, a Growing Period preset and a Comfort level before starting, so that I can shape the kind of game I want.
@@ -1984,7 +2002,7 @@ Manual checks in docs/plans/US-050.md done, with results recorded there.
 
 #### S-US-053 Weight choices by age (imprint curve)
 ```xml
-<prompt id="S-US-053" codex="1.4" milestone="M5" story="US-053" priority="Must" size="S">
+<prompt id="S-US-053" codex="1.5" milestone="M5" story="US-053" priority="Must" size="S">
 <context>
 Story US-053: Weight choices by age (imprint curve).
 As a developer, I want Path Affinity gains multiplied by the imprint curve, so that early choices shape the hero most, as designed.
@@ -2033,7 +2051,7 @@ Manual checks in docs/plans/US-053.md done, with results recorded there.
 
 #### S-US-051 Choose how to spend each year of youth
 ```xml
-<prompt id="S-US-051" codex="1.4" milestone="M5" story="US-051" priority="Must" size="M">
+<prompt id="S-US-051" codex="1.5" milestone="M5" story="US-051" priority="Must" size="M">
 <context>
 Story US-051: Choose how to spend each year of youth.
 As a player, I want to pick Focus activities each in-game year, so that I decide what kind of person my hero becomes.
@@ -2077,7 +2095,7 @@ Manual checks in docs/plans/US-051.md done, with results recorded there.
 
 #### S-US-052 Face Crossroads events
 ```xml
-<prompt id="S-US-052" codex="1.4" milestone="M5" story="US-052" priority="Must" size="L">
+<prompt id="S-US-052" codex="1.5" milestone="M5" story="US-052" priority="Must" size="L">
 <context>
 Story US-052: Face Crossroads events.
 As a player, I want story decisions with lasting consequences during youth, so that my choices feel meaningful.
@@ -2126,7 +2144,7 @@ Manual checks in docs/plans/US-052.md done, with results recorded there.
 
 #### S-US-054 Reveal the specialty at the Mantle moment
 ```xml
-<prompt id="S-US-054" codex="1.4" milestone="M5" story="US-054" priority="Must" size="S">
+<prompt id="S-US-054" codex="1.5" milestone="M5" story="US-054" priority="Must" size="S">
 <context>
 Story US-054: Reveal the specialty at the Mantle moment.
 As a player, I want my hero's specialty revealed at 26, so that I see the result of my youth.
@@ -2170,7 +2188,7 @@ Manual checks in docs/plans/US-054.md done, with results recorded there.
 
 #### S-US-060 Define the five Age 1 professions as data
 ```xml
-<prompt id="S-US-060" codex="1.4" milestone="M5" story="US-060" priority="Must" size="S">
+<prompt id="S-US-060" codex="1.5" milestone="M5" story="US-060" priority="Must" size="S">
 <context>
 Story US-060: Define the five Age 1 professions as data.
 As a designer (data editor), I want professions defined in JSON: skills, tools, actions, related pillar, so that content can grow without code changes.
@@ -2214,7 +2232,7 @@ Manual checks in docs/plans/US-060.md done, with results recorded there.
 
 #### S-US-061 Interact with things through a context menu
 ```xml
-<prompt id="S-US-061" codex="1.4" milestone="M5" story="US-061" priority="Must" size="L">
+<prompt id="S-US-061" codex="1.5" milestone="M5" story="US-061" priority="Must" size="L">
 <context>
 Story US-061: Interact with things through a context menu.
 As a player, I want to click a thing and pick from the actions it offers, so that I can do many things with everything in the world.
@@ -2263,7 +2281,7 @@ Manual checks in docs/plans/US-061.md done, with results recorded there.
 
 #### S-US-062 Craft at a workstation
 ```xml
-<prompt id="S-US-062" codex="1.4" milestone="M5" story="US-062" priority="Must" size="M">
+<prompt id="S-US-062" codex="1.5" milestone="M5" story="US-062" priority="Must" size="M">
 <context>
 Story US-062: Craft at a workstation.
 As a player, I want to turn materials into tools at a knapping stone or fire, so that my work produces useful things.
@@ -2312,7 +2330,7 @@ Manual checks in docs/plans/US-062.md done, with results recorded there.
 
 #### S-US-063 Learn a trade from a master
 ```xml
-<prompt id="S-US-063" codex="1.4" milestone="M5" story="US-063" priority="Should" size="M">
+<prompt id="S-US-063" codex="1.5" milestone="M5" story="US-063" priority="Should" size="M">
 <context>
 Story US-063: Learn a trade from a master.
 As a player, I want to apprentice with an NPC master once they trust me, so that skills and relationships grow together.
@@ -2361,7 +2379,7 @@ Manual checks in docs/plans/US-063.md done, with results recorded there.
 
 #### S-US-070 Track regional dominion
 ```xml
-<prompt id="S-US-070" codex="1.4" milestone="M5" story="US-070" priority="Must" size="M">
+<prompt id="S-US-070" codex="1.5" milestone="M5" story="US-070" priority="Must" size="M">
 <context>
 Story US-070: Track regional dominion.
 As a player, I want a Dominion Meter showing my clan's share of the region in Trade and Religion, so that I know how close I am to leading the region.
@@ -2405,7 +2423,7 @@ Manual checks in docs/plans/US-070.md done, with results recorded there.
 
 #### S-US-055 Age, die, and end the run
 ```xml
-<prompt id="S-US-055" codex="1.4" milestone="M5" story="US-055" priority="Must" size="M">
+<prompt id="S-US-055" codex="1.5" milestone="M5" story="US-055" priority="Must" size="M">
 <context>
 Story US-055: Age, die, and end the run.
 As a player, I want my hero to age and eventually die, ending the run with a summary, so that every life has an arc and an ending.
@@ -2454,7 +2472,7 @@ Manual checks in docs/plans/US-055.md done, with results recorded there.
 
 #### S-US-071 Barter with rival clans
 ```xml
-<prompt id="S-US-071" codex="1.4" milestone="M5" story="US-071" priority="Must" size="L">
+<prompt id="S-US-071" codex="1.5" milestone="M5" story="US-071" priority="Must" size="L">
 <context>
 Story US-071: Barter with rival clans.
 As a player, I want to exchange goods with other clans and track debts, so that Trade becomes a path to leadership.
@@ -2503,7 +2521,7 @@ Manual checks in docs/plans/US-071.md done, with results recorded there.
 
 #### S-US-072 Found a sacred fire and gather followers
 ```xml
-<prompt id="S-US-072" codex="1.4" milestone="M5" story="US-072" priority="Must" size="L">
+<prompt id="S-US-072" codex="1.5" milestone="M5" story="US-072" priority="Must" size="L">
 <context>
 Story US-072: Found a sacred fire and gather followers.
 As a player, I want to found a named sacred fire and hold rituals that attract followers, so that Religion becomes a path to leadership.
@@ -2552,7 +2570,7 @@ Manual checks in docs/plans/US-072.md done, with results recorded there.
 
 #### S-US-073 Win by leading the region
 ```xml
-<prompt id="S-US-073" codex="1.4" milestone="M5" story="US-073" priority="Must" size="S">
+<prompt id="S-US-073" codex="1.5" milestone="M5" story="US-073" priority="Must" size="S">
 <context>
 Story US-073: Win by leading the region.
 As a player, I want to win when my clan dominates the region, so that the run has a satisfying goal.
@@ -2596,7 +2614,7 @@ Manual checks in docs/plans/US-073.md done, with results recorded there.
 
 #### S-US-081 Change basic settings
 ```xml
-<prompt id="S-US-081" codex="1.4" milestone="M5" story="US-081" priority="Should" size="S">
+<prompt id="S-US-081" codex="1.5" milestone="M5" story="US-081" priority="Should" size="S">
 <context>
 Story US-081: Change basic settings.
 As a player, I want to set window mode, resolution and volume, so that the game fits my screen and ears.
@@ -2640,7 +2658,7 @@ Manual checks in docs/plans/US-081.md done, with results recorded there.
 
 #### S-US-082 Keep within the performance budget
 ```xml
-<prompt id="S-US-082" codex="1.4" milestone="M5" story="US-082" priority="Must" size="S">
+<prompt id="S-US-082" codex="1.5" milestone="M5" story="US-082" priority="Must" size="S">
 <context>
 Story US-082: Keep within the performance budget.
 As a developer, I want an FPS and tick-time overlay and a performance test, so that I notice slowdowns the day I cause them.
@@ -2683,7 +2701,7 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M5" codex="1.4" name="Exit review M5">
+<prompt id="X-M5" codex="1.5" name="Exit review M5">
 <instructions>
 1. Demonstrate the exit criteria: A player can start a new game, live the Growing Period, take a profession, pursue Trade or Religion, and win or lose.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M5.md, one section per criterion, each marked met or not met.
@@ -2697,7 +2715,7 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 
 ```xml
-<prompt id="K-M6" codex="1.4" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
+<prompt id="K-M6" codex="1.5" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -2710,7 +2728,7 @@ Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go d
 
 #### S-US-090 Learn the game in the first ten minutes
 ```xml
-<prompt id="S-US-090" codex="1.4" milestone="M6" story="US-090" priority="Should" size="M">
+<prompt id="S-US-090" codex="1.5" milestone="M6" story="US-090" priority="Should" size="M">
 <context>
 Story US-090: Learn the game in the first ten minutes.
 As a playtester, I want a clan elder to guide me through my first day, so that I can play without reading a manual.
@@ -2759,7 +2777,7 @@ Manual checks in docs/plans/US-090.md done, with results recorded there.
 
 #### S-US-091 Install and run the playtest build
 ```xml
-<prompt id="S-US-091" codex="1.4" milestone="M6" story="US-091" priority="Must" size="S">
+<prompt id="S-US-091" codex="1.5" milestone="M6" story="US-091" priority="Must" size="S">
 <context>
 Story US-091: Install and run the playtest build.
 As a playtester, I want a zip I can unpack and run, so that I can try the game without technical help.
@@ -2803,7 +2821,7 @@ Manual checks in docs/plans/US-091.md done, with results recorded there.
 
 #### S-US-092 Record local session statistics
 ```xml
-<prompt id="S-US-092" codex="1.4" milestone="M6" story="US-092" priority="Should" size="S">
+<prompt id="S-US-092" codex="1.5" milestone="M6" story="US-092" priority="Should" size="S">
 <context>
 Story US-092: Record local session statistics.
 As a developer, I want an opt-in local log of session length and key events, so that I can measure the MVP success criteria honestly.
@@ -2846,7 +2864,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M6" codex="1.4" name="Exit review M6">
+<prompt id="X-M6" codex="1.5" name="Exit review M6">
 <instructions>
 1. Demonstrate the exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M6.md, one section per criterion, each marked met or not met.
@@ -2862,7 +2880,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -2877,6 +2895,8 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | docs/codex-issues.md | Problems with the Codex, for Anima. | Any agent |
 | docs/learning-journal.md | Teach-back entries for the owner. | mraw-writer |
 | git log and tags | Merged stories (US-xxx commits) and finished milestones (mx-done). | mraw-orchestrator |
+| Limit.md | The resume point: what is done, the next prompt, any paused work (branch and what is left), how to continue. Updated after every story and before any planned stop. Read right after CLAUDE.md. | mraw-orchestrator |
+| tools/verify.ps1 | The tester's standard verification run (L-01 step 7) and its evidence. | mraw-tester |
 | Milestone.md, Milestone-<n>.md | Progress snapshots AP-###, one new file after every story and at milestone exits; newest file has the latest state. | mraw-orchestrator |
 | CHANGELOG.md | Every change set with verification evidence, updated before each push or merge. | mraw-writer |
 | docs/evidence/US-xxx/ | Raw logs proving acceptance criteria. | mraw-tester |
@@ -2891,3 +2911,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 1.2 | 2026-09-29 | Luna first (source of truth v1.4, ARC-09): M1 is now the Luna engine walking skeleton (K-M1, S-US-020..S-US-024, X-M1) and M2 the console clan simulator with Kill Gate 1 (K-M2, S-US-010..S-US-016, X-M2); Platform and Engine layers live in src/luna/ (targets luna_platform and luna_engine, namespaces luna::platform and luna::engine); Charter rule 9 keeps Luna game-agnostic; US-003 gains the "Luna stays game-agnostic" scenario; US-024 is Game code that uses Luna; new P-001 migrates v1.1 workspaces. Codex issues resolved: CI-001 (P-000 commits before the toolchain check), CI-002 (no split needed, D-12 Decided 2026-09-29), CI-003 (DoD: CI green from US-002 on, determinism from US-010 on; M0 and M1 verification no longer ask for the determinism test). Owner decisions recorded: D-04 (32x48 px, 8 directions), D-12, D-13. |
 | 1.3 | 2026-09-30 | Autonomous assembly with minimal owner intervention (owner instructions of 2026-09-30): Charter human gates reduced to people-dependent kill-gate results, accounts, credentials, money and destructive actions outside the repo; design decisions delegated to Dominus and recorded as "Decided by Dominus (delegated)"; stories branch from and merge into qa, qa merges into main at milestone exits; CHANGELOG.md updated per change set; Milestone-<n>.md snapshot after every story; ADR-016 header convention in coding standards; D-01 and D-03 Decided; new P-002 migrates v1.2 workspaces. Codex issues resolved: CI-004, CI-005. |
 | 1.4 | 2026-09-30 | Luna Physics (requirements v1.5, owner decisions of 2026-09-30: own physics, in the MVP, full 3D math, right after M1): Charter now has six layers (Physics between Core and Engine/Simulation) and rule 10 (deterministic fixed-point 32.32 physics, SI units, 1 tile = 1 m, textbook-tested); new milestone M1b with K-M1b, S-US-025..S-US-029 (3D math, hit detection, ballistics, rigid bodies, spear throw in the demo) and X-M1b; P-003 migrates v1.3 workspaces (US-011 paused on its branch); D-02 recorded as delegated; D-15 chain includes M1b. |
+| 1.5 | 2026-09-30 | Assembly instructions (owner requests of 2026-09-30): Limit.md is a state file and the resume point, updated after every story and before any stop, read by A-001; L-01 step 2 continues paused story branches; step 7 uses tools/verify.ps1; step 11 updates Limit.md; the Charter says how to stop safely at usage limits; section 0 states that Dominus designs, implements and tests while Anima alone writes the Codex, and that assembly is continuous; new P-004. |

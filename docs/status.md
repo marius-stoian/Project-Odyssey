@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v1.4. Edited only by mraw-orchestrator.
+Codex v1.5. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
@@ -8,6 +8,7 @@ Codex v1.4. Edited only by mraw-orchestrator.
 | P-001 | - | - | Done | 2026-09-29 |
 | P-002 | - | - | Done | 2026-09-30 |
 | P-003 | - | - | Done | 2026-09-30 |
+| P-004 | - | - | Done | 2026-09-30 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
