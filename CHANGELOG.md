@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-028 / S-US-028: Push and bounce bodies (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Physics: `rigid_body.{h,cpp}`: `SurfaceMaterial` and combining rules, `Ground`, `RigidBody` (invariants checked in the constructor; impulses, forces, exact constant-acceleration flight, impact times inside a step, restitution and friction impulses, Coulomb sliding, rest and sleep, wake on push).
+- Tests: `US-028 Impulse` (70 kg, 140 N s -> 2 m/s), `US-028 Bounce and rest` (height ratios 0.25 = e^2, then asleep), `US-028 Friction` (stops at v^2/(2 mu g) = 1.226 m).
+- Docs: plan `docs/plans/US-028.md`, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
 ## US-027 / S-US-027: Fly projectiles with real ballistics (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
