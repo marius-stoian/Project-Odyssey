@@ -22,7 +22,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | S-US-023 | US-023 | M1 | Done | 2026-09-30 |
 | S-US-024 | US-024 | M1 | Done | 2026-09-30 |
 | X-M1 | - | M1 | Done | 2026-09-30 |
-| K-M1b | - | M1b | To do |  |
+| K-M1b | - | M1b | Done | 2026-09-30 |
 | S-US-025 | US-025 | M1b | To do |  |
 | S-US-026 | US-026 | M1b | To do |  |
 | S-US-027 | US-027 | M1b | To do |  |
