@@ -2,15 +2,15 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-025 (Milestone-11.md, AP-012).
+**Last updated:** 2026-09-30, after US-026 (Milestone-12.md, AP-013).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
 - Codex v1.5, requirements v1.5. Done: P-000..P-002, all of M0 (`m0-done`) and all of M1, the Luna engine (`m1-done`).
 - K-M2 and US-010 Done (M2 design: `docs/plans/M2-clan-design.md`; D-02 delegated).
 - K-M1b Done: the physics design is `docs/plans/M1b-physics-design.md` (read it first).
-- US-025 Done: the `luna_physics` layer exists (Fixed 32.32, Vec3, Quat), layer rules extended to six layers.
-- **Next prompt: S-US-026** (hit detection; work may already be on branch `story/US-026`: check `git log qa..story/US-026`). Then S-US-027..S-US-029 (ballistics, rigid bodies, spear throw in the demo), then X-M1b (merge qa into main, tag `m1b-done`).
+- US-025 and US-026 Done: the `luna_physics` layer (Fixed 32.32, Vec3, Quat, shapes, sweeps, spatial grid), layer rules for six layers.
+- **Next prompt: S-US-027** (ballistics; work may already be on branch `story/US-027`: check `git log qa..story/US-027`). Then S-US-028, S-US-029 (rigid bodies, spear throw in the demo), then X-M1b (merge qa into main, tag `m1b-done`).
 - Then M2 resumes: **S-US-011** is half-done on branch `story/US-011` (pushed, not merged: needs data, Person, Chronicle written; still to do: CMake, the needs system in World, the starting clan, tests). Rebase or merge that branch onto the latest `qa` before continuing. Then US-012..US-016 and X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
