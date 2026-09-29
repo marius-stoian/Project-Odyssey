@@ -1,6 +1,10 @@
 #include "luna/platform/window.h"
 
+#include "luna/platform/sdl_events.h"
+
 #include <SDL3/SDL.h>
+
+#include <algorithm>
 
 #include <stdexcept>
 #include <string>
@@ -21,6 +25,10 @@ void Window::WindowDeleter::operator()(SDL_Window* window) const {
 
 void Window::RendererDeleter::operator()(SDL_Renderer* renderer) const {
     SDL_DestroyRenderer(renderer);
+}
+
+void Window::GamepadDeleter::operator()(SDL_Gamepad* gamepad) const {
+    SDL_CloseGamepad(gamepad);
 }
 
 Window::Window(const WindowSettings& settings) {
@@ -44,16 +52,21 @@ Window::Window(const WindowSettings& settings) {
 Window::~Window() = default; // the unique_ptrs destroy the renderer, then the window
 
 void Window::pollEvents(std::vector<Event>& events) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_EVENT_QUIT:
-        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-            events.push_back(Event{EventType::Quit});
-            break;
-        default:
-            break; // not needed yet
+    SDL_Event sdlEvent;
+    while (SDL_PollEvent(&sdlEvent)) {
+        const std::optional<Event> event = translateEvent(sdlEvent);
+        if (!event) {
+            continue;
         }
+        if (event->type == EventType::GamepadAdded) {
+            // A gamepad only sends button and stick events after it is opened.
+            if (SDL_Gamepad* gamepad = SDL_OpenGamepad(static_cast<SDL_JoystickID>(event->gamepad))) {
+                gamepads_.emplace_back(event->gamepad, GamepadHandle(gamepad));
+            }
+        } else if (event->type == EventType::GamepadRemoved) {
+            std::erase_if(gamepads_, [&](const auto& entry) { return entry.first == event->gamepad; });
+        }
+        events.push_back(*event);
     }
 }
 

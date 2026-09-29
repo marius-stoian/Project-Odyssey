@@ -2,6 +2,8 @@
 
 #include "boundary.h"
 
+#include "input.h"
+
 namespace luna::engine {
 
 // What a game gives Luna. Luna owns the window and the loop and calls these; the game
@@ -10,8 +12,9 @@ class Game {
 public:
     virtual ~Game() = default;
 
-    // Called at a fixed rate (20 times per second): change the world here.
-    virtual void update() = 0;
+    // Called at a fixed rate (20 times per second): change the world here. `intents` say
+    // what the player wants (move, interact, menu); games never see keys or buttons.
+    virtual void update(const Intents& intents) = 0;
 
     // Called once per frame. `alpha` (0..1) says how far we are towards the next tick,
     // so movement can be drawn smoothly between ticks.

@@ -13,7 +13,7 @@ namespace odysseus::game {
 // character by the end of M1, the living clan in M3.
 class OdysseyGame final : public luna::engine::Game {
 public:
-    void update() override;
+    void update(const luna::engine::Intents& intents) override;
     void render(double alpha) override;
 
     std::uint64_t ticks() const;
