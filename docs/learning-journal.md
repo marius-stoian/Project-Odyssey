@@ -74,3 +74,99 @@ ODYSSEUS_ASSERT(health > 0, "a hero cannot act when dead");
 **Try it (15 minutes).** In `apps/odysseus/main.cpp`, add `ODYSSEUS_ASSERT(version.empty(), "testing my first assert");` after the version line (and `#include "core/assertions.h"`). Press F5 in Visual Studio: it stops on your line. Open the newest file in the logs folder and find the file and line. Then build Release and run it: nothing happens, because asserts vanish in Release. Remove the line.
 
 **Check yourself.** Why is `ODYSSEUS_ASSERT` a macro while `logInfo` is a normal function?
+
+## US-020: Open a window with a steady game loop (2026-09-30)
+
+**What we built.** Project Odyssey now opens a real 1280 x 720 window through our own engine, Luna, and runs a game loop: 60 frames per second on your screen, while the world ticks exactly 20 times per second whatever the monitor.
+
+**The idea: an RAII wrapper around SDL_Window, with unique_ptr and a custom deleter.** SDL is a C library: you create a window with `SDL_CreateWindow` and must remember to call `SDL_DestroyWindow`. Forget it, or return early by mistake, and it leaks. `std::unique_ptr` normally calls `delete`; we give it a *deleter* that calls SDL's function instead. Now the window is destroyed automatically when the `Window` object goes away, even if an error is thrown.
+
+```cpp
+struct WindowDeleter { void operator()(SDL_Window* w) const { SDL_DestroyWindow(w); } };
+std::unique_ptr<SDL_Window, WindowDeleter> window_;   // destroys itself
+```
+
+**Where to look.** [src/luna/platform/window.h](../src/luna/platform/window.h) (the deleters), [src/luna/engine/fixed_step_clock.cpp](../src/luna/engine/fixed_step_clock.cpp) (why the world speed does not depend on the monitor), [src/luna/engine/application.cpp](../src/luna/engine/application.cpp) (the loop).
+
+**Try it (15 minutes).** In `src/game/odyssey_game.cpp`, change the three `clear...` numbers to your favourite colour and run the game. Then run `odysseus.exe --quit-after 10` from a terminal and read the "Average frame rate" line in the log.
+
+**Check yourself.** Why does the game loop count *ticks* separately from *frames*?
+
+## US-021: Control the game through intents (2026-09-30)
+
+**What we built.** Keyboard and gamepad now drive the same actions. Pressing W, the Up arrow, pushing the stick up or the D-pad up all mean one thing to the game: *Move Up*. Touch screens can plug in later without changing a line of game code.
+
+**The idea: separating "what happened" from "what it means" (the intent pattern, ARC-03).** Platform reports raw facts ("key W went down"); the Engine's `InputMap` translates facts into meanings through a table of bindings; the game only asks "does the player want to move up?". Each layer knows one thing. An `enum class` gives each meaning a safe name the compiler checks:
+
+```cpp
+enum class Intent { MoveUp, MoveDown, MoveLeft, MoveRight, Interact, OpenMenu, Count };
+if (intents.held(Intent::MoveUp)) { /* walk */ }   // no keys here
+```
+
+**Where to look.** [src/luna/engine/input.cpp](../src/luna/engine/input.cpp) (`keyBinding()`: the default bindings), [src/luna/platform/sdl_events.cpp](../src/luna/platform/sdl_events.cpp) (the only place that knows SDL's names).
+
+**Try it (15 minutes).** Add a binding so that the key Q also means `OpenMenu`: add `Q` to `Key` in `events.h`, map `SDL_SCANCODE_Q` in `sdl_events.cpp`, and add it to `keyBinding()`. Then add a check to `tests/luna/input_test.cpp` and run `luna_tests`.
+
+**Check yourself.** Why does Luna use `SDL_SCANCODE_W` (a key's position) instead of the letter W?
+
+## US-022: Draw sprites with crisp pixels (2026-09-30)
+
+**What we built.** The hero appears on screen as sharp pixel art. Everything is drawn on a small 480 x 270 "virtual screen" and scaled up by a whole number (x2, x3, x4...), with black bars for the leftover space, so pixels never blur.
+
+**The idea: interfaces with virtual functions.** `Renderer` is an *interface*: a list of promises (`createTexture`, `draw`) with no code. `WindowRenderer` keeps the promises by drawing into the real window; `RecordingRenderer` keeps them by just writing down what was asked, which is perfect for tests. The game only knows `Renderer&`, so it works with either:
+
+```cpp
+class Renderer {                       // the promise
+public:
+    virtual ~Renderer() = default;
+    virtual void draw(const Texture& texture, const Rect& source, Point at) = 0;
+};
+class WindowRenderer final : public Renderer { ... };  // one way to keep it
+```
+
+`virtual` means "decide at run time which version to call". When we switch to SDL_GPU later (ADR-003), only one new class is written; the game does not change.
+
+**Where to look.** [src/luna/engine/renderer.h](../src/luna/engine/renderer.h), [src/game/placeholder_art.cpp](../src/game/placeholder_art.cpp) (the hero is drawn with rectangles), [tests/luna/pixels_window_test.cpp](../tests/luna/pixels_window_test.cpp) (how we prove "no blur").
+
+**Try it (15 minutes).** In `placeholder_art.cpp`, change `kTunic` to your favourite colour. Run the game with `odysseus.exe --quit-after 3 --screenshot hero.bmp` and open `hero.bmp`. Then resize the game window while it runs and watch the log report the new scale.
+
+**Check yourself.** Why can the game's drawing code be tested without opening a window?
+
+## US-023: Show a tile map with a following camera (2026-09-30)
+
+**What we built.** A 64 x 64 world of grass, paths, rocks and a pond around the hero, seen through a camera that glides after its target and stops at the edges of the world. Only the roughly 135 tiles on screen are drawn, not all 4096.
+
+**The idea: a 2D grid stored in a 1D vector.** A map feels two-dimensional, but memory is one long line. So we store row after row in one `std::vector` and compute where cell (x, y) lives:
+
+```cpp
+// row y starts after y full rows of `width` cells, then step x along it
+return tiles_[y * width_ + x];
+```
+
+One allocation instead of 64 separate rows, and neighbours sit next to each other in memory, which is fast. The same trick is used for images (4 bytes per pixel, row after row).
+
+**Where to look.** [src/luna/engine/tile_map.cpp](../src/luna/engine/tile_map.cpp) (`at()` and `visibleTiles()`), [src/luna/engine/camera.cpp](../src/luna/engine/camera.cpp) (`follow()`: a quarter of the way per tick), [src/game/test_map.cpp](../src/game/test_map.cpp) (how the valley is laid out).
+
+**Try it (15 minutes).** In `test_map.cpp`, make the pond bigger (change `20` to `40` in the pond formula) and move it next to the crossing. Run the game with `--quit-after 2 --screenshot map.bmp` and look.
+
+**Check yourself.** In a map 64 cells wide, at which index does cell (3, 2) live?
+
+## US-024: Walk the character around the map (2026-09-30)
+
+**What we built.** You can play! Arrow keys, WASD or a gamepad move the hero in 8 directions through the valley, with a walking animation; rocks and water block the way; let go and the hero stops, facing where they went. The camera follows.
+
+**The idea: game state updated in fixed ticks, drawn with interpolation.** The hero moves only in `update()`, 20 times per second, exactly 4.8 pixels per tick. But the screen shows 60 frames per second. So we remember where the hero was at the previous tick and draw them part of the way (`alpha`) towards where they are now:
+
+```cpp
+double Hero::feetX(double alpha) const {
+    return previousX_ + (x_ - previousX_) * alpha; // 0 = last tick, 1 = this tick
+}
+```
+
+The rules stay simple and deterministic (ticks), while the picture stays smooth (frames).
+
+**Where to look.** [src/game/hero.cpp](../src/game/hero.cpp) (`update()`: speed, diagonals, animation), [src/luna/engine/collision.cpp](../src/luna/engine/collision.cpp) (how a box stops at a wall).
+
+**Try it (15 minutes).** In `src/game/hero.h`, change `speedPixelsPerSecond` from 96 to 160 and play. Then run `ctest --preset windows-x64-debug`: `US-024 Walk right` still passes (it reads the speed from the config), but `US-024 Walk to the rock` too? Find out why.
+
+**Check yourself.** Why does the hero's position change 20 times per second while the picture changes 60 times per second?

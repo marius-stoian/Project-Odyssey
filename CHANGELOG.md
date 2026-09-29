@@ -4,6 +4,56 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-024 / S-US-024: Walk the character around the map (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Completes M1 (Luna walking skeleton).
+
+- Luna Engine: `moveAndCollide()` tile collision (flush stops, wall sliding); scripted input (`InputMap::setScripted`, `RunOptions::holds`).
+- Game: `Hero` (8-way movement, 96 px/s, feet collision box, walking animation, idle facing the last direction, interpolated drawing); boulder on the east path; camera follows the hero.
+- `odysseus.exe --hold <Intent>:<from>:<to>` scripted play; the final hero position is logged.
+- Tests: `odysseus_game_tests` (new, Game identity: `US-024 Walk right`, `Stop at a rock`, `Stop and face the last direction`, diagonal speed), Luna collision tests, end to end `US-024 Walk to the rock` (label `window`).
+- Verification: 0 warnings; ctest 12/12 Debug and Release; real window: hero stops at x 1142.0 facing East.
+
+## US-023 / S-US-023: Show a tile map with a following camera (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Engine: `TileMap` (2D grid in one vector, solid tiles, `visibleTiles`, draws only what the camera sees), `Camera` (smooth follow, interpolation, whole pixels, clamped to the world).
+- Game: the 64x64 test valley (`test_map.cpp`); the map drawn through the camera with the hero on top.
+- Tests: `US-023 Only visible tiles are drawn`, `US-023 Camera follows and stops at the map edges`, TileMap grid test.
+- Verification: 0 warnings; ctest 10/10 Debug and Release; screenshot `docs/evidence/US-023/game-map.png`.
+
+## US-022 / S-US-022: Draw sprites with crisp pixels (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Core: `Point`, `Rect`. Luna Platform: textures (nearest-neighbour, alpha), `drawTexture`, `presentationRect`, `outputRect`, `setSize`, `readPixels` (whole window), `saveScreenshot`, `WindowResized` event.
+- Luna Engine: `Image`/`Color`, `Renderer` interface with `WindowRenderer` and `RecordingRenderer`, `integerScale()`; `Game::start(Renderer&)` and `render(Renderer&, alpha)`; pixel scale logged at start and on resize.
+- Game: code-drawn placeholder art (hero 32x48 in 8 directions x 4 frames; grass, path, rock, water tiles 32x32); the hero drawn mid-screen.
+- `odysseus.exe --screenshot <file.bmp>` saves the last frame.
+- Tests: `US-022 Whole-number scale`, `luna_window_tests` (`US-022 Crisp pixels`, label `window`: real hidden window, pixel readback).
+- Verification: 0 warnings; ctest 10/10 Debug and Release; 1920x1080 x4 with 0 wrong pixels; 1366x768 x2 letterboxed at (203, 114).
+
+## US-021 / S-US-021: Control the game through intents (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Platform: Luna `Key` (physical positions), `GamepadButton`, `GamepadAxis` events; `translateEvent()` from SDL; gamepads opened/closed on plug/unplug.
+- Luna Engine: `Intent`, `Intents` (held, pressed once, moveX/moveY), `InputMap` with default bindings (WASD/arrows, E/Space/Enter, Esc; stick with 0.3 dead zone, D-pad, South, Start); `Game::update(const Intents&)`.
+- Tests: `luna_platform_tests` (new, Platform identity), `US-021 Default bindings`, `US-021 Gamepad`, `US-021 Game reads only intents` (automated review).
+- Verification: 0 warnings; ctest 9/9 Debug and Release. No physical gamepad available: proven with synthetic SDL events.
+
+## US-020 / S-US-020: Open a window with a steady game loop (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M1 (Luna engine).
+
+- Luna Platform: `System` (SDL start/stop), `Window` (SDL_Window + SDL_Renderer, VSync, 480x270 integer-scaled virtual screen), clock, `requestQuit`, Luna events.
+- Luna Engine: `FixedStepClock` (20 ticks/s, capped catch-up, interpolation alpha), `FrameStats`, `Game` interface, `run()` loop with logging.
+- Game: `OdysseyGame` and its window settings. `odysseus.exe` opens the window; `--quit-after <s>`, `--log-dir <folder>`.
+- Tests: `luna_tests` (Engine identity, `US-020 Steady`), end-to-end `US-020 Open and close` (label `window`).
+- Docs: `docs/plans/M1-luna-design.md`, `docs/plans/US-020.md`, evidence, teach-back; delegated decisions D-16 (32x32 tiles), D-17 (8-way movement).
+- Verification: 0 warnings; ctest 7/7 Debug and Release; 60-second run: 60.0 FPS, 1200 ticks, first frame 279 ms.
+
 ## US-004 / S-US-004: Log what happens and stop on broken assumptions (Claude) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
