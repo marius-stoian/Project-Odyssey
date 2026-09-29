@@ -188,3 +188,21 @@ accumulated_ %= kNanosecondsPerTick;               // keep the remainder for nex
 **Try it (15 minutes).** Change `daysPerSeason` in `calendar.json` to 10 and run `odysseus_headless.exe --days 40`. Then break the file on purpose (write `"ten"`) and read the error: it names the file and the field.
 
 **Check yourself.** Why would `double seconds += 0.05` twenty times per second eventually give two computers different worlds?
+
+## US-025: Build deterministic 3D math (2026-09-30)
+
+**What we built.** Luna has a sixth layer, Physics, with its own number type `Fixed`, 3D vectors and quaternion rotations. A million mixed calculations give the very same 64-bit hash in Debug, in Release and on the CI machine.
+
+**The idea: fixed-point numbers and operator overloading.** A `Fixed` is a whole number that counts tiny steps of 1/2^32 (about 0.00000000023). 1.5 is stored as 1.5 x 2^32 = 6442450944. Adding two of them is ordinary integer addition, which every CPU does identically; floats round in ways that can differ between compilers. Multiplying needs care: (a x 2^32) x (b x 2^32) has an extra 2^32, so we compute the 128-bit product and shift it back. Operator overloading lets us hide all that behind a normal `*`:
+
+```cpp
+friend Fixed operator+(Fixed a, Fixed b) { return fromRaw(checkedAdd(a.raw_, b.raw_)); }
+```
+
+Now `a + b * c` reads like school maths. A quaternion is four such numbers describing a turn; rotating a vector by it never suffers "gimbal lock".
+
+**Where to look.** [src/luna/physics/fixed.h:55](../src/luna/physics/fixed.h) (the operators), [src/luna/physics/fixed.cpp:108](../src/luna/physics/fixed.cpp) (multiplication with 32-bit "digits", like long multiplication on paper), [src/luna/physics/quat.cpp:25](../src/luna/physics/quat.cpp) (rotating a vector).
+
+**Try it (15 minutes).** In `tests/physics/rotation_test.cpp`, rotate by `physics::degrees(45)` eight times instead of 90 four times, and run `luna_physics_tests.exe --test-case="US-025 Rotations"`. Then print `Fixed::fromRatio(1, 3).raw()` and check by hand that it is 2^32 / 3, rounded.
+
+**Check yourself.** Why is `Fixed::fromRatio(1, 3) * Fixed::fromInt(3)` one step short of 1, and why is that still perfectly deterministic?

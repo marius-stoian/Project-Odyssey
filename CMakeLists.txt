@@ -55,7 +55,7 @@ function(odysseus_apply_settings target)
     endif()
 endfunction()
 
-# --- Five layers: dependency arrows point down only (ADR-004, ADR-016). ---
+# --- Six layers: dependency arrows point down only (ADR-004, ADR-016, ARC-10). ---
 include(cmake/LayerRules.cmake)
 add_library(odysseus_core STATIC
     src/core/version.cpp
@@ -78,6 +78,15 @@ target_link_libraries(luna_platform PRIVATE SDL3::SDL3)
 odysseus_register_layer(luna_platform platform luna/platform)
 odysseus_apply_settings(luna_platform)
 
+# Luna Physics (ADR-017): deterministic fixed-point 3D, headless, Core only.
+add_library(luna_physics STATIC
+    src/luna/physics/fixed.cpp
+    src/luna/physics/vec3.cpp
+    src/luna/physics/quat.cpp)
+target_link_libraries(luna_physics PUBLIC odysseus_core)
+odysseus_register_layer(luna_physics physics luna/physics)
+odysseus_apply_settings(luna_physics)
+
 add_library(luna_engine STATIC
     src/luna/engine/layer.cpp
     src/luna/engine/application.cpp
@@ -88,7 +97,7 @@ add_library(luna_engine STATIC
     src/luna/engine/camera.cpp
     src/luna/engine/tile_map.cpp
     src/luna/engine/collision.cpp)
-target_link_libraries(luna_engine PUBLIC luna_platform)
+target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
 
@@ -98,7 +107,7 @@ add_library(odysseus_sim STATIC
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
     src/sim/world.cpp)
-target_link_libraries(odysseus_sim PUBLIC odysseus_core)
+target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_sim sim sim)
@@ -155,12 +164,28 @@ odysseus_apply_settings(us004_assert_probe)
 add_dependencies(odysseus_tests us004_assert_probe)
 add_subdirectory(tests/architecture)
 # Architecture scenarios invoke the build, so serialize them even under ctest -j.
-add_test(NAME odysseus_tests COMMAND odysseus_tests "--test-case-exclude=US-003*")
-foreach(scenario IN ITEMS "Allowed use" "Forbidden use" "Luna stays game-agnostic" "Guard completeness")
-    set(test_name "US-003 ${scenario}")
+add_test(NAME odysseus_tests COMMAND odysseus_tests "--test-case-exclude=US-003*,US-025*")
+foreach(test_name IN ITEMS "US-003 Allowed use" "US-003 Forbidden use" "US-003 Luna stays game-agnostic"
+                           "US-003 Guard completeness" "US-025 Physics layer rules")
     add_test(NAME "${test_name}" COMMAND odysseus_tests "--test-case=${test_name}")
     set_tests_properties("${test_name}" PROPERTIES RESOURCE_LOCK architecture_build)
 endforeach()
+
+# --- Luna Physics tests: Physics identity, headless (M1b) ---
+add_executable(luna_physics_tests
+    tests/main.cpp
+    tests/physics/fixed_test.cpp
+    tests/physics/rotation_test.cpp
+    tests/physics/determinism_test.cpp)
+target_link_libraries(luna_physics_tests PRIVATE luna_physics doctest::doctest)
+target_compile_definitions(luna_physics_tests PRIVATE ODYSSEUS_LAYER_PHYSICS)
+odysseus_apply_settings(luna_physics_tests)
+add_test(NAME luna_physics_tests COMMAND luna_physics_tests)
+
+# --- Charter rule 10: no float or double inside Luna Physics ---
+add_test(NAME "US-025 Physics uses no floating point"
+    COMMAND "${CMAKE_COMMAND}" -DSOURCE_DIR=${PROJECT_SOURCE_DIR}
+            -P "${PROJECT_SOURCE_DIR}/tests/physics/check_no_floating_point.cmake")
 
 # --- Luna tests: headless unit tests with the Engine identity (Engine, Platform, Core) ---
 add_executable(luna_tests
