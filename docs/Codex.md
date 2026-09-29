@@ -1,6 +1,6 @@
-# Project Odyssey Codex v1.1
+# Project Odyssey Codex v1.2
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-29 | Source of truth: Project Odyssey.docx v1.3 (chapter 12: MVP; chapter 7: architecture) | Executor: Claude Code autonomous agents (target model: Opus 5.5 for orchestrator, architect and acceptor; any current model for the others) | Human gate: owner design decisions only
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-29 | Source of truth: Project Odyssey.docx v1.4 (chapter 12: MVP; chapter 7: architecture) | Executor: Claude Code autonomous agents (target model: Opus 5.5 for orchestrator, architect and acceptor; any current model for the others) | Human gate: owner design decisions only
 
 ## 0. How to use this Codex
 
@@ -12,13 +12,13 @@ Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus A
 
 ## 1. Delivery format
 
-Hybrid: **stage gates** at milestones M0-M6 (with kill gates at M1 and M6) and **Kanban flow** inside each milestone, WIP 1. Milestone kickoff (K) batches owner decisions; exit review (X) demonstrates exit criteria and tags the repo.
+Hybrid: **stage gates** at milestones M0-M6 (with kill gates at M2 and M6) and **Kanban flow** inside each milestone, WIP 1. Milestone kickoff (K) batches owner decisions; exit review (X) demonstrates exit criteria and tags the repo.
 
 ## 2. Charter (C-01)
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.1)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.2)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -26,19 +26,20 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v1.3 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v1.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
 <architecture_rules>
-1. Five layers, dependencies point down only: Game -> Engine -> Platform -> Core; Game -> Simulation -> Core. Enforced by CMake targets (odysseus_game, odysseus_engine, odysseus_platform, odysseus_sim, odysseus_core).
-2. Only src/platform/ talks to the operating system, and only through SDL3. No '#ifdef _WIN32' outside src/platform/. Reason: Android and iOS later must only need a new Platform layer.
+1. Five layers, dependencies point down only: Game -> Engine -> Platform -> Core; Game -> Simulation -> Core. Enforced by CMake targets (odysseus_game, luna_engine, luna_platform, odysseus_sim, odysseus_core).
+2. Only src/luna/platform/ talks to the operating system, and only through SDL3. No '#ifdef _WIN32' outside src/luna/platform/. Reason: Android and iOS later must only need a new Platform layer.
 3. The Simulation layer has no graphics, no SDL3, no Engine includes. It runs headless in tests and in odysseus_headless.
 4. Game code reacts to input intents (Move, Interact, OpenMenu), never raw keys (ARC-03).
 5. Fixed timestep 20 ticks per second; rendering interpolates (ADR-006). Single-threaded unless a Codex prompt says otherwise (ADR-007).
 6. Determinism (ADR-011): all randomness from seeded PCG32 streams, one per system; no wall-clock time, std::rand or pointer addresses in the simulation; never depend on unordered-container iteration order; money and resources are integers.
 7. Content is data (JSON in assets/data/), validated at load with errors naming file and field (ARC-08).
 8. Saves: versioned JSON, write to a temp file then rename, keep 3 backups (ADR-010).
+9. Luna (ARC-09) is our game engine: the Platform and Engine layers in src/luna/ (targets luna_platform and luna_engine, namespaces luna::platform and luna::engine). Luna stays game-agnostic: it never includes Simulation or Game code and holds nothing specific to Odysseus, so another game can reuse it. Game code uses Luna; Luna never knows about the game.
 </architecture_rules>
 
 <stack>
@@ -48,7 +49,7 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 
 <coding_standards>
 - RAII everywhere; no raw new/delete; std::unique_ptr for ownership. Reason: the owner is a beginner and memory bugs are the costliest C++ mistake.
-- Names: PascalCase types, camelCase functions and variables, constants as kPascalCase, namespaces odysseus::core/platform/engine/sim/game.
+- Names: PascalCase types, camelCase functions and variables, constants as kPascalCase, namespaces odysseus::core, luna::platform, luna::engine, odysseus::sim, odysseus::game.
 - Headers (.h) declare, sources (.cpp) define. One class or small cluster per file.
 - Warnings as errors on our code; AddressSanitizer in Debug.
 - Comments explain WHY, briefly, in plain English the owner can learn from.
@@ -57,9 +58,9 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 <definition_of_done>
 - Code compiles with zero warnings in Debug and Release (x64).
 - All acceptance criteria verified; automated tests written where the story is testable headless.
-- CI is green on the main branch.
-- No layer rule broken (Simulation does not include Engine, Platform or SDL3).
-- Determinism test still passes.
+- CI is green on the main branch (from US-002 on, when CI exists).
+- No layer rule broken (Simulation does not include Engine, Platform or SDL3; Luna does not include Simulation or Game).
+- Determinism test still passes (from US-010 on, when the simulation exists).
 - Code reviewed with Dominus; anything unclear explained in the learning journal.
 - Requirements document updated if behaviour differs from what it says.
 - Teach-back entry appended to docs/learning-journal.md.
@@ -175,7 +176,7 @@ You are the Mraw designer. You write content only as data files in assets/data/ 
 
 ## 4. Build loop (L-01)
 ```xml
-<prompt id="L-01" codex="1.1" name="Mraw build loop">
+<prompt id="L-01" codex="1.2" name="Mraw build loop">
 <context>
 Used by mraw-orchestrator for every story prompt S-US-xxx. The Charter (CLAUDE.md) is already loaded.
 </context>
@@ -204,10 +205,10 @@ Agents stop only for owner design decisions. The decision log starts with these 
 
 | ID | Decision | Needed by | Blocks | Status |
 |---|---|---|---|---|
-| D-01 | Confirm time model: pausable real time with speed control (OPEN-04) | M1 | US-010 | Open |
-| D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M1 (week 3) | US-011, US-012, US-013 | Open |
-| D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M1 | US-011 | Proposed |
-| D-04 | Sprite size and facing directions (OPEN-11) | M2 | US-022, US-024, US-030 | Open |
+| D-01 | Confirm time model: pausable real time with speed control (OPEN-04) | M2 | US-010 | Open |
+| D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M2 (week 3) | US-011, US-012, US-013 | Open |
+| D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M2 | US-011 | Proposed |
+| D-04 | Sprite size and facing directions (OPEN-11); owner answer 2026-09-29: 32x48 px, 8 directions | M1 | US-022, US-024, US-030 | Decided |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M3 | US-030 | Open |
 | D-06 | Minimum PC spec (OPEN-19) | M4 | US-082 | Open |
 | D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Open |
@@ -215,8 +216,8 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Proposed |
 | D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Proposed |
 | D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Open |
-| D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Open |
-| D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Open |
+| D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
+| D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
 | D-15 | Technical chain: M0 > M1 > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |
 
@@ -225,7 +226,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.1 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.2 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -245,22 +246,41 @@ Read docs/Codex.md and docs/codex-issues.md. For each open issue: decide the fix
 ## 7. Prompts by milestone
 ### P-000 Bootstrap
 ```xml
-<prompt id="P-000" codex="1.1" name="Bootstrap the Mraw workspace">
+<prompt id="P-000" codex="1.2" name="Bootstrap the Mraw workspace">
 <context>
 Runs once, in an empty folder named odysseus/ that contains only Codex.md. Creates the files every later prompt relies on.
 </context>
 <instructions>
-1. Create the folder layout from the architecture (source of truth, section 7.9): src/platform, src/core, src/engine, src/sim, src/game, apps/odysseus, apps/headless, tests, assets/data, assets/sprites, assets/audio, assets/fonts, tools, third_party, docs/adr, docs/plans, docs/gates, docs/decision-requests.
+1. Create the folder layout from the architecture (source of truth, section 7.9): src/luna/platform, src/luna/engine, src/core, src/sim, src/game, apps/odysseus, apps/headless, tests, assets/data, assets/sprites, assets/audio, assets/fonts, tools, third_party, docs/adr, docs/plans, docs/gates, docs/decision-requests.
 2. Move Codex.md to docs/Codex.md.
 3. Write CLAUDE.md at the root with the exact text of Codex section C-01 (the Charter).
 4. Write one file per Mraw role in .claude/agents/ with the exact text of Codex section R-01..R-07 (frontmatter + body).
 5. Write docs/decisions.md: a table ID | Decision | Needed by | Blocks | Status | Owner answer, seeded with D-01..D-15 from the Codex dependency list and their current statuses.
 6. Write docs/status.md: a table Prompt | Story | Milestone | Status (To do / In progress / Blocked / Done / Failed) | Last report date, seeded with every prompt in this Codex in order.
 7. Write docs/learning-journal.md (title and a one-paragraph welcome to the owner), docs/codex-issues.md (empty table), docs/adr/README.md (index of ADR-001..ADR-015 with one line each from the source of truth).
-8. Check the toolchain: Visual Studio C++ compiler, CMake, Git, vcpkg. For anything missing, write docs/decision-requests/D-12.md telling the owner exactly what to install (this is an external dependency only he can resolve) and stop.
-9. git init, first commit "P-000: bootstrap Mraw workspace". If a remote is configured, push.
+8. git init, first commit "P-000: bootstrap Mraw workspace". If a remote is configured, push.
+9. Check the toolchain: Visual Studio C++ compiler, CMake, Git, vcpkg. For anything missing, write docs/decision-requests/D-12.md telling the owner exactly what to install (this is an external dependency only he can resolve) and stop.
 </instructions>
-<stop_conditions>Missing toolchain (step 8).</stop_conditions>
+<stop_conditions>Missing toolchain (step 9).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+### P-001 Adopt Codex v1.2 (Luna first)
+```xml
+<prompt id="P-001" codex="1.2" name="Adopt Codex v1.2 in an existing workspace">
+<context>
+Codex v1.2 builds the Luna engine first (source of truth v1.4, ARC-09): M1 is now the Luna engine walking skeleton and M2 the console clan simulator with Kill Gate 1. Workspaces bootstrapped with Codex v1.1 still have the old folders and prompt order. A workspace bootstrapped with v1.2 needs nothing: mark this prompt Done with the note "not needed".
+</context>
+<instructions>
+1. Folders: git mv src/platform to src/luna/platform and src/engine to src/luna/engine. They should hold only .gitkeep files; if either holds code, stop (see stop conditions).
+2. docs/status.md: rebuild the table in the v1.2 Execution order (section 7), adding P-001 and keeping the status and last report date of every prompt that already has one.
+3. docs/decisions.md: update "Needed by" for D-01, D-02, D-03 (M2) and D-04 (M1) from the section 5 table. Record owner answers the owner gave to Mraw since the last session (D-04: 32x48 px, 8 directions; D-13: all libraries from vcpkg, FastNoiseLite in third_party/) with status Decided. Never change an existing owner answer.
+4. docs/codex-issues.md: mark CI-001, CI-002 and CI-003 Resolved in v1.2 (amendment log, section 9).
+5. docs/adr/README.md: add one line under the table: "Luna (ARC-09): the Platform and Engine layers form our game-agnostic engine in src/luna/." Luna is a requirement, not a new library or pattern, so it needs no ADR.
+6. Commit on main "P-001: adopt Codex v1.2 (Luna first)", push, and set P-001 to Done.
+</instructions>
+<stop_conditions>Code (not only .gitkeep) already exists in src/luna/platform/ or src/luna/engine/: write a codex issue and stop, because moving code is a design change for Anima.</stop_conditions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
 ```
@@ -269,7 +289,7 @@ Runs once, in an empty folder named odysseus/ that contains only Codex.md. Creat
 Exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 
 ```xml
-<prompt id="K-M0" codex="1.1" name="Kick off M0 Tooling ready">
+<prompt id="K-M0" codex="1.2" name="Kick off M0 Tooling ready">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-12) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -282,7 +302,7 @@ Exit criteria: A clean checkout builds in Visual Studio; you pause the program o
 
 #### S-US-001 Build and debug from a clean checkout
 ```xml
-<prompt id="S-US-001" codex="1.1" milestone="M0" story="US-001" priority="Must" size="S">
+<prompt id="S-US-001" codex="1.2" milestone="M0" story="US-001" priority="Must" size="S">
 <context>
 Story US-001: Build and debug from a clean checkout.
 As a developer, I want to clone the repository and build every target with one CMake preset, so that I can start working in minutes and never fight the build.
@@ -320,7 +340,7 @@ Then CMake fails with a message naming the missing library
 <verification>
 cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
 cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-001 ..." cases and the determinism hash test.
+ctest --preset windows-x64-debug: all tests pass, including the "US-001 ..." cases. The determinism hash test starts with US-010.
 Manual checks in docs/plans/US-001.md done, with results recorded there.
 </verification>
 <teach_back>C++ concept for the owner: What compiler, linker and build system each do; CMake presets.</teach_back>
@@ -331,7 +351,7 @@ Manual checks in docs/plans/US-001.md done, with results recorded there.
 
 #### S-US-002 Run the build and tests on every push
 ```xml
-<prompt id="S-US-002" codex="1.1" milestone="M0" story="US-002" priority="Must" size="S">
+<prompt id="S-US-002" codex="1.2" milestone="M0" story="US-002" priority="Must" size="S">
 <context>
 Story US-002: Run the build and tests on every push.
 As a developer, I want GitHub Actions to build and test every push on a Windows runner, so that mistakes are caught automatically, even when I forget to run tests.
@@ -364,7 +384,7 @@ Then the CI run fails and names the failing test
 <verification>
 cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
 cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-002 ..." cases and the determinism hash test.
+ctest --preset windows-x64-debug: all tests pass, including the "US-002 ..." cases. The determinism hash test starts with US-010.
 Manual checks in docs/plans/US-002.md done, with results recorded there.
 </verification>
 <teach_back>C++ concept for the owner: Git basics: commit, branch, push.</teach_back>
@@ -375,12 +395,12 @@ Manual checks in docs/plans/US-002.md done, with results recorded there.
 
 #### S-US-003 Enforce the layer rules in the build
 ```xml
-<prompt id="S-US-003" codex="1.1" milestone="M0" story="US-003" priority="Must" size="S">
+<prompt id="S-US-003" codex="1.2" milestone="M0" story="US-003" priority="Must" size="S">
 <context>
 Story US-003: Enforce the layer rules in the build.
-As a developer, I want the build to reject code that breaks the five-layer rule, so that the architecture cannot rot by accident.
+As a developer, I want the build to reject code that breaks the five-layer rule or pulls game code into Luna, so that the architecture cannot rot by accident.
 Epic E0 Foundations: Every change builds, is tested and is safe to make.
-Traces to: ARC-01, ARC-02, ADR-004.
+Traces to: ARC-01, ARC-02, ARC-09, ADR-004.
 </context>
 <dependencies>
 Stories that must be Done: US-001.
@@ -388,7 +408,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Build system and Core: CMakeLists.txt, CMakePresets.json, vcpkg.json, .github/workflows/, src/core/.
+Where the work belongs: Build system and Core: CMakeLists.txt, CMakePresets.json, vcpkg.json, .github/workflows/, src/core/, src/luna/ (empty layer targets are enough).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -403,12 +423,17 @@ Given Simulation code that includes an Engine or SDL3 header
 When I build
 Then the build fails with an include error
 </scenario>
+<scenario name="Luna stays game-agnostic">
+Given Luna code that includes a Simulation or Game header
+When I build
+Then the build fails with an include error
+</scenario>
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done.</definition_of_done>
 <verification>
 cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
 cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-003 ..." cases and the determinism hash test.
+ctest --preset windows-x64-debug: all tests pass, including the "US-003 ..." cases. The determinism hash test starts with US-010.
 Manual checks in docs/plans/US-003.md done, with results recorded there.
 </verification>
 <teach_back>C++ concept for the owner: CMake targets and target_link_libraries.</teach_back>
@@ -419,7 +444,7 @@ Manual checks in docs/plans/US-003.md done, with results recorded there.
 
 #### S-US-004 Log what happens and stop on broken assumptions
 ```xml
-<prompt id="S-US-004" codex="1.1" milestone="M0" story="US-004" priority="Must" size="S">
+<prompt id="S-US-004" codex="1.2" milestone="M0" story="US-004" priority="Must" size="S">
 <context>
 Story US-004: Log what happens and stop on broken assumptions.
 As a developer, I want a logging system and asserts in Core, so that I can see what the game did before a problem.
@@ -457,7 +482,7 @@ Then the debugger stops there and the log records file and line
 <verification>
 cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
 cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-004 ..." cases and the determinism hash test.
+ctest --preset windows-x64-debug: all tests pass, including the "US-004 ..." cases. The determinism hash test starts with US-010.
 Manual checks in docs/plans/US-004.md done, with results recorded there.
 </verification>
 <teach_back>C++ concept for the owner: Header/source files, namespaces, macros.</teach_back>
@@ -467,7 +492,7 @@ Manual checks in docs/plans/US-004.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M0" codex="1.1" name="Exit review M0">
+<prompt id="X-M0" codex="1.2" name="Exit review M0">
 <instructions>
 1. Demonstrate the exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M0.md, one section per criterion, each marked met or not met.
@@ -477,11 +502,272 @@ Manual checks in docs/plans/US-004.md done, with results recorded there.
 </prompt>
 ```
 
-### M1 Console clan simulator (KILL GATE 1)
+### M1 Luna engine: walking skeleton
+Exit criteria: Luna opens a window; a demo character walks around a tile map at 60 FPS with crisp pixels at any window size; the build proves Luna contains no Odysseus code.
+
+```xml
+<prompt id="K-M1" codex="1.2" name="Kick off M1 Luna engine: walking skeleton">
+<instructions>
+1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
+2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
+3. Set this milestone's stories to To do in docs/status.md in this order: US-020, US-021, US-022, US-023, US-024.
+4. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, decisions requested.</output_format>
+</prompt>
+```
+
+#### S-US-020 Open a window with a steady game loop
+```xml
+<prompt id="S-US-020" codex="1.2" milestone="M1" story="US-020" priority="Must" size="M">
+<context>
+Story US-020: Open a window with a steady game loop.
+As a player, I want the game to open a window that runs smoothly and closes cleanly, so that the game feels solid from the first second.
+Epic E2 Luna engine walking skeleton: The player sees and controls a character in a window.
+Traces to: ADR-002, ADR-006, TEC-05.
+</context>
+<dependencies>
+Stories that must be Done: US-001.
+Owner decisions that must be Decided: D-13.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna (Platform and Engine layers): src/luna/platform/, src/luna/engine/; wiring in apps/odysseus/. Keep Luna game-agnostic (Charter rule 9).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Open">
+Given the game is started
+When it launches
+Then a 1280 x 720 window opens within 3 seconds
+</scenario>
+<scenario name="Steady">
+Given the loop is running
+When the frame time is measured for 60 seconds
+Then the average is 60 FPS on the development PC and simulation speed is identical at 30 and 144 Hz monitors
+</scenario>
+<scenario name="Close">
+Given the window is open
+When I press the close button
+Then the game shuts down with no error in the log
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
+cmake --build --preset windows-x64-release: zero warnings.
+ctest --preset windows-x64-debug: all tests pass, including the "US-020 ..." cases. The determinism hash test starts with US-010.
+Manual checks in docs/plans/US-020.md done, with results recorded there.
+</verification>
+<teach_back>C++ concept for the owner: RAII wrapper around SDL_Window; unique_ptr with a custom deleter.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-021 Control the game through intents
+```xml
+<prompt id="S-US-021" codex="1.2" milestone="M1" story="US-021" priority="Must" size="S">
+<context>
+Story US-021: Control the game through intents.
+As a player, I want keyboard, mouse and gamepad to control the same actions, so that I can play the way I like, and touch can be added later.
+Epic E2 Luna engine walking skeleton: The player sees and controls a character in a window.
+Traces to: ARC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-020.
+Owner decisions that must be Decided: none.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna (Platform and Engine layers): src/luna/platform/, src/luna/engine/; wiring in apps/odysseus/. Keep Luna game-agnostic (Charter rule 9).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Keyboard">
+Given the default bindings
+When I press W
+Then the Move Up intent is produced
+</scenario>
+<scenario name="Gamepad">
+Given a connected gamepad
+When I push the left stick up
+Then the same Move Up intent is produced
+</scenario>
+<scenario name="No raw keys">
+Given the Game layer code
+When it is reviewed
+Then it only reads intents, never key codes
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
+cmake --build --preset windows-x64-release: zero warnings.
+ctest --preset windows-x64-debug: all tests pass, including the "US-021 ..." cases. The determinism hash test starts with US-010.
+Manual checks in docs/plans/US-021.md done, with results recorded there.
+</verification>
+<teach_back>C++ concept for the owner: Enums, mapping tables, std::unordered_map.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-022 Draw sprites with crisp pixels
+```xml
+<prompt id="S-US-022" codex="1.2" milestone="M1" story="US-022" priority="Must" size="M">
+<context>
+Story US-022: Draw sprites with crisp pixels.
+As a player, I want pixel art to stay sharp at every window size, so that the game looks right on any screen.
+Epic E2 Luna engine walking skeleton: The player sees and controls a character in a window.
+Traces to: ENV-11, ADR-003.
+</context>
+<dependencies>
+Stories that must be Done: US-020.
+Owner decisions that must be Decided: D-04.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna (Platform and Engine layers): src/luna/platform/, src/luna/engine/; wiring in apps/odysseus/. Keep Luna game-agnostic (Charter rule 9).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Integer scaling">
+Given a 480 x 270 virtual screen
+When the window is resized to 1920 x 1080
+Then the image scales by exactly 4 with no blurred pixels
+</scenario>
+<scenario name="Odd size">
+Given a window size that is not an exact multiple
+When it is resized
+Then the image uses the largest whole-number scale and letterboxes the rest
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
+cmake --build --preset windows-x64-release: zero warnings.
+ctest --preset windows-x64-debug: all tests pass, including the "US-022 ..." cases. The determinism hash test starts with US-010.
+Manual checks in docs/plans/US-022.md done, with results recorded there.
+</verification>
+<teach_back>C++ concept for the owner: Interfaces with virtual functions (Renderer).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-023 Show a tile map with a following camera
+```xml
+<prompt id="S-US-023" codex="1.2" milestone="M1" story="US-023" priority="Must" size="M">
+<context>
+Story US-023: Show a tile map with a following camera.
+As a player, I want to see the world around my character, with the camera following me, so that I always know where I am.
+Epic E2 Luna engine walking skeleton: The player sees and controls a character in a window.
+Traces to: Architecture 7.4.
+</context>
+<dependencies>
+Stories that must be Done: US-022.
+Owner decisions that must be Decided: none.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna (Platform and Engine layers): src/luna/platform/, src/luna/engine/; wiring in apps/odysseus/. Keep Luna game-agnostic (Charter rule 9).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Draw">
+Given a 64 x 64 test map
+When the game runs
+Then tiles within the camera view are drawn and tiles outside are skipped
+</scenario>
+<scenario name="Follow">
+Given the character near the map centre
+When it moves
+Then the camera follows smoothly and stops at the map edges
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
+cmake --build --preset windows-x64-release: zero warnings.
+ctest --preset windows-x64-debug: all tests pass, including the "US-023 ..." cases. The determinism hash test starts with US-010.
+Manual checks in docs/plans/US-023.md done, with results recorded there.
+</verification>
+<teach_back>C++ concept for the owner: 2D grids stored in a 1D vector.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-024 Walk the character around the map
+```xml
+<prompt id="S-US-024" codex="1.2" milestone="M1" story="US-024" priority="Must" size="M">
+<context>
+Story US-024: Walk the character around the map.
+As a player, I want to move my character in four directions with animation, so that I feel in control of a person in the world.
+Epic E2 Luna engine walking skeleton: The player sees and controls a character in a window.
+Traces to: ENV-11.
+</context>
+<dependencies>
+Stories that must be Done: US-021, US-023.
+Owner decisions that must be Decided: D-04.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game layer using Luna: src/game/ and apps/odysseus/. The character and its behaviour are Odysseus code; anything reusable it needs goes into Luna, kept game-agnostic (Charter rule 9).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Walk">
+Given the character is idle
+When I hold Move Right
+Then it walks right with a walking animation at the configured speed
+</scenario>
+<scenario name="Blocked">
+Given a rock tile to the right
+When I walk into it
+Then the character stops at the tile edge
+</scenario>
+<scenario name="Idle">
+Given the character is walking
+When I release all movement input
+Then it stops and plays the idle animation facing the last direction
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
+cmake --build --preset windows-x64-release: zero warnings.
+ctest --preset windows-x64-debug: all tests pass, including the "US-024 ..." cases. The determinism hash test starts with US-010.
+Manual checks in docs/plans/US-024.md done, with results recorded there.
+</verification>
+<teach_back>C++ concept for the owner: State machines; simple collision.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M1" codex="1.2" name="Exit review M1">
+<instructions>
+1. Demonstrate the exit criteria: Luna opens a window; a demo character walks around a tile map at 60 FPS with crisp pixels at any window size; the build proves Luna contains no Odysseus code. For the last criterion, show the US-003 "Luna stays game-agnostic" check passing on the current code.
+2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M1.md, one section per criterion, each marked met or not met.
+3. If all are met: tag the repository m1-done and push. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the gate result.</output_format>
+</prompt>
+```
+
+### M2 Console clan simulator (KILL GATE 1)
 Exit criteria: The headless runner simulates a 20-person clan for 100 years without crashing; the printed chronicle is shown to 3 people and at least 2 find a story in it; the determinism test passes.
 
 ```xml
-<prompt id="K-M1" codex="1.1" name="Kick off M1 Console clan simulator (KILL GATE 1)">
+<prompt id="K-M2" codex="1.2" name="Kick off M2 Console clan simulator (KILL GATE 1)">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-01, D-02, D-03, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -494,7 +780,7 @@ Exit criteria: The headless runner simulates a 20-person clan for 100 years with
 
 #### S-US-010 Advance a seeded world clock
 ```xml
-<prompt id="S-US-010" codex="1.1" milestone="M1" story="US-010" priority="Must" size="M">
+<prompt id="S-US-010" codex="1.2" milestone="M2" story="US-010" priority="Must" size="M">
 <context>
 Story US-010: Advance a seeded world clock.
 As a developer, I want the simulation to tick 20 times per second of game time with a calendar of days and seasons, so that everything in the world happens on one reliable clock.
@@ -543,7 +829,7 @@ Manual checks in docs/plans/US-010.md done, with results recorded there.
 
 #### S-US-011 Give every person needs that change over time
 ```xml
-<prompt id="S-US-011" codex="1.1" milestone="M1" story="US-011" priority="Must" size="M">
+<prompt id="S-US-011" codex="1.2" milestone="M2" story="US-011" priority="Must" size="M">
 <context>
 Story US-011: Give every person needs that change over time.
 As a player, I want clan members to get hungry, tired, cold and lonely, so that the world feels alive and people have reasons to act.
@@ -592,7 +878,7 @@ Manual checks in docs/plans/US-011.md done, with results recorded there.
 
 #### S-US-012 Let people choose what to do (utility AI)
 ```xml
-<prompt id="S-US-012" codex="1.1" milestone="M1" story="US-012" priority="Must" size="L">
+<prompt id="S-US-012" codex="1.2" milestone="M2" story="US-012" priority="Must" size="L">
 <context>
 Story US-012: Let people choose what to do (utility AI).
 As a player, I want each clan member to pick sensible actions based on their needs and skills, so that the clan survives without me micromanaging it.
@@ -641,7 +927,7 @@ Manual checks in docs/plans/US-012.md done, with results recorded there.
 
 #### S-US-013 Remember events and spread gossip
 ```xml
-<prompt id="S-US-013" codex="1.1" milestone="M1" story="US-013" priority="Must" size="M">
+<prompt id="S-US-013" codex="1.2" milestone="M2" story="US-013" priority="Must" size="M">
 <context>
 Story US-013: Remember events and spread gossip.
 As a player, I want people to remember important events and tell others, so that reputations form and stories travel through the clan.
@@ -690,7 +976,7 @@ Manual checks in docs/plans/US-013.md done, with results recorded there.
 
 #### S-US-014 Write a readable chronicle
 ```xml
-<prompt id="S-US-014" codex="1.1" milestone="M1" story="US-014" priority="Must" size="M">
+<prompt id="S-US-014" codex="1.2" milestone="M2" story="US-014" priority="Must" size="M">
 <context>
 Story US-014: Write a readable chronicle.
 As a player, I want notable events recorded as short sentences, so that I can read the clan's story and share it.
@@ -734,7 +1020,7 @@ Manual checks in docs/plans/US-014.md done, with results recorded there.
 
 #### S-US-015 Soak-test the simulation from the command line
 ```xml
-<prompt id="S-US-015" codex="1.1" milestone="M1" story="US-015" priority="Must" size="S">
+<prompt id="S-US-015" codex="1.2" milestone="M2" story="US-015" priority="Must" size="S">
 <context>
 Story US-015: Soak-test the simulation from the command line.
 As a developer, I want to run the headless simulation for N years with a seed and get a report, so that I can check stability and balance in seconds.
@@ -778,7 +1064,7 @@ Manual checks in docs/plans/US-015.md done, with results recorded there.
 
 #### S-US-016 Save and load the simulation
 ```xml
-<prompt id="S-US-016" codex="1.1" milestone="M1" story="US-016" priority="Must" size="M">
+<prompt id="S-US-016" codex="1.2" milestone="M2" story="US-016" priority="Must" size="M">
 <context>
 Story US-016: Save and load the simulation.
 As a player, I want to save the world and load it later exactly as it was, so that I never lose my progress.
@@ -826,286 +1112,25 @@ Manual checks in docs/plans/US-016.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M1" codex="1.1" name="Exit review M1">
+<prompt id="X-M2" codex="1.2" name="Exit review M2">
 <instructions>
 1. Demonstrate the exit criteria: The headless runner simulates a 20-person clan for 100 years without crashing; the printed chronicle is shown to 3 people and at least 2 find a story in it; the determinism test passes.
-2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M1.md, one section per criterion, each marked met or not met.
-3. If all are met: tag the repository m1-done and push. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
-4. This is a kill gate. Evaluate each success criterion below with evidence and write a recommendation (go / pivot / stop) with reasons. Criteria that need people (readers, playtesters) cannot be measured by agents: write a decision request D-GATE-M1 asking the owner for the result, and treat his answer as the gate decision.
-- Chronicle interest (early): 2 of 3 readers find a story in the console chronicle (measured by: Show printed chronicle)
-- Determinism: Same seed + inputs give the same world hash after 10,000 ticks (measured by: Automated test in CI)
-- Kill / pivot rule: If M1 or M6 fails: stop adding content; redesign the simulation or the loop first (measured by: Owner decision, recorded)
-</instructions>
-<output_format>Assembly report with the gate result.</output_format>
-</prompt>
-```
-
-### M2 Walking skeleton
-Exit criteria: A window opens; the player character walks around a tile map at 60 FPS with crisp pixels at any window size.
-
-```xml
-<prompt id="K-M2" codex="1.1" name="Kick off M2 Walking skeleton">
-<instructions>
-1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
-2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
-3. Set this milestone's stories to To do in docs/status.md in this order: US-020, US-021, US-022, US-023, US-024.
-4. Continue with the first story prompt.
-</instructions>
-<output_format>Short kickoff note in the assembly report: milestone goal, stories, decisions requested.</output_format>
-</prompt>
-```
-
-#### S-US-020 Open a window with a steady game loop
-```xml
-<prompt id="S-US-020" codex="1.1" milestone="M2" story="US-020" priority="Must" size="M">
-<context>
-Story US-020: Open a window with a steady game loop.
-As a player, I want the game to open a window that runs smoothly and closes cleanly, so that the game feels solid from the first second.
-Epic E2 Engine walking skeleton: The player sees and controls a character in a window.
-Traces to: ADR-002, ADR-006, TEC-05.
-</context>
-<dependencies>
-Stories that must be Done: US-001.
-Owner decisions that must be Decided: D-13.
-</dependencies>
-<instructions>
-Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Platform and Engine layers: src/platform/, src/engine/, apps/odysseus/.
-Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
-</instructions>
-<acceptance_criteria>
-<scenario name="Open">
-Given the game is started
-When it launches
-Then a 1280 x 720 window opens within 3 seconds
-</scenario>
-<scenario name="Steady">
-Given the loop is running
-When the frame time is measured for 60 seconds
-Then the average is 60 FPS on the development PC and simulation speed is identical at 30 and 144 Hz monitors
-</scenario>
-<scenario name="Close">
-Given the window is open
-When I press the close button
-Then the game shuts down with no error in the log
-</scenario>
-</acceptance_criteria>
-<definition_of_done>Charter definition_of_done.</definition_of_done>
-<verification>
-cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
-cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-020 ..." cases and the determinism hash test.
-Manual checks in docs/plans/US-020.md done, with results recorded there.
-</verification>
-<teach_back>C++ concept for the owner: RAII wrapper around SDL_Window; unique_ptr with a custom deleter.</teach_back>
-<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
-<output_format>Assembly report (Charter report_format).</output_format>
-</prompt>
-```
-
-#### S-US-021 Control the game through intents
-```xml
-<prompt id="S-US-021" codex="1.1" milestone="M2" story="US-021" priority="Must" size="S">
-<context>
-Story US-021: Control the game through intents.
-As a player, I want keyboard, mouse and gamepad to control the same actions, so that I can play the way I like, and touch can be added later.
-Epic E2 Engine walking skeleton: The player sees and controls a character in a window.
-Traces to: ARC-03.
-</context>
-<dependencies>
-Stories that must be Done: US-020.
-Owner decisions that must be Decided: none.
-</dependencies>
-<instructions>
-Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Platform and Engine layers: src/platform/, src/engine/, apps/odysseus/.
-Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
-</instructions>
-<acceptance_criteria>
-<scenario name="Keyboard">
-Given the default bindings
-When I press W
-Then the Move Up intent is produced
-</scenario>
-<scenario name="Gamepad">
-Given a connected gamepad
-When I push the left stick up
-Then the same Move Up intent is produced
-</scenario>
-<scenario name="No raw keys">
-Given the Game layer code
-When it is reviewed
-Then it only reads intents, never key codes
-</scenario>
-</acceptance_criteria>
-<definition_of_done>Charter definition_of_done.</definition_of_done>
-<verification>
-cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
-cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-021 ..." cases and the determinism hash test.
-Manual checks in docs/plans/US-021.md done, with results recorded there.
-</verification>
-<teach_back>C++ concept for the owner: Enums, mapping tables, std::unordered_map.</teach_back>
-<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
-<output_format>Assembly report (Charter report_format).</output_format>
-</prompt>
-```
-
-#### S-US-022 Draw sprites with crisp pixels
-```xml
-<prompt id="S-US-022" codex="1.1" milestone="M2" story="US-022" priority="Must" size="M">
-<context>
-Story US-022: Draw sprites with crisp pixels.
-As a player, I want pixel art to stay sharp at every window size, so that the game looks right on any screen.
-Epic E2 Engine walking skeleton: The player sees and controls a character in a window.
-Traces to: ENV-11, ADR-003.
-</context>
-<dependencies>
-Stories that must be Done: US-020.
-Owner decisions that must be Decided: D-04.
-</dependencies>
-<instructions>
-Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Platform and Engine layers: src/platform/, src/engine/, apps/odysseus/.
-Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
-</instructions>
-<acceptance_criteria>
-<scenario name="Integer scaling">
-Given a 480 x 270 virtual screen
-When the window is resized to 1920 x 1080
-Then the image scales by exactly 4 with no blurred pixels
-</scenario>
-<scenario name="Odd size">
-Given a window size that is not an exact multiple
-When it is resized
-Then the image uses the largest whole-number scale and letterboxes the rest
-</scenario>
-</acceptance_criteria>
-<definition_of_done>Charter definition_of_done.</definition_of_done>
-<verification>
-cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
-cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-022 ..." cases and the determinism hash test.
-Manual checks in docs/plans/US-022.md done, with results recorded there.
-</verification>
-<teach_back>C++ concept for the owner: Interfaces with virtual functions (Renderer).</teach_back>
-<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
-<output_format>Assembly report (Charter report_format).</output_format>
-</prompt>
-```
-
-#### S-US-023 Show a tile map with a following camera
-```xml
-<prompt id="S-US-023" codex="1.1" milestone="M2" story="US-023" priority="Must" size="M">
-<context>
-Story US-023: Show a tile map with a following camera.
-As a player, I want to see the world around my character, with the camera following me, so that I always know where I am.
-Epic E2 Engine walking skeleton: The player sees and controls a character in a window.
-Traces to: Architecture 7.4.
-</context>
-<dependencies>
-Stories that must be Done: US-022.
-Owner decisions that must be Decided: none.
-</dependencies>
-<instructions>
-Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Platform and Engine layers: src/platform/, src/engine/, apps/odysseus/.
-Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
-</instructions>
-<acceptance_criteria>
-<scenario name="Draw">
-Given a 64 x 64 test map
-When the game runs
-Then tiles within the camera view are drawn and tiles outside are skipped
-</scenario>
-<scenario name="Follow">
-Given the character near the map centre
-When it moves
-Then the camera follows smoothly and stops at the map edges
-</scenario>
-</acceptance_criteria>
-<definition_of_done>Charter definition_of_done.</definition_of_done>
-<verification>
-cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
-cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-023 ..." cases and the determinism hash test.
-Manual checks in docs/plans/US-023.md done, with results recorded there.
-</verification>
-<teach_back>C++ concept for the owner: 2D grids stored in a 1D vector.</teach_back>
-<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
-<output_format>Assembly report (Charter report_format).</output_format>
-</prompt>
-```
-
-#### S-US-024 Walk the character around the map
-```xml
-<prompt id="S-US-024" codex="1.1" milestone="M2" story="US-024" priority="Must" size="M">
-<context>
-Story US-024: Walk the character around the map.
-As a player, I want to move my character in four directions with animation, so that I feel in control of a person in the world.
-Epic E2 Engine walking skeleton: The player sees and controls a character in a window.
-Traces to: ENV-11.
-</context>
-<dependencies>
-Stories that must be Done: US-021, US-023.
-Owner decisions that must be Decided: D-04.
-</dependencies>
-<instructions>
-Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Platform and Engine layers: src/platform/, src/engine/, apps/odysseus/.
-Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
-</instructions>
-<acceptance_criteria>
-<scenario name="Walk">
-Given the character is idle
-When I hold Move Right
-Then it walks right with a walking animation at the configured speed
-</scenario>
-<scenario name="Blocked">
-Given a rock tile to the right
-When I walk into it
-Then the character stops at the tile edge
-</scenario>
-<scenario name="Idle">
-Given the character is walking
-When I release all movement input
-Then it stops and plays the idle animation facing the last direction
-</scenario>
-</acceptance_criteria>
-<definition_of_done>Charter definition_of_done.</definition_of_done>
-<verification>
-cmake --preset windows-x64-debug, then cmake --build --preset windows-x64-debug: zero warnings.
-cmake --build --preset windows-x64-release: zero warnings.
-ctest --preset windows-x64-debug: all tests pass, including the "US-024 ..." cases and the determinism hash test.
-Manual checks in docs/plans/US-024.md done, with results recorded there.
-</verification>
-<teach_back>C++ concept for the owner: State machines; simple collision.</teach_back>
-<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
-<output_format>Assembly report (Charter report_format).</output_format>
-</prompt>
-```
-
-```xml
-<prompt id="X-M2" codex="1.1" name="Exit review M2">
-<instructions>
-1. Demonstrate the exit criteria: A window opens; the player character walks around a tile map at 60 FPS with crisp pixels at any window size.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M2.md, one section per criterion, each marked met or not met.
 3. If all are met: tag the repository m2-done and push. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+4. This is a kill gate. Evaluate each success criterion below with evidence and write a recommendation (go / pivot / stop) with reasons. Criteria that need people (readers, playtesters) cannot be measured by agents: write a decision request D-GATE-M2 asking the owner for the result, and treat his answer as the gate decision.
+- Chronicle interest (early): 2 of 3 readers find a story in the console chronicle (measured by: Show printed chronicle)
+- Determinism: Same seed + inputs give the same world hash after 10,000 ticks (measured by: Automated test in CI)
+- Kill / pivot rule: If M2 or M6 fails: stop adding content; redesign the simulation or the loop first (measured by: Owner decision, recorded)
 </instructions>
 <output_format>Assembly report with the gate result.</output_format>
 </prompt>
 ```
 
 ### M3 Living clan on screen
-Exit criteria: The clan from M1 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
+Exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
 
 ```xml
-<prompt id="K-M3" codex="1.1" name="Kick off M3 Living clan on screen">
+<prompt id="K-M3" codex="1.2" name="Kick off M3 Living clan on screen">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-05) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1118,7 +1143,7 @@ Exit criteria: The clan from M1 runs inside the game; NPCs are visible, dressed 
 
 #### S-US-030 Compose characters from layers
 ```xml
-<prompt id="S-US-030" codex="1.1" milestone="M3" story="US-030" priority="Must" size="M">
+<prompt id="S-US-030" codex="1.2" milestone="M3" story="US-030" priority="Must" size="M">
 <context>
 Story US-030: Compose characters from layers.
 As a player, I want characters built from body, hair, outfit and held-item layers with colour variants, so that every person looks different and outfits can grow with progression.
@@ -1131,7 +1156,7 @@ Owner decisions that must be Decided: D-04, D-05.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Engine and Game layers: src/engine/ (sprite composition), src/game/ (presentation of simulation state).
+Where the work belongs: Luna engine and Game layers: src/luna/engine/ (sprite composition), src/game/ (presentation of simulation state).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1167,7 +1192,7 @@ Manual checks in docs/plans/US-030.md done, with results recorded there.
 
 #### S-US-032 See the simulated clan on screen
 ```xml
-<prompt id="S-US-032" codex="1.1" milestone="M3" story="US-032" priority="Must" size="L">
+<prompt id="S-US-032" codex="1.2" milestone="M3" story="US-032" priority="Must" size="L">
 <context>
 Story US-032: See the simulated clan on screen.
 As a player, I want clan members from the simulation to appear and act in the world, so that I watch the clan live its life.
@@ -1180,7 +1205,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Engine and Game layers: src/engine/ (sprite composition), src/game/ (presentation of simulation state).
+Where the work belongs: Luna engine and Game layers: src/luna/engine/ (sprite composition), src/game/ (presentation of simulation state).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1216,7 +1241,7 @@ Manual checks in docs/plans/US-032.md done, with results recorded there.
 
 #### S-US-031 Read people's state at a glance
 ```xml
-<prompt id="S-US-031" codex="1.1" milestone="M3" story="US-031" priority="Should" size="S">
+<prompt id="S-US-031" codex="1.2" milestone="M3" story="US-031" priority="Should" size="S">
 <context>
 Story US-031: Read people's state at a glance.
 As a player, I want to see how people feel from their posture and small emote icons, so that I understand the clan without opening menus.
@@ -1229,7 +1254,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Engine and Game layers: src/engine/ (sprite composition), src/game/ (presentation of simulation state).
+Where the work belongs: Luna engine and Game layers: src/luna/engine/ (sprite composition), src/game/ (presentation of simulation state).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1259,9 +1284,9 @@ Manual checks in docs/plans/US-031.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M3" codex="1.1" name="Exit review M3">
+<prompt id="X-M3" codex="1.2" name="Exit review M3">
 <instructions>
-1. Demonstrate the exit criteria: The clan from M1 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
+1. Demonstrate the exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M3.md, one section per criterion, each marked met or not met.
 3. If all are met: tag the repository m3-done and push. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -1273,7 +1298,7 @@ Manual checks in docs/plans/US-031.md done, with results recorded there.
 Exit criteria: A region is generated from a seed with biomes, resources and two rival clans; any NPC can be inspected; the game saves and loads.
 
 ```xml
-<prompt id="K-M4" codex="1.1" name="Kick off M4 Region, tools and saves">
+<prompt id="K-M4" codex="1.2" name="Kick off M4 Region, tools and saves">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1286,7 +1311,7 @@ Exit criteria: A region is generated from a seed with biomes, resources and two 
 
 #### S-US-040 Generate a region from a seed
 ```xml
-<prompt id="S-US-040" codex="1.1" milestone="M4" story="US-040" priority="Must" size="L">
+<prompt id="S-US-040" codex="1.2" milestone="M4" story="US-040" priority="Must" size="L">
 <context>
 Story US-040: Generate a region from a seed.
 As a player, I want each new game to create a different region with steppe, forest, river and caves, so that every playthrough feels new.
@@ -1299,7 +1324,7 @@ Owner decisions that must be Decided: D-13.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Engine (src/engine/) for chunk streaming.
+Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Luna engine (src/luna/engine/) for chunk streaming.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1335,7 +1360,7 @@ Manual checks in docs/plans/US-040.md done, with results recorded there.
 
 #### S-US-041 Place resources by biome
 ```xml
-<prompt id="S-US-041" codex="1.1" milestone="M4" story="US-041" priority="Must" size="M">
+<prompt id="S-US-041" codex="1.2" milestone="M4" story="US-041" priority="Must" size="M">
 <context>
 Story US-041: Place resources by biome.
 As a player, I want flint, wood, berries and animals placed where they make sense, so that exploring the land matters.
@@ -1348,7 +1373,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Engine (src/engine/) for chunk streaming.
+Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Luna engine (src/luna/engine/) for chunk streaming.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1379,7 +1404,7 @@ Manual checks in docs/plans/US-041.md done, with results recorded there.
 
 #### S-US-042 Spawn rival clans
 ```xml
-<prompt id="S-US-042" codex="1.1" milestone="M4" story="US-042" priority="Must" size="M">
+<prompt id="S-US-042" codex="1.2" milestone="M4" story="US-042" priority="Must" size="M">
 <context>
 Story US-042: Spawn rival clans.
 As a player, I want two AI clans living elsewhere in the region, so that there are others to trade with, convert, or compete against.
@@ -1392,7 +1417,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Engine (src/engine/) for chunk streaming.
+Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Luna engine (src/luna/engine/) for chunk streaming.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1428,7 +1453,7 @@ Manual checks in docs/plans/US-042.md done, with results recorded there.
 
 #### S-US-043 Stream chunks and save only changes
 ```xml
-<prompt id="S-US-043" codex="1.1" milestone="M4" story="US-043" priority="Should" size="M">
+<prompt id="S-US-043" codex="1.2" milestone="M4" story="US-043" priority="Should" size="M">
 <context>
 Story US-043: Stream chunks and save only changes.
 As a developer, I want the region stored as a seed plus changed chunks, so that saves stay small and loading is fast.
@@ -1441,7 +1466,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Engine (src/engine/) for chunk streaming.
+Where the work belongs: Simulation (src/sim/worldgen/) for generation and clans; Luna engine (src/luna/engine/) for chunk streaming.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1472,7 +1497,7 @@ Manual checks in docs/plans/US-043.md done, with results recorded there.
 
 #### S-US-080 Autosave and keep backups
 ```xml
-<prompt id="S-US-080" codex="1.1" milestone="M4" story="US-080" priority="Must" size="M">
+<prompt id="S-US-080" codex="1.2" milestone="M4" story="US-080" priority="Must" size="M">
 <context>
 Story US-080: Autosave and keep backups.
 As a player, I want the game to autosave and keep backups, so that I never lose more than a few minutes.
@@ -1485,7 +1510,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/engine/.
+Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/luna/engine/.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1521,7 +1546,7 @@ Manual checks in docs/plans/US-080.md done, with results recorded there.
 
 #### S-US-083 Inspect and control the world with dev tools
 ```xml
-<prompt id="S-US-083" codex="1.1" milestone="M4" story="US-083" priority="Should" size="M">
+<prompt id="S-US-083" codex="1.2" milestone="M4" story="US-083" priority="Should" size="M">
 <context>
 Story US-083: Inspect and control the world with dev tools.
 As a developer, I want Dear ImGui panels to inspect any person and control time, so that I can understand and tune the simulation live.
@@ -1534,7 +1559,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/engine/.
+Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/luna/engine/.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -1569,7 +1594,7 @@ Manual checks in docs/plans/US-083.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M4" codex="1.1" name="Exit review M4">
+<prompt id="X-M4" codex="1.2" name="Exit review M4">
 <instructions>
 1. Demonstrate the exit criteria: A region is generated from a seed with biomes, resources and two rival clans; any NPC can be inspected; the game saves and loads.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M4.md, one section per criterion, each marked met or not met.
@@ -1583,7 +1608,7 @@ Manual checks in docs/plans/US-083.md done, with results recorded there.
 Exit criteria: A player can start a new game, live the Growing Period, take a profession, pursue Trade or Religion, and win or lose.
 
 ```xml
-<prompt id="K-M5" codex="1.1" name="Kick off M5 Vertical slice feature-complete">
+<prompt id="K-M5" codex="1.2" name="Kick off M5 Vertical slice feature-complete">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-06, D-07, D-08, D-09, D-10, D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1596,7 +1621,7 @@ Exit criteria: A player can start a new game, live the Growing Period, take a pr
 
 #### S-US-050 Start a new game
 ```xml
-<prompt id="S-US-050" codex="1.1" milestone="M5" story="US-050" priority="Must" size="M">
+<prompt id="S-US-050" codex="1.2" milestone="M5" story="US-050" priority="Must" size="M">
 <context>
 Story US-050: Start a new game.
 As a player, I want to choose a seed, a Growing Period preset and a Comfort level before starting, so that I can shape the kind of game I want.
@@ -1645,7 +1670,7 @@ Manual checks in docs/plans/US-050.md done, with results recorded there.
 
 #### S-US-053 Weight choices by age (imprint curve)
 ```xml
-<prompt id="S-US-053" codex="1.1" milestone="M5" story="US-053" priority="Must" size="S">
+<prompt id="S-US-053" codex="1.2" milestone="M5" story="US-053" priority="Must" size="S">
 <context>
 Story US-053: Weight choices by age (imprint curve).
 As a developer, I want Path Affinity gains multiplied by the imprint curve, so that early choices shape the hero most, as designed.
@@ -1694,7 +1719,7 @@ Manual checks in docs/plans/US-053.md done, with results recorded there.
 
 #### S-US-051 Choose how to spend each year of youth
 ```xml
-<prompt id="S-US-051" codex="1.1" milestone="M5" story="US-051" priority="Must" size="M">
+<prompt id="S-US-051" codex="1.2" milestone="M5" story="US-051" priority="Must" size="M">
 <context>
 Story US-051: Choose how to spend each year of youth.
 As a player, I want to pick Focus activities each in-game year, so that I decide what kind of person my hero becomes.
@@ -1738,7 +1763,7 @@ Manual checks in docs/plans/US-051.md done, with results recorded there.
 
 #### S-US-052 Face Crossroads events
 ```xml
-<prompt id="S-US-052" codex="1.1" milestone="M5" story="US-052" priority="Must" size="L">
+<prompt id="S-US-052" codex="1.2" milestone="M5" story="US-052" priority="Must" size="L">
 <context>
 Story US-052: Face Crossroads events.
 As a player, I want story decisions with lasting consequences during youth, so that my choices feel meaningful.
@@ -1787,7 +1812,7 @@ Manual checks in docs/plans/US-052.md done, with results recorded there.
 
 #### S-US-054 Reveal the specialty at the Mantle moment
 ```xml
-<prompt id="S-US-054" codex="1.1" milestone="M5" story="US-054" priority="Must" size="S">
+<prompt id="S-US-054" codex="1.2" milestone="M5" story="US-054" priority="Must" size="S">
 <context>
 Story US-054: Reveal the specialty at the Mantle moment.
 As a player, I want my hero's specialty revealed at 26, so that I see the result of my youth.
@@ -1831,7 +1856,7 @@ Manual checks in docs/plans/US-054.md done, with results recorded there.
 
 #### S-US-060 Define the five Age 1 professions as data
 ```xml
-<prompt id="S-US-060" codex="1.1" milestone="M5" story="US-060" priority="Must" size="S">
+<prompt id="S-US-060" codex="1.2" milestone="M5" story="US-060" priority="Must" size="S">
 <context>
 Story US-060: Define the five Age 1 professions as data.
 As a designer (data editor), I want professions defined in JSON: skills, tools, actions, related pillar, so that content can grow without code changes.
@@ -1875,7 +1900,7 @@ Manual checks in docs/plans/US-060.md done, with results recorded there.
 
 #### S-US-061 Interact with things through a context menu
 ```xml
-<prompt id="S-US-061" codex="1.1" milestone="M5" story="US-061" priority="Must" size="L">
+<prompt id="S-US-061" codex="1.2" milestone="M5" story="US-061" priority="Must" size="L">
 <context>
 Story US-061: Interact with things through a context menu.
 As a player, I want to click a thing and pick from the actions it offers, so that I can do many things with everything in the world.
@@ -1924,7 +1949,7 @@ Manual checks in docs/plans/US-061.md done, with results recorded there.
 
 #### S-US-062 Craft at a workstation
 ```xml
-<prompt id="S-US-062" codex="1.1" milestone="M5" story="US-062" priority="Must" size="M">
+<prompt id="S-US-062" codex="1.2" milestone="M5" story="US-062" priority="Must" size="M">
 <context>
 Story US-062: Craft at a workstation.
 As a player, I want to turn materials into tools at a knapping stone or fire, so that my work produces useful things.
@@ -1973,7 +1998,7 @@ Manual checks in docs/plans/US-062.md done, with results recorded there.
 
 #### S-US-063 Learn a trade from a master
 ```xml
-<prompt id="S-US-063" codex="1.1" milestone="M5" story="US-063" priority="Should" size="M">
+<prompt id="S-US-063" codex="1.2" milestone="M5" story="US-063" priority="Should" size="M">
 <context>
 Story US-063: Learn a trade from a master.
 As a player, I want to apprentice with an NPC master once they trust me, so that skills and relationships grow together.
@@ -2022,7 +2047,7 @@ Manual checks in docs/plans/US-063.md done, with results recorded there.
 
 #### S-US-070 Track regional dominion
 ```xml
-<prompt id="S-US-070" codex="1.1" milestone="M5" story="US-070" priority="Must" size="M">
+<prompt id="S-US-070" codex="1.2" milestone="M5" story="US-070" priority="Must" size="M">
 <context>
 Story US-070: Track regional dominion.
 As a player, I want a Dominion Meter showing my clan's share of the region in Trade and Religion, so that I know how close I am to leading the region.
@@ -2066,7 +2091,7 @@ Manual checks in docs/plans/US-070.md done, with results recorded there.
 
 #### S-US-055 Age, die, and end the run
 ```xml
-<prompt id="S-US-055" codex="1.1" milestone="M5" story="US-055" priority="Must" size="M">
+<prompt id="S-US-055" codex="1.2" milestone="M5" story="US-055" priority="Must" size="M">
 <context>
 Story US-055: Age, die, and end the run.
 As a player, I want my hero to age and eventually die, ending the run with a summary, so that every life has an arc and an ending.
@@ -2115,7 +2140,7 @@ Manual checks in docs/plans/US-055.md done, with results recorded there.
 
 #### S-US-071 Barter with rival clans
 ```xml
-<prompt id="S-US-071" codex="1.1" milestone="M5" story="US-071" priority="Must" size="L">
+<prompt id="S-US-071" codex="1.2" milestone="M5" story="US-071" priority="Must" size="L">
 <context>
 Story US-071: Barter with rival clans.
 As a player, I want to exchange goods with other clans and track debts, so that Trade becomes a path to leadership.
@@ -2164,7 +2189,7 @@ Manual checks in docs/plans/US-071.md done, with results recorded there.
 
 #### S-US-072 Found a sacred fire and gather followers
 ```xml
-<prompt id="S-US-072" codex="1.1" milestone="M5" story="US-072" priority="Must" size="L">
+<prompt id="S-US-072" codex="1.2" milestone="M5" story="US-072" priority="Must" size="L">
 <context>
 Story US-072: Found a sacred fire and gather followers.
 As a player, I want to found a named sacred fire and hold rituals that attract followers, so that Religion becomes a path to leadership.
@@ -2213,7 +2238,7 @@ Manual checks in docs/plans/US-072.md done, with results recorded there.
 
 #### S-US-073 Win by leading the region
 ```xml
-<prompt id="S-US-073" codex="1.1" milestone="M5" story="US-073" priority="Must" size="S">
+<prompt id="S-US-073" codex="1.2" milestone="M5" story="US-073" priority="Must" size="S">
 <context>
 Story US-073: Win by leading the region.
 As a player, I want to win when my clan dominates the region, so that the run has a satisfying goal.
@@ -2257,7 +2282,7 @@ Manual checks in docs/plans/US-073.md done, with results recorded there.
 
 #### S-US-081 Change basic settings
 ```xml
-<prompt id="S-US-081" codex="1.1" milestone="M5" story="US-081" priority="Should" size="S">
+<prompt id="S-US-081" codex="1.2" milestone="M5" story="US-081" priority="Should" size="S">
 <context>
 Story US-081: Change basic settings.
 As a player, I want to set window mode, resolution and volume, so that the game fits my screen and ears.
@@ -2270,7 +2295,7 @@ Owner decisions that must be Decided: none.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/engine/.
+Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/luna/engine/.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -2301,7 +2326,7 @@ Manual checks in docs/plans/US-081.md done, with results recorded there.
 
 #### S-US-082 Keep within the performance budget
 ```xml
-<prompt id="S-US-082" codex="1.1" milestone="M5" story="US-082" priority="Must" size="S">
+<prompt id="S-US-082" codex="1.2" milestone="M5" story="US-082" priority="Must" size="S">
 <context>
 Story US-082: Keep within the performance budget.
 As a developer, I want an FPS and tick-time overlay and a performance test, so that I notice slowdowns the day I cause them.
@@ -2314,7 +2339,7 @@ Owner decisions that must be Decided: D-06.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/engine/.
+Where the work belongs: Across layers; saves in src/sim/save/, settings and overlays in src/game/ and src/luna/engine/.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
 </instructions>
@@ -2344,7 +2369,7 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M5" codex="1.1" name="Exit review M5">
+<prompt id="X-M5" codex="1.2" name="Exit review M5">
 <instructions>
 1. Demonstrate the exit criteria: A player can start a new game, live the Growing Period, take a profession, pursue Trade or Religion, and win or lose.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M5.md, one section per criterion, each marked met or not met.
@@ -2358,7 +2383,7 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 
 ```xml
-<prompt id="K-M6" codex="1.1" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
+<prompt id="K-M6" codex="1.2" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -2371,7 +2396,7 @@ Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go d
 
 #### S-US-090 Learn the game in the first ten minutes
 ```xml
-<prompt id="S-US-090" codex="1.1" milestone="M6" story="US-090" priority="Should" size="M">
+<prompt id="S-US-090" codex="1.2" milestone="M6" story="US-090" priority="Should" size="M">
 <context>
 Story US-090: Learn the game in the first ten minutes.
 As a playtester, I want a clan elder to guide me through my first day, so that I can play without reading a manual.
@@ -2420,7 +2445,7 @@ Manual checks in docs/plans/US-090.md done, with results recorded there.
 
 #### S-US-091 Install and run the playtest build
 ```xml
-<prompt id="S-US-091" codex="1.1" milestone="M6" story="US-091" priority="Must" size="S">
+<prompt id="S-US-091" codex="1.2" milestone="M6" story="US-091" priority="Must" size="S">
 <context>
 Story US-091: Install and run the playtest build.
 As a playtester, I want a zip I can unpack and run, so that I can try the game without technical help.
@@ -2464,7 +2489,7 @@ Manual checks in docs/plans/US-091.md done, with results recorded there.
 
 #### S-US-092 Record local session statistics
 ```xml
-<prompt id="S-US-092" codex="1.1" milestone="M6" story="US-092" priority="Should" size="S">
+<prompt id="S-US-092" codex="1.2" milestone="M6" story="US-092" priority="Should" size="S">
 <context>
 Story US-092: Record local session statistics.
 As a developer, I want an opt-in local log of session length and key events, so that I can measure the MVP success criteria honestly.
@@ -2507,7 +2532,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M6" codex="1.1" name="Exit review M6">
+<prompt id="X-M6" codex="1.2" name="Exit review M6">
 <instructions>
 1. Demonstrate the exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M6.md, one section per criterion, each marked met or not met.
@@ -2516,14 +2541,14 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 - Voluntary play time: 5 of 8 playtesters play 30+ minutes without being asked to continue (measured by: Observation + local session log (US-092))
 - Emergent story: 3 of 8 can retell a story that came from the simulation, not from a script (measured by: Post-play interview)
 - Stability: No crash in a 2-hour play session or a 100-year soak test (measured by: Soak test + crash log)
-- Kill / pivot rule: If M1 or M6 fails: stop adding content; redesign the simulation or the loop first (measured by: Owner decision, recorded)
+- Kill / pivot rule: If M2 or M6 fails: stop adding content; redesign the simulation or the loop first (measured by: Owner decision, recorded)
 </instructions>
 <output_format>Assembly report with the gate result.</output_format>
 </prompt>
 ```
 
 ### Execution order
-P-000 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M1 -> K-M2 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M2 -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -2544,3 +2569,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 |---|---|---|
 | 1.0 | 2026-09-29 | First Codex, from Mraw's Build Brief (source of truth v1.2). |
 | 1.1 | 2026-09-29 | Aligned with Anima's canonical Codex format: verification section and completion condition in every story prompt, state files section, target models. US-053 no longer depends on US-051 (removed a dependency cycle). |
+| 1.2 | 2026-09-29 | Luna first (source of truth v1.4, ARC-09): M1 is now the Luna engine walking skeleton (K-M1, S-US-020..S-US-024, X-M1) and M2 the console clan simulator with Kill Gate 1 (K-M2, S-US-010..S-US-016, X-M2); Platform and Engine layers live in src/luna/ (targets luna_platform and luna_engine, namespaces luna::platform and luna::engine); Charter rule 9 keeps Luna game-agnostic; US-003 gains the "Luna stays game-agnostic" scenario; US-024 is Game code that uses Luna; new P-001 migrates v1.1 workspaces. Codex issues resolved: CI-001 (P-000 commits before the toolchain check), CI-002 (no split needed, D-12 Decided 2026-09-29), CI-003 (DoD: CI green from US-002 on, determinism from US-010 on; M0 and M1 verification no longer ask for the determinism test). Owner decisions recorded: D-04 (32x48 px, 8 directions), D-12, D-13. |

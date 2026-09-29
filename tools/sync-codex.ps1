@@ -65,16 +65,21 @@ if ($targetVersion -and $sourceVersion -eq $targetVersion) {
 [IO.File]::WriteAllText($target, $sourceText)
 $regenerated = @()
 
-$charter = [regex]::Match($sourceText, '(?s)## 2\. Charter \(C-01\)\n.*?```markdown\n(.*?)\n```\n')
-if ($charter.Success) {
-    [IO.File]::WriteAllText((Join-Path $repoRoot 'CLAUDE.md'), $charter.Groups[1].Value + "`n")
-    $regenerated += 'CLAUDE.md'
+# Writes a derived file only when its text changed, and remembers which ones did.
+function Update-DerivedFile([string]$relativePath, [string]$text) {
+    $path = Join-Path $repoRoot $relativePath
+    $current = if (Test-Path -LiteralPath $path) { [IO.File]::ReadAllText($path) -replace "`r`n", "`n" } else { $null }
+    if ($current -cne $text) {
+        [IO.File]::WriteAllText($path, $text)
+        $script:regenerated += $relativePath
+    }
 }
+
+$charter = [regex]::Match($sourceText, '(?s)## 2\. Charter \(C-01\)\n.*?```markdown\n(.*?)\n```\n')
+if ($charter.Success) { Update-DerivedFile 'CLAUDE.md' ($charter.Groups[1].Value + "`n") }
 $roles = [regex]::Matches($sourceText, '(?s)### (R-\d+) (mraw-[a-z]+) .*?\n```markdown\n(.*?)\n```\n')
 foreach ($role in $roles) {
-    $agentFile = Join-Path $repoRoot ".claude\agents\$($role.Groups[2].Value).md"
-    [IO.File]::WriteAllText($agentFile, $role.Groups[3].Value + "`n")
-    $regenerated += ".claude/agents/$($role.Groups[2].Value).md"
+    Update-DerivedFile ".claude/agents/$($role.Groups[2].Value).md" ($role.Groups[3].Value + "`n")
 }
 
 $from = if ($targetVersion) { "v$targetVersion" } else { 'none' }
