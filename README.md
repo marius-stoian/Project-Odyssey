@@ -4,7 +4,7 @@
 
 Codename **Odysseus**: a 2D pixel-art life and civilization simulation in C++20 on SDL3. Windows x64 first; Android and iOS later.
 
-Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), written by Anima. Progress: [docs/status.md](docs/status.md). Owner decisions: [docs/decisions.md](docs/decisions.md). Learning notes: [docs/learning-journal.md](docs/learning-journal.md).
+Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), written by Anima. Progress: [Milestone.md](Milestone.md) (snapshot per session, AP-###) and [docs/status.md](docs/status.md) (every prompt). Owner decisions: [docs/decisions.md](docs/decisions.md). Learning notes: [docs/learning-journal.md](docs/learning-journal.md).
 
 ## Anima's Codex
 `docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When Claude Code starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and Claude commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
