@@ -15,7 +15,7 @@ The owner wants Mraw to assemble Project Odyssey with minimal intervention:
 | ID | Decision | Needed by | Blocks | Status | Owner answer |
 |---|---|---|---|---|---|
 | D-01 | Confirm time model: pausable real time with speed control (OPEN-04) | M2 | US-010 | Decided | 2026-09-30, owner: confirmed as proposed, pausable real time with speed control. |
-| D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M2 (week 3) | US-011, US-012, US-013 | Open |  |
+| D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M2 (week 3) | US-011, US-012, US-013 | Decided by Dominus (delegated) | 2026-09-30: small, legible model: 4 needs (D-03), 6 traits (Brave, Timid, Kind, Greedy, Talkative, Diligent), one opinion -100..100 per pair plus kinship, memories with feelings, gossip at half strength, minor memories forgotten after 60 days. Reasoning in docs/decision-requests/D-02.md. |
 | D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M2 | US-011 | Decided | 2026-09-30, owner: confirmed as proposed, Age 1 needs are Hunger, Energy, Warmth, Social. |
 | D-04 | Sprite size and facing directions (OPEN-11) | M1 | US-022, US-024, US-030 | Decided | 2026-09-29, owner to Mraw/Anima: 32x48 px characters, 8 facing directions. |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M3 | US-030 | Open |  |
