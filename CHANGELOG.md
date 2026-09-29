@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-026 / S-US-026: Detect hits between shapes (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Physics: `Sphere`, `Capsule`, `Box`, `Shape` (variant), `bounds()`, `overlap()` for all six pairings (contact point, normal, depth), `raycast()`, `sweep()` of a moving sphere (Minkowski sum; exact rounded box corners), closest-point helpers; `SpatialGrid` (2 m cells, sorted unique candidate pairs) and `findContacts()`.
+- Tests: `US-026 Overlap`, `US-026 No tunnelling` (10 m per tick, 0.2 m target, time of impact 0.498 of a tick), `US-026 Many bodies` (1,000 bodies, 114 pairs tested, same contacts as all pairs, 0.61 ms in Release), every shape pairing, rays and rounded corners.
+- Docs: plan `docs/plans/US-026.md`, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
 ## US-025 / S-US-025: Build deterministic 3D math (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M1b (Luna Physics).
