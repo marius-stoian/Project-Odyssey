@@ -20,5 +20,6 @@ From Project Odyssey.docx v1.3, section 7.5. New ADRs get their own file here (A
 | ADR-014 | Git + GitHub (private repo) + GitHub Actions: build and test on every push (Windows runner). |
 | ADR-015 | Debug safety net: warnings as errors, AddressSanitizer, asserts. |
 | [ADR-016](ADR-016-layer-boundary-enforcement.md) | Enforce layer boundaries with narrow target interfaces, private identities, guarded headers and build-time include validation. |
+| [ADR-017](ADR-017-luna-physics.md) | Own deterministic 3D physics in Luna (Luna Physics), fixed-point 32.32 math, SI units (1 tile = 1 m). |
 
-Luna (ARC-09): the Platform and Engine layers form our game-agnostic engine in src/luna/.
+Luna (ARC-09, ARC-10): the Platform, Physics and Engine layers form our game-agnostic engine in src/luna/.

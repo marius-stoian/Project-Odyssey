@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Luna Physics added to the requirements and the Codex (Dominus, Anima) — 2026-09-30
+
+**State:** On `qa`. Owner decisions of 2026-09-30: Luna gets its own physics, core in the MVP, full 3D math, built right after M1.
+
+- Requirements v1.5 (Drive, mirrored to `docs/project/requirements/`): PHY-01..PHY-06 (Luna Physics, hit detection, ballistics, rigid-body dynamics, element physics and chemistry, later-Age physics), ARC-10 (Physics layer), ARC-01 now six layers, ADR-016 and ADR-017 recorded, MVP-12 decided and MVP-13 added, architecture risk and cut-list rows, milestone M1b (9 weeks likely) with epic E10 and stories US-025..US-029; later milestones shifted 9 weeks (MVP likely 72 weeks, 49 stories).
+- Backlog workbook: M1b in the timeline and Gantt, E10, US-025..US-029, decision statuses, MVP-13, kill-gate rows corrected to M2.
+- Codex v1.4 (Anima): Charter rules 1, 3, 9 and new rule 10 (deterministic fixed-point physics, SI units, 1 tile = 1 m); K-M1b, S-US-025..S-US-029, X-M1b; P-003.
+- Repo: `docs/adr/ADR-017-luna-physics.md`, ADR index, README layer tables, status (M1b next; US-011 paused on its branch), decisions (D-15), design-doc note.
+
 ## US-010 / S-US-010: Advance a seeded world clock (Claude) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2 (console clan simulator).

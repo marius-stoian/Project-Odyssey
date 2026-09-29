@@ -8,12 +8,12 @@ Everything written about Project Odyssey outside the code: the requirements, Ani
 
 | File | What it is | Status |
 |---|---|---|
-| [Project Odyssey.docx](requirements/Project%20Odyssey.docx) | The requirements, architecture, MVP plan and all 44 user stories | **Source of truth for WHAT**, v1.4 (Luna first) |
+| [Project Odyssey.docx](requirements/Project%20Odyssey.docx) | The requirements, architecture, MVP plan and all 44 user stories | **Source of truth for WHAT**, v1.5 (Luna first, Luna Physics) |
 | [Project Odyssey - MVP Backlog.xlsx](requirements/Project%20Odyssey%20-%20MVP%20Backlog.xlsx) | Working tracker: timeline with Gantt chart, dependencies, epics, stories with status | Generated from chapter 12 of the docx; the docx wins if they differ |
 
 ## codex/
 
-The Codex itself is [docs/Codex.md](../Codex.md) (source of truth for HOW and ORDER, v1.2). Supporting material:
+The Codex itself is [docs/Codex.md](../Codex.md) (source of truth for HOW and ORDER, v1.4). Supporting material:
 
 | File | What it is | Status |
 |---|---|---|
@@ -26,8 +26,8 @@ The Codex itself is [docs/Codex.md](../Codex.md) (source of truth for HOW and OR
 | File | What it shows | Status |
 |---|---|---|
 | [Amek Workflow.png](diagrams/Amek%20Workflow.png) | Brief (Mraw) -> Codex (Anima) -> Assemble (Mraw) | Current |
-| [Odysseus - Architecture Diagram.png](diagrams/Odysseus%20-%20Architecture%20Diagram.png) | The five layers (Figure 1 in the docx) | Current; drawn before the name Luna (Platform + Engine = Luna, ARC-09) |
-| [Odysseus - MVP Timeline.png](diagrams/Odysseus%20-%20MVP%20Timeline.png) | MVP timeline (Figure 2 in the docx) | Drawn for v1.3: shows the clan simulator before the engine. The table in docx section 12.5 is correct |
+| [Odysseus - Architecture Diagram.png](diagrams/Odysseus%20-%20Architecture%20Diagram.png) | The five layers (Figure 1 in the docx) | Drawn before the name Luna and before Luna Physics (ARC-09, ARC-10): the Physics layer is not in the picture |
+| [Odysseus - MVP Timeline.png](diagrams/Odysseus%20-%20MVP%20Timeline.png) | MVP timeline (Figure 2 in the docx) | Drawn for v1.3: shows neither the engine-first order nor M1b. The table in docx section 12.5 is correct |
 
 ## archive/
 

@@ -3,6 +3,8 @@
 Architect's design for M1, shared by US-020..US-024. Codex v1.3; requirements v1.4 (ARC-09, ADR-002, ADR-003, ADR-006, ARC-03); owner decisions D-04 (32x48 px characters, 8 facing directions) and D-13 (SDL3 from vcpkg).
 
 ## Principle
+> **Update (requirements v1.5, Codex v1.4):** Luna gains a third layer, **Physics** (`luna::physics`, ARC-10, ADR-017), built in milestone M1b: deterministic fixed-point 3D math, hit detection, ballistics, rigid bodies. It sits between Core and the Engine and Simulation layers.
+
 Luna knows nothing about Odysseus (Charter rule 9). Only `src/luna/platform/` includes SDL3 (rule 2), and the build enforces both (ADR-016). Luna therefore has two halves:
 
 | Luna layer | Owns | Talks to |

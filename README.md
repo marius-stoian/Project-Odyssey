@@ -67,7 +67,7 @@ Every push to GitHub, on any branch, builds Debug and Release on a Windows machi
 | Folder | What |
 |---|---|
 | `src/core/` | Core: logging, asserts, math, random, ids |
-| `src/luna/platform/`, `src/luna/engine/` | **Luna**, our game-agnostic engine (ARC-09) |
+| `src/luna/platform/`, `src/luna/physics/`, `src/luna/engine/` | **Luna**, our game-agnostic engine (ARC-09, ARC-10): platform, deterministic 3D physics (ADR-017), engine |
 | `src/sim/`, `src/game/` | The Odysseus simulation and game |
 | `apps/` | The programs: odysseus.exe, odysseus_headless.exe |
 | `cmake/` | Layer rules and the include validator (ADR-016) |
@@ -81,14 +81,15 @@ The layer rules are in [CLAUDE.md](CLAUDE.md).
 
 ## Layer boundaries
 
-Each layer has its own CMake library target. A target links only the layers below it; `PUBLIC` dependencies also carry the lower layers' header paths to callers.
+Each layer has its own CMake library target. Luna Physics (`luna_physics`, added in M1b) sits between Core and the Engine and Simulation layers. A target links only the layers below it; `PUBLIC` dependencies also carry the lower layers' header paths to callers.
 
 | Target | Direct layer dependencies |
 |---|---|
 | `odysseus_core` | None |
 | `luna_platform` | `odysseus_core` |
-| `luna_engine` | `luna_platform` |
-| `odysseus_sim` | `odysseus_core` |
+| `luna_physics` | `odysseus_core` (from M1b) |
+| `luna_engine` | `luna_platform`, `luna_physics` (from M1b) |
+| `odysseus_sim` | `odysseus_core`, `luna_physics` (from M1b) |
 | `odysseus_game` | `luna_engine`, `odysseus_sim` |
 
 The game executable links `odysseus_game`; the headless executable links `odysseus_sim`. Luna stays independent of game and simulation code, and Simulation stays independent of graphics.
