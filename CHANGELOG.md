@@ -99,7 +99,7 @@ its PR changes rather than leaving an outdated description.
 **State:** Merged into `qa`; GitHub CI green on `qa` ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). `qa` merges into `main` at the M0 exit review.
 
 ### Integration
-- New branch `qa` from `main` @ `98e45ca`; ChatGPT's work recreated as `story/US-003` @ `f3c3d26` on its base `4488238` (all 90 uploaded files verified identical) and merged with `--no-ff`.
+- New branch `qa` from `main` @ `76ee34e`; ChatGPT's work recreated as `story/US-003` @ `2170dfb` on its base `fb21b48` (all 90 uploaded files verified identical) and merged with `--no-ff`.
 - `README.md`: merge conflict resolved; keeps main's layout table (Luna, `docs/project/`) plus ChatGPT's "Layer boundaries" section; lists `cmake/` and `tests/architecture/`.
 
 ### Fixes
@@ -122,7 +122,7 @@ its PR changes rather than leaving an outdated description.
 ## US-003 / S-US-003: Enforce the layer rules in the build (ChatGPT) — 2026-09-29
 
 **State:** Built by ChatGPT on local `story/US-003` (GitHub push refused, HTTP 403).
-Imported unchanged as `f3c3d26` and merged into `qa` on 2026-09-30; Windows
+Imported unchanged as `2170dfb` and merged into `qa` on 2026-09-30; Windows
 verification and one test-harness fix in the QA entry above. **Done.**
 
 ### Build and source
@@ -184,12 +184,12 @@ Determinism testing starts at US-010. No owner design decision is requested.
 
 | Commit | Change |
 |---|---|
-| `5cda584`, `b9a3794` | P-000: bootstrap the Mraw workspace; toolchain installed, D-12 decided |
-| `ae799e9` | US-001: one CMake preset builds odysseus.exe, odysseus_headless.exe, odysseus_tests.exe with zero warnings |
-| `e34e9c0` | US-002: GitHub Actions builds and tests every push |
-| `1d172b0` | Codex sync from Google Drive at session start (`tools/sync-codex.ps1`) |
-| `bb3e93a` | Dominus and Anima skills in `.claude/skills/` |
-| `e7157d1` | Codex v1.2 from Anima: Luna engine first (requirements v1.4, ARC-09) |
-| `2a31596` | P-001: adopt Codex v1.2 (Luna folders, new prompt order, D-04 and D-13) |
-| `7393ca0`, `4488238` | Milestone.md progress snapshot AP-001; CI-004 |
-| `98e45ca` | Project documents mirrored from Google Drive into `docs/project/` (`tools/sync-workspace.ps1`) |
+| `3d96f58`, `c8c6301` | P-000: bootstrap the Mraw workspace; toolchain installed, D-12 decided |
+| `d231374` | US-001: one CMake preset builds odysseus.exe, odysseus_headless.exe, odysseus_tests.exe with zero warnings |
+| `38290bb` | US-002: GitHub Actions builds and tests every push |
+| `383cbd9` | Codex sync from Google Drive at session start (`tools/sync-codex.ps1`) |
+| `d54ce65` | Dominus and Anima skills in `.claude/skills/` |
+| `5770852` | Codex v1.2 from Anima: Luna engine first (requirements v1.4, ARC-09) |
+| `2d7dc23` | P-001: adopt Codex v1.2 (Luna folders, new prompt order, D-04 and D-13) |
+| `3438f4b`, `fb21b48` | Milestone.md progress snapshot AP-001; CI-004 |
+| `76ee34e` | Project documents mirrored from Google Drive into `docs/project/` (`tools/sync-workspace.ps1`) |

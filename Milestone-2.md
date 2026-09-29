@@ -9,7 +9,7 @@ Continues [Milestone.md](Milestone.md) (AP-001 by Mraw, AP-002 by ChatGPT). From
 | Snapshot ID | **AP-003** |
 | Codex | v1.2 (Anima, Luna first); v1.3 in preparation (CI-004, CI-005, owner's standing instructions) |
 | Source of truth | Project Odyssey.docx v1.4 |
-| Repository state | Branch `qa` (M0 work, CI green: [run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)); `main` @ `98e45ca` until the M0 exit review |
+| Repository state | Branch `qa` (M0 work, CI green: [run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)); `main` @ `76ee34e` until the M0 exit review |
 | Current milestone | **M0 Tooling ready**: 3 of 4 stories Done |
 | Next prompt | **S-US-004** Log what happens and stop on broken assumptions |
 | Blocked by owner decisions | Nothing: D-01, D-03, D-04, D-12, D-13 Decided; other decisions are delegated to Dominus (standing instructions in docs/decisions.md) |
@@ -17,7 +17,7 @@ Continues [Milestone.md](Milestone.md) (AP-001 by Mraw, AP-002 by ChatGPT). From
 ### What happened since AP-002
 
 1. **ChatGPT built US-003** (layer rules) on 2026-09-29 but could not verify it on Windows: GitHub refused its push (HTTP 403). Its full output arrived as an upload in docs/.
-2. **Mraw integrated it**: recreated ChatGPT's branch exactly (`f3c3d26`, 90 files verified), merged it with `main` into the new `qa` branch, and resolved one README conflict.
+2. **Mraw integrated it**: recreated ChatGPT's branch exactly (`2170dfb`, 90 files verified), merged it with `main` into the new `qa` branch, and resolved one README conflict.
 3. **Windows verification found a real portability bug** in the tests (not in the layer rules): MSBuild writes `fatal  error C1083` with two spaces, so 2 of 5 tests failed on Windows while passing on Linux. One-line fix; now 5/5 pass in Debug and Release, locally and on GitHub's Windows runner.
 4. **US-003 accepted and Done**: Allowed use, Forbidden use (including `../` and absolute-path bypasses) and Luna stays game-agnostic all pass on MSVC.
 5. **Records**: CHANGELOG covers the whole project; US-003 teach-back in the learning journal; new docs/README.md index; redundant upload copies removed.

@@ -7,7 +7,7 @@
 | Snapshot ID | **AP-004** |
 | Codex | v1.3 (autonomous assembly) |
 | Source of truth | Project Odyssey.docx v1.4 |
-| Repository state | `qa` @ `25bc08a`, CI green ([run 36636578405](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36636578405), 4 min 50 s) |
+| Repository state | `qa` @ `43da11e`, CI green ([run 36636578405](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36636578405), 4 min 50 s) |
 | Current milestone | **M0 Tooling ready: 4 of 4 stories Done** |
 | Next prompt | **X-M0** exit review (merge `qa` into `main`, tag `m0-done`), then K-M1: the Luna engine |
 

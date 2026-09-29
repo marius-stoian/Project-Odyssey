@@ -14,7 +14,7 @@ A snapshot of where the assembly stands, saved at the end of each assembly sessi
 | Snapshot ID | **AP-002** |
 | Codex | v1.2 (checked-in copy) |
 | Source of truth | Project Odyssey.docx v1.4 referenced by Codex; external document not read this session |
-| Repository state | Local `story/US-003` based on `main` @ `4488238`; changes not pushed or merged |
+| Repository state | Local `story/US-003` based on `main` @ `fb21b48`; changes not pushed or merged |
 | Current milestone | **M0 Tooling ready** (2 of 4 stories Done) |
 | Next prompt | Resume **S-US-003** at Windows verification/acceptance |
 | Blocker | GitHub branch creation rejected with HTTP 403; required Windows CI and integration unavailable |
@@ -54,7 +54,7 @@ drafted in its plan and will enter the learning journal after acceptance.
 | Snapshot ID | **AP-001** |
 | Codex | v1.2 (Anima, Luna first) |
 | Source of truth | Project Odyssey.docx v1.4 |
-| Repository state | `main` @ `2a31596` "P-001: adopt Codex v1.2 (Luna first)", CI green |
+| Repository state | `main` @ `2d7dc23` "P-001: adopt Codex v1.2 (Luna first)", CI green |
 | Current milestone | **M0 Tooling ready** (2 of 4 stories done) |
 | Next prompt | **S-US-003** Enforce the layer rules in the build |
 | Blocked by owner decisions | Nothing until M2 |
@@ -76,11 +76,11 @@ drafted in its plan and will enter the learning journal after acceptance.
 
 | Prompt | What it delivered | Evidence |
 |---|---|---|
-| P-000 | Repo, Charter (CLAUDE.md), 7 Mraw agents, state files; toolchain installed (D-12) | commits `5cda584`, `b9a3794` |
+| P-000 | Repo, Charter (CLAUDE.md), 7 Mraw agents, state files; toolchain installed (D-12) | commits `3d96f58`, `c8c6301` |
 | K-M0 | M0 kickoff | docs/status.md |
 | S-US-001 | One CMake preset builds odysseus.exe, odysseus_headless.exe, odysseus_tests.exe with zero warnings; debuggable; missing libraries named | [docs/plans/US-001.md](docs/plans/US-001.md) |
 | S-US-002 | GitHub Actions builds and tests every push (1 min 48 s); a broken test turns CI red and is named | [docs/plans/US-002.md](docs/plans/US-002.md) |
-| P-001 | Adopted Codex v1.2: Luna folders (src/luna/), new prompt order, D-04 and D-13 recorded | commit `2a31596` |
+| P-001 | Adopted Codex v1.2: Luna folders (src/luna/), new prompt order, D-04 and D-13 recorded | commit `2d7dc23` |
 
 Also done outside the Codex, at the owner's request: Codex sync from Google Drive at session start (tools/sync-codex.ps1), Dominus and Anima skills in .claude/skills/, requirements v1.3 -> v1.4 (Luna, ARC-09) and Codex v1.1 -> v1.2.
 

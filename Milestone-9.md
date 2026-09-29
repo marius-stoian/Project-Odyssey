@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Codex / requirements | v1.3 / v1.4 |
-| Repository | `qa` @ `8c30771`; `main` tagged **`m1-done`** (Luna complete, CI green on main) |
+| Repository | `qa` @ `68b348f`; `main` tagged **`m1-done`** (Luna complete, CI green on main) |
 | Milestone | **M2 Console clan simulator: 1 of 7** |
 | Next | S-US-011 needs (Hunger, Energy, Warmth, Social) |
 
