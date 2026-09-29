@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-025 / S-US-025: Build deterministic 3D math (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M1b (Luna Physics).
+
+- New layer Luna Physics (`src/luna/physics/`, target `luna_physics`, ARC-10): `Fixed` 32.32 numbers (own 128-bit multiply and long division, rounded to nearest, overflow asserted in Debug), `sqrt`, `sin`, `cos`, `degrees`; `Vec3` (dot, cross, length, normalise); `Quat` (axis-angle, product, conjugate, rotate, normalise). No floating point inside the layer.
+- Layer enforcement (ADR-016 update): all six `boundary.h` know the Physics identity; the include validator's table; Engine and Simulation link Physics.
+- Tests: `luna_physics_tests` (new, Physics identity): `US-025 Exact arithmetic` (+ 100,000 pairs against the CPU's 128-bit instructions), `US-025 Rotations`, `US-025 Determinism` (1,000,000 operations, pinned hash), sine/cosine accuracy, vectors; `US-025 Physics layer rules` (11 compiler probes); 4 more validator fixtures; `US-025 Physics uses no floating point` (source review).
+- Docs: plan `docs/plans/US-025.md`, ADR-016 update, README, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
 ## Codex v1.5 and K-M1b (Anima, Mraw) — 2026-09-30
 
 **State:** On `qa`.

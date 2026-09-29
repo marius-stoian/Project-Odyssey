@@ -46,3 +46,20 @@ TEST_CASE("US-003 Guard completeness") {
         "/architecture-validator\" -P \"" ODYSSEUS_VALIDATOR_SCRIPT "\"";
     CHECK(std::system(command.c_str()) == 0);
 }
+
+TEST_CASE("US-025 Physics layer rules") {
+    // Allowed: Physics uses Core; Engine, Simulation and Game use Physics.
+    checkProbe("us025_physics_core", true);
+    checkProbe("us025_engine_physics", true);
+    checkProbe("us025_sim_physics", true);
+    checkProbe("us025_game_physics", true);
+    // Forbidden: Physics never reaches up or sideways, and never sees SDL3.
+    checkProbe("us025_physics_platform", false, "luna/platform/layer.h");
+    checkProbe("us025_physics_engine", false, "luna/engine/layer.h");
+    checkProbe("us025_physics_sim", false, "sim/layer.h");
+    checkProbe("us025_physics_game", false, "game/layer.h");
+    checkProbe("us025_physics_sdl", false, "SDL3/SDL.h");
+    checkProbe("us025_physics_engine_absolute", false, "Engine|ENGINE|engine");
+    // Platform sits beside Physics, not above it.
+    checkProbe("us025_platform_physics", false, "Physics|PHYSICS|physics");
+}
