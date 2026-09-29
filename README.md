@@ -9,6 +9,9 @@ Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), 
 ## Anima's Codex
 `docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When Claude Code starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and Claude commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
 
+## Team skills
+The Dominus skill (all hats; the full team is Mraw) and the Anima skill (Prompt Architect, writes the Codex) live in [.claude/skills/](.claude/skills/), so every Claude Code session opened in this repo has them, on any machine. They are copies of the owner's personal skills; when those change, copy them in again.
+
 ## What you need
 - Visual Studio 2026 (or 2022) with the "Desktop development with C++" workload and "C++ AddressSanitizer"
 - CMake 3.28 or newer
