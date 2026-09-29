@@ -2,12 +2,13 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-024 and X-M1 (Milestone-8.md, AP-009).
+**Last updated:** 2026-09-30, after US-010 (Milestone-9.md, AP-010).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
 - Codex v1.3, requirements v1.4. Done: P-000..P-002, all of M0 (`m0-done`) and all of M1, the Luna engine (`m1-done`).
-- **Next prompt: K-M2**, then the console clan simulator US-010..US-016 (headless, in `src/sim/`, run by `odysseus_headless.exe`), then X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
+- K-M2 and US-010 Done (M2 design: `docs/plans/M2-clan-design.md`; D-02 delegated).
+- **Next prompt: S-US-011** (needs), then US-012..US-016 of the console clan simulator (headless, in `src/sim/`, run by `odysseus_headless.exe`), then X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue
@@ -24,6 +25,9 @@ Read CLAUDE.md, docs/Codex.md, docs/status.md and Limit.md. Check docs/decisions
 - Stories: branch from `qa`, merge into `qa`, CI green = Done. Milestone exit: `qa` into `main`, tag.
 - After every story: new Milestone-<n>.md (next AP-### ID), CHANGELOG.md entry, update this file.
 - Only real stops: kill-gate results that need people (X-M2, X-M6), accounts, credentials, money.
+
+## Tools
+- `pwsh tools/verify.ps1 -Story US-xxx`: configure, build Debug and Release, count warnings, run all tests, save evidence to docs/evidence/US-xxx/.
 
 ## Environment notes
 - Toolchain: Visual Studio 2026 (MSVC 19.51), CMake 4.4.3, vcpkg at `C:\dev\vcpkg`, gh logged in as marius-stoian.
