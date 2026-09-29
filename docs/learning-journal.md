@@ -206,3 +206,24 @@ Now `a + b * c` reads like school maths. A quaternion is four such numbers descr
 **Try it (15 minutes).** In `tests/physics/rotation_test.cpp`, rotate by `physics::degrees(45)` eight times instead of 90 four times, and run `luna_physics_tests.exe --test-case="US-025 Rotations"`. Then print `Fixed::fromRatio(1, 3).raw()` and check by hand that it is 2^32 / 3, rounded.
 
 **Check yourself.** Why is `Fixed::fromRatio(1, 3) * Fixed::fromInt(3)` one step short of 1, and why is that still perfectly deterministic?
+
+## US-026: Detect hits between shapes (2026-09-30)
+
+**What we built.** Luna Physics knows spheres, capsules (pills) and boxes. It can tell whether two of them touch (and where, and which way to push them apart), and it can follow a fast-moving ball along its whole path, so a spear moving 10 m per tick still hits a 20 cm target instead of jumping over it. A grid of 2 m cells makes 1,000 bodies cheap: only 114 pairs need an exact test.
+
+**The idea: plain structs, pure functions and a spatial grid.** Shapes are just data:
+
+```cpp
+struct Sphere {
+    Vec3 center;
+    Fixed radius;
+};
+```
+
+The geometry lives in pure functions such as `overlap(a, b)`: same inputs, same answer, no hidden state, which makes them easy to test and deterministic. The grid is the "phone book" trick: instead of asking every one of 1,000 people whether they stand next to you (499,500 questions), you only ask the people filed under your street.
+
+**Where to look.** [src/luna/physics/shapes.cpp](../src/luna/physics/shapes.cpp) (`sweep()`: a moving ball is a ray against the target grown by the ball's radius), [src/luna/physics/spatial_grid.cpp](../src/luna/physics/spatial_grid.cpp) (`findContacts()`: broad phase, then narrow phase).
+
+**Try it (15 minutes).** In `tests/physics/shapes_test.cpp`, change the grid's cell size in `US-026 Many bodies` from 2 to 64 metres and run the test in Release: watch "pairs tested" and the time grow. Then try 0.5 m.
+
+**Check yourself.** Why does checking only where the spear is at each tick miss the target, and how does sweeping fix it?
