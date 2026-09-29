@@ -1,0 +1,5 @@
+[doctest] test cases:  4 |  4 passed | 0 failed | 0 skipped
+[doctest] assertions: 18 | 18 passed | 0 failed |
+[doctest] Status: SUCCESS!
+2026-09-29 22:31:29.798Z [INFO] Screenshot saved: C:/Users/Amek/.amek-ai/Odysseus/odysseus/build/windows-x64/e2e/us024/walked-to-rock.bmp
+2026-09-29 22:31:29.815Z [INFO] Hero at (1142.0, 1048.0) facing East, idle

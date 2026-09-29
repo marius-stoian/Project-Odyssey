@@ -27,6 +27,7 @@ constexpr std::size_t kKeyboardA = 0;
 constexpr std::size_t kKeyboardB = 1;
 constexpr std::size_t kGamepadButton = 2;
 constexpr std::size_t kGamepadStick = 3;
+constexpr std::size_t kScript = 4;
 
 std::optional<KeyBinding> keyBinding(Key key) {
     switch (key) {
@@ -126,6 +127,10 @@ void InputMap::handle(const platform::Event& event) {
     default:
         return;
     }
+}
+
+void InputMap::setScripted(Intent intent, bool held) {
+    setDigital(intent, kScript, held);
 }
 
 Intents InputMap::nextTick() {

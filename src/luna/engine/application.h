@@ -3,10 +3,12 @@
 #include "boundary.h"
 
 #include "game.h"
+#include "input.h"
 
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 namespace luna::engine {
 
@@ -22,10 +24,18 @@ struct AppConfig {
     int clearBlue = 0;
 };
 
+// "Hold this intent from `fromSeconds` until `toSeconds`", for automated tests and demos.
+struct ScriptedHold {
+    Intent intent = Intent::MoveUp;
+    double fromSeconds = 0.0;
+    double toSeconds = 0.0;
+};
+
 struct RunOptions {
     std::uint64_t startNanoseconds = 0; // when the program started, to time the first frame
     double quitAfterSeconds = 0.0;      // > 0: close by itself, like pressing the close button
     std::filesystem::path screenshot;   // not empty: save the last frame there (.bmp)
+    std::vector<ScriptedHold> holds;    // scripted input, see ScriptedHold
 };
 
 // Opens the window and runs the loop until the player closes it. Logs the window size,

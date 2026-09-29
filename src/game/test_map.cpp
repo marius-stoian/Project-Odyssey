@@ -39,8 +39,8 @@ luna::engine::TileMap makeTestMap() {
             }
         }
     }
-    // One rock right next to the path, east of the start: US-024 walks into it.
-    map.set(centre + 4, centre - 1, rock);
+    // A boulder on the east path, 4 tiles from the start: walking right runs into it (US-024).
+    map.set(centre + 4, centre, rock);
     return map;
 }
 

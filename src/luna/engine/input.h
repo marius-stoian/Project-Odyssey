@@ -43,6 +43,9 @@ public:
 
     void handle(const platform::Event& event);
 
+    // Holds or releases an intent as if a device did it. For automated tests and demos.
+    void setScripted(Intent intent, bool held);
+
     // The intents for the next tick. "Pressed" is reported once, then cleared.
     Intents nextTick();
 
@@ -51,7 +54,7 @@ private:
 
     // Each intent can be held by several sources at once (W and Up, stick and D-pad);
     // it is active while any of them is held.
-    static constexpr std::size_t kSources = 4; // keyboard A, keyboard B, gamepad button, gamepad stick
+    static constexpr std::size_t kSources = 5; // keyboard A, keyboard B, gamepad button, gamepad stick, script
     std::array<std::array<bool, kSources>, kIntentCount> sources_{};
     std::array<bool, kIntentCount> pressedSinceTick_{};
 };
