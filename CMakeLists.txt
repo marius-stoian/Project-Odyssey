@@ -25,6 +25,7 @@ endforeach()
 # Libraries come from vcpkg.json. If one is missing there, find_package stops here
 # with a message that names the library.
 find_package(doctest CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
 
 # The AddressSanitizer runtime DLL sits next to the compiler. Debug programs need it
 # beside them to start outside Visual Studio (double-click, ctest).
@@ -53,13 +54,19 @@ endfunction()
 # --- Five layers: dependency arrows point down only (ADR-004, ADR-016). ---
 include(cmake/LayerRules.cmake)
 add_library(odysseus_core STATIC
-    src/core/version.cpp)
+    src/core/version.cpp
+    src/core/log.cpp
+    src/core/assertions.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
 
-add_library(luna_platform STATIC src/luna/platform/layer.cpp)
+add_library(luna_platform STATIC
+    src/luna/platform/layer.cpp
+    src/luna/platform/user_paths.cpp)
 target_link_libraries(luna_platform PUBLIC odysseus_core)
+# PRIVATE: only Platform sees SDL3 headers (Charter rule 2); callers still link it.
+target_link_libraries(luna_platform PRIVATE SDL3::SDL3)
 odysseus_register_layer(luna_platform platform luna/platform)
 odysseus_apply_settings(luna_platform)
 
@@ -97,6 +104,7 @@ enable_testing()
 add_executable(odysseus_tests
     tests/main.cpp
     tests/core/version_test.cpp
+    tests/core/log_test.cpp
     tests/architecture/layer_rules_test.cpp)
 target_link_libraries(odysseus_tests PRIVATE odysseus_core doctest::doctest)
 target_compile_definitions(odysseus_tests PRIVATE
@@ -105,8 +113,17 @@ target_compile_definitions(odysseus_tests PRIVATE
     ODYSSEUS_TEST_CONFIGURATION="$<CONFIG>"
     ODYSSEUS_PROBE_SCRIPT="${PROJECT_SOURCE_DIR}/tests/architecture/run_probe.cmake"
     ODYSSEUS_SOURCE_DIR="${PROJECT_SOURCE_DIR}"
-    ODYSSEUS_VALIDATOR_SCRIPT="${PROJECT_SOURCE_DIR}/tests/architecture/run_validator.cmake")
+    ODYSSEUS_VALIDATOR_SCRIPT="${PROJECT_SOURCE_DIR}/tests/architecture/run_validator.cmake"
+    ODYSSEUS_ASSERT_PROBE="$<TARGET_FILE:us004_assert_probe>"
+    ODYSSEUS_ASSERT_PROBE_LINE=13)
 odysseus_apply_settings(odysseus_tests)
+
+# US-004: a tiny program that fires a false assert on purpose (line 13 of assert_probe.cpp).
+add_executable(us004_assert_probe tests/core/assert_probe.cpp)
+target_link_libraries(us004_assert_probe PRIVATE odysseus_core)
+target_compile_definitions(us004_assert_probe PRIVATE ODYSSEUS_LAYER_CORE)
+odysseus_apply_settings(us004_assert_probe)
+add_dependencies(odysseus_tests us004_assert_probe)
 add_subdirectory(tests/architecture)
 # Architecture scenarios invoke the build, so serialize them even under ctest -j.
 add_test(NAME odysseus_tests COMMAND odysseus_tests "--test-case-exclude=US-003*")

@@ -1,0 +1,21 @@
+US-004 end-to-end checks on the owner's PC (2026-09-30, Windows 11, MSVC 19.51)
+
+Log file: odysseus.exe (Debug) printed
+  Log: C:\Users\Amek\AppData\Roaming\Project Odyssey\Odysseus\logs\session-20260929-215607-890-00.log
+and that file contains:
+  2026-09-29 21:56:07.891Z [INFO] Log session started
+  2026-09-29 21:56:07.892Z [INFO] Project Odyssey 0.1.0 started
+  2026-09-29 21:56:07.892Z [INFO] Shutting down
+  2026-09-29 21:56:07.892Z [INFO] Log session ended
+
+Rotation: odysseus.exe run 7 times in a row -> "session logs kept: 5" in the logs folder.
+
+Assert without a debugger: us004_assert_probe.exe exits with 0x80000003 (breakpoint exception); its log:
+  2026-09-29 21:56:16.382Z [INFO] before the assert
+  2026-09-29 21:56:16.382Z [ERROR] Assertion failed: 1 + 1 == 3 (the probe asserts on purpose) at C:\...\tests\core\assert_probe.cpp:13
+  ("after the assert" is never written)
+
+Assert under the debugger (cdb, WinDbg 1.2606):
+  Break instruction exception - code 80000003 (first chance)
+  00 ... us004_assert_probe!main+0x61d [C:\...\tests\core\assert_probe.cpp @ 13]
+  -> the debugger stops on the assert line itself.
