@@ -47,6 +47,9 @@ The programs are console programs for now, so start them from a terminal (a doub
 .\build\windows-x64\bin\Release\odysseus.exe
 ```
 
+## Logs
+Every run writes a timestamped log to `%APPDATA%\Project Odyssey\Odysseus\logs\` (the last five runs are kept). Attach the newest file to bug reports. In Debug builds, `ODYSSEUS_ASSERT(condition, "message")` logs the file and line of a broken assumption and stops in the debugger.
+
 ## Test
 ```powershell
 ctest --preset windows-x64-debug

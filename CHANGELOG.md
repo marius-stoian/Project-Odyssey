@@ -4,6 +4,19 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-004 / S-US-004: Log what happens and stop on broken assumptions (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- `src/core/log.{h,cpp}`: `LogSession` (RAII) writes `session-YYYYMMDD-HHMMSS-mmm-NN.log` with UTC-timestamped lines, keeps the last 5 session logs, never touches other files; `logInfo` / `logWarning` / `logError`.
+- `src/core/assertions.{h,cpp}`: `ODYSSEUS_ASSERT(condition, message)` logs `Assertion failed: ... at file:line` and breaks into the debugger in Debug; compiles away in Release without unused-variable warnings.
+- `src/luna/platform/user_paths.{h,cpp}`: `luna::platform::userDataDirectory()` via SDL3 `SDL_GetPrefPath` (Charter rule 2), SDL3 linked PRIVATE to Platform only.
+- `vcpkg.json`: add `sdl3` (3.4.16, D-13). `CMakeLists.txt`: new sources, SDL3, `us004_assert_probe`.
+- `apps/odysseus/main.cpp`: one log session per run in `%APPDATA%\Project Odyssey\Odysseus\logs`.
+- Tests: `tests/core/log_test.cpp` (US-004 Log file, Rotation, Assert), `tests/core/assert_probe.cpp`.
+- Docs: plan, evidence (`docs/evidence/US-004/`), teach-back, README "Logs".
+- Verification: Debug and Release 0 warnings; ctest 5/5 both; US-004 doctest 3 cases / 24 assertions; end to end: 7 runs leave 5 logs; cdb stops at `assert_probe.cpp @ 13`.
+
 ## QA integration of ChatGPT's work (Claude) — 2026-09-30 — branch `qa`
 
 **State:** Merged into `qa`; GitHub CI green on `qa` ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). `qa` merges into `main` at the M0 exit review.
