@@ -4,10 +4,36 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
-## Unreleased — US-003 / S-US-003 — 2026-09-29
+## QA integration of ChatGPT's work (Claude) — 2026-09-30 — branch `qa`
 
-**State:** Prepared on local `story/US-003`; no remote branch or PR created,
-no merge. Required Windows verification is pending GitHub write access.
+**State:** Merged into `qa`; GitHub CI green on `qa` ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). `qa` merges into `main` at the M0 exit review.
+
+### Integration
+- New branch `qa` from `main` @ `98e45ca`; ChatGPT's work recreated as `story/US-003` @ `f3c3d26` on its base `4488238` (all 90 uploaded files verified identical) and merged with `--no-ff`.
+- `README.md`: merge conflict resolved; keeps main's layout table (Luna, `docs/project/`) plus ChatGPT's "Layer boundaries" section; lists `cmake/` and `tests/architecture/`.
+
+### Fixes
+- `tests/architecture/run_probe.cmake`: accept MSBuild's `fatal  error C1083` spelling (two spaces) by matching the error code. On Windows, 2 of 5 tests had failed although every forbidden include was rejected; no check was weakened.
+
+### Verification (owner's PC, Visual Studio Community 2026, MSVC 19.51)
+- Debug and Release builds: exit 0, 0 warning lines. ctest 5/5 in both, AddressSanitizer on in Debug. Evidence: `docs/evidence/US-003/windows-*.txt`.
+- GitHub Actions (Windows runner) on `qa`: green, 5/5 in Debug and Release, 1 min 50 s.
+
+### Documentation and tracking
+- `docs/plans/US-003.md`, `docs/reports/US-003-2026-09-30.md`, `docs/learning-journal.md` (US-003 teach-back), `docs/status.md` (US-003 Done), ADR-016 status.
+- `docs/decisions.md`: D-01 and D-03 Decided by the owner; standing owner instructions (delegated decisions, `qa` branch rule, Milestone-<n>.md after every story).
+- `docs/README.md`: new index of the docs folder. `docs/codex-issues.md`: CI-005 for Anima.
+- `Milestone-2.md`: progress snapshot AP-003.
+
+### Clean-up
+- Removed the ChatGPT upload folder, its identical zip and the duplicate local checkpoint (kept as `docs/reports/local-checkpoint-2026-09-29.md`).
+- Removed `.gitkeep` placeholders in `src/game`, `src/sim`, `src/luna/engine`, `src/luna/platform` and `tools/`, which now contain files.
+
+## US-003 / S-US-003: Enforce the layer rules in the build (ChatGPT) — 2026-09-29
+
+**State:** Built by ChatGPT on local `story/US-003` (GitHub push refused, HTTP 403).
+Imported unchanged as `f3c3d26` and merged into `qa` on 2026-09-30; Windows
+verification and one test-harness fix in the QA entry above. **Done.**
 
 ### Build and source
 
@@ -62,3 +88,18 @@ Supplementary GCC Debug and Release builds pass with `-Wall -Wextra -Werror`:
 checks in each configuration. Required MSVC Windows Debug/Release, AddressSanitizer,
 Windows CTest and green CI on `main` are unverified. Completion is not accepted.
 Determinism testing starts at US-010. No owner design decision is requested.
+
+
+## Before this changelog existed — 2026-09-29 — `main`
+
+| Commit | Change |
+|---|---|
+| `5cda584`, `b9a3794` | P-000: bootstrap the Mraw workspace; toolchain installed, D-12 decided |
+| `ae799e9` | US-001: one CMake preset builds odysseus.exe, odysseus_headless.exe, odysseus_tests.exe with zero warnings |
+| `e34e9c0` | US-002: GitHub Actions builds and tests every push |
+| `1d172b0` | Codex sync from Google Drive at session start (`tools/sync-codex.ps1`) |
+| `bb3e93a` | Dominus and Anima skills in `.claude/skills/` |
+| `e7157d1` | Codex v1.2 from Anima: Luna engine first (requirements v1.4, ARC-09) |
+| `2a31596` | P-001: adopt Codex v1.2 (Luna folders, new prompt order, D-04 and D-13) |
+| `7393ca0`, `4488238` | Milestone.md progress snapshot AP-001; CI-004 |
+| `98e45ca` | Project documents mirrored from Google Drive into `docs/project/` (`tools/sync-workspace.ps1`) |

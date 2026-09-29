@@ -2,6 +2,9 @@
 
 A snapshot of where the assembly stands, saved at the end of each assembly session. Each save gets the next ID (AP-001, AP-002, ...) and records the Codex and requirements versions it was measured against. The newest snapshot is on top; older ones stay below as history. Live details: [docs/status.md](docs/status.md) (every prompt), [docs/decisions.md](docs/decisions.md) (owner decisions).
 
+
+**Newer snapshots:** [Milestone-2.md](Milestone-2.md) (AP-003) and later Milestone-<n>.md files.
+
 ---
 
 ## AP-002 · 2026-09-29

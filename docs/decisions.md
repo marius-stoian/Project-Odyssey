@@ -2,11 +2,21 @@
 
 The only way agents learn a decision. The owner answers in the last column and sets Status to Decided.
 
+## Standing owner instructions (2026-09-30)
+
+The owner wants Mraw to assemble Project Odyssey with minimal intervention:
+
+1. **Delegated decisions.** When an owner decision blocks the next prompt, Dominus decides using the recommended option from the source of truth (or the Codex), records it below with status "Decided by Dominus (delegated)" and the reasoning in docs/decision-requests/<ID>.md, lists it in the next Milestone file, and the team continues. The owner may override any delegated decision later; an override is a new decision and may need rework.
+2. **Branches.** Each accepted story merges into `qa` once CI is green (the story is then Done). At each milestone exit review (X-Mx), `qa` merges into `main`, CI on `main` must be green, and `main` is tagged mx-done.
+3. **Progress files.** After every story, save a new progress snapshot as Milestone-<n>.md at the repository root (Milestone-3.md, Milestone-4.md, ...), with the next AP-### ID.
+4. **Changelog.** Update CHANGELOG.md with every change set before it is pushed or merged (AGENTS.md).
+5. **Still reserved for the owner:** kill-gate results that need people (X-M2, X-M6), anything needing accounts, credentials, money or other people, and destructive actions outside the repo.
+
 | ID | Decision | Needed by | Blocks | Status | Owner answer |
 |---|---|---|---|---|---|
-| D-01 | Confirm time model: pausable real time with speed control (OPEN-04) | M2 | US-010 | Open |  |
+| D-01 | Confirm time model: pausable real time with speed control (OPEN-04) | M2 | US-010 | Decided | 2026-09-30, owner: confirmed as proposed, pausable real time with speed control. |
 | D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M2 (week 3) | US-011, US-012, US-013 | Open |  |
-| D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M2 | US-011 | Proposed |  |
+| D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M2 | US-011 | Decided | 2026-09-30, owner: confirmed as proposed, Age 1 needs are Hunger, Energy, Warmth, Social. |
 | D-04 | Sprite size and facing directions (OPEN-11) | M1 | US-022, US-024, US-030 | Decided | 2026-09-29, owner to Mraw/Anima: 32x48 px characters, 8 facing directions. |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M3 | US-030 | Open |  |
 | D-06 | Minimum PC spec (OPEN-19) | M4 | US-082 | Open |  |

@@ -1,6 +1,6 @@
 # ADR-016: Enforce layer boundaries with targets, header guards and build validation
 
-Status: Accepted implementation pattern for US-003; Windows acceptance evidence pending.
+Status: Accepted. Implemented by ChatGPT for US-003 (2026-09-29); Windows/MSVC evidence added 2026-09-30 (docs/evidence/US-003/windows-*.txt).
 
 ## Context
 
