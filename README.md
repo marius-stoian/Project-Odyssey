@@ -59,3 +59,19 @@ Every push to GitHub, on any branch, builds Debug and Release on a Windows machi
 
 ## Layout
 `src/` holds the five layers (core, platform, engine, sim, game), `apps/` the programs, `tests/` the doctest tests, `assets/` the game data, `docs/` everything written. The layer rules are in [CLAUDE.md](CLAUDE.md).
+
+## Layer boundaries
+
+Each layer has its own CMake library target. A target links only the layers below it; `PUBLIC` dependencies also carry the lower layers' header paths to callers.
+
+| Target | Direct layer dependencies |
+|---|---|
+| `odysseus_core` | None |
+| `luna_platform` | `odysseus_core` |
+| `luna_engine` | `luna_platform` |
+| `odysseus_sim` | `odysseus_core` |
+| `odysseus_game` | `luna_engine`, `odysseus_sim` |
+
+The game executable links `odysseus_game`; the headless executable links `odysseus_sim`. Luna stays independent of game and simulation code, and Simulation stays independent of graphics.
+
+[cmake/LayerRules.cmake](cmake/LayerRules.cmake) gives each target only its own public headers and a private layer identity. Header guards reject forbidden consumers, including relative-path includes. [cmake/ValidateLayerIncludes.cmake](cmake/ValidateLayerIncludes.cmake) checks production files on every build for missing boundary guards, forbidden includes and SDL use outside Platform. This catches accidental boundary violations even after configuration; it does not protect against deliberately editing the enforcement. The acceptance tests are in [tests/architecture/](tests/architecture/), and the design rationale is [ADR-016](docs/adr/ADR-016-layer-boundary-enforcement.md).

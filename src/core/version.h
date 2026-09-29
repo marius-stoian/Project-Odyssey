@@ -1,5 +1,7 @@
 #pragma once
 
+#include "boundary.h"
+
 #include <string_view>
 
 namespace odysseus::core {
