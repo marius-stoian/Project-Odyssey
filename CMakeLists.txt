@@ -63,14 +63,20 @@ odysseus_apply_settings(odysseus_core)
 
 add_library(luna_platform STATIC
     src/luna/platform/layer.cpp
-    src/luna/platform/user_paths.cpp)
+    src/luna/platform/system.cpp
+    src/luna/platform/user_paths.cpp
+    src/luna/platform/window.cpp)
 target_link_libraries(luna_platform PUBLIC odysseus_core)
 # PRIVATE: only Platform sees SDL3 headers (Charter rule 2); callers still link it.
 target_link_libraries(luna_platform PRIVATE SDL3::SDL3)
 odysseus_register_layer(luna_platform platform luna/platform)
 odysseus_apply_settings(luna_platform)
 
-add_library(luna_engine STATIC src/luna/engine/layer.cpp)
+add_library(luna_engine STATIC
+    src/luna/engine/layer.cpp
+    src/luna/engine/application.cpp
+    src/luna/engine/fixed_step_clock.cpp
+    src/luna/engine/frame_stats.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
@@ -80,7 +86,9 @@ target_link_libraries(odysseus_sim PUBLIC odysseus_core)
 odysseus_register_layer(odysseus_sim sim sim)
 odysseus_apply_settings(odysseus_sim)
 
-add_library(odysseus_game STATIC src/game/layer.cpp)
+add_library(odysseus_game STATIC
+    src/game/layer.cpp
+    src/game/odyssey_game.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
@@ -132,3 +140,18 @@ foreach(scenario IN ITEMS "Allowed use" "Forbidden use" "Luna stays game-agnosti
     add_test(NAME "${test_name}" COMMAND odysseus_tests "--test-case=${test_name}")
     set_tests_properties("${test_name}" PROPERTIES RESOURCE_LOCK architecture_build)
 endforeach()
+
+# --- Luna tests: headless unit tests with the Engine identity (Engine, Platform, Core) ---
+add_executable(luna_tests
+    tests/main.cpp
+    tests/luna/loop_test.cpp)
+target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
+target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
+odysseus_apply_settings(luna_tests)
+add_test(NAME luna_tests COMMAND luna_tests)
+
+# --- End-to-end: the real game window (US-020 Open and Close) ---
+add_test(NAME "US-020 Open and close"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us020 -DQUIT_AFTER=3
+            -P "${PROJECT_SOURCE_DIR}/tests/luna/run_game_window.cmake")
+set_tests_properties("US-020 Open and close" PROPERTIES LABELS window TIMEOUT 120)

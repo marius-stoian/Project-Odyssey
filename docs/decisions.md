@@ -27,5 +27,7 @@ The owner wants Mraw to assemble Project Odyssey with minimal intervention:
 | D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Open |  |
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided | 2026-09-29, installed by Mraw at the owner's request: Visual Studio Community 2026 (C++ desktop workload + AddressSanitizer), CMake 4.4.3, vcpkg at C:\dev\vcpkg (VCPKG_ROOT set), GitHub CLI 2.101.0. GitHub account marius-stoian; private repo marius-stoian/Project-Odyssey. |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided | 2026-09-29, owner to Mraw/Anima: take SDL3, EnTT, Dear ImGui, nlohmann/json and doctest from vcpkg; FastNoiseLite as a single header in third_party/. |
+| D-16 | Tile size for the tile grid (ENV-11) | M1 | US-023, US-024 | Decided by Dominus (delegated) | 2026-09-30: 32x32 px tiles, matching 32-px-wide characters (D-04). Reasoning in docs/decision-requests/D-16.md. |
+| D-17 | Movement directions: US-024 says four, D-04 gives 8 facing directions | M1 | US-024 | Decided by Dominus (delegated) | 2026-09-30: 8-way movement, diagonals at the same speed; US-024 scenarios unchanged. Reasoning in docs/decision-requests/D-17.md. |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |  |
 | D-15 | Technical chain: M0 > M1 > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |  |
