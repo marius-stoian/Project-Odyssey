@@ -314,6 +314,15 @@ Read the Charter and state files (progress, tests, git log) → take the next pr
 - **Fixed output contract** (assembly report) naming the Codex version and prompt ID.
 - **IDs are never reused.** Changed prompts get a new Codex minor version and an amendment-log line.
 
+### Autonomy settings (confirm with Amek before writing the Charter)
+Amek prefers autonomous assembly with minimal intervention (decided 2026-09-30). Every Codex Charter states:
+- **Decision delegation:** blocked owner decisions are decided by Dominus with the recommended option and recorded as "Decided by Dominus (delegated)" (decision-request file + decision log + next Milestone file); Amek may override.
+- **Integration branch:** stories branch from and merge into `qa`; green CI on `qa` = Done; `qa` merges into `main` at milestone exits (tagged).
+- **Progress snapshots:** a `Milestone-<n>.md` with the next AP-### ID after every story; `CHANGELOG.md` updated per change set.
+- **Human gates (the only stops):** kill-gate results that need people, accounts, credentials, money, destructive actions outside the repo.
+- **Every builder, one rulebook:** `AGENTS.md` points non-Claude agents to the Charter.
+Put these in the Charter's `<human_gates>`, `<git>` and `<definition_of_done>`, in L-01 (readiness, branch, integrate, snapshot) and in the state-files table. Ask Amek all open questions in one round before a long run, never during it.
+
 ### Codex red flags
 Prompts that say "implement the feature" without acceptance criteria · a Codex that differs from the requirements without saying so · agents asked to decide owner questions · no stop conditions · prompts that depend on chat history instead of files · no state files for multi-session work · human gates phrased as suggestions.
 
