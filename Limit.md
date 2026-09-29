@@ -2,12 +2,12 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-023 (Milestone-7.md, AP-008).
+**Last updated:** 2026-09-30, after US-024 and X-M1 (Milestone-8.md, AP-009).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
-- Codex v1.3, requirements v1.4. Done: P-000..P-002, all of M0 (tagged `m0-done` on `main`), K-M1, US-020..US-023.
-- **Next prompt: S-US-024** (walking character), then X-M1 (merge qa into main, tag m1-done).
+- Codex v1.3, requirements v1.4. Done: P-000..P-002, all of M0 (`m0-done`) and all of M1, the Luna engine (`m1-done`).
+- **Next prompt: K-M2**, then the console clan simulator US-010..US-016 (headless, in `src/sim/`, run by `odysseus_headless.exe`), then X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue

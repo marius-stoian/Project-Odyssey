@@ -1,0 +1,12 @@
+2026-09-29 22:32:18.544Z [INFO] Log session started
+2026-09-29 22:32:18.544Z [INFO] Project Odyssey 0.1.0 started
+2026-09-29 22:32:18.795Z [INFO] Window opened: 1280x720, virtual screen 480x270, VSync on
+2026-09-29 22:32:18.795Z [INFO] Window 1280x720: pixel art scaled x2, picture 960x540 at (160, 90)
+2026-09-29 22:32:18.797Z [INFO] Window 1280x720: pixel art scaled x2, picture 960x540 at (160, 90)
+2026-09-29 22:32:18.799Z [INFO] First frame after 257 ms
+2026-09-29 22:32:38.822Z [INFO] Screenshot saved: C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\e2e\m1-exit\m1-exit.bmp
+2026-09-29 22:32:38.822Z [INFO] Average frame rate: 60.0 FPS over 20.0 s (1200 frames); 400 simulation ticks
+2026-09-29 22:32:38.822Z [INFO] Window closed by the player
+2026-09-29 22:32:38.835Z [INFO] Hero at (368.0, 2048.0) facing West, idle
+2026-09-29 22:32:38.835Z [INFO] Shutting down
+2026-09-29 22:32:38.835Z [INFO] Log session ended
