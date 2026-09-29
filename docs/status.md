@@ -12,7 +12,7 @@ Codex v1.3. Edited only by mraw-orchestrator.
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
 | S-US-003 | US-003 | M0 | Done | 2026-09-30 |
 | S-US-004 | US-004 | M0 | Done | 2026-09-30 |
-| X-M0 | - | M0 | To do |  |
+| X-M0 | - | M0 | Done | 2026-09-30 |
 | K-M1 | - | M1 | To do |  |
 | S-US-020 | US-020 | M1 | To do |  |
 | S-US-021 | US-021 | M1 | To do |  |
