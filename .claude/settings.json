@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/tools/sync-codex.ps1\"",
+            "timeout": 30,
+            "statusMessage": "Checking for a new Codex from Anima"
+          }
+        ]
+      }
+    ]
+  }
+}
