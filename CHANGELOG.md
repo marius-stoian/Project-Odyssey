@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-024 / S-US-024: Walk the character around the map (Claude) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Completes M1 (Luna walking skeleton).
+
+- Luna Engine: `moveAndCollide()` tile collision (flush stops, wall sliding); scripted input (`InputMap::setScripted`, `RunOptions::holds`).
+- Game: `Hero` (8-way movement, 96 px/s, feet collision box, walking animation, idle facing the last direction, interpolated drawing); boulder on the east path; camera follows the hero.
+- `odysseus.exe --hold <Intent>:<from>:<to>` scripted play; the final hero position is logged.
+- Tests: `odysseus_game_tests` (new, Game identity: `US-024 Walk right`, `Stop at a rock`, `Stop and face the last direction`, diagonal speed), Luna collision tests, end to end `US-024 Walk to the rock` (label `window`).
+- Verification: 0 warnings; ctest 12/12 Debug and Release; real window: hero stops at x 1142.0 facing East.
+
 ## US-023 / S-US-023: Show a tile map with a following camera (Claude) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.

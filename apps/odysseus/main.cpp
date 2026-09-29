@@ -2,6 +2,8 @@
 //   --quit-after <seconds>   close by itself after that long, exactly like the close button
 //   --log-dir <folder>       write the session log there instead of the per-user folder
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
+//   --hold <Intent>:<from>:<to>  hold an intent (MoveUp, MoveDown, MoveLeft, MoveRight, Interact,
+//                            OpenMenu) between two times in seconds: scripted play for tests
 #include "core/log.h"
 #include "core/version.h"
 #include "game/odyssey_game.h"
@@ -10,6 +12,8 @@
 #include "luna/platform/user_paths.h"
 
 #include <exception>
+#include <stdexcept>
+#include <vector>
 #include <filesystem>
 #include <format>
 #include <iostream>
@@ -22,7 +26,19 @@ struct Arguments {
     double quitAfterSeconds = 0.0;
     std::filesystem::path logDirectory;
     std::filesystem::path screenshot;
+    std::vector<luna::engine::ScriptedHold> holds;
 };
+
+luna::engine::Intent intentNamed(std::string_view name) {
+    using luna::engine::Intent;
+    if (name == "MoveUp") return Intent::MoveUp;
+    if (name == "MoveDown") return Intent::MoveDown;
+    if (name == "MoveLeft") return Intent::MoveLeft;
+    if (name == "MoveRight") return Intent::MoveRight;
+    if (name == "Interact") return Intent::Interact;
+    if (name == "OpenMenu") return Intent::OpenMenu;
+    throw std::invalid_argument("unknown intent: " + std::string(name));
+}
 
 Arguments parseArguments(int argc, char* argv[]) {
     Arguments arguments;
@@ -34,6 +50,13 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.logDirectory = argv[++i];
         } else if (name == "--screenshot") {
             arguments.screenshot = argv[++i];
+        } else if (name == "--hold") {
+            // "MoveRight:0.5:3" -> hold MoveRight from 0.5 s to 3 s
+            const std::string value = argv[++i];
+            const std::size_t first = value.find(':');
+            const std::size_t second = value.find(':', first + 1);
+            arguments.holds.push_back({intentNamed(value.substr(0, first)), std::stod(value.substr(first + 1, second - first - 1)),
+                                       std::stod(value.substr(second + 1))});
         }
     }
     return arguments;
@@ -55,7 +78,10 @@ int main(int argc, char* argv[]) {
     try {
         odysseus::game::OdysseyGame game;
         const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
-                                               {start, arguments.quitAfterSeconds, arguments.screenshot});
+                                               {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds});
+        const odysseus::game::Hero& hero = game.hero();
+        odysseus::core::logInfo(std::format("Hero at ({:.1f}, {:.1f}) facing {}, {}", hero.feetX(), hero.feetY(),
+                                            odysseus::game::facingName(hero.facing()), hero.walking() ? "walking" : "idle"));
         odysseus::core::logInfo("Shutting down");
         return exitCode;
     } catch (const std::exception& error) {

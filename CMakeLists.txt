@@ -81,7 +81,8 @@ add_library(luna_engine STATIC
     src/luna/engine/input.cpp
     src/luna/engine/renderer.cpp
     src/luna/engine/camera.cpp
-    src/luna/engine/tile_map.cpp)
+    src/luna/engine/tile_map.cpp
+    src/luna/engine/collision.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
@@ -95,7 +96,8 @@ add_library(odysseus_game STATIC
     src/game/layer.cpp
     src/game/odyssey_game.cpp
     src/game/placeholder_art.cpp
-    src/game/test_map.cpp)
+    src/game/test_map.cpp
+    src/game/hero.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
@@ -154,7 +156,8 @@ add_executable(luna_tests
     tests/luna/input_test.cpp
     tests/luna/loop_test.cpp
     tests/luna/pixel_scale_test.cpp
-    tests/luna/tile_map_test.cpp)
+    tests/luna/tile_map_test.cpp
+    tests/luna/collision_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
@@ -189,3 +192,18 @@ target_compile_definitions(luna_window_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_window_tests)
 add_test(NAME luna_window_tests COMMAND luna_window_tests --success=false)
 set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
+
+# --- Game tests: Game identity (US-024 the hero) ---
+add_executable(odysseus_game_tests
+    tests/main.cpp
+    tests/game/hero_test.cpp)
+target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
+target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME)
+odysseus_apply_settings(odysseus_game_tests)
+add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
+
+# --- End-to-end: walk right into the boulder in the real window (US-024) ---
+add_test(NAME "US-024 Walk to the rock"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024
+            -P "${PROJECT_SOURCE_DIR}/tests/game/run_walk_to_rock.cmake")
+set_tests_properties("US-024 Walk to the rock" PROPERTIES LABELS window TIMEOUT 120)

@@ -150,3 +150,23 @@ One allocation instead of 64 separate rows, and neighbours sit next to each othe
 **Try it (15 minutes).** In `test_map.cpp`, make the pond bigger (change `20` to `40` in the pond formula) and move it next to the crossing. Run the game with `--quit-after 2 --screenshot map.bmp` and look.
 
 **Check yourself.** In a map 64 cells wide, at which index does cell (3, 2) live?
+
+## US-024: Walk the character around the map (2026-09-30)
+
+**What we built.** You can play! Arrow keys, WASD or a gamepad move the hero in 8 directions through the valley, with a walking animation; rocks and water block the way; let go and the hero stops, facing where they went. The camera follows.
+
+**The idea: game state updated in fixed ticks, drawn with interpolation.** The hero moves only in `update()`, 20 times per second, exactly 4.8 pixels per tick. But the screen shows 60 frames per second. So we remember where the hero was at the previous tick and draw them part of the way (`alpha`) towards where they are now:
+
+```cpp
+double Hero::feetX(double alpha) const {
+    return previousX_ + (x_ - previousX_) * alpha; // 0 = last tick, 1 = this tick
+}
+```
+
+The rules stay simple and deterministic (ticks), while the picture stays smooth (frames).
+
+**Where to look.** [src/game/hero.cpp](../src/game/hero.cpp) (`update()`: speed, diagonals, animation), [src/luna/engine/collision.cpp](../src/luna/engine/collision.cpp) (how a box stops at a wall).
+
+**Try it (15 minutes).** In `src/game/hero.h`, change `speedPixelsPerSecond` from 96 to 160 and play. Then run `ctest --preset windows-x64-debug`: `US-024 Walk right` still passes (it reads the speed from the config), but `US-024 Walk to the rock` too? Find out why.
+
+**Check yourself.** Why does the hero's position change 20 times per second while the picture changes 60 times per second?

@@ -4,6 +4,7 @@
 #include "game/placeholder_art.h"
 #include "game/test_map.h"
 
+#include <cmath>
 #include <string>
 
 namespace odysseus::game {
@@ -15,13 +16,14 @@ constexpr int kVirtualHeight = 270;
 
 OdysseyGame::OdysseyGame()
     : map_(makeTestMap()), camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
-      heroX_(map_.pixelWidth() / 2.0 + kTileSize / 2.0), heroY_(map_.pixelHeight() / 2.0 + kTileSize / 2.0) {
-    camera_.centreOn(heroX_, heroY_);
+      hero_(map_.pixelWidth() / 2.0 + kTileSize / 2.0, map_.pixelHeight() / 2.0 + kTileSize * 0.75) {
+    camera_.centreOn(hero_.feetX(), hero_.feetY());
 }
 
-void OdysseyGame::update(const luna::engine::Intents& /*intents*/) {
+void OdysseyGame::update(const luna::engine::Intents& intents) {
     ++ticks_;
-    camera_.follow(heroX_, heroY_); // US-024 moves the hero with the intents
+    hero_.update(intents, map_);
+    camera_.follow(hero_.feetX(), hero_.feetY());
 }
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {
@@ -31,11 +33,11 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     map_.draw(renderer, tiles_, camera_, alpha);
-    // The hero, idle and facing the player; their feet at (heroX_, heroY_).
+    // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     const luna::engine::Rect view = camera_.view(alpha);
-    const luna::engine::Rect idleSouth{0, 0, kCharacterWidth, kCharacterHeight};
-    renderer.draw(characters_, idleSouth,
-                  {static_cast<int>(heroX_) - kCharacterWidth / 2 - view.x, static_cast<int>(heroY_) - kCharacterHeight - view.y});
+    const int x = static_cast<int>(std::lround(hero_.feetX(alpha))) - kCharacterWidth / 2 - view.x;
+    const int y = static_cast<int>(std::lround(hero_.feetY(alpha))) - kCharacterHeight - view.y;
+    renderer.draw(characters_, hero_.spriteFrame(), {x, y});
 }
 
 std::uint64_t OdysseyGame::ticks() const {

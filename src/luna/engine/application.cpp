@@ -73,6 +73,11 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
             input.handle(event);
         }
 
+        const double runSeconds = static_cast<double>(now - loopStart) / 1e9;
+        for (const ScriptedHold& hold : options.holds) {
+            input.setScripted(hold.intent, runSeconds >= hold.fromSeconds && runSeconds < hold.toSeconds);
+        }
+
         const int ticks = clock.advance(elapsed);
         for (int tick = 0; tick < ticks; ++tick) {
             game.update(input.nextTick());

@@ -41,7 +41,7 @@ The programs land in `build\windows-x64\bin\Debug\` and `build\windows-x64\bin\R
 | `odysseus_tests.exe` | All automated tests. |
 
 ## Run
-`odysseus.exe` opens the game window (1280 x 720, resizable). Options: `--quit-after <seconds>` closes it automatically, `--screenshot <file.bmp>` saves the last frame, `--log-dir <folder>` writes the log elsewhere.
+`odysseus.exe` opens the game window (1280 x 720, resizable). Walk the hero with WASD, the arrow keys or a gamepad's left stick / D-pad. Options: `--quit-after <seconds>` closes it automatically, `--screenshot <file.bmp>` saves the last frame, `--log-dir <folder>` writes the log elsewhere, `--hold MoveRight:0.5:3` holds an intent between two times (scripted play).
 
 ```powershell
 .\build\windows-x64\bin\Release\odysseus.exe

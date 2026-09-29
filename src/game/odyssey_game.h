@@ -8,6 +8,8 @@
 #include "luna/engine/renderer.h"
 #include "luna/engine/tile_map.h"
 
+#include "game/hero.h"
+
 #include <cstdint>
 
 namespace odysseus::game {
@@ -23,6 +25,7 @@ public:
     void render(luna::engine::Renderer& renderer, double alpha) override;
 
     std::uint64_t ticks() const;
+    const Hero& hero() const { return hero_; }
 
 private:
     std::uint64_t ticks_ = 0;
@@ -30,8 +33,7 @@ private:
     luna::engine::Texture tiles_;
     luna::engine::TileMap map_;
     luna::engine::Camera camera_;
-    double heroX_; // the hero's feet, in world pixels
-    double heroY_;
+    Hero hero_;
 };
 
 // Window title, sizes and colours for Luna.
