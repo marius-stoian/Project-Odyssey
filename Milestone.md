@@ -4,6 +4,46 @@ A snapshot of where the assembly stands, saved at the end of each assembly sessi
 
 ---
 
+## AP-002 · 2026-09-29
+
+| | |
+|---|---|
+| Snapshot ID | **AP-002** |
+| Codex | v1.2 (checked-in copy) |
+| Source of truth | Project Odyssey.docx v1.4 referenced by Codex; external document not read this session |
+| Repository state | Local `story/US-003` based on `main` @ `4488238`; changes not pushed or merged |
+| Current milestone | **M0 Tooling ready** (2 of 4 stories Done) |
+| Next prompt | Resume **S-US-003** at Windows verification/acceptance |
+| Blocker | GitHub branch creation rejected with HTTP 403; required Windows CI and integration unavailable |
+
+### Assembly outcome
+
+US-003 implements five build targets, private layer identities, guarded headers,
+narrow include visibility and per-build validation. Supplementary GCC Debug and
+Release pass 5 named CTests, 5 doctest cases / 17 assertions, 14 compiler probes and
+six validator rejection checks. Windows/MSVC, ASan and main CI remain unverified;
+acceptor rejected completion pending those checks. US-003 stays **Blocked**.
+
+Full change tracking: [CHANGELOG.md](CHANGELOG.md). Evidence and resume instructions:
+[assembly report](docs/reports/US-003-2026-09-29.md), [plan](docs/plans/US-003.md).
+The owner requested changelog coverage for every future PR; `AGENTS.md` records it.
+
+### Decisions and Codex issues
+
+D-04, D-12 and D-13 are Decided; no newly answered decision unblocks a currently
+Blocked story. No new design requests or Codex issues. Existing CI-004 remains Open.
+M1-M6 remain To do; M0's US-004 and X-M0 remain To do. Formal US-003 teach-back is
+drafted in its plan and will enter the learning journal after acceptance.
+
+### Next
+
+1. Verify the external master Codex, DOCX charter and workbook when Drive tools are available.
+2. Enable repository write access, push the prepared story and run Windows CI.
+3. Obtain acceptance, publish teach-back, integrate and confirm main CI before marking Done.
+4. Continue S-US-004, then X-M0.
+
+---
+
 ## AP-001 · 2026-09-29
 
 | | |

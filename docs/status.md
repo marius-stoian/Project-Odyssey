@@ -9,7 +9,7 @@ Codex v1.2. Edited only by mraw-orchestrator.
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
-| S-US-003 | US-003 | M0 | To do |  |
+| S-US-003 | US-003 | M0 | Blocked | 2026-09-29 |
 | S-US-004 | US-004 | M0 | To do |  |
 | X-M0 | - | M0 | To do |  |
 | K-M1 | - | M1 | To do |  |
@@ -64,3 +64,8 @@ Codex v1.2. Edited only by mraw-orchestrator.
 | S-US-091 | US-091 | M6 | To do |  |
 | S-US-092 | US-092 | M6 | To do |  |
 | X-M6 | - | M6 | To do |  |
+
+US-003 is implemented locally but blocked at Windows verification/integration:
+GitHub branch creation returned HTTP 403 (`Resource not accessible by integration`).
+Supplementary checks do not satisfy Windows/MSVC or green-main CI requirements.
+Resume from [the assembly report](reports/US-003-2026-09-29.md).

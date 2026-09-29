@@ -67,10 +67,27 @@ Every push to GitHub, on any branch, builds Debug and Release on a Windows machi
 | `src/luna/platform/`, `src/luna/engine/` | **Luna**, our game-agnostic engine (ARC-09) |
 | `src/sim/`, `src/game/` | The Odysseus simulation and game |
 | `apps/` | The programs: odysseus.exe, odysseus_headless.exe |
-| `tests/` | doctest tests |
+| `cmake/` | Layer rules and the include validator (ADR-016) |
+| `tests/` | doctest tests; `tests/architecture/` proves the layer rules |
 | `assets/` | Game data, sprites, audio, fonts |
-| `docs/` | Codex, status, decisions, plans, learning journal |
+| `docs/` | Codex, status, decisions, plans, evidence, reports, learning journal. See [docs/README.md](docs/README.md) |
 | `docs/project/` | Project documents mirrored from Google Drive: requirements (source of truth), backlog, Codex analysis, diagrams, archive. See [docs/project/README.md](docs/project/README.md) |
 | `tools/` | Codex and workspace sync scripts |
 
 The layer rules are in [CLAUDE.md](CLAUDE.md).
+
+## Layer boundaries
+
+Each layer has its own CMake library target. A target links only the layers below it; `PUBLIC` dependencies also carry the lower layers' header paths to callers.
+
+| Target | Direct layer dependencies |
+|---|---|
+| `odysseus_core` | None |
+| `luna_platform` | `odysseus_core` |
+| `luna_engine` | `luna_platform` |
+| `odysseus_sim` | `odysseus_core` |
+| `odysseus_game` | `luna_engine`, `odysseus_sim` |
+
+The game executable links `odysseus_game`; the headless executable links `odysseus_sim`. Luna stays independent of game and simulation code, and Simulation stays independent of graphics.
+
+[cmake/LayerRules.cmake](cmake/LayerRules.cmake) gives each target only its own public headers and a private layer identity. Header guards reject forbidden consumers, including relative-path includes. [cmake/ValidateLayerIncludes.cmake](cmake/ValidateLayerIncludes.cmake) checks production files on every build for missing boundary guards, forbidden includes and SDL use outside Platform. This catches accidental boundary violations even after configuration; it does not protect against deliberately editing the enforcement. The acceptance tests are in [tests/architecture/](tests/architecture/), and the design rationale is [ADR-016](docs/adr/ADR-016-layer-boundary-enforcement.md).

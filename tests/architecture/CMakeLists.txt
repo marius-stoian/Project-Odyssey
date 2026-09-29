@@ -1,0 +1,26 @@
+# Compile probes use the real target include interfaces, without becoming part of ALL.
+function(odysseus_add_probe name layer dependency header)
+    set(source "${CMAKE_CURRENT_BINARY_DIR}/${name}.cpp")
+    file(WRITE "${source}" "#include \"${header}\"\nint architectureProbe() { return 0; }\n")
+    add_library(${name} OBJECT EXCLUDE_FROM_ALL "${source}")
+    target_link_libraries(${name} PRIVATE ${dependency})
+    target_compile_definitions(${name} PRIVATE "ODYSSEUS_LAYER_${layer}")
+    # The same warnings policy applies to valid and deliberately invalid fixtures.
+    target_compile_options(${name} PRIVATE /W4 /WX /permissive- /utf-8)
+endfunction()
+
+odysseus_add_probe(us003_game_engine GAME odysseus_game luna/engine/layer.h)
+odysseus_add_probe(us003_game_sim GAME odysseus_game sim/layer.h)
+odysseus_add_probe(us003_sim_core SIM odysseus_sim core/version.h)
+odysseus_add_probe(us003_engine_platform ENGINE luna_engine luna/platform/layer.h)
+odysseus_add_probe(us003_platform_core PLATFORM luna_platform core/version.h)
+odysseus_add_probe(us003_sim_engine SIM odysseus_sim luna/engine/layer.h)
+odysseus_add_probe(us003_sim_sdl SIM odysseus_sim SDL3/SDL.h)
+odysseus_add_probe(us003_sim_engine_absolute SIM odysseus_sim "${PROJECT_SOURCE_DIR}/src/luna/engine/layer.h")
+# Start from an actual Simulation source directory to exercise ../ bypasses.
+odysseus_add_probe(us003_sim_engine_relative SIM odysseus_sim "${PROJECT_SOURCE_DIR}/src/sim/../luna/engine/layer.h")
+odysseus_add_probe(us003_engine_sim ENGINE luna_engine sim/layer.h)
+odysseus_add_probe(us003_engine_game ENGINE luna_engine game/layer.h)
+odysseus_add_probe(us003_platform_sim PLATFORM luna_platform sim/layer.h)
+odysseus_add_probe(us003_platform_game PLATFORM luna_platform game/layer.h)
+odysseus_add_probe(us003_engine_sim_relative ENGINE luna_engine "${PROJECT_SOURCE_DIR}/src/luna/engine/../../sim/layer.h")
