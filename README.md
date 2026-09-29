@@ -9,6 +9,9 @@ Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), 
 ## Anima's Codex
 `docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When Claude Code starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and Claude commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
 
+## Project documents
+The requirements (source of truth), backlog, diagrams and archive live in [docs/project/](docs/project/README.md). Their masters are on Google Drive; [tools/sync-workspace.ps1](tools/sync-workspace.ps1) mirrors any changed file into the repo at session start.
+
 ## Team skills
 The Dominus skill (all hats; the full team is Mraw) and the Anima skill (Prompt Architect, writes the Codex) live in [.claude/skills/](.claude/skills/), so every Claude Code session opened in this repo has them, on any machine. They are copies of the owner's personal skills; when those change, copy them in again.
 
@@ -58,4 +61,16 @@ Every push to GitHub, on any branch, builds Debug and Release on a Windows machi
 3. Click in the left margin of a line to set a breakpoint, then press F5.
 
 ## Layout
-`src/` holds the five layers (core, platform, engine, sim, game), `apps/` the programs, `tests/` the doctest tests, `assets/` the game data, `docs/` everything written. The layer rules are in [CLAUDE.md](CLAUDE.md).
+| Folder | What |
+|---|---|
+| `src/core/` | Core: logging, asserts, math, random, ids |
+| `src/luna/platform/`, `src/luna/engine/` | **Luna**, our game-agnostic engine (ARC-09) |
+| `src/sim/`, `src/game/` | The Odysseus simulation and game |
+| `apps/` | The programs: odysseus.exe, odysseus_headless.exe |
+| `tests/` | doctest tests |
+| `assets/` | Game data, sprites, audio, fonts |
+| `docs/` | Codex, status, decisions, plans, learning journal |
+| `docs/project/` | Project documents mirrored from Google Drive: requirements (source of truth), backlog, Codex analysis, diagrams, archive. See [docs/project/README.md](docs/project/README.md) |
+| `tools/` | Codex and workspace sync scripts |
+
+The layer rules are in [CLAUDE.md](CLAUDE.md).

@@ -1,0 +1,3 @@
+# docs/project/ mirrors files from Google Drive byte for byte (tools/sync-workspace.ps1 compares
+# hashes), so Git must not convert their line endings.
+docs/project/** -text
