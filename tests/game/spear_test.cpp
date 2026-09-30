@@ -42,12 +42,12 @@ bool sameRect(const odysseus::core::Rect& a, const odysseus::core::Rect& b) {
     return a.x == b.x && a.y == b.y && a.width == b.width && a.height == b.height;
 }
 
-// Throws one spear of `kind` from the hero's start towards the open target and returns the hit.
+// Throws one spear of `kind` from the hero's start west towards the open target; returns the hit.
 game::SpearHit throwAtOpenTarget(const std::string& kind) {
     game::SpearRange range(game::makeTestMap(), game::loadMaterials(ODYSSEUS_DATA_DIR));
     range.addTarget(OdysseyGame::openTargetBase());
     const Vec3 heroFeet{luna::physics::Fixed::fromRatio(65, 2), luna::physics::Fixed::fromRatio(131, 4), {}};
-    range.throwSpear(heroFeet, game::Facing::South, range.materials().spear(kind));
+    range.throwSpear(heroFeet, game::Facing::West, range.materials().spear(kind));
     for (int tick = 0; tick < 100; ++tick) {
         const auto hits = range.update();
         if (!hits.empty()) {
@@ -61,11 +61,15 @@ game::SpearHit throwAtOpenTarget(const std::string& kind) {
 } // namespace
 
 TEST_CASE("US-029 Throw") {
-    // The hero starts facing South; the straw target stands 8 tiles south.
+    // The straw target stands 8 tiles west of the hero's start; one step left faces it.
     OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
     luna::engine::RecordingRenderer renderer;
     odyssey.start(renderer);
-    CHECK(odyssey.hero().facing() == game::Facing::South);
+    odyssey.update(holding(Intent::MoveLeft));
+    REQUIRE(odyssey.hero().facing() == game::Facing::West);
+    const double distance = toDouble(luna::engine::metresFromPixels(odyssey.hero().feetX()) - OdysseyGame::openTargetBase().x);
+    MESSAGE("target distance: ", distance, " m");
+    CHECK(distance > 7.8);
     odyssey.update(pressing(Intent::Interact));
     REQUIRE(odyssey.range().spears().size() == 1);
 
@@ -159,10 +163,10 @@ TEST_CASE("US-029 Materials are validated") {
 }
 
 TEST_CASE("US-029 Blocked") {
-    // The second target stands 8 tiles west, right behind a boulder.
+    // The second target stands 8 tiles north, right behind a boulder.
     OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
-    odyssey.update(holding(Intent::MoveLeft)); // turn to face West (one step)
-    REQUIRE(odyssey.hero().facing() == game::Facing::West);
+    odyssey.update(holding(Intent::MoveUp)); // turn to face North (one step)
+    REQUIRE(odyssey.hero().facing() == game::Facing::North);
     odyssey.update(pressing(Intent::Interact));
     for (int tick = 0; tick < 60 && odyssey.range().allHits().empty(); ++tick) {
         odyssey.update(Intents{});
@@ -172,7 +176,7 @@ TEST_CASE("US-029 Blocked") {
     MESSAGE("hit ", std::string(game::hitKindName(hit.kind)), " at (", toDouble(hit.point.x), ", ", toDouble(hit.point.y), ", ",
             toDouble(hit.point.z), ")");
     CHECK(hit.kind == HitKind::Rock);
-    CHECK(std::abs(toDouble(hit.point.x) - 26.0) < 0.001); // the boulder's east face (tile 25 spans x 25..26)
+    CHECK(std::abs(toDouble(hit.point.y) - 26.0) < 0.001); // the boulder's south face (tile row 25 spans y 25..26)
     // The spear stopped there, and the target is unharmed.
     const auto& spear = odyssey.range().spears().front();
     CHECK(spear.state == SpearState::Stuck);

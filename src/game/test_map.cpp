@@ -41,8 +41,8 @@ luna::engine::TileMap makeTestMap() {
     }
     // A boulder on the east path, 4 tiles from the start: walking right runs into it (US-024).
     map.set(centre + 4, centre, rock);
-    // A boulder on the west path, right in front of the second straw target (US-029 Blocked).
-    map.set(centre - 7, centre, rock);
+    // A boulder on the north path, right in front of the second straw target (US-029 Blocked).
+    map.set(centre, centre - 7, rock);
     return map;
 }
 

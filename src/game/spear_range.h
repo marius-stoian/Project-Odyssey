@@ -63,8 +63,8 @@ public:
 
     // Throws a spear from the hero's hand. It aims at the nearest target the hero faces
     // (within 45 degrees and maxAimDistance), solving the launch angle with drag; with no
-    // target in front it throws straight ahead at 15 degrees.
-    void throwSpear(luna::physics::Vec3 heroFeet, Facing facing, const SpearKind& kind);
+    // target in front it throws straight ahead at 15 degrees. Returns the target aimed at.
+    std::optional<std::size_t> throwSpear(luna::physics::Vec3 heroFeet, Facing facing, const SpearKind& kind);
 
     // One simulation tick (1/20 s): every flying spear moves; hits are reported.
     std::vector<SpearHit> update();

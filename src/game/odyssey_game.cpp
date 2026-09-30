@@ -32,11 +32,11 @@ Vec3 blended(const FlyingSpear& spear, double alpha) {
 
 // The hero starts at the crossing, feet at (32.5, 32.75) m.
 Vec3 OdysseyGame::openTargetBase() {
-    return {Fixed::fromRatio(65, 2), Fixed::fromRatio(163, 4), luna::physics::kFixedZero}; // (32.5, 40.75)
+    return {Fixed::fromRatio(49, 2), Fixed::fromRatio(131, 4), luna::physics::kFixedZero}; // (24.5, 32.75)
 }
 
 Vec3 OdysseyGame::blockedTargetBase() {
-    return {Fixed::fromRatio(49, 2), Fixed::fromRatio(65, 2), luna::physics::kFixedZero}; // (24.5, 32.5)
+    return {Fixed::fromRatio(65, 2), Fixed::fromRatio(49, 2), luna::physics::kFixedZero}; // (32.5, 24.5)
 }
 
 OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory)
@@ -56,8 +56,15 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         const Vec3 feet{luna::engine::metresFromPixels(hero_.feetX()), luna::engine::metresFromPixels(hero_.feetY()),
                         luna::physics::kFixedZero};
         const SpearKind& kind = range_.materials().spear(nextSpearIsFlint_ ? "flint" : "wooden");
-        range_.throwSpear(feet, hero_.facing(), kind);
+        const auto target = range_.throwSpear(feet, hero_.facing(), kind);
         nextSpearIsFlint_ = !nextSpearIsFlint_;
+        // Frame the throw: the camera moves to halfway between the hero and where the spear
+        // goes, so the whole arc is on screen. 2 seconds, then it follows the hero again.
+        const Vec3 goal = target ? range_.targets()[*target].base : feet + facingDirection(hero_.facing()) * Fixed::fromInt(6);
+        const luna::engine::ScreenPoint goalPixels = luna::engine::groundShadow(goal);
+        framingX_ = (hero_.feetX() + goalPixels.x) / 2.0;
+        framingY_ = (hero_.feetY() + goalPixels.y) / 2.0;
+        framingTicks_ = 2 * 20;
         core::logInfo(std::format("Threw a {} spear facing {}", kind.name, facingName(hero_.facing())));
     }
     for (const SpearHit& hit : range_.update()) {
@@ -68,7 +75,12 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
                                   luna::engine::toDouble(luna::physics::length(hit.velocity)),
                                   luna::engine::toDouble(hit.damage)));
     }
-    camera_.follow(hero_.feetX(), hero_.feetY());
+    if (framingTicks_ > 0) {
+        --framingTicks_;
+        camera_.follow(framingX_, framingY_);
+    } else {
+        camera_.follow(hero_.feetX(), hero_.feetY());
+    }
 }
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {

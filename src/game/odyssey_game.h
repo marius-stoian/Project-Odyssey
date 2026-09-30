@@ -31,8 +31,9 @@ public:
     const Hero& hero() const { return hero_; }
     const SpearRange& range() const { return range_; }
 
-    // Where the demo's straw targets stand (US-029), in metres: one 8 tiles south of the
-    // hero's start, one 8 tiles west behind a boulder.
+    // Where the demo's straw targets stand (US-029), in metres: one 8 tiles west of the
+    // hero's start (the view is 15 tiles wide, so the whole throw fits on screen), one
+    // 8 tiles north behind a boulder.
     static luna::physics::Vec3 openTargetBase();
     static luna::physics::Vec3 blockedTargetBase();
 
@@ -46,6 +47,10 @@ private:
     Hero hero_;
     SpearRange range_;
     bool nextSpearIsFlint_ = true; // Interact alternates flint and wooden spears
+    // After a throw the camera frames the hero and the target together for a while.
+    int framingTicks_ = 0;
+    double framingX_ = 0.0;
+    double framingY_ = 0.0;
 };
 
 // Window title, sizes and colours for Luna.

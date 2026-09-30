@@ -92,13 +92,14 @@ std::optional<std::size_t> SpearRange::targetInFront(Vec3 hand, Facing facing) c
     return best;
 }
 
-void SpearRange::throwSpear(Vec3 heroFeet, Facing facing, const SpearKind& kind) {
+std::optional<std::size_t> SpearRange::throwSpear(Vec3 heroFeet, Facing facing, const SpearKind& kind) {
     const Vec3 ahead = facingDirection(facing);
     // The hand is at shoulder height, a little in front of the body.
     const Vec3 hand = heroFeet + Vec3{luna::physics::kFixedZero, luna::physics::kFixedZero, config_.handHeight} +
                       ahead * Fixed::fromRatio(3, 10);
     luna::physics::Projectile body{hand, {}, kind.mass, kSpearDragArea};
-    if (const auto target = targetInFront(hand, facing)) {
+    const auto target = targetInFront(hand, facing);
+    if (target) {
         const Vec3 aimPoint = targets_[*target].base + Vec3{luna::physics::kFixedZero, luna::physics::kFixedZero, config_.targetAimHeight};
         const auto angle = luna::physics::aimLaunchAngle(body, air_, aimPoint, kind.throwSpeed);
         body.velocity = luna::physics::launchVelocity(hand, aimPoint, kind.throwSpeed, angle ? *angle : luna::physics::degrees(30));
@@ -109,6 +110,7 @@ void SpearRange::throwSpear(Vec3 heroFeet, Facing facing, const SpearKind& kind)
         spears_.erase(spears_.begin()); // the oldest spear is picked up
     }
     spears_.push_back({kind, body, hand, luna::physics::normalized(body.velocity), SpearState::Flying});
+    return target;
 }
 
 std::vector<SpearHit> SpearRange::update() {
