@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Assembly plan / requirements | **v1.9** / **v1.9** |
-| Repository | US-139 merged into `qa` and pushed; hosted CI to confirm |
-| Milestone | **M2d Content and combat**: 6 of 12 Done; US-139 verified locally |
+| Repository | `qa` pushed; hosted CI green (merge 00c0095) |
+| Milestone | **M2d Content and combat**: 6 of 12 Done; US-139 Done |
 | Next | Confirm CI on qa, then **S-US-140** (arc ballistics) |
 
 ### What happened
@@ -24,7 +24,7 @@
 | ID | Milestone | Stories done | State |
 |---|---|---|---|
 | M0-M2c | Tooling to Level editor | 34 / 34 | Done |
-| M2d | Content and combat | 6 / 12 | US-139 awaiting CI |
+| M2d | Content and combat | 6 / 12 | US-139 Done, CI green |
 | M3-M6 | | 0 / 28 | Waits for your word after M2d |
 | | **MVP total** | **40 / 74** | |
 

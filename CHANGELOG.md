@@ -15,7 +15,7 @@ its PR changes rather than leaving an outdated description.
 
 ## US-139: Mouse aiming (Avengers) — 2026-10-01
 
-**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+**State:** Done. Merged into `qa`, pushed; hosted CI green (merge 00c0095).
 
 - Luna Engine: new intent `Attack` (left mouse button, or scripted with `--hold Attack`); `--aim` flag (same as `--point`).
 - Game: while a catalog weapon is held and the pointer is over the picture, the hero faces the pointer (nearest of 8) and Attack swings or shoots toward it at the exact angle; Interact still attacks along the facing. Dotted aim line (to the weapon's range) and a crosshair (red beyond range).
