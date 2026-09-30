@@ -44,19 +44,34 @@ NameList loadNameList(const std::filesystem::path& file) {
     return {requireNames(json, file, "female"), requireNames(json, file, "male")};
 }
 
-std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& living, core::Pcg32& random) {
+namespace {
+
+// How many people ever carried this name, with or without an ordinal.
+int usesOf(const std::string& base, const std::vector<Person>& everyone) {
+    return static_cast<int>(std::count_if(everyone.begin(), everyone.end(), [&base](const Person& p) {
+        return p.name == base || p.name.rfind(base + " the ", 0) == 0;
+    }));
+}
+
+std::string ordinal(int number) {
+    static const char* const kWords[] = {"", "", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"};
+    return number <= 10 ? kWords[number] : std::to_string(number) + "th";
+}
+
+} // namespace
+
+std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& everyone, core::Pcg32& random) {
     const std::vector<std::string>& pool = sex == Sex::Female ? names.female : names.male;
-    // Try a few random names for one nobody alive has; a clan can still repeat names later.
+    // Try a few random names for one nobody has carried; otherwise reuse one with an ordinal.
     std::string name;
     for (int attempt = 0; attempt < 8; ++attempt) {
         name = pool[random.below(static_cast<std::uint32_t>(pool.size()))];
-        const bool taken = std::any_of(living.begin(), living.end(),
-                                       [&name](const Person& p) { return p.alive && p.name == name; });
-        if (!taken) {
-            break;
+        if (usesOf(name, everyone) == 0) {
+            return name;
         }
     }
-    return name;
+    const int uses = usesOf(name, everyone);
+    return uses == 0 ? name : name + " the " + ordinal(uses + 1);
 }
 
 void giveRandomTraits(Person& person, core::Pcg32& random) {

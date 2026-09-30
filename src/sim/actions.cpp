@@ -35,9 +35,16 @@ ActionConfig loadActionConfig(const std::filesystem::path& file) {
     const nlohmann::json& yield = json.at("gatherYield");
     config.gatherYield = {requireInt(yield, file, "spring", 0, 100), requireInt(yield, file, "summer", 0, 100),
                           requireInt(yield, file, "autumn", 0, 100), requireInt(yield, file, "winter", 0, 100)};
+    if (!json.contains("forageDaily") || !json.at("forageDaily").is_object()) {
+        throw DataError(file, "forageDaily", "must be an object with spring, summer, autumn and winter");
+    }
+    const nlohmann::json& forage = json.at("forageDaily");
+    config.forageDaily = {requireInt(forage, file, "spring", 0, 100'000), requireInt(forage, file, "summer", 0, 100'000),
+                          requireInt(forage, file, "autumn", 0, 100'000), requireInt(forage, file, "winter", 0, 100'000)};
     config.gatherSnack = requireInt(json, file, "gatherSnack", 0, 100);
     config.huntSuccessPercent = requireInt(json, file, "huntSuccessPercent", 0, 100);
     config.huntYield = requireInt(json, file, "huntYield", 0, 1000);
+    config.gameDaily = requireInt(json, file, "gameDaily", 0, 1000);
     config.mammothPerMille = requireInt(json, file, "mammothPerMille", 0, 1000);
     config.mammothYield = requireInt(json, file, "mammothYield", 0, 10'000);
     config.mammothDeathPercent = requireInt(json, file, "mammothDeathPercent", 0, 100);

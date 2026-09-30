@@ -341,3 +341,21 @@ In `talk`, `Person& from = people_[speaker];` is a reference: another name for t
 **Try it (15 minutes).** Set `gossipPercent` to 100 in `social.json` and run `odysseus_sim_tests.exe --test-case="US-013 Gifts*"`: how many memories are heard second-hand now? Then change `minorMemoryDays` to 7.
 
 **Check yourself.** In `talk`, what would go wrong if we wrote `Person from = people_[speaker];` (without the `&`)?
+
+## US-014: Write a readable chronicle (2026-09-30)
+
+**What we built.** The clan's story writes itself: couples form, children are born and named (sometimes after a parent, "Joro the Second"), the old die, mammoths are brought down, feuds break out, and hard winters empty the food store. Every event goes into the chronicle with its importance; `odysseus_headless --days 2800 --chronicle` prints a century of the ones worth telling.
+
+**The idea: std::string and formatting.** Each sentence is built with `std::format`, which fills the `{}` gaps in order:
+
+```cpp
+std::format("{} was born to {} and {}.", child.name, father.name, mother.name)
+```
+
+`std::string` owns its text and grows as needed, so we can join pieces with `+` without worrying about memory: `describe(entry.date) + ": " + entry.text` gives "Spring, year 3: Ura was born to Tok and Maa."
+
+**Where to look.** [src/sim/chronicle.cpp:21](../src/sim/chronicle.cpp) (`formatEntry`), `World::giveBirth` and `World::die` in [src/sim/world.cpp](../src/sim/world.cpp), [assets/data/sim/life.json](../assets/data/sim/life.json).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --days 2800 --chronicle > seed7.txt` and read it like a book: who is the clan's hero? Then try `--threshold 80` for only the biggest events.
+
+**Check yourself.** Why do newborns wait in a separate vector until the loop over `people_` has finished?

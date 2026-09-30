@@ -61,6 +61,12 @@ struct Person {
     std::vector<int> opinions;      // opinion of every person, by id: -100..100
     std::int64_t lastGiftDay = -1;  // one gift a day at most
     std::int64_t lastTheftDay = -1; // thieves wait a few days between thefts
+    int mother = -1;       // PersonIds, -1 = unknown (the founders) or none
+    int father = -1;
+    int partner = -1;
+    int pregnantDays = 0;  // 0 = not expecting
+    int childFather = -1;  // the father of the child she is expecting
+    std::int64_t lastBirthDay = -1;
 
     int ageYears(int daysPerYear) const { return ageDays / daysPerYear; }
     bool has(Trait trait) const { return (traits & (1U << static_cast<unsigned>(trait))) != 0; }

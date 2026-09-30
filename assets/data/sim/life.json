@@ -1,0 +1,18 @@
+{
+  "adultAgeYears": 16,
+  "pairOpinion": 50,
+  "courtingBonus": 30,
+  "pairPercent": 10,
+  "fertileFromYears": 16,
+  "fertileToYears": 40,
+  "conceptionPerMille": 25,
+  "pregnancyDays": 21,
+  "childbirthDeathPercent": 3,
+  "birthSpacingYears": 1,
+  "famineStorePressure": 80,
+  "oldAgeFromYears": 45,
+  "oldAgePerMillePerYear": 1,
+  "feudOpinion": -50,
+  "parentChildOpinion": 60,
+  "griefFeeling": -70
+}

@@ -8,7 +8,7 @@ const char* causeName(CauseOfDeath cause) {
     case CauseOfDeath::Starvation: return "starvation";
     case CauseOfDeath::Cold: return "the cold";
     case CauseOfDeath::OldAge: return "old age";
-    case CauseOfDeath::Hunting: return "a hunting accident";
+    case CauseOfDeath::Hunting: return "a mammoth's tusks";
     case CauseOfDeath::Childbirth: return "childbirth";
     }
     return "?";

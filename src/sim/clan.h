@@ -30,8 +30,10 @@ struct NameList {
 
 NameList loadNameList(const std::filesystem::path& file);
 
-// Picks a name for a new person, preferring names nobody alive carries.
-std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& living, core::Pcg32& random);
+// Picks a name for a new person, preferring names nobody has carried yet. When every name has
+// been used, an old one returns with an ordinal, "Mira the Second", so the chronicle never
+// mixes two people up.
+std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& everyone, core::Pcg32& random);
 
 // One or two random traits (never Brave and Timid together).
 void giveRandomTraits(Person& person, core::Pcg32& random);
