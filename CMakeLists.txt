@@ -152,7 +152,8 @@ add_library(odysseus_game STATIC
     src/game/sword.cpp
     src/game/enemy.cpp
     src/game/art.cpp
-    src/game/level.cpp)
+    src/game/level.cpp
+    src/game/editor.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -276,7 +277,8 @@ add_executable(odysseus_game_tests
     tests/game/hero_test.cpp
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
-    tests/game/level_test.cpp)
+    tests/game/level_test.cpp
+    tests/game/modes_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_game_tests)
@@ -336,3 +338,9 @@ add_executable(odysseus_atlas apps/atlas/main.cpp)
 target_link_libraries(odysseus_atlas PRIVATE odysseus_game)
 target_compile_definitions(odysseus_atlas PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_ASSETS_DIR="${PROJECT_SOURCE_DIR}/assets")
 odysseus_apply_settings(odysseus_atlas)
+
+# --- End-to-end: Game mode and Editor mode in the real window (US-123) ---
+add_test(NAME "US-123 Modes in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us123
+            -P "${PROJECT_SOURCE_DIR}/tests/game/run_modes.cmake")
+set_tests_properties("US-123 Modes in the game" PROPERTIES LABELS window TIMEOUT 120)

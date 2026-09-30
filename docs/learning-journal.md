@@ -590,3 +590,24 @@ Saving is the mirror image, with one more rule: never leave a half-written file.
 **Try it (15 minutes).** Copy `assets/levels/valley.json`, change `"heroStart"` and the goblin's `"hp"`, and run `odysseus.exe --level <your copy>`. Then misspell a tile name and read the log.
 
 **Check yourself.** Why is the ground saved as runs (`["grass", 30]`) instead of one name per cell?
+
+## US-123: Game mode and Editor mode (2026-09-30)
+
+**What we built.** F2 stops the world and opens the Editor; F1 plays the level again. The game now has two states, and what it does each tick depends on which one it is in.
+
+**The idea: state machines with `enum class`.** A state machine is a value that says "what mode we are in" plus rules for moving between modes:
+
+```cpp
+enum class Mode { Game, Editor };
+
+if (intents.pressed(Intent::ModeEditor)) switchMode(Mode::Editor);
+if (mode_ == Mode::Editor) { editor_.update(intents); return; } // the world stands still
+```
+
+`enum class` (not plain `enum`) keeps the names inside `Mode::` and refuses to mix with numbers, so `mode_ == 1` does not compile. All the work of *changing* state lives in one function, `switchMode`: entering the Editor points its camera where the game looked; leaving it rebuilds the play state from the level.
+
+**Where to look.** `OdysseyGame::switchMode` and `resetPlay` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); [src/game/editor.cpp](../src/game/editor.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe`, press F2, pan around with WASD and the right mouse button, then F1. Throw a spear, press F2 and F1 again: the level starts fresh.
+
+**Check yourself.** Why does going back to Game rebuild the whole play state instead of carrying on where the player was?

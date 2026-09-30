@@ -9,6 +9,7 @@
 #include "luna/engine/tile_map.h"
 
 #include "game/art.h"
+#include "game/editor.h"
 #include "game/enemy.h"
 #include "game/hero.h"
 #include "game/level.h"
@@ -22,6 +23,9 @@
 namespace odysseus::game {
 
 enum class WeaponType { Sword, Bow };
+
+// Game mode plays the level; Editor mode changes it (M2c, US-123).
+enum class Mode { Game, Editor };
 
 // Project Odyssey as Luna sees it. It grows story by story: a window now, a walking
 // character by the end of M1, the living clan in M3.
@@ -42,6 +46,11 @@ public:
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
     const std::filesystem::path& levelFile() const { return levelFile_; }
+    Mode mode() const { return mode_; }
+    // F1 and F2 do this; `--editor` starts in the Editor. Back in Game, the play state is
+    // rebuilt from the level as edited (the hero at the hero start).
+    void switchMode(Mode mode);
+    Editor& editor() { return editor_; }
 
     // Where the demo's straw targets stand (US-029), in metres: one 8 tiles west of the
     // hero's start (the view is 15 tiles wide, so the whole throw fits on screen), one
@@ -68,6 +77,13 @@ private:
     std::filesystem::path spritesDirectory_;
     Sword sword_;
     std::vector<Enemy> enemies_;
+    Editor editor_;
+    Mode mode_ = Mode::Game;
+    luna::engine::Texture uiSheet_;
+
+    void populate();  // the level's targets and enemies join the play state
+    void resetPlay(); // the whole play state again, from the level
+    void drawModeLabel(luna::engine::Renderer& renderer) const;
     WeaponType currentWeapon_ = WeaponType::Bow; // the spear demo (US-029) is the default; Shift switches to the sword
     bool nextSpearIsFlint_ = true; // Interact alternates flint and wooden spears
     // After a throw the camera frames the hero and the target together for a while.
