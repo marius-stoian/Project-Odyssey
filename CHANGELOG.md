@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-120 / S-US-120: Real art in the game (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M2c.
+
+- Engine: PNG reading and writing (stb from vcpkg, ADR-018) and image operations (crop, box-filter fit, mirror, background removal, blob finding).
+- Game: `art.{h,cpp}` cuts the owner's sheets by `assets/sprites/cuts.json` into atlases, loads them, and gives the game its pictures (programmer art when the atlas is missing or damaged, with the file and reason logged). The hero, the ground and the demo enemy now come from the owner's art.
+- Program: `odysseus_atlas` (writes `assets/sprites/atlas/`, `--preview` contact sheet, `--find` to measure a sheet).
+- Data: the owner's sheets committed unchanged; `cuts.json` (74 character frames, 16 tiles); the atlas.
+- Tests: `tests/game/art_test.cpp` (5 cases); ctest 21/21 in Debug and Release, zero warnings.
+
+
 ## US-115 / S-US-115: Tell the clan's story in episodes (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2b.

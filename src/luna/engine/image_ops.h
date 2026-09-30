@@ -1,0 +1,43 @@
+#pragma once
+
+#include "boundary.h"
+
+#include "image.h"
+
+#include "core/geometry.h"
+
+#include <vector>
+
+namespace luna::engine {
+
+// Small, pure picture operations used to turn artists' sheets into game-ready frames.
+
+// The part of `source` inside `area` (clipped to the picture).
+Image crop(const Image& source, const odysseus::core::Rect& area);
+
+// `source` shrunk (or grown) to fit inside a width x height box, keeping its proportions, by
+// averaging every source pixel that falls on a target pixel (a box filter). Transparent pixels
+// do not darken the edges. With `bottom` the picture stands on the bottom row (a character's
+// feet); otherwise it is centred. The rest of the box is transparent.
+Image fitInto(const Image& source, int width, int height, bool bottom);
+
+// Left and right swapped: a west-facing frame from an east-facing one.
+Image mirrored(const Image& source);
+
+// Makes the background transparent: every pixel connected to the picture's border whose
+// colour is within `tolerance` of the top-left pixel's colour (the sheet's background).
+void removeBackground(Image& image, int tolerance);
+
+// The smallest rectangle holding every pixel that is not transparent (empty when none is).
+odysseus::core::Rect opaqueBounds(const Image& image);
+
+// Connected groups of pixels (8 neighbours) inside `area` whose colour differs from
+// `background` by more than `tolerance`, as bounding boxes in reading order (top to bottom,
+// then left to right). Groups smaller than `minSize` pixels on both sides are left out.
+std::vector<odysseus::core::Rect> findBlobs(const Image& image, const odysseus::core::Rect& area, Color background, int tolerance,
+                                            int minSize);
+
+// How far apart two colours are: the largest difference of red, green and blue.
+int colourDistance(Color a, Color b);
+
+} // namespace luna::engine

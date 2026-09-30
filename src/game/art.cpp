@@ -1,0 +1,305 @@
+#include "game/art.h"
+
+#include "game/placeholder_art.h"
+
+#include "luna/engine/image_io.h"
+#include "luna/engine/image_ops.h"
+#include "sim/data.h"
+#include "sim/json_data.h"
+
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <format>
+#include <fstream>
+#include <tuple>
+
+namespace odysseus::game {
+
+using luna::engine::Image;
+using nlohmann::json;
+
+namespace {
+
+core::Rect cell(int index, int width, int height) {
+    return {index % kAtlasColumns * width, index / kAtlasColumns * height, width, height};
+}
+
+// Frames laid out in rows of kAtlasColumns cells.
+Image pack(const std::vector<Image>& frames, int width, int height) {
+    const int rows = std::max(1, (static_cast<int>(frames.size()) + kAtlasColumns - 1) / kAtlasColumns);
+    Image atlas(kAtlasColumns * width, rows * height);
+    for (std::size_t i = 0; i < frames.size(); ++i) {
+        const core::Rect at = cell(static_cast<int>(i), width, height);
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                atlas.set(at.x + x, at.y + y, frames[i].get(x, y));
+            }
+        }
+    }
+    return atlas;
+}
+
+} // namespace
+
+core::Rect Atlas::characterFrame(int index) const {
+    return cell(index, kAtlasCharacterWidth, kAtlasCharacterHeight);
+}
+
+core::Rect Atlas::tileFrame(int index) const {
+    return cell(index, kAtlasTileSize, kAtlasTileSize);
+}
+
+CutList loadCuts(const std::filesystem::path& file) {
+    const json data = sim::readJsonFile(file);
+    CutList list;
+    list.tolerance = sim::requireInt(data, file, "tolerance", 0, 255);
+    list.tileInset = sim::requireInt(data, file, "tileInset", 0, 64);
+    if (!data.contains("cuts") || !data.at("cuts").is_array()) {
+        throw sim::DataError(file, "cuts", "must be a list of frames");
+    }
+    std::map<std::string, CutKind> known;
+    for (std::size_t i = 0; i < data.at("cuts").size(); ++i) {
+        const json& entry = data.at("cuts").at(i);
+        const std::string where = std::format("cuts[{}]", i);
+        Cut cut;
+        if (!entry.contains("name") || !entry.at("name").is_string() || entry.at("name").get<std::string>().empty()) {
+            throw sim::DataError(file, where + ".name", "must be a name in quotes");
+        }
+        cut.name = entry.at("name").get<std::string>();
+        if (known.contains(cut.name)) {
+            throw sim::DataError(file, where + ".name", "\"" + cut.name + "\" is listed twice");
+        }
+        const std::string kind = entry.value("kind", std::string());
+        if (kind != "tile" && kind != "character") {
+            throw sim::DataError(file, where + ".kind", "must be \"tile\" or \"character\"");
+        }
+        cut.kind = kind == "tile" ? CutKind::Tile : CutKind::Character;
+        if (entry.contains("mirrorOf")) {
+            cut.mirrorOf = entry.at("mirrorOf").get<std::string>();
+            if (!known.contains(cut.mirrorOf) || known.at(cut.mirrorOf) != cut.kind) {
+                throw sim::DataError(file, where + ".mirrorOf", "\"" + cut.mirrorOf + "\" must be an earlier frame of the same kind");
+            }
+        } else {
+            if (!entry.contains("sheet") || !entry.at("sheet").is_string()) {
+                throw sim::DataError(file, where + ".sheet", "must be the file name of a sheet in assets/sprites");
+            }
+            cut.sheet = entry.at("sheet").get<std::string>();
+            const json& rect = entry.value("rect", json());
+            if (!rect.is_array() || rect.size() != 4 || !std::all_of(rect.begin(), rect.end(), [](const json& v) { return v.is_number_integer() && v.get<int>() >= 0; }) ||
+                rect.at(2).get<int>() == 0 || rect.at(3).get<int>() == 0) {
+                throw sim::DataError(file, where + ".rect", "must be [x, y, width, height] in whole pixels, width and height above 0");
+            }
+            cut.rect = {rect.at(0).get<int>(), rect.at(1).get<int>(), rect.at(2).get<int>(), rect.at(3).get<int>()};
+        }
+        known[cut.name] = cut.kind;
+        list.cuts.push_back(cut);
+    }
+    return list;
+}
+
+Atlas cutAtlas(const CutList& list, const std::filesystem::path& spritesFolder) {
+    std::map<std::string, Image> sheets;
+    std::map<std::string, Image> made;
+    std::vector<Image> characters;
+    std::vector<Image> tiles;
+    Atlas atlas;
+    for (const Cut& cut : list.cuts) {
+        Image frame(0, 0);
+        if (!cut.mirrorOf.empty()) {
+            frame = luna::engine::mirrored(made.at(cut.mirrorOf));
+        } else {
+            if (!sheets.contains(cut.sheet)) {
+                std::string error;
+                auto sheet = luna::engine::loadPng(spritesFolder / cut.sheet, error);
+                if (!sheet) {
+                    throw sim::DataError(spritesFolder / cut.sheet, "(file)", error);
+                }
+                sheets.emplace(cut.sheet, std::move(*sheet));
+            }
+            const Image& sheet = sheets.at(cut.sheet);
+            if (cut.kind == CutKind::Tile) {
+                // Tiles fill their square: trim the drawn frame around them, then scale.
+                const int inset = list.tileInset;
+                const Image inner = luna::engine::crop(sheet, {cut.rect.x + inset, cut.rect.y + inset, cut.rect.width - 2 * inset, cut.rect.height - 2 * inset});
+                frame = luna::engine::fitInto(inner, kAtlasTileSize, kAtlasTileSize, false);
+            } else {
+                // Characters stand on a coloured sheet: clear the background, keep only the figure.
+                Image figure = luna::engine::crop(sheet, cut.rect);
+                luna::engine::removeBackground(figure, list.tolerance);
+                figure = luna::engine::crop(figure, luna::engine::opaqueBounds(figure));
+                frame = luna::engine::fitInto(figure, kAtlasCharacterWidth, kAtlasCharacterHeight, true);
+            }
+        }
+        made.emplace(cut.name, frame);
+        if (cut.kind == CutKind::Tile) {
+            atlas.tileCells[cut.name] = static_cast<int>(tiles.size());
+            tiles.push_back(frame);
+        } else {
+            atlas.characterCells[cut.name] = static_cast<int>(characters.size());
+            characters.push_back(frame);
+        }
+    }
+    atlas.characters = pack(characters, kAtlasCharacterWidth, kAtlasCharacterHeight);
+    atlas.tiles = pack(tiles, kAtlasTileSize, kAtlasTileSize);
+    return atlas;
+}
+
+void saveAtlas(const Atlas& atlas, const std::filesystem::path& folder) {
+    std::filesystem::create_directories(folder);
+    if (!luna::engine::savePng(atlas.characters, folder / "characters.png") || !luna::engine::savePng(atlas.tiles, folder / "tiles.png")) {
+        throw sim::DataError(folder, "(files)", "the atlas pictures cannot be written");
+    }
+    const json index{{"atlasVersion", 1},
+                     {"characterSize", {kAtlasCharacterWidth, kAtlasCharacterHeight}},
+                     {"tileSize", kAtlasTileSize},
+                     {"columns", kAtlasColumns},
+                     {"characters", atlas.characterCells},
+                     {"tiles", atlas.tileCells}};
+    std::ofstream(folder / "atlas.json", std::ios::binary | std::ios::trunc) << index.dump(1) << '\n';
+}
+
+std::optional<Atlas> loadAtlas(const std::filesystem::path& folder, std::string& problem) {
+    Atlas atlas;
+    try {
+        const json index = sim::readJsonFile(folder / "atlas.json");
+        if (index.value("atlasVersion", 0) != 1 || index.value("columns", 0) != kAtlasColumns) {
+            problem = (folder / "atlas.json").string() + ": atlasVersion or columns is not what this game reads";
+            return std::nullopt;
+        }
+        atlas.characterCells = index.at("characters").get<std::map<std::string, int>>();
+        atlas.tileCells = index.at("tiles").get<std::map<std::string, int>>();
+    } catch (const std::exception& error) {
+        problem = error.what();
+        return std::nullopt;
+    }
+    for (const auto& [name, image, width, height, cells] :
+         {std::tuple{"characters.png", &atlas.characters, kAtlasCharacterWidth, kAtlasCharacterHeight, &atlas.characterCells},
+          std::tuple{"tiles.png", &atlas.tiles, kAtlasTileSize, kAtlasTileSize, &atlas.tileCells}}) {
+        std::string error;
+        auto picture = luna::engine::loadPng(folder / name, error);
+        if (!picture) {
+            problem = (folder / name).string() + " " + error;
+            return std::nullopt;
+        }
+        for (const auto& [frame, index] : *cells) {
+            const core::Rect at = cell(index, width, height);
+            if (index < 0 || at.x + at.width > picture->width() || at.y + at.height > picture->height()) {
+                problem = std::format("{}: frame \"{}\" (cell {}) lies outside the picture", (folder / "atlas.json").string(), frame, index);
+                return std::nullopt;
+            }
+        }
+        *image = std::move(*picture);
+    }
+    return atlas;
+}
+
+Image contactSheet(const Atlas& atlas) {
+    constexpr int kZoom = 3;
+    constexpr int kGap = 6;
+    auto section = [&](const Image& source, const std::map<std::string, int>& cells, int w, int h) {
+        const int count = static_cast<int>(cells.size());
+        const int cols = kAtlasColumns;
+        const int rows = std::max(1, (count + cols - 1) / cols);
+        Image out(cols * (w * kZoom + kGap) + kGap, rows * (h * kZoom + kGap) + kGap);
+        for (int y = 0; y < out.height(); ++y) {
+            for (int x = 0; x < out.width(); ++x) {
+                const bool light = ((x / 8) + (y / 8)) % 2 == 0;
+                out.set(x, y, light ? luna::engine::Color{200, 200, 200} : luna::engine::Color{150, 150, 150});
+            }
+        }
+        for (int i = 0; i < count; ++i) {
+            const core::Rect at = cell(i, w, h);
+            const int ox = kGap + (i % cols) * (w * kZoom + kGap);
+            const int oy = kGap + (i / cols) * (h * kZoom + kGap);
+            for (int y = 0; y < h * kZoom; ++y) {
+                for (int x = 0; x < w * kZoom; ++x) {
+                    const auto c = source.get(at.x + x / kZoom, at.y + y / kZoom);
+                    if (c.alpha > 0) out.set(ox + x, oy + y, c);
+                }
+            }
+        }
+        return out;
+    };
+    const Image people = section(atlas.characters, atlas.characterCells, kAtlasCharacterWidth, kAtlasCharacterHeight);
+    const Image ground = section(atlas.tiles, atlas.tileCells, kAtlasTileSize, kAtlasTileSize);
+    Image sheet(std::max(people.width(), ground.width()), people.height() + ground.height());
+    for (int y = 0; y < people.height(); ++y)
+        for (int x = 0; x < people.width(); ++x) sheet.set(x, y, people.get(x, y));
+    for (int y = 0; y < ground.height(); ++y)
+        for (int x = 0; x < ground.width(); ++x) sheet.set(x, people.height() + y, ground.get(x, y));
+    return sheet;
+}
+
+namespace {
+
+void paste(Image& target, int left, int top, const Image& source, const core::Rect& from) {
+    for (int y = 0; y < from.height; ++y) {
+        for (int x = 0; x < from.width; ++x) {
+            target.set(left + x, top + y, source.get(from.x + x, from.y + y));
+        }
+    }
+}
+
+// The same figure in red: how the enemy looks for a moment after a hit.
+Image redTint(const Image& source) {
+    Image out = source;
+    for (int y = 0; y < out.height(); ++y) {
+        for (int x = 0; x < out.width(); ++x) {
+            const auto c = out.get(x, y);
+            if (c.alpha > 0) {
+                out.set(x, y, {static_cast<std::uint8_t>(std::min(255, c.red / 2 + 150)), static_cast<std::uint8_t>(c.green / 4),
+                               static_cast<std::uint8_t>(c.blue / 4), c.alpha});
+            }
+        }
+    }
+    return out;
+}
+
+ArtSet programmerArt(std::string problem) {
+    ArtSet art;
+    art.heroSheet = makeCharacterSheet();
+    art.tileStrip = makeTileSheet();
+    art.enemy = luna::engine::crop(art.heroSheet, {0, 0, kCharacterWidth, kCharacterHeight});
+    art.enemyHit = luna::engine::crop(makePropSheet(), kEnemyHitFrame);
+    art.problem = std::move(problem);
+    return art;
+}
+
+} // namespace
+
+ArtSet makeArtSet(const std::filesystem::path& spritesFolder) {
+    std::string problem;
+    const auto atlas = loadAtlas(spritesFolder / "atlas", problem);
+    if (!atlas) {
+        return programmerArt(problem);
+    }
+    // The owner's sheets show a hero from the front (S), the side (E) and the back (N); the
+    // other side (W) is mirrored. Diagonals use the side view they move towards.
+    constexpr const char* kView[] = {"S", "W", "W", "W", "N", "E", "E", "E"}; // by Facing
+    constexpr int kSheetFrame[] = {0, 2, 4, 6};                               // walk frames used
+    static_assert(sizeof(kSheetFrame) / sizeof(kSheetFrame[0]) == kWalkFrames);
+    const std::vector<std::string> ground = {"grass", "path", "stone", "water"}; // TileKind order
+    try {
+        ArtSet art;
+        art.ownArt = true;
+        art.heroSheet = Image(kWalkFrames * kCharacterWidth, static_cast<int>(Facing::Count) * kCharacterHeight);
+        for (int facing = 0; facing < static_cast<int>(Facing::Count); ++facing) {
+            for (int frame = 0; frame < kWalkFrames; ++frame) {
+                const int index = atlas->characterCells.at(std::format("hero.{}.{}", kView[facing], kSheetFrame[frame]));
+                paste(art.heroSheet, frame * kCharacterWidth, facing * kCharacterHeight, atlas->characters, atlas->characterFrame(index));
+            }
+        }
+        art.tileStrip = Image(static_cast<int>(ground.size()) * kTileSize, kTileSize);
+        for (std::size_t i = 0; i < ground.size(); ++i) {
+            paste(art.tileStrip, static_cast<int>(i) * kTileSize, 0, atlas->tiles, atlas->tileFrame(atlas->tileCells.at(ground[i])));
+        }
+        art.enemy = luna::engine::crop(atlas->characters, atlas->characterFrame(atlas->characterCells.at("goblin")));
+        art.enemyHit = redTint(art.enemy);
+        return art;
+    } catch (const std::out_of_range&) {
+        return programmerArt((spritesFolder / "atlas" / "atlas.json").string() + ": a frame the game needs is missing (hero, goblin, grass, path, stone or water)");
+    }
+}
+
+} // namespace odysseus::game

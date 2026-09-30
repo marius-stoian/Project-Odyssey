@@ -2,6 +2,7 @@
 
 #include "core/log.h"
 #include "core/version.h"
+#include "game/art.h"
 #include "game/placeholder_art.h"
 #include "game/test_map.h"
 #include "luna/engine/physics_view.h"
@@ -42,7 +43,7 @@ Vec3 OdysseyGame::blockedTargetBase() {
 OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory)
     : map_(makeTestMap()), camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
       hero_(map_.pixelWidth() / 2.0 + kTileSize / 2.0, map_.pixelHeight() / 2.0 + kTileSize * 0.75),
-      range_(map_, loadMaterials(dataDirectory)),
+      range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       enemy_(hero_.feetX() + 2 * kTileSize, hero_.feetY(), 100) { // two tiles east of the hero
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     range_.addTarget(openTargetBase());
@@ -118,9 +119,18 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 }
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {
-    characters_ = renderer.createTexture(makeCharacterSheet());
-    tiles_ = renderer.createTexture(makeTileSheet());
-    props_ = renderer.createTexture(makePropSheet());
+    // The owner's art when its atlas loads, else the programmer art (US-120).
+    const ArtSet art = makeArtSet(spritesDirectory_);
+    if (art.ownArt) {
+        core::logInfo("Art: the owner's atlas");
+    } else {
+        core::logWarning("Art: programmer art, because " + art.problem);
+    }
+    characters_ = renderer.createTexture(art.heroSheet);
+    tiles_ = renderer.createTexture(art.tileStrip);
+    props_ = renderer.createTexture(makePropSheet()); // texture 2: tests find props by this number
+    enemyTexture_ = renderer.createTexture(art.enemy);
+    enemyHitTexture_ = renderer.createTexture(art.enemyHit);
 }
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
@@ -149,11 +159,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     if (enemy_.isAlive()) {
         const double left = enemy_.feetX() - kCharacterWidth / 2.0;
         const double top = enemy_.feetY() - kCharacterHeight;
-        if (enemy_.isFlashing()) {
-            renderer.draw(props_, kEnemyHitFrame, screen(left, top));
-        } else {
-            renderer.draw(characters_, luna::engine::Rect{0, 0, kCharacterWidth, kCharacterHeight}, screen(left, top));
-        }
+        renderer.draw(enemy_.isFlashing() ? enemyHitTexture_ : enemyTexture_, {0, 0, kCharacterWidth, kCharacterHeight}, screen(left, top));
 
         const double barLeft = enemy_.feetX() - kHealthBarEmpty.width / 2.0;
         const double barTop = top - 6;

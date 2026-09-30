@@ -27,6 +27,7 @@ endforeach()
 find_package(doctest CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Stb REQUIRED) # PNG reading and writing (ADR-018)
 
 # Content (JSON, sprites) lives in assets/; programs find it here during development.
 set(ODYSSEUS_DATA_DIR "${PROJECT_SOURCE_DIR}/assets/data")
@@ -102,8 +103,12 @@ add_library(luna_engine STATIC
     src/luna/engine/camera.cpp
     src/luna/engine/tile_map.cpp
     src/luna/engine/collision.cpp
-    src/luna/engine/physics_view.cpp)
+    src/luna/engine/physics_view.cpp
+    src/luna/engine/image_ops.cpp
+    src/luna/engine/image_io.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
+# PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
+target_include_directories(luna_engine SYSTEM PRIVATE ${Stb_INCLUDE_DIR})
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
 
@@ -144,7 +149,8 @@ add_library(odysseus_game STATIC
     src/game/materials.cpp
     src/game/spear_range.cpp
     src/game/sword.cpp
-    src/game/enemy.cpp)
+    src/game/enemy.cpp
+    src/game/art.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -265,7 +271,8 @@ set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
 add_executable(odysseus_game_tests
     tests/main.cpp
     tests/game/hero_test.cpp
-    tests/game/spear_test.cpp)
+    tests/game/spear_test.cpp
+    tests/game/art_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_game_tests)
@@ -319,3 +326,9 @@ add_test(NAME "US-115 Both views"
     COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=story
             -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
 set_tests_properties("US-115 Both views" PROPERTIES TIMEOUT 600)
+
+# --- US-120: the atlas cutter, turning the owner's sprite sheets into game-ready atlases ---
+add_executable(odysseus_atlas apps/atlas/main.cpp)
+target_link_libraries(odysseus_atlas PRIVATE odysseus_game)
+target_compile_definitions(odysseus_atlas PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_ASSETS_DIR="${PROJECT_SOURCE_DIR}/assets")
+odysseus_apply_settings(odysseus_atlas)

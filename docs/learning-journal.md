@@ -528,3 +528,21 @@ Data first, wording last: the groups and the scores are just numbers; only the f
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --story` and read three episodes. Then set `"maxPerCentury"` under `"episodes"` in `assets/data/sim/story.json` to 10 and see which episodes survive.
 
 **Check yourself.** Why can `findEpisodes` be called twice on the same world and always give the same answer, and what would break that?
+
+## US-120: Real art in the game (2026-09-30)
+
+**What we built.** Your sprite sheets are pictures for people, with labels and dark backgrounds. A small program, `odysseus_atlas`, cuts each figure and tile out by rectangles listed in `assets/sprites/cuts.json`, clears the background, shrinks them to the game's sizes (32x48 people, 32x32 tiles) and packs them into two atlas pictures. The game draws those.
+
+**The idea: reading binary files; structs of rectangles.** A PNG is bytes, not text: we read it whole into a `std::vector<unsigned char>` and let stb decode it into pixels. Every cut is described by a tiny struct, a rectangle:
+
+```cpp
+struct Rect { int x, y, width, height; };
+```
+
+Everything else (crop, fit, mirror) is a function from one picture and a rectangle to another picture. Small structs plus pure functions keep the art pipeline easy to test: the tests build a fake sheet in memory and check every pixel.
+
+**Where to look.** `cutAtlas` in [src/game/art.cpp](../src/game/art.cpp); `fitInto` and `removeBackground` in [src/luna/engine/image_ops.cpp](../src/luna/engine/image_ops.cpp).
+
+**Try it (15 minutes).** Run `odysseus_atlas.exe --preview preview.png` from the build folder and open the picture. Then run `odysseus_atlas.exe --find "assets/sprites/Retro RPG Heroes, Terrain & Monsters Sheet.png" 12 40 1515 180 12 45` and see the 20 heroes of that sheet measured.
+
+**Check yourself.** Why does `fitInto` weight each colour by its alpha before averaging, and what would the edges of a figure look like if it did not?

@@ -23,3 +23,4 @@ From Project Odyssey.docx v1.3, section 7.5. New ADRs get their own file here (A
 | [ADR-017](ADR-017-luna-physics.md) | Own deterministic 3D physics in Luna (Luna Physics), fixed-point 32.32 math, SI units (1 tile = 1 m). |
 
 Luna (ARC-09, ARC-10): the Platform, Physics and Engine layers form our game-agnostic engine in src/luna/.
+- [ADR-018](ADR-018-stb-image-and-own-ui.md): PNG with stb, and our own editor UI (M2c)
