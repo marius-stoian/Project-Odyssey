@@ -15,6 +15,7 @@ enum class Sex { Female, Male };
 
 enum class CauseOfDeath { None, Starvation, Cold, OldAge, Hunting, Childbirth };
 
+// "starvation", "the cold", ... as used in the chronicle: "Tok died of starvation."
 const char* causeName(CauseOfDeath cause);
 
 // One member of the clan. Plain data: the systems (needs, AI, memory) are functions that
@@ -27,8 +28,10 @@ struct Person {
     bool alive = true;
     CauseOfDeath causeOfDeath = CauseOfDeath::None;
     Needs needs;
-    int daysAtZeroHunger = 0; // consecutive days that started with Hunger at 0
-    int daysAtZeroWarmth = 0;
+    int daysAtZeroHunger = 0; // consecutive day starts with Hunger at 0
+    int daysAtZeroWarmth = 0; // the same for Warmth (only winter cold kills)
+
+    int ageYears(int daysPerYear) const { return ageDays / daysPerYear; }
 };
 
 } // namespace odysseus::sim

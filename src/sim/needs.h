@@ -38,4 +38,18 @@ struct NeedsConfig {
 
 NeedsConfig loadNeedsConfig(const std::filesystem::path& file);
 
+// How much a need drops in hour `hour` (1..24) of a day with daily rate `dailyRate`. The
+// 24 hourly drops add up to exactly the daily rate (30 a day -> 1, 1, 2, 1, 1, 2, ...), so
+// whole numbers never drift: after H hours the total is dailyRate x H / 24, rounded down.
+int hourlyDrop(int dailyRate, int hour);
+
+// The daily rate for a need today: Warmth drops faster in winter.
+int dailyRate(const NeedsConfig& config, Need need, bool winter);
+
+// One game hour passes: every need drops by its share of the daily rate, never below 0.
+void decayForHour(Needs& needs, const NeedsConfig& config, bool winter, int hour);
+
+// Something satisfies a need (a meal, sleep, a fire, a talk): it rises, capped at the maximum.
+void satisfy(Needs& needs, Need need, int amount, int maximum);
+
 } // namespace odysseus::sim

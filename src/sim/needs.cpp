@@ -1,6 +1,9 @@
 #include "sim/needs.h"
 
+#include "sim/calendar.h"
 #include "sim/json_data.h"
+
+#include <algorithm>
 
 namespace odysseus::sim {
 
@@ -12,6 +15,28 @@ const char* needName(Need need) {
     case Need::Social: return "Social";
     default: return "?";
     }
+}
+
+int hourlyDrop(int dailyRate, int hour) {
+    return dailyRate * hour / kHoursPerDay - dailyRate * (hour - 1) / kHoursPerDay;
+}
+
+int dailyRate(const NeedsConfig& config, Need need, bool winter) {
+    if (need == Need::Warmth && winter) {
+        return config.winterWarmthDecay;
+    }
+    return config.dailyDecay[static_cast<std::size_t>(need)];
+}
+
+void decayForHour(Needs& needs, const NeedsConfig& config, bool winter, int hour) {
+    for (std::size_t i = 0; i < kNeedCount; ++i) {
+        const Need need = static_cast<Need>(i);
+        needs[need] = std::max(0, needs[need] - hourlyDrop(dailyRate(config, need, winter), hour));
+    }
+}
+
+void satisfy(Needs& needs, Need need, int amount, int maximum) {
+    needs[need] = std::min(maximum, needs[need] + amount);
 }
 
 NeedsConfig loadNeedsConfig(const std::filesystem::path& file) {
