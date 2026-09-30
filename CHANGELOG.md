@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M5: The vertical slice - US-050..US-055, US-060..US-063, US-070..US-073, US-081, US-082 (Avengers) - 2026-10-01
+
+**State:** Built and compiled (Debug); simulation tests written, not run (owner: no testing); merged into local `qa`.
+
+- Simulation: `HeroData` (assets/data/hero/*.json, validated with file and field), `HeroLife` (imprint, presets, comforts, focus and crossroads, mantle, professions, crafting quality, apprenticeship, dominion, barter and debts, sacred fire, aging, win and lose, save and load).
+- Game and Luna: `RunFlow` screens and context menu, `GameSettings`, F3 overlay, fullscreen switching, `--new-game`.
+- D-32 records the choices. Tests: `tests/sim/hero_test.cpp`. Evidence `docs/evidence/US-050`; exit review `docs/gates/M5.md`.
 ## M4: Region, tools and saves — US-040, US-041, US-042, US-043, US-080, US-083 (Avengers) — 2026-10-01
 
 **State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing); merged into local `qa`.
