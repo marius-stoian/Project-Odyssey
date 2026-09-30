@@ -3,12 +3,14 @@
 #include "boundary.h"
 
 #include "actions.h"
+#include "memory.h"
 #include "needs.h"
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace odysseus::sim {
 
@@ -55,6 +57,10 @@ struct Person {
     int huntPractice = 0;
     Action action = Action::Rest; // what they are doing this hour
     Decision lastDecision;
+    std::vector<Memory> memories;   // oldest first (US-013)
+    std::vector<int> opinions;      // opinion of every person, by id: -100..100
+    std::int64_t lastGiftDay = -1;  // one gift a day at most
+    std::int64_t lastTheftDay = -1; // thieves wait a few days between thefts
 
     int ageYears(int daysPerYear) const { return ageDays / daysPerYear; }
     bool has(Trait trait) const { return (traits & (1U << static_cast<unsigned>(trait))) != 0; }

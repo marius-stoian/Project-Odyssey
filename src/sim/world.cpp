@@ -3,6 +3,7 @@
 #include "core/hash.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <format>
 
 namespace odysseus::sim {
@@ -29,6 +30,7 @@ SimConfig loadSimConfig(const std::filesystem::path& dataDirectory) {
     config.actions = loadActionConfig(dataDirectory / "sim" / "actions.json");
     config.clan = loadClanConfig(dataDirectory / "sim" / "clan.json");
     config.names = loadNameList(dataDirectory / "sim" / "names.json");
+    config.social = loadSocialConfig(dataDirectory / "sim" / "social.json");
     return config;
 }
 
@@ -38,8 +40,12 @@ World::World(std::uint64_t seed, SimConfig config)
       peopleRandom_(seed, static_cast<std::uint64_t>(Stream::People)),
       decisionRandom_(seed, static_cast<std::uint64_t>(Stream::Decisions)),
       huntRandom_(seed, static_cast<std::uint64_t>(Stream::Hunting)),
+      socialRandom_(seed, static_cast<std::uint64_t>(Stream::Social)),
       people_(makeStartingClan(config_.clan, config_.names, calendar_.daysPerYear(), peopleRandom_)),
       food_(config_.clan.startingFood) {
+    for (Person& person : people_) {
+        person.opinions.assign(people_.size(), 0); // strangers to nobody, friends of nobody yet
+    }
     startDay();
     decideAll(1);
 }
@@ -100,6 +106,8 @@ Situation World::situationOf(const Person& person) const {
     situation.someoneToTalkTo = std::any_of(people_.begin(), people_.end(), [&person](const Person& other) {
         return other.alive && other.id != person.id && other.action != Action::Sleep;
     });
+    situation.canGiveGift = situation.someoneToTalkTo && person.lastGiftDay != today();
+    situation.canSteal = food_ > 0 && (person.lastTheftDay < 0 || today() - person.lastTheftDay >= config_.social.theftCooldownDays);
     return situation;
 }
 
@@ -155,7 +163,35 @@ void World::doAction(Person& person) {
         break;
     case Action::Talk:
         satisfy(person.needs, Need::Social, actions.talkPerHour, maximum);
+        if (Person* partner = favouriteAwake(person)) {
+            talk(person.id, partner->id);
+        }
         break;
+    case Action::GiveGift:
+        if (Person* friendly = favouriteAwake(person)) {
+            giveGift(person.id, friendly->id);
+            satisfy(person.needs, Need::Social, actions.talkPerHour, maximum);
+        }
+        break;
+    case Action::Steal: {
+        // A handful from the store, eaten in secret; someone may see it.
+        const int taken = std::min(food_, config_.social.theftMeals);
+        food_ -= taken;
+        person.lastTheftDay = today();
+        satisfy(person.needs, Need::Hunger, taken * config_.needs.mealValue / 2, maximum);
+        if (taken > 0 && socialRandom_.chance(static_cast<std::uint32_t>(config_.social.witnessPercent))) {
+            std::vector<int> awake;
+            for (const Person& other : people_) {
+                if (other.alive && other.id != person.id && other.action != Action::Sleep) {
+                    awake.push_back(other.id);
+                }
+            }
+            if (!awake.empty()) {
+                recordTheft(person.id, awake[socialRandom_.below(static_cast<std::uint32_t>(awake.size()))]);
+            }
+        }
+        break;
+    }
     case Action::Rest:
         satisfy(person.needs, Need::Energy, actions.restPerHour, maximum);
         break;
@@ -183,6 +219,91 @@ void World::eatTogether() {
         --food_;
         satisfy(person->needs, Need::Hunger, config_.needs.mealValue, config_.needs.maximum);
     }
+}
+
+int World::opinion(int who, int about) const {
+    const Person& person = people_[static_cast<std::size_t>(who)];
+    return person.opinions[static_cast<std::size_t>(about)];
+}
+
+void World::changeOpinion(Person& who, int about, int change) {
+    int& value = who.opinions[static_cast<std::size_t>(about)];
+    value = std::clamp(value + change, -100, 100);
+}
+
+Person* World::favouriteAwake(const Person& person) {
+    // The awake person they like best; among equals the social stream picks.
+    std::vector<Person*> best;
+    int bestOpinion = -101;
+    for (Person& other : people_) {
+        if (!other.alive || other.id == person.id || other.action == Action::Sleep) {
+            continue;
+        }
+        const int value = person.opinions[static_cast<std::size_t>(other.id)];
+        if (value > bestOpinion) {
+            bestOpinion = value;
+            best.clear();
+        }
+        if (value == bestOpinion) {
+            best.push_back(&other);
+        }
+    }
+    if (best.empty()) {
+        return nullptr;
+    }
+    return best[socialRandom_.below(static_cast<std::uint32_t>(best.size()))];
+}
+
+void World::giveGift(int giver, int receiver) {
+    Person& from = people_[static_cast<std::size_t>(giver)];
+    Person& to = people_[static_cast<std::size_t>(receiver)];
+    from.lastGiftDay = today();
+    remember(to.memories, {giver, receiver, MemoryKind::Gift, today(), config_.social.giftFeeling, false, false},
+             config_.social.memoryLimit);
+    changeOpinion(to, giver, config_.social.giftOpinion);
+}
+
+void World::recordTheft(int thief, int witness) {
+    Person& seer = people_[static_cast<std::size_t>(witness)];
+    // The clan's store was robbed: the object of a theft is the thief's own clan (-1).
+    remember(seer.memories, {thief, -1, MemoryKind::Theft, today(), config_.social.theftFeeling, true, false},
+             config_.social.memoryLimit);
+    changeOpinion(seer, thief, config_.social.theftOpinion);
+}
+
+bool World::talk(int speaker, int listener) {
+    Person& from = people_[static_cast<std::size_t>(speaker)];
+    Person& to = people_[static_cast<std::size_t>(listener)];
+    satisfy(to.needs, Need::Social, config_.actions.talkPerHour / 2, config_.needs.maximum);
+    changeOpinion(from, listener, config_.social.talkOpinion);
+    changeOpinion(to, speaker, config_.social.talkOpinion);
+    const int chance = from.has(Trait::Talkative) ? config_.social.talkativeGossipPercent : config_.social.gossipPercent;
+    if (!socialRandom_.chance(static_cast<std::uint32_t>(chance))) {
+        return false;
+    }
+    // Gossip: the strongest memory the listener lacks (and is not about the listener).
+    const Memory* story = nullptr;
+    for (const Memory& memory : from.memories) {
+        if (memory.subject == listener) {
+            continue;
+        }
+        const bool known = std::any_of(to.memories.begin(), to.memories.end(),
+                                       [&memory](const Memory& theirs) { return theirs.sameEvent(memory); });
+        if (!known && (story == nullptr || std::abs(memory.feeling) > std::abs(story->feeling))) {
+            story = &memory;
+        }
+    }
+    if (story == nullptr) {
+        return false;
+    }
+    Memory copy = *story;
+    copy.feeling /= 2; // "slightly weaker" (GD-03): heard, not lived
+    copy.secondHand = true;
+    const int subject = copy.subject;
+    const int opinionChange = copy.feeling / 4;
+    remember(to.memories, copy, config_.social.memoryLimit);
+    changeOpinion(to, subject, opinionChange);
+    return true;
 }
 
 const Person* World::findPerson(const std::string& nameOrId) const {
@@ -232,6 +353,7 @@ void World::startDay() {
             continue;
         }
         ++person.ageDays;
+        forgetOldMemories(person.memories, today(), config_.social.minorMemoryDays);
         checkSurvival(person, winterNight);
     }
 }
@@ -246,6 +368,7 @@ std::uint64_t World::hash() const {
     hasher.add(peopleRandom_.state());
     hasher.add(decisionRandom_.state());
     hasher.add(huntRandom_.state());
+    hasher.add(socialRandom_.state());
     hasher.add(hour_);
     hasher.add(food_);
     for (const Person& person : people_) {
@@ -266,6 +389,20 @@ std::uint64_t World::hash() const {
         hasher.add(person.gatherPractice);
         hasher.add(person.huntPractice);
         hasher.add(static_cast<int>(person.action));
+        hasher.add(person.lastGiftDay);
+        hasher.add(person.lastTheftDay);
+        for (const Memory& memory : person.memories) {
+            hasher.add(memory.subject);
+            hasher.add(memory.object);
+            hasher.add(static_cast<int>(memory.kind));
+            hasher.add(memory.day);
+            hasher.add(memory.feeling);
+            hasher.add(memory.major);
+            hasher.add(memory.secondHand);
+        }
+        for (const int value : person.opinions) {
+            hasher.add(value);
+        }
     }
     for (const ChronicleEntry& entry : chronicle_.entries()) {
         hasher.add(entry.date.day);

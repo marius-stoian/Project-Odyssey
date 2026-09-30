@@ -25,13 +25,14 @@ struct SimConfig {
     ActionConfig actions;
     ClanConfig clan;
     NameList names;
+    SocialConfig social;
 };
 
 SimConfig loadSimConfig(const std::filesystem::path& dataDirectory);
 
 // Separate random streams per system (Charter rule 6): adding a random call in one system
 // never changes the numbers another system sees.
-enum class Stream : std::uint64_t { Weather = 1, People = 2, Decisions = 3, Hunting = 4 };
+enum class Stream : std::uint64_t { Weather = 1, People = 2, Decisions = 3, Hunting = 4, Social = 5 };
 
 // How important chronicle entries are (0..100): deaths and births are always worth telling.
 inline constexpr int kImportanceDeath = 90;
@@ -71,6 +72,18 @@ public:
     // alone use it (US-011 "without eating, sleeping, warmth or company").
     void setDailyLife(bool enabled) { dailyLife_ = enabled; }
 
+    // Social events (US-013). The AI's actions call these; tests may too.
+    // A gift: the receiver remembers who gave it and likes the giver more.
+    void giveGift(int giver, int receiver);
+    // A theft seen by a witness: a major, bitter memory about the thief.
+    void recordTheft(int thief, int witness);
+    // Two people talk: both feel better and like each other a little more, and the speaker
+    // may pass on one memory the listener lacks, as a weaker copy (gossip). Returns true
+    // if a memory was passed on.
+    bool talk(int speaker, int listener);
+    // What `who` thinks of `about`, -100..100.
+    int opinion(int who, int about) const;
+
     // One number summarising the entire state; equal worlds have equal hashes (ADR-011).
     std::uint64_t hash() const;
 
@@ -81,6 +94,9 @@ private:
     void eatTogether();
     void decideAll(int nextHour);
     void practise(int& practice, int& skill);
+    void changeOpinion(Person& who, int about, int change);
+    Person* favouriteAwake(const Person& person);
+    std::int64_t today() const { return date().day; }
     void checkSurvival(Person& person, bool winter);
     void die(Person& person, CauseOfDeath cause);
 
@@ -92,6 +108,7 @@ private:
     core::Pcg32 peopleRandom_;
     core::Pcg32 decisionRandom_;
     core::Pcg32 huntRandom_;
+    core::Pcg32 socialRandom_;
     int hour_ = 1; // the hour of the day now starting (1..24)
     bool dailyLife_ = true;
     int temperature_ = 0;

@@ -19,6 +19,8 @@ std::array<bool, kActionCount> availableActions(const Situation& situation, cons
     available[static_cast<std::size_t>(Action::Sleep)] = true;
     available[static_cast<std::size_t>(Action::WarmByFire)] = situation.fireLit;
     available[static_cast<std::size_t>(Action::Talk)] = situation.someoneToTalkTo;
+    available[static_cast<std::size_t>(Action::GiveGift)] = daylight && situation.canGiveGift;
+    available[static_cast<std::size_t>(Action::Steal)] = situation.canSteal;
     available[static_cast<std::size_t>(Action::Rest)] = true;   // always possible: nobody freezes
     available[static_cast<std::size_t>(Action::Wander)] = true; // the last resort
     return available;
@@ -57,6 +59,10 @@ std::array<int, kActionCount> scoreActions(const Person& person, const Situation
     set(Action::Sleep, 3 * tiredness + (night ? config.nightSleepBonus : 0));
     set(Action::WarmByFire, 3 * cold + (winter ? 10 : 0));
     set(Action::Talk, 2 * loneliness + (person.has(Trait::Talkative) ? trait : 0));
+    // Kind people give small gifts (a carved bead, the best berries) when they feel close
+    // to others; Greedy people steal from the store when they are hungry.
+    set(Action::GiveGift, person.has(Trait::Kind) ? 15 + loneliness : 0);
+    set(Action::Steal, person.has(Trait::Greedy) ? 11 + 2 * hunger : 0); // greed tempts even the fed
     set(Action::Rest, 10 + tiredness / 2 + (person.has(Trait::Timid) ? 5 : 0) - (person.has(Trait::Diligent) ? 5 : 0));
     set(Action::Wander, 5);
     for (std::size_t i = 0; i < kActionCount; ++i) {
