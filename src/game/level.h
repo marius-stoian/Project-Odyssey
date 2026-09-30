@@ -27,6 +27,7 @@ struct CharacterKindDef {
     int swordDamage = 5;
     bool enemy = true;      // the hero's sword can hit it
     double reach = 1.5;     // metres: how far its strike back reaches (US-131)
+    bool animal = false;    // a creature of animals.json (US-137): one side-view picture from the content atlas; rames is its name there
 };
 
 struct Definitions {

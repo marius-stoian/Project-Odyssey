@@ -122,6 +122,31 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
         }
         definitions.characters.push_back(kind);
     }
+    // The animals (US-137) are character kinds too: placed, named, hit and struck back by like the others.
+    const std::filesystem::path animalsFile = dataDirectory / "animals.json";
+    if (std::filesystem::exists(animalsFile)) {
+        const json animals = sim::readJsonFile(animalsFile);
+        if (!animals.contains("animals") || !animals.at("animals").is_array()) {
+            throw DataError(animalsFile, "animals", "must be a list of animals");
+        }
+        for (std::size_t i = 0; i < animals.at("animals").size(); ++i) {
+            const json& entry = animals.at("animals").at(i);
+            const std::string where = std::format("animals[{}]", i);
+            CharacterKindDef kind;
+            kind.name = text(entry, animalsFile, "name");
+            kind.frames = text(entry, animalsFile, "frame");
+            kind.directions = 1;
+            kind.hp = whole(entry, animalsFile, "hp", 1, 9999);
+            kind.swordDamage = whole(entry, animalsFile, "strikeDamage", 0, 999);
+            kind.enemy = entry.value("enemy", false);
+            kind.reach = entry.value("reach", 1.5);
+            kind.animal = true;
+            if (definitions.character(kind.name) != nullptr) {
+                throw DataError(animalsFile, where + ".name", "\"" + kind.name + "\" is already a character kind");
+            }
+            definitions.characters.push_back(kind);
+        }
+    }
     // Weapon names, so a level can be checked when it is read (catalogs.cpp checks the rest).
     const std::filesystem::path weaponsFile = dataDirectory / "weapons.json";
     if (std::filesystem::exists(weaponsFile)) {

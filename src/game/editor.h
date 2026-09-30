@@ -2,6 +2,7 @@
 
 #include "boundary.h"
 
+#include "game/animals.h"
 #include "game/art.h"
 #include "game/editor_history.h"
 #include "game/level.h"
@@ -33,6 +34,7 @@ struct EditorTextures {
     const ArtSet* art = nullptr;
     const WeaponArt* weapons = nullptr; // the weapon icons, for pickups and the weapon palette (US-134)
     const PlantArt* plants = nullptr;   // the plant pictures, for the plant palette and placed plants (US-136)
+    const AnimalArt* animals = nullptr; // the animal pictures, for the character palette and placed animals (US-137)
 };
 
 // What a left click on the map does.
@@ -70,6 +72,9 @@ public:
     bool gridShown() const { return grid_; }
     // The character kind the Place tool puts down (an index into Definitions::characters).
     int kind() const { return kind_; }
+    // The character palette shows 12 kinds to a page (the first page is the twelve characters, then the animals).
+    static constexpr int kKindsPerPage = 12;
+    int kindPage() const { return kindPage_; }
     void setKind(int kind) { kind_ = kind; }
     // Weapon pickups (US-134): the weapons the palette offers, in order (names that are in weapons.json
     // or built in); the Weapon tool places the chosen one.
@@ -146,6 +151,7 @@ private:
     const PlacedPlant* findPlant(int id) const;
     void changePlants(const std::string& what, std::vector<PlacedPlant> after, int nextIdAfter);
     void buildPlantPalette();
+    void buildCharacterPalette();
     void changePickups(const std::string& what, std::vector<PlacedPickup> after, int nextIdAfter);
     void removeSelected();
     void buildProperties();
@@ -196,6 +202,8 @@ private:
     std::vector<std::string> weaponNames_;
     std::unique_ptr<luna::engine::Panel> plantPalette_;
     int plant_ = 0;
+    int kindPage_ = 0;
+    int kindPageWanted_ = 0;
     int plantPage_ = 0;
     int plantPageWanted_ = 0; // a page button sets this; the palette is rebuilt at the start of the next tick
     int weapon_ = 0;

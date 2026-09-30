@@ -157,6 +157,8 @@ void OdysseyGame::populate() {
         enemy.name = placed.name;
         enemy.frames = kind->frames;
         enemy.directions = kind->directions;
+        enemy.animal = kind->animal;
+        enemy.kindName = kind->name;
         enemy.facing = placed.facing;
         enemy.swordDamage = placed.swordDamage;
         enemy.reachMetres = kind->reach;
@@ -933,6 +935,14 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         for (const char* page : {"plants-small", "plants-tall", "trees"}) {
             if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) plantArt_.pages[page] = renderer.createTexture(found->second);
         }
+        if (const auto animals = content_.pictures.find("animals"); animals != content_.pictures.end()) {
+            animalArt_.page = renderer.createTexture(animals->second);
+            animalArt_.mirrored = renderer.createTexture(luna::engine::mirrored(animals->second));
+            animalArt_.pageWidth = animals->second.width();
+            for (const AnimalDef& animal : catalogs_.animals) {
+                if (const auto rect = content_.rect(animal.frame)) animalArt_.sources[animal.name] = *rect;
+            }
+        }
         for (const PlantDef& plant : catalogs_.plants) {
             const auto frame = content_.frames.find(plant.frame);
             const auto rect = content_.rect(plant.frame);
@@ -941,7 +951,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         for (const WeaponDef& weapon : catalogs_.weapons) {
             if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
         }
-        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_});
+        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_});
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
@@ -988,6 +998,11 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     // Placed characters who are not enemies stand where they were put (M2c, D-19).
     for (const PlacedCharacter& placed : bystanders_) {
         if (const CharacterKindDef* kind = definitions_.character(placed.kind)) {
+            if (kind->animal) {
+                const luna::engine::Point feet = screen(placed.feet.x, placed.feet.y);
+                drawAnimal(renderer, animalArt_, kind->name, feet.x, feet.y, placed.facing, false);
+                continue;
+            }
             renderer.draw(charactersAtlas_, art_.frame(kind->frames, kind->directions, placed.facing, 0),
                           screen(placed.feet.x - kCharacterWidth / 2.0, placed.feet.y - kCharacterHeight));
         }
@@ -1000,8 +1015,13 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         }
         const double left = enemy.feetX() - kCharacterWidth / 2.0;
         const double top = enemy.feetY() - kCharacterHeight;
-        renderer.draw(enemy.isFlashing() ? charactersHitAtlas_ : charactersAtlas_, art_.frame(enemy.frames, enemy.directions, enemy.facing, 0),
-                      screen(left, top));
+        if (enemy.animal) {
+            const luna::engine::Point feet = screen(enemy.feetX(), enemy.feetY());
+            drawAnimal(renderer, animalArt_, enemy.kindName, feet.x, feet.y, enemy.facing, enemy.isFlashing());
+        } else {
+            renderer.draw(enemy.isFlashing() ? charactersHitAtlas_ : charactersAtlas_, art_.frame(enemy.frames, enemy.directions, enemy.facing, 0),
+                          screen(left, top));
+        }
 
         const double barLeft = enemy.feetX() - kHealthBarEmpty.width / 2.0;
         const double barTop = top - 6;

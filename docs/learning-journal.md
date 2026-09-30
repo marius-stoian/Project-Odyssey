@@ -907,3 +907,21 @@ A second idea hides in the trees: a tree is not a tile, but it must block like o
 **Try it (15 minutes).** Run `odysseus.exe --level docs/evidence/US-136/levels/garden.json`, cut down a flower with the sword (click toward it), and watch where it comes back 15 seconds later. Restart the level and cut it again: it comes back in the very same place. Then change the seed `core::Pcg32(1, 5)` in `populatePlants` to `Pcg32(2, 5)`, build, and see it move.
 
 **Check yourself.** Why does the regrow test run the same scenario twice and expect the same position, and what would make it fail?
+
+
+## US-137: Animals in the Editor (2026-10-01)
+
+**The idea: data-driven behaviour flags.** A wolf and a deer are both in `animals.json`; the only difference the game needs is one word:
+
+```json
+{"name":"grey wolf","frame":"grey wolf","hp":80,"enemy":true,"strikeDamage":10,"reach":1.5},
+{"name":"deer","frame":"deer","hp":80,"enemy":false,"strikeDamage":0,"reach":1.5}
+```
+
+At the start the game reads every line into a `CharacterKindDef` and, for each placed animal, asks `if (kind->enemy)`: an enemy becomes an `Enemy` (it can be hit, strikes back, dies); anything else is a bystander that is simply drawn. No `if (name == "wolf")` anywhere. To make the deer dangerous you change `false` to `true` in a text file. A *flag* in the data turns a whole behaviour on or off, so the code stays short and the designer stays in control. The same trick made the 50 animals cost almost no new game logic: they are just more character kinds.
+
+**Where to look.** The animals part of `loadDefinitions` in [src/game/level.cpp](../src/game/level.cpp); `OdysseyGame::populate` (where `kind->enemy` decides) in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `drawAnimal` in [src/game/animals.cpp](../src/game/animals.cpp).
+
+**Try it (10 minutes).** Open `docs/evidence/US-137/levels/animals.json` with `odysseus.exe --level`, hit the deer: nothing. Edit `assets/data/animals.json`, set the deer's `enemy` to `true` and `strikeDamage` to `12`, build, and hit it again.
+
+**Check yourself.** Why is it better that the wolf's danger is a `true` in a file than an `if` about wolves in the code?

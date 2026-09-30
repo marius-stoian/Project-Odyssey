@@ -111,25 +111,7 @@ void Editor::buildPanels() {
         tile.iconSource = {i * kTileSize + 7, 7, kPaletteCell - 4, kPaletteCell - 4};
     }
 
-    // Characters: every kind of characters.json, shown by the middle of its figure.
-    const int kinds = static_cast<int>(definitions_.characters.size());
-    const int kindRows = (kinds + kKindColumns - 1) / kKindColumns;
-    characterPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, kKindColumns * kKindWidth + 4, kindRows * kKindHeight + 4});
-    for (int i = 0; i < kinds; ++i) {
-        const CharacterKindDef& def = definitions_.characters[static_cast<std::size_t>(i)];
-        const Rect cell{4 + (i % kKindColumns) * kKindWidth, kToolbarHeight + 6 + (i / kKindColumns) * kKindHeight, kKindWidth - 2, kKindHeight - 2};
-        Button& kind = characterPalette_->add<Button>(cell, textures_.art == nullptr ? capitalised(def.name).substr(0, 1) : "", [this, i] {
-            kind_ = i;
-            tool_ = EditorTool::Place; // choosing a character means placing it
-        });
-        kind.hint = def.name;
-        if (textures_.art != nullptr) {
-            const Rect frame = textures_.art->frame(def.frames, def.directions, Facing::South, 0);
-            kind.icon = &textures_.characters;
-            kind.iconSource = {frame.x + (kCharacterWidth - (kKindWidth - 4)) / 2, frame.y + kCharacterHeight - (kKindHeight - 4) - 2, kKindWidth - 4,
-                               kKindHeight - 4};
-        }
-    }
+    buildCharacterPalette();
     // Weapons (US-134): every weapon a pickup may carry, shown by its icon (drawn in render()).
     const int weapons = static_cast<int>(weaponNames_.size());
     const int weaponRows = std::max(1, (weapons + kPaletteColumns - 1) / kPaletteColumns);
@@ -149,6 +131,38 @@ void Editor::buildPanels() {
     buildQuestion();
 }
 
+// One page of the character palette (US-137): 12 kinds, two to a row, then the page arrows. The first page holds
+// the twelve characters of characters.json, where they always were; the animals follow on the next pages.
+void Editor::buildCharacterPalette() {
+    const int kinds = static_cast<int>(definitions_.characters.size());
+    const int pages = std::max(1, (kinds + kKindsPerPage - 1) / kKindsPerPage);
+    kindPage_ = std::clamp(kindPageWanted_, 0, pages - 1);
+    kindPageWanted_ = kindPage_;
+    const int rows = kKindsPerPage / kKindColumns;
+    characterPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, kKindColumns * kKindWidth + 4, rows * kKindHeight + 4 + 14});
+    for (int i = 0; i < kKindsPerPage; ++i) {
+        const int index = kindPage_ * kKindsPerPage + i;
+        if (index >= kinds) break;
+        const CharacterKindDef& def = definitions_.characters[static_cast<std::size_t>(index)];
+        const Rect cell{4 + (i % kKindColumns) * kKindWidth, kToolbarHeight + 6 + (i / kKindColumns) * kKindHeight, kKindWidth - 2, kKindHeight - 2};
+        Button& kind = characterPalette_->add<Button>(cell, textures_.art == nullptr ? capitalised(def.name).substr(0, 1) : "", [this, index] {
+            kind_ = index;
+            tool_ = EditorTool::Place; // choosing a character means placing it
+        });
+        kind.hint = def.animal ? def.name + (def.enemy ? " (enemy)" : " (harmless)") : def.name;
+        if (textures_.art != nullptr && !def.animal) {
+            const Rect frame = textures_.art->frame(def.frames, def.directions, Facing::South, 0);
+            kind.icon = &textures_.characters;
+            kind.iconSource = {frame.x + (kCharacterWidth - (kKindWidth - 4)) / 2, frame.y + kCharacterHeight - (kKindHeight - 4) - 2, kKindWidth - 4,
+                               kKindHeight - 4};
+        }
+    }
+    const int arrowsTop = kToolbarHeight + 6 + rows * kKindHeight;
+    Button& previous = characterPalette_->add<Button>(Rect{4, arrowsTop, 20, 12}, "<", [this] { kindPageWanted_ = kindPage_ - 1; });
+    previous.hint = "Previous page of characters";
+    Button& next = characterPalette_->add<Button>(Rect{4 + kKindColumns * kKindWidth - 22, arrowsTop, 20, 12}, ">", [this] { kindPageWanted_ = kindPage_ + 1; });
+    next.hint = "Next page of characters";
+}
 // One page of the plant palette: two arrows, then up to 36 plants by picture (drawn in render()).
 void Editor::buildPlantPalette() {
     const int plants = static_cast<int>(definitions_.plants.size());
@@ -497,7 +511,9 @@ std::optional<int> Editor::characterAt(int screenX, int screenY) const {
     const auto [wx, wy] = toWorld(screenX, screenY);
     // The last one drawn is on top, so it is the one the owner sees and means.
     for (auto it = level_.characters.rbegin(); it != level_.characters.rend(); ++it) {
-        if (wx >= it->feet.x - kCharacterWidth / 2 && wx < it->feet.x + kCharacterWidth / 2 && wy >= it->feet.y - kCharacterHeight && wy <= it->feet.y) {
+        const CharacterKindDef* kind = definitions_.character(it->kind);
+        const int half = (kind != nullptr && kind->animal ? kAnimalWidth : kCharacterWidth) / 2;
+        if (wx >= it->feet.x - half && wx < it->feet.x + half && wy >= it->feet.y - kCharacterHeight && wy <= it->feet.y) {
             return it->id;
         }
     }
@@ -619,6 +635,7 @@ void Editor::finishStroke() {
 
 bool Editor::handlePanels(const luna::engine::UiInput& input) {
     if (plantPageWanted_ != plantPage_) buildPlantPalette(); // a page arrow was pressed last tick
+    if (kindPageWanted_ != kindPage_) buildCharacterPalette();
     for (auto& button : toolbar_->children()) {
         auto* b = dynamic_cast<Button*>(button.get());
         if (b == nullptr) continue;
@@ -630,8 +647,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(palette_->children()[i].get())) b->selected = static_cast<int>(i) == tile_;
     }
-    for (std::size_t i = 0; i < characterPalette_->children().size(); ++i) {
-        if (auto* b = dynamic_cast<Button*>(characterPalette_->children()[i].get())) b->selected = static_cast<int>(i) == kind_;
+    for (std::size_t i = 0; i + 2 < characterPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(characterPalette_->children()[i].get())) b->selected = kindPage_ * kKindsPerPage + static_cast<int>(i) == kind_;
     }
     for (std::size_t i = 0; i < weaponPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(weaponPalette_->children()[i].get())) b->selected = static_cast<int>(i) == weapon_;
@@ -945,6 +962,11 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     }
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
+        if (kind != nullptr && kind->animal && textures_.animals != nullptr) {
+            const auto feet = screen(placed.feet.x, placed.feet.y);
+            drawAnimal(renderer, *textures_.animals, kind->name, feet.x, feet.y, placed.facing, false);
+            continue;
+        }
         if (kind == nullptr || textures_.art == nullptr) continue;
         renderer.draw(textures_.characters, textures_.art->frame(kind->frames, kind->directions, placed.facing, 0),
                       screen(placed.feet.x - kCharacterWidth / 2, placed.feet.y - kCharacterHeight));
@@ -998,7 +1020,21 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     toolbar_->draw(painter);
     palette_->draw(painter);
     characterPalette_->draw(painter);
-    plantPalette_->draw(painter);
+    if (characterPalette_->visible) {
+        const int kinds = static_cast<int>(definitions_.characters.size());
+        const int pages = std::max(1, (kinds + kKindsPerPage - 1) / kKindsPerPage);
+        const std::string label = std::format("{}/{}", kindPage_ + 1, pages);
+        const Rect& panel = characterPalette_->bounds;
+        painter.text(panel.x + (panel.width - UiPainter::textWidth(label)) / 2, panel.y + panel.height - 11, label, UiColor::Text);
+        if (textures_.animals != nullptr) {
+            for (std::size_t i = 0; i + 2 < characterPalette_->children().size(); ++i) {
+                const std::size_t index = static_cast<std::size_t>(kindPage_ * kKindsPerPage) + i;
+                if (index >= definitions_.characters.size() || !definitions_.characters[index].animal) continue;
+                const Rect& cell = characterPalette_->children()[i]->bounds;
+                drawAnimalIcon(renderer, *textures_.animals, definitions_.characters[index].name, {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
+            }
+        }
+    }    plantPalette_->draw(painter);
     if (plantPalette_->visible && textures_.plants != nullptr) {
         const int plants = static_cast<int>(definitions_.plants.size());
         const int pages = std::max(1, (plants + kPlantsPerPage - 1) / kPlantsPerPage);
