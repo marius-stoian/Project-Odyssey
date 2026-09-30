@@ -361,3 +361,9 @@ add_test(NAME "US-125 Place in the game"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us125
             -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_place.cmake")
 set_tests_properties("US-125 Place in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- Scripted input: two holds of one intent are exactly two presses (found at X-M2c) ---
+add_test(NAME "X-M2c Two scripted presses"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/twopresses
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_two_presses.cmake")
+set_tests_properties("X-M2c Two scripted presses" PROPERTIES LABELS window TIMEOUT 120)
