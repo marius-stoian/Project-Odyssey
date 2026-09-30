@@ -46,7 +46,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-113 | US-113 | M2b | Done | 2026-09-30 |
 | S-US-114 | US-114 | M2b | Done | 2026-09-30 |
 | S-US-115 | US-115 | M2b | Done | 2026-09-30 |
-| X-M2b | - | M2b | To do |  |
+| X-M2b | - | M2b | Blocked: waits for the owner (D-GATE-M2b) | 2026-09-30 |
 | K-M3 | - | M3 | To do |  |
 | S-US-030 | US-030 | M3 | To do |  |
 | S-US-032 | US-032 | M3 | To do |  |
