@@ -137,5 +137,12 @@
     "cowardOpinionLoss": 15,
     "rescueFeeling": 90,
     "rescueOpinion": 40
+  },
+  "episodes": {
+    "minEvents": 3,
+    "minImportance": 60,
+    "minEventImportance": 25,
+    "maxPerCentury": 40,
+    "maxPeople": 4
   }
 }

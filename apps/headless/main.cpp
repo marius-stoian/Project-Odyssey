@@ -5,6 +5,7 @@
 //   --days <number>          or how many in-game days
 //   --data <folder>          content folder (default: the repository's assets/data)
 //   --inspect <name or id>   print that person's last decision: every action's score (US-012)
+//   --story                  print the clan's story: the episodes, then births, deaths, pairings and feuds (US-115)
 //   --chronicle [year]       print the chronicle (one year, or all years) (US-014)
 //   --threshold <0..100>     the importance an event needs to be printed (default 50)
 //   --why <event id>         print that event and the earlier events that caused it (US-110)
@@ -13,6 +14,7 @@
 //   --help                   print this list
 #include "core/version.h"
 #include "sim/chronicle.h"
+#include "sim/episodes.h"
 #include "sim/ai.h"
 #include "sim/report.h"
 #include "sim/save.h"
@@ -39,6 +41,7 @@ struct Options {
     std::string dataDirectory = ODYSSEUS_DATA_DIR;
     std::string inspect;
     bool chronicle = false;
+    bool story = false;
     int chronicleYear = 0;
     int threshold = odysseus::sim::kDefaultChronicleThreshold;
     int why = -1;
@@ -49,7 +52,7 @@ struct Options {
 
 void printUsage(std::ostream& out) {
     out << "Usage: odysseus_headless [--seed N] [--years N | --days N] [--data FOLDER]\n"
-           "                         [--inspect NAME] [--chronicle [YEAR]] [--threshold 0..100]\n"
+           "                         [--inspect NAME] [--story] [--chronicle [YEAR]] [--threshold 0..100]\n"
            "                         [--why EVENT] [--load FILE] [--save FILE]\n"
            "  --years and --days take a whole number from 1 to 10000; --seed a whole number 0 or more.\n"
            "Example: odysseus_headless --seed 7 --years 100\n";
@@ -75,6 +78,8 @@ std::optional<std::string> parse(int argc, char* argv[], Options& options) {
         auto value = [&]() { return std::string_view(argv[++i]); };
         if (flag == "--help") {
             options.help = true;
+        } else if (flag == "--story") {
+            options.story = true;
         } else if (flag == "--chronicle") {
             options.chronicle = true;
             if (hasValue && readNumber(argv[i + 1], 1, 1'000'000)) {
@@ -162,6 +167,12 @@ int main(int argc, char* argv[]) {
                                  ticks > 0 ? seconds.count() * 1e6 / static_cast<double>(ticks) : 0.0, seconds.count())
                   << "World hash: " << world.hash() << '\n';
 
+        if (options.story) {
+            std::cout << '\n';
+            for (const std::string& line : odysseus::sim::formatStory(world, options.threshold)) {
+                std::cout << line << '\n';
+            }
+        }
         if (options.chronicle) {
             std::cout << "\nChronicle" << (options.chronicleYear > 0 ? " of year " + std::to_string(options.chronicleYear) : std::string())
                       << " (importance " << options.threshold << " and above):\n";
