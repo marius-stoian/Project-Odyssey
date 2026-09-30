@@ -734,3 +734,26 @@ Nothing depends on how fast the computer draws: at 30 or 144 frames per second, 
 **Try it (15 minutes).** In `odyssey_game.cpp` change the hit effect `"spark"` to `"fire nova"` (a name from `assets/data/effects.json`), build, and hit a goblin. Then set its `ticksPerFrame` to 10 in effects.json and watch it slow down.
 
 **Check yourself.** Why does the effect player remove finished effects in `update()` and not in `draw()`?
+
+## US-133: Weapon classes and the starter set (2026-09-30)
+
+**What we built.** Eight kinds of weapon now fight differently: swords, axes, spears and whips hit what is in front of you; bows, thrown weapons, staffs and guns launch projectiles. Damage, speed and range come from `weapons.json`, and the 16 starters are a numbered contact sheet you can review and swap by editing the file.
+
+**The idea: virtual functions.** One base class says what every weapon can do; each kind fills it in its own way, and the game only talks to the base:
+
+```cpp
+class WeaponBehaviour {
+public:
+    virtual ~WeaponBehaviour() = default;
+    virtual bool melee() const = 0;
+    virtual std::optional<Projectile> launch(const WeaponDef&, double x, double y, Facing) const;
+};
+```
+
+The game calls `swing` or `launch` on the base, and C++ picks the right version at run time. A new class is a new subclass, not a new `if` in the game loop. `std::variant` would also work; virtual functions read more simply here.
+
+**Where to look.** [src/game/weapons.h](../src/game/weapons.h), [src/game/weapons.cpp](../src/game/weapons.cpp).
+
+**Try it (15 minutes).** Press Shift to cycle the starters and attack a goblin with each. Then set `"starter"` on another weapon in `assets/data/weapons.json` and rerun.
+
+**Check yourself.** Why does `WeaponBehaviour` need a virtual destructor?

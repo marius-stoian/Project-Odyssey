@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "luna/engine/image_ops.h"
+
 #include "core/log.h"
 #include "core/version.h"
 #include "game/art.h"
@@ -66,6 +68,9 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
+    for (const WeaponDef& weapon : catalogs_.weapons) {
+        if (weapon.starter) starters_.push_back(&weapon);
+    }
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -82,6 +87,9 @@ void OdysseyGame::resetPlay() {
     heroHp_ = kHeroMaxHp;
     respawnTicks_ = 0;
     effects_.clear();
+    projectiles_.clear();
+    attackCooldown_ = 0;
+    swingTicks_ = 0;
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -154,6 +162,83 @@ void OdysseyGame::playEffect(const std::string& name, double x, double y, int si
     effects_.start(spec, x, y, size);
 }
 
+std::string OdysseyGame::heldName() const {
+    if (held_ == 0) return "Spear throw";
+    if (held_ == 1) return "Sword";
+    return starters_.at(held_ - 2)->name;
+}
+
+const WeaponDef* OdysseyGame::heldWeapon() const {
+    return held_ >= 2 ? starters_.at(held_ - 2) : nullptr;
+}
+
+void OdysseyGame::strike(Enemy& enemy, int damage) {
+    const bool defeated = enemy.takeDamage(damage);
+    playEffect("spark", enemy.feetX(), enemy.feetY() - kCharacterHeight / 2.0, 24); // US-132: where the blow lands
+    if (defeated) {
+        playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
+    } else {
+        enemy.provoke();
+    }
+}
+
+void OdysseyGame::attackWith(const WeaponDef& weapon) {
+    if (attackCooldown_ > 0) {
+        return;
+    }
+    attackCooldown_ = cooldownTicks(weapon);
+    const WeaponBehaviour& behaviour = behaviourOf(weapon.weaponClass);
+    if (behaviour.melee()) {
+        std::vector<Target> targets;
+        for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
+        swingTicks_ = 6;
+        const auto hits = behaviour.swing(weapon, hero_.feetX(), hero_.feetY(), hero_.facing(), targets);
+        core::logInfo(std::format("{} ({}) swung facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), facingName(hero_.facing()), hits.size()));
+        for (const std::size_t index : hits) strike(enemies_[index], weapon.damage);
+    } else if (auto shot = behaviour.launch(weapon, hero_.feetX(), hero_.feetY(), hero_.facing())) {
+        projectiles_.push_back(*shot);
+        core::logInfo(std::format("{} ({}) shot facing {}", weapon.name, weaponClassName(weapon.weaponClass), facingName(hero_.facing())));
+    }
+}
+
+void OdysseyGame::drawHeld(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
+    if (!contentLoaded_) {
+        return;
+    }
+    const int iconsWidth = content_.pictures.at("icons").width();
+    // The held weapon in the hero's hand (US-133): its icon, turned to the side the hero faces,
+    // raised a little during a swing.
+    if (const WeaponDef* weapon = heldWeapon(); weapon != nullptr && respawnTicks_ == 0) {
+        if (const auto icon = content_.rect(weapon->frame)) {
+            const Facing facing = hero_.facing();
+            const bool west = facing == Facing::West || facing == Facing::SouthWest || facing == Facing::NorthWest;
+            const luna::engine::Rect source = west ? luna::engine::Rect{iconsWidth - icon->x - icon->width, icon->y, icon->width, icon->height} : *icon;
+            const double handX = hero_.feetX(alpha) + (west ? -9.0 : 9.0);
+            const double handY = hero_.feetY(alpha) - 22.0 - (swingTicks_ > 0 ? 4.0 : 0.0);
+            const int size = 20;
+            renderer.drawStyled(west ? iconsMirrored_ : iconsTexture_, source,
+                                {static_cast<int>(std::lround(handX)) - size / 2 - view.x, static_cast<int>(std::lround(handY)) - size / 2 - view.y, size, size}, {});
+        }
+    }
+    // Shots in flight: a thrown weapon is its own icon; arrows, bolts and bullets are light.
+    for (const Projectile& shot : projectiles_) {
+        std::string frame = "light arrow";
+        luna::engine::Texture texture = effectsTexture_;
+        luna::engine::DrawStyle style{255, luna::engine::Blend::Add};
+        int size = 16;
+        switch (shot.weapon->weaponClass) {
+        case WeaponClass::Thrown: frame = shot.weapon->frame; texture = iconsTexture_; style = {}; size = 14; break;
+        case WeaponClass::Staff: frame = content_.frameName("arcane orb", 0); break;
+        case WeaponClass::Gun: frame = "gold spark"; size = 10; break;
+        default: break;
+        }
+        if (const auto source = content_.rect(frame)) {
+            renderer.drawStyled(texture, *source,
+                                {static_cast<int>(std::lround(shot.x)) - size / 2 - view.x, static_cast<int>(std::lround(shot.y)) - size / 2 - view.y, size, size}, style);
+        }
+    }
+}
+
 void OdysseyGame::hurtHero(int damage, const Enemy& by) {
     heroHp_ = std::max(0, heroHp_ - damage);
     core::logInfo(std::format("{} struck the hero for {}, HP {} / {}", by.name, damage, heroHp_, kHeroMaxHp));
@@ -180,6 +265,11 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
     const luna::engine::Rect box{2, 2, luna::engine::UiPainter::textWidth(label) + 6, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 3, box.y + 3, label, heroHp_ * 4 <= kHeroMaxHp ? luna::engine::UiColor::Red : luna::engine::UiColor::Text);
+    // What the hero holds, under the health.
+    const std::string held = heldName();
+    const luna::engine::Rect heldBox{2, box.y + box.height + 1, luna::engine::UiPainter::textWidth(held) + 6, luna::engine::kGlyphHeight + 6};
+    painter.fill(heldBox, luna::engine::UiColor::Shade);
+    painter.text(heldBox.x + 3, heldBox.y + 3, held, luna::engine::UiColor::Gold);
     // After a fall the screen darkens, more with every step of the fade.
     for (int layer = 0; layer < (kRespawnTicks - respawnTicks_) / 4 + 1 && respawnTicks_ > 0; ++layer) {
         painter.fill({0, 0, kVirtualWidth, kVirtualHeight}, luna::engine::UiColor::Shade);
@@ -211,12 +301,15 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
     // Handle weapon switching (Shift key).
     if (!fallen && intents.pressed(luna::engine::Intent::SwitchWeapon)) {
-        currentWeapon_ = currentWeapon_ == WeaponType::Sword ? WeaponType::Bow : WeaponType::Sword;
-        core::logInfo(std::format("Switched to {}", currentWeapon_ == WeaponType::Sword ? "Sword" : "Bow"));
+        held_ = (held_ + 1) % carriedCount();
+        currentWeapon_ = held_ == 1 ? WeaponType::Sword : WeaponType::Bow; // the demos' own two
+        core::logInfo("Switched to " + heldName());
     }
 
     // Handle attacks based on current weapon.
-    if (!fallen && intents.pressed(luna::engine::Intent::Interact)) {
+    if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldWeapon() != nullptr) {
+        attackWith(*heldWeapon());
+    } else if (!fallen && intents.pressed(luna::engine::Intent::Interact)) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
             sword_.slash(hero_.facing());
@@ -270,15 +363,26 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             }
         }
         if (nearest != nullptr) {
-            const bool defeated = nearest->takeDamage(sword_.config().damagePerHit);
-            playEffect("spark", nearest->feetX(), nearest->feetY() - kCharacterHeight / 2.0, 24); // US-132: where the blade lands
-            if (defeated) {
-                playEffect("smoke puff", nearest->feetX(), nearest->feetY() - kCharacterHeight / 3.0, 40);
-            } else {
-                nearest->provoke();
-            }
+            strike(*nearest, sword_.config().damagePerHit);
             sword_.markHit();
         }
+    }
+
+    // Catalog weapons (US-133): the cooldown between attacks, and shots in flight.
+    if (attackCooldown_ > 0) --attackCooldown_;
+    if (swingTicks_ > 0) --swingTicks_;
+    if (!projectiles_.empty()) {
+        std::vector<Target> targets;
+        for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
+        for (Projectile& shot : projectiles_) {
+            bool done = false;
+            if (const auto hit = stepProjectile(shot, map_, targets, done)) {
+                strike(enemies_[*hit], shot.weapon->damage);
+                targets[*hit].alive = enemies_[*hit].isAlive();
+            }
+            if (done) shot.maxDistance = -1.0; // spent: removed below
+        }
+        std::erase_if(projectiles_, [](const Projectile& shot) { return shot.maxDistance < 0.0; });
     }
 
     // A puff of dust behind every spear in the air, every third tick: its trail (US-132).
@@ -334,6 +438,8 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         content_ = std::move(*content);
         contentLoaded_ = true;
         effectsTexture_ = renderer.createTexture(content_.pictures.at("effects"));
+        iconsTexture_ = renderer.createTexture(content_.pictures.at("icons"));
+        iconsMirrored_ = renderer.createTexture(luna::engine::mirrored(content_.pictures.at("icons")));
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
@@ -420,6 +526,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         renderer.draw(props_, spearFrame(facingForVector(pointing.x, pointing.y), spear.kind.tip == "flint"),
                       screen(p.x - kSpearFrameSize / 2.0, p.y - kSpearFrameSize / 2.0));
     }
+    drawHeld(renderer, view, alpha);
     effects_.draw(renderer, view);
     drawHud(renderer);
     drawModeLabel(renderer);
