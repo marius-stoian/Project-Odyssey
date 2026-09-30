@@ -130,6 +130,12 @@ StoryConfig loadStoryConfig(const std::filesystem::path& file) {
     hunt.cowardOpinionLoss = requireInt(json, file, "hunt", "cowardOpinionLoss", 0, 100);
     hunt.rescueFeeling = requireInt(json, file, "hunt", "rescueFeeling", 0, 100);
     hunt.rescueOpinion = requireInt(json, file, "hunt", "rescueOpinion", 0, 100);
+
+    config.episodes.minEvents = requireInt(json, file, "episodes", "minEvents", 2, 100);
+    config.episodes.minImportance = requireInt(json, file, "episodes", "minImportance", 0, 100);
+    config.episodes.minEventImportance = requireInt(json, file, "episodes", "minEventImportance", 0, 100);
+    config.episodes.maxPerCentury = requireInt(json, file, "episodes", "maxPerCentury", 1, 1000);
+    config.episodes.maxPeople = requireInt(json, file, "episodes", "maxPeople", 1, 20);
     return config;
 }
 

@@ -178,6 +178,15 @@ struct HuntStory {
     int rescueOpinion = 40;
 };
 
+// How the chronicle is told as episodes (US-115).
+struct EpisodeStory {
+    int minEvents = 3;             // an episode links at least this many events...
+    int minImportance = 60;        // ...one of them at least this important
+    int minEventImportance = 25;   // smaller events (gifts) are not part of any episode
+    int maxPerCentury = 40;        // the best this many episodes per hundred years are told
+    int maxPeople = 4;             // people named in an episode
+};
+
 struct StoryConfig {
     SeasonStory season;
     CauseStory causes;
@@ -194,6 +203,7 @@ struct StoryConfig {
     PartingStory parting;
     TeachingStory teaching;
     HuntStory hunt;
+    EpisodeStory episodes;
 };
 
 StoryConfig loadStoryConfig(const std::filesystem::path& file);

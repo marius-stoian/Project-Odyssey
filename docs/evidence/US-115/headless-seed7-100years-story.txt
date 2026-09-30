@@ -1,0 +1,301 @@
+Project Odyssey headless runner 0.1.0
+Seed 7, 2800 days (100 years, 6720000 ticks): now Spring, year 101, day 1, 12 C
+Population: 45 alive (20 founders, 100 born, 70 died, 5 exiled)
+Deaths by cause: starvation 0, the cold 0, old age 42, a mammoth's tusks 13, childbirth 4, a fight 5, wounds 4, sickness 2
+Average needs of the living: Hunger 92, Energy 87, Warmth 55, Social 56
+Food in store: 0 meals; couples 12, feuds 0, mammoths 72, chronicle entries 14606
+Tick time: 0.073 microseconds per tick (0.49 s in total)
+World hash: 15810530208701249003
+
+The story of the clan, 101 years
+Episodes (40):
+  The Vengeance of Joro. It began in Spring, year 1: Garu stole from the food store; Joro saw it. The turn came in Autumn, year 6: Joro attacked Garu over stolen meat: Garu lost the fight and was badly hurt. It ended in Winter, year 11: The clan drove Garu out for attacking Joro after the fight. Those who lived it: Garu, Joro, Ilka and Sela.
+  The Vengeance of Tarek. It began in Spring, year 1: Tarek began courting Sela. The turn came in Summer, year 7: Tarek attacked Garu over stolen meat: Garu lost the fight and was badly hurt. It ended in Summer, year 12: Pela and Tarek quarrelled after the fight. Those who lived it: Tarek, Garu, Sela and Ossa.
+  The Vengeance of Kesh. It began in Spring, year 2: Tok stole from the food store; Kesh saw it. The turn came in Spring, year 23: Tok was killed by Kesh in a fight. It ended in Spring, year 23: Ruk the Second blamed Kesh for Tok's death, because Kesh struck the blow. Those who lived it: Tok, Kesh, Ama and Oda.
+  The Vengeance of Kesh. It began in Summer, year 10: Joro stole from the food store; Kesh saw it. The turn came in Autumn, year 29: Kesh was killed by Joro in a fight. It ended in Autumn, year 29: Neva blamed Joro for Kesh's death, because Joro struck the blow. Those who lived it: Kesh, Joro, Sela and Ilka.
+  The Vengeance of Tok. It began in Spring, year 12: Tok stole from the food store; Moru saw it. The turn came in Winter, year 13: Moru was killed by Tok in a fight. It ended in Winter, year 13: Grem blamed Tok for Moru's death, because Tok struck the blow. Those who lived it: Tok, Moru, Ilka and Joro.
+  The Great Hunt of year 34. It began in Winter, year 34: A hunting party of 5 (Kal, Pim, Ama, Ura and Sef) went after a mammoth under Ama, and brought it down. The turn came in Winter, year 34: Ura was killed hunting a mammoth. It ended in Winter, year 34: Ama recovered from the wounds, nursed by Oda. Those who lived it: Ama, Oda, Kal and Ura.
+  The Sickness of year 43. It began in Winter, year 43: Hela the Second stole from the food store. The turn came in Winter, year 43: The food store ran empty after the thefts of Hela the Second, Iva and Tok the Second; 7 went to bed hungry. It ended in Spring, year 44: Tarek the Second recovered from the wounds, nursed by Pim. Those who lived it: Tarek the Second, Zuri, Pim and Nara.
+  The Hard Winter of year 44. It began in Autumn, year 44: Tok the Second stole from the food store. The turn came in Winter, year 44: The food store ran empty after the thefts of Maa the Second, Hela the Second, Iva and Tok the Second; 2 went to bed hungry. It ended in Spring, year 45: Ysa got well again, nursed by Pim. Those who lived it: Enko, Ruu, Garu the Second and Kal.
+  The Hard Winter of year 45. It began in Autumn, year 45: Maa the Second stole from the food store. The turn came in Winter, year 45: The food store ran empty after the thefts of Hela the Second, Iva, Tok the Second and Maa the Second; 11 went to bed hungry. It ended in Spring, year 46: Kesh the Second shared food with hungry Ena the Second. Those who lived it: Moru the Third, Pim, Kal and Ama.
+  The Sickness of year 46. It began in Autumn, year 46: Maa the Second stole from the food store. The turn came in Winter, year 46: The food store ran empty after the thefts of Maa the Second, Hela the Second and Iva; 22 went to bed hungry. It ended in Spring, year 47: Duro recovered from the wounds, nursed by Ama. Those who lived it: Oren, Duro, Ban and Maa the Second.
+  The Sickness of year 47. It began in Winter, year 47: A hunting party of 5 (Enko, Ruu, Mira, Sef and Lin) went after a mammoth under Enko, and brought it down. The turn came in Winter, year 47: Mira died of the wounds. It ended in Spring, year 48: Duro recovered from the wounds, nursed by Ama. Those who lived it: Mira, Arn, Duro and Hano.
+  The Great Hunt of year 48. It began in Spring, year 48: A hunting party of 5 (Pim, Oren, Grem, Hano and Ulf the Second) went after a mammoth under Pim, and brought it down. The turn came in Spring, year 48: Hano was killed hunting a mammoth. It ended in Spring, year 48: Grem recovered from the wounds, nursed by Nara. Those who lived it: Pim, Grem, Nara and Hano.
+  The Sickness of year 48. It began in Winter, year 48: Iva stole from the food store. The turn came in Winter, year 48: The food store ran empty after the thefts of Iva, Maa the Second and Hela the Second; 2 went to bed hungry. It ended in Spring, year 49: Zuri recovered from the wounds, nursed by Nara. Those who lived it: Pim, Sef, Zuri and Ruu.
+  The Hard Winter of year 61. It began in Spring, year 49: Maa the Second stole from the food store; Kesh the Second saw it. The turn came in Winter, year 65: Oda was killed hunting a mammoth. It ended in Winter, year 69: Tok the Second and Kesh the Second quarrelled over the death of Maa the Second. Those who lived it: Maa the Second, Kesh the Second, Moru the Third and Arn.
+  The Great Hunt of year 49. It began in Autumn, year 49: Hela the Second stole from the food store; Ivo saw it. The turn came in Winter, year 49: The food store ran empty after the thefts of Hela the Second, Iva and Maa the Second; 22 went to bed hungry. It ended in Spring, year 50: Arn recovered from the wounds, nursed by Kesh the Second. Those who lived it: Arn, Lott, Vena and Tarek the Second.
+  The Vengeance of Kesh the Second. It began in Winter, year 49: Ruu began courting Tarek the Second. The turn came in Spring, year 66: Tarek the Second was killed by Kesh the Second in a fight. It ended in Spring, year 69: Tok the Second and Kesh the Second quarrelled after the fight. Those who lived it: Kesh the Second, Tarek the Second, Ruu and Tok the Second.
+  The Hard Winter of year 52. It began in Summer, year 52: Maa the Second stole from the food store; Ruk the Second saw it. The turn came in Winter, year 52: The food store ran empty after the failed harvest and the thefts of Maa the Second and Hela the Second; 16 went to bed hungry. It ended in Winter, year 52: Oren shared food with hungry Mira the Second. Those who lived it: Hela the Second, Maa the Second, Pim the Second and Oren.
+  The Sickness of year 52. It began in Winter, year 52: Hela the Second stole from the food store; Voll the Second saw it. The turn came in Spring, year 53: The food store ran empty after the thefts of Hela the Second, Tok the Second and Maa the Second; 2 went to bed hungry. It ended in Summer, year 53: Ulf the Second got well again, nursed by Zuri. Those who lived it: Zuri, Oren, Ulf the Second and Hela the Second.
+  The Sickness of year 54. It began in Summer, year 54: Maa the Second stole from the food store; Sef saw it. The turn came in Winter, year 54: The food store ran empty after the thefts of Maa the Second; 8 went to bed hungry. It ended in Spring, year 55: Ruu recovered from the wounds, nursed by Tarek the Second. Those who lived it: Maa the Second, Duro, Ruu and Tarek the Second.
+  The Lean Autumn of year 55. It began in Spring, year 55: Maa the Second stole from the food store. The turn came in Autumn, year 55: The food store ran empty after the failed harvest and the thefts of Maa the Second; 23 went to bed hungry. It ended in Spring, year 56: Tok the Second got well again, nursed by Ivo. Those who lived it: Ulf the Second, Maa the Second, Tarek the Second and Zuri.
+  The Lean Autumn of year 58. It began in Winter, year 57: Maa the Second stole from the food store. The turn came in Autumn, year 58: The food store ran empty after the thefts of Maa the Second; one went to bed hungry. It ended in Summer, year 59: Enko the Second shared food with hungry Hela the Third. Those who lived it: Duro, Tarek the Second, Sten and Vena.
+  The Great Hunt of year 58. It began in Spring, year 58: A hunting party of 5 (Sef, Lin, Ban, Ruk the Second and Ulf the Second) went after a mammoth under Sef, and brought it down. The turn came in Spring, year 58: Ulf the Second was killed hunting a mammoth. It ended in Spring, year 58: Lin recovered from the wounds, nursed by Sef. Those who lived it: Lin, Sef, Ruk the Second and Ulf the Second.
+  The Hard Winter of year 59. It began in Spring, year 59: Tok the Second stole from the food store. The turn came in Winter, year 59: The food store ran empty after the thefts of Tok the Second and Maa the Second; 9 went to bed hungry. It ended in Spring, year 61: Pim the Second got well again. Those who lived it: Oda, Joro the Second, Lott and Awa.
+  The Great Hunt of year 60. It began in Winter, year 60: Tok the Second stole from the food store; Ruu saw it. The turn came in Spring, year 61: The food store ran empty after the thefts of Maa the Second and Tok the Second; 2 went to bed hungry. It ended in Summer, year 61: Brak the Second got well again, nursed by Zuri. Those who lived it: Lott, Brak the Second, Oda and Zuri.
+  The Hungry Spring of year 67. It began in Winter, year 66: Tok the Second stole from the food store; Duro the Second saw it. The turn came in Spring, year 67: The food store ran empty after the thefts of Maa the Second and Tok the Second; one went to bed hungry. It ended in Spring, year 69: Tala the Second recovered from the wounds, nursed by Ysa. Those who lived it: Ban, Zuri, Brak the Third and Maa the Second.
+  The Great Hunt of year 66. It began in Winter, year 66: A hunting party of 5 (Sef, Garu the Second, Zuri, Vena and Tok the Second) went after a mammoth under Sef, and brought it down. The turn came in Winter, year 66: Vena was killed hunting a mammoth. It ended in Winter, year 67: Moru the Fourth, orphaned by the death of Vena, was taken in by Garu the Second. Those who lived it: Zuri, Sef, Garu the Second and Ura the Second.
+  The Sickness of year 79. It began in Winter, year 79: Tavo the Third was hurt hunting. The turn came in Winter, year 79: The food store ran empty; 18 went to bed hungry. It ended in Spring, year 80: Hela the Third recovered from the wounds, nursed by Tok the Second. Those who lived it: Brak the Third, Tok the Second, Tiru and Ena the Second.
+  The Lean Autumn of year 80. It began in Autumn, year 80: The autumn harvest failed: the land gave only 45% of its usual food. The turn came in Autumn, year 80: The food store ran empty after the failed harvest; 11 went to bed hungry. It ended in Winter, year 80: Arn the Second shared food with hungry Garu the Third. Those who lived it: Tok the Second, Kal the Second, Brak the Third and Ena the Second.
+  The Hard Winter of year 81. It began in Autumn, year 81: The autumn harvest failed: the land gave only 45% of its usual food. The turn came in Winter, year 81: The food store ran empty after the failed harvest; 21 went to bed hungry. It ended in Spring, year 82: Ban the Second recovered from the wounds, nursed by Ena the Second. Those who lived it: Brak the Third, Ban the Second, Ura the Second and Ena the Second.
+  The Great Hunt of year 83. It began in Spring, year 83: A hunting party of 5 (Pim the Second, Hano the Second, Ura the Second, Moru the Fourth and Enko the Third) went after a mammoth under Pim the Second, and brought it down. The turn came in Spring, year 83: Moru the Fourth stood firm against the mammoth. It ended in Summer, year 83: Moru the Fourth recovered from the wounds, nursed by Brak the Second. Those who lived it: Moru the Fourth, Brak the Second, Pim the Second and Hano the Second.
+  The Great Hunt of year 85. It began in Autumn, year 85: The autumn harvest failed: the land gave only 45% of its usual food. The turn came in Winter, year 85: The food store ran empty after the failed harvest; 14 went to bed hungry. It ended in Spring, year 86: Enko the Second recovered from the wounds, nursed by Tok the Second. Those who lived it: Joro the Second, Enko the Second, Tok the Second and Brak the Third.
+  The Great Hunt of year 87. It began in Spring, year 87: Vena the Second stole from the food store. The turn came in Winter, year 87: The food store ran empty after the thefts of Vena the Second; 3 went to bed hungry. It ended in Spring, year 88: Tavo the Third recovered from the wounds, nursed by Pim the Second. Those who lived it: Kora, Vena the Second, Tavo the Third and Ban the Second.
+  The Sickness of year 90. It began in Summer, year 90: Vena the Second stole from the food store. The turn came in Winter, year 90: The food store ran empty after the thefts of Vena the Second; 9 went to bed hungry. It ended in Spring, year 91: Ivo the Second recovered from the wounds, nursed by Kora. Those who lived it: Ivo the Second, Kora, Vena the Second and Ura the Second.
+  The Hard Winter of year 92. It began in Spring, year 92: Vena the Second stole from the food store; Mira the Second saw it. The turn came in Winter, year 92: The food store ran empty after the thefts of Vena the Second; 3 went to bed hungry. It ended in Spring, year 93: Tavo the Third shared food with hungry Awa the Second. Those who lived it: Hela the Third, Vena the Second, Enko the Second and Ban the Second.
+  The Hard Winter of year 93. It began in Summer, year 93: Vena the Second stole from the food store. The turn came in Winter, year 93: The food store ran empty after the thefts of Vena the Second; 19 went to bed hungry. It ended in Spring, year 94: Pela the Second shared food with hungry Brak the Fourth. Those who lived it: Ura the Second, Hela the Third, Vena the Second and Moru the Third.
+  The Great Hunt of year 95. It began in Summer, year 95: Vena the Second stole from the food store. The turn came in Winter, year 95: The food store ran empty after the thefts of Vena the Second; 7 went to bed hungry. It ended in Spring, year 96: Hano the Second recovered from the wounds, nursed by Pela the Second. Those who lived it: Kora, Hano the Second, Vena the Second and Pela the Second.
+  The Great Hunt of year 96. It began in Spring, year 96: A hunting party of 5 (Kora, Tala the Second, Grem the Second, Pim the Second and Ulf the Fourth) went after a mammoth under Kora, and brought it down. The turn came in Spring, year 96: Pim the Second stood firm against the mammoth. It ended in Spring, year 96: Pim the Second recovered from the wounds, nursed by Enko the Third. Those who lived it: Pim the Second, Enko the Third, Kora and Ena the Second.
+  The Hard Winter of year 96. It began in Spring, year 96: Vena the Second stole from the food store. The turn came in Winter, year 96: The food store ran empty after the failed harvest and the thefts of Vena the Second; 15 went to bed hungry. It ended in Spring, year 97: Vena the Second got well again, nursed by Hela the Third. Those who lived it: Vena the Second, Oda the Second, Zuri the Second and Ossa the Third.
+  The Sickness of year 97. It began in Summer, year 97: Vena the Second stole from the food store; Voll the Third saw it. The turn came in Winter, year 97: The food store ran empty after the thefts of Vena the Second; 6 went to bed hungry. It ended in Spring, year 98: Lott the Second got well again, nursed by Kora. Those who lived it: Kora, Voll the Third, Vena the Second and Oda the Second.
+  The Hard Winter of year 99. It began in Autumn, year 99: The autumn harvest failed: the land gave only 45% of its usual food. The turn came in Winter, year 99: The food store ran empty after the failed harvest and the thefts of Vena the Second; 22 went to bed hungry. It ended in Spring, year 100: Ruu the Second shared food with hungry Vena the Second. Those who lived it: Pim the Second, Ivo the Second, Nara the Second and Awa the Second.
+Births, deaths, pairings and feuds, with their reasons:
+  Summer, year 1: Joro and Ilka became partners after Ilka's courtship.
+  Summer, year 1: Tavo and Hela became partners after Hela's courtship.
+  Spring, year 2: Tarek and Sela became partners after Tarek's courtship.
+  Summer, year 2: Tala and Voll became partners after Voll's courtship.
+  Spring, year 3: Grem was born to Joro and Ilka.
+  Spring, year 3: Hano was born to Tarek and Sela.
+  Summer, year 3: Ama was born to Tavo and Hela.
+  Autumn, year 3: Voll died of old age, 46 years old.
+  Autumn, year 3: A feud broke out between Garu and Joro over stolen meat.
+  Spring, year 4: Tala died of old age, 46 years old.
+  Spring, year 5: Enko was born to Tarek and Sela.
+  Autumn, year 5: Sten was born to Tavo and Hela.
+  Winter, year 5: Moru was born to Joro and Ilka.
+  Winter, year 6: A feud broke out between Tarek and Garu over their love for Sela.
+  Winter, year 7: Ena was born to Tavo and Hela.
+  Winter, year 7: Garu and Ossa became partners after Garu's courtship.
+  Winter, year 8: A feud broke out between Garu and Tok over stolen meat.
+  Winter, year 8: Arn was born to Tarek and Sela.
+  Autumn, year 9: Pela was born to Garu and Ossa.
+  Autumn, year 10: Duro was born to Tavo and Hela.
+  Spring, year 12: Ivo was born to Tarek and Sela.
+  Summer, year 12: Lott was born to Garu and Ossa.
+  Summer, year 12: Tavo died of old age, 49 years old.
+  Summer, year 12: Pim and Hela became partners after Hela's courtship.
+  Autumn, year 12: Tarek died of old age, 55 years old.
+  Winter, year 12: Ruk and Soa became partners after Soa's courtship.
+  Spring, year 13: Oren and Ossa became partners after Oren's courtship.
+  Summer, year 13: A feud broke out between Tok and Moru over stolen meat.
+  Winter, year 13: Moru was killed by Tok in a fight.
+  Summer, year 14: Kal and Maa became partners after Maa's courtship.
+  Spring, year 15: Ruu was born to Kal and Maa.
+  Summer, year 15: Mira was born to Oren and Ossa.
+  Winter, year 15: Ura was born to Ruk and Soa.
+  Autumn, year 16: A feud broke out between Kesh and Joro over stolen meat.
+  Autumn, year 17: Brak died of old age, 57 years old.
+  Spring, year 18: Sef was born to Ruk and Soa.
+  Spring, year 18: Kesh and Sela became partners after Sela's courtship.
+  Spring, year 19: Lin was born to Kal and Maa.
+  Summer, year 19: Tok and Ama became partners after Tok's courtship.
+  Autumn, year 19: Neva was born to Kesh and Sela.
+  Winter, year 19: Ban was born to Oren and Ossa.
+  Summer, year 20: Oda was born to Tok and Ama.
+  Summer, year 20: A feud broke out between Joro and Pela over stolen meat.
+  Summer, year 20: Ilka died of old age, 54 years old.
+  Winter, year 20: Maa was killed hunting a mammoth.
+  Summer, year 21: Tavo the Second was born to Ruk and Soa.
+  Autumn, year 21: Ruk died of old age, 53 years old.
+  Spring, year 22: A feud broke out between Tok and Kesh over stolen meat.
+  Autumn, year 22: Garu the Second was born to Oren and Ossa.
+  Winter, year 22: Ruk the Second was born to Tok and Ama.
+  Spring, year 23: Tok was killed by Kesh in a fight.
+  Spring, year 24: Hela died of old age, 54 years old.
+  Spring, year 24: Ena and Pim became partners after Pim's courtship.
+  Autumn, year 24: Nara was born to Oren and Ossa.
+  Spring, year 25: Tarek the Second was born to Pim and Ena.
+  Autumn, year 26: Zuri was born to Oren and Ossa.
+  Winter, year 27: Ulf was killed hunting a mammoth.
+  Autumn, year 29: Kesh was killed by Joro in a fight.
+  Autumn, year 29: A feud broke out between Joro and Mira over stolen meat.
+  Winter, year 29: Moru the Second was born to Pim and Ena.
+  Spring, year 30: Sten and Sela became partners after Sela's courtship.
+  Summer, year 30: Ulf the Second was born to Oren and Ossa.
+  Spring, year 31: Sela died of old age, 52 years old.
+  Summer, year 31: Duro and Mira became partners after Duro's courtship.
+  Summer, year 31: Ama and Enko became partners after Enko's courtship.
+  Winter, year 31: Soa and Sten became partners after Sten's courtship.
+  Spring, year 32: Joro the Second was born to Enko and Ama.
+  Summer, year 32: Hano and Ura became partners after Hano's courtship.
+  Winter, year 33: Vena was born to Pim and Ena.
+  Winter, year 33: Ena died giving birth.
+  Winter, year 33: Tok the Second was born to Duro and Mira.
+  Winter, year 33: Ruu and Pim became partners after Pim's courtship.
+  Summer, year 34: Kesh the Second was born to Hano and Ura.
+  Summer, year 34: Awa was born to Enko and Ama.
+  Autumn, year 34: Voll the Second was born to Sten and Soa.
+  Winter, year 34: Ura was killed hunting a mammoth.
+  Spring, year 35: Brak the Second was born to Pim and Ruu.
+  Spring, year 35: Lin and Hano became partners after Hano's courtship.
+  Autumn, year 35: Iva was born to Duro and Mira.
+  Spring, year 36: Kal and Neva became partners after Kal's courtship.
+  Spring, year 37: Kal the Second was born to Kal and Neva.
+  Spring, year 37: Neva died giving birth.
+  Spring, year 38: Ossa died of old age, 46 years old.
+  Autumn, year 38: Ban the Second was born to Hano and Lin.
+  Autumn, year 38: Brak the Third was born to Pim and Ruu.
+  Winter, year 38: Tavo the Second was killed hunting a mammoth.
+  Spring, year 39: Kora was born to Duro and Mira.
+  Summer, year 40: Ysa was born to Pim and Ruu.
+  Winter, year 40: Kal and Oda became partners after Kal's courtship.
+  Spring, year 41: Tiru was born to Enko and Ama.
+  Summer, year 41: Ena the Second was born to Hano and Lin.
+  Winter, year 41: Tavo the Third was born to Kal and Oda.
+  Winter, year 41: Moru the Third was born to Duro and Mira.
+  Autumn, year 42: Grem and Nara became partners after Nara's courtship.
+  Spring, year 43: Tala the Second was born to Pim and Ruu.
+  Summer, year 43: Grem the Second was born to Enko and Ama.
+  Summer, year 43: Hela the Second was born to Grem and Nara.
+  Autumn, year 44: Maa the Second was born to Duro and Mira.
+  Summer, year 46: Soa died of old age, 49 years old.
+  Winter, year 47: Mira died of the wounds.
+  Spring, year 48: Hano was killed hunting a mammoth.
+  Winter, year 48: Ossa the Second was born to Pim and Ruu.
+  Winter, year 48: Lin and Sef became partners after Lin's courtship.
+  Winter, year 48: Grem died of old age, 45 years old.
+  Winter, year 48: Duro and Nara became partners after Duro's courtship.
+  Summer, year 49: Kal died of old age, 51 years old.
+  Winter, year 49: Pim died of old age, 58 years old.
+  Winter, year 49: Oren and Vena became partners after Vena's courtship.
+  Winter, year 49: Oda and Lott became partners after Lott's courtship.
+  Winter, year 50: Tarek the Second and Ruu became partners after Ruu's courtship.
+  Spring, year 51: Pim the Second was born to Lott and Oda.
+  Summer, year 51: Hano the Second was born to Duro and Nara.
+  Summer, year 51: Nara died giving birth.
+  Summer, year 51: Enko died of old age, 46 years old.
+  Autumn, year 51: Zuri and Brak the Second became partners after Zuri's courtship.
+  Winter, year 51: A feud broke out between Tok the Second and Iva over stolen meat.
+  Winter, year 52: Mira the Second was born to Oren and Vena.
+  Winter, year 52: Ama and Ivo became partners after Ivo's courtship.
+  Winter, year 52: Ura the Second was born to Brak the Second and Zuri.
+  Winter, year 52: A feud broke out between Tok the Second and Hela the Second over stolen meat.
+  Spring, year 54: Oren died of old age, 57 years old.
+  Autumn, year 54: Moru the Second and Awa became partners after Moru the Second's courtship.
+  Autumn, year 55: Enko the Second was born to Moru the Second and Awa.
+  Spring, year 56: A feud broke out between Tarek the Second and Kesh the Second over their love for Ruu.
+  Autumn, year 56: Ysa and Arn became partners after Arn's courtship.
+  Autumn, year 56: Ulf the Second and Vena became partners after Vena's courtship.
+  Autumn, year 57: Oren the Second was born to Brak the Second and Zuri.
+  Autumn, year 57: Sten the Second was born to Sef and Lin.
+  Autumn, year 57: Moru the Fourth was born to Ulf the Second and Vena.
+  Winter, year 57: Ama died of old age, 54 years old.
+  Spring, year 58: Enko the Third was born to Lott and Oda.
+  Spring, year 58: Ulf the Second was killed hunting a mammoth.
+  Summer, year 58: Tiru and Ivo became partners after Ivo's courtship.
+  Winter, year 58: Moru the Second died of the wounds.
+  Spring, year 59: Duro and Tala the Second became partners after Duro's courtship.
+  Spring, year 59: Hela the Third was born to Moru the Second and Awa.
+  Autumn, year 59: Ivo died of old age, 47 years old.
+  Spring, year 60: Kesh the Second and Vena became partners after Vena's courtship.
+  Winter, year 60: Joro the Second and Kora became partners after Joro the Second's courtship.
+  Summer, year 61: A feud broke out between Kesh the Second and Maa the Second over stolen meat.
+  Spring, year 62: Sten died of old age, 56 years old.
+  Autumn, year 62: Ulf the Third was born to Duro and Tala the Second.
+  Spring, year 64: Moru the Third and Awa became partners after Awa's courtship.
+  Autumn, year 64: Lott died of old age, 52 years old.
+  Spring, year 65: Duro died of old age, 54 years old.
+  Summer, year 65: Kal the Second and Oda became partners after Oda's courtship.
+  Winter, year 65: Tok the Second and Ossa the Second became partners after Ossa the Second's courtship.
+  Winter, year 65: Oda was killed hunting a mammoth.
+  Spring, year 66: Tarek the Second was killed by Kesh the Second in a fight.
+  Spring, year 66: Ruu died of old age, 50 years old.
+  Summer, year 66: Lin died of old age, 47 years old.
+  Autumn, year 66: Sef and Ena the Second became partners after Sef's courtship.
+  Autumn, year 66: Duro the Second was born to Tok the Second and Ossa the Second.
+  Winter, year 66: Vena was killed hunting a mammoth.
+  Autumn, year 67: Oda the Second was born to Brak the Second and Zuri.
+  Winter, year 67: A feud broke out between Tok the Second and Kesh the Second after a bitter quarrel.
+  Winter, year 67: Sef died of old age, 49 years old.
+  Summer, year 68: Voll the Second and Ena the Second became partners after Voll the Second's courtship.
+  Autumn, year 68: Arn died of old age, 59 years old.
+  Autumn, year 68: Ama the Second was born to Arn and Ysa.
+  Summer, year 69: Brak the Third and Ura the Second became partners after Brak the Third's courtship.
+  Summer, year 69: Maa the Second was killed by Kesh the Second in a fight.
+  Summer, year 69: Tala the Second and Hano the Second became partners after Tala the Second's courtship.
+  Winter, year 69: Kesh the Second was killed hunting a mammoth.
+  Spring, year 70: Arn the Second was born to Moru the Third and Awa.
+  Summer, year 70: Tarek the Third was born to Brak the Third and Ura the Second.
+  Winter, year 70: Sela the Second was born to Voll the Second and Ena the Second.
+  Winter, year 70: Ruk the Second died of old age, 48 years old.
+  Autumn, year 71: Ivo the Second was born to Joro the Second and Kora.
+  Spring, year 72: Ban died of old age, 52 years old.
+  Spring, year 73: Ruk the Third was born to Brak the Third and Ura the Second.
+  Autumn, year 73: Nara the Second was born to Moru the Third and Awa.
+  Autumn, year 73: Awa died giving birth.
+  Autumn, year 73: Moru the Third and Mira the Second became partners after Moru the Third's courtship.
+  Winter, year 73: Sef the Second was born to Voll the Second and Ena the Second.
+  Spring, year 74: Awa the Second was born to Joro the Second and Kora.
+  Spring, year 74: Kesh the Third was born to Tok the Second and Ossa the Second.
+  Spring, year 74: Pela the Second was born to Hano the Second and Tala the Second.
+  Winter, year 75: Zuri died of old age, 49 years old.
+  Spring, year 76: Ruu the Second was born to Tok the Second and Ossa the Second.
+  Summer, year 76: Tiru and Kal the Second became partners after Kal the Second's courtship.
+  Summer, year 76: Ilka the Second was born to Moru the Third and Mira the Second.
+  Autumn, year 76: Lott the Second was born to Joro the Second and Kora.
+  Spring, year 77: Iva the Second was born to Kal the Second and Tiru.
+  Spring, year 77: Duro the Third was born to Voll the Second and Ena the Second.
+  Spring, year 77: Neva the Second was born to Brak the Third and Ura the Second.
+  Summer, year 77: Duro the Third died of the sickness.
+  Autumn, year 77: Ulf the Fourth was born to Hano the Second and Tala the Second.
+  Winter, year 77: Garu the Second died of old age, 55 years old.
+  Spring, year 78: Garu the Third was born to Moru the Third and Mira the Second.
+  Summer, year 79: Ulf the Third and Ysa became partners after Ulf the Third's courtship.
+  Winter, year 79: Voll the Second died of old age, 45 years old.
+  Autumn, year 80: Pim the Second and Ena the Second became partners after Ena the Second's courtship.
+  Winter, year 80: Ossa the Second was killed hunting a mammoth.
+  Spring, year 81: Duro the Second died of the sickness.
+  Summer, year 81: Tok the Second and Hela the Third became partners after Tok the Second's courtship.
+  Spring, year 82: Tiru was killed hunting a mammoth.
+  Winter, year 82: Oren the Second died of the wounds.
+  Autumn, year 83: Tiru the Second was born to Hano the Second and Tala the Second.
+  Spring, year 84: Ban the Second and Oda the Second became partners after Ban the Second's courtship.
+  Autumn, year 84: Kal the Second died of old age, 47 years old.
+  Autumn, year 84: Voll the Third was born to Moru the Third and Mira the Second.
+  Spring, year 85: Ama the Second and Brak the Second became partners after Brak the Second's courtship.
+  Spring, year 85: Zuri the Second was born to Ban the Second and Oda the Second.
+  Autumn, year 85: Oren the Third was born to Brak the Third and Ura the Second.
+  Spring, year 86: Vena the Second was born to Tok the Second and Hela the Third.
+  Summer, year 86: Tok the Second died of old age, 52 years old.
+  Winter, year 86: Grem the Second and Hela the Third became partners after Grem the Second's courtship.
+  Spring, year 87: Joro the Second died of old age, 54 years old.
+  Summer, year 87: Tok the Third was born to Ban the Second and Oda the Second.
+  Summer, year 87: Brak the Second died of old age, 52 years old.
+  Summer, year 87: Kora and Tarek the Third became partners after Kora's courtship.
+  Autumn, year 87: Kal the Third was born to Brak the Second and Ama the Second.
+  Autumn, year 87: Brak the Third died of old age, 49 years old.
+  Spring, year 88: Ysa died of the wounds.
+  Autumn, year 88: Ura the Second and Moru the Fourth became partners after Ura the Second's courtship.
+  Autumn, year 89: Joro the Third was born to Moru the Fourth and Ura the Second.
+  Spring, year 90: Kesh the Third and Ama the Second became partners after Ama the Second's courtship.
+  Spring, year 90: Tavo the Third and Awa the Second became partners after Tavo the Third's courtship.
+  Spring, year 90: Soa the Second was born to Ban the Second and Oda the Second.
+  Spring, year 90: Sten the Second and Pela the Second became partners after Sten the Second's courtship.
+  Summer, year 90: Maa the Third was born to Grem the Second and Hela the Third.
+  Winter, year 91: Duro the Fourth was born to Ban the Second and Oda the Second.
+  Summer, year 92: Brak the Fourth was born to Sten the Second and Pela the Second.
+  Winter, year 92: Joro the Fourth was born to Moru the Fourth and Ura the Second.
+  Autumn, year 93: Ossa the Third was born to Moru the Third and Mira the Second.
+  Spring, year 94: Tavo the Third died of old age, 52 years old.
+  Autumn, year 94: Iva the Second and Enko the Third became partners after Iva the Second's courtship.
+  Spring, year 95: Ban the Second died of old age, 56 years old.
+  Autumn, year 95: Awa the Second and Sef the Second became partners after Sef the Second's courtship.
+  Winter, year 95: Moru the Third died of old age, 54 years old.
+  Spring, year 96: Mira the Second and Ulf the Third became partners after Ulf the Third's courtship.
+  Spring, year 96: Ena the Second died of old age, 54 years old.
+  Summer, year 96: Oda the Second and Arn the Second became partners after Oda the Second's courtship.
+  Summer, year 97: Neva the Second was killed hunting a mammoth.
+  Winter, year 97: Ruk the Third and Sela the Second became partners after Sela the Second's courtship.
+  Autumn, year 98: Kora was killed hunting a mammoth.
+  Autumn, year 98: Ura the Second died of old age, 45 years old.
+  Autumn, year 98: Kora the Second was born to Sef the Second and Awa the Second.
+  Winter, year 98: Nara the Second and Ivo the Second became partners after Ivo the Second's courtship.
+  Spring, year 99: Tarek the Third and Ilka the Second became partners after Tarek the Third's courtship.
+  Autumn, year 99: Tiru the Second and Pim the Second became partners after Pim the Second's courtship.
+  Winter, year 99: Ban the Third was born to Grem the Second and Hela the Third.
+  Spring, year 100: Tavo the Fourth was born to Ivo the Second and Nara the Second.
+  Spring, year 100: Ysa the Second was born to Sten the Second and Pela the Second.
+  Summer, year 100: Grem the Second died of old age, 57 years old.
+  Summer, year 100: Hano the Second died of old age, 48 years old.
+  Summer, year 100: Tala the Second and Moru the Fourth became partners after Tala the Second's courtship.
+  Winter, year 100: Ulf the Fourth and Ruu the Second became partners after Ruu the Second's courtship.

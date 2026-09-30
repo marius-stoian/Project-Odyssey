@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-115 / S-US-115: Tell the clan's story in episodes (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Last story of M2b.
+
+- Simulation: episodes derived from the chronicle (no new state, so the hash and the save format are unchanged). Events and their causes are linked; the hardship events of a hard season are joined; the best groups (at least 3 events, one important) are told, at most 40 a century, each as one named paragraph: "The Hard Winter of year 2. It began in Summer, year 2: ... The turn came in Winter, year 2: ... It ended in Spring, year 3: ... Those who lived it: ...". Names by theme: hardship, feud and vengeance, hunting, sickness, love, apprenticeship.
+- Headless runner: `--story` prints the episodes, then the births, deaths, pairings, partings and feuds with their reasons; `--chronicle` still prints every event.
+- Data: `story.json` section `episodes`.
+- Code: `src/sim/episodes.{h,cpp}` (new).
+- Tests: `tests/sim/story_episode_test.cpp` (3 cases) and the command-line check `US-115 Both views`; ctest 21/21 in Debug and Release, zero warnings.
+- Balance (10 seeds x 100 years): 29 to 51 alive; every seed tells the maximum 40 episodes.
+
+
 ## US-114 / S-US-114: Teach the young and hunt together (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fifth story of M2b.

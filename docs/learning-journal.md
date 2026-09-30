@@ -508,3 +508,23 @@ A pointer here means "look at this person, do not copy them": changing `*party[i
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one "hunting party" line to the "stood firm" and "saved ... from the mammoth" lines it caused (`--why <id>`). Then set `"dangerPercent"` under `"hunt"` in `assets/data/sim/story.json` to 100 and see how the deaths change.
 
 **Check yourself.** Why does the party keep `Person*` pointers instead of copies of the people, and what would go wrong if we copied them?
+
+## US-115: Tell the clan's story in episodes (2026-09-30)
+
+**What we built.** The chronicle holds thousands of small events; nobody reads that. Now the runner also finds the *episodes*: groups of linked events (a failed harvest, an empty store, thefts, hunger deaths) and tells each as one short named paragraph with a beginning, a turn and an end. `--story` prints at most 40 a century, then the births, deaths, pairings and feuds with their reasons.
+
+**The idea: designing with data (grouping and summarising).** We never store episodes. We compute them from the events, each time, in three steps: (1) *group* events that belong together (each event points to its causes, and a small "union-find" table merges them), (2) *score* each group and keep the best, (3) *summarise* each group as a name and three sentences. Because the story is a pure function of the data, an old save tells the same story as a new one.
+
+```cpp
+for (const int cause : entry.causes) {
+    groups.join(entry.id, cause);      // an event and its causes belong together
+}
+```
+
+Data first, wording last: the groups and the scores are just numbers; only the final step turns them into sentences.
+
+**Where to look.** `findEpisodes` and `formatEpisode` in [src/sim/episodes.cpp](../src/sim/episodes.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --story` and read three episodes. Then set `"maxPerCentury"` under `"episodes"` in `assets/data/sim/story.json` to 10 and see which episodes survive.
+
+**Check yourself.** Why can `findEpisodes` be called twice on the same world and always give the same answer, and what would break that?
