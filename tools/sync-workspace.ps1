@@ -1,9 +1,9 @@
 # Mirrors the project documents from the Google Drive master folder into docs/project/.
 #
 # Dominus and Anima write the requirements, backlog and diagrams on Google Drive; the repo keeps
-# copies so everything lives on GitHub too. Claude Code runs this at session start (see
+# copies so everything lives on GitHub too. The AI coding session runs this at session start (see
 # .claude/settings.json). It copies every Drive file whose content changed, reports Drive files
-# it does not know yet, and tells Claude to commit. Codex.md is handled by sync-codex.ps1.
+# it does not know yet, and tells the session to commit. Codex.md is handled by sync-codex.ps1.
 #
 # Usage:  pwsh tools/sync-workspace.ps1
 #         pwsh tools/sync-workspace.ps1 -Source <Drive project folder>

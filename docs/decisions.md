@@ -15,7 +15,7 @@ The owner wants Mraw to assemble Project Odyssey with minimal intervention:
 | ID | Decision | Needed by | Blocks | Status | Owner answer |
 |---|---|---|---|---|---|
 | D-01 | Confirm time model: pausable real time with speed control (OPEN-04) | M2 | US-010 | Decided | 2026-09-30, owner: confirmed as proposed, pausable real time with speed control. |
-| D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M2 (week 3) | US-011, US-012, US-013 | Open |  |
+| D-02 | Side Characters interview: needs, traits, relationships (OPEN-10) | M2 (week 3) | US-011, US-012, US-013 | Decided by Dominus (delegated) | 2026-09-30: small, legible model: 4 needs (D-03), 6 traits (Brave, Timid, Kind, Greedy, Talkative, Diligent), one opinion -100..100 per pair plus kinship, memories with feelings, gossip at half strength, minor memories forgotten after 60 days. Reasoning in docs/decision-requests/D-02.md. |
 | D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M2 | US-011 | Decided | 2026-09-30, owner: confirmed as proposed, Age 1 needs are Hunger, Energy, Warmth, Social. |
 | D-04 | Sprite size and facing directions (OPEN-11) | M1 | US-022, US-024, US-030 | Decided | 2026-09-29, owner to Mraw/Anima: 32x48 px characters, 8 facing directions. |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M3 | US-030 | Open |  |
@@ -30,4 +30,4 @@ The owner wants Mraw to assemble Project Odyssey with minimal intervention:
 | D-16 | Tile size for the tile grid (ENV-11) | M1 | US-023, US-024 | Decided by Dominus (delegated) | 2026-09-30: 32x32 px tiles, matching 32-px-wide characters (D-04). Reasoning in docs/decision-requests/D-16.md. |
 | D-17 | Movement directions: US-024 says four, D-04 gives 8 facing directions | M1 | US-024 | Decided by Dominus (delegated) | 2026-09-30: 8-way movement, diagonals at the same speed; US-024 scenarios unchanged. Reasoning in docs/decision-requests/D-17.md. |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |  |
-| D-15 | Technical chain: M0 > M1 > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |  |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |  |

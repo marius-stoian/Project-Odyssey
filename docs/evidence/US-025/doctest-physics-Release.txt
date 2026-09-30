@@ -1,0 +1,8 @@
+TEST CASE:  US-025 Determinism
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\determinism_test.cpp(64): MESSAGE: mixed-math hash: 17224312723153614174
+
+===============================================================================
+[doctest] test cases:      6 |      6 passed | 0 failed | 0 skipped
+[doctest] assertions: 404040 | 404040 passed | 0 failed |
+[doctest] Status: SUCCESS!

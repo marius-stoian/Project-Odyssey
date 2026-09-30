@@ -1,0 +1,12 @@
+US-025 compiler probe diagnostics (Debug, 2026-09-30). Forbidden probes must fail with an include error naming the header.
+us025_engine_physics: compiled (allowed)
+us025_game_physics: compiled (allowed)
+us025_physics_core: compiled (allowed)
+us025_physics_engine: error C1083: Cannot open include file: 'luna/engine/layer.h': No such file or directory
+us025_physics_engine_absolute: error C1189: #error:  "Architecture include error: luna/engine/boundary.h is forbidden from PHYSICS source layer"
+us025_physics_game: error C1083: Cannot open include file: 'game/layer.h': No such file or directory
+us025_physics_platform: error C1083: Cannot open include file: 'luna/platform/layer.h': No such file or directory
+us025_physics_sdl: error C1083: Cannot open include file: 'SDL3/SDL.h': No such file or directory
+us025_physics_sim: error C1083: Cannot open include file: 'sim/layer.h': No such file or directory
+us025_platform_physics: error C1189: #error:  "Architecture include error: luna/physics/boundary.h is forbidden from PLATFORM source layer"
+us025_sim_physics: compiled (allowed)

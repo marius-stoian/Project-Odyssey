@@ -1,5 +1,6 @@
 #include "game/placeholder_art.h"
 
+#include <cmath>
 #include <cstdint>
 
 namespace odysseus::game {
@@ -122,7 +123,101 @@ void drawTile(Image& sheet, int left, TileKind kind) {
     }
 }
 
+constexpr Color kShaft{150, 104, 60};
+constexpr Color kShaftDark{110, 74, 42};
+constexpr Color kFlint{70, 74, 86};
+constexpr Color kFlintEdge{150, 156, 170};
+constexpr Color kStraw{222, 190, 96};
+constexpr Color kStrawDark{178, 144, 64};
+constexpr Color kRing{176, 52, 44};
+constexpr Color kPost{104, 72, 44};
+
+// A spear in a 32x32 cell, pointing along (dx, dy): a shaft with the tip at the front.
+void drawSpear(Image& sheet, int left, int top, double dx, double dy, bool flintTip) {
+    const double size = std::sqrt(dx * dx + dy * dy);
+    dx /= size;
+    dy /= size;
+    for (double t = -13.0; t <= 13.0; t += 0.25) {
+        const int x = left + 16 + static_cast<int>(std::lround(dx * t));
+        const int y = top + 16 + static_cast<int>(std::lround(dy * t));
+        const bool tip = t > 8.0;
+        Color color = t < -11.0 ? kShaftDark : kShaft;
+        if (tip) {
+            color = flintTip ? (t > 11.5 ? kFlintEdge : kFlint) : kShaftDark;
+        }
+        sheet.set(x, y, color);
+        if (tip && t < 12.0) {
+            // The tip is two pixels wide: a leaf-shaped point.
+            sheet.set(x + static_cast<int>(std::lround(-dy)), y + static_cast<int>(std::lround(dx)), color);
+        }
+    }
+}
+
+// A straw bale on a post with painted rings; a hit one has straw sticking out.
+void drawTarget(Image& sheet, int left, int top, bool hit) {
+    sheet.fillRect(left + 14, top + 30, 4, 18, kPost);
+    for (int y = 0; y < 26; ++y) {
+        for (int x = 0; x < 24; ++x) {
+            const int dx = x - 12;
+            const int dy = y - 13;
+            if (dx * dx + dy * dy <= 12 * 12) {
+                const int ring = static_cast<int>(std::sqrt(static_cast<double>(dx * dx + dy * dy)));
+                Color color = (ring == 3 || ring == 8) ? kRing : ((x + y) % 5 == 0 ? kStrawDark : kStraw);
+                if (ring <= 1) {
+                    color = kRing;
+                }
+                sheet.set(left + 4 + x, top + 4 + y, color);
+            }
+        }
+    }
+    if (hit) {
+        for (int i = 0; i < 6; ++i) {
+            sheet.set(left + 2 + i * 5, top + 2 + (i % 3) * 9, kStrawDark);
+            sheet.set(left + 3 + i * 5, top + 3 + (i % 3) * 9, kStraw);
+        }
+    }
+}
+
 } // namespace
+
+luna::engine::Image makePropSheet() {
+    Image sheet(8 * kSpearFrameSize, 112);
+    for (int row = 0; row < 2; ++row) {
+        for (int facing = 0; facing < static_cast<int>(Facing::Count); ++facing) {
+            const Look look = lookOf(static_cast<Facing>(facing));
+            drawSpear(sheet, facing * kSpearFrameSize, row * kSpearFrameSize, look.x, look.y, row == 0);
+        }
+    }
+    drawTarget(sheet, kTargetFrame.x, kTargetFrame.y, false);
+    drawTarget(sheet, kTargetHitFrame.x, kTargetHitFrame.y, true);
+    // A soft oval shadow, see-through so the ground shows.
+    for (int y = 0; y < kShadowFrame.height; ++y) {
+        for (int x = 0; x < kShadowFrame.width; ++x) {
+            const double nx = (x - 11.5) / 12.0;
+            const double ny = (y - 3.5) / 4.0;
+            if (nx * nx + ny * ny <= 1.0) {
+                sheet.set(kShadowFrame.x + x, kShadowFrame.y + y, Color{20, 24, 20, 110});
+            }
+        }
+    }
+    return sheet;
+}
+
+odysseus::core::Rect spearFrame(Facing facing, bool flintTip) {
+    return {static_cast<int>(facing) * kSpearFrameSize, flintTip ? 0 : kSpearFrameSize, kSpearFrameSize, kSpearFrameSize};
+}
+
+Facing facingForVector(double x, double y) {
+    if (x == 0.0 && y == 0.0) {
+        return Facing::South;
+    }
+    // Eight sectors of 45 degrees; sector 0 is East, counting towards South (y down).
+    const double eighth = std::atan2(y, x) / (std::acos(-1.0) / 4.0);
+    const int sector = (static_cast<int>(std::lround(eighth)) + 8) % 8;
+    constexpr Facing kBySector[8] = {Facing::East, Facing::SouthEast, Facing::South, Facing::SouthWest,
+                                     Facing::West, Facing::NorthWest, Facing::North, Facing::NorthEast};
+    return kBySector[sector];
+}
 
 luna::engine::Image makeCharacterSheet() {
     const int directions = static_cast<int>(Facing::Count);

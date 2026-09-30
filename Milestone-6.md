@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Codex / requirements | v1.3 / v1.4 |
-| Repository | `qa` @ `1649d33` (CI for US-021 green; US-022 CI running at save time) |
+| Repository | `qa` @ `5ce489b` (CI for US-021 green; US-022 CI running at save time) |
 | Milestone | **M1 Luna engine: 3 of 5** |
 | Next | S-US-023 tile map and a following camera |
 

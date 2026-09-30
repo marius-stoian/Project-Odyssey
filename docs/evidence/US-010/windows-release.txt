@@ -1,0 +1,36 @@
+US-010 Windows ctest, release (2026-09-30). Build: 0 warning lines.
+
+Test project C:/Users/Amek/.amek-ai/Odysseus/odysseus/build/windows-x64
+      Start  1: odysseus_tests
+ 1/13 Test  #1: odysseus_tests ....................   Passed    0.04 sec
+      Start  2: US-003 Allowed use
+ 2/13 Test  #2: US-003 Allowed use ................   Passed    6.08 sec
+      Start  3: US-003 Forbidden use
+ 3/13 Test  #3: US-003 Forbidden use ..............   Passed    3.96 sec
+      Start  4: US-003 Luna stays game-agnostic
+ 4/13 Test  #4: US-003 Luna stays game-agnostic ...   Passed    5.05 sec
+      Start  5: US-003 Guard completeness
+ 5/13 Test  #5: US-003 Guard completeness .........   Passed    5.30 sec
+      Start  6: luna_tests
+ 6/13 Test  #6: luna_tests ........................   Passed    0.03 sec
+      Start  7: US-020 Open and close
+ 7/13 Test  #7: US-020 Open and close .............   Passed    3.37 sec
+      Start  8: luna_platform_tests
+ 8/13 Test  #8: luna_platform_tests ...............   Passed    0.03 sec
+      Start  9: US-021 Game reads only intents
+ 9/13 Test  #9: US-021 Game reads only intents ....   Passed    0.02 sec
+      Start 10: luna_window_tests
+10/13 Test #10: luna_window_tests .................   Passed    0.55 sec
+      Start 11: odysseus_game_tests
+11/13 Test #11: odysseus_game_tests ...............   Passed    0.03 sec
+      Start 12: US-024 Walk to the rock
+12/13 Test #12: US-024 Walk to the rock ...........   Passed    4.36 sec
+      Start 13: odysseus_sim_tests
+13/13 Test #13: odysseus_sim_tests ................   Passed    0.03 sec
+
+100% tests passed out of 13
+
+Label Time Summary:
+window    =   8.28 sec*proc (3 tests)
+
+Total Test time (real) =  28.87 sec

@@ -26,6 +26,10 @@ endforeach()
 # with a message that names the library.
 find_package(doctest CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+
+# Content (JSON, sprites) lives in assets/; programs find it here during development.
+set(ODYSSEUS_DATA_DIR "${PROJECT_SOURCE_DIR}/assets/data")
 
 # The AddressSanitizer runtime DLL sits next to the compiler. Debug programs need it
 # beside them to start outside Visual Studio (double-click, ctest).
@@ -51,12 +55,13 @@ function(odysseus_apply_settings target)
     endif()
 endfunction()
 
-# --- Five layers: dependency arrows point down only (ADR-004, ADR-016). ---
+# --- Six layers: dependency arrows point down only (ADR-004, ADR-016, ARC-10). ---
 include(cmake/LayerRules.cmake)
 add_library(odysseus_core STATIC
     src/core/version.cpp
     src/core/log.cpp
-    src/core/assertions.cpp)
+    src/core/assertions.cpp
+    src/core/random.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
@@ -73,6 +78,20 @@ target_link_libraries(luna_platform PRIVATE SDL3::SDL3)
 odysseus_register_layer(luna_platform platform luna/platform)
 odysseus_apply_settings(luna_platform)
 
+# Luna Physics (ADR-017): deterministic fixed-point 3D, headless, Core only.
+add_library(luna_physics STATIC
+    src/luna/physics/fixed.cpp
+    src/luna/physics/vec3.cpp
+    src/luna/physics/quat.cpp
+    src/luna/physics/shapes.cpp
+    src/luna/physics/spatial_grid.cpp
+    src/luna/physics/ballistics.cpp
+    src/luna/physics/rigid_body.cpp
+    src/luna/physics/material.cpp)
+target_link_libraries(luna_physics PUBLIC odysseus_core)
+odysseus_register_layer(luna_physics physics luna/physics)
+odysseus_apply_settings(luna_physics)
+
 add_library(luna_engine STATIC
     src/luna/engine/layer.cpp
     src/luna/engine/application.cpp
@@ -82,13 +101,21 @@ add_library(luna_engine STATIC
     src/luna/engine/renderer.cpp
     src/luna/engine/camera.cpp
     src/luna/engine/tile_map.cpp
-    src/luna/engine/collision.cpp)
-target_link_libraries(luna_engine PUBLIC luna_platform)
+    src/luna/engine/collision.cpp
+    src/luna/engine/physics_view.cpp)
+target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
 
-add_library(odysseus_sim STATIC src/sim/layer.cpp)
-target_link_libraries(odysseus_sim PUBLIC odysseus_core)
+add_library(odysseus_sim STATIC
+    src/sim/layer.cpp
+    src/sim/calendar.cpp
+    src/sim/game_clock.cpp
+    src/sim/json_data.cpp
+    src/sim/world.cpp)
+target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
+# PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
+target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_sim sim sim)
 odysseus_apply_settings(odysseus_sim)
 
@@ -97,20 +124,24 @@ add_library(odysseus_game STATIC
     src/game/odyssey_game.cpp
     src/game/placeholder_art.cpp
     src/game/test_map.cpp
-    src/game/hero.cpp)
+    src/game/hero.cpp
+    src/game/materials.cpp
+    src/game/spear_range.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
+# PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
+target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
 
 # --- Programs ---
 add_executable(odysseus apps/odysseus/main.cpp)
 target_link_libraries(odysseus PRIVATE odysseus_game)
-target_compile_definitions(odysseus PRIVATE ODYSSEUS_LAYER_GAME)
+target_compile_definitions(odysseus PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus)
 
 add_executable(odysseus_headless apps/headless/main.cpp)
 target_link_libraries(odysseus_headless PRIVATE odysseus_sim)
-target_compile_definitions(odysseus_headless PRIVATE ODYSSEUS_LAYER_SIM)
+target_compile_definitions(odysseus_headless PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_headless)
 
 # Visual Studio: F5 starts the game.
@@ -143,12 +174,31 @@ odysseus_apply_settings(us004_assert_probe)
 add_dependencies(odysseus_tests us004_assert_probe)
 add_subdirectory(tests/architecture)
 # Architecture scenarios invoke the build, so serialize them even under ctest -j.
-add_test(NAME odysseus_tests COMMAND odysseus_tests "--test-case-exclude=US-003*")
-foreach(scenario IN ITEMS "Allowed use" "Forbidden use" "Luna stays game-agnostic" "Guard completeness")
-    set(test_name "US-003 ${scenario}")
+add_test(NAME odysseus_tests COMMAND odysseus_tests "--test-case-exclude=US-003*,US-025*")
+foreach(test_name IN ITEMS "US-003 Allowed use" "US-003 Forbidden use" "US-003 Luna stays game-agnostic"
+                           "US-003 Guard completeness" "US-025 Physics layer rules")
     add_test(NAME "${test_name}" COMMAND odysseus_tests "--test-case=${test_name}")
     set_tests_properties("${test_name}" PROPERTIES RESOURCE_LOCK architecture_build)
 endforeach()
+
+# --- Luna Physics tests: Physics identity, headless (M1b) ---
+add_executable(luna_physics_tests
+    tests/main.cpp
+    tests/physics/fixed_test.cpp
+    tests/physics/rotation_test.cpp
+    tests/physics/determinism_test.cpp
+    tests/physics/shapes_test.cpp
+    tests/physics/ballistics_test.cpp
+    tests/physics/rigid_body_test.cpp)
+target_link_libraries(luna_physics_tests PRIVATE luna_physics doctest::doctest)
+target_compile_definitions(luna_physics_tests PRIVATE ODYSSEUS_LAYER_PHYSICS)
+odysseus_apply_settings(luna_physics_tests)
+add_test(NAME luna_physics_tests COMMAND luna_physics_tests)
+
+# --- Charter rule 10: no float or double inside Luna Physics ---
+add_test(NAME "US-025 Physics uses no floating point"
+    COMMAND "${CMAKE_COMMAND}" -DSOURCE_DIR=${PROJECT_SOURCE_DIR}
+            -P "${PROJECT_SOURCE_DIR}/tests/physics/check_no_floating_point.cmake")
 
 # --- Luna tests: headless unit tests with the Engine identity (Engine, Platform, Core) ---
 add_executable(luna_tests
@@ -196,9 +246,10 @@ set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
 # --- Game tests: Game identity (US-024 the hero) ---
 add_executable(odysseus_game_tests
     tests/main.cpp
-    tests/game/hero_test.cpp)
+    tests/game/hero_test.cpp
+    tests/game/spear_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
-target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME)
+target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_game_tests)
 add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
 
@@ -207,3 +258,18 @@ add_test(NAME "US-024 Walk to the rock"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_walk_to_rock.cmake")
 set_tests_properties("US-024 Walk to the rock" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- End-to-end: throw a spear at the straw target in the real window (US-029) ---
+add_test(NAME "US-029 Throw in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us029
+            -P "${PROJECT_SOURCE_DIR}/tests/game/run_throw_spear.cmake")
+set_tests_properties("US-029 Throw in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- Simulation tests: Simulation identity, headless (M2) ---
+add_executable(odysseus_sim_tests
+    tests/main.cpp
+    tests/sim/world_test.cpp)
+target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest)
+target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
+odysseus_apply_settings(odysseus_sim_tests)
+add_test(NAME odysseus_sim_tests COMMAND odysseus_sim_tests)

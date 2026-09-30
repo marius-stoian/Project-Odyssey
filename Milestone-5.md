@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Codex / requirements | v1.3 / v1.4 |
-| Repository | `qa` @ `f22a5ef` (CI running at save time; see the next snapshot) |
+| Repository | `qa` @ `1773390` (CI running at save time; see the next snapshot) |
 | Milestone | **M1 Luna engine: 2 of 5** |
 | Next | S-US-022 crisp pixel-art sprites |
 

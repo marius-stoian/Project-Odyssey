@@ -1,0 +1,42 @@
+US-028 Windows ctest, debug (2026-09-30). Build: 0 warning lines.
+
+Test project C:/Users/Amek/.amek-ai/Odysseus/odysseus/build/windows-x64
+      Start  1: odysseus_tests
+ 1/16 Test  #1: odysseus_tests ..........................   Passed    0.14 sec
+      Start  2: US-003 Allowed use
+ 2/16 Test  #2: US-003 Allowed use ......................   Passed    6.26 sec
+      Start  3: US-003 Forbidden use
+ 3/16 Test  #3: US-003 Forbidden use ....................   Passed    4.29 sec
+      Start  4: US-003 Luna stays game-agnostic
+ 4/16 Test  #4: US-003 Luna stays game-agnostic .........   Passed    5.32 sec
+      Start  5: US-003 Guard completeness
+ 5/16 Test  #5: US-003 Guard completeness ...............   Passed    7.70 sec
+      Start  6: US-025 Physics layer rules
+ 6/16 Test  #6: US-025 Physics layer rules ..............   Passed   12.34 sec
+      Start  7: luna_physics_tests
+ 7/16 Test  #7: luna_physics_tests ......................   Passed    4.02 sec
+      Start  8: US-025 Physics uses no floating point
+ 8/16 Test  #8: US-025 Physics uses no floating point ...   Passed    0.03 sec
+      Start  9: luna_tests
+ 9/16 Test  #9: luna_tests ..............................   Passed    0.07 sec
+      Start 10: US-020 Open and close
+10/16 Test #10: US-020 Open and close ...................   Passed    3.60 sec
+      Start 11: luna_platform_tests
+11/16 Test #11: luna_platform_tests .....................   Passed    0.05 sec
+      Start 12: US-021 Game reads only intents
+12/16 Test #12: US-021 Game reads only intents ..........   Passed    0.05 sec
+      Start 13: luna_window_tests
+13/16 Test #13: luna_window_tests .......................   Passed    0.81 sec
+      Start 14: odysseus_game_tests
+14/16 Test #14: odysseus_game_tests .....................   Passed    0.06 sec
+      Start 15: US-024 Walk to the rock
+15/16 Test #15: US-024 Walk to the rock .................   Passed    4.53 sec
+      Start 16: odysseus_sim_tests
+16/16 Test #16: odysseus_sim_tests ......................   Passed    0.06 sec
+
+100% tests passed out of 16
+
+Label Time Summary:
+window    =   8.93 sec*proc (3 tests)
+
+Total Test time (real) =  49.36 sec
