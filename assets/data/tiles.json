@@ -1,0 +1,20 @@
+{
+  "tiles": [
+    { "name": "grass", "atlas": "grass", "solid": false },
+    { "name": "path", "atlas": "path", "solid": false },
+    { "name": "stone", "atlas": "stone", "solid": true },
+    { "name": "water", "atlas": "water", "solid": true },
+    { "name": "dirt", "atlas": "dirt", "solid": false },
+    { "name": "mossy stone", "atlas": "mossy_stone", "solid": false },
+    { "name": "sand", "atlas": "sand", "solid": false },
+    { "name": "snow", "atlas": "snow", "solid": false },
+    { "name": "ice", "atlas": "ice", "solid": false },
+    { "name": "mud", "atlas": "mud", "solid": false },
+    { "name": "wooden floor", "atlas": "wooden_floor", "solid": false },
+    { "name": "planks", "atlas": "planks", "solid": false },
+    { "name": "brick", "atlas": "brick", "solid": true },
+    { "name": "cobblestone", "atlas": "cobblestone", "solid": false },
+    { "name": "desert", "atlas": "desert_cracked", "solid": false },
+    { "name": "lava", "atlas": "lava", "solid": true }
+  ]
+}

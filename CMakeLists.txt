@@ -151,7 +151,8 @@ add_library(odysseus_game STATIC
     src/game/spear_range.cpp
     src/game/sword.cpp
     src/game/enemy.cpp
-    src/game/art.cpp)
+    src/game/art.cpp
+    src/game/level.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -274,7 +275,8 @@ add_executable(odysseus_game_tests
     tests/main.cpp
     tests/game/hero_test.cpp
     tests/game/spear_test.cpp
-    tests/game/art_test.cpp)
+    tests/game/art_test.cpp
+    tests/game/level_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_game_tests)

@@ -2,9 +2,14 @@
 
 #include "boundary.h"
 
+#include "game/placeholder_art.h"
+
+#include <string>
+
 namespace odysseus::game {
 
-// A standing training enemy the sword can hit. Position is in world pixels, like the hero's.
+// A character placed in the level whom the sword can hit (M2c: they stand still, D-19).
+// Position is in world pixels, like the hero's.
 class Enemy {
 public:
     Enemy(double feetX, double feetY, int maxHp);
@@ -21,6 +26,14 @@ public:
     int maxHp() const { return maxHp_; }
     bool isAlive() const { return hp_ > 0; }
     bool isFlashing() const { return damageFlashTicks_ > 0; }
+
+    // Who it is, from the level (US-122).
+    int id = 0;
+    std::string name = "Enemy";
+    std::string frames = "goblin"; // its art: an atlas frame, or a frame set with 8 directions
+    int directions = 1;
+    Facing facing = Facing::South;
+    int swordDamage = 5;
 
 private:
     double feetX_;

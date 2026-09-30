@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "core/geometry.h"
+#include "game/placeholder_art.h"
 #include "luna/engine/image.h"
 
 #include <filesystem>
@@ -73,14 +74,21 @@ luna::engine::Image contactSheet(const Atlas& atlas);
 // programmer art (US-120 "Missing art").
 struct ArtSet {
     luna::engine::Image heroSheet{0, 0};
-    luna::engine::Image tileStrip{0, 0};
-    luna::engine::Image enemy{0, 0};
-    luna::engine::Image enemyHit{0, 0};
+    luna::engine::Image tileStrip{0, 0};      // one column per ground kind, in the order asked for
+    luna::engine::Image characters{0, 0};     // every character frame (the atlas)
+    luna::engine::Image charactersHit{0, 0};  // the same, tinted red: the flash after a hit
+    std::map<std::string, int> cells;         // atlas cell by frame name; empty with programmer art
     bool ownArt = false;
     std::string problem; // why the programmer art is used, when it is
+
+    // Where a character of this kind stands in `characters`: `frames` is its frame set, with 8
+    // directions ("<frames>.S.0" ...) or 1 (a front view, "<frames>"). An unknown frame shows
+    // the first cell rather than nothing.
+    core::Rect frame(const std::string& frames, int directions, Facing facing, int walkFrame) const;
 };
 
-// `spritesFolder` holds atlas/ (written by odysseus_atlas).
-ArtSet makeArtSet(const std::filesystem::path& spritesFolder);
+// `spritesFolder` holds atlas/ (written by odysseus_atlas); `groundFrames` names the atlas frame
+// of each ground kind, in tile-number order.
+ArtSet makeArtSet(const std::filesystem::path& spritesFolder, const std::vector<std::string>& groundFrames);
 
 } // namespace odysseus::game

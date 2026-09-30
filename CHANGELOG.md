@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-122 / S-US-122: Levels as data (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Third story of M2c.
+
+- Data: `assets/data/tiles.json` (16 ground kinds), `assets/data/characters.json` (12 character kinds), `assets/levels/valley.json` (the demo that used to be code).
+- Game: `level.{h,cpp}` (definitions; level model; validated reading with file and field in every error; safe saving with 3 backups; falling back to a backup when damaged); the game starts from a level (`--level <file>`); enemies are the level's placed characters, each drawn with its own art; the ground strip follows tiles.json.
+- Tests: `tests/game/level_test.cpp` (3 cases), US-120 tests adapted; ctest 21/21 in Debug and Release, zero warnings.
+
+
 ## US-121 / S-US-121: Point, click and read on screen (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Second story of M2c.

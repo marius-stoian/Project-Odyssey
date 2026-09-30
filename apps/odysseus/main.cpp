@@ -2,6 +2,7 @@
 //   --quit-after <seconds>   close by itself after that long, exactly like the close button
 //   --log-dir <folder>       write the session log there instead of the per-user folder
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
+//   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
 //   --drag <x1>:<y1>:<x2>:<y2>:<from>:<to>  hold the left button and move from one point to the other
 //   --point <x>:<y>:<from>:<to>  rest the pointer there without pressing (hover)
@@ -32,6 +33,7 @@ struct Arguments {
     double quitAfterSeconds = 0.0;
     std::filesystem::path logDirectory;
     std::filesystem::path screenshot;
+    std::filesystem::path level;
     std::vector<luna::engine::ScriptedHold> holds;
     std::vector<luna::engine::ScriptedPointer> pointer;
     std::vector<luna::engine::ScriptedText> typing;
@@ -79,6 +81,8 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.quitAfterSeconds = std::stod(argv[++i]);
         } else if (name == "--log-dir") {
             arguments.logDirectory = argv[++i];
+        } else if (name == "--level") {
+            arguments.level = argv[++i];
         } else if (name == "--screenshot") {
             arguments.screenshot = argv[++i];
         } else if (name == "--click") {
@@ -125,7 +129,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Project Odyssey " << version << "\nLog: " << log.file().string() << '\n';
 
     try {
-        odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR);
+        odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR, arguments.level);
         const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
                                                {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds, arguments.pointer, arguments.typing});
         const odysseus::game::Hero& hero = game.hero();
