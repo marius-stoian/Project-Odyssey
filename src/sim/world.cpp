@@ -21,6 +21,16 @@ int seasonalTemperature(Season season) {
     return 10;
 }
 
+// "Tok", "Tok and Brak", "Tok, Brak and Ura".
+std::string joinNames(const std::vector<std::string>& names) {
+    std::string joined;
+    for (std::size_t i = 0; i < names.size(); ++i) {
+        joined += i == 0 ? "" : (i + 1 == names.size() ? " and " : ", ");
+        joined += names[i];
+    }
+    return joined;
+}
+
 } // namespace
 
 SimConfig loadSimConfig(const std::filesystem::path& dataDirectory) {
@@ -32,6 +42,7 @@ SimConfig loadSimConfig(const std::filesystem::path& dataDirectory) {
     config.names = loadNameList(dataDirectory / "sim" / "names.json");
     config.social = loadSocialConfig(dataDirectory / "sim" / "social.json");
     config.life = loadLifeConfig(dataDirectory / "sim" / "life.json");
+    config.story = loadStoryConfig(dataDirectory / "sim" / "story.json");
     return config;
 }
 
@@ -43,6 +54,7 @@ World::World(std::uint64_t seed, SimConfig config)
       huntRandom_(seed, static_cast<std::uint64_t>(Stream::Hunting)),
       socialRandom_(seed, static_cast<std::uint64_t>(Stream::Social)),
       lifeRandom_(seed, static_cast<std::uint64_t>(Stream::Life)),
+      storyRandom_(seed, static_cast<std::uint64_t>(Stream::Story)),
       people_(makeStartingClan(config_.clan, config_.names, calendar_.daysPerYear(), peopleRandom_)),
       food_(config_.clan.startingFood) {
     for (Person& person : people_) {
@@ -189,16 +201,22 @@ void World::doAction(Person& person) {
         food_ -= taken;
         person.lastTheftDay = today();
         satisfy(person.needs, Need::Hunger, taken * config_.needs.mealValue / 2, maximum);
-        if (taken > 0 && socialRandom_.chance(static_cast<std::uint32_t>(config_.social.witnessPercent))) {
-            std::vector<int> awake;
-            for (const Person& other : people_) {
-                if (other.alive && other.id != person.id && other.action != Action::Sleep) {
-                    awake.push_back(other.id);
+        if (taken > 0) {
+            // Someone may see it; either way the theft is an event, so a later empty store
+            // can name the thief (US-110).
+            int witness = -1;
+            if (socialRandom_.chance(static_cast<std::uint32_t>(config_.social.witnessPercent))) {
+                std::vector<int> awake;
+                for (const Person& other : people_) {
+                    if (other.alive && other.id != person.id && other.action != Action::Sleep) {
+                        awake.push_back(other.id);
+                    }
+                }
+                if (!awake.empty()) {
+                    witness = awake[socialRandom_.below(static_cast<std::uint32_t>(awake.size()))];
                 }
             }
-            if (!awake.empty()) {
-                recordTheft(person.id, awake[socialRandom_.below(static_cast<std::uint32_t>(awake.size()))]);
-            }
+            recordTheft(person.id, witness);
         }
         break;
     }
@@ -233,8 +251,26 @@ void World::eatTogether() {
     }
     // The first evening the store runs dry is news; the next ones are not, until it refills.
     if (hungry > 0 && !storeRanOut_) {
-        chronicle_.add(date(), kImportanceStoreEmpty,
-                       std::format("The food store ran empty; {} went to bed hungry.", hungry == 1 ? std::string("one") : std::to_string(hungry)));
+        // Why it ran empty: the thefts of the last weeks and the failed harvest, if any (US-110).
+        std::vector<int> causes = recentEvents(EventKind::Theft, config_.story.causes.theftWindowDays);
+        std::vector<std::string> thieves;
+        for (const int theft : causes) {
+            const std::string& thief = nameOf(chronicle_.find(theft)->who);
+            if (std::find(thieves.begin(), thieves.end(), thief) == thieves.end()) {
+                thieves.push_back(thief);
+            }
+        }
+        std::string reason;
+        if (leanEvent_ >= 0) {
+            causes.push_back(leanEvent_);
+            reason = " after the failed harvest";
+        }
+        if (!thieves.empty()) {
+            reason += std::string(reason.empty() ? " after" : " and") + " the thefts of " + joinNames(thieves);
+        }
+        chronicle_.record(date(), kImportanceStoreEmpty, EventKind::StoreEmpty, -1, -1, -1, causes,
+                          std::format("The food store ran empty{}; {} went to bed hungry.", reason,
+                                      hungry == 1 ? std::string("one") : std::to_string(hungry)));
     }
     storeRanOut_ = hungry > 0;
 }
@@ -294,6 +330,16 @@ void World::pairUp() {
 
 void World::updateFeuds() {
     const int bitter = config_.life.feudOpinion;
+    // The latest event of a kind between two people (either way round), or -1.
+    auto findEvent = [this](EventKind kind, int a, int b) {
+        const auto& entries = chronicle_.entries();
+        for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
+            if (it->kind == kind && ((it->who == a && it->other == b) || (it->who == b && it->other == a))) {
+                return it->id;
+            }
+        }
+        return -1;
+    };
     // Old feuds end when one side dies or both have cooled down.
     std::vector<std::pair<int, int>> still;
     for (const auto& [a, b] : feuds_) {
@@ -303,13 +349,19 @@ void World::updateFeuds() {
             continue;
         }
         if (opinion(a, b) > 0 && opinion(b, a) > 0) {
-            chronicle_.add(date(), kImportancePeace, std::format("{} and {} made peace.", first.name, second.name));
+            std::vector<int> causes;
+            if (const int feud = findEvent(EventKind::Feud, a, b); feud >= 0) {
+                causes.push_back(feud);
+            }
+            chronicle_.record(date(), kImportancePeace, EventKind::Peace, a, b, -1, causes,
+                              std::format("{} and {} made peace.", first.name, second.name));
             continue;
         }
         still.push_back({a, b});
     }
     feuds_ = still;
-    // New feuds: both think badly of each other.
+    // New feuds: both think badly of each other, and say why: the strongest grudges they hold
+    // against each other are the causes, the strongest of all gives the reason.
     for (const Person& first : people_) {
         if (!first.alive) {
             continue;
@@ -321,7 +373,33 @@ void World::updateFeuds() {
             if (opinion(first.id, second.id) <= bitter && opinion(second.id, first.id) <= bitter &&
                 std::find(feuds_.begin(), feuds_.end(), std::pair<int, int>{first.id, second.id}) == feuds_.end()) {
                 feuds_.push_back({first.id, second.id});
-                chronicle_.add(date(), kImportanceFeud, std::format("A feud broke out between {} and {}.", first.name, second.name));
+                std::vector<Grudge> reasons;
+                for (const Grudge& grudge : first.grudges) {
+                    if (grudge.about == second.id) reasons.push_back(grudge);
+                }
+                for (const Grudge& grudge : second.grudges) {
+                    if (grudge.about == first.id) reasons.push_back(grudge);
+                }
+                // Heaviest first; equal weights: the earlier event (a total order, so no ties remain).
+                std::sort(reasons.begin(), reasons.end(), [](const Grudge& a, const Grudge& b) {
+                    return a.weight != b.weight ? a.weight > b.weight : a.event < b.event;
+                });
+                std::vector<int> causes;
+                for (const Grudge& grudge : reasons) {
+                    if (static_cast<int>(causes.size()) < config_.story.causes.maxCauses &&
+                        std::find(causes.begin(), causes.end(), grudge.event) == causes.end()) {
+                        causes.push_back(grudge.event);
+                    }
+                }
+                std::string reason;
+                if (!reasons.empty()) {
+                    if (const ChronicleEntry* top = chronicle_.find(reasons.front().event)) {
+                        reason = reasonPhrase(*top);
+                    }
+                }
+                chronicle_.record(date(), kImportanceFeud, EventKind::Feud, first.id, second.id, -1, causes,
+                                  reason.empty() ? std::format("A feud broke out between {} and {}.", first.name, second.name)
+                                                 : std::format("A feud broke out between {} and {} {}.", first.name, second.name, reason));
             }
         }
     }
@@ -354,12 +432,13 @@ void World::giveBirth(Person& mother, std::vector<Person>& newborns) {
     } else {
         giveRandomTraits(child, lifeRandom_);
     }
-    chronicle_.add(date(), kImportanceBirth, std::format("{} was born to {} and {}.", child.name, father.name, mother.name));
+    const int birthEvent = chronicle_.record(date(), kImportanceBirth, EventKind::Birth, child.id, mother.id, father.id, {},
+                                             std::format("{} was born to {} and {}.", child.name, father.name, mother.name));
     mother.pregnantDays = 0;
     mother.lastBirthDay = today();
     newborns.push_back(child);
     if (lifeRandom_.chance(static_cast<std::uint32_t>(life.childbirthDeathPercent))) {
-        die(mother, CauseOfDeath::Childbirth, child.id);
+        die(mother, CauseOfDeath::Childbirth, birthEvent);
     }
 }
 
@@ -464,14 +543,74 @@ void World::giveGift(int giver, int receiver) {
     changeOpinion(to, giver, config_.social.giftOpinion);
 }
 
-void World::recordTheft(int thief, int witness) {
-    Person& seer = people_[static_cast<std::size_t>(witness)];
-    chronicle_.add(date(), kImportanceTheft,
-                   std::format("{} saw {} stealing from the food store.", seer.name, people_[static_cast<std::size_t>(thief)].name));
-    // The clan's store was robbed: the object of a theft is the thief's own clan (-1).
-    remember(seer.memories, {thief, -1, MemoryKind::Theft, today(), config_.social.theftFeeling, true, false},
-             config_.social.memoryLimit);
-    changeOpinion(seer, thief, config_.social.theftOpinion);
+int World::recordTheft(int thief, int witness) {
+    const std::string text = witness >= 0 ? std::format("{} stole from the food store; {} saw it.", nameOf(thief), nameOf(witness))
+                                          : std::format("{} stole from the food store.", nameOf(thief));
+    const int event = chronicle_.record(date(), kImportanceTheft, EventKind::Theft, thief, witness, -1, {}, text);
+    if (witness >= 0) {
+        Person& seer = people_[static_cast<std::size_t>(witness)];
+        // The clan's store was robbed: the object of a theft is the thief's own clan (-1).
+        remember(seer.memories, {thief, -1, MemoryKind::Theft, today(), config_.social.theftFeeling, true, false, event},
+                 config_.social.memoryLimit);
+        changeOpinion(seer, thief, config_.social.theftOpinion);
+        addGrudge(seer, thief, event, -config_.social.theftOpinion);
+    }
+    return event;
+}
+
+void World::addGrudge(Person& owner, int about, int event, int weight) {
+    if (weight <= 0 || about == owner.id) {
+        return;
+    }
+    std::vector<Grudge>& grudges = owner.grudges;
+    for (Grudge& known : grudges) {
+        if (known.about == about && known.event == event) {
+            known.weight = std::max(known.weight, weight);
+            return;
+        }
+    }
+    grudges.push_back({about, event, weight});
+    if (static_cast<int>(grudges.size()) > config_.story.causes.grudgeLimit) {
+        // The weakest reason goes; among equals the oldest (min_element returns the first).
+        grudges.erase(std::min_element(grudges.begin(), grudges.end(), [](const Grudge& a, const Grudge& b) { return a.weight < b.weight; }));
+    }
+}
+
+std::string World::reasonPhrase(const ChronicleEntry& event) const {
+    switch (event.kind) {
+    case EventKind::Theft: return "over stolen meat";
+    case EventKind::Quarrel: return "after a bitter quarrel";
+    case EventKind::Blame: return event.aux >= 0 ? std::format("over the death of {}", nameOf(event.aux)) : "over a death";
+    case EventKind::Death: return std::format("over the death of {}", nameOf(event.who));
+    case EventKind::Revenge: return "after the fight";
+    case EventKind::Jealousy: return event.aux >= 0 ? std::format("over their love for {}", nameOf(event.aux)) : "out of jealousy";
+    default: return "";
+    }
+}
+
+std::vector<int> World::recentEvents(EventKind kind, int days) const {
+    std::vector<int> found;
+    const std::int64_t earliest = today() - days;
+    const auto& entries = chronicle_.entries();
+    for (auto it = entries.rbegin(); it != entries.rend() && it->date.day >= earliest; ++it) {
+        if (it->kind == kind) {
+            found.push_back(it->id);
+            if (static_cast<int>(found.size()) >= config_.story.causes.maxCauses) {
+                break;
+            }
+        }
+    }
+    return found;
+}
+
+std::string World::seasonPhrase() const {
+    switch (date().season) {
+    case Season::Winter: return "the hard winter";
+    case Season::Autumn: return "the lean autumn";
+    case Season::Spring: return "the hungry spring";
+    case Season::Summer: return "the dry summer";
+    }
+    return "a hard time";
 }
 
 bool World::talk(int speaker, int listener) {
@@ -506,6 +645,7 @@ bool World::talk(int speaker, int listener) {
     const int opinionChange = copy.feeling / 4;
     remember(to.memories, copy, config_.social.memoryLimit);
     changeOpinion(to, subject, opinionChange);
+    addGrudge(to, subject, copy.event, -opinionChange); // a bad story heard is still a reason (US-110)
     return true;
 }
 
@@ -531,12 +671,43 @@ void World::checkSurvival(Person& person, bool winter) {
     }
 }
 
-void World::die(Person& person, CauseOfDeath cause, int other) {
+int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     person.alive = false;
     person.causeOfDeath = cause;
     const int years = person.ageYears(calendar_.daysPerYear());
     std::string sentence;
+    std::vector<int> causes;
+    int behind = -1; // the person behind the death (a thief, later a hunt's leader), if any
     switch (cause) {
+    case CauseOfDeath::Starvation: {
+        // Hunger kills after an empty store: name the store's cause, a thief if there was one (US-110).
+        sentence = std::format("{} died of hunger in {}", person.name, seasonPhrase());
+        const std::vector<int> stores = recentEvents(EventKind::StoreEmpty, config_.story.causes.starvationWindowDays);
+        if (!stores.empty()) {
+            const ChronicleEntry& store = *chronicle_.find(stores.front());
+            causes.push_back(store.id);
+            for (const int earlier : store.causes) {
+                const ChronicleEntry* entry = chronicle_.find(earlier);
+                if (entry != nullptr && entry->kind == EventKind::Theft && behind < 0) {
+                    behind = entry->who;
+                    causes.push_back(entry->id);
+                }
+            }
+            const bool failedHarvest = std::find_if(store.causes.begin(), store.causes.end(), [this](int id) {
+                                           return chronicle_.find(id)->kind == EventKind::Lean;
+                                       }) != store.causes.end();
+            if (behind >= 0) {
+                sentence += std::format(", after {} stole from the store", nameOf(behind));
+            } else {
+                sentence += failedHarvest ? ", after the failed harvest" : ", when the store ran empty";
+            }
+        }
+        sentence += ".";
+        break;
+    }
+    case CauseOfDeath::Cold:
+        sentence = std::format("{} died of the cold in the hard winter.", person.name);
+        break;
     case CauseOfDeath::Hunting:
         sentence = std::format("{} was killed hunting a mammoth.", person.name);
         break;
@@ -550,8 +721,10 @@ void World::die(Person& person, CauseOfDeath cause, int other) {
         sentence = std::format("{} died of {}.", person.name, causeName(cause));
         break;
     }
-    chronicle_.add(date(), kImportanceDeath, sentence);
-    (void)other;
+    if (causeEvent >= 0) {
+        causes.push_back(causeEvent);
+    }
+    const int deathEvent = chronicle_.record(date(), kImportanceDeath, EventKind::Death, person.id, behind, -1, causes, sentence);
     // Close kin grieve: a memory kept for life. A widow or widower may pair again.
     for (Person& kin : people_) {
         if (!kin.alive || kin.id == person.id) {
@@ -559,13 +732,14 @@ void World::die(Person& person, CauseOfDeath cause, int other) {
         }
         const bool close = kin.partner == person.id || closeKin(kin, person);
         if (close) {
-            remember(kin.memories, {person.id, kin.id, MemoryKind::Death, today(), config_.life.griefFeeling, true, false},
+            remember(kin.memories, {person.id, kin.id, MemoryKind::Death, today(), config_.life.griefFeeling, true, false, deathEvent},
                      config_.social.memoryLimit);
         }
         if (kin.partner == person.id) {
             kin.partner = -1;
         }
     }
+    return deathEvent;
 }
 
 void World::runTicks(std::uint64_t count) {
@@ -577,7 +751,19 @@ void World::runTicks(std::uint64_t count) {
 void World::startDay() {
     // Each morning the weather is rolled: the season's typical value, give or take 5 degrees.
     temperature_ = seasonalTemperature(date().season) + static_cast<int>(weather_.below(11)) - 5;
-    forageLeft_ = config_.actions.forageDaily[static_cast<std::size_t>(date().season)];
+    // Once a year, on the first morning of autumn, the harvest may fail: a lean autumn is the
+    // root of many hard winters (US-110). The failure lasts until the next spring.
+    if (date().dayOfSeason == 1) {
+        if (date().season == Season::Spring) {
+            leanEvent_ = -1;
+        } else if (date().season == Season::Autumn && weather_.chance(static_cast<std::uint32_t>(config_.story.season.leanAutumnPercent))) {
+            leanEvent_ = chronicle_.record(date(), kImportanceLean, EventKind::Lean, -1, -1, -1, {},
+                                           std::format("The autumn harvest failed: the land gave only {}% of its usual food.",
+                                                       config_.story.season.leanForagePercent));
+        }
+    }
+    const int share = (date().season == Season::Autumn && leanEvent_ >= 0) ? config_.story.season.leanForagePercent : 100;
+    forageLeft_ = config_.actions.forageDaily[static_cast<std::size_t>(date().season)] * share / 100;
     gameLeft_ = config_.actions.gameDaily;
     if (ticks_ == 0) {
         return; // the first morning: everyone starts rested and fed
@@ -609,6 +795,8 @@ std::uint64_t World::hash() const {
     hasher.add(huntRandom_.state());
     hasher.add(socialRandom_.state());
     hasher.add(lifeRandom_.state());
+    hasher.add(storyRandom_.state());
+    hasher.add(leanEvent_);
     hasher.add(mammoths_);
     hasher.add(storeRanOut_);
     hasher.add(forageLeft_);
@@ -654,15 +842,28 @@ std::uint64_t World::hash() const {
             hasher.add(memory.feeling);
             hasher.add(memory.major);
             hasher.add(memory.secondHand);
+            hasher.add(memory.event);
         }
         for (const int value : person.opinions) {
             hasher.add(value);
+        }
+        for (const Grudge& grudge : person.grudges) {
+            hasher.add(grudge.about);
+            hasher.add(grudge.event);
+            hasher.add(grudge.weight);
         }
     }
     for (const ChronicleEntry& entry : chronicle_.entries()) {
         hasher.add(entry.date.day);
         hasher.add(entry.importance);
         hasher.add(std::string_view(entry.text));
+        hasher.add(static_cast<int>(entry.kind));
+        hasher.add(entry.who);
+        hasher.add(entry.other);
+        hasher.add(entry.aux);
+        for (const int cause : entry.causes) {
+            hasher.add(cause);
+        }
     }
     return hasher.value();
 }

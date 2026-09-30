@@ -37,6 +37,14 @@ struct Decision {
     Action chosen = Action::Rest;
 };
 
+// A reason to think badly of someone: the event that turned `owner` against `about` (M2b).
+// Feuds, blame and revenge look through these to say *why* (STO-03).
+struct Grudge {
+    int about = -1;   // PersonId
+    int event = -1;   // chronicle entry that caused it
+    int weight = 0;   // how much it counted (opinion lost)
+};
+
 // One member of the clan. Plain data: the systems (needs, AI, memory) are functions that
 // read and change it. This "struct as component" style is what an ECS formalises later.
 struct Person {
@@ -59,6 +67,7 @@ struct Person {
     Decision lastDecision;
     std::vector<Memory> memories;   // oldest first (US-013)
     std::vector<int> opinions;      // opinion of every person, by id: -100..100
+    std::vector<Grudge> grudges;    // why they think badly of others (M2b), oldest first
     std::int64_t lastGiftDay = -1;  // one gift a day at most
     std::int64_t lastTheftDay = -1; // thieves wait a few days between thefts
     int mother = -1;       // PersonIds, -1 = unknown (the founders) or none

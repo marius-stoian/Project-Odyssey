@@ -11,8 +11,9 @@
 namespace odysseus::sim {
 
 // Saves (US-016, ADR-010): versioned JSON. Version 1 was the needs-only world of US-011;
-// version 2 adds traits, skills, memories, opinions, kinship and the life events.
-inline constexpr int kSaveVersion = 2;
+// version 2 adds traits, skills, memories, opinions, kinship and the life events; version 3
+// (M2b) adds the story engine: event links in the chronicle, grudges and the story stream.
+inline constexpr int kSaveVersion = 3;
 inline constexpr int kSaveBackups = 3;
 
 // Writes the whole world to `file`, safely: first to "<file>.tmp", then the old save moves to

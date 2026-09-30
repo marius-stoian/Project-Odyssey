@@ -161,9 +161,43 @@ TEST_CASE("US-016 Old version") {
         upgraded.runTicks(upgraded.calendar().ticksPerYear());
         CHECK(upgraded.population() > 0);
     }
+    SUBCASE("a version 2 save (before the story engine) is upgraded and loads") {
+        // Turn the file into what version 2 wrote: no event links in the chronicle, no grudges,
+        // no event ids in memories, no story stream, no lean-season flag.
+        sim::World lived(42, realConfig());
+        lived.runTicks(lived.calendar().ticksPerYear());
+        sim::saveWorld(lived, file);
+        nlohmann::json save = nlohmann::json::parse(readAll(file));
+        save["saveVersion"] = 2;
+        save.erase("leanEvent");
+        save["random"].erase("story");
+        for (auto& person : save["people"]) {
+            person.erase("grudges");
+            for (auto& memory : person["memories"]) {
+                memory.erase("event");
+            }
+        }
+        for (auto& entry : save["chronicle"]) {
+            for (const char* key : {"kind", "who", "other", "aux", "causes"}) {
+                entry.erase(key);
+            }
+        }
+        writeAll(file, save.dump(1));
+        const sim::LoadedWorld loaded = sim::loadWorld(file, realConfig());
+        REQUIRE_FALSE(loaded.notes.empty());
+        CHECK(loaded.notes.front().find("upgraded from save version 2 to 3") != std::string::npos);
+        REQUIRE(loaded.world.chronicle().entries().size() == lived.chronicle().entries().size());
+        for (std::size_t i = 0; i < lived.chronicle().entries().size(); ++i) {
+            CHECK(loaded.world.chronicle().entries()[i].text == lived.chronicle().entries()[i].text); // the past is kept word for word
+            CHECK(loaded.world.chronicle().entries()[i].kind == sim::EventKind::Note);                // but its links are unknown
+        }
+        sim::World upgraded = loaded.world;
+        upgraded.runTicks(upgraded.calendar().ticksPerYear());
+        CHECK(upgraded.population() > 0); // and the upgraded world lives on, with new events linked
+    }
     SUBCASE("a save from a newer version explains why it cannot load") {
         std::string text = readAll(file);
-        replaceFirst(text, "\"saveVersion\": 2", "\"saveVersion\": 99");
+        replaceFirst(text, "\"saveVersion\": 3", "\"saveVersion\": 99");
         writeAll(file, text);
         try {
             (void)sim::loadWorld(file, realConfig());

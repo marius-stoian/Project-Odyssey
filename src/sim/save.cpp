@@ -24,7 +24,19 @@ void loadRandom(core::Pcg32& random, const json& value) {
 json saveMemory(const Memory& memory) {
     return json{{"subject", memory.subject}, {"object", memory.object},   {"kind", static_cast<int>(memory.kind)},
                 {"day", memory.day},         {"feeling", memory.feeling}, {"major", memory.major},
-                {"secondHand", memory.secondHand}};
+                {"secondHand", memory.secondHand}, {"event", memory.event}};
+}
+
+json saveGrudge(const Grudge& grudge) {
+    return json{{"about", grudge.about}, {"event", grudge.event}, {"weight", grudge.weight}};
+}
+
+Grudge loadGrudge(const json& value) {
+    Grudge grudge;
+    grudge.about = value.at("about").get<int>();
+    grudge.event = value.at("event").get<int>();
+    grudge.weight = value.at("weight").get<int>();
+    return grudge;
 }
 
 Memory loadMemory(const json& value) {
@@ -36,6 +48,7 @@ Memory loadMemory(const json& value) {
     memory.feeling = value.at("feeling").get<int>();
     memory.major = value.at("major").get<bool>();
     memory.secondHand = value.at("secondHand").get<bool>();
+    memory.event = value.at("event").get<int>();
     return memory;
 }
 
@@ -43,6 +56,10 @@ json savePerson(const Person& p) {
     json memories = json::array();
     for (const Memory& memory : p.memories) {
         memories.push_back(saveMemory(memory));
+    }
+    json grudges = json::array();
+    for (const Grudge& grudge : p.grudges) {
+        grudges.push_back(saveGrudge(grudge));
     }
     return json{{"id", p.id},
                 {"name", p.name},
@@ -63,6 +80,7 @@ json savePerson(const Person& p) {
                 {"lastChosen", static_cast<int>(p.lastDecision.chosen)},
                 {"memories", memories},
                 {"opinions", p.opinions},
+                {"grudges", grudges},
                 {"lastGiftDay", p.lastGiftDay},
                 {"lastTheftDay", p.lastTheftDay},
                 {"mother", p.mother},
@@ -96,6 +114,9 @@ Person loadPerson(const json& value) {
         p.memories.push_back(loadMemory(memory));
     }
     p.opinions = value.at("opinions").get<std::vector<int>>();
+    for (const json& grudge : value.at("grudges")) {
+        p.grudges.push_back(loadGrudge(grudge));
+    }
     p.lastGiftDay = value.at("lastGiftDay").get<std::int64_t>();
     p.lastTheftDay = value.at("lastTheftDay").get<std::int64_t>();
     p.mother = value.at("mother").get<int>();
@@ -147,6 +168,29 @@ void upgradeFrom1(json& save) {
     save["saveVersion"] = 2;
 }
 
+// Version 2 -> 3 (M2b story engine): chronicle entries get an id's worth of links (they are
+// free-text notes with no known causes), memories know no event, nobody holds a grudge yet,
+// and the story's random stream starts fresh, as a new world's would.
+void upgradeFrom2(json& save) {
+    const std::uint64_t seed = save.at("seed").get<std::uint64_t>();
+    for (json& person : save.at("people")) {
+        person["grudges"] = json::array();
+        for (json& memory : person.at("memories")) {
+            memory["event"] = -1;
+        }
+    }
+    for (json& entry : save.at("chronicle")) {
+        entry["kind"] = static_cast<int>(EventKind::Note);
+        entry["who"] = -1;
+        entry["other"] = -1;
+        entry["aux"] = -1;
+        entry["causes"] = json::array();
+    }
+    save["random"]["story"] = saveRandom(core::Pcg32(seed, static_cast<std::uint64_t>(Stream::Story)));
+    save["leanEvent"] = -1;
+    save["saveVersion"] = 3;
+}
+
 // Reads one file into a world, or throws DataError naming the file and the problem.
 World readSave(const std::filesystem::path& file, const SimConfig& config, std::vector<std::string>& notes);
 
@@ -166,7 +210,12 @@ struct WorldArchive {
                                      {"dayOfSeason", entry.date.dayOfSeason},
                                      {"day", entry.date.day},
                                      {"importance", entry.importance},
-                                     {"text", entry.text}});
+                                     {"text", entry.text},
+                                     {"kind", static_cast<int>(entry.kind)},
+                                     {"who", entry.who},
+                                     {"other", entry.other},
+                                     {"aux", entry.aux},
+                                     {"causes", entry.causes}});
         }
         json feuds = json::array();
         for (const auto& [a, b] : world.feuds_) {
@@ -182,7 +231,9 @@ struct WorldArchive {
                       {"decisions", saveRandom(world.decisionRandom_)},
                       {"hunting", saveRandom(world.huntRandom_)},
                       {"social", saveRandom(world.socialRandom_)},
-                      {"life", saveRandom(world.lifeRandom_)}}},
+                      {"life", saveRandom(world.lifeRandom_)},
+                      {"story", saveRandom(world.storyRandom_)}}},
+                    {"leanEvent", world.leanEvent_},
                     {"temperature", world.temperature_},
                     {"hour", world.hour_},
                     {"dailyLife", world.dailyLife_},
@@ -207,6 +258,8 @@ struct WorldArchive {
         loadRandom(world.huntRandom_, random.at("hunting"));
         loadRandom(world.socialRandom_, random.at("social"));
         loadRandom(world.lifeRandom_, random.at("life"));
+        loadRandom(world.storyRandom_, random.at("story"));
+        world.leanEvent_ = save.at("leanEvent").get<int>();
         world.temperature_ = save.at("temperature").get<int>();
         world.hour_ = save.at("hour").get<int>();
         world.dailyLife_ = save.value("dailyLife", true);
@@ -231,7 +284,9 @@ struct WorldArchive {
             date.season = static_cast<Season>(entry.at("season").get<int>());
             date.dayOfSeason = entry.at("dayOfSeason").get<int>();
             date.day = entry.at("day").get<std::int64_t>();
-            world.chronicle_.add(date, entry.at("importance").get<int>(), entry.at("text").get<std::string>());
+            world.chronicle_.record(date, entry.at("importance").get<int>(), static_cast<EventKind>(entry.at("kind").get<int>()),
+                                    entry.at("who").get<int>(), entry.at("other").get<int>(), entry.at("aux").get<int>(),
+                                    entry.at("causes").get<std::vector<int>>(), entry.at("text").get<std::string>());
         }
         return world;
     }
@@ -240,6 +295,7 @@ struct WorldArchive {
     // see) must never reach the simulation, which trusts its own indices.
     static std::string problemIn(const World& world) {
         const auto count = static_cast<int>(world.people_.size());
+        const auto events = static_cast<int>(world.chronicle_.entries().size());
         auto validId = [count](int id) { return id >= -1 && id < count; };
         for (int i = 0; i < count; ++i) {
             const Person& p = world.people_[static_cast<std::size_t>(i)];
@@ -256,7 +312,28 @@ struct WorldArchive {
                 if (!validId(memory.subject) || !validId(memory.object)) {
                     return std::format("people[{}].memories names a person who does not exist", i);
                 }
+                if (memory.event >= events) {
+                    return std::format("people[{}].memories names an event that does not exist", i);
+                }
             }
+            for (const Grudge& grudge : p.grudges) {
+                if (!validId(grudge.about) || grudge.event < -1 || grudge.event >= events) {
+                    return std::format("people[{}].grudges names a person or event that does not exist", i);
+                }
+            }
+        }
+        for (const ChronicleEntry& entry : world.chronicle_.entries()) {
+            if (!validId(entry.who) || !validId(entry.other) || !validId(entry.aux)) {
+                return std::format("chronicle entry {} names a person who does not exist", entry.id);
+            }
+            for (const int cause : entry.causes) {
+                if (cause < 0 || cause >= entry.id) {
+                    return std::format("chronicle entry {} names a cause that did not happen before it", entry.id);
+                }
+            }
+        }
+        if (world.leanEvent_ >= events) {
+            return "leanEvent names an event that does not exist";
         }
         for (const auto& [a, b] : world.feuds_) {
             if (a < 0 || b < 0 || a >= count || b >= count) {
@@ -285,9 +362,13 @@ World readSave(const std::filesystem::path& file, const SimConfig& config, std::
     if (version < 1) {
         throw DataError(file, "saveVersion", std::format("is {}: no such save version", version));
     }
-    if (version == 1) {
-        upgradeFrom1(save);
-        notes.push_back(std::format("{}: upgraded from save version 1 to {}", file.filename().string(), kSaveVersion));
+    if (version < kSaveVersion) {
+        // One step at a time: 1 -> 2 -> 3, so each upgrade only has to know its own change.
+        if (version == 1) {
+            upgradeFrom1(save);
+        }
+        upgradeFrom2(save);
+        notes.push_back(std::format("{}: upgraded from save version {} to {}", file.filename().string(), version, kSaveVersion));
     }
     try {
         World world = WorldArchive::fromJson(save, config);

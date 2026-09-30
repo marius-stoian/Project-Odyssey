@@ -1,0 +1,12 @@
+{
+  "season": {
+    "leanAutumnPercent": 20,
+    "leanForagePercent": 45
+  },
+  "causes": {
+    "theftWindowDays": 20,
+    "starvationWindowDays": 60,
+    "maxCauses": 4,
+    "grudgeLimit": 16
+  }
+}

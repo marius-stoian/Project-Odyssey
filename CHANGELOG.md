@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-110 / S-US-110: Give every death and feud a reason (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M2b (Kill Gate 1 retry).
+
+- Simulation: chronicle entries carry an id, an `EventKind`, up to three people and the ids of their causes (`Chronicle::record`, `find`, `explainEvent`); grudges (`Grudge`) and memories know their event; thefts are events (seen or not); the empty store names the thieves and the failed harvest; deaths by hunger name the store and the thief ("Hano died of hunger in the hard winter, after Brak stole from the store."); feuds name their strongest grudge ("over stolen meat"); a lean autumn (20% a year) is a new event and the root of hard winters.
+- Data: `assets/data/sim/story.json` (season, causes), validated with errors like `season.leanAutumnPercent`.
+- Saves: version 3 (event links, grudges, story stream, lean flag); versions 1 and 2 upgrade.
+- Runner: `[#id]` in chronicle lines, `--why <id>`.
+- Tests: `US-110 ...` cases in `tests/sim/story_test.cpp`, a real version-2 upgrade in `save_test.cpp`, ctest `US-110 Traceable`; existing texts updated ("died of hunger", "over stolen meat").
+
 ## Kill Gate 1 pivot: requirements v1.6, Codex v1.6, P-005 (Mraw, Anima) — 2026-09-30
 
 **State:** On `qa`.

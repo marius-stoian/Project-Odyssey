@@ -1,11 +1,32 @@
 #include "sim/chronicle.h"
 
+#include <algorithm>
 #include <utility>
 
 namespace odysseus::sim {
 
-void Chronicle::add(const Date& date, int importance, std::string text) {
-    entries_.push_back({date, importance, std::move(text)});
+int Chronicle::add(const Date& date, int importance, std::string text) {
+    return record(date, importance, EventKind::Note, -1, -1, -1, {}, std::move(text));
+}
+
+int Chronicle::record(const Date& date, int importance, EventKind kind, int who, int other, int aux, std::vector<int> causes,
+                      std::string text) {
+    const int id = static_cast<int>(entries_.size());
+    entries_.push_back({date, importance, std::move(text), id, kind, who, other, aux, std::move(causes)});
+    return id;
+}
+
+const ChronicleEntry* Chronicle::find(int id) const {
+    return id >= 0 && id < static_cast<int>(entries_.size()) ? &entries_[static_cast<std::size_t>(id)] : nullptr;
+}
+
+const char* eventKindName(EventKind kind) {
+    static constexpr const char* kNames[] = {"note", "birth", "death", "pairing", "parting", "feud", "peace", "theft", "empty store",
+                                             "lean season", "mammoth", "gift", "quarrel", "blame", "revenge", "exile", "sickness",
+                                             "injury", "recovery", "nursing", "sharing", "adoption", "courtship", "jealousy",
+                                             "rejection", "apprentice", "graduation", "hunting party", "rescue", "hero", "coward"};
+    const auto index = static_cast<std::size_t>(kind);
+    return index < sizeof(kNames) / sizeof(kNames[0]) ? kNames[index] : "?";
 }
 
 std::vector<ChronicleEntry> Chronicle::select(int year, int threshold) const {
@@ -20,6 +41,37 @@ std::vector<ChronicleEntry> Chronicle::select(int year, int threshold) const {
 
 std::string formatEntry(const ChronicleEntry& entry) {
     return describe(entry.date) + ": " + entry.text;
+}
+
+namespace {
+
+constexpr int kExplainDepth = 6;
+
+void explainInto(const Chronicle& chronicle, int id, int depth, std::vector<int>& seen, std::vector<std::string>& lines) {
+    const ChronicleEntry* entry = chronicle.find(id);
+    if (entry == nullptr) {
+        return;
+    }
+    lines.push_back(std::string(static_cast<std::size_t>(depth) * 2, ' ') + (depth > 0 ? "because " : "") + "[#" +
+                    std::to_string(id) + "] " + formatEntry(*entry));
+    if (depth >= kExplainDepth) {
+        return;
+    }
+    for (const int cause : entry->causes) {
+        if (std::find(seen.begin(), seen.end(), cause) == seen.end()) {
+            seen.push_back(cause);
+            explainInto(chronicle, cause, depth + 1, seen, lines);
+        }
+    }
+}
+
+} // namespace
+
+std::vector<std::string> explainEvent(const Chronicle& chronicle, int id) {
+    std::vector<std::string> lines;
+    std::vector<int> seen{id};
+    explainInto(chronicle, id, 0, seen, lines);
+    return lines;
 }
 
 } // namespace odysseus::sim

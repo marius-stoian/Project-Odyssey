@@ -10,6 +10,7 @@
 #include "life.h"
 #include "needs.h"
 #include "person.h"
+#include "story.h"
 
 #include "core/random.h"
 
@@ -28,13 +29,14 @@ struct SimConfig {
     NameList names;
     SocialConfig social;
     LifeConfig life;
+    StoryConfig story;
 };
 
 SimConfig loadSimConfig(const std::filesystem::path& dataDirectory);
 
 // Separate random streams per system (Charter rule 6): adding a random call in one system
 // never changes the numbers another system sees.
-enum class Stream : std::uint64_t { Weather = 1, People = 2, Decisions = 3, Hunting = 4, Social = 5, Life = 6 };
+enum class Stream : std::uint64_t { Weather = 1, People = 2, Decisions = 3, Hunting = 4, Social = 5, Life = 6, Story = 7 };
 
 // The whole simulated world. No graphics, no operating system: it runs the same in the
 // game, in the headless runner and in tests, and the same seed gives the same history.
@@ -74,8 +76,9 @@ public:
     // Social events (US-013). The AI's actions call these; tests may too.
     // A gift: the receiver remembers who gave it and likes the giver more.
     void giveGift(int giver, int receiver);
-    // A theft seen by a witness: a major, bitter memory about the thief.
-    void recordTheft(int thief, int witness);
+    // A theft, seen by `witness` (or by nobody: -1). It is always an event in the chronicle;
+    // a witness also keeps a major, bitter memory of the thief. Returns the event's id.
+    int recordTheft(int thief, int witness);
     // Two people talk: both feel better and like each other a little more, and the speaker
     // may pass on one memory the listener lacks, as a weaker copy (gossip). Returns true
     // if a memory was passed on.
@@ -110,7 +113,17 @@ private:
     bool courtable(const Person& a, const Person& b) const;
     std::int64_t today() const { return date().day; }
     void checkSurvival(Person& person, bool winter);
-    void die(Person& person, CauseOfDeath cause, int other = -1);
+    // Records the death as an event with its reason and returns the event's id. `causeEvent`
+    // is the event behind the death when the caller knows it (a birth, a fight...).
+    int die(Person& person, CauseOfDeath cause, int causeEvent = -1);
+    // The story engine's helpers (US-110): who thinks badly of whom and why, and how the
+    // reasons are put into words.
+    void addGrudge(Person& owner, int about, int event, int weight);
+    std::string reasonPhrase(const ChronicleEntry& event) const;
+    // The most recent entries of a kind within `days` (newest first, at most maxCauses).
+    std::vector<int> recentEvents(EventKind kind, int days) const;
+    const std::string& nameOf(int id) const { return people_[static_cast<std::size_t>(id)].name; }
+    std::string seasonPhrase() const;
     void lifeEvents();
     void pairUp();
     void updateFeuds();
@@ -130,6 +143,8 @@ private:
     std::vector<std::pair<int, int>> feuds_;
     int mammoths_ = 0;
     bool storeRanOut_ = false; // while true, another empty evening is not news
+    core::Pcg32 storyRandom_;
+    int leanEvent_ = -1;       // this year's failed harvest (a chronicle id) until the next spring
     int forageLeft_ = 0;       // what the land still offers today (carrying capacity)
     int lastMammothYear_ = 0;  // the herd passes the valley once a year: one mammoth at most
     int gameLeft_ = 0;

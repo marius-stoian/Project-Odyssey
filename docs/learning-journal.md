@@ -400,3 +400,27 @@ Loading can go wrong in many ways (a missing file, broken JSON, a field of the w
 **Try it (15 minutes).** Run `odysseus_headless.exe --years 10 --save clan.json`, open `clan.json` in a text editor and find your clan's names. Change one person's `"partner"` to 999 and try `--load clan.json`: read the message, and see which file was loaded instead.
 
 **Check yourself.** Why do we rename `clan.json.tmp` at the end instead of writing straight into `clan.json`?
+
+## US-110: Give every death and feud a reason (2026-09-30)
+
+**What we built.** Every event in the chronicle now has a number (its id), a kind, the people it is about, and the numbers of the earlier events that caused it. A death by hunger says which empty store it came from, and which thief helped empty it; a feud says what turned the two people against each other. You can ask the runner why: `odysseus_headless --seed 7 --years 100 --why 7279`.
+
+**The idea: small structs that point to other data, and enums.** Instead of copying a whole earlier event into a new one, we store its *number*. That is like a page reference in a book: cheap, and it always leads to the one true original.
+
+```cpp
+struct ChronicleEntry {
+    int id;                    // its place in the log
+    EventKind kind;            // an enum: Birth, Death, Feud, Theft ...
+    int who, other, aux;       // people, by number (-1 = nobody)
+    std::vector<int> causes;   // numbers of earlier events
+    ...
+};
+```
+
+An `enum class` is a list of named choices (`EventKind::Theft`) that the compiler checks, so you cannot mix up a kind with a plain number by accident. Because a cause always has a *smaller* id than its effect (it happened earlier), the chain of causes can never loop, and `explainEvent` can walk it safely.
+
+**Where to look.** [src/sim/chronicle.h](../src/sim/chronicle.h) (`ChronicleEntry`, `EventKind`), `World::die` and `World::updateFeuds` in [src/sim/world.cpp](../src/sim/world.cpp), `explainEvent` in [src/sim/chronicle.cpp](../src/sim/chronicle.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --chronicle`, pick a "died of hunger" line, note its `[#id]`, and run the same command with `--why <id>` instead of `--chronicle`. Follow the "because" lines. Then change `leanAutumnPercent` in `assets/data/sim/story.json` to 0 and see how many hunger deaths remain.
+
+**Check yourself.** Why do we store `-1` for "nobody" in `who` and `other`, and what would go wrong if we used `0`?
