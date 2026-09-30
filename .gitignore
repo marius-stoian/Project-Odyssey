@@ -1,11 +1,3 @@
-# Build output (CMake presets put everything here)
-/build/
-/out/
 
-# Visual Studio's per-user cache
-/.vs/
-*.user
-
-# Level backups written by the editor's safe save (kept locally, never committed)
-assets/levels/*.bak*
-assets/levels/*.tmp
+# Office lock files (a document open in Word or Excel)
+~$*
