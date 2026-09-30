@@ -49,7 +49,7 @@ With **Brush**, **Rect**, **Fill** or **Erase** chosen, the palette on the left 
    - press **Delete** to remove it;
    - change its **Name**, **HP** and **Sword** damage in the panel on the right: click a field, type, press **Enter** (or click somewhere else).
 
-In the game, take the sword (**Shift**) and strike (**E**, **Space** or **Enter**): monsters lose HP, flash red and fall at 0. The heroes you place just stand there for now.
+In the game, take the sword (**Shift**) and strike (**E**, **Space** or **Enter**): monsters lose HP, flash red and fall at 0. A monster you hit strikes back: a red **!** appears over it, and half a second later its **Sword** damage hits you if you are still within 1.5 m, so step away in time. Your HP is shown top left; at 0 you start again at the START marker. The heroes you place just stand there for now.
 
 ## The hero's start
 The hero begins where the gold **START** marker stands. With **Select**, drag the marker to move it. Press **F1** and the hero starts there.

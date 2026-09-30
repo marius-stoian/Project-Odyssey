@@ -102,6 +102,13 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
         kind.hp = whole(entry, charactersFile, "hp", 1, 9999);
         kind.swordDamage = whole(entry, charactersFile, "swordDamage", 0, 999);
         kind.enemy = entry.value("enemy", true);
+        if (entry.contains("reach")) {
+            // How far its strike back reaches, in metres (US-131); 1.5 when not given.
+            if (!entry.at("reach").is_number() || entry.at("reach").get<double>() < 0.5 || entry.at("reach").get<double>() > 10.0) {
+                throw DataError(charactersFile, where + ".reach", "must be a number of metres from 0.5 to 10");
+            }
+            kind.reach = entry.at("reach").get<double>();
+        }
         if (definitions.character(kind.name) != nullptr) {
             throw DataError(charactersFile, where + ".name", "\"" + kind.name + "\" is listed twice");
         }

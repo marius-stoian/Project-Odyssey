@@ -45,6 +45,11 @@ public:
     const Level& level() const { return level_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
+    // The hero's health (US-131): 100, lost to enemies striking back; at 0 a short fade, then
+    // the hero starts again at the hero start with full health.
+    int heroHp() const { return heroHp_; }
+    bool heroRespawning() const { return respawnTicks_ > 0; }
+    static constexpr int kHeroMaxHp = 100;
     const std::vector<PlacedCharacter>& bystanders() const { return bystanders_; }
     const std::filesystem::path& levelFile() const { return editor_.levelFile(); } // the Editor may open another
     Mode mode() const { return mode_; }
@@ -86,6 +91,11 @@ private:
     void populate();  // the level's targets and enemies join the play state
     void resetPlay(); // the whole play state again, from the level
     void drawModeLabel(luna::engine::Renderer& renderer) const;
+    int heroHp_ = kHeroMaxHp;
+    int respawnTicks_ = 0; // counting down the fade after the hero falls
+    static constexpr int kRespawnTicks = 20; // one second of fade
+    void hurtHero(int damage, const Enemy& by);
+    void drawHud(luna::engine::Renderer& renderer) const;
     WeaponType currentWeapon_ = WeaponType::Bow; // the spear demo (US-029) is the default; Shift switches to the sword
     bool nextSpearIsFlint_ = true; // Interact alternates flint and wooden spears
     // After a throw the camera frames the hero and the target together for a while.

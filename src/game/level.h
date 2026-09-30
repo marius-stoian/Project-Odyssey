@@ -26,6 +26,7 @@ struct CharacterKindDef {
     int hp = 100;
     int swordDamage = 5;
     bool enemy = true;      // the hero's sword can hit it
+    double reach = 1.5;     // metres: how far its strike back reaches (US-131)
 };
 
 struct Definitions {

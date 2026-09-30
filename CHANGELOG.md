@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-131: Hero HP, fighting back and death (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `Enemy`: strike-back state machine (0.5 s wind-up, one strike per wind-up, no strikes from the dead), `reachMetres`; character kinds may set `reach`.
+- `OdysseyGame`: hero 100 HP; hit enemies strike back with their sword damage within reach; fall, 1 s fade, respawn at the hero start; HUD (hero HP, red "!" over a wind-up).
+- `characters.json`: strike numbers per D-21.
+- Tests: US-131 Strike back, One strike per wind-up, Out of reach, Death and respawn; evidence `docs/evidence/US-131/`; plan `docs/plans/US-131.md`.
+- Verification: `tools/verify.ps1 -Story US-131`: zero warnings, ctest 25/25 in Debug and Release.
+
 ## US-130: Content catalogs from the new sheets (Mraw) — 2026-09-30
 
 **State:** Done; merged into `qa`.
