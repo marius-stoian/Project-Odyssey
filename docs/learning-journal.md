@@ -982,3 +982,13 @@ The noise that shapes the land uses only whole numbers (a hashed lattice, blende
 **Try it (15 minutes).** Run `odysseus.exe --region 1` and `--region 2`; press F12 (Debug build) and click a person. Change `lakeLevel` in `assets/data/sim/region.json` from 140 to 300 and see how much more water the region has.
 
 **Check yourself.** Why can the game make a chunk "whenever somebody walks near it" without ever storing it, and what would break if `biomeAt` used the time of day?
+
+## M5: a whole life in data
+
+A run is a short list of numbers (affinities, skills, inventory) that two yearly choices nudge, multiplied by an *imprint*: the same choice teaches three times as much at 12 as at 26. Keeping the curve in `hero.json` means you tune the feel of youth without recompiling. The screens are rebuilt from the state every tick, so they can never show stale numbers.
+
+**Where to look.** `HeroLife::imprintPercent` and `liveYear` in [src/sim/hero_life.cpp](../src/sim/hero_life.cpp); `RunFlow::build` in [src/game/run_flow.cpp](../src/game/run_flow.cpp).
+
+**Try it (15 minutes).** Change `peakPercent` in `assets/data/hero/hero.json` and start a new game; compare the affinities after the first year.
+
+**Check yourself.** Why is it safer to rebuild a screen's buttons every tick than to update them when something changes?

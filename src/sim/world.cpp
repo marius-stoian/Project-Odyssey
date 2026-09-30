@@ -458,6 +458,15 @@ int World::opinion(int who, int about) const {
     return person.opinions[static_cast<std::size_t>(about)];
 }
 
+void World::adjustOpinion(int who, int about, int delta) {
+    if (who < 0 || about < 0 || static_cast<std::size_t>(who) >= people_.size() || static_cast<std::size_t>(about) >= people_.size()) return;
+    changeOpinion(people_[static_cast<std::size_t>(who)], about, delta);
+}
+
+int World::note(const std::string& text, int importance, EventKind kind, int who, int other) {
+    return chronicle_.record(date(), importance, kind, who, other, -1, {}, text);
+}
+
 void World::changeOpinion(Person& who, int about, int change) {
     int& value = who.opinions[static_cast<std::size_t>(about)];
     value = std::clamp(value + change, -100, 100);

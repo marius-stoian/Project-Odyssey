@@ -27,6 +27,8 @@ enum class Intent {
     Inspect,
     // DevTools (US-083): F12 opens the developer panels in Debug builds; in Release nothing happens.
     DevTools,
+    // Overlay (US-082): F3 shows the frame rate and the time each simulation tick takes (every build).
+    Overlay,
     Count
 };
 

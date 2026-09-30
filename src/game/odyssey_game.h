@@ -21,6 +21,8 @@
 #include "game/pickups.h"
 #include "game/effect_art.h"
 #include "game/plants.h"
+#include "game/run_flow.h"
+#include "game/settings.h"
 #include "game/weather.h"
 #include "game/level.h"
 #include "game/spear_range.h"
@@ -29,6 +31,7 @@
 
 #include "core/random.h"
 
+#include "sim/hero_life.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
 #include "sim/rivals.h"
@@ -36,6 +39,7 @@
 #include "sim/world.h"
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -107,6 +111,33 @@ public:
     void setClanSpeed(int ticksPerTick) { clanSpeed_ = ticksPerTick < 1 ? 1 : ticksPerTick; }
     const sim::World* clan() const { return clan_.get(); }
     const ClanView& clanView() const { return clanView_; }
+    // The player's run (M5, D-32): a hero of the clan with a Growing Period, professions, trade and a sacred fire, played through the
+    // screens of RunFlow. `--new-game` opens the New Game screen; Esc opens the menu.
+    sim::HeroLife* life() { return life_.get(); }
+    const sim::HeroLife* life() const { return life_.get(); }
+    const sim::HeroData* heroData() const { return heroData_ ? &*heroData_ : nullptr; }
+    RunFlow& run() { return runFlow_; }
+    const RunFlow& run() const { return runFlow_; }
+    // useRegion false starts the run in the level already loaded (a hand-made camp) instead of a generated region.
+    void startNewRun(const sim::NewGame& game, bool useRegion = true);
+    void afterYear();                                    // the clan has lived a year while the hero grew up
+    bool harvestPlant(std::size_t index);                // gathering takes a plant (it regrows): no healing, no leaf burst
+    int plantAtWorld(double x, double y) const;          // the growing plant whose picture covers a world point, or -1
+    int personAtWorld(double x, double y) const;         // the clan member standing there, or -1
+    std::vector<int> attendeesAt(double x, double y, int radiusTiles) const; // the clan members within reach of a point
+    PixelPoint campPixels() const { return clanView_.camp(); }
+    PixelPoint knappingStone() const { return {clanView_.camp().x + 4 * kTileSize, clanView_.camp().y + 2 * kTileSize}; }
+    const GameSettings& settings() const { return settings_; }
+    // The performance overlay (US-082): F3. Frame rate and frame time over the last second of frames, and the time one simulation
+    // tick (the clan, the rivals and the run) takes: its average and its worst over the last 100 ticks.
+    bool overlayOn() const { return overlayOn_; }
+    void showOverlay(bool on) { overlayOn_ = on; }
+    double framesPerSecond() const;
+    double frameMilliseconds() const;
+    double tickMilliseconds() const;
+    double worstTickMilliseconds() const;
+    void applySettings(const GameSettings& settings);    // saved, and asked of the window at once
+    std::optional<WindowChange> takeWindowChange() override;
     // A generated region (US-040..US-042, D-31): the land is made from the seed and played as a 256-tile level, with the
     // clan at the start and two rival clans far away. The Editor is off in a region (it is for hand-made levels).
     void loadRegion(std::uint64_t seed);
@@ -114,7 +145,10 @@ public:
     const sim::Rivals* rivals() const { return rivals_.get(); }
     // Saves (US-080): the clan's world (and the region's changes) are written each time an in-game day ends, into this folder
     // (by default the user's save folder). `loadAutosave` brings them back; a damaged file falls back to the newest backup.
-    void setSaveDirectory(const std::filesystem::path& directory) { saveDirectory_ = directory; }
+    void setSaveDirectory(const std::filesystem::path& directory) {
+        saveDirectory_ = directory;
+        settings_ = loadSettings(saveDirectory_ / "settings.json", nullptr);
+    }
     const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
     bool autosave();              // false when it could not write
     bool loadAutosave();          // false when there is nothing to load
@@ -224,6 +258,22 @@ private:
     // Plants (US-136).
     PlantArt plantArt_;
     std::filesystem::path dataDirectory_;
+    std::optional<sim::HeroData> heroData_;
+    std::unique_ptr<sim::HeroLife> life_;
+    RunFlow runFlow_;
+    bool overlayOn_ = false;
+    std::array<double, 100> tickTimes_{};
+    std::array<double, 60> frameTimes_{};
+    std::size_t tickTimeAt_ = 0;
+    std::size_t frameTimeAt_ = 0;
+    std::size_t tickTimesFilled_ = 0;
+    std::size_t frameTimesFilled_ = 0;
+    std::chrono::steady_clock::time_point lastRender_{};
+    void drawOverlay(luna::engine::Renderer& renderer) const;
+    GameSettings settings_;
+    std::optional<WindowChange> pendingWindow_;
+    void drawRunHud(luna::engine::Renderer& renderer) const;
+    void drawRunWorld(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
     bool clanEnabled_ = false;
     int clanSpeed_ = 1;
     std::unique_ptr<sim::Region> region_;
@@ -267,7 +317,7 @@ private:
         int ticks = 0;
     } inspection_;
     void populatePlants();
-    void destroyPlant(std::size_t index);
+    void destroyPlant(std::size_t index, bool heal = true);
     void tickPlants();
     bool inspectNearestPlant();
     bool plantSpotFree(int cellX, int cellY) const;
