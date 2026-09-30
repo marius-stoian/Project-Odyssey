@@ -305,3 +305,21 @@ The "systems" are ordinary functions that take the data and change it, such as `
 **Try it (15 minutes).** In `needs.json`, change the Hunger rate from 30 to 50 and run `odysseus_sim_tests.exe --test-case="US-011*"`: the tests read the rate from the file, so they still pass, but the death date in the MESSAGE line moves earlier. Why?
 
 **Check yourself.** Why do we store the dead in `people()` too, instead of removing them from the vector?
+
+## US-012: Let people choose what to do (utility AI) (2026-09-30)
+
+**What we built.** The clan lives by itself now. Every game hour each person looks at their needs, their traits and skills, the time of day and the food store, gives every possible action a score, and does the best one: gather, hunt, sleep, warm up by the fire, talk, rest or wander. In the evening they eat together. `odysseus_headless --inspect Garu` shows exactly why Garu did what he did.
+
+**The idea: functions as systems, enums, and choosing the best.** An `enum class` names a fixed set of choices so the compiler catches typos:
+
+```cpp
+enum class Action { Gather, Hunt, Sleep, WarmByFire, Talk, Rest, Wander, Count };
+```
+
+`Count` is a trick: it equals the number of actions, so `std::array<int, kActionCount>` holds one score per action. The AI itself is a plain function, `decide(person, situation, available, config, random)`: it reads, it scores, it returns a `Decision`. It changes nothing, so a test can call it with any made-up person. Picking the winner is a simple loop keeping the highest score; ties go to the seeded random stream, so the same world always makes the same choices.
+
+**Where to look.** [src/sim/ai.cpp:70](../src/sim/ai.cpp) (`decide`), `scoreActions` just above it, [assets/data/sim/actions.json](../assets/data/sim/actions.json).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --days 3 --inspect 0` and read the scores. Then raise `traitBonus` in `actions.json` to 100 and run again: do Brave people hunt more? Try `--days 30` too.
+
+**Check yourself.** Why is it important that `decide` only reads the person and never changes them?
