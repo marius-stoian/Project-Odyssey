@@ -153,7 +153,8 @@ add_library(odysseus_game STATIC
     src/game/enemy.cpp
     src/game/art.cpp
     src/game/level.cpp
-    src/game/editor.cpp)
+    src/game/editor.cpp
+    src/game/editor_history.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -278,7 +279,8 @@ add_executable(odysseus_game_tests
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
     tests/game/level_test.cpp
-    tests/game/modes_test.cpp)
+    tests/game/modes_test.cpp
+    tests/game/paint_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_game_tests)
@@ -344,3 +346,9 @@ add_test(NAME "US-123 Modes in the game"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us123
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_modes.cmake")
 set_tests_properties("US-123 Modes in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- End-to-end: paint a tile and save, in the real window, on a copy of the valley (US-124) ---
+add_test(NAME "US-124 Paint in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us124
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/valley.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_paint.cmake")
+set_tests_properties("US-124 Paint in the game" PROPERTIES LABELS window TIMEOUT 120)

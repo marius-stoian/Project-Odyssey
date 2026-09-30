@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-124 / S-US-124: Paint ground tiles (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fifth story of M2c.
+
+- Game: the Editor paints ground: brush (click or drag), rectangle, flood fill and eraser; a toolbar and a tile palette with hints; a grid (G); undo and redo (Ctrl+Z, Ctrl+Y, 100 steps, one step per stroke or fill); Ctrl+S saves the level safely; a status line. Solid ground blocks walking in Game mode.
+- Code: `src/game/editor_history.{h,cpp}` (commands, history, line, rectangle and flood fill); `src/game/editor.{h,cpp}` extended.
+- Tests: `tests/game/paint_test.cpp` (4 cases, including random undo and redo sequences), end-to-end `US-124 Paint in the game`; ctest 23/23 in Debug and Release, zero warnings.
+
+
 ## US-123 / S-US-123: Game mode and Editor mode (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fourth story of M2c.
