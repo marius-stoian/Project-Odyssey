@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M2c: Exit review M2c (Mraw) — 2026-09-30
+
+**State:** Done; `qa` merged into `main`, tag `m2c-done`.
+
+- Evidence: `docs/gates/M2c.md`, `docs/evidence/X-M2c/` (a scripted session: paint, place, rename, save; then load, play and strike).
+- Fix: scripted input with two holds of the same intent no longer presses it on every tick (`src/luna/engine/application.cpp`); regression ctest `X-M2c Two scripted presses`; ctest 25/25 in Debug and Release, zero warnings.
+
+
 ## US-126 / S-US-126: Level and character settings (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2c.

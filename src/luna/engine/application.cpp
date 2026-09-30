@@ -9,6 +9,7 @@
 #include "luna/platform/window.h"
 
 #include <algorithm>
+#include <array>
 #include <format>
 #include <vector>
 
@@ -78,8 +79,17 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
         }
 
         const double runSeconds = static_cast<double>(now - loopStart) / 1e9;
+        // Several holds may name the same intent (two presses): it is held while any of them is
+        // active, and set once, so an inactive hold never releases an active one.
+        std::array<bool, kIntentCount> scripted{};
+        std::array<bool, kIntentCount> named{};
         for (const ScriptedHold& hold : options.holds) {
-            input.setScripted(hold.intent, runSeconds >= hold.fromSeconds && runSeconds < hold.toSeconds);
+            const auto i = static_cast<std::size_t>(hold.intent);
+            named[i] = true;
+            scripted[i] = scripted[i] || (runSeconds >= hold.fromSeconds && runSeconds < hold.toSeconds);
+        }
+        for (std::size_t i = 0; i < kIntentCount; ++i) {
+            if (named[i]) input.setScripted(static_cast<Intent>(i), scripted[i]);
         }
         for (std::size_t i = 0; i < options.pointer.size(); ++i) {
             const ScriptedPointer& move = options.pointer[i];

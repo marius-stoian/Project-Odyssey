@@ -1,0 +1,21 @@
+2026-09-30 16:06:48.907Z [INFO] Log session started
+2026-09-30 16:06:48.907Z [INFO] Project Odyssey 0.1.0 started
+2026-09-30 16:06:48.908Z [INFO] Level "Exit Review" (64x64 tiles, 2 characters) from C:\Users\Amek\AppData\Local\Temp\claude\xm2c2\review.json
+2026-09-30 16:06:49.162Z [INFO] Window opened: 1280x720, virtual screen 480x270, VSync on
+2026-09-30 16:06:49.162Z [INFO] Window 1280x720: pixel art scaled x2, picture 960x540 at (160, 90)
+2026-09-30 16:06:49.166Z [INFO] Art: the owner's atlas
+2026-09-30 16:06:49.169Z [INFO] Window 1280x720: pixel art scaled x2, picture 960x540 at (160, 90)
+2026-09-30 16:06:49.172Z [INFO] First frame after 266 ms
+2026-09-30 16:06:49.684Z [INFO] Switched to Sword
+2026-09-30 16:06:50.084Z [INFO] Sword slash facing South
+2026-09-30 16:06:50.084Z [INFO] Goblin took 5 damage, HP 55 / 60
+2026-09-30 16:06:51.384Z [INFO] Sword slash facing South
+2026-09-30 16:06:51.384Z [INFO] Goblin took 5 damage, HP 50 / 60
+2026-09-30 16:06:51.607Z [INFO] Screenshot saved: C:\Users\Amek\AppData\Local\Temp\claude\xm2c2\b\game.bmp
+2026-09-30 16:06:51.607Z [INFO] Average frame rate: 57.5 FPS over 2.4 s (139 frames); 48 simulation ticks
+2026-09-30 16:06:51.607Z [INFO] Window closed by the player
+2026-09-30 16:06:51.635Z [INFO] Hero at (1040.0, 1048.0) facing South, idle
+2026-09-30 16:06:51.635Z [INFO] Straw target at (24.50, 32.75) m: 0 hits, 0.0 damage
+2026-09-30 16:06:51.635Z [INFO] Straw target at (32.50, 24.50) m: 0 hits, 0.0 damage
+2026-09-30 16:06:51.635Z [INFO] Shutting down
+2026-09-30 16:06:51.635Z [INFO] Log session ended
