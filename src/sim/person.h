@@ -48,6 +48,12 @@ struct Grudge {
     int weight = 0;   // how much it counted (opinion lost)
 };
 
+struct Person;
+
+// The heaviest grudge `holder` has about `other`, or `best` when it is heavier, or nullptr.
+// Equal weights: the earlier event (a total order, so no ties remain).
+const Grudge* heaviestGrudge(const Person& holder, int other, const Grudge* best = nullptr);
+
 // One member of the clan. Plain data: the systems (needs, AI, memory) are functions that
 // read and change it. This "struct as component" style is what an ECS formalises later.
 struct Person {
@@ -83,6 +89,10 @@ struct Person {
     int mother = -1;       // PersonIds, -1 = unknown (the founders) or none
     int father = -1;
     int partner = -1;
+    int courting = -1;        // the unpaired adult they court now, -1 = nobody (M2b)
+    int courtDays = 0;        // days spent courting them
+    int courtEvent = -1;      // the chronicle entry that began the courtship
+    std::int64_t courtPauseDay = -1; // no courting before this day: a broken heart mends
     int pregnantDays = 0;  // 0 = not expecting
     int childFather = -1;  // the father of the child she is expecting
     std::int64_t lastBirthDay = -1;

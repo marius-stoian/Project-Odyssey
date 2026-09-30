@@ -109,8 +109,12 @@ public:
     int opinion(int who, int about) const;
 
     // Life events (US-014), called by the daily rules; tests may call them too.
-    // Two adults become partners.
-    void pair(int a, int b);
+    // Two adults become partners. Any courtship behind it is a cause of the Pairing event, and
+    // every other suitor of either is passed over (US-113). Returns the event's id.
+    int pair(int a, int b);
+    // Partners go their separate ways. The event says why: the heaviest grudge between them, or
+    // that their love faded. Returns the event's id.
+    int part(int a, int b);
     // A hunter kills a mammoth: a feast, and the clan's first is remembered.
     void bringDownMammoth(int hunter);
     // Pairs of people who feud now (smaller id first).
@@ -156,7 +160,11 @@ private:
     void releaseCare(Person& person); // a death or exile ends any nursing they gave or needed
     void hurtOnHunt(Person& hunter);  // a small-game hunt can end in a wound
     int exile(Person& person, int victim, std::vector<int> causes, const std::string& text);
-    void pairUp();
+    void courtship();       // every morning: partings, then suitors court, are turned down or win (US-113)
+    void stopCourting(Person& person);
+    void dropSuitors(int beloved); // nobody courts someone who has died or been driven out
+    void turnDown(Person& suitor, int beloved, const std::string& text);
+    void makeJealous(Person& rival, int winner, int beloved, int pairing);
     void updateFeuds();
     void giveBirth(Person& mother, std::vector<Person>& newborns);
     bool closeKin(const Person& a, const Person& b) const;

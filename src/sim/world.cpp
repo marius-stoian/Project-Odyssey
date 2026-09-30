@@ -287,14 +287,6 @@ bool World::closeKin(const Person& a, const Person& b) const {
     return parentChild || siblings || guardian;
 }
 
-void World::pair(int a, int b) {
-    Person& first = people_[static_cast<std::size_t>(a)];
-    Person& second = people_[static_cast<std::size_t>(b)];
-    first.partner = b;
-    second.partner = a;
-    chronicle_.add(date(), kImportancePairing, std::format("{} and {} became partners.", first.name, second.name));
-}
-
 void World::bringDownMammoth(int hunter) {
     food_ += config_.actions.mammothYield;
     ++mammoths_;
@@ -303,34 +295,6 @@ void World::bringDownMammoth(int hunter) {
         chronicle_.add(date(), kImportanceFirstMammoth, std::format("{} brought down the clan's first mammoth.", name));
     } else {
         chronicle_.add(date(), kImportanceMammoth, std::format("{} brought down a mammoth.", name));
-    }
-}
-
-void World::pairUp() {
-    const LifeConfig& life = config_.life;
-    const int daysPerYear = calendar_.daysPerYear();
-    for (Person& woman : people_) {
-        if (!woman.alive || woman.sex != Sex::Female || woman.partner >= 0 || woman.ageYears(daysPerYear) < life.adultAgeYears) {
-            continue;
-        }
-        // The man she and who both like best, if they like each other enough.
-        Person* best = nullptr;
-        int bestBond = 0;
-        for (Person& man : people_) {
-            if (!man.alive || man.sex != Sex::Male || man.partner >= 0 || man.ageYears(daysPerYear) < life.adultAgeYears ||
-                closeKin(woman, man)) {
-                continue;
-            }
-            const int hers = woman.opinions[static_cast<std::size_t>(man.id)];
-            const int his = man.opinions[static_cast<std::size_t>(woman.id)];
-            if (hers >= life.pairOpinion && his >= life.pairOpinion && hers + his > bestBond) {
-                best = &man;
-                bestBond = hers + his;
-            }
-        }
-        if (best != nullptr && lifeRandom_.chance(static_cast<std::uint32_t>(life.pairPercent))) {
-            pair(woman.id, best->id);
-        }
     }
 }
 
@@ -496,7 +460,7 @@ void World::lifeEvents() {
     updateHealth();
     adoptOrphans();
     encounters();
-    pairUp();
+    courtship();
     updateFeuds();
     considerRevenge();
 }
@@ -683,6 +647,8 @@ void World::checkSurvival(Person& person, bool winter) {
 int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     person.alive = false;
     person.causeOfDeath = cause;
+    stopCourting(person);         // the dead court nobody, and nobody courts the dead
+    dropSuitors(person.id);
     releaseCare(person);          // nobody nurses the dead, and a carer who dies frees their patient
     person.health = Health::Well; // nothing more to heal
     const int years = person.ageYears(calendar_.daysPerYear());
@@ -903,6 +869,10 @@ std::uint64_t World::hash() const {
         hasher.add(person.mother);
         hasher.add(person.father);
         hasher.add(person.partner);
+        hasher.add(person.courting);
+        hasher.add(person.courtDays);
+        hasher.add(person.courtEvent);
+        hasher.add(person.courtPauseDay);
         hasher.add(person.pregnantDays);
         hasher.add(person.childFather);
         hasher.add(person.lastBirthDay);

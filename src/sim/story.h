@@ -112,6 +112,33 @@ struct AdoptionStory {
     int feeling = 80;             // the child's memory of being taken in
 };
 
+// An unpaired adult courts the one they like best (US-113).
+struct CourtshipStory {
+    int favourOpinion = 20;        // they court someone they like at least this much
+    int opinionPerDay = 2;         // gifts and time together: the loved one thinks this much better of the suitor each day
+    int suitorOpinionPerDay = 1;   // and the suitor a little better of the loved one
+    int rejectBelow = 0;           // a loved one who thinks worse of the suitor than this turns them down at once
+    int giveUpDays = 40;           // a suitor who has not won them by now gives up
+    int rejectionOpinionLoss = 15; // the turned-down suitor thinks this much less of the loved one
+    int rejectionFeeling = -50;    // and remembers it
+    int pauseDays = 30;            // a broken heart waits this long before courting again
+};
+
+// The suitors who lose (US-113).
+struct RivalStory {
+    int minCourtDays = 2;          // a suitor who has courted this long is hurt when another wins
+    int opinionLoss = 25;          // they think this much worse of the winner
+    int feeling = -60;             // and remember being passed over for life
+    int quarrelPercent = 50;       // chance that rival and winner quarrel at once
+    int pauseDays = 30;
+};
+
+// Partners fall out of love (US-113).
+struct PartingStory {
+    int partingOpinion = -20;      // a partner who thinks less than this of the other leaves
+    int pauseDays = 30;            // both wait this long before courting again
+};
+
 struct StoryConfig {
     SeasonStory season;
     CauseStory causes;
@@ -123,6 +150,9 @@ struct StoryConfig {
     NursingStory nursing;
     SharingStory sharing;
     AdoptionStory adoption;
+    CourtshipStory courtship;
+    RivalStory rivals;
+    PartingStory parting;
 };
 
 StoryConfig loadStoryConfig(const std::filesystem::path& file);

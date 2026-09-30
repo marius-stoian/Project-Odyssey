@@ -78,6 +78,24 @@ StoryConfig loadStoryConfig(const std::filesystem::path& file) {
     config.adoption.limit = requireInt(json, file, "adoption", "limit", 1, 20);
     config.adoption.opinionGain = requireInt(json, file, "adoption", "opinionGain", 0, 100);
     config.adoption.feeling = requireInt(json, file, "adoption", "feeling", 0, 100);
+
+    config.courtship.favourOpinion = requireInt(json, file, "courtship", "favourOpinion", -100, 100);
+    config.courtship.opinionPerDay = requireInt(json, file, "courtship", "opinionPerDay", 0, 100);
+    config.courtship.suitorOpinionPerDay = requireInt(json, file, "courtship", "suitorOpinionPerDay", 0, 100);
+    config.courtship.rejectBelow = requireInt(json, file, "courtship", "rejectBelow", -100, 100);
+    config.courtship.giveUpDays = requireInt(json, file, "courtship", "giveUpDays", 1, 3650);
+    config.courtship.rejectionOpinionLoss = requireInt(json, file, "courtship", "rejectionOpinionLoss", 0, 100);
+    config.courtship.rejectionFeeling = requireInt(json, file, "courtship", "rejectionFeeling", -100, 0);
+    config.courtship.pauseDays = requireInt(json, file, "courtship", "pauseDays", 0, 3650);
+
+    config.rivals.minCourtDays = requireInt(json, file, "rivals", "minCourtDays", 0, 3650);
+    config.rivals.opinionLoss = requireInt(json, file, "rivals", "opinionLoss", 0, 100);
+    config.rivals.feeling = requireInt(json, file, "rivals", "feeling", -100, 0);
+    config.rivals.quarrelPercent = requireInt(json, file, "rivals", "quarrelPercent", 0, 100);
+    config.rivals.pauseDays = requireInt(json, file, "rivals", "pauseDays", 0, 3650);
+
+    config.parting.partingOpinion = requireInt(json, file, "parting", "partingOpinion", -100, 100);
+    config.parting.pauseDays = requireInt(json, file, "parting", "pauseDays", 0, 3650);
     return config;
 }
 

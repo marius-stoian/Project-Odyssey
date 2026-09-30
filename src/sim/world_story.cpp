@@ -7,21 +7,6 @@
 
 namespace odysseus::sim {
 
-namespace {
-
-// The heaviest grudge `holder` has about `other`, or nullptr. Equal weights: the earlier event.
-const Grudge* heaviestGrudge(const Person& holder, int other, const Grudge* best = nullptr) {
-    for (const Grudge& grudge : holder.grudges) {
-        if (grudge.about == other &&
-            (best == nullptr || grudge.weight > best->weight || (grudge.weight == best->weight && grudge.event < best->event))) {
-            best = &grudge;
-        }
-    }
-    return best;
-}
-
-} // namespace
-
 int World::quarrel(int a, int b) {
     Person& first = people_[static_cast<std::size_t>(a)];
     Person& second = people_[static_cast<std::size_t>(b)];
@@ -76,6 +61,8 @@ int World::blame(int griever, int blamed, int dead, int deathEvent, const std::s
 int World::exile(Person& person, int victim, std::vector<int> causes, const std::string& text) {
     person.alive = false;
     person.exiled = true;
+    stopCourting(person);
+    dropSuitors(person.id);
     releaseCare(person);
     person.health = Health::Well;
     const int event = chronicle_.record(date(), kImportanceExile, EventKind::Exile, person.id, victim, -1, std::move(causes), text);

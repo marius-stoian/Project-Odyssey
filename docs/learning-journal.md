@@ -467,3 +467,23 @@ The little function in `[...]` is a *lambda*: a comparison written on the spot. 
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --chronicle --threshold 30` and find a "fell sick" line followed by "nursed ... back to health". Then set `"percent"` under `"nursing"` in `assets/data/sim/story.json` to 0 and compare how many people died of sickness (the report line "sickness N").
 
 **Check yourself.** In `assignCarers` we only replace the best score when the new one is *strictly greater* (`>`). Which carer wins when two people have the same score, and why does that keep the run repeatable?
+
+## US-113: Court and compete for a partner (2026-09-30)
+
+**What we built.** Pairing is now a little story. Someone who likes another begins courting; every day the loved one warms a bit; a loved one who dislikes the suitor turns them down; when both think enough of each other the loved one chooses, and the other suitors grow jealous and may quarrel. Partners who fall out of love part, and the chronicle says why.
+
+**The idea: comparators and ranking (std::sort with a lambda).** "Who does she choose?" and "what is the reason?" are both rankings. When the parting code lists the grudges two partners hold, it sorts them heaviest first, and equal weights go to the earlier event, so the answer never depends on luck or memory layout:
+
+```cpp
+std::sort(reasons.begin(), reasons.end(), [](const Grudge& x, const Grudge& y) {
+    return x.weight != y.weight ? x.weight > y.weight : x.event < y.event;
+});
+```
+
+The `[](...) {...}` is a lambda, a comparison written on the spot. It must say which of two items goes first, and a tie needs its own rule, or two runs of the same seed could order equals differently.
+
+**Where to look.** `World::courtship`, `World::pair`, `World::makeJealous` and `World::part` in [src/sim/world_love.cpp](../src/sim/world_love.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one "began courting" line to the "became partners" line it caused (`--why <id>` shows the chain). Then set `"opinionPerDay"` under `"courtship"` in `assets/data/sim/story.json` to 0 and watch how many courtships end in a pairing.
+
+**Check yourself.** Why does `pair()` clear every other suitor of both partners, even those who courted only a day and get no Jealousy event?
