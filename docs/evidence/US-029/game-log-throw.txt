@@ -1,0 +1,5 @@
+2026-09-30 00:10:34.744Z [INFO] Threw a flint spear facing West
+2026-09-30 00:10:35.293Z [INFO] Spear (flint) hit the straw target at (24.80, 32.75, 1.08) m, 12.8 m/s, 69.5 damage
+2026-09-30 00:10:37.270Z [INFO] Screenshot saved: C:/Users/Amek/.amek-ai/Odysseus/odysseus/build/windows-x64/e2e/us029/spear-hit.bmp
+2026-09-30 00:10:37.287Z [INFO] Straw target at (24.50, 32.75) m: 1 hits, 69.5 damage
+2026-09-30 00:10:37.287Z [INFO] Straw target at (32.50, 24.50) m: 0 hits, 0.0 damage

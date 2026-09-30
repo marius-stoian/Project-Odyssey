@@ -8,6 +8,7 @@
 #include "core/version.h"
 #include "game/odyssey_game.h"
 #include "luna/engine/application.h"
+#include "luna/engine/physics_view.h"
 #include "luna/platform/system.h"
 #include "luna/platform/user_paths.h"
 
@@ -76,12 +77,17 @@ int main(int argc, char* argv[]) {
     std::cout << "Project Odyssey " << version << "\nLog: " << log.file().string() << '\n';
 
     try {
-        odysseus::game::OdysseyGame game;
+        odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR);
         const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
                                                {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds});
         const odysseus::game::Hero& hero = game.hero();
         odysseus::core::logInfo(std::format("Hero at ({:.1f}, {:.1f}) facing {}, {}", hero.feetX(), hero.feetY(),
                                             odysseus::game::facingName(hero.facing()), hero.walking() ? "walking" : "idle"));
+        for (const auto& target : game.range().targets()) {
+            odysseus::core::logInfo(std::format("Straw target at ({:.2f}, {:.2f}) m: {} hits, {:.1f} damage",
+                                                luna::engine::toDouble(target.base.x), luna::engine::toDouble(target.base.y),
+                                                target.hits, luna::engine::toDouble(target.damageTaken)));
+        }
         odysseus::core::logInfo("Shutting down");
         return exitCode;
     } catch (const std::exception& error) {

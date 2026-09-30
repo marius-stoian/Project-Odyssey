@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-029 / S-US-029: Throw a spear in the demo (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Completes the M1b stories (Luna Physics).
+
+- Luna Physics: `Material`, `massOf`, `kineticEnergy`; `flyTick` skips obstacles outside the path box.
+- Luna Engine: `physics_view.{h,cpp}` (metres to pixels, top-down position lifted by height, ground shadow, on-screen direction).
+- Data: `assets/data/materials.json` (flint, wood, straw, stone; damage scale; flint and wooden spears).
+- Game: `materials.{h,cpp}` (validated loading, `impactDamage`), `spear_range.{h,cpp}` (boulders from rock tiles, ground, straw targets, auto-aimed throws, swept flight, sticking spears), prop art (spears in 8 directions, target, shadow), `OdysseyGame` (Interact throws alternating flint and wooden spears, two targets, a camera that frames the throw, hit logging), a boulder on the north path; `odysseus.exe` reads data from `ODYSSEUS_DATA_DIR` and logs target totals.
+- Tests: `US-029 Throw`, `US-029 Material`, `US-029 Materials are validated`, `US-029 Blocked` (game tests); `US-029 Throw in the game` (real window, label `window`).
+- Evidence: `docs/evidence/US-029/spear-in-flight.png`, `spear-hit.png`, game log.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
 ## US-028 / S-US-028: Push and bounce bodies (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.

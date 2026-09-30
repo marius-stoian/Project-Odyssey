@@ -264,3 +264,22 @@ After that, the only way to change a body is through its member functions (`appl
 **Try it (15 minutes).** In `tests/physics/rigid_body_test.cpp`, give the ball restitution 0.8 and change the expected ratio to 0.64 (e^2). Run `luna_physics_tests.exe --test-case="US-028 Bounce*"` and read the bounce heights.
 
 **Check yourself.** What would go wrong if `mass_` were a public member that any code could set to 0?
+
+## US-029: Throw a spear in the demo (2026-09-30)
+
+**What we built.** Press Interact (E, Space or the gamepad's South button) and the hero throws a spear at the straw target in front: it flies in an arc, its shadow glides along the ground, and it sticks in the target. Throw at the target behind the boulder and the spear hits the rock instead. Flint tips hurt almost six times more than sharpened wood.
+
+**The idea: putting it together, and content as data.** Every piece from M1 and M1b meets here: intents (Interact), the tile map (rocks become 3D boulders), ballistics (the arc), swept hits (no tunnelling) and the Engine's top-down view, which draws height by lifting the sprite:
+
+```cpp
+// screen y = (y - z) x 32: the higher the spear, the further up the screen
+return {toDouble(metres.x) * kPixelsPerMetre, (toDouble(metres.y) - toDouble(metres.z)) * kPixelsPerMetre};
+```
+
+How hard a flint tip is lives in `assets/data/materials.json`, not in C++. A designer can change it without recompiling, and a typo is caught at start with a message naming the file and the field.
+
+**Where to look.** [src/game/spear_range.cpp](../src/game/spear_range.cpp) (`throwSpear`, `update`), [src/luna/engine/physics_view.cpp](../src/luna/engine/physics_view.cpp), [assets/data/materials.json](../assets/data/materials.json).
+
+**Try it (15 minutes).** In `materials.json`, set the flint `hardness` to 10 and run the game: throw at the west target and read the damage in the log. Then set it to 11 and read the error message.
+
+**Check yourself.** Why is the shadow drawn at (x, y) while the spear is drawn at (x, y - z)?
