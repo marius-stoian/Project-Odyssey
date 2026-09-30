@@ -9,6 +9,9 @@
 #include "luna/engine/tile_map.h"
 
 #include "game/art.h"
+#include "game/catalogs.h"
+#include "game/content_art.h"
+#include "luna/engine/effects.h"
 #include "game/editor.h"
 #include "game/enemy.h"
 #include "game/hero.h"
@@ -45,6 +48,12 @@ public:
     const Level& level() const { return level_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
+    // Effects playing now (US-132): hit sparks, smoke, trails.
+    const luna::engine::EffectPlayer& effects() const { return effects_; }
+    const Catalogs& catalogs() const { return catalogs_; }
+    // Starts the named effect (effects.json) centred on a world point, `size` pixels across.
+    // Does nothing when the content atlas or the effect is missing.
+    void playEffect(const std::string& name, double x, double y, int size = 0);
     // The hero's health (US-131): 100, lost to enemies striking back; at 0 a short fade, then
     // the hero starts again at the hero start with full health.
     int heroHp() const { return heroHp_; }
@@ -91,6 +100,11 @@ private:
     void populate();  // the level's targets and enemies join the play state
     void resetPlay(); // the whole play state again, from the level
     void drawModeLabel(luna::engine::Renderer& renderer) const;
+    Catalogs catalogs_;
+    ContentAtlas content_;
+    bool contentLoaded_ = false;
+    luna::engine::Texture effectsTexture_;
+    luna::engine::EffectPlayer effects_;
     int heroHp_ = kHeroMaxHp;
     int respawnTicks_ = 0; // counting down the fade after the hero falls
     static constexpr int kRespawnTicks = 20; // one second of fade

@@ -137,3 +137,35 @@ TEST_CASE("US-131 Death and respawn") {
         CHECK_FALSE(play.goblin().isWindingUp());
     }
 }
+
+TEST_CASE("US-132 Combat effects") {
+    Play play(demoCopy("effects", -1));
+    REQUIRE(play.odyssey.catalogs().effect("spark") != nullptr);
+    play.closeIn();
+    CHECK(play.odyssey.effects().count() == 0);
+    play.tick(1, pressing(Intent::Interact));
+    CHECK(play.odyssey.effects().count() == 1); // a hit spark where the blade landed
+    play.tick(20);
+    CHECK(play.odyssey.effects().count() == 0); // one-shot: gone when played
+    // A throw: dust puffs trail the spear while it flies.
+    play.tick(1, pressing(Intent::SwitchWeapon));
+    play.tick(1, pressing(Intent::Interact));
+    int most = 0;
+    for (int i = 0; i < 20; ++i) {
+        play.tick();
+        most = std::max(most, static_cast<int>(play.odyssey.effects().count()));
+    }
+    CHECK(most >= 2);
+}
+
+TEST_CASE("US-132 Death smoke") {
+    Play play(demoCopy("smoke", 0)); // a goblin that strikes for nothing
+    play.closeIn();
+    bool smoke = false;
+    while (play.goblin().isAlive()) {
+        play.tick(1, pressing(Intent::Interact));
+        if (!play.goblin().isAlive()) smoke = play.odyssey.effects().count() == 2; // spark and smoke
+        play.tick(25);
+    }
+    CHECK(smoke);
+}

@@ -210,6 +210,7 @@ public:
 
     Texture createTexture(const Image& image) override;
     void draw(const Texture& texture, const Rect& source, Point at) override;
+    void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) override;
     const Image& image() const { return target_; }
     void clear(Color color) { target_.fillRect(0, 0, target_.width(), target_.height(), color); }
 

@@ -16,12 +16,20 @@ void WindowRenderer::draw(const Texture& texture, const Rect& source, Point at) 
     window_.drawTexture(texture.id, source, {at.x, at.y, source.width, source.height});
 }
 
+void WindowRenderer::drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) {
+    window_.drawTexture(texture.id, source, destination, style.alpha, style.blend == Blend::Add);
+}
+
 Texture RecordingRenderer::createTexture(const Image& image) {
     return {nextTexture_++, image.width(), image.height()};
 }
 
 void RecordingRenderer::draw(const Texture& texture, const Rect& source, Point at) {
     draws_.push_back({texture.id, source, at});
+}
+
+void RecordingRenderer::drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) {
+    draws_.push_back({texture.id, source, {destination.x, destination.y}, destination, style, true});
 }
 
 PixelScale integerScale(int windowWidth, int windowHeight, int virtualWidth, int virtualHeight) {
