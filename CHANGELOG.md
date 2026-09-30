@@ -3,6 +3,16 @@
 Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
+
+## P-007: Adopt Codex v1.8 (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `docs/status.md`: P-007 Done; K-M2d, S-US-130..S-US-138, X-M2d added (To do).
+- `docs/decisions.md`: D-21 (M2d content and combat) and D-22 (design decisions are the owner's).
+- `assets/sprites/`: the seven new sheets committed unchanged.
+- `Limit.md`, `Milestone-41.md` (AP-042): next prompt K-M2d.
+- Verification: docs and assets only; CI on `qa`.
 ## M2d planning: brief, requirements v1.8, Codex v1.8 (Mraw, Anima) — 2026-09-30
 
 **State:** Done; merged into `qa`.
