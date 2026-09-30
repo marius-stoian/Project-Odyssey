@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-014 / S-US-014: Write a readable chronicle (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Simulation: chronicle importance levels, `select(year, threshold)`, `formatEntry`; life events (pairing with courting, conception, pregnancy, births with inherited traits, childbirth, old age, grief, feuds and peace, first mammoth, empty-store evenings); names never repeat without an ordinal; carrying capacity (daily forage and game budgets) and cumulative hunger damage.
+- Data: `assets/data/sim/life.json` (new); `actions.json` (forage and game budgets, rarer mammoths).
+- `odysseus_headless --chronicle [year] --threshold <n>`.
+- Tests: `US-014 Record`, `US-014 Filter`, generations.
+- Docs: plan `docs/plans/US-014.md` (with the balance notes), D-02 tuning note, teach-back entry; evidence: a century's chronicle for seed 42.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
 ## US-013 / S-US-013: Remember events and spread gossip (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
