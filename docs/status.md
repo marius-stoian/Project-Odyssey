@@ -65,7 +65,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-132 | US-132 | M2d | Done | 2026-09-30 |
 | S-US-133 | US-133 | M2d | Done | 2026-09-30 |
 | S-US-134 | US-134 | M2d | Done | 2026-09-30 |
-| S-US-135 | US-135 | M2d | In progress | 2026-10-01 |
+| S-US-135 | US-135 | M2d | Done | 2026-10-01 |
 | S-US-139 | US-139 | M2d | To do |  |
 | S-US-140 | US-140 | M2d | To do |  |
 | S-US-141 | US-141 | M2d | To do |  |

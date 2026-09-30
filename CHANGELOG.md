@@ -6,7 +6,7 @@ its PR changes rather than leaving an outdated description.
 
 ## US-135: Elements (Avengers) — 2026-09-30
 
-**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+**State:** Done. Merged into `qa`, pushed; hosted CI run 36776897333 green.
 
 - `assets/data/weapons.json`: new `elements` section with the numbers and effect names per element; `loadCatalogs` range-checks them and requires every effect name to exist in effects.json (`ElementDef`, `Catalogs::element`).
 - `src/game/status.{h,cpp}`: `StatusEffects` (burn, poison, slow) held by every `Enemy`; a new hit restarts the timer, it never stacks.
