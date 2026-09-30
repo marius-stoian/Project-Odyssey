@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-123 / S-US-123: Game mode and Editor mode (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fourth story of M2c.
+
+- Game: F2 opens the Editor (the world pauses; the camera pans with the move keys or a right-button drag; the level, its characters, targets and hero start are shown); F1 plays the level again from the hero start (the play state is rebuilt from the level). The mode is shown in the top-right corner. `odysseus.exe --editor` starts in the Editor.
+- Code: `src/game/editor.{h,cpp}` (codex issue CI-007: not in a sub-folder, because of ADR-016).
+- Tests: `tests/game/modes_test.cpp` (3 cases), end-to-end `US-123 Modes in the game`; ctest 22/22 in Debug and Release, zero warnings.
+
+
 ## US-122 / S-US-122: Levels as data (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Third story of M2c.

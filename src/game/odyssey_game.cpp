@@ -5,6 +5,7 @@
 #include "game/art.h"
 #include "game/placeholder_art.h"
 #include "luna/engine/physics_view.h"
+#include "luna/engine/ui.h"
 
 #include <cmath>
 #include <format>
@@ -62,8 +63,51 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       level_(loadAndReport(levelFile_, definitions_)), map_(buildTileMap(level_, definitions_)),
       camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
-      range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites") {
+      range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
+      editor_(level_, definitions_, kVirtualWidth, kVirtualHeight) {
     camera_.centreOn(hero_.feetX(), hero_.feetY());
+    populate();
+}
+
+void OdysseyGame::resetPlay() {
+    map_ = buildTileMap(level_, definitions_);
+    camera_ = luna::engine::Camera(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight());
+    hero_ = Hero(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y));
+    const MaterialsConfig materials = range_.materials();
+    range_ = SpearRange(map_, materials);
+    sword_ = Sword();
+    framingTicks_ = 0;
+    nextSpearIsFlint_ = true;
+    camera_.centreOn(hero_.feetX(), hero_.feetY());
+    populate();
+}
+
+void OdysseyGame::switchMode(Mode mode) {
+    if (mode == mode_) {
+        return;
+    }
+    mode_ = mode;
+    if (mode == Mode::Editor) {
+        const luna::engine::Rect view = camera_.view();
+        editor_.enter(view.x + view.width / 2.0, view.y + view.height / 2.0); // looking where the game looked
+        core::logInfo("Mode: Editor");
+    } else {
+        resetPlay();
+        core::logInfo(std::format("Mode: Game (level \"{}\", hero at ({}, {}))", level_.name, level_.heroStart.x, level_.heroStart.y));
+    }
+}
+
+void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const char* label = mode_ == Mode::Game ? "GAME  F2: EDIT" : "EDITOR  F1: PLAY";
+    const int width = luna::engine::UiPainter::textWidth(label) + 6;
+    const luna::engine::Rect box{kVirtualWidth - width - 2, 2, width, luna::engine::kGlyphHeight + 6};
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.text(box.x + 3, box.y + 3, label, mode_ == Mode::Game ? luna::engine::UiColor::Text : luna::engine::UiColor::Gold);
+}
+
+void OdysseyGame::populate() {
+    enemies_.clear();
     for (const PixelPoint& target : level_.targets) {
         range_.addTarget({luna::engine::metresFromPixels(target.x), luna::engine::metresFromPixels(target.y), luna::physics::kFixedZero});
     }
@@ -85,6 +129,15 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
+    if (intents.pressed(luna::engine::Intent::ModeEditor)) {
+        switchMode(Mode::Editor);
+    } else if (intents.pressed(luna::engine::Intent::ModeGame)) {
+        switchMode(Mode::Game);
+    }
+    if (mode_ == Mode::Editor) {
+        editor_.update(intents); // the world stands still
+        return;
+    }
     ++ticks_;
     hero_.update(intents, map_);
 
@@ -180,9 +233,15 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     props_ = renderer.createTexture(makePropSheet()); // texture 2: tests find props by this number
     charactersAtlas_ = renderer.createTexture(art_.characters);
     charactersHitAtlas_ = renderer.createTexture(art_.charactersHit);
+    uiSheet_ = renderer.createTexture(luna::engine::makeUiSheet());
 }
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
+    if (mode_ == Mode::Editor) {
+        editor_.render(renderer, {tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_}, alpha);
+        drawModeLabel(renderer);
+        return;
+    }
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);
     auto screen = [&view](double worldX, double worldY) {
@@ -250,6 +309,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         renderer.draw(props_, spearFrame(facingForVector(pointing.x, pointing.y), spear.kind.tip == "flint"),
                       screen(p.x - kSpearFrameSize / 2.0, p.y - kSpearFrameSize / 2.0));
     }
+    drawModeLabel(renderer);
 }
 
 std::uint64_t OdysseyGame::ticks() const {
