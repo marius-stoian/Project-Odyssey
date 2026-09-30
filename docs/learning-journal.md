@@ -611,3 +611,25 @@ if (mode_ == Mode::Editor) { editor_.update(intents); return; } // the world sta
 **Try it (15 minutes).** Run `odysseus.exe`, press F2, pan around with WASD and the right mouse button, then F1. Throw a spear, press F2 and F1 again: the level starts fresh.
 
 **Check yourself.** Why does going back to Game rebuild the whole play state instead of carrying on where the player was?
+
+## US-124: Paint ground tiles (2026-09-30)
+
+**What we built.** In the Editor you paint the ground: a brush, a rectangle, a flood fill and an eraser, with a tile palette, a grid, Undo and Redo, and Ctrl+S to save.
+
+**The idea: the command pattern (undo and redo).** Every change is an object that knows how to do itself *and* how to take itself back:
+
+```cpp
+class Command {
+public:
+    virtual void apply(Level& level) const = 0;
+    virtual void undo(Level& level) const = 0;
+};
+```
+
+A `PaintCommand` just remembers, for each cell, what it was before and what it became. The `History` keeps two stacks: done and undone. Undo moves the top command from one to the other and calls `undo`; Redo moves it back and calls `apply`. A brand-new edit empties the undone stack: you cannot redo a future you have just replaced. The test plays hundreds of random edits, undos and redos and checks the level against snapshots at every step.
+
+**Where to look.** [src/game/editor_history.cpp](../src/game/editor_history.cpp); `Editor::useTool` in [src/game/editor.cpp](../src/game/editor.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --editor`, paint a moat of water around the start, press F1 and try to walk out. Press F2, Ctrl+Z a few times, F1 again.
+
+**Check yourself.** Why does `PaintCommand::undo` go through its cells *backwards*?

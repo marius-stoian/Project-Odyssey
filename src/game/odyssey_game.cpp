@@ -64,7 +64,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
-      editor_(level_, definitions_, kVirtualWidth, kVirtualHeight) {
+      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -234,11 +234,12 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     charactersAtlas_ = renderer.createTexture(art_.characters);
     charactersHitAtlas_ = renderer.createTexture(art_.charactersHit);
     uiSheet_ = renderer.createTexture(luna::engine::makeUiSheet());
+    editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_});
 }
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     if (mode_ == Mode::Editor) {
-        editor_.render(renderer, {tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_}, alpha);
+        editor_.render(renderer, alpha);
         drawModeLabel(renderer);
         return;
     }
