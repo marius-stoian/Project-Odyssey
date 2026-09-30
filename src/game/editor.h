@@ -32,7 +32,7 @@ struct EditorTextures {
 };
 
 // What a left click on the map does.
-enum class EditorTool { Brush, Rectangle, Fill, Eraser };
+enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select };
 
 const char* toolName(EditorTool tool);
 
@@ -64,6 +64,18 @@ public:
     int tile() const { return tile_; }
     void setTile(int tile) { tile_ = tile; }
     bool gridShown() const { return grid_; }
+    // The character kind the Place tool puts down (an index into Definitions::characters).
+    int kind() const { return kind_; }
+    void setKind(int kind) { kind_ = kind; }
+    // The placed character selected with the Select tool (its id), if any.
+    std::optional<int> selected() const { return selected_; }
+    void select(std::optional<int> id);
+    // Changes one property of the selected character, as one step of Undo.
+    void setSelectedName(const std::string& name);
+    void setSelectedHp(int hp);
+    void setSelectedSwordDamage(int damage);
+    // The character whose picture covers a screen point (the one drawn last, on top), if any.
+    std::optional<int> characterAt(int screenX, int screenY) const;
 
     // Every edit goes through here: applied, and remembered for Undo.
     void run(std::unique_ptr<Command> command);
@@ -88,6 +100,11 @@ private:
     void useTool(const luna::engine::Pointer& pointer, bool overPanel);
     void paintAt(int x, int y);
     void finishStroke();
+    void usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released);
+    void changeCharacters(const std::string& what, std::vector<PlacedCharacter> after, int nextIdAfter);
+    PlacedCharacter* find(int id);
+    void buildProperties();
+    std::pair<int, int> toWorld(int screenX, int screenY) const;
 
     Level& level_;
     const Definitions& definitions_;
@@ -123,6 +140,18 @@ private:
 
     std::unique_ptr<luna::engine::Panel> toolbar_;
     std::unique_ptr<luna::engine::Panel> palette_;
+    std::unique_ptr<luna::engine::Panel> characterPalette_;
+    std::unique_ptr<luna::engine::Panel> properties_;
+    int propertiesFor_ = -1;       // the character the properties panel shows (-1: none)
+    bool propertiesStale_ = false; // the character changed (undo, redo): show its values again
+
+    int kind_ = 0;
+    std::optional<int> selected_;
+    // A character being dragged with the Select tool: the list before, and where it was grabbed.
+    bool moving_ = false;
+    std::vector<PlacedCharacter> movingBefore_;
+    int grabX_ = 0;
+    int grabY_ = 0;
 };
 
 } // namespace odysseus::game

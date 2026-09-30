@@ -101,19 +101,25 @@ void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
     luna::engine::UiPainter painter(renderer, uiSheet_);
     const char* label = mode_ == Mode::Game ? "GAME  F2: EDIT" : "EDITOR  F1: PLAY";
     const int width = luna::engine::UiPainter::textWidth(label) + 6;
-    const luna::engine::Rect box{kVirtualWidth - width - 2, 2, width, luna::engine::kGlyphHeight + 6};
+    // Top right in the game; bottom right in the Editor, where the toolbar needs the top.
+    const int top = mode_ == Mode::Game ? 2 : kVirtualHeight - luna::engine::kGlyphHeight - 6;
+    const luna::engine::Rect box{kVirtualWidth - width - 2, top, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 3, box.y + 3, label, mode_ == Mode::Game ? luna::engine::UiColor::Text : luna::engine::UiColor::Gold);
 }
 
 void OdysseyGame::populate() {
     enemies_.clear();
+    bystanders_.clear();
     for (const PixelPoint& target : level_.targets) {
         range_.addTarget({luna::engine::metresFromPixels(target.x), luna::engine::metresFromPixels(target.y), luna::physics::kFixedZero});
     }
     // Every placed character the sword can hit stands in the world (M2c: they stand still, D-19).
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
+        if (kind != nullptr && !kind->enemy) {
+            bystanders_.push_back(placed);
+        }
         if (kind == nullptr || !kind->enemy) {
             continue;
         }
@@ -263,6 +269,14 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     renderer.draw(characters_, hero_.spriteFrame(),
                   screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
+
+    // Placed characters who are not enemies stand where they were put (M2c, D-19).
+    for (const PlacedCharacter& placed : bystanders_) {
+        if (const CharacterKindDef* kind = definitions_.character(placed.kind)) {
+            renderer.draw(charactersAtlas_, art_.frame(kind->frames, kind->directions, placed.facing, 0),
+                          screen(placed.feet.x - kCharacterWidth / 2.0, placed.feet.y - kCharacterHeight));
+        }
+    }
 
     // Enemies: red while the hit flash lasts, with a health bar and "HP/max" above their heads.
     for (const Enemy& enemy : enemies_) {

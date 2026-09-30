@@ -55,7 +55,7 @@ fs::path valleyCopy(const std::string& name) {
     const fs::path folder = fs::temp_directory_path() / "odysseus-us124" / name;
     fs::remove_all(folder);
     fs::create_directories(folder);
-    fs::copy_file(fs::path(ODYSSEUS_DATA_DIR).parent_path() / "levels" / "valley.json", folder / "valley.json");
+    fs::copy_file(ODYSSEUS_DEMO_LEVEL, folder / "valley.json");
     return folder / "valley.json";
 }
 

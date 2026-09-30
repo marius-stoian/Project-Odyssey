@@ -62,7 +62,7 @@ game::SpearHit throwAtOpenTarget(const std::string& kind) {
 
 TEST_CASE("US-029 Throw") {
     // The straw target stands 8 tiles west of the hero's start; one step left faces it.
-    OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
+    OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     luna::engine::RecordingRenderer renderer;
     odyssey.start(renderer);
     odyssey.update(holding(Intent::MoveLeft));
@@ -164,7 +164,7 @@ TEST_CASE("US-029 Materials are validated") {
 
 TEST_CASE("US-029 Blocked") {
     // The second target stands 8 tiles north, right behind a boulder.
-    OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
+    OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     odyssey.update(holding(Intent::MoveUp)); // turn to face North (one step)
     REQUIRE(odyssey.hero().facing() == game::Facing::North);
     odyssey.update(pressing(Intent::Interact));

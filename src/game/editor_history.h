@@ -41,6 +41,24 @@ private:
     std::vector<CellChange> changes_;
 };
 
+// Characters placed, moved, turned, renamed or removed: the whole list before and after, and the
+// next free id (ids are never reused, even after an undo).
+class CharactersCommand final : public Command {
+public:
+    CharactersCommand(std::string what, std::vector<PlacedCharacter> before, std::vector<PlacedCharacter> after, int nextIdBefore, int nextIdAfter)
+        : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)), nextIdBefore_(nextIdBefore), nextIdAfter_(nextIdAfter) {}
+    void apply(Level& level) const override;
+    void undo(Level& level) const override;
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    std::vector<PlacedCharacter> before_;
+    std::vector<PlacedCharacter> after_;
+    int nextIdBefore_;
+    int nextIdAfter_;
+};
+
 // The edits done, and the ones undone that can be done again. At most `limit` are kept.
 class History {
 public:

@@ -1,12 +1,12 @@
 # End-to-end US-024 in the real game window: hold Move Right for 3 seconds from the start.
 # The boulder on the east path (test map) must stop the hero flush against it:
 # boulder column 36 -> left edge x = 1152; feet box 20 px wide -> feet centre x = 1142.
-if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR)
-    message(FATAL_ERROR "run_walk_to_rock.cmake needs GAME and WORK_DIR")
+if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR OR NOT DEFINED LEVEL)
+    message(FATAL_ERROR "run_walk_to_rock.cmake needs GAME, WORK_DIR and LEVEL")
 endif()
 file(REMOVE_RECURSE "${WORK_DIR}")
 file(MAKE_DIRECTORY "${WORK_DIR}")
-execute_process(COMMAND "${GAME}" --quit-after 4 --hold MoveRight:0.2:3.2 --log-dir "${WORK_DIR}"
+execute_process(COMMAND "${GAME}" --level "${LEVEL}" --quit-after 4 --hold MoveRight:0.2:3.2 --log-dir "${WORK_DIR}"
                         --screenshot "${WORK_DIR}/walked-to-rock.bmp"
     RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
 file(GLOB logs "${WORK_DIR}/session-*.log")

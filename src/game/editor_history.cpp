@@ -23,6 +23,16 @@ std::string PaintCommand::name() const {
     return std::format("{} ({} cells)", what_, changes_.size());
 }
 
+void CharactersCommand::apply(Level& level) const {
+    level.characters = after_;
+    level.nextId = std::max(level.nextId, nextIdAfter_); // an id once given is never given again
+}
+
+void CharactersCommand::undo(Level& level) const {
+    level.characters = before_;
+    level.nextId = std::max(level.nextId, std::max(nextIdBefore_, nextIdAfter_));
+}
+
 void History::run(std::unique_ptr<Command> command, Level& level) {
     command->apply(level);
     record(std::move(command));

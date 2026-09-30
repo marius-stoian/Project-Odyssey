@@ -19,7 +19,7 @@ namespace game = odysseus::game;
 namespace {
 
 fs::path valleyFile() {
-    return fs::path(ODYSSEUS_DATA_DIR).parent_path() / "levels" / "valley.json";
+    return ODYSSEUS_DEMO_LEVEL; // the demo level the tests play (the owner edits valley.json)
 }
 
 fs::path freshFolder(const std::string& name) {
@@ -63,15 +63,15 @@ TEST_CASE("US-122 Load") {
     CHECK(definitions.tiles.size() >= 12);
     CHECK(definitions.character("goblin") != nullptr);
     if (!fs::exists(valleyFile())) {
-        const fs::path made = freshFolder("valley") / "valley.json";
+        const fs::path made = freshFolder("valley") / "demo.json";
         game::saveLevel(oldDemo(), definitions, made);
-        FAIL("assets/levels/valley.json is missing; the old demo was written to ", made.string());
+        FAIL("assets/levels/demo.json is missing; the old demo was written to ", made.string());
     }
     const game::Level valley = game::loadLevel(valleyFile(), definitions).level;
     CHECK(valley == oldDemo()); // the valley is exactly the demo that used to be code
 
     // The game plays it: map, hero start, targets and the goblin all come from the file.
-    const game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
+    const game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     CHECK(odyssey.level() == valley);
     CHECK(odyssey.hero().feetX() == doctest::Approx(1040.0));
     CHECK(odyssey.hero().feetY() == doctest::Approx(1048.0));

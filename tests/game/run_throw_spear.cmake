@@ -1,14 +1,14 @@
 # End-to-end US-029 in the real game window: tap Move Left to face the straw target 8 tiles
 # west, then press Interact half a second after the start; the log must report the hit.
 # A second, shorter run saves a screenshot while the spear is still in the air.
-if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR)
-    message(FATAL_ERROR "run_throw_spear.cmake needs GAME and WORK_DIR")
+if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR OR NOT DEFINED LEVEL)
+    message(FATAL_ERROR "run_throw_spear.cmake needs GAME, WORK_DIR and LEVEL")
 endif()
 file(REMOVE_RECURSE "${WORK_DIR}")
 file(MAKE_DIRECTORY "${WORK_DIR}/hit" "${WORK_DIR}/flight")
 
 function(run_game folder quit_after screenshot)
-    execute_process(COMMAND "${GAME}" --quit-after ${quit_after} --hold MoveLeft:0.25:0.35 --hold Interact:0.5:0.6 --log-dir "${WORK_DIR}/${folder}"
+    execute_process(COMMAND "${GAME}" --level "${LEVEL}" --quit-after ${quit_after} --hold MoveLeft:0.25:0.35 --hold Interact:0.5:0.6 --log-dir "${WORK_DIR}/${folder}"
                             --screenshot "${WORK_DIR}/${screenshot}"
         RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
     file(GLOB logs "${WORK_DIR}/${folder}/session-*.log")

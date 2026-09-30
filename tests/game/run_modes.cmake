@@ -1,13 +1,13 @@
 # End-to-end US-123 in the real game window: F2 opens the Editor (the world pauses, the camera
 # pans), F1 plays again from the level. Screenshots are saved for review.
-if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR)
-    message(FATAL_ERROR "run_modes.cmake needs GAME and WORK_DIR")
+if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR OR NOT DEFINED LEVEL)
+    message(FATAL_ERROR "run_modes.cmake needs GAME, WORK_DIR and LEVEL")
 endif()
 file(REMOVE_RECURSE "${WORK_DIR}")
 file(MAKE_DIRECTORY "${WORK_DIR}/editor" "${WORK_DIR}/back")
 
 function(run_game folder)
-    execute_process(COMMAND "${GAME}" ${ARGN} --log-dir "${WORK_DIR}/${folder}"
+    execute_process(COMMAND "${GAME}" --level "${LEVEL}" ${ARGN} --log-dir "${WORK_DIR}/${folder}"
         RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
     file(GLOB logs "${WORK_DIR}/${folder}/session-*.log")
     file(READ "${logs}" log)

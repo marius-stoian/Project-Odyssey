@@ -633,3 +633,22 @@ A `PaintCommand` just remembers, for each cell, what it was before and what it b
 **Try it (15 minutes).** Run `odysseus.exe --editor`, paint a moat of water around the start, press F1 and try to walk out. Press F2, Ctrl+Z a few times, F1 again.
 
 **Check yourself.** Why does `PaintCommand::undo` go through its cells *backwards*?
+
+## US-125: Place characters (2026-09-30)
+
+**What we built.** The Editor places heroes and monsters, selects them, moves, turns and deletes them, and edits their name, HP and sword damage. In Game mode your sword finds them.
+
+**The idea: owning objects in a `std::vector`; ids instead of pointers.** The level owns its characters by value: `std::vector<PlacedCharacter>`. It is tempting to remember "the selected character" as a pointer into that vector, but a vector moves its elements when it grows or shrinks, and Undo replaces the whole list, so an old pointer would point at garbage. Instead each character has an `id` that is never reused, and the editor remembers the id:
+
+```cpp
+std::optional<int> selected_;          // an id, or nothing
+PlacedCharacter* find(int id);         // look it up when needed, fresh each time
+```
+
+`std::optional` says "maybe there is one" without a magic value like -1.
+
+**Where to look.** `Editor::usePlaceOrSelect`, `Editor::find` and `CharactersCommand` in [src/game/editor.cpp](../src/game/editor.cpp) and [editor_history.cpp](../src/game/editor_history.cpp).
+
+**Try it (15 minutes).** `odysseus.exe --editor`: choose Place, then the troll, put it on the path; choose Select, give it 20 HP; F1, Shift for the sword, and defeat it.
+
+**Check yourself.** Why does `CharactersCommand::undo` keep `nextId` at its highest value instead of putting it back?

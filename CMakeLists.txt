@@ -280,21 +280,23 @@ add_executable(odysseus_game_tests
     tests/game/art_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
-    tests/game/paint_test.cpp)
+    tests/game/paint_test.cpp
+    tests/game/place_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
-target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
+target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
+    ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
 add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
 
 # --- End-to-end: walk right into the boulder in the real window (US-024) ---
 add_test(NAME "US-024 Walk to the rock"
-    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024 -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_walk_to_rock.cmake")
 set_tests_properties("US-024 Walk to the rock" PROPERTIES LABELS window TIMEOUT 120)
 
 # --- End-to-end: throw a spear at the straw target in the real window (US-029) ---
 add_test(NAME "US-029 Throw in the game"
-    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us029
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us029 -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_throw_spear.cmake")
 set_tests_properties("US-029 Throw in the game" PROPERTIES LABELS window TIMEOUT 120)
 
@@ -343,12 +345,18 @@ odysseus_apply_settings(odysseus_atlas)
 
 # --- End-to-end: Game mode and Editor mode in the real window (US-123) ---
 add_test(NAME "US-123 Modes in the game"
-    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us123
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us123 -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_modes.cmake")
 set_tests_properties("US-123 Modes in the game" PROPERTIES LABELS window TIMEOUT 120)
 
 # --- End-to-end: paint a tile and save, in the real window, on a copy of the valley (US-124) ---
 add_test(NAME "US-124 Paint in the game"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us124
-            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/valley.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_paint.cmake")
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_paint.cmake")
 set_tests_properties("US-124 Paint in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- End-to-end: place a character, save, play and strike it, in the real window (US-125) ---
+add_test(NAME "US-125 Place in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us125
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_place.cmake")
+set_tests_properties("US-125 Place in the game" PROPERTIES LABELS window TIMEOUT 120)
