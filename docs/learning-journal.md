@@ -690,3 +690,28 @@ The atlas keeps a `std::map<std::string, ContentFrame>`: from a name ("iron swor
 **Try it (15 minutes).** Open `docs/evidence/US-130/icons.png` and `icons.md`, pick a weapon you like, find it in `assets/data/weapons.json` and set its `"starter"` to true. Run `odysseus_game_tests -tc="US-130*"`: which check now fails, and why?
 
 **Check yourself.** Why does the catalog loader check that every `frame` exists in the atlas, rather than letting the game find out when it draws?
+
+## US-131: Hero HP, fighting back and death (2026-09-30)
+
+**What we built.** Enemies hit back now. Hit a goblin and a red "!" appears over it: half a second later it strikes, if you are still within 1.5 m. Your HP is shown top left; at 0 the screen fades and you start again at the hero start.
+
+**The idea: a small state machine with `enum class`.** An enemy is always in exactly one state, and each tick decides whether to move to another:
+
+```cpp
+enum class Strike { Idle, WindUp };
+void Enemy::provoke() { if (isAlive() && state_ == Strike::Idle) { state_ = Strike::WindUp; windUpTicks_ = 10; } }
+bool Enemy::update() {           // true on the tick the strike lands
+    if (state_ != Strike::WindUp) return false;
+    if (--windUpTicks_ > 0) return false;
+    state_ = Strike::Idle;
+    return true;
+}
+```
+
+Because `provoke` does nothing while winding up, hitting twice cannot make two strikes. The game, not the enemy, checks the distance when the strike lands: the enemy does not need to know where the hero is.
+
+**Where to look.** [src/game/enemy.cpp](../src/game/enemy.cpp); `OdysseyGame::update` and `hurtHero` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** Play the valley, walk to a goblin, hit it once with the sword (Shift, then E), and step away as soon as the "!" appears. Then change the goblin's `swordDamage` in `assets/data/characters.json` to 60 and see how fast you fall.
+
+**Check yourself.** What would happen if `update()` checked `isAlive()` only at the end, after the countdown?

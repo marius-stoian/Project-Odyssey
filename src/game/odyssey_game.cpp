@@ -78,6 +78,8 @@ void OdysseyGame::resetPlay() {
     sword_ = Sword();
     framingTicks_ = 0;
     nextSpearIsFlint_ = true;
+    heroHp_ = kHeroMaxHp;
+    respawnTicks_ = 0;
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -130,7 +132,40 @@ void OdysseyGame::populate() {
         enemy.directions = kind->directions;
         enemy.facing = placed.facing;
         enemy.swordDamage = placed.swordDamage;
+        enemy.reachMetres = kind->reach;
         enemies_.push_back(enemy);
+    }
+}
+
+void OdysseyGame::hurtHero(int damage, const Enemy& by) {
+    heroHp_ = std::max(0, heroHp_ - damage);
+    core::logInfo(std::format("{} struck the hero for {}, HP {} / {}", by.name, damage, heroHp_, kHeroMaxHp));
+    if (heroHp_ == 0) {
+        respawnTicks_ = kRespawnTicks;
+        core::logInfo("The hero fell");
+    }
+}
+
+void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const luna::engine::Rect view = camera_.view();
+    // A warning mark over every enemy winding up to strike: the moment to step away.
+    for (const Enemy& enemy : enemies_) {
+        if (enemy.isAlive() && enemy.isWindingUp()) {
+            const int x = static_cast<int>(std::lround(enemy.feetX())) - view.x - 2;
+            const int y = static_cast<int>(std::lround(enemy.feetY())) - kCharacterHeight - view.y - 26;
+            painter.fill({x - 2, y - 2, luna::engine::kGlyphWidth + 4, luna::engine::kGlyphHeight + 4}, luna::engine::UiColor::Red);
+            painter.text(x, y, "!", luna::engine::UiColor::Text);
+        }
+    }
+    // The hero's health, top left.
+    const std::string label = std::format("HP {}/{}", heroHp_, kHeroMaxHp);
+    const luna::engine::Rect box{2, 2, luna::engine::UiPainter::textWidth(label) + 6, luna::engine::kGlyphHeight + 6};
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.text(box.x + 3, box.y + 3, label, heroHp_ * 4 <= kHeroMaxHp ? luna::engine::UiColor::Red : luna::engine::UiColor::Text);
+    // After a fall the screen darkens, more with every step of the fade.
+    for (int layer = 0; layer < (kRespawnTicks - respawnTicks_) / 4 + 1 && respawnTicks_ > 0; ++layer) {
+        painter.fill({0, 0, kVirtualWidth, kVirtualHeight}, luna::engine::UiColor::Shade);
     }
 }
 
@@ -145,16 +180,26 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         return;
     }
     ++ticks_;
-    hero_.update(intents, map_);
+    // After a fall the hero waits out a short fade, then starts again at the hero start.
+    const bool fallen = respawnTicks_ > 0;
+    if (fallen && --respawnTicks_ == 0) {
+        hero_ = Hero(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y));
+        heroHp_ = kHeroMaxHp;
+        camera_.centreOn(hero_.feetX(), hero_.feetY());
+        core::logInfo(std::format("The hero is back at the start with {} HP", heroHp_));
+    }
+    if (!fallen) {
+        hero_.update(intents, map_);
+    }
 
     // Handle weapon switching (Shift key).
-    if (intents.pressed(luna::engine::Intent::SwitchWeapon)) {
+    if (!fallen && intents.pressed(luna::engine::Intent::SwitchWeapon)) {
         currentWeapon_ = currentWeapon_ == WeaponType::Sword ? WeaponType::Bow : WeaponType::Sword;
         core::logInfo(std::format("Switched to {}", currentWeapon_ == WeaponType::Sword ? "Sword" : "Bow"));
     }
 
     // Handle attacks based on current weapon.
-    if (intents.pressed(luna::engine::Intent::Interact)) {
+    if (!fallen && intents.pressed(luna::engine::Intent::Interact)) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
             sword_.slash(hero_.facing());
@@ -180,8 +225,17 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     // Update sword state every tick.
     sword_.update();
 
+    // Enemies strike back (US-131): the strike lands when the wind-up ends, if the hero is
+    // still within reach; stepping away in time is how the hero dodges.
     for (Enemy& enemy : enemies_) {
-        enemy.update();
+        if (enemy.update() && respawnTicks_ == 0) {
+            const double distance = std::hypot(enemy.feetX() - hero_.feetX(), enemy.feetY() - hero_.feetY());
+            if (distance <= enemy.reachMetres * kTileSize) {
+                hurtHero(enemy.swordDamage, enemy);
+            } else {
+                core::logInfo(enemy.name + " struck back and missed");
+            }
+        }
     }
 
     // One hit per swing, on the nearest living enemy within reach. Range is in metres; one tile
@@ -200,6 +254,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         }
         if (nearest != nullptr) {
             nearest->takeDamage(sword_.config().damagePerHit);
+            nearest->provoke();
             sword_.markHit();
         }
     }
@@ -324,6 +379,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         renderer.draw(props_, spearFrame(facingForVector(pointing.x, pointing.y), spear.kind.tip == "flint"),
                       screen(p.x - kSpearFrameSize / 2.0, p.y - kSpearFrameSize / 2.0));
     }
+    drawHud(renderer);
     drawModeLabel(renderer);
 }
 
