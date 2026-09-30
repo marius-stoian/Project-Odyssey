@@ -131,6 +131,20 @@ TEST_CASE("US-121 Pointer") {
         CHECK(tick.pointer().x == 12);
         CHECK(tick.pointer().wasPressed(PointerButton::Left));
     }
+    SUBCASE("the left button is the Attack intent (US-139)") {
+        CHECK_FALSE(input.nextTick().held(Intent::Attack));
+        input.setScriptedPointer(50, 60, PointerButton::Left, true);
+        const auto down = input.nextTick();
+        CHECK(down.held(Intent::Attack));
+        CHECK(down.pressed(Intent::Attack));
+        const auto still = input.nextTick();
+        CHECK(still.held(Intent::Attack));
+        CHECK_FALSE(still.pressed(Intent::Attack));
+        input.setScriptedPointer(50, 60, PointerButton::Left, false);
+        CHECK_FALSE(input.nextTick().held(Intent::Attack));
+        input.setScripted(Intent::Attack, true); // a script can attack without the mouse
+        CHECK(input.nextTick().held(Intent::Attack));
+    }
 }
 
 TEST_CASE("US-121 Text") {

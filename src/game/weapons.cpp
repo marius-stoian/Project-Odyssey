@@ -24,19 +24,40 @@ void facingVector(Facing facing, double& x, double& y) {
     y = v[1];
 }
 
-std::vector<std::size_t> WeaponBehaviour::swing(const WeaponDef&, double, double, Facing, const std::vector<Target>&) const {
+Facing facingToward(double dirX, double dirY) {
+    // Facing order: S, SW, W, NW, N, NE, E, SE; each takes the 45 degrees around its direction.
+    const double angle = std::atan2(dirY, dirX); // 0 = east, pi/2 = south
+    const int sector = static_cast<int>(std::lround(angle / (std::numbers::pi / 4.0))); // -4..4, 0 = east
+    constexpr std::array<Facing, 8> kBySector{Facing::East, Facing::SouthEast, Facing::South, Facing::SouthWest,
+                                              Facing::West, Facing::NorthWest, Facing::North, Facing::NorthEast};
+    return kBySector.at(static_cast<std::size_t>((sector + 8) % 8));
+}
+
+std::vector<std::size_t> WeaponBehaviour::swingToward(const WeaponDef&, double, double, double, double, const std::vector<Target>&) const {
     return {};
 }
 
-std::optional<Projectile> WeaponBehaviour::launch(const WeaponDef&, double, double, Facing) const {
+std::optional<Projectile> WeaponBehaviour::launchToward(const WeaponDef&, double, double, double, double) const {
     return std::nullopt;
 }
 
-std::vector<std::size_t> MeleeBehaviour::swing(const WeaponDef& weapon, double heroX, double heroY, Facing facing,
-                                               const std::vector<Target>& targets) const {
+std::vector<std::size_t> WeaponBehaviour::swing(const WeaponDef& weapon, double heroX, double heroY, Facing facing,
+                                                const std::vector<Target>& targets) const {
     double fx = 0.0;
     double fy = 0.0;
     facingVector(facing, fx, fy);
+    return swingToward(weapon, heroX, heroY, fx, fy, targets);
+}
+
+std::optional<Projectile> WeaponBehaviour::launch(const WeaponDef& weapon, double heroX, double heroY, Facing facing) const {
+    double fx = 0.0;
+    double fy = 0.0;
+    facingVector(facing, fx, fy);
+    return launchToward(weapon, heroX, heroY, fx, fy);
+}
+
+std::vector<std::size_t> MeleeBehaviour::swingToward(const WeaponDef& weapon, double heroX, double heroY, double fx, double fy,
+                                                     const std::vector<Target>& targets) const {
     const double reach = weapon.range * kPixelsPerMetre;
     const double halfArc = arcDegrees_ / 2.0 * std::numbers::pi / 180.0;
     std::vector<std::pair<double, std::size_t>> inArc;
@@ -63,10 +84,11 @@ std::vector<std::size_t> MeleeBehaviour::swing(const WeaponDef& weapon, double h
     return hits;
 }
 
-std::optional<Projectile> RangedBehaviour::launch(const WeaponDef& weapon, double heroX, double heroY, Facing facing) const {
+std::optional<Projectile> RangedBehaviour::launchToward(const WeaponDef& weapon, double heroX, double heroY, double dirX, double dirY) const {
     Projectile shot;
     shot.weapon = &weapon;
-    facingVector(facing, shot.dx, shot.dy);
+    shot.dx = dirX;
+    shot.dy = dirY;
     // It starts at the hero's middle, a little ahead, so it does not hit what stands behind.
     shot.x = heroX + shot.dx * 10.0;
     shot.y = heroY - 20.0 + shot.dy * 10.0;
