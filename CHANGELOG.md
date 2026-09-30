@@ -6,7 +6,7 @@ its PR changes rather than leaving an outdated description.
 
 ## US-134: Pickups and the hotbar (Avengers) — 2026-09-30
 
-**State:** Locally merged into `qa`; Debug and Release verified. Remote push awaits owner authorization; hosted CI pending.
+**State:** Done. Merged into `qa`, pushed; hosted CI run 36766225054 green.
 
 - Level format version 2 (`pickups`: weapon name and position); version 1 files load unchanged; unknown weapon names are refused with the field named. `Definitions::weapons`.
 - Editor: Weapon tool and palette (16 starters + the two demo weapons), Select moves, Delete removes, Undo and Redo through `PickupsCommand`.

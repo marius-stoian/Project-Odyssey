@@ -5,9 +5,9 @@
 | | |
 |---|---|
 | Assembly plan / requirements | **v1.8** / **v1.8** |
-| Repository | Locally merged into `qa`; push and hosted CI pending |
-| Milestone | **M2d Content and combat**: 4 of 9 Done; US-134 locally verified |
-| Next | Authorize US-134 push, confirm CI, then **S-US-135** |
+| Repository | `qa` pushed; hosted CI green (run 36766225054) |
+| Milestone | **M2d Content and combat**: 5 of 9 Done; US-134 Done |
+| Next | **S-US-135** |
 
 ### What happened
 - US-134: weapons can be placed in a level with the editor's Weapon tool and saved (level format version 2; version 1 files still open). In the game you start empty-handed, walk over a weapon to take it into the first free of 9 hotbar boxes, press 1-9 to hold one and Shift for the next. A full hotbar leaves the weapon lying and flashes "Hotbar full".
@@ -22,7 +22,7 @@
 | ID | Milestone | Stories done | State |
 |---|---|---|---|
 | M0-M2c | Tooling to Level editor | 34 / 34 | Done |
-| M2d | Content and combat | 4 / 9 | US-134 awaiting push and CI |
+| M2d | Content and combat | 4 / 9 | US-134 Done, CI green |
 | M3-M6 | | 0 / 28 | Waits for your word after M2d |
 | | **MVP total** | **38 / 71** | |
 
@@ -33,4 +33,4 @@
 - Debug and Release: zero warnings, 25/25 checks passed in each, including simulation determinism and the earlier end-to-end tests.
 - Local story commit: 8c595ec. The story is merged into local qa.
 - Automatic approval review rejected the push to https://github.com/marius-stoian/Project-Odyssey.git because it requires explicit owner authorization of the destination. No remote push occurred.
-- After authorization: push qa and story/US-134, verify hosted CI on the merge, and mark S-US-134 Done.
+- Done: pushed, CI green.
