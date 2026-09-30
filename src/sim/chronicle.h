@@ -14,7 +14,7 @@ namespace odysseus::sim {
 // deaths and feuds.
 inline constexpr int kImportanceGift = 10;
 inline constexpr int kImportanceTheft = 35;
-inline constexpr int kImportanceStoreEmpty = 55;
+inline constexpr int kImportanceStoreEmpty = 70; // hunger in the clan is a turn in its story
 inline constexpr int kImportanceMammoth = 60;
 inline constexpr int kImportancePeace = 60;
 inline constexpr int kImportancePairing = 70;

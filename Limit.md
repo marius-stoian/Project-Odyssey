@@ -2,7 +2,7 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-016 (Milestone-22.md, AP-023).
+**Last updated:** 2026-09-30, at the X-M2 human gate (Milestone-23.md, AP-024). The next session starts here.
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
@@ -11,7 +11,8 @@ This file is kept current after every story, so if a session stops (usage limit,
 - K-M1b Done: the physics design is `docs/plans/M1b-physics-design.md` (read it first).
 - US-025..US-029 Done: Luna Physics complete (Fixed 32.32, Vec3, Quat, shapes, sweeps, spatial grid, ballistics, aim solver, rigid bodies, materials) and the spear throw in the demo.
 - X-M1b Done: `main` tagged `m1b-done`, CI green on main.
-- **Next prompt: X-M2** (Exit review M2 = Kill Gate 1; work may already be on branch `story/M2`: check `git log qa..story/M2`). X-M2 is a human gate: the chronicle must be read by 3 people (D-GATE-M2).
+- All of M2 is Done (US-010..US-016, CI green on `qa`). **X-M2 = Kill Gate 1 is waiting for the owner**: the reader test in `docs/gates/M2-reader-packet.md`, answer in `docs/decision-requests/D-GATE-M2.md`. Do not start M3 before that answer (Charter human gate 1).
+- **When the owner has answered:** if Go (A or B), finish X-M2: merge `qa` into `main`, push, confirm CI on `main`, tag `m2-done`, save a Milestone file; then K-M3 (M3 needs D-05, the art source: delegated to Dominus if still open). If Pivot (C), follow the Codex kill rule: no new content; raise codex issues for Anima with the redesign. Open codex issue for Anima: CI-006.
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue

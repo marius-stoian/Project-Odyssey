@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M2: Exit review M2 = Kill Gate 1 (Mraw) — 2026-09-30
+
+**State:** On `qa`. **Waiting for the owner** (human gate D-GATE-M2); `qa` is not merged into `main` and M3 does not start until the answer.
+
+- `docs/gates/M2.md`: 100 years without crashing (13 seeds, all finished) met; determinism met (same 100-year hash in Debug and Release: 6887756077218264421); "2 of 3 readers find a story" needs people: `docs/gates/M2-reader-packet.md` (instructions, three questions, the seed-7 chronicle, 244 entries) and `docs/decision-requests/D-GATE-M2.md` (options Go / Go with a "why" layer / Pivot / Stop; recommendation: Go if 2 of 3 find a story).
+- Fixes found while preparing the gate: names are now unique among the living (`US-014 No two living people share a name`); an empty food store is a major chronicle event (importance 70) so famines show.
+- `docs/decisions.md`: D-GATE-M2 (open); `docs/status.md`: X-M2 blocked on the human gate.
+- Verification: 0 warnings; ctest 19/19 Debug and Release.
+
 ## US-016 / S-US-016: Save and load the simulation (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2.

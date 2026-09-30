@@ -1,0 +1,292 @@
+# Kill Gate 1: the reader test (M2)
+
+Prepared by Mraw for the owner, 2026-09-30. Codex v1.5, prompt X-M2. This is the part of the gate only people can do.
+
+## What to do (about 20 minutes per reader)
+1. Find **3 people** who have not seen the project. They do not need to play games.
+2. Give each one the chronicle below (print this page, or send it). Say only: "This is the chronicle of a Stone Age clan over 100 years, written by a simulation. Read as much as you like."
+3. When they finish, ask the three questions and write down the answers in their own words:
+   1. **Did you find a story in it?** (yes / no / partly) If yes, tell it to me in two sentences.
+   2. **Who did you care about, or want to know more about?**
+   3. **What was boring or confusing?**
+4. Count the readers who answered yes (or partly, with a real story in their two sentences) to question 1. **The gate passes with 2 of 3.**
+5. Answer [D-GATE-M2](../decision-requests/D-GATE-M2.md) with the count and the notes. The team does not start M3 until you do.
+
+## The chronicle
+The clan founded with seed 7, the seed the Codex uses for its 100-year soak test (`odysseus_headless --seed 7 --years 100 --chronicle --threshold 65`). Only events of importance 65 and above are shown (couples, births, deaths, feuds, the first mammoth, empty food stores); everyday gifts, thefts and mammoth hunts are left out. 244 entries.
+
+People who share a name with someone who died earlier get an ordinal: "Kal the Second" is a different person from Kal.
+
+### Years 1-10
+
+- Autumn, year 1: Ilka and Joro became partners.
+- Autumn, year 1: Sela and Tarek became partners.
+- Autumn, year 1: Joro brought down the clan's first mammoth.
+- Winter, year 1: Tala and Garu became partners.
+- Summer, year 2: Hela and Tavo became partners.
+- Autumn, year 3: Oda was born to Tavo and Hela.
+- Autumn, year 3: Moru was born to Tarek and Sela.
+- Winter, year 3: Lin was born to Joro and Ilka.
+- Winter, year 3: Tala died of old age, 46 years old.
+- Autumn, year 5: Tarek died of old age, 48 years old.
+- Autumn, year 5: Ban was born to Tavo and Hela.
+- Autumn, year 5: Sela and Kesh became partners.
+- Winter, year 5: Arn was born to Tarek and Sela.
+- Winter, year 5: Enko was born to Joro and Ilka.
+- Spring, year 9: Lott was born to Kesh and Sela.
+- Winter, year 9: Pela was born to Tavo and Hela.
+- Summer, year 10: Tavo died of old age, 47 years old.
+- Summer, year 10: Voll died of old age, 53 years old.
+- Autumn, year 10: Garu died of old age, 50 years old.
+
+### Years 11-20
+
+- Spring, year 12: Grem was born to Kesh and Sela.
+- Autumn, year 12: Soa and Ruk became partners.
+- Spring, year 14: Duro was born to Ruk and Soa.
+- Summer, year 14: Hano was born to Kesh and Sela.
+- Winter, year 16: Neva was born to Kesh and Sela.
+- Autumn, year 17: Brak died of old age, 57 years old.
+- Winter, year 17: Sten was born to Ruk and Soa.
+- Winter, year 17: Hela and Oren became partners.
+- Autumn, year 18: Vena was born to Kesh and Sela.
+- Winter, year 18: A feud broke out between Tok and Lin.
+- Winter, year 19: Sef was born to Ruk and Soa.
+
+### Years 21-30
+
+- Summer, year 21: Hela died of old age, 52 years old.
+- Summer, year 21: Ossa and Oren became partners.
+- Autumn, year 21: Ura was born to Ruk and Soa.
+- Winter, year 21: Ruk died of old age, 53 years old.
+- Summer, year 23: Zuri was born to Oren and Ossa.
+- Winter, year 23: Ilka died of old age, 57 years old.
+- Winter, year 23: Maa and Joro became partners.
+- Summer, year 26: Mira was born to Joro and Maa.
+- Winter, year 26: Ivo was born to Oren and Ossa.
+- Spring, year 28: Tavo the Second was born to Joro and Maa.
+- Spring, year 28: Joro died of old age, 47 years old.
+- Autumn, year 28: Oda and Pim became partners.
+- Autumn, year 28: Soa and Enko became partners.
+- Autumn, year 29: Ruk the Second was born to Pim and Oda.
+- Autumn, year 29: Ama was born to Enko and Soa.
+- Summer, year 30: Pela and Duro became partners.
+- Summer, year 30: Brak the Second was born to Oren and Ossa.
+
+### Years 31-40
+
+- Summer, year 31: Kora was born to Duro and Pela.
+- Autumn, year 31: Tiru was born to Pim and Oda.
+- Autumn, year 31: Enko was killed hunting a mammoth.
+- Spring, year 32: Enko the Second was born to Enko and Soa.
+- Spring, year 32: Grem was killed hunting a mammoth.
+- Summer, year 32: Sela died of old age, 54 years old.
+- Winter, year 32: Soa and Arn became partners.
+- Spring, year 33: Ban was killed hunting a mammoth.
+- Autumn, year 33: Maa and Moru became partners.
+- Winter, year 34: The food store ran empty; 5 went to bed hungry.
+- Winter, year 35: Kesh died of old age, 52 years old.
+- Summer, year 36: Neva and Ulf became partners.
+- Autumn, year 36: Kesh the Second was born to Arn and Soa.
+- Winter, year 36: Vena and Tok became partners.
+- Spring, year 37: Lin and Lott became partners.
+- Autumn, year 37: Tarek the Second was born to Duro and Pela.
+- Winter, year 37: The food store ran empty; one went to bed hungry.
+- Winter, year 38: The food store ran empty; 2 went to bed hungry.
+- Spring, year 39: The food store ran empty; 9 went to bed hungry.
+- Spring, year 40: The food store ran empty; 10 went to bed hungry.
+- Winter, year 40: The food store ran empty; 10 went to bed hungry.
+
+### Years 41-50
+
+- Spring, year 41: The food store ran empty; 8 went to bed hungry.
+- Winter, year 41: The food store ran empty; 8 went to bed hungry.
+- Winter, year 42: The food store ran empty; 12 went to bed hungry.
+- Spring, year 43: Soa died of old age, 46 years old.
+- Summer, year 43: Mira and Sten became partners.
+- Autumn, year 43: Ura and Kal became partners.
+- Winter, year 43: Iva was born to Pim and Oda.
+- Spring, year 44: Awa was born to Tok and Vena.
+- Spring, year 44: The food store ran empty; 6 went to bed hungry.
+- Autumn, year 44: Ena was born to Ulf and Neva.
+- Winter, year 44: The food store ran empty; 11 went to bed hungry.
+- Autumn, year 45: Ossa died of old age, 54 years old.
+- Autumn, year 45: The food store ran empty; 4 went to bed hungry.
+- Winter, year 45: Maa died of old age, 51 years old.
+- Spring, year 46: Ama and Ruk the Second became partners.
+- Winter, year 46: Zuri and Moru became partners.
+- Winter, year 46: Nara was born to Sten and Mira.
+- Spring, year 47: Ban the Second was born to Tok and Vena.
+- Autumn, year 47: Ruu was born to Kal and Ura.
+- Winter, year 47: Voll the Second was born to Ulf and Neva.
+- Spring, year 48: Kora and Enko the Second became partners.
+- Summer, year 48: Ysa was born to Moru and Zuri.
+- Autumn, year 48: Kal died of old age, 50 years old.
+- Winter, year 48: Lin died of old age, 45 years old.
+- Spring, year 49: Lin the Second was born to Enko the Second and Kora.
+- Spring, year 49: Hela the Second was born to Sten and Mira.
+- Summer, year 49: Soa the Second was born to Ruk the Second and Ama.
+- Autumn, year 49: Pim died of old age, 58 years old.
+- Autumn, year 49: Ura and Hano became partners.
+- Winter, year 49: Joro the Second was born to Ulf and Neva.
+- Winter, year 49: Tiru and Lott became partners.
+- Spring, year 50: Tok died of old age, 59 years old.
+- Autumn, year 50: Kal the Second was born to Hano and Ura.
+- Winter, year 50: Tala the Second was born to Duro and Pela.
+
+### Years 51-60
+
+- Spring, year 51: Pim the Second was born to Moru and Zuri.
+- Spring, year 51: Zuri died giving birth.
+- Spring, year 52: Ilka the Second was born to Lott and Tiru.
+- Summer, year 53: Ossa the Second was born to Hano and Ura.
+- Summer, year 53: Grem the Second was born to Ulf and Neva.
+- Autumn, year 53: Sela the Second was born to Ruk the Second and Ama.
+- Winter, year 53: Zuri the Second was born to Enko the Second and Kora.
+- Autumn, year 54: Ulf died of old age, 58 years old.
+- Spring, year 56: Oda died of old age, 52 years old.
+- Spring, year 56: Arn died of old age, 50 years old.
+- Autumn, year 56: Tok the Second was born to Enko the Second and Kora.
+- Winter, year 56: Neva and Kesh the Second became partners.
+- Spring, year 57: Maa the Second was born to Lott and Tiru.
+- Spring, year 57: The food store ran empty; one went to bed hungry.
+- Summer, year 57: Ulf the Second was born to Hano and Ura.
+- Winter, year 57: The food store ran empty; 9 went to bed hungry.
+- Winter, year 58: Moru died of old age, 55 years old.
+- Autumn, year 59: Oda the Second was born to Hano and Ura.
+- Spring, year 60: Lott died of old age, 50 years old.
+- Spring, year 60: Mira was killed hunting a mammoth.
+- Spring, year 60: Pela died of old age, 50 years old.
+- Autumn, year 60: Oren died of old age, 63 years old.
+- Autumn, year 60: Garu the Second was born to Enko the Second and Kora.
+- Winter, year 60: The food store ran empty; 24 went to bed hungry.
+
+### Years 61-70
+
+- Winter, year 61: The food store ran empty; 8 went to bed hungry.
+- Winter, year 62: Hano died of old age, 48 years old.
+- Autumn, year 63: Duro died of old age, 49 years old.
+- Autumn, year 63: Pela the Second was born to Enko the Second and Kora.
+- Spring, year 64: Vena and Sef became partners.
+- Summer, year 64: Tiru and Tarek the Second became partners.
+- Winter, year 65: Mira the Second was born to Ruk the Second and Ama.
+- Spring, year 66: Neva died of old age, 49 years old.
+- Autumn, year 66: Ruu and Joro the Second became partners.
+- Winter, year 66: Ysa and Kal the Second became partners.
+- Winter, year 66: Ena and Kesh the Second became partners.
+- Autumn, year 67: Neva the Second was born to Kal the Second and Ysa.
+- Winter, year 67: Sef died of old age, 47 years old.
+- Winter, year 67: Oren the Second was born to Ruk the Second and Ama.
+- Spring, year 68: Arn the Second was born to Tarek the Second and Tiru.
+- Autumn, year 68: Sten died of old age, 50 years old.
+- Autumn, year 68: Ura the Second was born to Enko the Second and Kora.
+- Winter, year 68: Maa the Third was born to Joro the Second and Ruu.
+- Winter, year 68: Nara and Ban the Second became partners.
+- Summer, year 69: Hano the Second was born to Kal the Second and Ysa.
+- Autumn, year 70: Moru the Second was born to Enko the Second and Kora.
+- Autumn, year 70: Lott the Second was born to Ban the Second and Nara.
+
+### Years 71-80
+
+- Spring, year 71: Tavo the Second was killed hunting a mammoth.
+- Spring, year 71: Ura the Third was born to Tarek the Second and Tiru.
+- Summer, year 71: Ura died of old age, 49 years old.
+- Winter, year 71: The food store ran empty; 16 went to bed hungry.
+- Spring, year 72: The food store ran empty; 2 went to bed hungry.
+- Summer, year 72: Iva and Brak the Second became partners.
+- Autumn, year 72: Oda the Third was born to Enko the Second and Kora.
+- Winter, year 72: The food store ran empty; 4 went to bed hungry.
+- Spring, year 73: Iva the Second was born to Tarek the Second and Tiru.
+- Spring, year 73: The food store ran empty; 3 went to bed hungry.
+- Winter, year 73: The food store ran empty; 5 went to bed hungry.
+- Summer, year 74: Voll the Second was killed hunting a mammoth.
+- Autumn, year 74: The food store ran empty; 16 went to bed hungry.
+- Autumn, year 74: Ruk the Second died of old age, 45 years old.
+- Winter, year 74: Ossa the Second and Pim the Second became partners.
+- Winter, year 74: Maa the Third died of starvation.
+- Winter, year 74: Hano the Second died of starvation.
+- Winter, year 74: Moru the Second died of starvation.
+- Winter, year 74: Lott the Second died of starvation.
+- Winter, year 74: Oda the Third died of starvation.
+- Winter, year 74: Iva the Second died of starvation.
+- Summer, year 75: The food store ran empty; 2 went to bed hungry.
+- Summer, year 75: Sela the Second and Grem the Second became partners.
+- Summer, year 75: The food store ran empty; 2 went to bed hungry.
+- Winter, year 75: Oda the Second and Ivo became partners.
+- Spring, year 76: The food store ran empty; 12 went to bed hungry.
+- Summer, year 76: The food store ran empty; 2 went to bed hungry.
+- Autumn, year 76: The food store ran empty; 10 went to bed hungry.
+- Spring, year 77: The food store ran empty; 6 went to bed hungry.
+- Summer, year 77: The food store ran empty; 2 went to bed hungry.
+- Autumn, year 77: The food store ran empty; 10 went to bed hungry.
+- Autumn, year 77: Ruk the Third was born to Ban the Second and Nara.
+- Winter, year 77: Grem the Second was killed hunting a mammoth.
+- Spring, year 78: Ruk the Third died of starvation.
+- Summer, year 78: The food store ran empty; 3 went to bed hungry.
+- Autumn, year 78: The food store ran empty; 7 went to bed hungry.
+- Winter, year 78: The food store ran empty; 13 went to bed hungry.
+- Spring, year 79: Vena died of old age, 60 years old.
+- Spring, year 79: Ama died of old age, 49 years old.
+- Spring, year 79: Tiru died of old age, 47 years old.
+- Autumn, year 79: The food store ran empty; 6 went to bed hungry.
+- Autumn, year 79: Soa the Second and Ulf the Second became partners.
+- Winter, year 79: Sela the Second and Garu the Second became partners.
+- Winter, year 79: Pim the Second was killed hunting a mammoth.
+- Summer, year 80: Ivo died of old age, 53 years old.
+- Autumn, year 80: Oda the Second and Tok the Second became partners.
+- Winter, year 80: The food store ran empty; 8 went to bed hungry.
+
+### Years 81-90
+
+- Winter, year 81: Tiru the Second was born to Joro the Second and Ruu.
+- Spring, year 82: The food store ran empty; 5 went to bed hungry.
+- Autumn, year 82: Ama the Second was born to Kal the Second and Ysa.
+- Autumn, year 82: The food store ran empty; 3 went to bed hungry.
+- Winter, year 82: Zuri the Second was killed hunting a mammoth.
+- Spring, year 83: Enko the Second died of old age, 51 years old.
+- Autumn, year 83: Brak the Second died of old age, 53 years old.
+- Winter, year 83: The food store ran empty; 14 went to bed hungry.
+- Summer, year 84: Ossa the Second and Tarek the Second became partners.
+- Winter, year 84: Kora died of old age, 53 years old.
+- Winter, year 84: Pim the Third was born to Ulf the Second and Soa the Second.
+- Spring, year 85: The food store ran empty; 2 went to bed hungry.
+- Summer, year 85: Kesh the Second died of old age, 48 years old.
+- Autumn, year 85: Zuri the Third was born to Ban the Second and Nara.
+- Autumn, year 85: Sten the Second was born to Tok the Second and Oda the Second.
+- Winter, year 85: Ura the Second and Oren the Second became partners.
+- Spring, year 86: The food store ran empty; 6 went to bed hungry.
+- Winter, year 86: The food store ran empty; 8 went to bed hungry.
+- Winter, year 86: Garu the Second was killed hunting a mammoth.
+- Winter, year 87: The food store ran empty; 8 went to bed hungry.
+- Winter, year 88: Sef the Second was born to Kal the Second and Ysa.
+- Spring, year 89: The food store ran empty; 10 went to bed hungry.
+- Autumn, year 89: Enko the Third was born to Tarek the Second and Ossa the Second.
+- Winter, year 89: The food store ran empty; 7 went to bed hungry.
+- Summer, year 90: Tarek the Second died of old age, 52 years old.
+- Winter, year 90: Iva and Arn the Second became partners.
+
+### Years 91-100
+
+- Spring, year 91: The food store ran empty; 9 went to bed hungry.
+- Autumn, year 91: Moru the Third was born to Oren the Second and Ura the Second.
+- Autumn, year 91: The food store ran empty; 2 went to bed hungry.
+- Autumn, year 92: The food store ran empty; 4 went to bed hungry.
+- Spring, year 93: The food store ran empty; 8 went to bed hungry.
+- Autumn, year 93: Garu the Third was born to Oren the Second and Ura the Second.
+- Autumn, year 93: The food store ran empty; 4 went to bed hungry.
+- Winter, year 93: The food store ran empty; 20 went to bed hungry.
+- Spring, year 94: Ban the Second died of old age, 46 years old.
+- Autumn, year 94: The food store ran empty; 4 went to bed hungry.
+- Spring, year 95: The food store ran empty; 4 went to bed hungry.
+- Autumn, year 95: The food store ran empty; 2 went to bed hungry.
+- Autumn, year 96: The food store ran empty; 6 went to bed hungry.
+- Spring, year 97: The food store ran empty; 10 went to bed hungry.
+- Spring, year 97: Iva died of old age, 53 years old.
+- Autumn, year 97: Ena died of old age, 52 years old.
+- Spring, year 98: The food store ran empty; 7 went to bed hungry.
+- Summer, year 98: Lin the Second and Arn the Second became partners.
+- Spring, year 99: The food store ran empty; one went to bed hungry.
+- Summer, year 99: Ossa the Second died of old age, 46 years old.
+- Winter, year 99: Kal the Second died of old age, 49 years old.
+- Spring, year 100: The food store ran empty; 4 went to bed hungry.
+- Autumn, year 100: Joro the Second died of old age, 50 years old.
