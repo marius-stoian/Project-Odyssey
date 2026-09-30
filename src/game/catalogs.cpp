@@ -168,6 +168,41 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         }
     }
 
+
+    // Element numbers (US-135): weapons.json "elements" has an entry per element; unused fields stay off.
+    {
+        const json data = sim::readJsonFile(weaponsFile);
+        if (!data.contains("elements") || !data.at("elements").is_object()) {
+            throw sim::DataError(weaponsFile, "elements", "must list fire, ice, lightning, poison and void");
+        }
+        for (std::size_t i = 1; i < kElementNames.size(); ++i) {
+            const std::string where = std::string("elements.") + kElementNames[i];
+            if (!data.at("elements").contains(kElementNames[i]) || !data.at("elements").at(kElementNames[i]).is_object()) {
+                throw sim::DataError(weaponsFile, where, "is missing");
+            }
+            const json& entry = data.at("elements").at(kElementNames[i]);
+            const Fields f{weaponsFile, entry, where};
+            ElementDef& def = catalogs.elements[i];
+            const auto maybeNumber = [&](const char* field, double low, double high, double fallback) {
+                return entry.contains(field) ? f.number(field, low, high) : fallback;
+            };
+            const auto maybeEffect = [&](const char* field) {
+                if (!entry.contains(field)) return std::string();
+                const std::string name = f.text(field);
+                if (catalogs.effect(name) == nullptr) throw sim::DataError(weaponsFile, where + "." + field, "\"" + name + "\" is not an effect in effects.json");
+                return name;
+            };
+            def.perSecond = maybeNumber("perSecond", 0.0, 1000.0, 0.0);
+            def.seconds = maybeNumber("seconds", 0.0, 600.0, 0.0);
+            def.slowTo = maybeNumber("slowTo", 0.05, 1.0, 1.0);
+            def.chainMetres = maybeNumber("chainMetres", 0.0, 50.0, 0.0);
+            def.chainFraction = maybeNumber("chainFraction", 0.0, 10.0, 0.0);
+            def.drainFraction = maybeNumber("drainFraction", 0.0, 1.0, 0.0);
+            def.effect = maybeEffect("effect");
+            def.hitEffect = maybeEffect("hitEffect");
+            def.healEffect = maybeEffect("healEffect");
+        }
+    }
     const auto weatherFile = dataDirectory / "weather.json";
     catalogs.weather = readList<WeatherDef>(weatherFile, "weather", [&](const json& entry, const std::string& where) {
         const Fields f{weatherFile, entry, where};

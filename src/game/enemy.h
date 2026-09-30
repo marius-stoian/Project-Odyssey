@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/placeholder_art.h"
+#include "game/status.h"
 
 #include <string>
 
@@ -15,7 +16,8 @@ public:
     Enemy(double feetX, double feetY, int maxHp);
 
     // Returns true when this hit brings HP to zero.
-    bool takeDamage(int damage);
+    // `flash`: the red hit flash (burning and poison do not flash on every tick).
+    bool takeDamage(int damage, bool flash = true);
 
     // Hit and still standing: it winds up to strike back (US-131), unless it already is.
     void provoke();
@@ -40,6 +42,7 @@ public:
     Facing facing = Facing::South;
     int swordDamage = 5;          // what its own strike does to the hero
     double reachMetres = 1.5;     // how far its strike reaches (D-21)
+    StatusEffects status;         // burning, poison and slow left by elements (US-135); a slowed enemy winds up slower
 
 private:
     double feetX_;
@@ -49,7 +52,7 @@ private:
     int damageFlashTicks_ = 0;
     enum class Strike { Idle, WindUp };
     Strike state_ = Strike::Idle;
-    int windUpTicks_ = 0;
+    double windUpLeft_ = 0.0; // ticks; a slowed enemy loses less than one per tick
 };
 
 } // namespace odysseus::game

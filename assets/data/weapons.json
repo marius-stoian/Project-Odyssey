@@ -1,4 +1,11 @@
 {
+  "elements": {
+    "fire": {"perSecond":2,"seconds":3,"effect":"ember","hitEffect":"fire wisp"},
+    "ice": {"slowTo":0.5,"seconds":2,"effect":"ice shards","hitEffect":"frost nova"},
+    "lightning": {"chainMetres":3,"chainFraction":0.5,"hitEffect":"chain lightning"},
+    "poison": {"perSecond":1,"seconds":5,"effect":"poison drip","hitEffect":"poison splash"},
+    "void": {"drainFraction":0.25,"effect":"void orb","hitEffect":"life steal","healEffect":"healing glow"}
+  },
   "weapons": [
     {"name":"iron sword","frame":"iron sword","class":"sword","element":"none","era":"fantasy","starter":true,"damage":5,"speed":2.0,"range":1.5},
     {"name":"flame sword","frame":"flame sword","class":"sword","element":"fire","era":"fantasy","starter":true,"damage":5,"speed":2.0,"range":1.5},

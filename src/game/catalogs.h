@@ -2,6 +2,7 @@
 
 #include "boundary.h"
 
+#include <array>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -61,17 +62,33 @@ struct WeatherDef {
     bool additive = true;  // light weather adds light; fog and clouds are drawn see-through
 };
 
+// What an element does (US-135), from weapons.json under "elements". Only the fields an element uses are
+// set: fire and poison drip damage, ice slows, lightning chains, void drains. Effect names are effects.json entries.
+struct ElementDef {
+    double perSecond = 0.0;     // fire, poison: HP lost per second while it lasts
+    double seconds = 0.0;       // fire, poison, ice: how long it lasts
+    double slowTo = 1.0;        // ice: speed left (0.5 = half speed)
+    double chainMetres = 0.0;   // lightning: how far it jumps
+    double chainFraction = 0.0; // lightning: the jump does this part of the damage
+    double drainFraction = 0.0; // void: this part of the damage heals the hero
+    std::string effect;         // shown on the target while the status lasts
+    std::string hitEffect;      // shown at the moment of the hit (lightning: at the target it jumps to)
+    std::string healEffect;     // void: shown on the hero when healed
+};
+
 struct Catalogs {
     std::vector<WeaponDef> weapons;
     std::vector<PlantDef> plants;
     std::vector<AnimalDef> animals;
     std::vector<EffectDef> effects;
     std::vector<WeatherDef> weather;
+    std::array<ElementDef, 6> elements{}; // by Element; "none" does nothing
 
     const WeaponDef* weapon(const std::string& name) const;
     const PlantDef* plant(const std::string& name) const;
     const AnimalDef* animal(const std::string& name) const;
     const EffectDef* effect(const std::string& name) const;
+    const ElementDef& element(Element element) const { return elements.at(static_cast<std::size_t>(element)); }
 };
 
 // Reads weapons.json, plants.json, animals.json, effects.json and weather.json. Every problem

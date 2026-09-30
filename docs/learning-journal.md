@@ -776,3 +776,30 @@ Old files load as they are, with no pickups. The next time you save, the game wr
 **Try it (15 minutes).** Open the editor (F2), choose Weapon, place three weapons by the START marker and save. Open `valley.json` in a text editor and find the new `pickups` list. Then change `"levelVersion": 2` to `9` and start the game: read the error.
 
 **Check yourself.** Why does a pickup list that is missing entirely count as "no pickups" and not as an error?
+
+
+## US-135: Elements (2026-09-30)
+
+**The idea: components, small structs attached to a character.** A goblin used to be "a position and some HP". Now a goblin can also be burning, poisoned or slowed. We did not add three loose variables to `Enemy`; we made one small struct, `StatusEffects`, and gave every enemy one:
+
+```cpp
+struct StatusEffects {
+    Drip burn;              // HP per second, ticks left
+    Drip poison;
+    double slowFactor = 1.0;
+    int slowTicksLeft = 0;
+    void apply(Element, const ElementDef&);
+    int tick();             // counts down, returns the whole HP lost this tick
+};
+class Enemy { ... StatusEffects status; ... };
+```
+
+The struct knows nothing about goblins, swords or drawing; it only counts down. The game asks it "how much HP did this cost now?" once per tick and does the rest. That split (data that belongs to a thing, small logic next to the data, the game doing the big decisions) is how big games keep hundreds of effects manageable, and it is the idea behind the "components" of the EnTT library we will meet in M3.
+
+One detail worth understanding: 2 HP per second is 0.1 HP per tick, and HP is a whole number. `Drip::carry` keeps the part of an HP not yet lost (0.1, 0.2, ...), and when it reaches 1 the goblin loses a whole HP. Over 3 seconds that is exactly 6.
+
+**Where to look.** [src/game/status.cpp](../src/game/status.cpp) (`dripTick`), `OdysseyGame::applyElement` and `tickStatus` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); the numbers in the `elements` part of [assets/data/weapons.json](../assets/data/weapons.json).
+
+**Try it (10 minutes).** In weapons.json change fire to `"perSecond": 10` and `"seconds": 1`, build again (the build copies the assets next to the game), then run the game with `--level docs/evidence/US-135/levels/fire.json` and hold Interact. How much HP does the goblin lose? Then set `"slowTo": 0.25` for ice and watch the warning last longer.
+
+**Check yourself.** Why does a second fire hit restart the timer instead of adding a second burn? (Hint: D-24, and what would 5 quick hits do to a stacking burn.)

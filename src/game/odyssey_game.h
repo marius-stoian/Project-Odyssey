@@ -145,7 +145,9 @@ private:
     luna::engine::Texture iconsTexture_;
     luna::engine::Texture iconsMirrored_;    // the same icons facing the other way (west)
     void attackWith(const WeaponDef& weapon);
-    void strike(Enemy& enemy, int damage);   // a hit: damage, spark, then death smoke or strike back
+    void strike(Enemy& enemy, int damage, const WeaponDef* weapon = nullptr); // a hit: damage, spark, then death smoke or strike back; the weapon's element follows
+    void applyElement(Enemy& target, const WeaponDef& weapon, int dealt); // US-135: burn, slow, poison, chain, drain
+    void tickStatus(Enemy& enemy);           // burning and poison hurt, effects show while they last
     void drawHeld(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     int heroHp_ = kHeroMaxHp;
     int respawnTicks_ = 0; // counting down the fade after the hero falls

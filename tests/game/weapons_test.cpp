@@ -136,7 +136,12 @@ TEST_CASE("US-133 Starters fight") {
         play.tick(1, holding({Intent::MoveRight})); // face east
         play.tick(1, pressing(Intent::Interact));
         play.tick(12); // shots fly
-        CHECK(goblin.hp() == goblin.maxHp() - weapon->damage);
+        // Fire and poison go on hurting after the hit (US-135); the others do exactly their damage.
+        if (weapon->element == game::Element::Fire || weapon->element == game::Element::Poison) {
+            CHECK(goblin.hp() <= goblin.maxHp() - weapon->damage);
+        } else {
+            CHECK(goblin.hp() == goblin.maxHp() - weapon->damage);
+        }
     }
 }
 
