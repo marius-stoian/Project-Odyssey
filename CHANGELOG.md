@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-137: Animals in the Editor (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
+
+- The 50 animals are character kinds (`CharacterKindDef::animal`); the Editor's character palette has pages (12 to a page) with arrows; animals are drawn from the content atlas side views (`animals.{h,cpp}`), mirrored for west; the 20 predators and boars are enemies that are hit, strike back and die; the others are harmless bystanders.
+- D-28 records the small choices. Tests: US-137 The fifty animals are character kinds, Place, Enemies, Bystanders. Evidence `docs/evidence/US-137/`; plan `docs/plans/US-137.md`; guide `docs/guides/editor.md`.
 ## US-136: Plants (Avengers) — 2026-10-01
 
 **State:** Done on local verification (Debug and Release); merged into local `qa`, pushed with the M2d milestone gate.

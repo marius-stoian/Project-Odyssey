@@ -39,6 +39,8 @@ public:
     std::string name = "Enemy";
     std::string frames = "goblin"; // its art: an atlas frame, or a frame set with 8 directions
     int directions = 1;
+    std::string kindName;          // the kind in characters.json / animals.json (an animal's picture is found by it)
+    bool animal = false;           // drawn from the animal art (a side view) instead of the character sheet (US-137)
     Facing facing = Facing::South;
     int swordDamage = 5;          // what its own strike does to the hero
     double reachMetres = 1.5;     // how far its strike reaches (D-21)

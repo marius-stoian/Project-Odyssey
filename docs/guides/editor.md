@@ -66,6 +66,10 @@ In the game the hero starts with empty hands. Walk over a pickup and its weapon 
 2. Click a plant in the palette, then click a cell of the map: the plant grows there, with its feet in the middle of the bottom edge of the cell. Only one plant grows in a cell.
 3. With **Select** you can click a plant, drag it to another cell and press **Delete** to remove it. **Ctrl+Z** and **Ctrl+Y** undo and redo all of it.
 4. In the game: walk next to a plant and press **E**, **Space** or **Enter** with empty hands (or the **right mouse button** at any time) and its name and a line about it show for three seconds. Hit it with any weapon and it is destroyed with a burst of leaves; an **edible** plant heals you 10 HP. Fifteen seconds later the same plant grows back at a random free spot inside the picture.
+## Animals
+The character palette has six pages (the arrows **<** and **>** under it): the first is the twelve characters, the others the 50 animals. Place, select, move, turn (**R**), rename and delete them like any character; their **Facing** picks the side they look toward (west shows the picture turned around). Hovering a button tells the animal's name and whether it is an enemy.
+
+In the game these 20 animals are **enemies**: grey wolf, fox, bear, boar, wild pig, cougar, lynx, leopard, jaguar, cheetah, lion, tiger, snow leopard, hyena, jackal, rhino, hippopotamus, buffalo, bull, water buffalo. They can be hit, strike back after a half-second warning when you are within 1.5 m, and fall at 0 HP. All the others (deer, cows, rabbits, ...) are harmless: they stand where you put them, cannot be hit, and every weapon passes them. The **Sword** number in the properties panel is an animal's strike damage.
 ## The hero's start
 The hero begins where the gold **START** marker stands. With **Select**, drag the marker to move it. Press **F1** and the hero starts there.
 

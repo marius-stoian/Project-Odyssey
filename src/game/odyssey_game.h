@@ -8,6 +8,7 @@
 #include "luna/engine/renderer.h"
 #include "luna/engine/tile_map.h"
 
+#include "game/animals.h"
 #include "game/arc_shots.h"
 #include "game/art.h"
 #include "game/catalogs.h"
@@ -86,6 +87,7 @@ public:
     const std::string& inspectedName() const { return inspection_.name; }
     const std::string& inspectedText() const { return inspection_.text; }
     const PlantArt& plantArt() const { return plantArt_; }
+    const AnimalArt& animalArt() const { return animalArt_; }
     // Arrows, bolts and thrown weapons in flight or stuck in the ground (US-140): physics arcs with height.
     const std::vector<ArcShot>& arcShots() const { return arcShots_; }
     // Mouse aiming (US-139): while a catalog weapon is held and the pointer is over the picture,
@@ -174,6 +176,7 @@ private:
 
     // Plants (US-136).
     PlantArt plantArt_;
+    AnimalArt animalArt_;
     std::vector<WorldPlant> plants_;
     core::Pcg32 plantRng_{1, 5}; // the stream "plants": where destroyed plants grow back (Charter rule 6)
     struct Inspection {
