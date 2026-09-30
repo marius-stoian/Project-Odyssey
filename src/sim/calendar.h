@@ -10,6 +10,9 @@ namespace odysseus::sim {
 
 enum class Season { Spring, Summer, Autumn, Winter };
 
+// The simulation's slow systems (needs, and later decisions) run once per game hour.
+inline constexpr int kHoursPerDay = 24;
+
 const char* seasonName(Season season);
 
 // From assets/data/sim/calendar.json.
@@ -34,6 +37,7 @@ public:
 
     Date dateAt(std::uint64_t tick) const;
     int ticksPerDay() const { return config_.ticksPerDay; }
+    int ticksPerHour() const { return config_.ticksPerDay / kHoursPerDay; }
     int daysPerYear() const { return config_.daysPerSeason * 4; }
     std::uint64_t ticksPerYear() const {
         return static_cast<std::uint64_t>(daysPerYear()) * static_cast<std::uint64_t>(config_.ticksPerDay);

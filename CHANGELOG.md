@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-011 / S-US-011: Give every person needs that change over time (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Second story of M2 (paused during M1b, resumed on its branch).
+
+- Data: `assets/data/sim/needs.json`, `clan.json`, `names.json`.
+- Simulation: `needs.{h,cpp}` (hourly decay adding up exactly to the daily rates, winter Warmth, capped satisfaction), `person.{h,cpp}`, `clan.{h,cpp}` (founders from data, names), `chronicle.{h,cpp}`; `World` holds the clan, the food store and the chronicle, decays needs every game hour, ages people and applies starvation and winter-cold deaths each morning; the world hash covers them; `calendar`: `kHoursPerDay`, `ticksPerHour()`, day length must split into hours.
+- Tests: `US-011 Decay`, `US-011 Satisfaction`, `US-011 Consequence`, starting clan from data.
+- Docs: plan `docs/plans/US-011.md`, teach-back entry.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
 ## X-M1b: Exit review M1b, Luna Physics (Mraw) — 2026-09-30
 
 **State:** On `qa`; merged into `main` and tagged `m1b-done` once CI on `main` is green.
