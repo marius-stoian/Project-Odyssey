@@ -283,3 +283,25 @@ How hard a flint tip is lives in `assets/data/materials.json`, not in C++. A des
 **Try it (15 minutes).** In `materials.json`, set the flint `hardness` to 10 and run the game: throw at the west target and read the damage in the log. Then set it to 11 and read the error message.
 
 **Check yourself.** Why is the shadow drawn at (x, y) while the spear is drawn at (x, y - z)?
+
+## US-011: Give every person needs that change over time (2026-09-30)
+
+**What we built.** The console world has people now: a clan of 20 with names and ages from data files. Every game hour they get a little hungrier, more tired, colder and lonelier; a meal raises Hunger (never above 100); and someone whose Hunger stays at zero for three days dies, which the chronicle writes down: "Summer, year 1: Garu died of starvation." (Nobody eats yet: choosing what to do is the next story.)
+
+**The idea: plain structs as components, and std::vector.** A `Person` is just data, with no functions of its own that change it:
+
+```cpp
+struct Person {
+    std::string name;
+    Needs needs;          // four whole numbers
+    bool alive = true;
+};
+```
+
+The "systems" are ordinary functions that take the data and change it, such as `decayForHour(person.needs, config, winter, hour)`. Keeping data and behaviour apart makes each system easy to test alone, and it is exactly how an Entity Component System (EnTT, coming in M3) works. All the people live in one `std::vector<Person>`: a resizable array that owns its elements, keeps them next to each other in memory, and frees them automatically.
+
+**Where to look.** [src/sim/needs.cpp:20](../src/sim/needs.cpp) (`hourlyDrop`: 24 whole-number drops that add up exactly to the daily rate), [src/sim/world.cpp:70](../src/sim/world.cpp) (`checkSurvival`), [assets/data/sim/needs.json](../assets/data/sim/needs.json).
+
+**Try it (15 minutes).** In `needs.json`, change the Hunger rate from 30 to 50 and run `odysseus_sim_tests.exe --test-case="US-011*"`: the tests read the rate from the file, so they still pass, but the death date in the MESSAGE line moves earlier. Why?
+
+**Check yourself.** Why do we store the dead in `people()` too, instead of removing them from the vector?
