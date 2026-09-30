@@ -925,3 +925,21 @@ At the start the game reads every line into a `CharacterKindDef` and, for each p
 **Try it (10 minutes).** Open `docs/evidence/US-137/levels/animals.json` with `odysseus.exe --level`, hit the deer: nothing. Edit `assets/data/animals.json`, set the deer's `enemy` to `true` and `strikeDamage` to `12`, build, and hit it again.
 
 **Check yourself.** Why is it better that the wolf's danger is a `true` in a file than an `if` about wolves in the code?
+
+
+## US-138: Placed effects and random weather (2026-10-01)
+
+**The idea: blending two layers with alpha.** When rain fades into sunshine, the screen shows *both* for three seconds, the rain a little less each moment and the new weather a little more. The renderer blends each layer with an *alpha*, a number from 0 (invisible) to 255 (solid). Every tick of the fade we work out how far along it is, from 0.0 to 1.0, and draw the old weather with `1 - fade` and the new one with `fade`:
+
+```cpp
+layer(weather_.previous(), 1.0 - weather_.fade());   // the old one fades out
+layer(weather_.current(),  weather_.fade());          // the new one fades in
+```
+
+Two blend *modes* are used: *add* for light things (rain and sparks are added to the picture below, so they glow) and *normal* for fog (laid over the picture, hiding a little of it). The weather itself is another seeded stream like the plants: the same seed brings the same weathers in the same order, which is how the test can check a whole day of weather in a moment.
+
+**Where to look.** `OdysseyGame::drawWeather` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `WeatherCycle::update` in [src/game/weather.cpp](../src/game/weather.cpp).
+
+**Try it (10 minutes).** Run `odysseus.exe --level docs/evidence/US-138/levels/ambient.json --weather "steady rain"`, then `--weather "dense fog"`. Change `kStrength` in `drawWeather` from `0.8` to `0.3` and see the rain thin out.
+
+**Check yourself.** Why must the two alphas of the old and the new weather add up to about 1 during the fade?

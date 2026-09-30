@@ -18,7 +18,9 @@
 #include "game/enemy.h"
 #include "game/hero.h"
 #include "game/pickups.h"
+#include "game/effect_art.h"
 #include "game/plants.h"
+#include "game/weather.h"
 #include "game/level.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
@@ -29,6 +31,7 @@
 #include <array>
 #include <cstdint>
 #include <filesystem>
+#include <map>
 #include <vector>
 
 namespace odysseus::game {
@@ -87,6 +90,12 @@ public:
     const std::string& inspectedName() const { return inspection_.name; }
     const std::string& inspectedText() const { return inspection_.text; }
     const PlantArt& plantArt() const { return plantArt_; }
+    // The weather (US-138): a seeded cycle, drawn over the world and under the interface. `--seed` (or this) fixes it.
+    void setWeatherSeed(std::uint64_t seed);
+    // Starts under the named weather (false when weather.json has none of that name).
+    bool setWeatherNamed(const std::string& name);
+    const WeatherCycle& weather() const { return weather_; }
+    const EffectArt& effectArt() const { return effectArt_; }
     const AnimalArt& animalArt() const { return animalArt_; }
     // Arrows, bolts and thrown weapons in flight or stuck in the ground (US-140): physics arcs with height.
     const std::vector<ArcShot>& arcShots() const { return arcShots_; }
@@ -176,6 +185,13 @@ private:
 
     // Plants (US-136).
     PlantArt plantArt_;
+    EffectArt effectArt_;
+    WeatherCycle weather_;
+    std::uint64_t weatherSeed_ = 0;
+    luna::engine::Texture weatherTexture_;
+    std::map<std::string, std::vector<luna::engine::Rect>> weatherFrames_; // weather name -> its frames in the page
+    void startPlacedEffects();
+    void drawWeather(luna::engine::Renderer& renderer) const;
     AnimalArt animalArt_;
     std::vector<WorldPlant> plants_;
     core::Pcg32 plantRng_{1, 5}; // the stream "plants": where destroyed plants grow back (Charter rule 6)

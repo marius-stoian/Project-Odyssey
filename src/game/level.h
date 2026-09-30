@@ -33,6 +33,7 @@ struct CharacterKindDef {
 struct Definitions {
     std::vector<TileKindDef> tiles;
     std::vector<CharacterKindDef> characters;
+    std::vector<std::string> loopingEffects; // names of the effects of effects.json that loop (US-138): what an Editor may place
     std::vector<std::string> plants;    // names of plants.json (US-136): what a placed plant may be
     std::vector<std::string> weapons;   // names a pickup may carry (US-134): the weapons of weapons.json, then the built-in demo weapons
 
@@ -40,6 +41,7 @@ struct Definitions {
     const CharacterKindDef* character(const std::string& name) const;  // nullptr when unknown
     bool hasWeapon(const std::string& name) const;
     bool hasPlant(const std::string& name) const;
+    bool hasLoopingEffect(const std::string& name) const;
 };
 
 // The demo weapons of M1b and US-029 (the physics spear throw, the plain sword slash) are not in
@@ -91,6 +93,14 @@ struct PlacedPlant {
     friend bool operator==(const PlacedPlant&, const PlacedPlant&) = default;
 };
 
+// A looping effect placed in the level (US-138): fireflies, a campfire, a portal. Same ids as the rest.
+struct PlacedEffect {
+    int id = 0;
+    std::string name;     // a looping effect of effects.json
+    PixelPoint at;        // world pixels: the middle of the effect
+    friend bool operator==(const PlacedEffect&, const PlacedEffect&) = default;
+};
+
 // A level: the ground, who stands where, and where the hero begins. Plain data.
 struct Level {
     std::string name = "Untitled";
@@ -101,6 +111,7 @@ struct Level {
     std::vector<PlacedCharacter> characters;
     std::vector<PlacedPickup> pickups;
     std::vector<PlacedPlant> plants;
+    std::vector<PlacedEffect> effects;
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
     int nextId = 1;

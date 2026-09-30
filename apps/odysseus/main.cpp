@@ -4,6 +4,8 @@
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
+//   --weather <name>         start under that weather, for example `steady rain` (screenshots and demos)
+//   --seed <number>          fix the weather sequence (the same seed gives the same weathers in the same order)
 //   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
 //   --drag <x1>:<y1>:<x2>:<y2>:<from>:<to>  hold the left button and move from one point to the other
 //   --point <x>:<y>:<from>:<to>  rest the pointer there without pressing (hover)
@@ -26,6 +28,7 @@
 #include <filesystem>
 #include <format>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -37,6 +40,8 @@ struct Arguments {
     std::filesystem::path screenshot;
     std::filesystem::path level;
     bool editor = false;
+    std::optional<std::uint64_t> seed; // fixes the weather sequence (US-138)
+    std::string weather;               // start under this weather (screenshots)
     std::vector<luna::engine::ScriptedHold> holds;
     std::vector<luna::engine::ScriptedPointer> pointer;
     std::vector<luna::engine::ScriptedText> typing;
@@ -96,6 +101,10 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.quitAfterSeconds = std::stod(argv[++i]);
         } else if (name == "--log-dir") {
             arguments.logDirectory = argv[++i];
+        } else if (name == "--weather") {
+            arguments.weather = argv[++i];
+        } else if (name == "--seed") {
+            arguments.seed = std::stoull(argv[++i]);
         } else if (name == "--level") {
             arguments.level = argv[++i];
         } else if (name == "--screenshot") {
@@ -145,6 +154,12 @@ int main(int argc, char* argv[]) {
 
     try {
         odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR, arguments.level);
+        if (arguments.seed) {
+            game.setWeatherSeed(*arguments.seed);
+        }
+        if (!arguments.weather.empty() && !game.setWeatherNamed(arguments.weather)) {
+            throw std::invalid_argument("unknown weather: " + arguments.weather);
+        }
         if (arguments.editor) {
             game.switchMode(odysseus::game::Mode::Editor);
         }

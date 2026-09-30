@@ -35,6 +35,7 @@ const char* toolName(EditorTool tool) {
     case EditorTool::Select: return "Select";
     case EditorTool::Weapon: return "Weapon";
     case EditorTool::Plant: return "Plant";
+    case EditorTool::Effect: return "Effect";
     }
     return "?";
 }
@@ -87,10 +88,11 @@ void Editor::buildPanels() {
     button("Place", "Place a character: choose one, click the map", [this] { tool_ = EditorTool::Place; });
     button("Arms", "Place a weapon pickup: choose one, click the map", [this] { tool_ = EditorTool::Weapon; });
     button("Plant", "Place a plant: choose one (pages with the arrows), click the map", [this] { tool_ = EditorTool::Plant; });
-    button("Select", "Select a character, pickup or plant: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
+    button("Fx", "Place a looping effect (fireflies, campfire, portal): choose one, click the map", [this] { tool_ = EditorTool::Effect; });
+    button("Select", "Select a character, pickup, plant or effect: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
-    button("Grid", "Show or hide the grid (G)", [this] { grid_ = !grid_; });
+    button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
     button("Redo", "Redo (Ctrl+Y)", [this] { redo(); });
     button("Save", "Save the level (Ctrl+S)", [this] { save(); });
@@ -125,6 +127,21 @@ void Editor::buildPanels() {
         weapon.hint = weaponNames_[static_cast<std::size_t>(i)];
     }
     buildPlantPalette();
+    // Looping effects (US-138): the ones of effects.json that loop, by their first picture (drawn in render()).
+    {
+        const int effects = static_cast<int>(definitions_.loopingEffects.size());
+        const int effectColumns = 4;
+        const int effectRows = std::max(1, (effects + effectColumns - 1) / effectColumns);
+        effectPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, effectColumns * kPaletteCell + 4, effectRows * kPaletteCell + 4});
+        for (int i = 0; i < effects; ++i) {
+            const Rect cell{4 + (i % effectColumns) * kPaletteCell, kToolbarHeight + 6 + (i / effectColumns) * kPaletteCell, kPaletteCell - 2, kPaletteCell - 2};
+            Button& effectButton = effectPalette_->add<Button>(cell, "", [this, i] {
+                effect_ = i;
+                tool_ = EditorTool::Effect; // choosing an effect means placing it
+            });
+            effectButton.hint = definitions_.loopingEffects[static_cast<std::size_t>(i)];
+        }
+    }
     buildProperties();
     buildSettings();
     buildOpenList();
@@ -187,6 +204,27 @@ void Editor::buildPlantPalette() {
         });
         button.hint = definitions_.plants[static_cast<std::size_t>(index)];
     }
+}
+
+const PlacedEffect* Editor::findEffect(int id) const {
+    for (const PlacedEffect& effect : level_.effects) {
+        if (effect.id == id) return &effect;
+    }
+    return nullptr;
+}
+
+void Editor::changeEffects(const std::string& what, std::vector<PlacedEffect> after, int nextIdAfter) {
+    run(std::make_unique<EffectsCommand>(what, level_.effects, std::move(after), level_.nextId, nextIdAfter));
+}
+
+// A placed effect is picked by a box of 24 x 24 around its middle.
+std::optional<int> Editor::effectAt(int screenX, int screenY) const {
+    if (screenX < 0 || screenY < 0) return std::nullopt;
+    const auto [wx, wy] = toWorld(screenX, screenY);
+    for (auto it = level_.effects.rbegin(); it != level_.effects.rend(); ++it) {
+        if (wx >= it->at.x - 12 && wx < it->at.x + 12 && wy >= it->at.y - 12 && wy < it->at.y + 12) return it->id;
+    }
+    return std::nullopt;
 }
 
 const PlacedPlant* Editor::findPlant(int id) const {
@@ -254,6 +292,14 @@ void Editor::removeSelected() {
         select(std::nullopt);
         return;
     }
+    if (const PlacedEffect* gone = findEffect(*selected_)) {
+        const std::string what = "remove " + gone->name;
+        auto after = level_.effects;
+        std::erase_if(after, [this](const PlacedEffect& e) { return e.id == *selected_; });
+        changeEffects(what, std::move(after), level_.nextId);
+        select(std::nullopt);
+        return;
+    }
     if (const PlacedPlant* gone = findPlant(*selected_)) {
         const std::string what = "remove " + gone->kind;
         auto after = level_.plants;
@@ -299,7 +345,7 @@ PlacedCharacter* Editor::find(int id) {
 }
 
 void Editor::select(std::optional<int> id) {
-    if (id && find(*id) == nullptr && findPickup(*id) == nullptr && findPlant(*id) == nullptr) id.reset();
+    if (id && find(*id) == nullptr && findPickup(*id) == nullptr && findPlant(*id) == nullptr && findEffect(*id) == nullptr) id.reset();
     if (id == selected_ && !propertiesStale_) return;
     selected_ = id;
     buildProperties();
@@ -642,7 +688,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
                       (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) ||
-                      (b->label == "Grid" && grid_);
+                      (b->label == "#" && grid_) || (b->label == "Fx" && tool_ == EditorTool::Effect);
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(palette_->children()[i].get())) b->selected = static_cast<int>(i) == tile_;
@@ -653,6 +699,9 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     for (std::size_t i = 0; i < weaponPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(weaponPalette_->children()[i].get())) b->selected = static_cast<int>(i) == weapon_;
     }
+    for (std::size_t i = 0; i < effectPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(effectPalette_->children()[i].get())) b->selected = static_cast<int>(i) == effect_;
+    }
     for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(plantPalette_->children()[i].get())) b->selected = plantPage_ * kPlantsPerPage + static_cast<int>(i) - 2 == plant_;
     }
@@ -660,7 +709,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     palette_->visible = paints(tool_);
     weaponPalette_->visible = tool_ == EditorTool::Weapon;
     plantPalette_->visible = tool_ == EditorTool::Plant;
-    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant;
+    effectPalette_->visible = tool_ == EditorTool::Effect;
+    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect;
     if (propertiesStale_ && !properties_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
@@ -680,7 +730,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     const bool onToolbar = toolbar_->handle(input);
-    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input);
+    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input);
     const bool onProperties = properties_->handle(input);
     const bool onSettings = settings_->handle(input);
     return onToolbar || onPalette || onProperties || onSettings;
@@ -711,6 +761,18 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
             const int id = level_.nextId;
             after.push_back({id, weapon, {x, y}});
             changePickups(std::format("place {} #{}", weapon, id), std::move(after), level_.nextId + 1);
+            select(id);
+        }
+        return;
+    }
+    if (tool_ == EditorTool::Effect) {
+        if (pressed && hover_ && !definitions_.loopingEffects.empty()) {
+            const std::string& name = definitions_.loopingEffects[static_cast<std::size_t>(effect_)];
+            const auto [x, y] = insideLevel(wx, wy);
+            auto after = level_.effects;
+            const int id = level_.nextId;
+            after.push_back({id, name, {x, y}});
+            changeEffects(std::format("place {} #{}", name, id), std::move(after), level_.nextId + 1);
             select(id);
         }
         return;
@@ -763,9 +825,18 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         const bool character = hit.has_value();
         if (!hit) hit = pickupAt(pointer.x, pointer.y); // pickups lie on the ground, under the characters
         const bool pickup = hit.has_value() && !character;
+        if (!hit) hit = effectAt(pointer.x, pointer.y);  // effects float above the plants
+        const bool effect = hit.has_value() && !character && !pickup;
         if (!hit) hit = plantAt(pointer.x, pointer.y);   // plants stand under everything
         select(hit);
-        if (hit && !character && !pickup) {
+        if (hit && effect) {
+            const PlacedEffect& grabbed = *findEffect(*hit);
+            movingEffect_ = true;
+            movingEffectsBefore_ = level_.effects;
+            grabX_ = grabbed.at.x - wx;
+            grabY_ = grabbed.at.y - wy;
+        }
+        if (hit && !character && !pickup && !effect) {
             const PlacedPlant& grabbed = *findPlant(*hit);
             movingPlant_ = true;
             movingPlantsBefore_ = level_.plants;
@@ -791,6 +862,24 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         if (PlacedCharacter* dragged = find(*selected_)) {
             const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
             dragged->feet = {x, y}; // moved at once, so the owner sees it follow the pointer
+        }
+    }
+    if (movingEffect_ && held && pointer.inside() && selected_) {
+        for (PlacedEffect& effect : level_.effects) {
+            if (effect.id == *selected_) {
+                const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
+                effect.at = {x, y};
+            }
+        }
+    }
+    if (movingEffect_ && (released || !held)) {
+        movingEffect_ = false;
+        if (level_.effects != movingEffectsBefore_) {
+            const PlacedEffect* moved = selected_ ? findEffect(*selected_) : nullptr;
+            const std::string what = moved == nullptr ? "move" : std::format("move {} to ({}, {})", moved->name, moved->at.x, moved->at.y);
+            history_.record(std::make_unique<EffectsCommand>(what, movingEffectsBefore_, level_.effects, level_.nextId, level_.nextId));
+            unsaved_ = true;
+            say(what);
         }
     }
     if (movingPlant_ && held && pointer.inside() && selected_) {
@@ -1008,6 +1097,19 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         }
     }
 
+    if (textures_.effects != nullptr) {
+        for (const PlacedEffect& placed : level_.effects) {
+            const auto corner = screen(placed.at.x - 24, placed.at.y - 24);
+            drawEffectPicture(renderer, *textures_.effects, placed.name, {corner.x, corner.y, 48, 48});
+        }
+        if (selected_) {
+            if (const PlacedEffect* effect = findEffect(*selected_)) {
+                const auto corner = screen(effect->at.x - 12, effect->at.y - 12);
+                painter.outline({corner.x, corner.y, 24, 24}, UiColor::Gold);
+                painter.text(corner.x + (24 - UiPainter::textWidth(effect->name)) / 2, corner.y - 10, effect->name, UiColor::Gold);
+            }
+        }
+    }
     if (selected_ && textures_.plants != nullptr) {
         if (const PlacedPlant* plant = findPlant(*selected_)) {
             const Rect extent = plantExtent(*textures_.plants, plant->kind);
@@ -1034,14 +1136,23 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
                 drawAnimalIcon(renderer, *textures_.animals, definitions_.characters[index].name, {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
             }
         }
-    }    plantPalette_->draw(painter);
-    if (plantPalette_->visible && textures_.plants != nullptr) {
+    }    effectPalette_->draw(painter);
+    if (effectPalette_->visible && textures_.effects != nullptr) {
+        for (std::size_t i = 0; i < effectPalette_->children().size() && i < definitions_.loopingEffects.size(); ++i) {
+            const Rect& cell = effectPalette_->children()[i]->bounds;
+            drawEffectPicture(renderer, *textures_.effects, definitions_.loopingEffects[i], {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
+        }
+    }
+    plantPalette_->draw(painter);    if (plantPalette_->visible && textures_.plants != nullptr) {
         const int plants = static_cast<int>(definitions_.plants.size());
         const int pages = std::max(1, (plants + kPlantsPerPage - 1) / kPlantsPerPage);
         const std::string label = std::format("{}/{}", plantPage_ + 1, pages);
         const Rect& panel = plantPalette_->bounds;
         painter.text(panel.x + (panel.width - UiPainter::textWidth(label)) / 2, panel.y + 4, label, UiColor::Text);
-        for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
+        for (std::size_t i = 0; i < effectPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(effectPalette_->children()[i].get())) b->selected = static_cast<int>(i) == effect_;
+    }
+    for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
             const Rect& cell = plantPalette_->children()[i]->bounds;
             const std::size_t index = static_cast<std::size_t>(plantPage_ * kPlantsPerPage) + i - 2;
             if (index < definitions_.plants.size()) {
@@ -1068,6 +1179,10 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         what = definitions_.characters[static_cast<std::size_t>(kind_)].name;
     } else if (tool_ == EditorTool::Weapon) {
         what = weaponNames_.empty() ? "no weapons" : weaponNames_[static_cast<std::size_t>(weapon_)];
+    } else if (tool_ == EditorTool::Effect) {
+        what = definitions_.loopingEffects.empty() ? "no effects" : definitions_.loopingEffects[static_cast<std::size_t>(effect_)];
+    } else if (selected_ && findEffect(*selected_) != nullptr) {
+        what = findEffect(*selected_)->name;
     } else if (tool_ == EditorTool::Plant) {
         what = definitions_.plants.empty() ? "no plants" : definitions_.plants[static_cast<std::size_t>(plant_)];
     } else if (selected_ && findPlant(*selected_) != nullptr) {
@@ -1093,6 +1208,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         characterPalette_->drawOverlay(painter);
         weaponPalette_->drawOverlay(painter);
         plantPalette_->drawOverlay(painter);
+        effectPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         settings_->drawOverlay(painter);
     }

@@ -70,6 +70,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
+    weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
+    weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
     std::vector<std::string> palette;
     for (const WeaponDef& weapon : catalogs_.weapons) {
         if (weapon.starter) {
@@ -97,6 +99,7 @@ void OdysseyGame::resetPlay() {
     heroHp_ = kHeroMaxHp;
     respawnTicks_ = 0;
     effects_.clear();
+    weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
     projectiles_.clear();
     arcShots_.clear();
     attackCooldown_ = 0;
@@ -136,6 +139,7 @@ void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
 
 void OdysseyGame::populate() {
     populatePlants();
+    startPlacedEffects();
     enemies_.clear();
     bystanders_.clear();
     pickups_.clear();
@@ -327,6 +331,56 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
     const int lost = enemy.status.tick();
     if (lost > 0 && enemy.takeDamage(lost, false)) {
         playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
+    }
+}
+
+void OdysseyGame::setWeatherSeed(std::uint64_t seed) {
+    weatherSeed_ = seed;
+    weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
+}
+
+bool OdysseyGame::setWeatherNamed(const std::string& name) {
+    for (std::size_t i = 0; i < catalogs_.weather.size(); ++i) {
+        if (catalogs_.weather[i].name == name) {
+            weather_.force(static_cast<int>(i));
+            return true;
+        }
+    }
+    return false;
+}
+
+// The effects placed in the level play in a loop from the start of the level (US-138).
+void OdysseyGame::startPlacedEffects() {
+    if (!contentLoaded_) return;
+    for (const PlacedEffect& placed : level_.effects) playEffect(placed.name, placed.at.x, placed.at.y);
+}
+
+// The weather: the page's 32 x 64 pictures tiled over the whole screen (rain, snow, sparks; fog and clouds stretched), animated; the old weather fades out as the
+// new one fades in (alpha), light weathers added to the picture, fog and clouds laid over it.
+void OdysseyGame::drawWeather(luna::engine::Renderer& renderer) const {
+    if (weatherFrames_.empty() || catalogs_.weather.empty()) return;
+    constexpr double kStrength = 0.8; // the most opaque a weather gets
+    auto layer = [&](int index, double amount) {
+        if (amount <= 0.0 || index < 0 || index >= static_cast<int>(catalogs_.weather.size())) return;
+        const WeatherDef& def = catalogs_.weather[static_cast<std::size_t>(index)];
+        const auto frames = weatherFrames_.find(def.name);
+        if (def.frames == 0 || frames == weatherFrames_.end() || frames->second.empty()) return; // clear sky: nothing to draw
+        const luna::engine::Rect& source = frames->second[static_cast<std::size_t>((ticks_ / static_cast<std::uint64_t>(std::max(1, def.ticksPerFrame))) % frames->second.size())];
+        const luna::engine::DrawStyle style{static_cast<std::uint8_t>(std::clamp(amount * kStrength, 0.0, 1.0) * 255.0), def.additive ? luna::engine::Blend::Add : luna::engine::Blend::Normal};
+        if (!def.additive) {
+            // Fog and clouds: the one picture stretched over the whole screen, soft (tiled it would show its edges).
+            renderer.drawStyled(weatherTexture_, source, {0, 0, kVirtualWidth, kVirtualHeight}, style);
+            return;
+        }
+        for (int y = 0; y < kVirtualHeight; y += source.height) {
+            for (int x = 0; x < kVirtualWidth; x += source.width) renderer.drawStyled(weatherTexture_, source, {x, y, source.width, source.height}, style);
+        }
+    };
+    if (weather_.fading()) {
+        layer(weather_.previous(), 1.0 - weather_.fade());
+        layer(weather_.current(), weather_.fade());
+    } else {
+        layer(weather_.current(), 1.0);
     }
 }
 
@@ -716,6 +770,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         return;
     }
     ++ticks_;
+    weather_.update();
     // After a fall the hero waits out a short fade, then starts again at the hero start.
     const bool fallen = respawnTicks_ > 0;
     if (fallen && --respawnTicks_ == 0) {
@@ -932,6 +987,18 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         iconsTexture_ = renderer.createTexture(content_.pictures.at("icons"));
         iconsMirrored_ = renderer.createTexture(luna::engine::mirrored(content_.pictures.at("icons")));
         weaponArt_.icons = iconsTexture_;
+        if (const auto weather = content_.pictures.find("weather"); weather != content_.pictures.end()) {
+            weatherTexture_ = renderer.createTexture(weather->second);
+            for (const WeatherDef& def : catalogs_.weather) {
+                for (int i = 0; i < def.frames; ++i) {
+                    if (const auto rect = content_.rect(content_.frameName(def.name, i))) weatherFrames_[def.name].push_back(*rect);
+                }
+            }
+        }
+        effectArt_.page = effectsTexture_;
+        for (const EffectDef& def : catalogs_.effects) {
+            if (const auto rect = content_.rect(content_.frameName(def.name, 0))) effectArt_.firstFrame[def.name] = *rect;
+        }
         for (const char* page : {"plants-small", "plants-tall", "trees"}) {
             if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) plantArt_.pages[page] = renderer.createTexture(found->second);
         }
@@ -951,7 +1018,8 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         for (const WeaponDef& weapon : catalogs_.weapons) {
             if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
         }
-        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_});
+        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_, &effectArt_});
+        startPlacedEffects(); // the content is loaded now: the effects placed in the level start
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
@@ -1064,6 +1132,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawHeld(renderer, view, alpha);
     drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
+    drawWeather(renderer);
     drawInspection(renderer, view);
     drawHud(renderer);
     drawModeLabel(renderer);
