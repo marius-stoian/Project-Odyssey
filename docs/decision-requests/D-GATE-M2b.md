@@ -1,6 +1,6 @@
 # D-GATE-M2b: Kill Gate 1 retry (owner, human gate)
 
-**Status:** Open. Asked 2026-09-30 by Mraw at the X-M2b exit review. **The team waits for this answer before M3.**
+**Status:** Decided (owner, 2026-09-30): Option A, Go. Asked 2026-09-30 by Mraw at the X-M2b exit review. **The team waits for this answer before M3.**
 
 **Question.** Is the printed story of the clan a story? (You judge alone, D-18.)
 
@@ -21,4 +21,4 @@ Your notes were: not really a story; needs reasons for deaths and feuds, more in
 | D. Stop | The idea does not work for you | The project stops or changes direction |
 
 ## Your answer
-_(write here)_
+Option A. it is a story. don't start M3 yet, I have new feature requests for Dominus

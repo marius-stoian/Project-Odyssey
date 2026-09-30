@@ -2,7 +2,7 @@
 
 Codex v1.6, prompt X-M2b, 2026-09-30. Exit criteria: the chronicle tells the clan's story in fewer, bigger episodes with reasons; every death and feud says why; the 100-year soak still runs without crashing and the determinism test passes; the owner reads the printed story and judges whether it is a story.
 
-**Result: three criteria are met; the last one needs you and is waiting ([D-GATE-M2b](../decision-requests/D-GATE-M2b.md)).** Until you answer, `qa` is not merged into `main` and M3 does not start.
+**Result: all four criteria met. The owner answered Option A, Go (2026-09-30): "it is a story".**
 
 ## 1. Fewer, bigger episodes with reasons: **Met**
 `odysseus_headless --seed S --years 100 --story` prints at most 40 named episodes (each: beginning = the cause, turn, end, and the people), then the births, deaths, pairings and feuds with their reasons; `--chronicle` still prints every event. Tests: `US-115 Episode`, `US-115 Fewer, bigger`, `US-115 The story, then the lines with reasons`, and the command-line check `US-115 Both views` (evidence: [US-115](../evidence/US-115/headless-seed7-100years-story.txt)).
