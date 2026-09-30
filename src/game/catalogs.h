@@ -76,18 +76,25 @@ struct ElementDef {
     std::string healEffect;     // void: shown on the hero when healed
 };
 
+// What a weapon class shoots with (US-141), from weapons.json under "classes": how fast its shots leave, metres per second.
+struct ClassDef {
+    double launchSpeed = 0.0; // 0: the class shoots nothing (melee)
+};
+
 struct Catalogs {
     std::vector<WeaponDef> weapons;
     std::vector<PlantDef> plants;
     std::vector<AnimalDef> animals;
     std::vector<EffectDef> effects;
     std::vector<WeatherDef> weather;
+    std::array<ClassDef, 8> classes{};    // by WeaponClass
     std::array<ElementDef, 6> elements{}; // by Element; "none" does nothing
 
     const WeaponDef* weapon(const std::string& name) const;
     const PlantDef* plant(const std::string& name) const;
     const AnimalDef* animal(const std::string& name) const;
     const EffectDef* effect(const std::string& name) const;
+    const ClassDef& weaponClass(WeaponClass weaponClass) const { return classes.at(static_cast<std::size_t>(weaponClass)); }
     const ElementDef& element(Element element) const { return elements.at(static_cast<std::size_t>(element)); }
 };
 

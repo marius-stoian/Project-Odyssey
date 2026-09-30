@@ -57,13 +57,11 @@ struct ArcEvent {
 // Where a shot from `heroFeetX/Y` (world pixels) aimed along (dirX, dirY) lands: on the ground
 // `distancePixels` away (a mouse aim), or, for `chestHeight`, at chest height `distancePixels`
 // away (a key aim, which has no pointer: a shallow arrow that hits what stands in front).
-// The distance is clamped to the weapon's range and to what its launch speed can reach.
+// launchSpeed (metres per second) comes from weapons.json ("classes"). The distance is clamped to the weapon's range and to what that speed can reach.
 // Returns nothing for a weapon that does not arc (staffs, guns).
-std::optional<ArcShot> launchArcShot(const WeaponDef& weapon, double heroFeetX, double heroFeetY, double dirX, double dirY, double distancePixels,
+std::optional<ArcShot> launchArcShot(const WeaponDef& weapon, double launchSpeed, double heroFeetX, double heroFeetY, double dirX, double dirY, double distancePixels,
                                      bool chestHeight);
 
-// The launch speed of a class, metres per second (bows 16, thrown 10).
-double arcLaunchSpeed(WeaponClass weaponClass);
 // Whether a class flies in an arc (bows and crossbows, thrown) rather than flat.
 bool flysInArc(WeaponClass weaponClass);
 

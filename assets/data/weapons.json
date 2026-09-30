@@ -1,4 +1,10 @@
 {
+  "classes": {
+    "bow": {"launchSpeed":16},
+    "thrown": {"launchSpeed":10},
+    "staff": {"launchSpeed":12},
+    "gun": {"launchSpeed":24}
+  },
   "elements": {
     "fire": {"perSecond":2,"seconds":3,"effect":"ember","hitEffect":"fire wisp"},
     "ice": {"slowTo":0.5,"seconds":2,"effect":"ice shards","hitEffect":"frost nova"},

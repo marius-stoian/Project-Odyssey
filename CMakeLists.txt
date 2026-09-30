@@ -297,6 +297,7 @@ add_executable(odysseus_game_tests
     tests/game/elements_test.cpp
     tests/game/aiming_test.cpp
     tests/game/arc_test.cpp
+    tests/game/ranged_test.cpp
     tests/game/pickups_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
