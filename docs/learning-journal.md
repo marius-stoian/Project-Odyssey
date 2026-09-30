@@ -652,3 +652,22 @@ PlacedCharacter* find(int id);         // look it up when needed, fresh each tim
 **Try it (15 minutes).** `odysseus.exe --editor`: choose Place, then the troll, put it on the path; choose Select, give it 20 HP; F1, Shift for the sword, and defeat it.
 
 **Check yourself.** Why does `CharactersCommand::undo` keep `nextId` at its highest value instead of putting it back?
+
+## US-126: Level and character settings (2026-09-30)
+
+**What we built.** A Level panel in the Editor: name, width, height and default ground; New and Open for other levels, with a "Save the changes first?" question; the hero's start dragged by its marker. And the guide, `docs/guides/editor.md`.
+
+**The idea: resizing a 2D grid stored in one vector.** The ground is one `std::vector<int>`, row after row: cell (x, y) lives at `y * width + x`. Change the width and every index moves, so you cannot just `resize()` the vector: the rows would slide into each other. Instead we build a new grid and copy the part both sizes share:
+
+```cpp
+out.ground.assign(newWidth * newHeight, level.defaultGround);   // all default ground
+for (int y = 0; y < std::min(level.height, out.height); ++y)
+    for (int x = 0; x < std::min(level.width, out.width); ++x)
+        out.set(x, y, level.at(x, y));                           // the overlap, cell by cell
+```
+
+**Where to look.** `resized` in [src/game/level.cpp](../src/game/level.cpp); `Editor::requestOpen` and `Editor::answer` in [src/game/editor.cpp](../src/game/editor.cpp).
+
+**Try it (15 minutes).** Follow [the Editor guide](guides/editor.md): make a new level, paint a lake, place a troll, move the START marker, save, and press F1.
+
+**Check yourself.** What would go wrong if `resized` called `ground.resize(newWidth * newHeight)` and nothing else?

@@ -250,3 +250,12 @@ TEST_CASE("US-121 Showcase") {
     REQUIRE(engine::savePng(screen.image(), file));
     MESSAGE("showcase: ", file.string());
 }
+
+TEST_CASE("US-126 Hints stay on screen") {
+    engine::ImageRenderer screen(480, 270);
+    const auto sheet = screen.createTexture(engine::makeUiSheet());
+    engine::UiPainter painter(screen, sheet);
+    painter.setScreen({0, 0, 480, 270});
+    CHECK(painter.keepOnScreen({470, 260, 100, 13}) == engine::Rect{380, 257, 100, 13}); // pushed back inside
+    CHECK(painter.keepOnScreen({10, 10, 100, 13}) == engine::Rect{10, 10, 100, 13});     // already inside: unchanged
+}

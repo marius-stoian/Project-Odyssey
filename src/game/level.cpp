@@ -121,6 +121,25 @@ Level makeLevel(std::string name, int width, int height, int ground) {
     return level;
 }
 
+Level resized(const Level& level, int width, int height) {
+    Level out = level;
+    out.width = std::clamp(width, kLevelMinSize, kLevelMaxSize);
+    out.height = std::clamp(height, kLevelMinSize, kLevelMaxSize);
+    out.ground.assign(static_cast<std::size_t>(out.width) * static_cast<std::size_t>(out.height), level.defaultGround);
+    for (int y = 0; y < std::min(level.height, out.height); ++y) {
+        for (int x = 0; x < std::min(level.width, out.width); ++x) {
+            out.set(x, y, level.at(x, y));
+        }
+    }
+    const int pixelsWide = out.width * kTileSize;
+    const int pixelsHigh = out.height * kTileSize;
+    auto inside = [&](const PixelPoint& p) { return p.x < pixelsWide && p.y < pixelsHigh; };
+    std::erase_if(out.characters, [&](const PlacedCharacter& c) { return !inside(c.feet); });
+    std::erase_if(out.targets, [&](const PixelPoint& p) { return !inside(p); });
+    out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
+    return out;
+}
+
 luna::engine::TileMap buildTileMap(const Level& level, const Definitions& definitions) {
     luna::engine::TileMap map(level.width, level.height, kTileSize, level.defaultGround);
     for (std::size_t i = 0; i < definitions.tiles.size(); ++i) {

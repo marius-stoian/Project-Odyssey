@@ -103,6 +103,12 @@ void UiPainter::fill(const Rect& area, UiColor color) {
     }
 }
 
+Rect UiPainter::keepOnScreen(Rect box) const {
+    box.x = std::clamp(box.x, screen_.x, std::max(screen_.x, screen_.x + screen_.width - box.width));
+    box.y = std::clamp(box.y, screen_.y, std::max(screen_.y, screen_.y + screen_.height - box.height));
+    return box;
+}
+
 void UiPainter::outline(const Rect& area, UiColor color) {
     fill({area.x, area.y, area.width, 1}, color);
     fill({area.x, area.y + area.height - 1, area.width, 1}, color);
@@ -148,7 +154,7 @@ void Button::draw(UiPainter& painter) const {
 void Button::drawOverlay(UiPainter& painter) const {
     if (!hovered_ || hint.empty()) return;
     const int width = UiPainter::textWidth(hint) + 6;
-    const Rect box{hoverX_ + 8, hoverY_ + 10, width, kGlyphHeight + 6};
+    const Rect box = painter.keepOnScreen({hoverX_ + 8, hoverY_ + 10, width, kGlyphHeight + 6});
     painter.fill(box, UiColor::Dark);
     painter.outline(box, UiColor::Border);
     painter.text(box.x + 3, box.y + 3, hint, UiColor::Text);

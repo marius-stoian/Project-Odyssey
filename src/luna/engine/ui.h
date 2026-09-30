@@ -43,6 +43,11 @@ public:
     void text(int x, int y, std::string_view text, UiColor color);
     void image(const Texture& texture, const Rect& source, Point at) { renderer_.draw(texture, source, at); }
 
+    // The visible screen, so pop-ups (hints) can stay inside it. Unset: anywhere.
+    void setScreen(const Rect& screen) { screen_ = screen; }
+    // `box` moved (not resized) so it lies inside the screen where it can.
+    Rect keepOnScreen(Rect box) const;
+
     static int textWidth(std::string_view text) {
         return text.empty() ? 0 : static_cast<int>(text.size()) * kTextAdvance - 1;
     }
@@ -50,6 +55,7 @@ public:
 private:
     Renderer& renderer_;
     const Texture& sheet_;
+    Rect screen_{0, 0, 1 << 20, 1 << 20};
 };
 
 // What a widget sees of the player's input in one tick.
