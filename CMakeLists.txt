@@ -161,6 +161,7 @@ add_library(odysseus_game STATIC
     src/game/pickups.cpp
     src/game/plants.cpp
     src/game/animals.cpp
+    src/game/weather.cpp
     src/game/level.cpp
     src/game/editor.cpp
     src/game/editor_history.cpp)
@@ -302,6 +303,7 @@ add_executable(odysseus_game_tests
     tests/game/ranged_test.cpp
     tests/game/plants_test.cpp
     tests/game/animals_test.cpp
+    tests/game/weather_test.cpp
     tests/game/pickups_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"

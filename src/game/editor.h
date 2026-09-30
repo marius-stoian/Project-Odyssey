@@ -4,6 +4,7 @@
 
 #include "game/animals.h"
 #include "game/art.h"
+#include "game/effect_art.h"
 #include "game/editor_history.h"
 #include "game/level.h"
 #include "game/pickups.h"
@@ -35,10 +36,11 @@ struct EditorTextures {
     const WeaponArt* weapons = nullptr; // the weapon icons, for pickups and the weapon palette (US-134)
     const PlantArt* plants = nullptr;   // the plant pictures, for the plant palette and placed plants (US-136)
     const AnimalArt* animals = nullptr; // the animal pictures, for the character palette and placed animals (US-137)
+    const EffectArt* effects = nullptr; // the first picture of each effect, for the effect palette and placed effects (US-138)
 };
 
 // What a left click on the map does.
-enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant };
+enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant, Effect };
 
 const char* toolName(EditorTool tool);
 
@@ -86,6 +88,11 @@ public:
     std::optional<int> pickupAt(int screenX, int screenY) const;
     // Plants (US-136): the Plant tool places the chosen plant of Definitions::plants at the clicked cell (its feet
     // in the middle of the cell's bottom edge); the palette shows them by picture, 36 to a page.
+    // Looping effects (US-138): the Effect tool places the chosen effect of Definitions::loopingEffects where the
+    // pointer clicks; in the game it plays in a loop. The Editor shows its first picture.
+    int effect() const { return effect_; }
+    void setEffect(int effect) { effect_ = effect; }
+    std::optional<int> effectAt(int screenX, int screenY) const;
     int plant() const { return plant_; }
     void setPlant(int plant) { plant_ = plant; }
     int plantPage() const { return plantPage_; }
@@ -151,6 +158,8 @@ private:
     const PlacedPlant* findPlant(int id) const;
     void changePlants(const std::string& what, std::vector<PlacedPlant> after, int nextIdAfter);
     void buildPlantPalette();
+    const PlacedEffect* findEffect(int id) const;
+    void changeEffects(const std::string& what, std::vector<PlacedEffect> after, int nextIdAfter);
     void buildCharacterPalette();
     void changePickups(const std::string& what, std::vector<PlacedPickup> after, int nextIdAfter);
     void removeSelected();
@@ -202,6 +211,10 @@ private:
     std::vector<std::string> weaponNames_;
     std::unique_ptr<luna::engine::Panel> plantPalette_;
     int plant_ = 0;
+    int effect_ = 0;
+    std::unique_ptr<luna::engine::Panel> effectPalette_;
+    bool movingEffect_ = false;
+    std::vector<PlacedEffect> movingEffectsBefore_;
     int kindPage_ = 0;
     int kindPageWanted_ = 0;
     int plantPage_ = 0;

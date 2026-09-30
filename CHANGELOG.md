@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-138: Placed effects and random weather (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
+
+- Level format version 2 gains `effects`; the Editor has an **Fx** tool and palette of the 17 looping effects with place, select, move, delete, Undo and Redo; the toolbar button **Grid** is now **#**.
+- `WeatherCycle` (seeded PCG32 stream `weather`): a random weather from weather.json every 60-120 s, 3 s cross-fade, clear about a third of the time; drawn over the world and under the interface; `--seed` and `--weather` flags.
+- D-29 records the small choices. Tests: US-138 Weather cycle, Weather in the game, Placed effects. Evidence `docs/evidence/US-138/`; plan `docs/plans/US-138.md`; guide `docs/guides/editor.md`.
 ## US-137: Animals in the Editor (Avengers) — 2026-10-01
 
 **State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.

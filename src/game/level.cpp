@@ -65,6 +65,10 @@ bool Definitions::hasWeapon(const std::string& name) const {
     return std::find(weapons.begin(), weapons.end(), name) != weapons.end();
 }
 
+bool Definitions::hasLoopingEffect(const std::string& name) const {
+    return std::find(loopingEffects.begin(), loopingEffects.end(), name) != loopingEffects.end();
+}
+
 bool Definitions::hasPlant(const std::string& name) const {
     return std::find(plants.begin(), plants.end(), name) != plants.end();
 }
@@ -168,6 +172,17 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             definitions.plants.push_back(text(plants.at("plants").at(i), plantsFile, "name"));
         }
     }
+    const std::filesystem::path effectsFile = dataDirectory / "effects.json";
+    if (std::filesystem::exists(effectsFile)) {
+        const json effects = sim::readJsonFile(effectsFile);
+        if (!effects.contains("effects") || !effects.at("effects").is_array()) {
+            throw DataError(effectsFile, "effects", "must be a list of effects");
+        }
+        for (std::size_t i = 0; i < effects.at("effects").size(); ++i) {
+            const json& entry = effects.at("effects").at(i);
+            if (entry.value("loop", false)) definitions.loopingEffects.push_back(text(entry, effectsFile, "name"));
+        }
+    }
     definitions.weapons.push_back(kSpearThrowName);
     definitions.weapons.push_back(kSwordSlashName);
     return definitions;
@@ -201,6 +216,7 @@ Level resized(const Level& level, int width, int height) {
     std::erase_if(out.targets, [&](const PixelPoint& p) { return !inside(p); });
     std::erase_if(out.pickups, [&](const PlacedPickup& p) { return !inside(p.at); });
     std::erase_if(out.plants, [&](const PlacedPlant& p) { return !inside(p.feet); });
+    std::erase_if(out.effects, [&](const PlacedEffect& p) { return !inside(p.at); });
     out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
     return out;
 }
@@ -328,6 +344,26 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.plants.push_back(plant);
         }
     }
+    if (data.contains("effects")) { // level version 2 (US-138); a version 1 file has none
+        if (!data.at("effects").is_array()) throw DataError(file, "effects", "must be a list");
+        for (std::size_t i = 0; i < data.at("effects").size(); ++i) {
+            const json& entry = data.at("effects").at(i);
+            const std::string where = std::format("effects[{}]", i);
+            PlacedEffect effect;
+            effect.id = whole(entry, file, "id", 1, level.nextId - 1);
+            const auto used = [&] { return DataError(file, where + ".id", std::format("{} is used twice", effect.id)); };
+            for (const PlacedCharacter& other : level.characters) if (other.id == effect.id) throw used();
+            for (const PlacedPickup& other : level.pickups) if (other.id == effect.id) throw used();
+            for (const PlacedPlant& other : level.plants) if (other.id == effect.id) throw used();
+            for (const PlacedEffect& other : level.effects) if (other.id == effect.id) throw used();
+            effect.name = text(entry, file, "name");
+            if (!definitions.hasLoopingEffect(effect.name)) {
+                throw DataError(file, where + ".name", "\"" + effect.name + "\" is not a looping effect in effects.json");
+            }
+            effect.at = point(json::array({entry.value("x", -1), entry.value("y", -1)}), file, where + ".x/y", level);
+            level.effects.push_back(effect);
+        }
+    }
     if (data.contains("targets")) {
         if (!data.at("targets").is_array()) throw DataError(file, "targets", "must be a list of [x, y]");
         for (std::size_t i = 0; i < data.at("targets").size(); ++i) {
@@ -381,6 +417,8 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     for (const PlacedPickup& p : level.pickups) pickups.push_back({{"id", p.id}, {"weapon", p.weapon}, {"x", p.at.x}, {"y", p.at.y}});
     json plants = json::array();
     for (const PlacedPlant& p : level.plants) plants.push_back({{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}});
+    json effects = json::array();
+    for (const PlacedEffect& e : level.effects) effects.push_back({{"id", e.id}, {"name", e.name}, {"x", e.at.x}, {"y", e.at.y}});
     json targets = json::array();
     for (const PixelPoint& t : level.targets) targets.push_back({t.x, t.y});
     const json data{{"levelVersion", kLevelVersion},
@@ -393,6 +431,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"characters", characters},
                     {"pickups", pickups},
                     {"plants", plants},
+                    {"effects", effects},
                     {"targets", targets},
                     {"ground", ground}};
     fs::create_directories(file.parent_path());

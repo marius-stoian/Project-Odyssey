@@ -32,7 +32,8 @@ Rest the pointer on any button to see what it does.
 | **Plant** | Put a plant on the map (see Plants). |
 | **Select** | Pick a character, pickup, plant or the hero's start, to move or change it. |
 | **Level** | Open the level settings (see Level settings). |
-| **Grid** | Show or hide the cell lines (also **G**). |
+| **#** | The Grid button: show or hide the cell lines (also **G**). |
+| **Fx** | Put a looping effect on the map (see Effects and weather). |
 | **Undo** | Take back the last change (also **Ctrl+Z**). Up to 100 steps. |
 | **Redo** | Do it again (also **Ctrl+Y**). |
 | **Save** | Save the level (also **Ctrl+S**). The last three saves are kept as backups (`.bak1` to `.bak3`), so a mistake is never final. |
@@ -70,6 +71,9 @@ In the game the hero starts with empty hands. Walk over a pickup and its weapon 
 The character palette has six pages (the arrows **<** and **>** under it): the first is the twelve characters, the others the 50 animals. Place, select, move, turn (**R**), rename and delete them like any character; their **Facing** picks the side they look toward (west shows the picture turned around). Hovering a button tells the animal's name and whether it is an enemy.
 
 In the game these 20 animals are **enemies**: grey wolf, fox, bear, boar, wild pig, cougar, lynx, leopard, jaguar, cheetah, lion, tiger, snow leopard, hyena, jackal, rhino, hippopotamus, buffalo, bull, water buffalo. They can be hit, strike back after a half-second warning when you are within 1.5 m, and fall at 0 HP. All the others (deer, cows, rabbits, ...) are harmless: they stand where you put them, cannot be hit, and every weapon passes them. The **Sword** number in the properties panel is an animal's strike damage.
+## Effects and weather
+1. Click **Fx**. The palette shows the 17 looping effects (fireflies, a flame, a portal, a magic circle, a whirlpool, dark mist, ...) by their first picture. Click one, then click the map: it is placed where you click. **Select** moves it (drag) or removes it (**Delete**); **Ctrl+Z** and **Ctrl+Y** undo and redo. In the game it plays in a loop.
+2. The weather is not edited: in the game a random weather fades in over 3 seconds every 60 to 120 seconds, and the sky is clear about one time in three. The weather is only for the eyes. The same level plays under the same weathers every time. To try a weather: `odysseus.exe --weather "steady rain"`; to choose another sequence: `--seed 7`. The Editor shows no weather.
 ## The hero's start
 The hero begins where the gold **START** marker stands. With **Select**, drag the marker to move it. Press **F1** and the hero starts there.
 
