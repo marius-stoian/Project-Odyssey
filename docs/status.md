@@ -39,7 +39,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-015 | US-015 | M2 | Done | 2026-09-30 |
 | S-US-016 | US-016 | M2 | Done | 2026-09-30 |
 | X-M2 | - | M2 | Failed: Kill Gate 1, owner verdict Pivot (D-GATE-M2); evidence docs/gates/M2.md | 2026-09-30 |
-| K-M2b | - | M2b | To do |  |
+| K-M2b | - | M2b | Done | 2026-09-30 |
 | S-US-110 | US-110 | M2b | To do |  |
 | S-US-111 | US-111 | M2b | To do |  |
 | S-US-112 | US-112 | M2b | To do |  |
