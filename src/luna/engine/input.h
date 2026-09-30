@@ -11,7 +11,7 @@ namespace luna::engine {
 
 // What the player wants to do, independent of the device (ARC-03). Games read only these,
 // so keyboard, gamepad and, later, touch all control the same actions.
-enum class Intent { MoveUp, MoveDown, MoveLeft, MoveRight, Interact, OpenMenu, Count };
+enum class Intent { MoveUp, MoveDown, MoveLeft, MoveRight, Interact, OpenMenu, SwitchWeapon, Count };
 
 inline constexpr std::size_t kIntentCount = static_cast<std::size_t>(Intent::Count);
 

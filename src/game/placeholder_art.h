@@ -24,6 +24,28 @@ luna::engine::Image makeCharacterSheet();
 enum class TileKind { Grass, Path, Rock, Water, Count };
 luna::engine::Image makeTileSheet();
 
+// Sword slash animation (M3 melee combat): 4 frames for each of 8 directions.
+// Frames represent the swing arc from idle through full extension.
+inline constexpr int kSwordFrameSize = 32;
+inline constexpr odysseus::core::Rect kSwordFrames[static_cast<std::size_t>(Facing::Count)][4] = {
+    // South (index 0): placeholder uses character frames
+    {{{0, 0, 32, 48}, {32, 0, 32, 48}, {64, 0, 32, 48}, {96, 0, 32, 48}}},
+    // SouthWest (index 1)
+    {{{0, 48, 32, 48}, {32, 48, 32, 48}, {64, 48, 32, 48}, {96, 48, 32, 48}}},
+    // West (index 2)
+    {{{0, 96, 32, 48}, {32, 96, 32, 48}, {64, 96, 32, 48}, {96, 96, 32, 48}}},
+    // NorthWest (index 3)
+    {{{0, 144, 32, 48}, {32, 144, 32, 48}, {64, 144, 32, 48}, {96, 144, 32, 48}}},
+    // North (index 4)
+    {{{0, 192, 32, 48}, {32, 192, 32, 48}, {64, 192, 32, 48}, {96, 192, 32, 48}}},
+    // NorthEast (index 5)
+    {{{0, 240, 32, 48}, {32, 240, 32, 48}, {64, 240, 32, 48}, {96, 240, 32, 48}}},
+    // East (index 6)
+    {{{0, 288, 32, 48}, {32, 288, 32, 48}, {64, 288, 32, 48}, {96, 288, 32, 48}}},
+    // SouthEast (index 7)
+    {{{0, 336, 32, 48}, {32, 336, 32, 48}, {64, 336, 32, 48}, {96, 336, 32, 48}}},
+};
+
 // Props for the spear demo (US-029): spears pointing 8 ways (row 0 flint, row 1 wooden),
 // a straw target on a post (untouched and hit), and a soft shadow.
 inline constexpr int kSpearFrameSize = 32;

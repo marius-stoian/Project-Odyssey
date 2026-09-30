@@ -43,6 +43,9 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::Space:
     case Key::Enter: return KeyBinding{Intent::Interact, kKeyboardB};
     case Key::Escape: return KeyBinding{Intent::OpenMenu, kKeyboardA};
+    case Key::LShift:
+    case Key::RShift: return KeyBinding{Intent::SwitchWeapon, kKeyboardA};
+    case Key::Tab: return KeyBinding{Intent::SwitchWeapon, kKeyboardB};
     default: return std::nullopt;
     }
 }

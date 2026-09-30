@@ -51,22 +51,41 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory)
 void OdysseyGame::update(const luna::engine::Intents& intents) {
     ++ticks_;
     hero_.update(intents, map_);
-    if (intents.pressed(luna::engine::Intent::Interact)) {
-        // Throw from where the hero stands, in the direction they face.
-        const Vec3 feet{luna::engine::metresFromPixels(hero_.feetX()), luna::engine::metresFromPixels(hero_.feetY()),
-                        luna::physics::kFixedZero};
-        const SpearKind& kind = range_.materials().spear(nextSpearIsFlint_ ? "flint" : "wooden");
-        const auto target = range_.throwSpear(feet, hero_.facing(), kind);
-        nextSpearIsFlint_ = !nextSpearIsFlint_;
-        // Frame the throw: the camera moves to halfway between the hero and where the spear
-        // goes, so the whole arc is on screen. 2 seconds, then it follows the hero again.
-        const Vec3 goal = target ? range_.targets()[*target].base : feet + facingDirection(hero_.facing()) * Fixed::fromInt(6);
-        const luna::engine::ScreenPoint goalPixels = luna::engine::groundShadow(goal);
-        framingX_ = (hero_.feetX() + goalPixels.x) / 2.0;
-        framingY_ = (hero_.feetY() + goalPixels.y) / 2.0;
-        framingTicks_ = 2 * 20;
-        core::logInfo(std::format("Threw a {} spear facing {}", kind.name, facingName(hero_.facing())));
+
+    // Handle weapon switching (Shift key).
+    if (intents.pressed(luna::engine::Intent::SwitchWeapon)) {
+        currentWeapon_ = currentWeapon_ == WeaponType::Sword ? WeaponType::Bow : WeaponType::Sword;
+        core::logInfo(std::format("Switched to {}", currentWeapon_ == WeaponType::Sword ? "Sword" : "Bow"));
     }
+
+    // Handle attacks based on current weapon.
+    if (intents.pressed(luna::engine::Intent::Interact)) {
+        if (currentWeapon_ == WeaponType::Sword) {
+            // Perform sword slash in the direction the hero is facing.
+            sword_.slash(hero_.facing());
+            core::logInfo(std::format("Sword slash facing {}", facingName(hero_.facing())));
+        } else {
+            // Throw spear (bow).
+            const Vec3 feet{luna::engine::metresFromPixels(hero_.feetX()), luna::engine::metresFromPixels(hero_.feetY()),
+                            luna::physics::kFixedZero};
+            const SpearKind& kind = range_.materials().spear(nextSpearIsFlint_ ? "flint" : "wooden");
+            const auto target = range_.throwSpear(feet, hero_.facing(), kind);
+            nextSpearIsFlint_ = !nextSpearIsFlint_;
+            // Frame the throw: the camera moves to halfway between the hero and where the spear
+            // goes, so the whole arc is on screen. 2 seconds, then it follows the hero again.
+            const Vec3 goal = target ? range_.targets()[*target].base : feet + facingDirection(hero_.facing()) * Fixed::fromInt(6);
+            const luna::engine::ScreenPoint goalPixels = luna::engine::groundShadow(goal);
+            framingX_ = (hero_.feetX() + goalPixels.x) / 2.0;
+            framingY_ = (hero_.feetY() + goalPixels.y) / 2.0;
+            framingTicks_ = 2 * 20;
+            core::logInfo(std::format("Threw a {} spear facing {}", kind.name, facingName(hero_.facing())));
+        }
+    }
+
+    // Update sword state every tick.
+    sword_.update();
+
+    // Update spear physics.
     for (const SpearHit& hit : range_.update()) {
         const FlyingSpear& spear = range_.spears()[hit.spear];
         core::logInfo(std::format("Spear ({}) hit {} at ({:.2f}, {:.2f}, {:.2f}) m, {:.1f} m/s, {:.1f} damage", spear.kind.name,
@@ -75,6 +94,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
                                   luna::engine::toDouble(luna::physics::length(hit.velocity)),
                                   luna::engine::toDouble(hit.damage)));
     }
+
     if (framingTicks_ > 0) {
         --framingTicks_;
         camera_.follow(framingX_, framingY_);
@@ -110,6 +130,15 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     renderer.draw(characters_, hero_.spriteFrame(),
                   screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
+
+    // Draw sword if it's the current weapon.
+    if (currentWeapon_ == WeaponType::Sword && sword_.state().state != SlashState::Idle) {
+        const int frame = sword_.animationFrame();
+        const luna::engine::Rect swordFrame = kSwordFrames[static_cast<std::size_t>(sword_.lastSlashFacing())][frame];
+        renderer.draw(characters_, swordFrame,
+                      screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
+    }
+
     // Spears: height lifts the sprite up the screen, while the shadow stays on the ground.
     for (const FlyingSpear& spear : range_.spears()) {
         const luna::engine::ScreenPoint p = luna::engine::topDownPosition(blended(spear, alpha));

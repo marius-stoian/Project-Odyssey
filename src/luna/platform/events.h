@@ -19,7 +19,7 @@ enum class EventType {
 
 // Physical key positions: W is "the key where W is on a US keyboard", so WASD also works
 // on French (AZERTY) or German (QWERTZ) keyboards.
-enum class Key { Unknown, W, A, S, D, E, Up, Down, Left, Right, Escape, Space, Enter };
+enum class Key { Unknown, W, A, S, D, E, Up, Down, Left, Right, Escape, Space, Enter, LShift, RShift, Tab };
 
 // Named by position, not label: South is Xbox "A", PlayStation "Cross", Switch "B".
 enum class GamepadButton { Unknown, South, East, West, North, Back, Start, DpadUp, DpadDown, DpadLeft, DpadRight };
