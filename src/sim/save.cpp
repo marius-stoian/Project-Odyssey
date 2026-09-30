@@ -71,6 +71,9 @@ json savePerson(const Person& p) {
                 {"health", static_cast<int>(p.health)},
                 {"healthDays", p.healthDays},
                 {"healthEvent", p.healthEvent},
+                {"carer", p.carer},
+                {"nursing", p.nursing},
+                {"guardian", p.guardian},
                 {"needs", p.needs.values},
                 {"daysAtZeroHunger", p.daysAtZeroHunger},
                 {"daysAtZeroWarmth", p.daysAtZeroWarmth},
@@ -107,6 +110,9 @@ Person loadPerson(const json& value) {
     p.health = static_cast<Health>(value.at("health").get<int>());
     p.healthDays = value.at("healthDays").get<int>();
     p.healthEvent = value.at("healthEvent").get<int>();
+    p.carer = value.at("carer").get<int>();
+    p.nursing = value.at("nursing").get<int>();
+    p.guardian = value.at("guardian").get<int>();
     p.needs.values = value.at("needs").get<std::array<int, kNeedCount>>();
     p.daysAtZeroHunger = value.at("daysAtZeroHunger").get<int>();
     p.daysAtZeroWarmth = value.at("daysAtZeroWarmth").get<int>();
@@ -187,6 +193,9 @@ void upgradeFrom2(json& save) {
         person["health"] = static_cast<int>(Health::Well);
         person["healthDays"] = 0;
         person["healthEvent"] = -1;
+        person["carer"] = -1;
+        person["nursing"] = -1;
+        person["guardian"] = -1;
         for (json& memory : person.at("memories")) {
             memory["event"] = -1;
         }
@@ -325,6 +334,9 @@ struct WorldArchive {
             }
             if (p.healthEvent >= events) {
                 return std::format("people[{}].healthEvent names an event that does not exist", i);
+            }
+            if (!validId(p.carer) || !validId(p.nursing) || !validId(p.guardian)) {
+                return std::format("people[{}] names a carer, patient or guardian who does not exist", i);
             }
             if (!validId(p.mother) || !validId(p.father) || !validId(p.partner) || !validId(p.childFather)) {
                 return std::format("people[{}] names a person who does not exist", i);

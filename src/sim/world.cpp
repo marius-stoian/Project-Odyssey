@@ -162,6 +162,7 @@ void World::doAction(Person& person) {
         break;
     }
     case Action::Hunt: {
+        hurtOnHunt(person); // a hunt can end in a wound (US-112)
         practise(person.huntPractice, person.huntSkill);
         if (lastMammothYear_ != date().year && huntRandom_.below(1000) < static_cast<std::uint32_t>(actions.mammothPerMille)) {
             lastMammothYear_ = date().year; // met or not, the herd moves on
@@ -274,12 +275,16 @@ void World::eatTogether() {
                                       hungry == 1 ? std::string("one") : std::to_string(hungry)));
     }
     storeRanOut_ = hungry > 0;
+    if (hungry > 0) {
+        shareFood(); // in a famine the better fed spare food for the hungriest (US-112)
+    }
 }
 
 bool World::closeKin(const Person& a, const Person& b) const {
     const bool parentChild = a.mother == b.id || a.father == b.id || b.mother == a.id || b.father == a.id;
     const bool siblings = (a.mother >= 0 && a.mother == b.mother) || (a.father >= 0 && a.father == b.father);
-    return parentChild || siblings;
+    const bool guardian = a.guardian == b.id || b.guardian == a.id; // an adopted child is family too
+    return parentChild || siblings || guardian;
 }
 
 void World::pair(int a, int b) {
@@ -489,6 +494,7 @@ void World::lifeEvents() {
         }
     }
     updateHealth();
+    adoptOrphans();
     encounters();
     pairUp();
     updateFeuds();
@@ -677,6 +683,7 @@ void World::checkSurvival(Person& person, bool winter) {
 int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     person.alive = false;
     person.causeOfDeath = cause;
+    releaseCare(person);          // nobody nurses the dead, and a carer who dies frees their patient
     person.health = Health::Well; // nothing more to heal
     const int years = person.ageYears(calendar_.daysPerYear());
     std::string sentence;
@@ -739,6 +746,16 @@ int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
         } else {
             sentence = std::format("{} died of the wounds.", person.name);
         }
+        break;
+    }
+    case CauseOfDeath::Illness: {
+        // What weakened them, as the sickness event told it ("weakened by hunger").
+        const ChronicleEntry* sick = chronicle_.find(causeEvent);
+        const std::string reason = sick == nullptr                                           ? ""
+                                   : sick->text.find("weakened by hunger") != std::string::npos ? ", weakened by hunger"
+                                   : sick->text.find("weakened by the cold") != std::string::npos ? ", weakened by the cold"
+                                                                                                  : "";
+        sentence = std::format("{} died of the sickness{}.", person.name, reason);
         break;
     }
     default:
@@ -867,6 +884,9 @@ std::uint64_t World::hash() const {
         hasher.add(static_cast<int>(person.health));
         hasher.add(person.healthDays);
         hasher.add(person.healthEvent);
+        hasher.add(person.carer);
+        hasher.add(person.nursing);
+        hasher.add(person.guardian);
         for (const int value : person.needs.values) {
             hasher.add(value);
         }

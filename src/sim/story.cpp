@@ -39,6 +39,45 @@ StoryConfig loadStoryConfig(const std::filesystem::path& file) {
     config.health.woundDaysMin = requireInt(json, file, "health", "woundDaysMin", 1, 365);
     config.health.woundDaysMax = requireInt(json, file, "health", "woundDaysMax", config.health.woundDaysMin, 365);
     config.health.woundDeathPerMille = requireInt(json, file, "health", "woundDeathPerMille", 0, 1000);
+
+    config.sickness.basePerMille = requireInt(json, file, "sickness", "basePerMille", 0, 1000);
+    config.sickness.hungerBelow = requireInt(json, file, "sickness", "hungerBelow", 0, 100);
+    config.sickness.hungerPerMille = requireInt(json, file, "sickness", "hungerPerMille", 0, 1000);
+    config.sickness.coldBelow = requireInt(json, file, "sickness", "coldBelow", 0, 100);
+    config.sickness.coldPerMille = requireInt(json, file, "sickness", "coldPerMille", 0, 1000);
+    config.sickness.daysMin = requireInt(json, file, "sickness", "daysMin", 1, 365);
+    config.sickness.daysMax = requireInt(json, file, "sickness", "daysMax", config.sickness.daysMin, 365);
+    config.sickness.deathPerMille = requireInt(json, file, "sickness", "deathPerMille", 0, 1000);
+    config.sickness.huntWoundPerMille = requireInt(json, file, "sickness", "huntWoundPerMille", 0, 1000);
+
+    config.nursing.minScore = requireInt(json, file, "nursing", "minScore", -100, 300);
+    config.nursing.kinBonus = requireInt(json, file, "nursing", "kinBonus", 0, 200);
+    config.nursing.kindBonus = requireInt(json, file, "nursing", "kindBonus", 0, 200);
+    config.nursing.percent = requireInt(json, file, "nursing", "percent", 0, 100);
+    config.nursing.extraHealPerDay = requireInt(json, file, "nursing", "extraHealPerDay", 0, 10);
+    config.nursing.deathPercentWhenNursed = requireInt(json, file, "nursing", "deathPercentWhenNursed", 0, 100);
+    config.nursing.opinionGain = requireInt(json, file, "nursing", "opinionGain", 0, 100);
+    config.nursing.carerOpinionGain = requireInt(json, file, "nursing", "carerOpinionGain", 0, 100);
+    config.nursing.feeling = requireInt(json, file, "nursing", "feeling", 0, 100);
+
+    config.sharing.giverHungerMin = requireInt(json, file, "sharing", "giverHungerMin", 0, 100);
+    config.sharing.gapMin = requireInt(json, file, "sharing", "gapMin", 0, 100);
+    config.sharing.receiverHungerMax = requireInt(json, file, "sharing", "receiverHungerMax", 0, 100);
+    config.sharing.amount = requireInt(json, file, "sharing", "amount", 1, 100);
+    config.sharing.repeatDays = requireInt(json, file, "sharing", "repeatDays", 0, 3650);
+    config.sharing.minScore = requireInt(json, file, "sharing", "minScore", -100, 300);
+    config.sharing.kinBonus = requireInt(json, file, "sharing", "kinBonus", 0, 200);
+    config.sharing.kindBonus = requireInt(json, file, "sharing", "kindBonus", 0, 200);
+    config.sharing.childBonus = requireInt(json, file, "sharing", "childBonus", 0, 200);
+    config.sharing.opinionGain = requireInt(json, file, "sharing", "opinionGain", 0, 100);
+    config.sharing.feeling = requireInt(json, file, "sharing", "feeling", 0, 100);
+
+    config.adoption.minScore = requireInt(json, file, "adoption", "minScore", -100, 300);
+    config.adoption.kinBonus = requireInt(json, file, "adoption", "kinBonus", 0, 200);
+    config.adoption.kindBonus = requireInt(json, file, "adoption", "kindBonus", 0, 200);
+    config.adoption.limit = requireInt(json, file, "adoption", "limit", 1, 20);
+    config.adoption.opinionGain = requireInt(json, file, "adoption", "opinionGain", 0, 100);
+    config.adoption.feeling = requireInt(json, file, "adoption", "feeling", 0, 100);
     return config;
 }
 

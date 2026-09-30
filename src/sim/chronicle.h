@@ -14,6 +14,10 @@ namespace odysseus::sim {
 // deaths and feuds.
 inline constexpr int kImportanceGift = 10;
 inline constexpr int kImportanceQuarrel = 30;
+inline constexpr int kImportanceSharing = 30;
+inline constexpr int kImportanceSickness = 35;
+inline constexpr int kImportanceNursing = 35;
+inline constexpr int kImportanceAdoption = 55;
 inline constexpr int kImportanceRecovery = 25;
 inline constexpr int kImportanceBlame = 60;
 inline constexpr int kImportanceRevenge = 80;

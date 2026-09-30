@@ -37,6 +37,49 @@
   "health": {
     "woundDaysMin": 5,
     "woundDaysMax": 12,
-    "woundDeathPerMille": 15
+    "woundDeathPerMille": 10
+  },
+  "sickness": {
+    "basePerMille": 1,
+    "hungerBelow": 25,
+    "hungerPerMille": 25,
+    "coldBelow": 25,
+    "coldPerMille": 25,
+    "daysMin": 3,
+    "daysMax": 9,
+    "deathPerMille": 12,
+    "huntWoundPerMille": 1
+  },
+  "nursing": {
+    "minScore": 30,
+    "kinBonus": 40,
+    "kindBonus": 30,
+    "percent": 80,
+    "extraHealPerDay": 1,
+    "deathPercentWhenNursed": 40,
+    "opinionGain": 20,
+    "carerOpinionGain": 5,
+    "feeling": 60
+  },
+  "sharing": {
+    "giverHungerMin": 40,
+    "gapMin": 20,
+    "receiverHungerMax": 35,
+    "amount": 15,
+    "repeatDays": 30,
+    "minScore": 20,
+    "kinBonus": 30,
+    "kindBonus": 20,
+    "childBonus": 30,
+    "opinionGain": 15,
+    "feeling": 50
+  },
+  "adoption": {
+    "minScore": 20,
+    "kinBonus": 50,
+    "kindBonus": 20,
+    "limit": 2,
+    "opinionGain": 30,
+    "feeling": 80
   }
 }

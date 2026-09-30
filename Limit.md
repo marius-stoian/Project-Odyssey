@@ -2,7 +2,7 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-111 (Milestone-26.md, AP-027). The next session starts here.
+**Last updated:** 2026-09-30, after US-112 (Milestone-27.md, AP-028). The next session starts here.
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
@@ -14,7 +14,7 @@ This file is kept current after every story, so if a session stops (usage limit,
 - All of M2 is built (US-010..US-016 Done). **Kill Gate 1 failed** (owner, 2026-09-30: "not really a story"; D-GATE-M2 = Pivot). The owner chose the redesign (D-18): story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; he judges the retry alone.
 - Requirements v1.6 (Drive, mirrored in docs/project/requirements/): STO-02, STO-03, SDC-02, milestone M2b, epic E11, US-110..US-115. **Codex v1.6** (Anima) adds P-005, K-M2b, S-US-110..S-US-115, X-M2b; CI-006 resolved.
 - P-005 Done (status, decisions, CI-006 fix: first frame 3 s in Release, 15 s in Debug).
-- **Next prompt: S-US-112** (sharing, nursing, sickness), then S-US-113..S-US-115 in order, then X-M2b = Kill Gate 1 retry: a human gate, the owner reads `odysseus_headless --seed 7 --years 100 --story` and answers D-GATE-M2b. Do not start M3 before his Go. K-M2b, US-110 and US-111 are Done (design: docs/plans/M2b-story-design.md).
+- **Next prompt: S-US-113** (courtship, rivals, parting), then S-US-114..S-US-115 in order, then X-M2b = Kill Gate 1 retry: a human gate, the owner reads `odysseus_headless --seed 7 --years 100 --story` and answers D-GATE-M2b. Do not start M3 before his Go. K-M2b, US-110, US-111 and US-112 are Done (design: docs/plans/M2b-story-design.md).
 - The M2 work stays on `qa`; `main` is still at `m1b-done` (M2 is not merged to main until the retry passes).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 

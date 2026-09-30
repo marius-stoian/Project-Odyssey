@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-112 / S-US-112: Share food and nurse the sick (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Third story of M2b.
+
+- Simulation: sickness (likelier when hungry or cold; the sick cannot work; it can kill, "died of the sickness, weakened by hunger"), hunting wounds, nursing by the kind and close (faster recovery, fewer deaths, gratitude kept for life), sharing food in a famine, orphans taken in (guardians count as family). New file `src/sim/world_care.cpp`; `Person` gains carer, nursing, guardian.
+- Data: `story.json` sections `sickness`, `nursing`, `sharing`, `adoption`.
+- Tuning: wound and sickness numbers chosen on 100 seeds x 100 years (9 to 53 alive, median 38); the low end is lifted by courtship (US-113) and a final pass.
+- Tests: `tests/sim/story_care_test.cpp` (11 cases).
+
 ## US-111 / S-US-111: Quarrel, blame and take revenge (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Second story of M2b.

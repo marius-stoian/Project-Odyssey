@@ -4,6 +4,7 @@
 #include "sim/chronicle.h"
 #include "sim/world.h"
 
+#include <utility>
 #include <vector>
 
 namespace story_test {
@@ -54,6 +55,23 @@ inline const sim::Memory* memoryOf(const sim::Person& person, sim::MemoryKind ki
         }
     }
     return nullptr;
+}
+
+// A living unpaired woman and man, both adults, for the tests that need a couple.
+inline std::pair<int, int> aCouple(const sim::World& world) {
+    int woman = -1;
+    int man = -1;
+    for (const auto& person : world.people()) {
+        const int age = person.ageYears(world.calendar().daysPerYear());
+        if (person.alive && age >= 16 && age <= 35 && person.partner < 0) {
+            if (person.sex == sim::Sex::Female && woman < 0) {
+                woman = person.id;
+            } else if (person.sex == sim::Sex::Male && man < 0) {
+                man = person.id;
+            }
+        }
+    }
+    return {woman, man};
 }
 
 } // namespace story_test

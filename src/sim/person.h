@@ -61,6 +61,9 @@ struct Person {
     Health health = Health::Well;
     int healthDays = 0;       // days left until they recover
     int healthEvent = -1;     // the chronicle entry that made them unwell
+    int carer = -1;           // who nurses them now (a PersonId), -1 = nobody
+    int nursing = -1;         // whom they nurse now, -1 = nobody
+    int guardian = -1;        // who took them in as an orphan, -1 = nobody
     Needs needs;
     int daysAtZeroHunger = 0; // consecutive day starts with Hunger at 0
     int daysAtZeroWarmth = 0; // the same for Warmth (only winter cold kills)
