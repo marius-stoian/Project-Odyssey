@@ -2,7 +2,7 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, US-134 verification in progress on story/US-134. Finish both test suites, merge into qa, push and confirm CI before marking Done.
+**Last updated:** 2026-09-30, US-134 locally verified and merged into qa (Milestone-46.md, AP-047). Push awaits explicit owner authorization after automatic approval review rejected the configured GitHub destination. Push qa and story/US-134 only after authorization; confirm CI before marking Done.
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
