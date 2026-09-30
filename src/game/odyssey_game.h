@@ -46,10 +46,13 @@ private:
     luna::engine::Texture characters_;
     luna::engine::Texture tiles_;
     luna::engine::Texture props_;
+    luna::engine::Texture enemyTexture_;
+    luna::engine::Texture enemyHitTexture_;
     luna::engine::TileMap map_;
     luna::engine::Camera camera_;
     Hero hero_;
     SpearRange range_;
+    std::filesystem::path spritesDirectory_;
     Sword sword_;
     Enemy enemy_;
     WeaponType currentWeapon_ = WeaponType::Bow; // the spear demo (US-029) is the default; Shift switches to the sword
