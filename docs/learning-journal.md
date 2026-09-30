@@ -715,3 +715,22 @@ Because `provoke` does nothing while winding up, hitting twice cannot make two s
 **Try it (15 minutes).** Play the valley, walk to a goblin, hit it once with the sword (Shift, then E), and step away as soon as the "!" appears. Then change the goblin's `swordDamage` in `assets/data/characters.json` to 60 and see how fast you fall.
 
 **Check yourself.** What would happen if `update()` checked `isAlive()` only at the end, after the countdown?
+
+## US-132: Effect player (2026-09-30)
+
+**What we built.** Effects from your VFX sheets now play in the game: a spark where the sword lands, a smoke puff when a monster falls, puffs of dust behind a flying spear. Luna has a small effect player; the game says which effect plays where.
+
+**The idea: timers and animation frames in a fixed timestep.** The game ticks 20 times a second. An effect only counts its age in ticks; which frame to show is worked out from the age when drawing:
+
+```cpp
+const int step = effect.age / ticksPerFrame;                 // 3 ticks per frame: 0,0,0,1,1,1,...
+const Rect& frame = frames[loop ? step % count : std::min(step, count - 1)];
+```
+
+Nothing depends on how fast the computer draws: at 30 or 144 frames per second, the same tick shows the same frame. A one-shot effect removes itself once `age >= frames * ticksPerFrame`.
+
+**Where to look.** [src/luna/engine/effects.cpp](../src/luna/engine/effects.cpp); `playEffect` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** In `odyssey_game.cpp` change the hit effect `"spark"` to `"fire nova"` (a name from `assets/data/effects.json`), build, and hit a goblin. Then set its `ticksPerFrame` to 10 in effects.json and watch it slow down.
+
+**Check yourself.** Why does the effect player remove finished effects in `update()` and not in `draw()`?

@@ -65,6 +65,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+    catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -80,6 +81,7 @@ void OdysseyGame::resetPlay() {
     nextSpearIsFlint_ = true;
     heroHp_ = kHeroMaxHp;
     respawnTicks_ = 0;
+    effects_.clear();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -135,6 +137,21 @@ void OdysseyGame::populate() {
         enemy.reachMetres = kind->reach;
         enemies_.push_back(enemy);
     }
+}
+
+void OdysseyGame::playEffect(const std::string& name, double x, double y, int size) {
+    const EffectDef* def = catalogs_.effect(name);
+    if (!contentLoaded_ || def == nullptr) {
+        return;
+    }
+    luna::engine::EffectSpec spec;
+    spec.texture = effectsTexture_;
+    spec.ticksPerFrame = def->ticksPerFrame;
+    spec.loop = def->loop;
+    for (int i = 0; i < def->frames; ++i) {
+        if (const auto frame = content_.rect(content_.frameName(name, i))) spec.frames.push_back(*frame);
+    }
+    effects_.start(spec, x, y, size);
 }
 
 void OdysseyGame::hurtHero(int damage, const Enemy& by) {
@@ -253,11 +270,26 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             }
         }
         if (nearest != nullptr) {
-            nearest->takeDamage(sword_.config().damagePerHit);
-            nearest->provoke();
+            const bool defeated = nearest->takeDamage(sword_.config().damagePerHit);
+            playEffect("spark", nearest->feetX(), nearest->feetY() - kCharacterHeight / 2.0, 24); // US-132: where the blade lands
+            if (defeated) {
+                playEffect("smoke puff", nearest->feetX(), nearest->feetY() - kCharacterHeight / 3.0, 40);
+            } else {
+                nearest->provoke();
+            }
             sword_.markHit();
         }
     }
+
+    // A puff of dust behind every spear in the air, every third tick: its trail (US-132).
+    if (ticks_ % 3 == 0) {
+        for (const FlyingSpear& spear : range_.spears()) {
+            if (spear.state != SpearState::Flying) continue;
+            const luna::engine::ScreenPoint p = luna::engine::topDownPosition(spear.body.position);
+            playEffect("dust", p.x, p.y, 16);
+        }
+    }
+    effects_.update();
 
     // Update spear physics.
     for (const SpearHit& hit : range_.update()) {
@@ -296,6 +328,15 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     charactersHitAtlas_ = renderer.createTexture(art_.charactersHit);
     uiSheet_ = renderer.createTexture(luna::engine::makeUiSheet());
     editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_});
+    // The M2d content atlas (US-130); without it the game plays on, just without effects.
+    std::string problem;
+    if (auto content = loadContent(spritesDirectory_ / "atlas", problem)) {
+        content_ = std::move(*content);
+        contentLoaded_ = true;
+        effectsTexture_ = renderer.createTexture(content_.pictures.at("effects"));
+    } else {
+        core::logWarning("Content art missing, no effects: " + problem);
+    }
 }
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
@@ -379,6 +420,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         renderer.draw(props_, spearFrame(facingForVector(pointing.x, pointing.y), spear.kind.tip == "flint"),
                       screen(p.x - kSpearFrameSize / 2.0, p.y - kSpearFrameSize / 2.0));
     }
+    effects_.draw(renderer, view);
     drawHud(renderer);
     drawModeLabel(renderer);
 }

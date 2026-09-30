@@ -63,6 +63,9 @@ public:
 
     // Draws part of a texture at a position on the virtual screen (virtual pixels).
     void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination);
+    // The same with see-through `alpha` (0-255) and, with `additive`, its colours added to what
+    // is below (glows, light rain), used by effects and weather (M2d).
+    void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive);
 
     // Where the virtual screen lands in the window, in real pixels (the scaled picture
     // without the black bars).

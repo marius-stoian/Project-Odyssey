@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-132: Effect player (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- Luna: `Renderer::drawStyled` (stretch, alpha, additive) in the window, the recorder and `ImageRenderer`; `EffectPlayer` (`effects.{h,cpp}`).
+- Game: catalogs and content atlas loaded; `playEffect`; hit spark, death smoke, spear dust trail.
+- Tests: US-132 One-shot, Looping, Placement and style, Additive light (luna_tests); Combat effects, Death smoke (odysseus_game_tests). Evidence `docs/evidence/US-132/`; plan `docs/plans/US-132.md`.
+- Verification: `tools/verify.ps1 -Story US-132`: zero warnings, ctest 25/25 in Debug and Release.
+
 ## US-131: Hero HP, fighting back and death (Mraw) — 2026-09-30
 
 **State:** Done; merged into `qa`.
