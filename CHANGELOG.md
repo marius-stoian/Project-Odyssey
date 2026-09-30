@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## K-M2d: Kick off M2d (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `docs/plans/M2d-content-design.md`: atlas pages, cut-list grids and smooth background removal, catalogs, Luna renderer additions and effect player, combat state machine, level format version 2, plants, weather.
+- Verification: docs only.
+
 ## P-007: Adopt Codex v1.8 (Mraw) — 2026-09-30
 
 **State:** Done; merged into `qa`.
@@ -13,6 +20,7 @@ its PR changes rather than leaving an outdated description.
 - `assets/sprites/`: the seven new sheets committed unchanged.
 - `Limit.md`, `Milestone-41.md` (AP-042): next prompt K-M2d.
 - Verification: docs and assets only; CI on `qa`.
+
 ## M2d planning: brief, requirements v1.8, Codex v1.8 (Mraw, Anima) — 2026-09-30
 
 **State:** Done; merged into `qa`.
