@@ -1,6 +1,6 @@
 # End-to-end check for US-020 "Open" and "Close": start the real game, let it close itself
 # after QUIT_AFTER seconds through the same path as the close button, then read its log.
-# Usage: cmake -DGAME=<odysseus.exe> -DWORK_DIR=<folder> -DQUIT_AFTER=3 -P run_game_window.cmake
+# Usage: cmake -DGAME=<odysseus.exe> -DWORK_DIR=<folder> -DQUIT_AFTER=3 -DCONFIG=<Debug|Release> -P run_game_window.cmake
 if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR)
     message(FATAL_ERROR "run_game_window.cmake needs GAME and WORK_DIR")
 endif()
@@ -33,11 +33,20 @@ foreach(expected "Window opened: 1280x720" "Average frame rate" "Window closed b
         message(FATAL_ERROR "Missing from the log: ${expected}")
     endif()
 endforeach()
-# "Open": the window must show its first frame within 3 seconds of starting.
+# "Open": the window must show its first frame within 3 seconds of starting, in the build a
+# player runs (Release). The Debug build runs under AddressSanitizer, which on shared CI
+# machines can take several seconds just to create the window, so it gets 15 seconds (CI-006).
 if(NOT log MATCHES "First frame after ([0-9]+) ms")
     message(FATAL_ERROR "The log does not report the first frame")
 endif()
-if(CMAKE_MATCH_1 GREATER_EQUAL 3000)
-    message(FATAL_ERROR "First frame took ${CMAKE_MATCH_1} ms (limit 3000 ms)")
+set(first_frame_ms "${CMAKE_MATCH_1}")
+if(CONFIG STREQUAL "Debug")
+    set(limit_ms 15000)
+else()
+    set(limit_ms 3000)
 endif()
+if(first_frame_ms GREATER_EQUAL limit_ms)
+    message(FATAL_ERROR "First frame took ${first_frame_ms} ms (limit ${limit_ms} ms in ${CONFIG})")
+endif()
+set(CMAKE_MATCH_1 "${first_frame_ms}")
 message(STATUS "US-020 Open: first frame after ${CMAKE_MATCH_1} ms; Close: clean shutdown")

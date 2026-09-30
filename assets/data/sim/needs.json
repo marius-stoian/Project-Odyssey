@@ -1,0 +1,7 @@
+{
+  "maximum": 100,
+  "dailyDecay": { "hunger": 30, "energy": 35, "warmth": 20, "social": 15 },
+  "winterWarmthDecay": 45,
+  "mealValue": 40,
+  "daysAtZeroBeforeDeath": { "hunger": 3, "warmth": 3 }
+}

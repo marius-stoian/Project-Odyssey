@@ -283,3 +283,248 @@ How hard a flint tip is lives in `assets/data/materials.json`, not in C++. A des
 **Try it (15 minutes).** In `materials.json`, set the flint `hardness` to 10 and run the game: throw at the west target and read the damage in the log. Then set it to 11 and read the error message.
 
 **Check yourself.** Why is the shadow drawn at (x, y) while the spear is drawn at (x, y - z)?
+
+## US-011: Give every person needs that change over time (2026-09-30)
+
+**What we built.** The console world has people now: a clan of 20 with names and ages from data files. Every game hour they get a little hungrier, more tired, colder and lonelier; a meal raises Hunger (never above 100); and someone whose Hunger stays at zero for three days dies, which the chronicle writes down: "Summer, year 1: Garu died of starvation." (Nobody eats yet: choosing what to do is the next story.)
+
+**The idea: plain structs as components, and std::vector.** A `Person` is just data, with no functions of its own that change it:
+
+```cpp
+struct Person {
+    std::string name;
+    Needs needs;          // four whole numbers
+    bool alive = true;
+};
+```
+
+The "systems" are ordinary functions that take the data and change it, such as `decayForHour(person.needs, config, winter, hour)`. Keeping data and behaviour apart makes each system easy to test alone, and it is exactly how an Entity Component System (EnTT, coming in M3) works. All the people live in one `std::vector<Person>`: a resizable array that owns its elements, keeps them next to each other in memory, and frees them automatically.
+
+**Where to look.** [src/sim/needs.cpp:20](../src/sim/needs.cpp) (`hourlyDrop`: 24 whole-number drops that add up exactly to the daily rate), [src/sim/world.cpp:70](../src/sim/world.cpp) (`checkSurvival`), [assets/data/sim/needs.json](../assets/data/sim/needs.json).
+
+**Try it (15 minutes).** In `needs.json`, change the Hunger rate from 30 to 50 and run `odysseus_sim_tests.exe --test-case="US-011*"`: the tests read the rate from the file, so they still pass, but the death date in the MESSAGE line moves earlier. Why?
+
+**Check yourself.** Why do we store the dead in `people()` too, instead of removing them from the vector?
+
+## US-012: Let people choose what to do (utility AI) (2026-09-30)
+
+**What we built.** The clan lives by itself now. Every game hour each person looks at their needs, their traits and skills, the time of day and the food store, gives every possible action a score, and does the best one: gather, hunt, sleep, warm up by the fire, talk, rest or wander. In the evening they eat together. `odysseus_headless --inspect Garu` shows exactly why Garu did what he did.
+
+**The idea: functions as systems, enums, and choosing the best.** An `enum class` names a fixed set of choices so the compiler catches typos:
+
+```cpp
+enum class Action { Gather, Hunt, Sleep, WarmByFire, Talk, Rest, Wander, Count };
+```
+
+`Count` is a trick: it equals the number of actions, so `std::array<int, kActionCount>` holds one score per action. The AI itself is a plain function, `decide(person, situation, available, config, random)`: it reads, it scores, it returns a `Decision`. It changes nothing, so a test can call it with any made-up person. Picking the winner is a simple loop keeping the highest score; ties go to the seeded random stream, so the same world always makes the same choices.
+
+**Where to look.** [src/sim/ai.cpp:70](../src/sim/ai.cpp) (`decide`), `scoreActions` just above it, [assets/data/sim/actions.json](../assets/data/sim/actions.json).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --days 3 --inspect 0` and read the scores. Then raise `traitBonus` in `actions.json` to 100 and run again: do Brave people hunt more? Try `--days 30` too.
+
+**Check yourself.** Why is it important that `decide` only reads the person and never changes them?
+
+## US-013: Remember events and spread gossip (2026-09-30)
+
+**What we built.** People remember. A gift, a theft someone saw: each becomes a memory of who did what, when, and how it felt, and it changes what they think of each other. When two people talk, one may pass on a story the other has not heard, a little weaker, so reputations travel through the clan. Small things are forgotten after 60 days; a theft is remembered for life.
+
+**The idea: containers of structs, and references.** Each person keeps a `std::vector<Memory>`. Forgetting uses a classic pair, erase and remove_if: `remove_if` moves the memories we keep to the front and returns where the rest begins; `erase` cuts them off:
+
+```cpp
+memories.erase(std::remove_if(memories.begin(), memories.end(), isOldAndMinor), memories.end());
+```
+
+In `talk`, `Person& from = people_[speaker];` is a reference: another name for the same person inside the vector, not a copy. Changing `from` changes the real person. (A copy would change nothing that lasts.)
+
+**Where to look.** [src/sim/world.cpp:274](../src/sim/world.cpp) (`talk`: gossip), [src/sim/memory.cpp](../src/sim/memory.cpp) (`forgetOldMemories`, `remember`), [assets/data/sim/social.json](../assets/data/sim/social.json).
+
+**Try it (15 minutes).** Set `gossipPercent` to 100 in `social.json` and run `odysseus_sim_tests.exe --test-case="US-013 Gifts*"`: how many memories are heard second-hand now? Then change `minorMemoryDays` to 7.
+
+**Check yourself.** In `talk`, what would go wrong if we wrote `Person from = people_[speaker];` (without the `&`)?
+
+## US-014: Write a readable chronicle (2026-09-30)
+
+**What we built.** The clan's story writes itself: couples form, children are born and named (sometimes after a parent, "Joro the Second"), the old die, mammoths are brought down, feuds break out, and hard winters empty the food store. Every event goes into the chronicle with its importance; `odysseus_headless --days 2800 --chronicle` prints a century of the ones worth telling.
+
+**The idea: std::string and formatting.** Each sentence is built with `std::format`, which fills the `{}` gaps in order:
+
+```cpp
+std::format("{} was born to {} and {}.", child.name, father.name, mother.name)
+```
+
+`std::string` owns its text and grows as needed, so we can join pieces with `+` without worrying about memory: `describe(entry.date) + ": " + entry.text` gives "Spring, year 3: Ura was born to Tok and Maa."
+
+**Where to look.** [src/sim/chronicle.cpp:21](../src/sim/chronicle.cpp) (`formatEntry`), `World::giveBirth` and `World::die` in [src/sim/world.cpp](../src/sim/world.cpp), [assets/data/sim/life.json](../assets/data/sim/life.json).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --days 2800 --chronicle > seed7.txt` and read it like a book: who is the clan's hero? Then try `--threshold 80` for only the biggest events.
+
+**Check yourself.** Why do newborns wait in a separate vector until the loop over `people_` has finished?
+
+## US-015: Soak-test the simulation from the command line (2026-09-30)
+
+**What we built.** `odysseus_headless --seed 7 --years 100` simulates a whole century in half a second and reports how the clan fared: who is alive, what people died of, how hungry and cold the living are, and how long each tick took. Give it nonsense like `--years -5` and it explains how to use it and exits with an error code.
+
+**The idea: main(), command-line arguments, and checking input.** Every C++ program starts in `main(int argc, char* argv[])`: `argc` is how many words were typed, `argv` the words themselves (argv[0] is the program). Words are text, so numbers must be read carefully. `std::from_chars` reads a number and tells us where it stopped, so "12x" is caught:
+
+```cpp
+const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+if (error != std::errc() || end != text.data() + text.size() || value < minimum || value > maximum) {
+    return std::nullopt; // not a whole number in range
+}
+```
+
+`std::optional` says "a value, or nothing"; the caller must check before using it. The program returns 2 on a wrong command line: scripts and CI can see the failure.
+
+**Where to look.** [apps/headless/main.cpp:52](../apps/headless/main.cpp) (`readNumber`, then `parse`), [src/sim/report.cpp](../src/sim/report.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 3 --years 200` and compare with `--years 100`. Then try `--years 10001` and read the message. Finally run `echo $LASTEXITCODE` in PowerShell after a bad command.
+
+**Check yourself.** Why does the program measure time with a clock, when the Charter forbids wall-clock time in the simulation?
+
+## US-016: Save and load the simulation (2026-09-30)
+
+**What we built.** The world can be saved and loaded exactly: after 50 years, save, load, and the world hash is the same; run 50 more years and you get the very world that 100 years in one go would have made. A crash while saving never destroys the last good save, and old save files are upgraded.
+
+**The idea: file I/O, JSON and error handling.** Writing a file is not instant; if the power goes out halfway, the file is garbage. So we write to `clan.json.tmp` first and only then rename it: a rename happens in one step, so there is always one complete save.
+
+```cpp
+out << WorldArchive::toJson(world).dump(1);   // 1. write everything to clan.json.tmp
+fs::rename(file, backupPath(file, 1));        // 2. the old save becomes clan.json.bak1
+fs::rename(temporary, file);                  // 3. the new one takes its name, in one step
+```
+
+Loading can go wrong in many ways (a missing file, broken JSON, a field of the wrong type). Each becomes a `DataError` naming the file and the problem, and `loadWorld` catches it and tries the next backup. `try`/`catch` lets us deal with a problem where we can do something sensible about it.
+
+**Where to look.** [src/sim/save.cpp:310](../src/sim/save.cpp) (`saveWorld`), `loadWorld` just below it, `upgradeFrom1` near the top.
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --years 10 --save clan.json`, open `clan.json` in a text editor and find your clan's names. Change one person's `"partner"` to 999 and try `--load clan.json`: read the message, and see which file was loaded instead.
+
+**Check yourself.** Why do we rename `clan.json.tmp` at the end instead of writing straight into `clan.json`?
+
+## US-110: Give every death and feud a reason (2026-09-30)
+
+**What we built.** Every event in the chronicle now has a number (its id), a kind, the people it is about, and the numbers of the earlier events that caused it. A death by hunger says which empty store it came from, and which thief helped empty it; a feud says what turned the two people against each other. You can ask the runner why: `odysseus_headless --seed 7 --years 100 --why 7279`.
+
+**The idea: small structs that point to other data, and enums.** Instead of copying a whole earlier event into a new one, we store its *number*. That is like a page reference in a book: cheap, and it always leads to the one true original.
+
+```cpp
+struct ChronicleEntry {
+    int id;                    // its place in the log
+    EventKind kind;            // an enum: Birth, Death, Feud, Theft ...
+    int who, other, aux;       // people, by number (-1 = nobody)
+    std::vector<int> causes;   // numbers of earlier events
+    ...
+};
+```
+
+An `enum class` is a list of named choices (`EventKind::Theft`) that the compiler checks, so you cannot mix up a kind with a plain number by accident. Because a cause always has a *smaller* id than its effect (it happened earlier), the chain of causes can never loop, and `explainEvent` can walk it safely.
+
+**Where to look.** [src/sim/chronicle.h](../src/sim/chronicle.h) (`ChronicleEntry`, `EventKind`), `World::die` and `World::updateFeuds` in [src/sim/world.cpp](../src/sim/world.cpp), `explainEvent` in [src/sim/chronicle.cpp](../src/sim/chronicle.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --chronicle`, pick a "died of hunger" line, note its `[#id]`, and run the same command with `--why <id>` instead of `--chronicle`. Follow the "because" lines. Then change `leanAutumnPercent` in `assets/data/sim/story.json` to 0 and see how many hunger deaths remain.
+
+**Check yourself.** Why do we store `-1` for "nobody" in `who` and `other`, and what would go wrong if we used `0`?
+
+## US-111: Quarrel, blame and take revenge (2026-09-30)
+
+**What we built.** People now quarrel, grieve and blame, and feuds can end in a fight or an exile. A hungry, short-tempered pair who dislike each other may quarrel ("Tok and Lin quarrelled over stolen meat while hungry."); when someone's partner starves after a theft they knew of, they blame the thief for life; and a feud that keeps worsening ends with an attack, or the clan driving the aggressor out.
+
+**The idea: state machines with enums, and `std::optional`-style "maybe" values.** A person is always in exactly one health state: `Well`, `Sick` or `Injured`. An `enum class` makes that a closed list, and the daily rule `updateHealth` is a tiny state machine: an injured person either dies (a small chance each day), or counts their days down to zero and becomes `Well` again.
+
+```cpp
+enum class Health { Well, Sick, Injured };
+...
+if (person.health == Health::Injured && chance(...)) { die(...); }
+else if (--person.healthDays <= 0) { person.health = Health::Well; }
+```
+
+Some questions have "no answer": *who is the heaviest grudge against this person?* might be nobody. We return a pointer that can be `nullptr`, and every caller checks it. `std::optional<T>` does the same job with a type that forces the check; the project uses `nullptr` where the value already lives inside a container (a grudge in a list) and `optional` for a number that may be absent.
+
+**Where to look.** `World::quarrel`, `World::takeRevenge` and `World::updateHealth` in [src/sim/world_story.cpp](../src/sim/world_story.cpp); the numbers in [assets/data/sim/story.json](../assets/data/sim/story.json).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one feud from its first quarrel to its ending. Then set `"percentPerDay"` under `"revenge"` to 0 and run again: what happens to the feuds?
+
+**Check yourself.** Why does a fight's winner get *more* opinion of the victim after taking revenge (`satisfaction`), and what would happen to the feud if it did not?
+
+## US-112: Share food and nurse the sick (2026-09-30)
+
+**What we built.** People fall sick (more often when hungry or cold) and get hurt hunting; the kind and the close nurse them, and the patient remembers it for life. In a famine the better fed spare food for the hungriest, and orphans are taken in. Each of these says why in the chronicle.
+
+**The idea: standard algorithms.** Choosing "the best carer" or "the hungriest person first" is a small search or sort, and the standard library already has them: `std::sort` orders a list, `std::find_if` finds the first match, `std::count_if` counts, `std::min_element` picks the smallest.
+
+```cpp
+std::sort(hungry.begin(), hungry.end(), [this](int a, int b) {
+    const int ha = people_[a].needs[Need::Hunger];
+    const int hb = people_[b].needs[Need::Hunger];
+    return ha != hb ? ha < hb : a < b;   // hungriest first; a tie goes to the lower id
+});
+```
+
+The little function in `[...]` is a *lambda*: a comparison written on the spot. The tie-break (`a < b`) matters here: without it two equally hungry people could swap places from one run to the next, and the same seed would no longer give the same history (Charter rule 6).
+
+**Where to look.** `World::assignCarers`, `World::shareFood` and `World::adoptOrphans` in [src/sim/world_care.cpp](../src/sim/world_care.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --chronicle --threshold 30` and find a "fell sick" line followed by "nursed ... back to health". Then set `"percent"` under `"nursing"` in `assets/data/sim/story.json` to 0 and compare how many people died of sickness (the report line "sickness N").
+
+**Check yourself.** In `assignCarers` we only replace the best score when the new one is *strictly greater* (`>`). Which carer wins when two people have the same score, and why does that keep the run repeatable?
+
+## US-113: Court and compete for a partner (2026-09-30)
+
+**What we built.** Pairing is now a little story. Someone who likes another begins courting; every day the loved one warms a bit; a loved one who dislikes the suitor turns them down; when both think enough of each other the loved one chooses, and the other suitors grow jealous and may quarrel. Partners who fall out of love part, and the chronicle says why.
+
+**The idea: comparators and ranking (std::sort with a lambda).** "Who does she choose?" and "what is the reason?" are both rankings. When the parting code lists the grudges two partners hold, it sorts them heaviest first, and equal weights go to the earlier event, so the answer never depends on luck or memory layout:
+
+```cpp
+std::sort(reasons.begin(), reasons.end(), [](const Grudge& x, const Grudge& y) {
+    return x.weight != y.weight ? x.weight > y.weight : x.event < y.event;
+});
+```
+
+The `[](...) {...}` is a lambda, a comparison written on the spot. It must say which of two items goes first, and a tie needs its own rule, or two runs of the same seed could order equals differently.
+
+**Where to look.** `World::courtship`, `World::pair`, `World::makeJealous` and `World::part` in [src/sim/world_love.cpp](../src/sim/world_love.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one "began courting" line to the "became partners" line it caused (`--why <id>` shows the chain). Then set `"opinionPerDay"` under `"courtship"` in `assets/data/sim/story.json` to 0 and watch how many courtships end in a pairing.
+
+**Check yourself.** Why does `pair()` clear every other suitor of both partners, even those who courted only a day and get no Jealousy event?
+
+## US-114: Teach the young and hunt together (2026-09-30)
+
+**What we built.** Skilled adults take youths as apprentices, who learn faster and grow close to them. When a mammoth is sighted, a party of three to five hunters goes out, with a leader, sometimes a hero and sometimes a coward. The party's strength decides the hunt, a member in danger may be saved (and owes a debt of gratitude for life), and everyone remembers what the others did.
+
+**The idea: a class that coordinates others.** A hunting party is not a thing that lives on its own; it is a short-lived *coordinator*. `World::huntMammoth` gathers the members (as pointers to people who already exist), works out the roles, decides the outcome, and hands the consequences back to the people and the chronicle. The people stay plain data; the coordinator holds the rules of how they act together:
+
+```cpp
+std::vector<Person*> party{&sighter};      // borrowed, never owned
+// ... more hunters join ...
+const int event = chronicle_.record(..., "A hunting party of ...");
+remembered(heroAt, MemoryKind::Heroism, ...);   // every member remembers
+```
+
+A pointer here means "look at this person, do not copy them": changing `*party[i]` changes the real person in `people_`. That is safe only because the list of people does not grow while the party is at work.
+
+**Where to look.** `World::huntMammoth` and `World::teaching` in [src/sim/world_hunt.cpp](../src/sim/world_hunt.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one "hunting party" line to the "stood firm" and "saved ... from the mammoth" lines it caused (`--why <id>`). Then set `"dangerPercent"` under `"hunt"` in `assets/data/sim/story.json` to 100 and see how the deaths change.
+
+**Check yourself.** Why does the party keep `Person*` pointers instead of copies of the people, and what would go wrong if we copied them?
+
+## US-115: Tell the clan's story in episodes (2026-09-30)
+
+**What we built.** The chronicle holds thousands of small events; nobody reads that. Now the runner also finds the *episodes*: groups of linked events (a failed harvest, an empty store, thefts, hunger deaths) and tells each as one short named paragraph with a beginning, a turn and an end. `--story` prints at most 40 a century, then the births, deaths, pairings and feuds with their reasons.
+
+**The idea: designing with data (grouping and summarising).** We never store episodes. We compute them from the events, each time, in three steps: (1) *group* events that belong together (each event points to its causes, and a small "union-find" table merges them), (2) *score* each group and keep the best, (3) *summarise* each group as a name and three sentences. Because the story is a pure function of the data, an old save tells the same story as a new one.
+
+```cpp
+for (const int cause : entry.causes) {
+    groups.join(entry.id, cause);      // an event and its causes belong together
+}
+```
+
+Data first, wording last: the groups and the scores are just numbers; only the final step turns them into sentences.
+
+**Where to look.** `findEpisodes` and `formatEpisode` in [src/sim/episodes.cpp](../src/sim/episodes.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --story` and read three episodes. Then set `"maxPerCentury"` under `"episodes"` in `assets/data/sim/story.json` to 10 and see which episodes survive.
+
+**Check yourself.** Why can `findEpisodes` be called twice on the same world and always give the same answer, and what would break that?

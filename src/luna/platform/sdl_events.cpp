@@ -18,6 +18,9 @@ Key toKey(SDL_Scancode scancode) {
     case SDL_SCANCODE_ESCAPE: return Key::Escape;
     case SDL_SCANCODE_SPACE: return Key::Space;
     case SDL_SCANCODE_RETURN: return Key::Enter;
+    case SDL_SCANCODE_LSHIFT: return Key::LShift;
+    case SDL_SCANCODE_RSHIFT: return Key::RShift;
+    case SDL_SCANCODE_TAB: return Key::Tab;
     default: return Key::Unknown;
     }
 }

@@ -1,0 +1,6 @@
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(45): MESSAGE: Gather 144, Hunt 124, Sleep 27, Rest 14
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(91): MESSAGE: Garu (13, Brave Talkative): Hunger 85, Energy 93, Warmth 90, Social 100 -> Gather 1, Hunt -, Sleep 1, WarmByFire 3, Talk 30 (chosen), Rest 10, Wander 5
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(109): MESSAGE: after one year: population 20, food in store 214
+[doctest] test cases:  4 |  4 passed | 0 failed | 8 skipped
+[doctest] assertions: 29 | 29 passed | 0 failed |
+[doctest] Status: SUCCESS!

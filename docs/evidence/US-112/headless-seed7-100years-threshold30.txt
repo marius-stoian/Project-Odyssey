@@ -1,0 +1,1725 @@
+Project Odyssey headless runner 0.1.0
+Seed 7, 2800 days (100 years, 6720000 ticks): now Spring, year 101, day 1, 12 C
+Population: 44 alive (20 founders, 88 born, 63 died, 1 exiled)
+Deaths by cause: starvation 0, the cold 0, old age 42, a mammoth's tusks 8, childbirth 1, a fight 3, wounds 8, sickness 1
+Average needs of the living: Hunger 93, Energy 86, Warmth 59, Social 59
+Food in store: 35 meals; couples 6, feuds 0, mammoths 58, chronicle entries 22349
+Tick time: 0.055 microseconds per tick (0.37 s in total)
+World hash: 105462534459236614
+
+Chronicle (importance 30 and above):
+  [#0] Spring, year 1: Tala stole from the food store; Ilka saw it.
+  [#1] Spring, year 1: Voll stole from the food store; Kal saw it.
+  [#2] Spring, year 1: Garu stole from the food store.
+  [#8] Spring, year 1: Joro stole from the food store.
+  [#9] Spring, year 1: Tok stole from the food store.
+  [#34] Spring, year 1: Tala stole from the food store.
+  [#35] Spring, year 1: Voll stole from the food store.
+  [#36] Spring, year 1: Garu stole from the food store; Pim saw it.
+  [#38] Spring, year 1: Joro stole from the food store; Ossa saw it.
+  [#39] Spring, year 1: Tok stole from the food store.
+  [#63] Summer, year 1: Tala stole from the food store.
+  [#64] Summer, year 1: Voll stole from the food store.
+  [#65] Summer, year 1: Garu stole from the food store.
+  [#68] Summer, year 1: Joro stole from the food store; Tok saw it.
+  [#69] Summer, year 1: Tok stole from the food store; Ossa saw it.
+  [#88] Autumn, year 1: Ilka and Joro became partners.
+  [#92] Autumn, year 1: Tok stole from the food store.
+  [#93] Autumn, year 1: Sela and Tarek became partners.
+  [#98] Autumn, year 1: Joro brought down the clan's first mammoth.
+  [#104] Autumn, year 1: Joro stole from the food store.
+  [#105] Autumn, year 1: Tala stole from the food store; Kesh saw it.
+  [#106] Autumn, year 1: Voll stole from the food store; Tala saw it.
+  [#107] Autumn, year 1: Garu stole from the food store; Voll saw it.
+  [#122] Autumn, year 1: Tok stole from the food store.
+  [#132] Winter, year 1: Tala stole from the food store; Ulf saw it.
+  [#135] Winter, year 1: Joro stole from the food store.
+  [#136] Winter, year 1: Voll stole from the food store.
+  [#137] Winter, year 1: Garu stole from the food store; Kesh saw it.
+  [#138] Winter, year 1: Tala and Garu became partners.
+  [#154] Winter, year 1: Tok stole from the food store.
+  [#161] Winter, year 1: Tala stole from the food store; Garu saw it.
+  [#162] Winter, year 1: Voll stole from the food store.
+  [#163] Winter, year 1: Garu stole from the food store.
+  [#168] Winter, year 1: Joro stole from the food store.
+  [#184] Spring, year 2: Tok stole from the food store.
+  [#190] Spring, year 2: Tala stole from the food store; Ilka saw it.
+  [#195] Spring, year 2: Joro stole from the food store.
+  [#196] Spring, year 2: Voll stole from the food store; Sela saw it.
+  [#197] Spring, year 2: Garu stole from the food store.
+  [#209] Summer, year 2: Hela and Tavo became partners.
+  [#215] Summer, year 2: Tok stole from the food store.
+  [#221] Summer, year 2: Tala stole from the food store.
+  [#222] Summer, year 2: Voll stole from the food store.
+  [#223] Summer, year 2: Garu stole from the food store; Pim saw it.
+  [#229] Summer, year 2: Joro stole from the food store; Tarek saw it.
+  [#244] Summer, year 2: Tok stole from the food store.
+  [#251] Autumn, year 2: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#255] Autumn, year 2: Tala brought down a mammoth.
+  [#257] Autumn, year 2: Joro stole from the food store.
+  [#262] Autumn, year 2: Garu stole from the food store; Hela saw it.
+  [#270] Autumn, year 2: Tok stole from the food store.
+  [#280] Autumn, year 2: Joro stole from the food store.
+  [#290] Winter, year 2: Tala stole from the food store.
+  [#291] Winter, year 2: Garu stole from the food store.
+  [#292] Winter, year 2: Voll stole from the food store; Oren saw it.
+  [#297] Winter, year 2: Tok stole from the food store.
+  [#308] Winter, year 2: Joro stole from the food store.
+  [#318] Winter, year 2: Tala stole from the food store; Oren saw it.
+  [#319] Winter, year 2: Garu stole from the food store.
+  [#322] Winter, year 2: Voll stole from the food store; Garu saw it.
+  [#328] Winter, year 2: Tok stole from the food store; Ossa saw it.
+  [#339] Spring, year 3: Joro stole from the food store.
+  [#345] Spring, year 3: Tala stole from the food store.
+  [#346] Spring, year 3: Voll stole from the food store; Garu saw it.
+  [#352] Spring, year 3: Garu stole from the food store.
+  [#358] Spring, year 3: Tok stole from the food store; Ilka saw it.
+  [#369] Spring, year 3: Joro stole from the food store.
+  [#375] Summer, year 3: Tala stole from the food store.
+  [#380] Summer, year 3: Voll stole from the food store; Tavo saw it.
+  [#382] Summer, year 3: Garu stole from the food store.
+  [#388] Summer, year 3: Tok stole from the food store.
+  [#394] Summer, year 3: Oren fell sick with a fever.
+  [#395] Summer, year 3: Brak nursed Oren back to health.
+  [#401] Summer, year 3: Joro stole from the food store.
+  [#407] Summer, year 3: Tala stole from the food store.
+  [#408] Summer, year 3: Voll stole from the food store.
+  [#414] Summer, year 3: Garu stole from the food store.
+  [#415] Autumn, year 3: Oda was born to Tavo and Hela.
+  [#428] Autumn, year 3: Tok stole from the food store.
+  [#429] Autumn, year 3: Moru was born to Tarek and Sela.
+  [#442] Winter, year 3: Tala stole from the food store; Oda saw it.
+  [#444] Winter, year 3: Joro stole from the food store; Tok saw it.
+  [#445] Winter, year 3: Garu stole from the food store; Pim saw it.
+  [#446] Winter, year 3: Voll stole from the food store.
+  [#452] Winter, year 3: Lin was born to Joro and Ilka.
+  [#453] Winter, year 3: Voll and Garu quarrelled over stolen meat.
+  [#459] Winter, year 3: Lin stole from the food store.
+  [#460] Winter, year 3: Tok stole from the food store; Ilka saw it.
+  [#461] Winter, year 3: Voll and Garu quarrelled over stolen meat.
+  [#467] Winter, year 3: Tala died of old age, 46 years old.
+  [#468] Winter, year 3: Moru fell sick with a fever.
+  [#469] Winter, year 3: Sela nursed Moru back to health.
+  [#478] Winter, year 3: Garu stole from the food store.
+  [#481] Winter, year 3: Voll stole from the food store; Moru saw it.
+  [#482] Winter, year 3: Joro stole from the food store; Ilka saw it.
+  [#492] Spring, year 4: Lin stole from the food store.
+  [#493] Spring, year 4: Tok stole from the food store.
+  [#506] Spring, year 4: Garu stole from the food store.
+  [#512] Spring, year 4: Joro stole from the food store.
+  [#513] Spring, year 4: Voll stole from the food store.
+  [#524] Spring, year 4: Lin stole from the food store; Pim saw it.
+  [#525] Spring, year 4: Tok stole from the food store.
+  [#526] Spring, year 4: Garu and Voll quarrelled over stolen meat.
+  [#527] Spring, year 4: A feud broke out between Voll and Garu over stolen meat.
+  [#538] Summer, year 4: Garu stole from the food store; Soa saw it.
+  [#544] Summer, year 4: Joro stole from the food store.
+  [#545] Summer, year 4: Voll stole from the food store; Ulf saw it.
+  [#556] Summer, year 4: Lin stole from the food store; Pim saw it.
+  [#557] Summer, year 4: Tok stole from the food store; Sela saw it.
+  [#563] Summer, year 4: Voll and Garu quarrelled over stolen meat.
+  [#569] Summer, year 4: Tok and Joro quarrelled over stolen meat.
+  [#575] Summer, year 4: Joro stole from the food store; Hela saw it.
+  [#576] Summer, year 4: Voll stole from the food store.
+  [#577] Summer, year 4: Garu stole from the food store.
+  [#580] Autumn, year 4: Lin stole from the food store.
+  [#581] Autumn, year 4: Garu and Voll quarrelled over stolen meat.
+  [#586] Autumn, year 4: Kesh fell sick with a fever.
+  [#587] Autumn, year 4: Sela nursed Kesh back to health.
+  [#594] Autumn, year 4: Tok stole from the food store; Kal saw it.
+  [#597] Autumn, year 4: Lin stole from the food store; Garu saw it.
+  [#606] Winter, year 4: Garu stole from the food store; Lin saw it.
+  [#607] Winter, year 4: Joro stole from the food store.
+  [#608] Winter, year 4: Voll stole from the food store; Soa saw it.
+  [#624] Winter, year 4: Tok stole from the food store; Ulf saw it.
+  [#630] Winter, year 4: Lin stole from the food store.
+  [#632] Winter, year 4: Garu stole from the food store; Tarek saw it.
+  [#637] Winter, year 4: Joro stole from the food store; Tavo saw it.
+  [#638] Winter, year 4: Voll stole from the food store; Sela saw it.
+  [#652] Spring, year 5: Tok stole from the food store.
+  [#658] Spring, year 5: Lin stole from the food store; Tavo saw it.
+  [#664] Spring, year 5: Voll stole from the food store; Oda saw it.
+  [#665] Spring, year 5: Garu stole from the food store; Kal saw it.
+  [#668] Spring, year 5: Joro stole from the food store; Pim saw it.
+  [#679] Spring, year 5: Voll was hurt hunting.
+  [#680] Spring, year 5: Kesh nursed Voll back to health.
+  [#684] Spring, year 5: Tok stole from the food store.
+  [#687] Summer, year 5: Garu attacked Voll over stolen meat: Garu lost the fight and was badly hurt.
+  [#691] Summer, year 5: Lin stole from the food store; Oren saw it.
+  [#694] Summer, year 5: Tok nursed Garu back to health.
+  [#700] Summer, year 5: Joro stole from the food store; Pim saw it.
+  [#707] Summer, year 5: Voll stole from the food store; Tavo saw it.
+  [#714] Summer, year 5: Garu stole from the food store.
+  [#718] Summer, year 5: Tok stole from the food store; Lin saw it.
+  [#724] Summer, year 5: Lin stole from the food store.
+  [#727] Summer, year 5: Garu and Voll quarrelled after the fight.
+  [#733] Summer, year 5: Joro stole from the food store.
+  [#736] Autumn, year 5: Tarek died of old age, 48 years old.
+  [#740] Autumn, year 5: Lin stole from the food store.
+  [#743] Autumn, year 5: Ban was born to Tavo and Hela.
+  [#744] Autumn, year 5: Sela and Kesh became partners.
+  [#751] Autumn, year 5: Tok stole from the food store; Joro saw it.
+  [#752] Autumn, year 5: A feud broke out between Tok and Joro over stolen meat.
+  [#756] Winter, year 5: Arn was born to Tarek and Sela.
+  [#762] Winter, year 5: Joro stole from the food store.
+  [#763] Winter, year 5: Garu stole from the food store.
+  [#764] Winter, year 5: Voll stole from the food store; Oren saw it.
+  [#770] Winter, year 5: Lin stole from the food store; Ossa saw it.
+  [#781] Winter, year 5: Tok stole from the food store.
+  [#787] Winter, year 5: Enko was born to Joro and Ilka.
+  [#789] Winter, year 5: Garu stole from the food store.
+  [#794] Winter, year 5: Voll stole from the food store; Ruk saw it.
+  [#795] Winter, year 5: Joro stole from the food store; Soa saw it.
+  [#800] Winter, year 5: Lin stole from the food store; Ban saw it.
+  [#812] Spring, year 6: Tok stole from the food store.
+  [#820] Spring, year 6: Voll stole from the food store.
+  [#821] Spring, year 6: Garu stole from the food store.
+  [#825] Spring, year 6: Joro stole from the food store; Brak saw it.
+  [#829] Spring, year 6: Lin stole from the food store.
+  [#837] Spring, year 6: Tok attacked Joro over stolen meat: Tok lost the fight and was killed.
+  [#838] Spring, year 6: Tok was killed by Joro in a fight.
+  [#843] Summer, year 6: Voll and Garu quarrelled after the fight.
+  [#848] Summer, year 6: Voll stole from the food store.
+  [#849] Summer, year 6: Garu stole from the food store; Maa saw it.
+  [#852] Summer, year 6: Joro stole from the food store; Voll saw it.
+  [#858] Summer, year 6: Lin stole from the food store; Ossa saw it.
+  [#872] Summer, year 6: Voll stole from the food store.
+  [#873] Summer, year 6: Garu stole from the food store.
+  [#876] Summer, year 6: Joro stole from the food store.
+  [#879] Autumn, year 6: Lin stole from the food store.
+  [#886] Autumn, year 6: Lin stole from the food store; Hela saw it.
+  [#890] Autumn, year 6: Joro brought down a mammoth.
+  [#893] Autumn, year 6: Joro stole from the food store.
+  [#894] Autumn, year 6: Garu stole from the food store; Kal saw it.
+  [#895] Autumn, year 6: Voll stole from the food store; Enko saw it.
+  [#912] Winter, year 6: Lin stole from the food store; Brak saw it.
+  [#913] Winter, year 6: Voll stole from the food store.
+  [#914] Winter, year 6: Garu stole from the food store.
+  [#919] Winter, year 6: Joro stole from the food store.
+  [#935] Spring, year 7: Lin stole from the food store.
+  [#937] Spring, year 7: Voll stole from the food store; Kesh saw it.
+  [#938] Spring, year 7: Garu stole from the food store; Sela saw it.
+  [#942] Spring, year 7: Joro stole from the food store.
+  [#958] Spring, year 7: Lin stole from the food store; Garu saw it.
+  [#961] Summer, year 7: Garu stole from the food store.
+  [#965] Summer, year 7: Joro stole from the food store; Kal saw it.
+  [#966] Summer, year 7: Voll stole from the food store.
+  [#983] Summer, year 7: Lin stole from the food store; Sela saw it.
+  [#985] Summer, year 7: Voll stole from the food store.
+  [#986] Summer, year 7: Garu stole from the food store.
+  [#989] Summer, year 7: Joro stole from the food store.
+  [#996] Autumn, year 7: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#998] Autumn, year 7: Enko fell sick with a fever.
+  [#999] Autumn, year 7: Joro nursed Enko back to health.
+  [#1002] Autumn, year 7: Lin stole from the food store.
+  [#1003] Autumn, year 7: Garu and Voll quarrelled after the fight.
+  [#1009] Winter, year 7: Lin and Garu quarrelled over stolen meat.
+  [#1011] Winter, year 7: Lin stole from the food store; Oren saw it.
+  [#1013] Winter, year 7: Joro stole from the food store; Voll saw it.
+  [#1016] Winter, year 7: Voll stole from the food store.
+  [#1017] Winter, year 7: Garu stole from the food store; Moru saw it.
+  [#1034] Winter, year 7: Garu stole from the food store; Kesh saw it.
+  [#1039] Winter, year 7: Lin stole from the food store.
+  [#1050] Spring, year 8: Voll stole from the food store; Ossa saw it.
+  [#1051] Spring, year 8: Joro stole from the food store; Sela saw it.
+  [#1052] Spring, year 8: Voll and Garu quarrelled after the fight.
+  [#1053] Spring, year 8: Voll attacked Garu after the fight: Garu lost the fight and was badly hurt.
+  [#1058] Spring, year 8: Kesh nursed Garu back to health.
+  [#1060] Spring, year 8: Lin stole from the food store; Garu saw it.
+  [#1072] Spring, year 8: Voll stole from the food store.
+  [#1076] Spring, year 8: Joro stole from the food store.
+  [#1083] Summer, year 8: Garu stole from the food store.
+  [#1088] Summer, year 8: Lin stole from the food store.
+  [#1093] Summer, year 8: Tavo fell sick with a fever.
+  [#1094] Summer, year 8: Hela nursed Tavo back to health.
+  [#1103] Summer, year 8: Joro stole from the food store.
+  [#1104] Summer, year 8: Voll stole from the food store.
+  [#1109] Summer, year 8: Garu stole from the food store; Kesh saw it.
+  [#1114] Summer, year 8: Lin stole from the food store.
+  [#1118] Autumn, year 8: Voll was hurt hunting.
+  [#1119] Autumn, year 8: Kesh nursed Voll back to health.
+  [#1120] Autumn, year 8: Lin stole from the food store; Ilka saw it.
+  [#1128] Winter, year 8: Joro stole from the food store.
+  [#1129] Winter, year 8: Garu stole from the food store.
+  [#1130] Winter, year 8: Voll stole from the food store.
+  [#1139] Winter, year 8: Lin stole from the food store; Oren saw it.
+  [#1148] Winter, year 8: Voll and Joro quarrelled over stolen meat.
+  [#1149] Winter, year 8: Garu stole from the food store; Hela saw it.
+  [#1154] Winter, year 8: Joro stole from the food store; Moru saw it.
+  [#1155] Winter, year 8: Voll stole from the food store.
+  [#1161] Spring, year 9: Lin stole from the food store; Garu saw it.
+  [#1169] Spring, year 9: Voll and Joro quarrelled over stolen meat.
+  [#1174] Spring, year 9: Garu stole from the food store.
+  [#1178] Spring, year 9: Joro stole from the food store; Ban saw it.
+  [#1179] Spring, year 9: Voll stole from the food store; Ban saw it.
+  [#1188] Spring, year 9: Lin stole from the food store.
+  [#1190] Spring, year 9: Lott was born to Kesh and Sela.
+  [#1204] Summer, year 9: Joro stole from the food store.
+  [#1206] Summer, year 9: Voll stole from the food store; Pim saw it.
+  [#1207] Summer, year 9: Garu stole from the food store.
+  [#1217] Summer, year 9: Lin stole from the food store.
+  [#1220] Summer, year 9: Lin and Garu quarrelled over stolen meat.
+  [#1221] Summer, year 9: A feud broke out between Garu and Lin over stolen meat.
+  [#1232] Summer, year 9: Garu stole from the food store.
+  [#1236] Summer, year 9: Joro stole from the food store.
+  [#1238] Summer, year 9: Voll stole from the food store.
+  [#1241] Autumn, year 9: Lin stole from the food store.
+  [#1248] Autumn, year 9: Lin stole from the food store; Ilka saw it.
+  [#1255] Winter, year 9: Joro stole from the food store; Kal saw it.
+  [#1256] Winter, year 9: Garu stole from the food store.
+  [#1257] Winter, year 9: Voll stole from the food store; Moru saw it.
+  [#1277] Winter, year 9: Lin stole from the food store; Kal saw it.
+  [#1279] Winter, year 9: Pela was born to Tavo and Hela.
+  [#1282] Winter, year 9: Garu stole from the food store.
+  [#1286] Winter, year 9: Voll stole from the food store; Moru saw it.
+  [#1287] Winter, year 9: Joro stole from the food store.
+  [#1288] Winter, year 9: Lin and Garu quarrelled over stolen meat.
+  [#1305] Spring, year 10: Lin stole from the food store.
+  [#1310] Spring, year 10: Garu and Lin quarrelled over stolen meat.
+  [#1311] Spring, year 10: Voll stole from the food store; Sela saw it.
+  [#1317] Spring, year 10: Joro stole from the food store.
+  [#1318] Spring, year 10: Garu stole from the food store.
+  [#1319] Spring, year 10: Garu attacked Lin over stolen meat: Lin lost the fight and was killed.
+  [#1320] Spring, year 10: Lin was killed by Garu in a fight.
+  [#1321] Spring, year 10: Ilka blamed Garu for Lin's death, because Garu struck the blow.
+  [#1322] Spring, year 10: Joro blamed Garu for Lin's death, because Garu struck the blow.
+  [#1323] Spring, year 10: Enko blamed Garu for Lin's death, because Garu struck the blow.
+  [#1344] Summer, year 10: Garu attacked Voll after the fight: Garu lost the fight and was killed.
+  [#1345] Summer, year 10: Garu was killed by Voll in a fight.
+  [#1346] Summer, year 10: Voll stole from the food store.
+  [#1352] Summer, year 10: Joro stole from the food store; Lott saw it.
+  [#1353] Summer, year 10: Brak died of old age, 50 years old.
+  [#1370] Summer, year 10: Voll stole from the food store.
+  [#1375] Summer, year 10: Joro stole from the food store.
+  [#1379] Autumn, year 10: Ilka brought down a mammoth.
+  [#1391] Autumn, year 10: Voll stole from the food store.
+  [#1392] Autumn, year 10: Joro stole from the food store.
+  [#1401] Winter, year 10: Joro and Voll quarrelled over stolen meat.
+  [#1406] Winter, year 10: Tavo died of old age, 47 years old.
+  [#1412] Winter, year 10: Voll stole from the food store.
+  [#1416] Winter, year 10: Joro stole from the food store.
+  [#1436] Spring, year 11: Joro stole from the food store.
+  [#1438] Spring, year 11: Voll stole from the food store.
+  [#1447] Spring, year 11: Kora was born to Kesh and Sela.
+  [#1458] Spring, year 11: Voll stole from the food store; Enko saw it.
+  [#1461] Spring, year 11: Joro stole from the food store; Arn saw it.
+  [#1465] Spring, year 11: A feud broke out between Voll and Joro over stolen meat.
+  [#1486] Summer, year 11: Voll stole from the food store.
+  [#1488] Summer, year 11: Joro stole from the food store.
+  [#1528] Winter, year 11: Joro stole from the food store; Oda saw it.
+  [#1529] Winter, year 11: Voll stole from the food store.
+  [#1552] Winter, year 11: Voll stole from the food store.
+  [#1556] Winter, year 11: Joro stole from the food store; Ruk saw it.
+  [#1577] Spring, year 12: Voll stole from the food store.
+  [#1580] Spring, year 12: Joro stole from the food store; Arn saw it.
+  [#1599] Summer, year 12: Voll attacked Joro over stolen meat: Joro lost the fight and was badly hurt.
+  [#1605] Summer, year 12: Kesh nursed Voll back to health.
+  [#1606] Summer, year 12: Ilka nursed Joro back to health.
+  [#1623] Summer, year 12: Voll stole from the food store.
+  [#1635] Summer, year 12: Joro stole from the food store.
+  [#1658] Winter, year 12: Lott fell sick with a fever.
+  [#1663] Winter, year 12: Joro stole from the food store; Ossa saw it.
+  [#1664] Winter, year 12: Voll stole from the food store; Arn saw it.
+  [#1665] Winter, year 12: Voll and Joro quarrelled after the fight.
+  [#1670] Winter, year 12: Kesh nursed Lott back to health.
+  [#1689] Winter, year 12: Joro stole from the food store; Sela saw it.
+  [#1691] Winter, year 12: Voll stole from the food store.
+  [#1715] Spring, year 13: Joro stole from the food store.
+  [#1718] Spring, year 13: Voll stole from the food store.
+  [#1729] Spring, year 13: Soa and Ulf became partners.
+  [#1743] Summer, year 13: Joro stole from the food store.
+  [#1746] Summer, year 13: Voll stole from the food store; Joro saw it.
+  [#1770] Summer, year 13: Joro stole from the food store.
+  [#1773] Summer, year 13: Voll stole from the food store; Moru saw it.
+  [#1776] Autumn, year 13: Voll brought down a mammoth.
+  [#1790] Autumn, year 13: Kesh fell sick with a fever.
+  [#1791] Autumn, year 13: Sela nursed Kesh back to health.
+  [#1796] Autumn, year 13: Joro stole from the food store.
+  [#1797] Autumn, year 13: Voll stole from the food store; Pim saw it.
+  [#1811] Winter, year 13: Moru fell sick with a fever.
+  [#1812] Winter, year 13: Sela nursed Moru back to health.
+  [#1820] Winter, year 13: Voll stole from the food store.
+  [#1824] Winter, year 13: Joro stole from the food store; Ossa saw it.
+  [#1849] Spring, year 14: Joro stole from the food store; Ilka saw it.
+  [#1852] Spring, year 14: Voll stole from the food store; Kora saw it.
+  [#1873] Spring, year 14: Ura was born to Kesh and Sela.
+  [#1878] Spring, year 14: Joro stole from the food store; Kora saw it.
+  [#1879] Spring, year 14: Voll stole from the food store; Arn saw it.
+  [#1886] Spring, year 14: Joro was hurt hunting.
+  [#1887] Summer, year 14: Ilka nursed Joro back to health.
+  [#1906] Summer, year 14: Joro stole from the food store.
+  [#1910] Summer, year 14: Voll stole from the food store.
+  [#1926] Autumn, year 14: Ena was born to Ulf and Soa.
+  [#1930] Autumn, year 14: Voll was hurt hunting.
+  [#1931] Autumn, year 14: Joro brought down a mammoth.
+  [#1932] Autumn, year 14: Kesh nursed Voll back to health.
+  [#1948] Autumn, year 14: Joro was hurt hunting.
+  [#1952] Autumn, year 14: Ilka nursed Joro back to health.
+  [#1959] Autumn, year 14: Voll stole from the food store.
+  [#1960] Autumn, year 14: Joro attacked Voll after the fight: Joro lost the fight and was badly hurt.
+  [#1988] Winter, year 14: Voll stole from the food store.
+  [#1993] Winter, year 14: Joro stole from the food store.
+  [#2021] Spring, year 15: Voll stole from the food store.
+  [#2025] Spring, year 15: Joro stole from the food store; Kora saw it.
+  [#2038] Spring, year 15: Voll and Joro quarrelled after the fight.
+  [#2045] Spring, year 15: Ilka fell sick with a fever.
+  [#2046] Spring, year 15: Joro nursed Ilka back to health.
+  [#2053] Spring, year 15: Voll stole from the food store.
+  [#2057] Spring, year 15: Joro stole from the food store; Enko saw it.
+  [#2089] Summer, year 15: Joro stole from the food store.
+  [#2093] Summer, year 15: Voll stole from the food store; Pela saw it.
+  [#2109] Autumn, year 15: Joro was hurt hunting.
+  [#2110] Autumn, year 15: Ilka nursed Joro back to health.
+  [#2120] Autumn, year 15: Voll and Joro quarrelled after the fight.
+  [#2138] Winter, year 15: Joro stole from the food store.
+  [#2139] Winter, year 15: Voll stole from the food store; Pela saw it.
+  [#2146] Winter, year 15: Voll and Joro quarrelled after the fight.
+  [#2169] Winter, year 15: Joro stole from the food store.
+  [#2172] Winter, year 15: Voll stole from the food store; Enko saw it.
+  [#2191] Spring, year 16: Joro and Voll quarrelled after the fight.
+  [#2198] Spring, year 16: Neva was born to Kesh and Sela.
+  [#2199] Spring, year 16: Joro and Voll quarrelled after the fight.
+  [#2204] Spring, year 16: Voll stole from the food store.
+  [#2208] Spring, year 16: Joro stole from the food store; Ena saw it.
+  [#2244] Summer, year 16: Voll stole from the food store.
+  [#2245] Summer, year 16: Joro stole from the food store.
+  [#2274] Summer, year 16: Voll stole from the food store; Ulf saw it.
+  [#2282] Summer, year 16: Joro stole from the food store; Pim saw it.
+  [#2291] Autumn, year 16: Voll and Joro quarrelled after the fight.
+  [#2319] Winter, year 16: Joro stole from the food store.
+  [#2320] Winter, year 16: Voll stole from the food store.
+  [#2335] Winter, year 16: Tiru was born to Ulf and Soa.
+  [#2336] Winter, year 16: The clan drove Voll out for attacking Joro after the fight.
+  [#2361] Winter, year 16: Joro stole from the food store; Neva saw it.
+  [#2397] Spring, year 17: Joro stole from the food store.
+  [#2438] Summer, year 17: Joro stole from the food store; Maa saw it.
+  [#2484] Summer, year 17: Joro stole from the food store.
+  [#2485] Autumn, year 17: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#2528] Winter, year 17: Joro stole from the food store; Neva saw it.
+  [#2553] Winter, year 17: Joro was hurt hunting.
+  [#2555] Winter, year 17: Ilka nursed Joro back to health.
+  [#2572] Winter, year 17: Ilka was hurt hunting.
+  [#2573] Winter, year 17: Ossa nursed Ilka back to health.
+  [#2595] Spring, year 18: Ena fell sick with a fever.
+  [#2603] Spring, year 18: Joro stole from the food store.
+  [#2604] Spring, year 18: Soa nursed Ena back to health.
+  [#2619] Spring, year 18: Joro brought down a mammoth.
+  [#2645] Summer, year 18: Joro stole from the food store; Arn saw it.
+  [#2646] Summer, year 18: Hano was born to Kesh and Sela.
+  [#2687] Summer, year 18: Joro stole from the food store.
+  [#2739] Winter, year 18: Joro stole from the food store.
+  [#2780] Winter, year 18: Joro stole from the food store.
+  [#2789] Spring, year 19: Duro was born to Ulf and Soa.
+  [#2821] Spring, year 19: Joro stole from the food store; Hela saw it.
+  [#2863] Summer, year 19: Joro stole from the food store; Sela saw it.
+  [#2915] Summer, year 19: Joro stole from the food store.
+  [#2916] Autumn, year 19: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#2967] Winter, year 19: Joro stole from the food store.
+  [#3063] Spring, year 20: Joro stole from the food store; Soa saw it.
+  [#3109] Summer, year 20: Joro stole from the food store; Soa saw it.
+  [#3137] Autumn, year 20: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#3150] Autumn, year 20: Ruk fell sick with a fever.
+  [#3151] Autumn, year 20: Soa nursed Ruk back to health.
+  [#3191] Winter, year 20: Joro stole from the food store.
+  [#3275] Spring, year 21: Joro stole from the food store; Kora saw it.
+  [#3321] Summer, year 21: Joro stole from the food store; Arn saw it.
+  [#3367] Summer, year 21: Joro stole from the food store; Kora saw it.
+  [#3388] Autumn, year 21: Ilka died of old age, 55 years old.
+  [#3416] Winter, year 21: Joro stole from the food store.
+  [#3426] Winter, year 21: Grem was born to Ulf and Soa.
+  [#3457] Winter, year 21: Ossa and Kal became partners.
+  [#3458] Winter, year 21: Oda and Enko became partners.
+  [#3469] Winter, year 21: Maa and Joro became partners.
+  [#3487] Spring, year 22: Joro brought down a mammoth.
+  [#3498] Spring, year 22: Joro stole from the food store.
+  [#3499] Spring, year 22: Ruk died of old age, 53 years old.
+  [#3550] Spring, year 22: Joro stole from the food store.
+  [#3571] Summer, year 22: Hano fell sick with a fever.
+  [#3582] Summer, year 22: Sela nursed Hano back to health.
+  [#3603] Summer, year 22: Joro stole from the food store; Duro saw it.
+  [#3677] Winter, year 22: Joro stole from the food store; Pela saw it.
+  [#3729] Winter, year 22: Joro stole from the food store; Ura saw it.
+  [#3740] Winter, year 22: Joro was hurt hunting.
+  [#3741] Spring, year 23: Maa nursed Joro back to health.
+  [#3793] Spring, year 23: Joro stole from the food store; Hano saw it.
+  [#3804] Spring, year 23: Ruu was born to Kal and Ossa.
+  [#3840] Summer, year 23: Joro stole from the food store; Pela saw it.
+  [#3918] Autumn, year 23: Ban brought down a mammoth.
+  [#3931] Autumn, year 23: Enko was hurt hunting.
+  [#3932] Autumn, year 23: Joro nursed Enko back to health.
+  [#3953] Autumn, year 23: Joro stole from the food store.
+  [#3976] Winter, year 23: Ysa was born to Ulf and Soa.
+  [#4009] Winter, year 23: Joro stole from the food store.
+  [#4034] Spring, year 24: Nara was born to Joro and Maa.
+  [#4035] Spring, year 24: Maa died giving birth.
+  [#4067] Spring, year 24: Joro stole from the food store; Oda saw it.
+  [#4125] Summer, year 24: Joro stole from the food store; Sela saw it.
+  [#4179] Summer, year 24: Joro stole from the food store; Enko saw it.
+  [#4182] Summer, year 24: Ban fell sick with a fever.
+  [#4183] Summer, year 24: Hela nursed Ban back to health.
+  [#4240] Winter, year 24: Hela died of old age, 55 years old.
+  [#4241] Winter, year 24: Pela, orphaned by the death of Hela, was taken in by Ban.
+  [#4253] Winter, year 24: Joro stole from the food store; Moru saw it.
+  [#4276] Winter, year 24: Arn fell sick with a fever.
+  [#4277] Winter, year 24: Sela nursed Arn back to health.
+  [#4342] Spring, year 25: Joro stole from the food store.
+  [#4398] Spring, year 25: Joro stole from the food store.
+  [#4454] Summer, year 25: Joro stole from the food store; Neva saw it.
+  [#4455] Summer, year 25: Sef was born to Enko and Oda.
+  [#4532] Winter, year 25: Joro stole from the food store; Pela saw it.
+  [#4544] Winter, year 25: Ivo was born to Ulf and Soa.
+  [#4627] Spring, year 26: Joro stole from the food store; Sef saw it.
+  [#4674] Summer, year 26: Joro stole from the food store.
+  [#4730] Summer, year 26: Joro stole from the food store.
+  [#4798] Winter, year 26: Joro stole from the food store; Oren saw it.
+  [#4871] Spring, year 27: Ban was hurt hunting.
+  [#4873] Spring, year 27: Pela nursed Ban back to health.
+  [#4901] Spring, year 27: Joro stole from the food store.
+  [#4914] Spring, year 27: Zuri was born to Enko and Oda.
+  [#4958] Summer, year 27: Joro stole from the food store.
+  [#5015] Summer, year 27: Joro stole from the food store; Ivo saw it.
+  [#5036] Autumn, year 27: Kesh fell sick with a fever.
+  [#5037] Autumn, year 27: Kora nursed Kesh back to health.
+  [#5063] Winter, year 27: Joro stole from the food store.
+  [#5173] Spring, year 28: Joro stole from the food store.
+  [#5218] Summer, year 28: Sten was born to Ulf and Soa.
+  [#5219] Summer, year 28: Joro stole from the food store; Kal saw it.
+  [#5295] Autumn, year 28: Tok the Second was born to Kal and Ossa.
+  [#5318] Winter, year 28: Joro stole from the food store.
+  [#5462] Summer, year 29: Joro stole from the food store.
+  [#5475] Summer, year 29: Awa was born to Enko and Oda.
+  [#5513] Summer, year 29: Joro stole from the food store.
+  [#5577] Winter, year 29: Joro stole from the food store; Moru saw it.
+  [#5663] Spring, year 30: Ban was hurt hunting.
+  [#5664] Spring, year 30: Pela nursed Ban back to health.
+  [#5718] Summer, year 30: Joro stole from the food store; Nara saw it.
+  [#5755] Summer, year 30: Sela died of old age, 52 years old.
+  [#5768] Summer, year 30: Joro stole from the food store; Ruu saw it.
+  [#5801] Autumn, year 30: Ruk the Second was born to Ulf and Soa.
+  [#5812] Autumn, year 30: Joro brought down a mammoth.
+  [#5824] Autumn, year 30: Ulf fell sick with a fever.
+  [#5825] Autumn, year 30: Soa nursed Ulf back to health.
+  [#5845] Winter, year 30: Joro stole from the food store; Arn saw it.
+  [#5985] Spring, year 31: Joro stole from the food store; Ossa saw it.
+  [#5999] Summer, year 31: Grem fell sick with a fever.
+  [#6000] Summer, year 31: Soa nursed Grem back to health.
+  [#6049] Summer, year 31: Joro stole from the food store.
+  [#6090] Autumn, year 31: Pela and Moru became partners.
+  [#6130] Winter, year 31: Joro stole from the food store.
+  [#6216] Spring, year 32: Joro died of old age, 51 years old.
+  [#6217] Spring, year 32: Nara, orphaned by the death of Joro, was taken in by Enko.
+  [#6404] Winter, year 32: Iva was born to Enko and Oda.
+  [#6483] Winter, year 32: Enko was killed hunting a mammoth.
+  [#6484] Spring, year 33: Nara, orphaned by the death of Joro, was taken in by Ossa.
+  [#6490] Spring, year 33: Ban was hurt hunting.
+  [#6491] Spring, year 33: Pela nursed Ban back to health.
+  [#6522] Summer, year 33: Enko the Second was born to Moru and Pela.
+  [#6593] Autumn, year 33: Ban was killed hunting a mammoth.
+  [#6598] Autumn, year 33: Kesh died of old age, 50 years old.
+  [#6599] Autumn, year 33: Hano, orphaned by the death of Kesh, was taken in by Lott.
+  [#6672] Winter, year 33: Neva and Pim became partners.
+  [#6724] Summer, year 34: Kora and Oren became partners.
+  [#6749] Autumn, year 34: Ura fell sick with a fever.
+  [#6750] Autumn, year 34: Oren nursed Ura back to health.
+  [#6760] Autumn, year 34: Vena was born to Ulf and Soa.
+  [#6790] Winter, year 34: Hano was hurt hunting.
+  [#6791] Winter, year 34: Lott nursed Hano back to health.
+  [#6802] Spring, year 35: Tavo the Second was born to Pim and Neva.
+  [#6816] Spring, year 35: The food store ran empty; one went to bed hungry.
+  [#6839] Summer, year 35: Oren fell sick with a fever.
+  [#6840] Summer, year 35: Kora nursed Oren back to health.
+  [#6877] Winter, year 35: The food store ran empty; 2 went to bed hungry.
+  [#6883] Winter, year 35: Ulf brought down a mammoth.
+  [#6904] Winter, year 35: Neva was hurt hunting.
+  [#6905] Spring, year 36: Pim nursed Neva back to health.
+  [#6928] Spring, year 36: The food store ran empty; 3 went to bed hungry.
+  [#6981] Winter, year 36: Soa brought down a mammoth.
+  [#7017] Spring, year 37: The food store ran empty; 4 went to bed hungry.
+  [#7051] Autumn, year 37: Soa fell sick with a fever.
+  [#7052] Autumn, year 37: Ena nursed Soa back to health.
+  [#7076] Winter, year 37: The food store ran empty; 2 went to bed hungry.
+  [#7085] Winter, year 37: Soa was hurt hunting.
+  [#7090] Winter, year 37: Neva was hurt hunting.
+  [#7091] Winter, year 37: Ena nursed Soa back to health.
+  [#7092] Winter, year 37: Pim nursed Neva back to health.
+  [#7100] Winter, year 37: Tiru brought down a mammoth.
+  [#7102] Winter, year 37: Ulf was hurt hunting.
+  [#7103] Spring, year 38: Tiru nursed Ulf back to health.
+  [#7173] Winter, year 38: Neva was hurt hunting.
+  [#7174] Winter, year 38: Pim nursed Neva back to health.
+  [#7181] Winter, year 38: Kora was hurt hunting.
+  [#7185] Winter, year 38: The food store ran empty; 4 went to bed hungry.
+  [#7186] Winter, year 38: Oda was hurt hunting.
+  [#7187] Winter, year 38: Sef nursed Oda back to health.
+  [#7188] Winter, year 38: Oren nursed Kora back to health.
+  [#7193] Winter, year 38: Lott brought down a mammoth.
+  [#7197] Winter, year 38: Oren was hurt hunting.
+  [#7198] Winter, year 38: Arn nursed Oren back to health.
+  [#7271] Winter, year 39: Pim brought down a mammoth.
+  [#7281] Winter, year 39: Kal was hurt hunting.
+  [#7282] Winter, year 39: Ossa nursed Kal back to health.
+  [#7311] Spring, year 40: The food store ran empty; 5 went to bed hungry.
+  [#7345] Autumn, year 40: Voll the Second was born to Oren and Kora.
+  [#7364] Winter, year 40: Ivo fell sick with a fever.
+  [#7365] Winter, year 40: Soa nursed Ivo back to health.
+  [#7370] Winter, year 40: The food store ran empty; 8 went to bed hungry.
+  [#7371] Winter, year 40: Moru brought down a mammoth.
+  [#7405] Spring, year 41: The food store ran empty; 3 went to bed hungry.
+  [#7448] Autumn, year 41: Enko the Second fell sick with a fever.
+  [#7449] Autumn, year 41: Pela nursed Enko the Second back to health.
+  [#7463] Winter, year 41: Ossa was hurt hunting.
+  [#7465] Winter, year 41: The food store ran empty; 2 went to bed hungry.
+  [#7470] Winter, year 41: Ruu nursed Ossa back to health.
+  [#7475] Winter, year 41: Grem was hurt hunting.
+  [#7476] Winter, year 41: Soa nursed Grem back to health.
+  [#7484] Winter, year 41: Ena was hurt hunting.
+  [#7486] Winter, year 41: Tiru nursed Ena back to health.
+  [#7491] Winter, year 41: Oren stole from the food store; Zuri saw it.
+  [#7492] Winter, year 41: Ossa shared food with hungry Ruu.
+  [#7493] Winter, year 41: Ulf shared food with hungry Ysa.
+  [#7494] Winter, year 41: Soa shared food with hungry Nara.
+  [#7495] Winter, year 41: Oda shared food with hungry Sef.
+  [#7496] Winter, year 41: Ena shared food with hungry Ivo.
+  [#7497] Winter, year 41: Lott shared food with hungry Zuri.
+  [#7498] Winter, year 41: Tiru shared food with hungry Sten.
+  [#7499] Winter, year 41: Kal shared food with hungry Tok the Second.
+  [#7500] Winter, year 41: Kora shared food with hungry Awa.
+  [#7501] Winter, year 41: Duro shared food with hungry Ruk the Second.
+  [#7502] Winter, year 41: Neva shared food with hungry Iva.
+  [#7503] Winter, year 41: Pela shared food with hungry Enko the Second.
+  [#7504] Winter, year 41: Grem shared food with hungry Vena.
+  [#7510] Winter, year 41: Hano was hurt hunting.
+  [#7511] Winter, year 41: Oda shared food with hungry Zuri.
+  [#7512] Winter, year 41: Soa shared food with hungry Sten.
+  [#7513] Winter, year 41: Ossa shared food with hungry Tok the Second.
+  [#7514] Winter, year 41: Sef shared food with hungry Awa.
+  [#7515] Winter, year 41: Ulf shared food with hungry Ruk the Second.
+  [#7516] Winter, year 41: Lott shared food with hungry Iva.
+  [#7517] Winter, year 41: Ena shared food with hungry Vena.
+  [#7518] Winter, year 41: Tiru shared food with hungry Duro.
+  [#7519] Winter, year 41: Ysa shared food with hungry Grem.
+  [#7520] Winter, year 41: Neva shared food with hungry Pim.
+  [#7521] Winter, year 41: Kora shared food with hungry Oren.
+  [#7522] Winter, year 41: Ruu shared food with hungry Moru.
+  [#7523] Winter, year 41: Tavo the Second shared food with hungry Arn.
+  [#7524] Winter, year 41: Voll the Second shared food with hungry Ura.
+  [#7526] Spring, year 42: Lott nursed Hano back to health.
+  [#7530] Spring, year 42: Lott shared food with hungry Ura.
+  [#7531] Spring, year 42: Neva shared food with hungry Pim.
+  [#7532] Spring, year 42: Pela shared food with hungry Moru.
+  [#7533] Spring, year 42: Hano shared food with hungry Arn.
+  [#7534] Spring, year 42: Ossa shared food with hungry Nara.
+  [#7535] Spring, year 42: Soa shared food with hungry Ivo.
+  [#7536] Spring, year 42: Ruu shared food with hungry Kal.
+  [#7540] Spring, year 42: Neva shared food with hungry Tavo the Second.
+  [#7541] Spring, year 42: Kora shared food with hungry Voll the Second.
+  [#7542] Spring, year 42: Soa shared food with hungry Ena.
+  [#7543] Spring, year 42: Ruk the Second shared food with hungry Tiru.
+  [#7544] Spring, year 42: Ivo shared food with hungry Duro.
+  [#7545] Spring, year 42: Vena shared food with hungry Grem.
+  [#7546] Spring, year 42: Sten shared food with hungry Ysa.
+  [#7549] Spring, year 42: Grem fell sick with a fever.
+  [#7550] Spring, year 42: Soa nursed Grem back to health.
+  [#7554] Spring, year 42: Lott shared food with hungry Hano.
+  [#7555] Spring, year 42: Soa shared food with hungry Awa.
+  [#7556] Spring, year 42: Kora shared food with hungry Iva.
+  [#7557] Spring, year 42: Moru shared food with hungry Enko the Second.
+  [#7558] Spring, year 42: Ena shared food with hungry Pela.
+  [#7559] Spring, year 42: Neva shared food with hungry Zuri.
+  [#7560] Spring, year 42: Kora fell sick, weakened by hunger.
+  [#7564] Spring, year 42: Oren stole from the food store; Pela saw it.
+  [#7565] Spring, year 42: Soa shared food with hungry Grem.
+  [#7566] Spring, year 42: Tiru shared food with hungry Ruk the Second.
+  [#7567] Spring, year 42: Duro shared food with hungry Ulf.
+  [#7568] Spring, year 42: Tavo the Second shared food with hungry Pim.
+  [#7569] Spring, year 42: Oren shared food with hungry Arn.
+  [#7570] Spring, year 42: Ruu shared food with hungry Ysa.
+  [#7571] Spring, year 42: Tok the Second shared food with hungry Ivo.
+  [#7572] Spring, year 42: Voll the Second shared food with hungry Sten.
+  [#7574] Spring, year 42: Oren nursed Kora back to health.
+  [#7578] Spring, year 42: Ena shared food with hungry Sten.
+  [#7579] Spring, year 42: Kora shared food with hungry Oren.
+  [#7580] Spring, year 42: Enko the Second shared food with hungry Moru.
+  [#7581] Spring, year 42: Neva shared food with hungry Pela.
+  [#7582] Spring, year 42: Sten fell sick, weakened by hunger.
+  [#7583] Spring, year 42: Soa nursed Sten back to health.
+  [#7587] Spring, year 42: Ulf shared food with hungry Duro.
+  [#7588] Spring, year 42: Tavo the Second shared food with hungry Pim.
+  [#7592] Spring, year 42: Tiru shared food with hungry Grem.
+  [#7593] Spring, year 42: Kal shared food with hungry Ruu.
+  [#7594] Spring, year 42: Pim shared food with hungry Tok the Second.
+  [#7595] Spring, year 42: Oren shared food with hungry Voll the Second.
+  [#7596] Spring, year 42: Tavo the Second shared food with hungry Pela.
+  [#7605] Summer, year 42: Oren stole from the food store.
+  [#7639] Winter, year 42: Kal was hurt hunting.
+  [#7640] Winter, year 42: The food store ran empty after the thefts of Oren; 4 went to bed hungry.
+  [#7642] Winter, year 42: Ossa nursed Kal back to health.
+  [#7651] Winter, year 42: Tavo the Second fell sick with a fever.
+  [#7652] Winter, year 42: Neva nursed Tavo the Second back to health.
+  [#7661] Winter, year 42: Oren stole from the food store; Hano saw it.
+  [#7663] Winter, year 42: Ulf was hurt hunting.
+  [#7664] Winter, year 42: Soa shared food with hungry Duro.
+  [#7665] Winter, year 42: Ulf shared food with hungry Grem.
+  [#7666] Winter, year 42: Lott shared food with hungry Nara.
+  [#7667] Winter, year 42: Tiru shared food with hungry Ivo.
+  [#7668] Winter, year 42: Kora shared food with hungry Zuri.
+  [#7669] Winter, year 42: Neva shared food with hungry Sten.
+  [#7670] Winter, year 42: Kal shared food with hungry Tok the Second.
+  [#7671] Winter, year 42: Pim shared food with hungry Iva.
+  [#7672] Winter, year 42: Ysa brought down a mammoth.
+  [#7673] Winter, year 42: Soa nursed Ulf back to health.
+  [#7692] Summer, year 43: Lott fell sick with a fever.
+  [#7693] Summer, year 43: Hano nursed Lott back to health.
+  [#7701] Summer, year 43: Nara fell sick with a fever.
+  [#7702] Summer, year 43: Ossa nursed Nara back to health.
+  [#7720] Autumn, year 43: Tiru fell sick with a fever.
+  [#7721] Autumn, year 43: Soa nursed Tiru back to health.
+  [#7730] Winter, year 43: Soa was hurt hunting.
+  [#7732] Winter, year 43: Ena nursed Soa back to health.
+  [#7736] Winter, year 43: Pim brought down a mammoth.
+  [#7741] Winter, year 43: Ossa died of old age, 52 years old.
+  [#7745] Winter, year 43: Ena was hurt hunting.
+  [#7746] Winter, year 43: Tiru nursed Ena back to health.
+  [#7748] Winter, year 43: Soa fell sick with a fever.
+  [#7752] Winter, year 43: Duro nursed Soa back to health.
+  [#7756] Winter, year 43: Oren was hurt hunting.
+  [#7757] Winter, year 43: Kora nursed Oren back to health.
+  [#7776] Spring, year 44: The food store ran empty; 6 went to bed hungry.
+  [#7797] Autumn, year 44: Nara and Lott became partners.
+  [#7813] Winter, year 44: The food store ran empty; 2 went to bed hungry.
+  [#7820] Winter, year 44: Sef fell sick with a fever.
+  [#7821] Winter, year 44: Oda nursed Sef back to health.
+  [#7825] Winter, year 44: Nara fell sick with a fever.
+  [#7826] Winter, year 44: Lott nursed Nara back to health.
+  [#7833] Winter, year 44: Soa shared food with hungry Ivo.
+  [#7834] Winter, year 44: Oda shared food with hungry Zuri.
+  [#7835] Winter, year 44: Ulf shared food with hungry Sten.
+  [#7836] Winter, year 44: Kal shared food with hungry Tok the Second.
+  [#7837] Winter, year 44: Sef shared food with hungry Awa.
+  [#7838] Winter, year 44: Tiru shared food with hungry Ruk the Second.
+  [#7839] Winter, year 44: Lott shared food with hungry Iva.
+  [#7840] Winter, year 44: Pela shared food with hungry Enko the Second.
+  [#7841] Winter, year 44: Grem shared food with hungry Vena.
+  [#7844] Spring, year 45: Oren shared food with hungry Kora.
+  [#7845] Spring, year 45: Lott shared food with hungry Ura.
+  [#7846] Spring, year 45: Soa shared food with hungry Ena.
+  [#7847] Spring, year 45: Pim shared food with hungry Neva.
+  [#7851] Spring, year 45: Oren stole from the food store; Iva saw it.
+  [#7854] Spring, year 45: Nara was hurt hunting.
+  [#7855] Spring, year 45: Lott nursed Nara back to health.
+  [#7863] Spring, year 45: Pim died of old age, 54 years old.
+  [#7918] Winter, year 45: Ulf was hurt hunting.
+  [#7919] Winter, year 45: Soa nursed Ulf back to health.
+  [#7931] Winter, year 45: Ivo brought down a mammoth.
+  [#8081] Summer, year 46: Ban the Second was born to Lott and Nara.
+  [#8164] Autumn, year 46: Iva fell sick with a fever.
+  [#8168] Autumn, year 46: Oda nursed Iva back to health.
+  [#8204] Winter, year 46: Garu the Second was born to Oren and Kora.
+  [#8302] Summer, year 47: Oren died of old age, 50 years old.
+  [#8303] Summer, year 47: Oda fell sick with a fever.
+  [#8304] Summer, year 47: Sef nursed Oda back to health.
+  [#8316] Summer, year 47: Ama was born to Moru and Pela.
+  [#8356] Summer, year 47: Ulf died of old age, 51 years old.
+  [#8468] Winter, year 47: Soa died of old age, 51 years old.
+  [#8469] Winter, year 47: Vena, orphaned by the death of Soa, was taken in by Grem.
+  [#8600] Summer, year 48: Neva and Sten became partners.
+  [#8683] Autumn, year 48: Ulf the Second was born to Lott and Nara.
+  [#8749] Winter, year 48: Iva brought down a mammoth.
+  [#8991] Autumn, year 49: Ruu and Duro became partners.
+  [#9004] Autumn, year 49: Lott fell sick with a fever.
+  [#9005] Autumn, year 49: Hano nursed Lott back to health.
+  [#9129] Spring, year 50: Mira was born to Sten and Neva.
+  [#9240] Autumn, year 50: Kal died of old age, 52 years old.
+  [#9247] Autumn, year 50: Nara was hurt hunting.
+  [#9248] Autumn, year 50: Lott nursed Nara back to health.
+  [#9266] Winter, year 50: Pim the Second was born to Moru and Pela.
+  [#9324] Winter, year 50: Kesh the Second was born to Lott and Nara.
+  [#9478] Autumn, year 51: Ruu fell sick with a fever.
+  [#9479] Autumn, year 51: Duro nursed Ruu back to health.
+  [#9484] Autumn, year 51: Arn died of old age, 45 years old.
+  [#9573] Winter, year 51: Tarek the Second was born to Duro and Ruu.
+  [#9586] Winter, year 51: Neva was hurt hunting.
+  [#9589] Winter, year 51: Tavo the Second nursed Neva back to health.
+  [#9622] Spring, year 52: Nara brought down a mammoth.
+  [#9793] Autumn, year 52: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#9885] Winter, year 52: Nara was hurt hunting.
+  [#9886] Winter, year 52: Lott nursed Nara back to health.
+  [#10028] Winter, year 53: Hela the Second was born to Duro and Ruu.
+  [#10046] Winter, year 53: Ysa brought down a mammoth.
+  [#10064] Winter, year 53: Soa the Second was born to Sten and Neva.
+  [#10145] Spring, year 54: Nara brought down a mammoth.
+  [#10370] Autumn, year 54: Lin the Second was born to Lott and Nara.
+  [#10377] Autumn, year 54: Awa fell sick with a fever.
+  [#10384] Autumn, year 54: Oda nursed Awa back to health.
+  [#10476] Winter, year 54: Soa the Second fell sick with a fever.
+  [#10477] Winter, year 54: Sten nursed Soa the Second back to health.
+  [#10485] Winter, year 54: Kora was hurt hunting.
+  [#10491] Winter, year 54: Voll the Second nursed Kora back to health.
+  [#10504] Winter, year 54: Oda died of old age, 51 years old.
+  [#10630] Autumn, year 55: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#10631] Autumn, year 55: Zuri and Grem became partners.
+  [#10650] Autumn, year 55: Oren the Second was born to Duro and Ruu.
+  [#10675] Winter, year 55: Iva and Enko the Second became partners.
+  [#10718] Winter, year 55: Grem brought down a mammoth.
+  [#10771] Spring, year 56: Ossa the Second was born to Sten and Neva.
+  [#10779] Spring, year 56: Nara brought down a mammoth.
+  [#10935] Autumn, year 56: Ulf the Second fell sick with a fever.
+  [#10936] Autumn, year 56: Lott nursed Ulf the Second back to health.
+  [#10987] Winter, year 56: Oda the Second was born to Lott and Nara.
+  [#11089] Winter, year 56: Neva fell sick with a fever.
+  [#11090] Winter, year 56: Tavo the Second nursed Neva back to health.
+  [#11101] Winter, year 56: Hano was hurt hunting.
+  [#11102] Spring, year 57: Lott nursed Hano back to health.
+  [#11103] Spring, year 57: Ura and Voll the Second became partners.
+  [#11112] Spring, year 57: Moru fell sick with a fever.
+  [#11113] Spring, year 57: Pela nursed Moru back to health.
+  [#11129] Spring, year 57: Nara was hurt hunting.
+  [#11130] Spring, year 57: Lott nursed Nara back to health.
+  [#11146] Spring, year 57: Maa the Second was born to Enko the Second and Iva.
+  [#11169] Summer, year 57: Nara was hurt hunting.
+  [#11170] Summer, year 57: Lott nursed Nara back to health.
+  [#11200] Summer, year 57: Nara brought down a mammoth.
+  [#11247] Autumn, year 57: Sef fell sick with a fever.
+  [#11248] Autumn, year 57: Awa nursed Sef back to health.
+  [#11483] Summer, year 58: Ruk the Second fell sick with a fever.
+  [#11484] Summer, year 58: Tiru nursed Ruk the Second back to health.
+  [#11518] Autumn, year 58: Joro the Second was born to Grem and Zuri.
+  [#11525] Autumn, year 58: Zuri was hurt hunting.
+  [#11526] Autumn, year 58: Grem nursed Zuri back to health.
+  [#11539] Autumn, year 58: Nara was hurt hunting.
+  [#11540] Autumn, year 58: Lott nursed Nara back to health.
+  [#11581] Winter, year 58: Ena brought down a mammoth.
+  [#11614] Winter, year 58: Pela was hurt hunting.
+  [#11616] Winter, year 58: Moru nursed Pela back to health.
+  [#11626] Winter, year 58: Tiru was hurt hunting.
+  [#11628] Winter, year 58: Zuri was hurt hunting.
+  [#11629] Winter, year 58: Ena nursed Tiru back to health.
+  [#11630] Winter, year 58: Zuri died of the wounds.
+  [#11661] Spring, year 59: Brak the Second was born to Duro and Ruu.
+  [#11753] Autumn, year 59: Nara fell sick with a fever.
+  [#11754] Autumn, year 59: Lott nursed Nara back to health.
+  [#11761] Autumn, year 59: Ilka the Second was born to Enko the Second and Iva.
+  [#11762] Autumn, year 59: Ama fell sick with a fever.
+  [#11763] Autumn, year 59: Pela nursed Ama back to health.
+  [#11802] Winter, year 59: Neva was hurt hunting.
+  [#11803] Winter, year 59: Tavo the Second nursed Neva back to health.
+  [#11837] Winter, year 59: Ysa was hurt hunting.
+  [#11838] Spring, year 60: Ivo nursed Ysa back to health.
+  [#11883] Summer, year 60: Hela the Second fell sick with a fever.
+  [#11884] Summer, year 60: Duro nursed Hela the Second back to health.
+  [#11905] Summer, year 60: Pela fell sick with a fever.
+  [#11911] Summer, year 60: Moru nursed Pela back to health.
+  [#11976] Winter, year 60: Vena fell sick with a fever.
+  [#11977] Winter, year 60: Tavo the Second fell sick with a fever.
+  [#11978] Winter, year 60: Grem nursed Vena back to health.
+  [#11987] Winter, year 60: Neva nursed Tavo the Second back to health.
+  [#12004] Winter, year 60: Ena was hurt hunting.
+  [#12006] Winter, year 60: Tiru nursed Ena back to health.
+  [#12030] Winter, year 60: Duro brought down a mammoth.
+  [#12058] Spring, year 61: Iva brought down a mammoth.
+  [#12071] Spring, year 61: Iva was hurt hunting.
+  [#12072] Spring, year 61: Enko the Second nursed Iva back to health.
+  [#12091] Summer, year 61: Kora fell sick with a fever.
+  [#12099] Summer, year 61: Voll the Second nursed Kora back to health.
+  [#12106] Summer, year 61: Kal the Second was born to Duro and Ruu.
+  [#12200] Winter, year 61: Iva was hurt hunting.
+  [#12202] Winter, year 61: Neva was hurt hunting.
+  [#12203] Winter, year 61: Tavo the Second nursed Neva back to health.
+  [#12204] Winter, year 61: Enko the Second nursed Iva back to health.
+  [#12213] Winter, year 61: Arn the Second was born to Lott and Nara.
+  [#12214] Winter, year 61: Ban the Second fell sick with a fever.
+  [#12215] Winter, year 61: Lott nursed Ban the Second back to health.
+  [#12245] Winter, year 61: Hano was hurt hunting.
+  [#12246] Spring, year 62: Kora nursed Hano back to health.
+  [#12341] Summer, year 62: Iva was killed hunting a mammoth.
+  [#12391] Autumn, year 62: Hela the Second fell sick with a fever.
+  [#12392] Autumn, year 62: Duro nursed Hela the Second back to health.
+  [#12418] Winter, year 62: Ivo was hurt hunting.
+  [#12420] Winter, year 62: Nara was hurt hunting.
+  [#12421] Winter, year 62: Lott nursed Nara back to health.
+  [#12422] Winter, year 62: Ysa nursed Ivo back to health.
+  [#12430] Winter, year 62: Ban the Second was hurt hunting.
+  [#12431] Winter, year 62: Ulf the Second nursed Ban the Second back to health.
+  [#12439] Winter, year 62: Moru died of old age, 59 years old.
+  [#12448] Winter, year 62: The food store ran empty; 13 went to bed hungry.
+  [#12476] Spring, year 63: Nara was hurt hunting.
+  [#12477] Spring, year 63: Lott nursed Nara back to health.
+  [#12484] Spring, year 63: The food store ran empty; 18 went to bed hungry.
+  [#12498] Spring, year 63: Mira fell sick with a fever.
+  [#12499] Spring, year 63: Neva nursed Mira back to health.
+  [#12598] Winter, year 63: Enko the Second was hurt hunting.
+  [#12599] Winter, year 63: Pela nursed Enko the Second back to health.
+  [#12629] Winter, year 63: The food store ran empty; 6 went to bed hungry.
+  [#12644] Winter, year 63: Ama brought down a mammoth.
+  [#12680] Spring, year 64: Nara brought down a mammoth.
+  [#12696] Summer, year 64: Nara was hurt hunting.
+  [#12697] Summer, year 64: Lott nursed Nara back to health.
+  [#12729] Autumn, year 64: Pela died of old age, 54 years old.
+  [#12730] Autumn, year 64: Pim the Second, orphaned by the death of Pela, was taken in by Enko the Second.
+  [#12761] Winter, year 64: Ysa was hurt hunting.
+  [#12764] Winter, year 64: Ivo nursed Ysa back to health.
+  [#12765] Winter, year 64: Enko the Second fell sick with a fever.
+  [#12766] Winter, year 64: Pim the Second nursed Enko the Second back to health.
+  [#12797] Winter, year 64: Hano was hurt hunting.
+  [#12798] Winter, year 64: Lott nursed Hano back to health.
+  [#12806] Winter, year 64: Ban the Second was hurt hunting.
+  [#12807] Winter, year 64: Nara nursed Ban the Second back to health.
+  [#12826] Spring, year 65: Moru the Second was born to Lott and Nara.
+  [#12863] Summer, year 65: Soa the Second fell sick with a fever.
+  [#12864] Summer, year 65: Neva nursed Soa the Second back to health.
+  [#12865] Summer, year 65: Ama and Ruk the Second became partners.
+  [#12927] Autumn, year 65: Nara was hurt hunting.
+  [#12928] Winter, year 65: Lott nursed Nara back to health.
+  [#12949] Winter, year 65: Grem brought down a mammoth.
+  [#12952] Winter, year 65: Awa fell sick with a fever.
+  [#12960] Winter, year 65: Ruu was hurt hunting.
+  [#12961] Winter, year 65: Duro nursed Ruu back to health.
+  [#12969] Winter, year 65: Ban the Second was hurt hunting.
+  [#12970] Winter, year 65: Sef nursed Awa back to health.
+  [#12971] Winter, year 65: Lott nursed Ban the Second back to health.
+  [#12988] Spring, year 66: Kora died of old age, 54 years old.
+  [#13079] Winter, year 66: Ivo brought down a mammoth.
+  [#13083] Winter, year 66: Tavo the Second was hurt hunting.
+  [#13084] Winter, year 66: Neva nursed Tavo the Second back to health.
+  [#13125] Spring, year 67: Tala the Second was born to Ruk the Second and Ama.
+  [#13130] Spring, year 67: Ura died of old age, 52 years old.
+  [#13135] Spring, year 67: Lott died of old age, 57 years old.
+  [#13140] Spring, year 67: Ena died of old age, 52 years old.
+  [#13157] Summer, year 67: Nara was hurt hunting.
+  [#13158] Summer, year 67: Ban the Second nursed Nara back to health.
+  [#13171] Summer, year 67: Hano died of old age, 49 years old.
+  [#13181] Autumn, year 67: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#13222] Winter, year 67: Tarek the Second brought down a mammoth.
+  [#13299] Autumn, year 68: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#13337] Winter, year 68: Awa was hurt hunting.
+  [#13338] Winter, year 68: Voll the Second was hurt hunting.
+  [#13339] Winter, year 68: Sef nursed Awa back to health.
+  [#13340] Winter, year 68: Garu the Second nursed Voll the Second back to health.
+  [#13356] Winter, year 68: Garu the Second brought down a mammoth.
+  [#13376] Spring, year 69: Oda the Second fell sick with a fever.
+  [#13377] Spring, year 69: Nara nursed Oda the Second back to health.
+  [#13381] Spring, year 69: Neva died of old age, 53 years old.
+  [#13385] Spring, year 69: Ruu died of old age, 46 years old.
+  [#13423] Autumn, year 69: Ulf the Second was hurt hunting.
+  [#13424] Autumn, year 69: Nara nursed Ulf the Second back to health.
+  [#13431] Autumn, year 69: Nara was hurt hunting.
+  [#13435] Winter, year 69: Ban the Second nursed Nara back to health.
+  [#13436] Winter, year 69: Vena and Tok the Second became partners.
+  [#13478] Winter, year 69: Pim the Second brought down a mammoth.
+  [#13490] Winter, year 69: Lott the Second was born to Ruk the Second and Ama.
+  [#13491] Winter, year 69: Tiru and Tavo the Second became partners.
+  [#13594] Autumn, year 70: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#13604] Autumn, year 70: Pim the Second fell sick with a fever.
+  [#13608] Autumn, year 70: Nara brought down a mammoth.
+  [#13609] Autumn, year 70: Enko the Second nursed Pim the Second back to health.
+  [#13614] Autumn, year 70: Ivo fell sick with a fever.
+  [#13615] Autumn, year 70: Ysa nursed Ivo back to health.
+  [#13711] Winter, year 70: Tarek the Second was hurt hunting.
+  [#13712] Spring, year 71: Duro nursed Tarek the Second back to health.
+  [#13734] Summer, year 71: Ulf the Second brought down a mammoth.
+  [#13753] Summer, year 71: Hano the Second was born to Tok the Second and Vena.
+  [#13788] Summer, year 71: Ysa died of old age, 47 years old.
+  [#13842] Autumn, year 71: Ulf the Second was hurt hunting.
+  [#13843] Autumn, year 71: Nara nursed Ulf the Second back to health.
+  [#13972] Spring, year 72: Joro the Second fell sick with a fever.
+  [#13973] Spring, year 72: Grem nursed Joro the Second back to health.
+  [#14021] Summer, year 72: Oren the Second fell sick with a fever.
+  [#14022] Summer, year 72: Duro nursed Oren the Second back to health.
+  [#14040] Autumn, year 72: Duro died of old age, 53 years old.
+  [#14041] Autumn, year 72: Tarek the Second nursed Oren the Second back to health.
+  [#14042] Autumn, year 72: Brak the Second, orphaned by the death of Duro, was taken in by Hela the Second.
+  [#14043] Autumn, year 72: Kal the Second, orphaned by the death of Duro, was taken in by Hela the Second.
+  [#14057] Autumn, year 72: Ulf the Second was hurt hunting.
+  [#14058] Winter, year 72: Nara nursed Ulf the Second back to health.
+  [#14091] Winter, year 72: Nara brought down a mammoth.
+  [#14092] Winter, year 72: Ulf the Second died of the wounds.
+  [#14173] Winter, year 72: Oda the Second was hurt hunting.
+  [#14174] Spring, year 73: Nara nursed Oda the Second back to health.
+  [#14229] Spring, year 73: Ivo died of old age, 47 years old.
+  [#14370] Autumn, year 73: Grem died of old age, 51 years old.
+  [#14371] Autumn, year 73: Joro the Second, orphaned by the death of Grem, was taken in by Tiru.
+  [#14377] Autumn, year 73: Sten died of old age, 45 years old.
+  [#14380] Winter, year 73: Nara and Tarek the Second became partners.
+  [#14471] Winter, year 73: Mira and Garu the Second became partners.
+  [#14486] Spring, year 74: Tiru died of old age, 57 years old.
+  [#14487] Spring, year 74: Joro the Second, orphaned by the death of Grem, was taken in by Tok the Second.
+  [#14644] Autumn, year 74: Awa and Tavo the Second became partners.
+  [#14703] Winter, year 74: Tavo the Second brought down a mammoth.
+  [#14788] Spring, year 75: Oren the Second fell sick with a fever.
+  [#14789] Spring, year 75: Hela the Second nursed Oren the Second back to health.
+  [#14889] Summer, year 75: Sef died of old age, 49 years old.
+  [#14946] Autumn, year 75: Nara died of old age, 51 years old.
+  [#14947] Autumn, year 75: Arn the Second, orphaned by the death of Nara, was taken in by Ban the Second.
+  [#14948] Autumn, year 75: Moru the Second, orphaned by the death of Nara, was taken in by Ban the Second.
+  [#14952] Autumn, year 75: Sela the Second was born to Tok the Second and Vena.
+  [#14953] Autumn, year 75: Oda the Second fell sick with a fever.
+  [#14954] Autumn, year 75: Ban the Second nursed Oda the Second back to health.
+  [#14956] Autumn, year 75: Sela the Second stole from the food store.
+  [#14961] Winter, year 75: Lin the Second fell sick with a fever.
+  [#14962] Winter, year 75: Ban the Second nursed Lin the Second back to health.
+  [#14976] Winter, year 75: Pim the Second fell sick with a fever.
+  [#14977] Winter, year 75: Enko the Second nursed Pim the Second back to health.
+  [#14988] Winter, year 75: Sela the Second stole from the food store.
+  [#15002] Winter, year 75: Hela the Second was hurt hunting.
+  [#15003] Winter, year 75: Brak the Second nursed Hela the Second back to health.
+  [#15012] Winter, year 75: Duro the Second was born to Garu the Second and Mira.
+  [#15031] Winter, year 75: Sela the Second stole from the food store.
+  [#15035] Spring, year 76: Oda the Second and Joro the Second became partners.
+  [#15038] Spring, year 76: Arn the Second fell sick with a fever.
+  [#15039] Spring, year 76: Ban the Second nursed Arn the Second back to health.
+  [#15041] Spring, year 76: Sela the Second stole from the food store.
+  [#15047] Summer, year 76: Ossa the Second and Tarek the Second became partners.
+  [#15049] Summer, year 76: Sela the Second stole from the food store.
+  [#15055] Autumn, year 76: Sela the Second stole from the food store.
+  [#15057] Autumn, year 76: Hela the Second and Kesh the Second became partners.
+  [#15059] Autumn, year 76: Lin the Second and Enko the Second became partners.
+  [#15062] Autumn, year 76: Awa fell sick with a fever.
+  [#15063] Autumn, year 76: Tavo the Second nursed Awa back to health.
+  [#15065] Autumn, year 76: Sela the Second stole from the food store; Tok the Second saw it.
+  [#15069] Winter, year 76: Ossa the Second was hurt hunting.
+  [#15070] Winter, year 76: Tarek the Second nursed Ossa the Second back to health.
+  [#15072] Winter, year 76: Vena fell sick with a fever.
+  [#15073] Winter, year 76: Tok the Second nursed Vena back to health.
+  [#15076] Winter, year 76: Sela the Second stole from the food store.
+  [#15077] Winter, year 76: Ama was hurt hunting.
+  [#15080] Winter, year 76: Ruk the Second nursed Ama back to health.
+  [#15082] Winter, year 76: Ilka the Second was hurt hunting.
+  [#15083] Winter, year 76: Enko the Second nursed Ilka the Second back to health.
+  [#15085] Winter, year 76: Zuri the Second was born to Joro the Second and Oda the Second.
+  [#15088] Winter, year 76: Zuri the Second stole from the food store.
+  [#15089] Winter, year 76: The food store ran empty after the thefts of Zuri the Second and Sela the Second; 12 went to bed hungry.
+  [#15092] Spring, year 77: Sela the Second stole from the food store; Oren the Second saw it.
+  [#15097] Spring, year 77: Zuri the Second stole from the food store; Voll the Second saw it.
+  [#15100] Spring, year 77: Sela the Second stole from the food store.
+  [#15103] Summer, year 77: Ruk the Second fell sick with a fever.
+  [#15104] Summer, year 77: Ama nursed Ruk the Second back to health.
+  [#15106] Summer, year 77: Zuri the Second stole from the food store.
+  [#15109] Summer, year 77: Sela the Second stole from the food store.
+  [#15114] Autumn, year 77: Zuri the Second stole from the food store; Oren the Second saw it.
+  [#15116] Autumn, year 77: Kora the Second was born to Ruk the Second and Ama.
+  [#15117] Autumn, year 77: Nara the Second was born to Tarek the Second and Ossa the Second.
+  [#15121] Autumn, year 77: Sela the Second stole from the food store; Ruk the Second saw it.
+  [#15129] Autumn, year 77: Zuri the Second stole from the food store.
+  [#15138] Winter, year 77: Sela the Second stole from the food store; Moru the Second saw it.
+  [#15139] Winter, year 77: Voll the Second was killed hunting a mammoth.
+  [#15140] Winter, year 77: The food store ran empty after the thefts of Sela the Second and Zuri the Second; 10 went to bed hungry.
+  [#15150] Winter, year 77: Zuri the Second stole from the food store; Tarek the Second saw it.
+  [#15154] Winter, year 77: Ama shared food with hungry Lott the Second.
+  [#15155] Winter, year 77: Tok the Second shared food with hungry Hano the Second.
+  [#15156] Winter, year 77: Garu the Second shared food with hungry Duro the Second.
+  [#15157] Winter, year 77: Joro the Second shared food with hungry Zuri the Second.
+  [#15158] Winter, year 77: Ruk the Second shared food with hungry Kora the Second.
+  [#15159] Winter, year 77: Ossa the Second shared food with hungry Nara the Second.
+  [#15163] Winter, year 77: Sela the Second stole from the food store; Awa saw it.
+  [#15164] Winter, year 77: Awa was hurt hunting.
+  [#15165] Winter, year 77: Arn the Second shared food with hungry Ban the Second.
+  [#15166] Winter, year 77: Duro the Second shared food with hungry Mira.
+  [#15167] Winter, year 77: Enko the Second shared food with hungry Pim the Second.
+  [#15168] Winter, year 77: Tavo the Second shared food with hungry Kesh the Second.
+  [#15169] Winter, year 77: Ossa the Second shared food with hungry Tarek the Second.
+  [#15170] Winter, year 77: Kora the Second shared food with hungry Hela the Second.
+  [#15171] Winter, year 77: Nara the Second shared food with hungry Soa the Second.
+  [#15172] Winter, year 77: Joro the Second shared food with hungry Oda the Second.
+  [#15173] Winter, year 77: Awa died of the wounds.
+  [#15177] Winter, year 77: Tok the Second shared food with hungry Tavo the Second.
+  [#15178] Winter, year 77: Duro the Second shared food with hungry Garu the Second.
+  [#15179] Winter, year 77: Ossa the Second shared food with hungry Mira.
+  [#15180] Winter, year 77: Ban the Second shared food with hungry Kesh the Second.
+  [#15181] Winter, year 77: Nara the Second shared food with hungry Tarek the Second.
+  [#15182] Winter, year 77: Brak the Second shared food with hungry Hela the Second.
+  [#15183] Winter, year 77: Ruk the Second shared food with hungry Soa the Second.
+  [#15184] Winter, year 77: Tala the Second shared food with hungry Ama.
+  [#15185] Winter, year 77: Kora the Second shared food with hungry Lott the Second.
+  [#15186] Winter, year 77: Moru the Second shared food with hungry Hano the Second.
+  [#15190] Spring, year 78: Maa the Second shared food with hungry Ilka the Second.
+  [#15191] Spring, year 78: Hela the Second shared food with hungry Kal the Second.
+  [#15192] Spring, year 78: Ban the Second shared food with hungry Arn the Second.
+  [#15193] Spring, year 78: Tala the Second shared food with hungry Lott the Second.
+  [#15194] Spring, year 78: Tok the Second shared food with hungry Hano the Second.
+  [#15195] Spring, year 78: Kora the Second shared food with hungry Ruk the Second.
+  [#15196] Spring, year 78: Lin the Second shared food with hungry Enko the Second.
+  [#15197] Spring, year 78: Pim the Second shared food with hungry Ama.
+  [#15198] Spring, year 78: Pim the Second fell sick, weakened by hunger.
+  [#15199] Spring, year 78: Ilka the Second fell sick, weakened by hunger.
+  [#15200] Spring, year 78: Enko the Second nursed Ilka the Second back to health.
+  [#15204] Spring, year 78: Zuri the Second stole from the food store; Kesh the Second saw it.
+  [#15205] Spring, year 78: Hela the Second shared food with hungry Tarek the Second.
+  [#15206] Spring, year 78: Tavo the Second shared food with hungry Soa the Second.
+  [#15207] Spring, year 78: Tok the Second shared food with hungry Ossa the Second.
+  [#15208] Spring, year 78: Oda the Second shared food with hungry Joro the Second.
+  [#15209] Spring, year 78: Ban the Second shared food with hungry Moru the Second.
+  [#15210] Spring, year 78: Ruk the Second shared food with hungry Duro the Second.
+  [#15211] Spring, year 78: Kesh the Second shared food with hungry Nara the Second.
+  [#15212] Spring, year 78: Brak the Second shared food with hungry Oren the Second.
+  [#15213] Spring, year 78: Ama nursed Pim the Second back to health.
+  [#15217] Spring, year 78: Enko the Second shared food with hungry Lin the Second.
+  [#15218] Spring, year 78: Tala the Second shared food with hungry Ama.
+  [#15219] Spring, year 78: Ilka the Second shared food with hungry Maa the Second.
+  [#15220] Spring, year 78: Garu the Second shared food with hungry Sela the Second.
+  [#15221] Spring, year 78: Tavo the Second shared food with hungry Vena.
+  [#15227] Spring, year 78: Sela the Second stole from the food store; Tala the Second saw it.
+  [#15228] Spring, year 78: Tarek the Second shared food with hungry Ossa the Second.
+  [#15229] Spring, year 78: Hela the Second shared food with hungry Kesh the Second.
+  [#15230] Spring, year 78: Tok the Second shared food with hungry Oren the Second.
+  [#15231] Spring, year 78: Ruk the Second shared food with hungry Brak the Second.
+  [#15232] Spring, year 78: Tavo the Second shared food with hungry Kal the Second.
+  [#15233] Spring, year 78: Enko the Second shared food with hungry Pim the Second.
+  [#15237] Spring, year 78: Enko the Second shared food with hungry Maa the Second.
+  [#15238] Spring, year 78: Ruk the Second shared food with hungry Ilka the Second.
+  [#15239] Spring, year 78: Tarek the Second shared food with hungry Nara the Second.
+  [#15240] Spring, year 78: Tavo the Second shared food with hungry Mira.
+  [#15241] Spring, year 78: Ossa the Second shared food with hungry Soa the Second.
+  [#15245] Spring, year 78: Ruk the Second shared food with hungry Ama.
+  [#15246] Spring, year 78: Lott the Second shared food with hungry Kora the Second.
+  [#15247] Spring, year 78: Ban the Second shared food with hungry Pim the Second.
+  [#15248] Spring, year 78: Kesh the Second shared food with hungry Lin the Second.
+  [#15249] Spring, year 78: Garu the Second shared food with hungry Tala the Second.
+  [#15250] Spring, year 78: Vena shared food with hungry Sela the Second.
+  [#15254] Spring, year 78: Zuri the Second stole from the food store; Garu the Second saw it.
+  [#15255] Spring, year 78: Enko the Second shared food with hungry Ilka the Second.
+  [#15256] Spring, year 78: Tarek the Second shared food with hungry Brak the Second.
+  [#15257] Spring, year 78: Kesh the Second shared food with hungry Hela the Second.
+  [#15258] Spring, year 78: Lin the Second shared food with hungry Oren the Second.
+  [#15262] Summer, year 78: Oren the Second fell sick with a fever.
+  [#15263] Summer, year 78: Hela the Second nursed Oren the Second back to health.
+  [#15265] Summer, year 78: Sela the Second stole from the food store.
+  [#15274] Summer, year 78: Enko the Second died of old age, 45 years old.
+  [#15276] Summer, year 78: Zuri the Second stole from the food store; Kora the Second saw it.
+  [#15286] Summer, year 78: Sela the Second stole from the food store.
+  [#15294] Autumn, year 78: Zuri the Second stole from the food store.
+  [#15303] Autumn, year 78: Sela the Second stole from the food store.
+  [#15304] Autumn, year 78: Maa the Second and Tavo the Second became partners.
+  [#15314] Winter, year 78: Zuri the Second stole from the food store; Ruk the Second saw it.
+  [#15318] Winter, year 78: Kesh the Second was hurt hunting.
+  [#15319] Winter, year 78: The food store ran empty after the thefts of Zuri the Second and Sela the Second; 2 went to bed hungry.
+  [#15320] Winter, year 78: Hela the Second nursed Kesh the Second back to health.
+  [#15324] Winter, year 78: Sela the Second stole from the food store.
+  [#15325] Winter, year 78: Arn the Second brought down a mammoth.
+  [#15335] Winter, year 78: Zuri the Second stole from the food store.
+  [#15343] Spring, year 79: Sela the Second stole from the food store; Soa the Second saw it.
+  [#15344] Spring, year 79: Maa the Second was hurt hunting.
+  [#15345] Spring, year 79: Tavo the Second nursed Maa the Second back to health.
+  [#15351] Spring, year 79: Ilka the Second and Oren the Second became partners.
+  [#15354] Spring, year 79: Zuri the Second stole from the food store.
+  [#15360] Spring, year 79: Sela the Second stole from the food store.
+  [#15365] Summer, year 79: Lin the Second and Kal the Second became partners.
+  [#15368] Summer, year 79: Zuri the Second stole from the food store.
+  [#15371] Summer, year 79: Soa the Second and Pim the Second became partners.
+  [#15374] Summer, year 79: Sela the Second stole from the food store; Brak the Second saw it.
+  [#15385] Summer, year 79: Zuri the Second stole from the food store.
+  [#15399] Autumn, year 79: Sela the Second stole from the food store.
+  [#15402] Autumn, year 79: Kesh the Second fell sick with a fever.
+  [#15403] Autumn, year 79: Hela the Second nursed Kesh the Second back to health.
+  [#15408] Autumn, year 79: Zuri the Second stole from the food store; Tavo the Second saw it.
+  [#15413] Autumn, year 79: Sela the Second stole from the food store.
+  [#15460] Winter, year 79: Zuri the Second stole from the food store.
+  [#15461] Winter, year 79: Maa the Second brought down a mammoth.
+  [#15492] Winter, year 79: Sela the Second stole from the food store; Lott the Second saw it.
+  [#15513] Winter, year 79: Maa the Second was hurt hunting.
+  [#15524] Spring, year 80: Tavo the Second nursed Maa the Second back to health.
+  [#15526] Spring, year 80: Zuri the Second stole from the food store.
+  [#15567] Spring, year 80: Sela the Second stole from the food store.
+  [#15583] Spring, year 80: Oda the Second was killed hunting a mammoth.
+  [#15600] Spring, year 80: Zuri the Second stole from the food store; Brak the Second saw it.
+  [#15645] Summer, year 80: Sela the Second stole from the food store.
+  [#15646] Summer, year 80: Nara the Second fell sick with a fever.
+  [#15647] Summer, year 80: Tarek the Second nursed Nara the Second back to health.
+  [#15686] Summer, year 80: Zuri the Second stole from the food store.
+  [#15693] Summer, year 80: Ulf the Third was born to Kesh the Second and Hela the Second.
+  [#15726] Summer, year 80: Sela the Second stole from the food store; Lott the Second saw it.
+  [#15743] Autumn, year 80: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#15747] Autumn, year 80: Zuri the Second stole from the food store.
+  [#15757] Autumn, year 80: Sela the Second stole from the food store.
+  [#15764] Autumn, year 80: Zuri the Second stole from the food store.
+  [#15799] Winter, year 80: Sela the Second stole from the food store; Oren the Second saw it.
+  [#15816] Winter, year 80: Ruk the Second was hurt hunting.
+  [#15817] Winter, year 80: Tala the Second nursed Ruk the Second back to health.
+  [#15837] Winter, year 80: Zuri the Second stole from the food store.
+  [#15848] Winter, year 80: Hela the Second fell sick with a fever.
+  [#15855] Winter, year 80: Sela the Second stole from the food store.
+  [#15857] Spring, year 81: Kesh the Second nursed Hela the Second back to health.
+  [#15865] Spring, year 81: Sef the Second was born to Oren the Second and Ilka the Second.
+  [#15867] Spring, year 81: Zuri the Second stole from the food store.
+  [#15877] Spring, year 81: Sela the Second stole from the food store; Kesh the Second saw it.
+  [#15878] Spring, year 81: Tok the Second died of old age, 52 years old.
+  [#15885] Summer, year 81: Ruk the Second died of old age, 50 years old.
+  [#15886] Summer, year 81: Zuri the Second stole from the food store.
+  [#15907] Summer, year 81: Sela the Second stole from the food store; Nara the Second saw it.
+  [#15944] Summer, year 81: Zuri the Second stole from the food store; Lott the Second saw it.
+  [#15958] Summer, year 81: Ruk the Third was born to Garu the Second and Mira.
+  [#15973] Autumn, year 81: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#15977] Autumn, year 81: Sela the Second stole from the food store; Ama saw it.
+  [#15978] Autumn, year 81: Maa the Second was hurt hunting.
+  [#15979] Autumn, year 81: Tavo the Second nursed Maa the Second back to health.
+  [#15990] Autumn, year 81: Zuri the Second stole from the food store; Ruk the Third saw it.
+  [#15997] Autumn, year 81: Sela the Second stole from the food store; Moru the Second saw it.
+  [#16014] Winter, year 81: Duro the Second fell sick with a fever.
+  [#16022] Winter, year 81: Zuri the Second stole from the food store; Joro the Second saw it.
+  [#16029] Winter, year 81: Ama was hurt hunting.
+  [#16030] Winter, year 81: Tala the Second nursed Ama back to health.
+  [#16031] Winter, year 81: Garu the Second nursed Duro the Second back to health.
+  [#16032] Winter, year 81: Tavo the Second fell sick with a fever.
+  [#16033] Winter, year 81: Maa the Second nursed Tavo the Second back to health.
+  [#16044] Winter, year 81: Kesh the Second was hurt hunting.
+  [#16045] Winter, year 81: Hela the Second nursed Kesh the Second back to health.
+  [#16055] Winter, year 81: Sela the Second stole from the food store; Ama saw it.
+  [#16071] Winter, year 81: Lin the Second was hurt hunting.
+  [#16072] Winter, year 81: Kal the Second nursed Lin the Second back to health.
+  [#16076] Winter, year 81: Zuri the Second stole from the food store; Brak the Second saw it.
+  [#16082] Spring, year 82: Joro the Second was killed hunting a mammoth.
+  [#16083] Spring, year 82: Zuri the Second, orphaned by the death of Joro the Second, was taken in by Kal the Second.
+  [#16087] Spring, year 82: Sela the Second stole from the food store; Moru the Second saw it.
+  [#16091] Spring, year 82: Ura the Second was born to Tavo the Second and Maa the Second.
+  [#16097] Spring, year 82: Zuri the Second stole from the food store.
+  [#16110] Spring, year 82: Sela the Second stole from the food store.
+  [#16111] Summer, year 82: Voll the Third was born to Pim the Second and Soa the Second.
+  [#16120] Summer, year 82: Zuri the Second stole from the food store.
+  [#16151] Summer, year 82: Sela the Second stole from the food store.
+  [#16187] Autumn, year 82: Zuri the Second stole from the food store; Oren the Second saw it.
+  [#16200] Autumn, year 82: Sela the Second stole from the food store.
+  [#16209] Autumn, year 82: Oda the Third was born to Kesh the Second and Hela the Second.
+  [#16215] Autumn, year 82: Zuri the Second stole from the food store.
+  [#16216] Autumn, year 82: Arn the Second fell sick with a fever.
+  [#16222] Winter, year 82: Ban the Second nursed Arn the Second back to health.
+  [#16229] Winter, year 82: Sela the Second stole from the food store.
+  [#16287] Winter, year 82: Zuri the Second stole from the food store; Kesh the Second saw it.
+  [#16314] Winter, year 82: Sela the Second stole from the food store.
+  [#16316] Winter, year 82: Hela the Second was hurt hunting.
+  [#16317] Winter, year 82: Kesh the Second nursed Hela the Second back to health.
+  [#16328] Winter, year 82: Ilka the Second was hurt hunting.
+  [#16329] Spring, year 83: Oren the Second nursed Ilka the Second back to health.
+  [#16335] Spring, year 83: Zuri the Second stole from the food store.
+  [#16353] Spring, year 83: Sela the Second stole from the food store; Lin the Second saw it.
+  [#16364] Spring, year 83: Zuri the Second stole from the food store.
+  [#16380] Summer, year 83: Sela the Second stole from the food store.
+  [#16425] Summer, year 83: Zuri the Second stole from the food store; Pim the Second saw it.
+  [#16428] Summer, year 83: Maa the Second fell sick with a fever.
+  [#16429] Summer, year 83: Tavo the Second nursed Maa the Second back to health.
+  [#16462] Summer, year 83: Sela the Second stole from the food store.
+  [#16474] Autumn, year 83: Neva the Second was born to Garu the Second and Mira.
+  [#16475] Autumn, year 83: Zuri the Second stole from the food store; Ruk the Third saw it.
+  [#16491] Autumn, year 83: Sela the Second stole from the food store.
+  [#16507] Winter, year 83: Zuri the Second stole from the food store; Tarek the Second saw it.
+  [#16550] Winter, year 83: Sela the Second stole from the food store.
+  [#16590] Winter, year 83: Zuri the Second stole from the food store; Ruk the Third saw it.
+  [#16601] Winter, year 83: Kesh the Second was hurt hunting.
+  [#16603] Winter, year 83: Soa the Second brought down a mammoth.
+  [#16609] Spring, year 84: Hela the Second nursed Kesh the Second back to health.
+  [#16625] Spring, year 84: Sela the Second stole from the food store.
+  [#16626] Spring, year 84: Awa the Second was born to Tavo the Second and Maa the Second.
+  [#16657] Spring, year 84: Pela the Second was born to Tarek the Second and Ossa the Second.
+  [#16658] Spring, year 84: Zuri the Second stole from the food store.
+  [#16700] Spring, year 84: Sela the Second stole from the food store.
+  [#16736] Summer, year 84: Zuri the Second stole from the food store.
+  [#16788] Summer, year 84: Sela the Second stole from the food store; Oren the Second saw it.
+  [#16840] Summer, year 84: Zuri the Second stole from the food store; Kesh the Second saw it.
+  [#16853] Autumn, year 84: Sela the Second stole from the food store; Lin the Second saw it.
+  [#16854] Autumn, year 84: Arn the Second brought down a mammoth.
+  [#16867] Autumn, year 84: Zuri the Second stole from the food store; Arn the Second saw it.
+  [#16874] Autumn, year 84: Ivo the Second was born to Pim the Second and Soa the Second.
+  [#16875] Autumn, year 84: Kal the Second fell sick with a fever.
+  [#16876] Autumn, year 84: Hela the Second nursed Kal the Second back to health.
+  [#16889] Autumn, year 84: Sela the Second stole from the food store.
+  [#16941] Winter, year 84: Zuri the Second stole from the food store; Awa the Second saw it.
+  [#16976] Winter, year 84: Sela the Second stole from the food store.
+  [#16993] Winter, year 84: Ilka the Second was hurt hunting.
+  [#16994] Winter, year 84: Oren the Second nursed Ilka the Second back to health.
+  [#17009] Spring, year 85: Zuri the Second stole from the food store.
+  [#17029] Spring, year 85: Sela the Second stole from the food store.
+  [#17042] Spring, year 85: Zuri the Second stole from the food store; Arn the Second saw it.
+  [#17049] Spring, year 85: Iva the Second was born to Kesh the Second and Hela the Second.
+  [#17064] Summer, year 85: Sela the Second stole from the food store.
+  [#17065] Summer, year 85: Ruu the Second was born to Oren the Second and Ilka the Second.
+  [#17082] Summer, year 85: Zuri the Second stole from the food store.
+  [#17115] Summer, year 85: Sela the Second stole from the food store; Ossa the Second saw it.
+  [#17137] Autumn, year 85: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#17146] Autumn, year 85: Zuri the Second stole from the food store.
+  [#17163] Autumn, year 85: Vena died of old age, 50 years old.
+  [#17164] Autumn, year 85: Hano the Second, orphaned by the death of Vena, was taken in by Tavo the Second.
+  [#17165] Autumn, year 85: Sela the Second, orphaned by the death of Vena, was taken in by Garu the Second.
+  [#17174] Autumn, year 85: Sela the Second stole from the food store.
+  [#17191] Autumn, year 85: Zuri the Second stole from the food store; Kora the Second saw it.
+  [#17222] Winter, year 85: Sela the Second stole from the food store.
+  [#17223] Winter, year 85: Ban the Second was killed hunting a mammoth.
+  [#17250] Winter, year 85: Zuri the Second stole from the food store.
+  [#17251] Winter, year 85: Ysa the Second was born to Kal the Second and Lin the Second.
+  [#17270] Winter, year 85: Sela the Second stole from the food store; Iva the Second saw it.
+  [#17271] Winter, year 85: Maa the Second was hurt hunting.
+  [#17272] Spring, year 86: Tavo the Second nursed Maa the Second back to health.
+  [#17300] Spring, year 86: Zuri the Second stole from the food store; Tala the Second saw it.
+  [#17320] Spring, year 86: Sela the Second stole from the food store.
+  [#17348] Summer, year 86: Zuri the Second stole from the food store.
+  [#17367] Summer, year 86: Sela the Second stole from the food store.
+  [#17386] Summer, year 86: Tavo the Second died of old age, 51 years old.
+  [#17387] Summer, year 86: Tok the Third was born to Tarek the Second and Ossa the Second.
+  [#17388] Summer, year 86: Hano the Second, orphaned by the death of Vena, was taken in by Garu the Second.
+  [#17399] Summer, year 86: Zuri the Second stole from the food store.
+  [#17400] Summer, year 86: Tavo the Third was born to Garu the Second and Mira.
+  [#17401] Summer, year 86: Ama and Moru the Second became partners.
+  [#17424] Autumn, year 86: Sela the Second stole from the food store; Nara the Second saw it.
+  [#17425] Autumn, year 86: Tala the Second and Arn the Second became partners.
+  [#17448] Autumn, year 86: Sten the Second was born to Pim the Second and Soa the Second.
+  [#17460] Autumn, year 86: Zuri the Second stole from the food store.
+  [#17483] Autumn, year 86: Sela the Second stole from the food store; Ura the Second saw it.
+  [#17518] Winter, year 86: Zuri the Second stole from the food store.
+  [#17530] Winter, year 86: Ban the Third was born to Tavo the Second and Maa the Second.
+  [#17542] Winter, year 86: Ban the Third stole from the food store; Pela the Second saw it.
+  [#17543] Winter, year 86: Sela the Second stole from the food store; Ama saw it.
+  [#17555] Winter, year 86: Kesh the Second brought down a mammoth.
+  [#17567] Winter, year 86: Garu the Second was hurt hunting.
+  [#17568] Winter, year 86: Mira nursed Garu the Second back to health.
+  [#17579] Winter, year 86: Zuri the Second stole from the food store.
+  [#17601] Spring, year 87: Ban the Third stole from the food store; Neva the Second saw it.
+  [#17604] Spring, year 87: Sela the Second stole from the food store.
+  [#17628] Spring, year 87: Zuri the Second stole from the food store; Maa the Second saw it.
+  [#17640] Spring, year 87: Kal the Second brought down a mammoth.
+  [#17641] Spring, year 87: Enko the Third was born to Oren the Second and Ilka the Second.
+  [#17662] Spring, year 87: Ban the Third stole from the food store.
+  [#17665] Spring, year 87: Sela the Second stole from the food store.
+  [#17666] Summer, year 87: Tiru the Second was born to Kesh the Second and Hela the Second.
+  [#17691] Summer, year 87: Zuri the Second stole from the food store; Tarek the Second saw it.
+  [#17728] Summer, year 87: Ban the Third stole from the food store.
+  [#17729] Summer, year 87: Sela the Second stole from the food store.
+  [#17754] Autumn, year 87: Zuri the Second stole from the food store; Hela the Second saw it.
+  [#17779] Autumn, year 87: Kal the Second was hurt hunting.
+  [#17780] Autumn, year 87: Hela the Second nursed Kal the Second back to health.
+  [#17791] Autumn, year 87: Ban the Third stole from the food store; Pim the Second saw it.
+  [#17794] Autumn, year 87: Sela the Second stole from the food store; Kesh the Second saw it.
+  [#17830] Autumn, year 87: Zuri the Second stole from the food store; Ruu the Second saw it.
+  [#17845] Autumn, year 87: Arn the Second was hurt hunting.
+  [#17846] Winter, year 87: Tala the Second nursed Arn the Second back to health.
+  [#17858] Winter, year 87: Ban the Third stole from the food store.
+  [#17864] Winter, year 87: Sela the Second stole from the food store; Kesh the Second saw it.
+  [#17895] Winter, year 87: Zuri the Second stole from the food store.
+  [#17915] Winter, year 87: Garu the Second was hurt hunting.
+  [#17917] Winter, year 87: Mira nursed Garu the Second back to health.
+  [#17930] Winter, year 87: Ban the Third stole from the food store; Garu the Second saw it.
+  [#17931] Winter, year 87: Sela the Second stole from the food store.
+  [#17956] Spring, year 88: Zuri the Second stole from the food store; Sela the Second saw it.
+  [#17982] Spring, year 88: Kal the Second brought down a mammoth.
+  [#17995] Spring, year 88: Ban the Third stole from the food store.
+  [#18031] Spring, year 88: Zuri the Second stole from the food store; Garu the Second saw it.
+  [#18057] Summer, year 88: Ban the Third stole from the food store.
+  [#18070] Summer, year 88: Ena the Second was born to Garu the Second and Mira.
+  [#18083] Summer, year 88: Kal the Second was hurt hunting.
+  [#18084] Summer, year 88: Hela the Second nursed Kal the Second back to health.
+  [#18085] Summer, year 88: Zuri the Second stole from the food store.
+  [#18122] Summer, year 88: Ban the Third stole from the food store.
+  [#18147] Autumn, year 88: Zuri the Second stole from the food store; Ossa the Second saw it.
+  [#18173] Autumn, year 88: Ivo the Second fell sick with a fever.
+  [#18174] Autumn, year 88: Pim the Second nursed Ivo the Second back to health.
+  [#18187] Autumn, year 88: Ban the Third stole from the food store; Kora the Second saw it.
+  [#18188] Autumn, year 88: Ivo the Second died of the sickness.
+  [#18201] Autumn, year 88: Vena the Second was born to Kal the Second and Lin the Second.
+  [#18228] Winter, year 88: Zuri the Second stole from the food store.
+  [#18229] Winter, year 88: Sela the Second stole from the food store; Kesh the Second saw it.
+  [#18243] Winter, year 88: Tarek the Second was hurt hunting.
+  [#18244] Winter, year 88: Hela the Second nursed Tarek the Second back to health.
+  [#18258] Winter, year 88: Ban the Third stole from the food store.
+  [#18295] Winter, year 88: Zuri the Second stole from the food store; Hano the Second saw it.
+  [#18299] Winter, year 88: Sela the Second stole from the food store.
+  [#18314] Spring, year 89: Duro the Second fell sick with a fever.
+  [#18315] Spring, year 89: Garu the Second nursed Duro the Second back to health.
+  [#18327] Spring, year 89: Ban the Third stole from the food store.
+  [#18343] Spring, year 89: The food store ran empty after the thefts of Ban the Third, Sela the Second and Zuri the Second; 2 went to bed hungry.
+  [#18397] Spring, year 89: Ban the Third stole from the food store; Sef the Second saw it.
+  [#18411] Spring, year 89: Arn the Second was killed hunting a mammoth.
+  [#18451] Summer, year 89: Sef the Second fell sick with a fever.
+  [#18452] Summer, year 89: Ilka the Second nursed Sef the Second back to health.
+  [#18466] Summer, year 89: Ban the Third stole from the food store.
+  [#18493] Summer, year 89: Iva the Third was born to Kesh the Second and Hela the Second.
+  [#18494] Summer, year 89: Ivo the Third was born to Tarek the Second and Ossa the Second.
+  [#18538] Autumn, year 89: Ban the Third stole from the food store; Soa the Second saw it.
+  [#18551] Autumn, year 89: Arn the Third was born to Oren the Second and Ilka the Second.
+  [#18564] Autumn, year 89: Tala the Third was born to Arn the Second and Tala the Second.
+  [#18604] Autumn, year 89: Ban the Third stole from the food store.
+  [#18619] Winter, year 89: Sela the Second stole from the food store.
+  [#18636] Winter, year 89: Zuri the Second stole from the food store; Kal the Second saw it.
+  [#18652] Winter, year 89: The food store ran empty after the thefts of Zuri the Second, Sela the Second and Ban the Third; 9 went to bed hungry.
+  [#18668] Winter, year 89: Zuri the Second fell sick with a fever.
+  [#18669] Winter, year 89: Kal the Second nursed Zuri the Second back to health.
+  [#18682] Winter, year 89: Hela the Second was hurt hunting.
+  [#18684] Winter, year 89: Ban the Third stole from the food store; Neva the Second saw it.
+  [#18687] Winter, year 89: Moru the Second was hurt hunting.
+  [#18688] Winter, year 89: Kesh the Second nursed Hela the Second back to health.
+  [#18689] Winter, year 89: Ama nursed Moru the Second back to health.
+  [#18703] Winter, year 89: Sela the Second stole from the food store; Tok the Third saw it.
+  [#18706] Winter, year 89: Mira shared food with hungry Ena the Second.
+  [#18707] Winter, year 89: Kal the Second shared food with hungry Vena the Second.
+  [#18708] Winter, year 89: Kesh the Second shared food with hungry Iva the Third.
+  [#18709] Winter, year 89: Tarek the Second shared food with hungry Ivo the Third.
+  [#18710] Winter, year 89: Oren the Second shared food with hungry Arn the Third.
+  [#18711] Winter, year 89: Tala the Second shared food with hungry Tala the Third.
+  [#18727] Winter, year 89: Tarek the Second shared food with hungry Ossa the Second.
+  [#18728] Winter, year 89: Garu the Second shared food with hungry Maa the Second.
+  [#18729] Winter, year 89: Hela the Second shared food with hungry Brak the Second.
+  [#18730] Winter, year 89: Oren the Second shared food with hungry Ilka the Second.
+  [#18731] Winter, year 89: Ama shared food with hungry Moru the Second.
+  [#18732] Winter, year 89: Tala the Second shared food with hungry Lott the Second.
+  [#18733] Winter, year 89: Sela the Second shared food with hungry Hano the Second.
+  [#18734] Winter, year 89: Mira shared food with hungry Duro the Second.
+  [#18735] Winter, year 89: Kal the Second shared food with hungry Zuri the Second.
+  [#18736] Winter, year 89: Kesh the Second shared food with hungry Kora the Second.
+  [#18737] Winter, year 89: Soa the Second shared food with hungry Nara the Second.
+  [#18738] Winter, year 89: Iva the Third shared food with hungry Ulf the Third.
+  [#18739] Winter, year 89: Arn the Third shared food with hungry Sef the Second.
+  [#18740] Winter, year 89: Ena the Second shared food with hungry Ruk the Third.
+  [#18741] Winter, year 89: Lin the Second shared food with hungry Ura the Second.
+  [#18742] Winter, year 89: Pim the Second shared food with hungry Voll the Third.
+  [#18743] Winter, year 89: Vena the Second shared food with hungry Oda the Third.
+  [#18744] Winter, year 89: Ivo the Third shared food with hungry Neva the Second.
+  [#18745] Winter, year 89: Tala the Third shared food with hungry Awa the Second.
+  [#18760] Spring, year 90: Zuri the Second stole from the food store.
+  [#18761] Spring, year 90: Mira shared food with hungry Garu the Second.
+  [#18762] Spring, year 90: Tala the Second shared food with hungry Ama.
+  [#18763] Spring, year 90: Voll the Third shared food with hungry Pim the Second.
+  [#18764] Spring, year 90: Ossa the Second shared food with hungry Soa the Second.
+  [#18765] Spring, year 90: Kal the Second shared food with hungry Lin the Second.
+  [#18766] Spring, year 90: Hano the Second shared food with hungry Sela the Second.
+  [#18767] Spring, year 90: Hela the Second died of the wounds.
+  [#18769] Spring, year 90: Garu the Second fell sick, weakened by hunger.
+  [#18770] Spring, year 90: Mira nursed Garu the Second back to health.
+  [#18784] Spring, year 90: Maa the Second shared food with hungry Awa the Second.
+  [#18785] Spring, year 90: Ruu the Second shared food with hungry Oren the Second.
+  [#18786] Spring, year 90: Sef the Second shared food with hungry Ilka the Second.
+  [#18800] Spring, year 90: Ban the Third stole from the food store; Ura the Second saw it.
+  [#18801] Spring, year 90: Kesh the Second shared food with hungry Ulf the Third.
+  [#18802] Spring, year 90: Mira shared food with hungry Ruk the Third.
+  [#18803] Spring, year 90: Maa the Second shared food with hungry Ura the Second.
+  [#18804] Spring, year 90: Iva the Second shared food with hungry Oda the Third.
+  [#18805] Spring, year 90: Garu the Second shared food with hungry Neva the Second.
+  [#18819] Spring, year 90: Sela the Second stole from the food store.
+  [#18820] Spring, year 90: Ama shared food with hungry Lott the Second.
+  [#18821] Spring, year 90: Tavo the Third shared food with hungry Duro the Second.
+  [#18822] Spring, year 90: Tala the Second shared food with hungry Kora the Second.
+  [#18823] Spring, year 90: Tarek the Second shared food with hungry Nara the Second.
+  [#18851] Spring, year 90: Zuri the Second stole from the food store.
+  [#18878] Summer, year 90: Ban the Third stole from the food store; Tarek the Second saw it.
+  [#18940] Summer, year 90: Ban the Third stole from the food store.
+  [#18971] Autumn, year 90: Lott the Second was hurt hunting.
+  [#18972] Autumn, year 90: Ama nursed Lott the Second back to health.
+  [#18986] Autumn, year 90: Maa the Second was hurt hunting.
+  [#18987] Autumn, year 90: Brak the Second nursed Maa the Second back to health.
+  [#18988] Autumn, year 90: Maa the Second and Brak the Second became partners.
+  [#19010] Autumn, year 90: Ban the Third stole from the food store.
+  [#19087] Winter, year 90: Ban the Third stole from the food store.
+  [#19088] Winter, year 90: Zuri the Second stole from the food store.
+  [#19104] Winter, year 90: The food store ran empty after the thefts of Zuri the Second and Ban the Third; 23 went to bed hungry.
+  [#19120] Winter, year 90: Oren the Second brought down a mammoth.
+  [#19164] Winter, year 90: Ban the Third stole from the food store; Awa the Second saw it.
+  [#19167] Winter, year 90: Zuri the Second stole from the food store.
+  [#19168] Winter, year 90: The food store ran empty after the thefts of Zuri the Second and Ban the Third; 2 went to bed hungry.
+  [#19234] Spring, year 91: Ban the Third stole from the food store; Tiru the Second saw it.
+  [#19235] Spring, year 91: Tarek the Second fell sick with a fever.
+  [#19236] Spring, year 91: Ossa the Second nursed Tarek the Second back to health.
+  [#19237] Spring, year 91: Lott the Second brought down a mammoth.
+  [#19291] Summer, year 91: Neva the Second fell sick with a fever.
+  [#19292] Summer, year 91: Garu the Second nursed Neva the Second back to health.
+  [#19306] Summer, year 91: Ban the Third stole from the food store; Oda the Third saw it.
+  [#19373] Autumn, year 91: Ban the Third stole from the food store; Mira saw it.
+  [#19439] Autumn, year 91: Ban the Third stole from the food store.
+  [#19466] Winter, year 91: Tarek the Second was hurt hunting.
+  [#19468] Winter, year 91: Sela the Second stole from the food store.
+  [#19470] Winter, year 91: Ossa the Second nursed Tarek the Second back to health.
+  [#19486] Winter, year 91: Zuri the Second stole from the food store; Tala the Second saw it.
+  [#19516] Winter, year 91: Ban the Third stole from the food store; Mira saw it.
+  [#19534] Winter, year 91: The food store ran empty after the thefts of Ban the Third, Zuri the Second and Sela the Second; 7 went to bed hungry.
+  [#19562] Winter, year 91: Sela the Second stole from the food store; Ilka the Second saw it.
+  [#19564] Winter, year 91: Maa the Second was hurt hunting.
+  [#19566] Winter, year 91: Zuri the Second stole from the food store; Ura the Second saw it.
+  [#19567] Spring, year 92: Brak the Second nursed Maa the Second back to health.
+  [#19594] Spring, year 92: Ban the Third stole from the food store; Iva the Third saw it.
+  [#19661] Spring, year 92: Ban the Third stole from the food store; Tarek the Second saw it.
+  [#19726] Summer, year 92: Ban the Third stole from the food store; Oda the Third saw it.
+  [#19751] Autumn, year 92: Hela the Third was born to Brak the Second and Maa the Second.
+  [#19791] Autumn, year 92: Ban the Third stole from the food store; Tala the Third saw it.
+  [#19854] Winter, year 92: Ban the Third stole from the food store; Hela the Third saw it.
+  [#19858] Winter, year 92: Mira was hurt hunting.
+  [#19860] Winter, year 92: Garu the Second nursed Mira back to health.
+  [#19889] Winter, year 92: Tarek the Second brought down a mammoth.
+  [#19931] Winter, year 92: Ban the Third stole from the food store; Awa the Second saw it.
+  [#19933] Winter, year 92: The food store ran empty after the thefts of Ban the Third; 3 went to bed hungry.
+  [#20000] Spring, year 93: Ban the Third stole from the food store; Sela the Second saw it.
+  [#20066] Summer, year 93: Ban the Third stole from the food store; Oda the Third saw it.
+  [#20107] Summer, year 93: Lott the Second brought down a mammoth.
+  [#20108] Summer, year 93: Ossa the Second fell sick with a fever.
+  [#20109] Summer, year 93: Tarek the Second nursed Ossa the Second back to health.
+  [#20123] Summer, year 93: Maa the Second was hurt hunting.
+  [#20124] Summer, year 93: Brak the Second nursed Maa the Second back to health.
+  [#20125] Summer, year 93: Iva the Second fell sick with a fever.
+  [#20126] Summer, year 93: Kesh the Second nursed Iva the Second back to health.
+  [#20138] Summer, year 93: Ban the Third stole from the food store; Mira saw it.
+  [#20181] Autumn, year 93: Kal the Second was hurt hunting.
+  [#20182] Autumn, year 93: Lin the Second nursed Kal the Second back to health.
+  [#20183] Autumn, year 93: Ruu the Second fell sick with a fever.
+  [#20184] Autumn, year 93: Oren the Second nursed Ruu the Second back to health.
+  [#20209] Autumn, year 93: Ban the Third stole from the food store.
+  [#20247] Winter, year 93: Sela the Second stole from the food store.
+  [#20264] Winter, year 93: Maa the Second was hurt hunting.
+  [#20265] Winter, year 93: Brak the Second nursed Maa the Second back to health.
+  [#20280] Winter, year 93: Ban the Third stole from the food store.
+  [#20281] Winter, year 93: Brak the Second fell sick with a fever.
+  [#20282] Winter, year 93: Tarek the Second nursed Brak the Second back to health.
+  [#20311] Winter, year 93: The food store ran empty after the thefts of Ban the Third and Sela the Second; 4 went to bed hungry.
+  [#20327] Winter, year 93: Brak the Second nursed Maa the Second back to health.
+  [#20341] Winter, year 93: Sela the Second stole from the food store; Ivo the Third saw it.
+  [#20357] Spring, year 94: Ban the Third stole from the food store.
+  [#20358] Spring, year 94: Kal the Second brought down a mammoth.
+  [#20415] Spring, year 94: Ban the Third stole from the food store; Ulf the Third saw it.
+  [#20476] Summer, year 94: Ban the Third stole from the food store; Pela the Second saw it.
+  [#20531] Autumn, year 94: Ruu the Third was born to Kal the Second and Lin the Second.
+  [#20544] Autumn, year 94: Ban the Third stole from the food store.
+  [#20569] Autumn, year 94: Oren the Second fell sick with a fever.
+  [#20570] Autumn, year 94: Ilka the Second nursed Oren the Second back to health.
+  [#20600] Autumn, year 94: Ban the Third stole from the food store; Ruu the Second saw it.
+  [#20606] Winter, year 94: Brak the Second fell sick with a fever.
+  [#20636] Winter, year 94: Maa the Second nursed Brak the Second back to health.
+  [#20651] Winter, year 94: Maa the Second was hurt hunting.
+  [#20652] Winter, year 94: Ura the Second nursed Maa the Second back to health.
+  [#20667] Winter, year 94: The food store ran empty after the thefts of Ban the Third; 21 went to bed hungry.
+  [#20668] Winter, year 94: Pela the Second fell sick with a fever.
+  [#20669] Winter, year 94: Tarek the Second nursed Pela the Second back to health.
+  [#20681] Winter, year 94: Ban the Third stole from the food store.
+  [#20697] Winter, year 94: Sela the Second stole from the food store.
+  [#20699] Winter, year 94: Maa the Second nursed Brak the Second back to health.
+  [#20711] Winter, year 94: Zuri the Second stole from the food store; Lin the Second saw it.
+  [#20713] Winter, year 94: Maa the Second shared food with hungry Awa the Second.
+  [#20714] Winter, year 94: Tarek the Second shared food with hungry Pela the Second.
+  [#20715] Winter, year 94: Kesh the Second shared food with hungry Iva the Second.
+  [#20716] Winter, year 94: Oren the Second shared food with hungry Ruu the Second.
+  [#20717] Winter, year 94: Kal the Second shared food with hungry Ysa the Second.
+  [#20718] Winter, year 94: Ossa the Second shared food with hungry Tok the Third.
+  [#20719] Winter, year 94: Garu the Second shared food with hungry Tavo the Third.
+  [#20720] Winter, year 94: Soa the Second shared food with hungry Sten the Second.
+  [#20721] Winter, year 94: Ura the Second shared food with hungry Ban the Third.
+  [#20722] Winter, year 94: Ilka the Second shared food with hungry Enko the Third.
+  [#20723] Winter, year 94: Ulf the Third shared food with hungry Tiru the Second.
+  [#20724] Winter, year 94: Mira shared food with hungry Ena the Second.
+  [#20725] Winter, year 94: Lin the Second shared food with hungry Vena the Second.
+  [#20726] Winter, year 94: Oda the Third shared food with hungry Iva the Third.
+  [#20727] Winter, year 94: Nara the Second shared food with hungry Ivo the Third.
+  [#20728] Winter, year 94: Sef the Second shared food with hungry Arn the Third.
+  [#20729] Winter, year 94: Tala the Second shared food with hungry Tala the Third.
+  [#20730] Winter, year 94: Brak the Second shared food with hungry Hela the Third.
+  [#20731] Winter, year 94: Kora the Second shared food with hungry Ruu the Third.
+  [#20742] Spring, year 95: Kal the Second shared food with hungry Zuri the Second.
+  [#20743] Spring, year 95: Mira shared food with hungry Ruk the Third.
+  [#20744] Spring, year 95: Soa the Second shared food with hungry Voll the Third.
+  [#20745] Spring, year 95: Tala the Second shared food with hungry Ama.
+  [#20746] Spring, year 95: Sten the Second shared food with hungry Pim the Second.
+  [#20747] Spring, year 95: Duro the Second shared food with hungry Neva the Second.
+  [#20760] Spring, year 95: Oren the Second shared food with hungry Ilka the Second.
+  [#20761] Spring, year 95: Kesh the Second shared food with hungry Oda the Third.
+  [#20762] Spring, year 95: Ama shared food with hungry Moru the Second.
+  [#20763] Spring, year 95: Kora the Second shared food with hungry Lott the Second.
+  [#20764] Spring, year 95: Garu the Second shared food with hungry Hano the Second.
+  [#20765] Spring, year 95: Ysa the Second shared food with hungry Sela the Second.
+  [#20777] Spring, year 95: Ban the Third stole from the food store.
+  [#20778] Spring, year 95: Oren the Second shared food with hungry Arn the Third.
+  [#20779] Spring, year 95: Tala the Second shared food with hungry Tala the Third.
+  [#20780] Spring, year 95: Maa the Second shared food with hungry Hela the Third.
+  [#20781] Spring, year 95: Kal the Second shared food with hungry Ruu the Third.
+  [#20782] Spring, year 95: Kesh the Second shared food with hungry Ulf the Third.
+  [#20783] Spring, year 95: Ossa the Second shared food with hungry Tarek the Second.
+  [#20784] Spring, year 95: Ruu the Second shared food with hungry Sef the Second.
+  [#20796] Spring, year 95: Sela the Second stole from the food store.
+  [#20797] Spring, year 95: Kesh the Second shared food with hungry Iva the Third.
+  [#20798] Spring, year 95: Tarek the Second shared food with hungry Ivo the Third.
+  [#20831] Spring, year 95: Kal the Second brought down a mammoth.
+  [#20838] Summer, year 95: Ban the Third stole from the food store; Neva the Second saw it.
+  [#20900] Summer, year 95: Ban the Third stole from the food store.
+  [#20901] Summer, year 95: Lott the Second was hurt hunting.
+  [#20902] Summer, year 95: Ama nursed Lott the Second back to health.
+  [#20936] Autumn, year 95: Kal the Second was hurt hunting.
+  [#20938] Autumn, year 95: Lin the Second nursed Kal the Second back to health.
+  [#20956] Autumn, year 95: Ban the Third stole from the food store.
+  [#21007] Winter, year 95: Sela the Second stole from the food store; Nara the Second saw it.
+  [#21022] Winter, year 95: Ban the Third stole from the food store; Tala the Second saw it.
+  [#21063] Winter, year 95: Lin the Second was hurt hunting.
+  [#21064] Winter, year 95: The food store ran empty after the thefts of Ban the Third and Sela the Second; 31 went to bed hungry.
+  [#21065] Winter, year 95: Kal the Second nursed Lin the Second back to health.
+  [#21078] Winter, year 95: Sela the Second stole from the food store.
+  [#21091] Winter, year 95: Ban the Third stole from the food store.
+  [#21105] Spring, year 96: Zuri the Second stole from the food store; Lin the Second saw it.
+  [#21106] Spring, year 96: Tala the Second shared food with hungry Tala the Third.
+  [#21118] Spring, year 96: Ilka the Second shared food with hungry Sef the Second.
+  [#21119] Spring, year 96: Ban the Third shared food with hungry Ura the Second.
+  [#21120] Spring, year 96: Pim the Second shared food with hungry Voll the Third.
+  [#21142] Spring, year 96: Lin the Second died of the wounds.
+  [#21153] Spring, year 96: Ban the Third stole from the food store; Tarek the Second saw it.
+  [#21154] Spring, year 96: Lott the Second was hurt hunting.
+  [#21155] Spring, year 96: Ama nursed Lott the Second back to health.
+  [#21202] Summer, year 96: Ban the Third stole from the food store; Tala the Third saw it.
+  [#21218] Summer, year 96: Maa the Second was hurt hunting.
+  [#21219] Summer, year 96: Brak the Second nursed Maa the Second back to health.
+  [#21240] Summer, year 96: Oren the Second fell sick with a fever.
+  [#21241] Summer, year 96: Nara the Second fell sick with a fever.
+  [#21242] Summer, year 96: Ulf the Third fell sick with a fever.
+  [#21243] Summer, year 96: Ilka the Second nursed Oren the Second back to health.
+  [#21244] Summer, year 96: Kesh the Second nursed Ulf the Third back to health.
+  [#21255] Autumn, year 96: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#21256] Autumn, year 96: Tarek the Second nursed Nara the Second back to health.
+  [#21262] Autumn, year 96: Ban the Third stole from the food store.
+  [#21268] Autumn, year 96: Duro the Second was hurt hunting.
+  [#21269] Autumn, year 96: Garu the Second nursed Duro the Second back to health.
+  [#21304] Autumn, year 96: The food store ran empty after the failed harvest and the thefts of Ban the Third and Zuri the Second; 4 went to bed hungry.
+  [#21305] Autumn, year 96: Kal the Second was hurt hunting.
+  [#21316] Autumn, year 96: Zuri the Second nursed Kal the Second back to health.
+  [#21327] Autumn, year 96: Ban the Third stole from the food store.
+  [#21349] Winter, year 96: Sela the Second stole from the food store; Pela the Second saw it.
+  [#21363] Winter, year 96: Zuri the Second stole from the food store.
+  [#21367] Winter, year 96: Kesh the Second shared food with hungry Iva the Second.
+  [#21368] Winter, year 96: Oren the Second shared food with hungry Ruu the Second.
+  [#21369] Winter, year 96: Kal the Second shared food with hungry Ysa the Second.
+  [#21370] Winter, year 96: Tarek the Second shared food with hungry Tok the Third.
+  [#21371] Winter, year 96: Garu the Second shared food with hungry Tavo the Third.
+  [#21372] Winter, year 96: Soa the Second shared food with hungry Sten the Second.
+  [#21373] Winter, year 96: Maa the Second shared food with hungry Ban the Third.
+  [#21374] Winter, year 96: Ilka the Second shared food with hungry Enko the Third.
+  [#21375] Winter, year 96: Ulf the Third shared food with hungry Tiru the Second.
+  [#21376] Winter, year 96: Mira shared food with hungry Ena the Second.
+  [#21377] Winter, year 96: Oda the Third shared food with hungry Vena the Second.
+  [#21378] Winter, year 96: Ossa the Second shared food with hungry Iva the Third.
+  [#21379] Winter, year 96: Nara the Second shared food with hungry Ivo the Third.
+  [#21380] Winter, year 96: Sef the Second shared food with hungry Arn the Third.
+  [#21381] Winter, year 96: Tala the Second shared food with hungry Tala the Third.
+  [#21382] Winter, year 96: Brak the Second shared food with hungry Hela the Third.
+  [#21383] Winter, year 96: Kora the Second shared food with hungry Ruu the Third.
+  [#21397] Winter, year 96: Kesh the Second shared food with hungry Oda the Third.
+  [#21398] Winter, year 96: Ossa the Second shared food with hungry Vena the Second.
+  [#21399] Winter, year 96: Iva the Second shared food with hungry Iva the Third.
+  [#21400] Winter, year 96: Ama shared food with hungry Moru the Second.
+  [#21401] Winter, year 96: Brak the Second fell sick, weakened by hunger.
+  [#21402] Winter, year 96: Maa the Second nursed Brak the Second back to health.
+  [#21413] Winter, year 96: Ban the Third stole from the food store; Ruu the Second saw it.
+  [#21414] Winter, year 96: Pim the Second shared food with hungry Voll the Third.
+  [#21415] Winter, year 96: Garu the Second shared food with hungry Neva the Second.
+  [#21416] Winter, year 96: Maa the Second shared food with hungry Awa the Second.
+  [#21417] Winter, year 96: Tarek the Second shared food with hungry Pela the Second.
+  [#21418] Winter, year 96: Ossa the Second shared food with hungry Iva the Second.
+  [#21419] Winter, year 96: Brak the Second shared food with hungry Ruu the Second.
+  [#21420] Winter, year 96: Ura the Second shared food with hungry Tok the Third.
+  [#21421] Winter, year 96: Mira shared food with hungry Tavo the Third.
+  [#21422] Winter, year 96: Lott the Second shared food with hungry Sten the Second.
+  [#21423] Winter, year 96: Hano the Second shared food with hungry Enko the Third.
+  [#21424] Winter, year 96: Sela the Second shared food with hungry Tiru the Second.
+  [#21425] Winter, year 96: Ruk the Third shared food with hungry Ena the Second.
+  [#21426] Winter, year 96: Duro the Second shared food with hungry Vena the Second.
+  [#21427] Winter, year 96: Zuri the Second shared food with hungry Iva the Third.
+  [#21428] Winter, year 96: Ban the Third shared food with hungry Ivo the Third.
+  [#21439] Winter, year 96: Garu the Second shared food with hungry Duro the Second.
+  [#21440] Winter, year 96: Kal the Second shared food with hungry Zuri the Second.
+  [#21441] Winter, year 96: Ama shared food with hungry Kora the Second.
+  [#21442] Winter, year 96: Tarek the Second shared food with hungry Nara the Second.
+  [#21443] Winter, year 96: Kesh the Second shared food with hungry Ulf the Third.
+  [#21444] Winter, year 96: Mira shared food with hungry Ruk the Third.
+  [#21445] Winter, year 96: Maa the Second shared food with hungry Ura the Second.
+  [#21446] Winter, year 96: Ossa the Second shared food with hungry Oda the Third.
+  [#21447] Winter, year 96: Brak the Second shared food with hungry Neva the Second.
+  [#21448] Winter, year 96: Tala the Second shared food with hungry Awa the Second.
+  [#21449] Winter, year 96: Soa the Second shared food with hungry Pela the Second.
+  [#21450] Winter, year 96: Oren the Second shared food with hungry Iva the Second.
+  [#21451] Winter, year 96: Moru the Second shared food with hungry Ruu the Second.
+  [#21452] Winter, year 96: Sela the Second shared food with hungry Ysa the Second.
+  [#21453] Winter, year 96: Lott the Second shared food with hungry Tok the Third.
+  [#21454] Winter, year 96: Hano the Second shared food with hungry Tavo the Third.
+  [#21462] Winter, year 96: Sela the Second stole from the food store.
+  [#21466] Winter, year 96: Tala the Second was hurt hunting.
+  [#21467] Winter, year 96: Zuri the Second brought down a mammoth.
+  [#21469] Winter, year 96: Ama nursed Tala the Second back to health.
+  [#21480] Winter, year 96: Zuri the Second stole from the food store.
+  [#21481] Spring, year 97: Tarek the Second died of old age, 45 years old.
+  [#21492] Spring, year 97: Kal the Second was hurt hunting.
+  [#21493] Spring, year 97: Zuri the Second nursed Kal the Second back to health.
+  [#21499] Spring, year 97: Ban the Third stole from the food store; Pela the Second saw it.
+  [#21515] Spring, year 97: Duro the Second brought down a mammoth.
+  [#21518] Spring, year 97: Ena the Second fell sick with a fever.
+  [#21519] Spring, year 97: Mira nursed Ena the Second back to health.
+  [#21520] Spring, year 97: Kal the Second was hurt hunting.
+  [#21531] Spring, year 97: Zuri the Second nursed Kal the Second back to health.
+  [#21532] Spring, year 97: Kal the Second died of the wounds.
+  [#21533] Spring, year 97: Ysa the Second, orphaned by the death of Kal the Second, was taken in by Kesh the Second.
+  [#21534] Spring, year 97: Vena the Second, orphaned by the death of Kal the Second, was taken in by Kesh the Second.
+  [#21535] Spring, year 97: Ruu the Third, orphaned by the death of Kal the Second, was taken in by Ossa the Second.
+  [#21561] Spring, year 97: Ban the Third stole from the food store.
+  [#21603] Summer, year 97: Ban the Third stole from the food store; Duro the Second saw it.
+  [#21644] Autumn, year 97: Ban the Third stole from the food store; Lott the Second saw it.
+  [#21650] Autumn, year 97: Lott the Second was hurt hunting.
+  [#21651] Autumn, year 97: Ama nursed Lott the Second back to health.
+  [#21668] Autumn, year 97: Maa the Second was hurt hunting.
+  [#21678] Autumn, year 97: Brak the Second nursed Maa the Second back to health.
+  [#21696] Winter, year 97: Ban the Third stole from the food store; Brak the Second saw it.
+  [#21699] Winter, year 97: Sela the Second stole from the food store.
+  [#21723] Winter, year 97: Lin the Third was born to Brak the Second and Maa the Second.
+  [#21745] Winter, year 97: Kesh the Second was hurt hunting.
+  [#21747] Winter, year 97: Lott the Second was hurt hunting.
+  [#21748] Winter, year 97: Ulf the Third nursed Kesh the Second back to health.
+  [#21749] Winter, year 97: Ama nursed Lott the Second back to health.
+  [#21759] Winter, year 97: Ban the Third stole from the food store.
+  [#21773] Winter, year 97: The food store ran empty after the thefts of Ban the Third and Sela the Second; 28 went to bed hungry.
+  [#21782] Spring, year 98: Lott the Second died of the wounds.
+  [#21783] Spring, year 98: Maa the Second brought down a mammoth.
+  [#21799] Spring, year 98: Ban the Third stole from the food store; Awa the Second saw it.
+  [#21827] Summer, year 98: Zuri the Second and Duro the Second became partners.
+  [#21835] Summer, year 98: Sela the Second fell sick with a fever.
+  [#21836] Summer, year 98: Garu the Second nursed Sela the Second back to health.
+  [#21844] Summer, year 98: Ban the Third stole from the food store.
+  [#21873] Summer, year 98: Ban the Third stole from the food store.
+  [#21889] Autumn, year 98: Maa the Second was hurt hunting.
+  [#21890] Autumn, year 98: Zuri the Second fell sick with a fever.
+  [#21891] Autumn, year 98: Brak the Second nursed Maa the Second back to health.
+  [#21892] Autumn, year 98: Duro the Second nursed Zuri the Second back to health.
+  [#21904] Autumn, year 98: Ban the Third stole from the food store.
+  [#21943] Winter, year 98: Sef the Second was hurt hunting.
+  [#21944] Winter, year 98: Oren the Second nursed Sef the Second back to health.
+  [#21949] Winter, year 98: Ban the Third stole from the food store; Tiru the Second saw it.
+  [#21957] Winter, year 98: Oda the Third was hurt hunting.
+  [#21958] Winter, year 98: Kesh the Second nursed Oda the Third back to health.
+  [#21970] Winter, year 98: Ossa the Second was hurt hunting.
+  [#21982] Winter, year 98: Ama died of old age, 51 years old.
+  [#21983] Winter, year 98: Nara the Second nursed Ossa the Second back to health.
+  [#21996] Winter, year 98: The food store ran empty after the thefts of Ban the Third; 26 went to bed hungry.
+  [#22005] Winter, year 98: Nara the Second was hurt hunting.
+  [#22009] Spring, year 99: Tok the Third nursed Nara the Second back to health.
+  [#22032] Spring, year 99: Nara the Second died of the wounds.
+  [#22038] Spring, year 99: Duro the Second brought down a mammoth.
+  [#22057] Summer, year 99: Maa the Second was hurt hunting.
+  [#22058] Summer, year 99: Brak the Second nursed Maa the Second back to health.
+  [#22080] Autumn, year 99: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#22113] Winter, year 99: Ossa the Second was hurt hunting.
+  [#22120] Winter, year 99: Pela the Second nursed Ossa the Second back to health.
+  [#22131] Winter, year 99: Ban the Third stole from the food store; Tavo the Third saw it.
+  [#22152] Winter, year 99: The food store ran empty after the failed harvest and the thefts of Ban the Third; 22 went to bed hungry.
+  [#22170] Winter, year 99: Sela the Second stole from the food store; Mira saw it.
+  [#22179] Winter, year 99: Zuri the Second stole from the food store.
+  [#22180] Winter, year 99: Ban the Third stole from the food store; Arn the Third saw it.
+  [#22185] Winter, year 99: Kesh the Second shared food with hungry Ysa the Second.
+  [#22186] Winter, year 99: Ossa the Second shared food with hungry Tok the Third.
+  [#22187] Winter, year 99: Garu the Second shared food with hungry Tavo the Third.
+  [#22188] Winter, year 99: Soa the Second shared food with hungry Sten the Second.
+  [#22189] Winter, year 99: Ilka the Second shared food with hungry Enko the Third.
+  [#22190] Winter, year 99: Ulf the Third shared food with hungry Tiru the Second.
+  [#22191] Winter, year 99: Mira shared food with hungry Ena the Second.
+  [#22192] Winter, year 99: Oda the Third shared food with hungry Vena the Second.
+  [#22193] Winter, year 99: Iva the Second shared food with hungry Iva the Third.
+  [#22194] Winter, year 99: Pela the Second shared food with hungry Ivo the Third.
+  [#22195] Winter, year 99: Oren the Second shared food with hungry Arn the Third.
+  [#22196] Winter, year 99: Tala the Second shared food with hungry Tala the Third.
+  [#22197] Winter, year 99: Maa the Second shared food with hungry Hela the Third.
+  [#22198] Winter, year 99: Kora the Second shared food with hungry Ruu the Third.
+  [#22199] Winter, year 99: Brak the Second shared food with hungry Lin the Third.
+  [#22205] Spring, year 100: Ura the Second shared food with hungry Ban the Third.
+  [#22214] Spring, year 100: Duro the Second was hurt hunting.
+  [#22227] Spring, year 100: Garu the Second nursed Duro the Second back to health.
+  [#22257] Summer, year 100: Ossa the Second and Moru the Second became partners.
+  [#22266] Autumn, year 100: Hela the Third fell sick with a fever.
+  [#22267] Autumn, year 100: Brak the Second nursed Hela the Third back to health.
+  [#22292] Winter, year 100: Ban the Third stole from the food store.
+  [#22301] Winter, year 100: Oda the Third was hurt hunting.
+  [#22306] Winter, year 100: Kesh the Second nursed Oda the Third back to health.
+  [#22307] Winter, year 100: Tala the Third fell sick with a fever.
+  [#22308] Winter, year 100: Tala the Second nursed Tala the Third back to health.
+  [#22316] Winter, year 100: Kesh the Second brought down a mammoth.
+  [#22324] Winter, year 100: Mira was hurt hunting.
+  [#22325] Winter, year 100: Garu the Second nursed Mira back to health.
+  [#22339] Winter, year 100: Ban the Third stole from the food store.

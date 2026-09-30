@@ -1,0 +1,148 @@
+{
+  "season": {
+    "leanAutumnPercent": 20,
+    "leanForagePercent": 45
+  },
+  "causes": {
+    "theftWindowDays": 20,
+    "starvationWindowDays": 60,
+    "maxCauses": 4,
+    "grudgeLimit": 16
+  },
+  "quarrel": {
+    "grudgeMeetPercent": 40,
+    "dislikeOpinion": -10,
+    "irritableBelow": 60,
+    "irritablePercent": 40,
+    "calmPercent": 6,
+    "opinionLoss": 12,
+    "feeling": -40
+  },
+  "blame": {
+    "opinionLoss": 40,
+    "feeling": -70
+  },
+  "revenge": {
+    "minFeudDays": 10,
+    "revengeOpinion": -60,
+    "percentPerDay": 8,
+    "cooldownDays": 60,
+    "exileClanOpinion": -25,
+    "fightDeathPercent": 20,
+    "winnerHurtPercent": 30,
+    "satisfaction": 30,
+    "victimOpinionLoss": 30,
+    "feeling": -80
+  },
+  "health": {
+    "woundDaysMin": 5,
+    "woundDaysMax": 12,
+    "woundDeathPerMille": 10
+  },
+  "sickness": {
+    "basePerMille": 1,
+    "hungerBelow": 25,
+    "hungerPerMille": 25,
+    "coldBelow": 25,
+    "coldPerMille": 25,
+    "daysMin": 3,
+    "daysMax": 9,
+    "deathPerMille": 12,
+    "huntWoundPerMille": 1
+  },
+  "nursing": {
+    "minScore": 30,
+    "kinBonus": 40,
+    "kindBonus": 30,
+    "percent": 80,
+    "extraHealPerDay": 1,
+    "deathPercentWhenNursed": 40,
+    "opinionGain": 20,
+    "carerOpinionGain": 5,
+    "feeling": 60
+  },
+  "sharing": {
+    "giverHungerMin": 40,
+    "gapMin": 20,
+    "receiverHungerMax": 35,
+    "amount": 15,
+    "repeatDays": 30,
+    "minScore": 20,
+    "kinBonus": 30,
+    "kindBonus": 20,
+    "childBonus": 30,
+    "opinionGain": 15,
+    "feeling": 50
+  },
+  "adoption": {
+    "minScore": 20,
+    "kinBonus": 50,
+    "kindBonus": 20,
+    "limit": 2,
+    "opinionGain": 30,
+    "feeling": 80
+  },
+  "courtship": {
+    "favourOpinion": 20,
+    "opinionPerDay": 2,
+    "suitorOpinionPerDay": 1,
+    "rejectBelow": 0,
+    "giveUpDays": 40,
+    "rejectionOpinionLoss": 15,
+    "rejectionFeeling": -50,
+    "pauseDays": 30
+  },
+  "rivals": {
+    "minCourtDays": 2,
+    "opinionLoss": 25,
+    "feeling": -60,
+    "quarrelPercent": 50,
+    "pauseDays": 30
+  },
+  "parting": {
+    "partingOpinion": -20,
+    "pauseDays": 30
+  },
+  "teaching": {
+    "masterMinSkill": 30,
+    "skillGap": 15,
+    "takePercent": 20,
+    "minOpinion": -10,
+    "kinBonus": 40,
+    "youthMaxYears": 15,
+    "skillPerDay": 1,
+    "opinionPerDay": 2,
+    "graduateGap": 5
+  },
+  "hunt": {
+    "minSize": 3,
+    "maxSize": 5,
+    "joinPercent": 70,
+    "braveJoinBonus": 20,
+    "timidJoinPenalty": 30,
+    "successBase": 20,
+    "leaderBonus": 10,
+    "heroBonus": 15,
+    "cowardPenalty": 15,
+    "heroCourage": 55,
+    "cowardCourage": 30,
+    "dangerPercent": 25,
+    "rescuePercent": 70,
+    "braveRescueBonus": 15,
+    "rescuerHurtPercent": 30,
+    "dangerDeathPercent": 60,
+    "heroFeeling": 60,
+    "heroOpinion": 10,
+    "cowardFeeling": -50,
+    "cowardOpinionLoss": 15,
+    "rescueFeeling": 90,
+    "rescueOpinion": 40
+  },
+  "episodes": {
+    "minEvents": 3,
+    "minImportance": 60,
+    "minEventImportance": 25,
+    "maxPerCentury": 40,
+    "maxPeople": 4
+  }
+}

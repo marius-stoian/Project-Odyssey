@@ -1,0 +1,303 @@
+Project Odyssey headless runner 0.1.0
+Seed 42, 2800 days: now Spring, year 101, day 1, 10 C
+Population 51, food in store 346 meals
+World hash: 3668400739995684256
+
+Chronicle (importance 50 and above):
+  Spring, year 1: Mira and Voll became partners.
+  Spring, year 1: Sela and Kesh became partners.
+  Winter, year 1: Nara and Ulf became partners.
+  Spring, year 2: Hela and Ivo became partners.
+  Summer, year 2: Awa was born to Kesh and Sela.
+  Autumn, year 2: Zuri brought down the clan's first mammoth.
+  Spring, year 4: Maa was born to Ivo and Hela.
+  Autumn, year 4: Ysa and Garu became partners.
+  Autumn, year 4: Sef was born to Kesh and Sela.
+  Summer, year 5: Ysa died of old age, 46 years old.
+  Autumn, year 5: Vena and Garu became partners.
+  Spring, year 6: Ura was born to Ivo and Hela.
+  Autumn, year 6: Ena brought down a mammoth.
+  Winter, year 6: Moru was born to Garu and Vena.
+  Winter, year 7: Ivo died of old age, 50 years old.
+  Winter, year 9: Ama brought down a mammoth.
+  Summer, year 10: Ruu was born to Garu and Vena.
+  Autumn, year 10: Zuri brought down a mammoth.
+  Autumn, year 12: Zuri died of old age, 48 years old.
+  Winter, year 12: Mira died of old age, 54 years old.
+  Spring, year 13: Ena and Voll became partners.
+  Summer, year 13: Kesh died of old age, 48 years old.
+  Autumn, year 13: Garu brought down a mammoth.
+  Spring, year 14: Sela died of old age, 49 years old.
+  Summer, year 14: Kora and Tavo became partners.
+  Summer, year 14: Joro was born to Garu and Vena.
+  Summer, year 15: A feud broke out between Lin and Tavo.
+  Autumn, year 16: Grem was born to Garu and Vena.
+  Autumn, year 16: Vena died giving birth.
+  Winter, year 16: Ilka and Garu became partners.
+  Winter, year 17: A feud broke out between Tavo and Ruu.
+  Spring, year 18: Ena died of old age, 52 years old.
+  Summer, year 18: Soa and Voll became partners.
+  Winter, year 18: Tiru was born to Tavo and Kora.
+  Summer, year 19: A feud broke out between Kora and Ruu.
+  Autumn, year 20: Maa brought down a mammoth.
+  Winter, year 20: Arn was born to Tavo and Kora.
+  Winter, year 20: Ossa was born to Voll and Soa.
+  Winter, year 21: Nara died of old age, 54 years old.
+  Autumn, year 22: Garu brought down a mammoth.
+  Summer, year 24: Iva was born to Voll and Soa.
+  Autumn, year 24: Ura brought down a mammoth.
+  Summer, year 25: Tala was born to Tavo and Kora.
+  Spring, year 26: Ilka died of old age, 49 years old.
+  Summer, year 26: Ulf died of old age, 51 years old.
+  Summer, year 27: A feud broke out between Lin and Ruu.
+  Autumn, year 27: Duro was born to Voll and Soa.
+  Autumn, year 27: Soa died giving birth.
+  Winter, year 27: Lin and Lott became partners.
+  Winter, year 27: Moru brought down a mammoth.
+  Spring, year 28: Hela died of old age, 53 years old.
+  Spring, year 28: Ama and Voll became partners.
+  Winter, year 28: Ura and Moru became partners.
+  Winter, year 29: A feud broke out between Ruu and Tiru.
+  Winter, year 30: Garu brought down a mammoth.
+  Spring, year 31: Oda was born to Moru and Ura.
+  Winter, year 31: Voll died of old age, 50 years old.
+  Autumn, year 32: Maa brought down a mammoth.
+  Winter, year 33: Enko was born to Moru and Ura.
+  Summer, year 34: A feud broke out between Ruu and Arn.
+  Autumn, year 34: Ura brought down a mammoth.
+  Autumn, year 34: A feud broke out between Kora and Arn.
+  Spring, year 35: Lin died of old age, 48 years old.
+  Summer, year 36: Maa brought down a mammoth.
+  Autumn, year 36: Oren was born to Moru and Ura.
+  Autumn, year 37: Moru brought down a mammoth.
+  Summer, year 38: A feud broke out between Tiru and Enko.
+  Spring, year 39: Ban was born to Moru and Ura.
+  Summer, year 39: A feud broke out between Arn and Tala.
+  Winter, year 40: A feud broke out between Kora and Enko.
+  Autumn, year 41: Iva brought down a mammoth.
+  Spring, year 42: Kora died of old age, 52 years old.
+  Autumn, year 42: Iva brought down a mammoth.
+  Autumn, year 42: Ama died of old age, 49 years old.
+  Summer, year 43: A feud broke out between Tiru and Arn.
+  Summer, year 43: Tala and Joro became partners.
+  Summer, year 43: A feud broke out between Tiru and Tala.
+  Autumn, year 43: Tiru and Sef became partners.
+  Autumn, year 43: Awa and Duro became partners.
+  Summer, year 44: A feud broke out between Arn and Enko.
+  Autumn, year 44: Ruu brought down a mammoth.
+  Winter, year 44: Neva was born to Moru and Ura.
+  Summer, year 45: A feud broke out between Ruu and Enko.
+  Summer, year 45: Ruk was born to Sef and Tiru.
+  Summer, year 45: A feud broke out between Tavo and Enko.
+  Autumn, year 46: Brak was born to Joro and Tala.
+  Summer, year 48: Hela the Second was born to Sef and Tiru.
+  Summer, year 48: Garu died of old age, 60 years old.
+  Autumn, year 48: Pim was born to Joro and Tala.
+  Winter, year 49: Ruu and Lott became partners.
+  Autumn, year 50: Sten was born to Lott and Ruu.
+  Winter, year 50: A feud broke out between Tavo and Tala.
+  Autumn, year 51: Oda and Grem became partners.
+  Autumn, year 51: Awa died of old age, 49 years old.
+  Autumn, year 51: Joro the Second was born to Joro and Tala.
+  Winter, year 51: Tavo died of old age, 53 years old.
+  Winter, year 52: Pela was born to Sef and Tiru.
+  Spring, year 53: Oda brought down a mammoth.
+  Winter, year 53: Ysa the Second was born to Joro and Tala.
+  Winter, year 53: Ossa and Arn became partners.
+  Spring, year 54: Lott died of old age, 55 years old.
+  Summer, year 54: Tok was born to Grem and Oda.
+  Autumn, year 54: Maa died of old age, 50 years old.
+  Autumn, year 54: Ura brought down a mammoth.
+  Autumn, year 54: Ruu brought down a mammoth.
+  Spring, year 55: Ruu the Second was born to Arn and Ossa.
+  Autumn, year 55: Hano was born to Sef and Tiru.
+  Autumn, year 55: Iva brought down a mammoth.
+  Winter, year 55: Ulf the Second was born to Joro and Tala.
+  Summer, year 56: Awa the Second was born to Grem and Oda.
+  Autumn, year 56: Iva brought down a mammoth.
+  Autumn, year 56: Oren brought down a mammoth.
+  Winter, year 56: Sef died of old age, 52 years old.
+  Autumn, year 57: Oda the Second was born to Arn and Ossa.
+  Autumn, year 57: Oren was killed hunting a mammoth.
+  Spring, year 58: Ura died of old age, 52 years old.
+  Spring, year 58: A feud broke out between Tala and Hela the Second.
+  Autumn, year 58: Tarek was born to Grem and Oda.
+  Autumn, year 58: Ban brought down a mammoth.
+  Winter, year 58: A feud broke out between Tala and Enko.
+  Autumn, year 59: Tavo the Second was born to Joro and Tala.
+  Autumn, year 59: Sef the Second was born to Arn and Ossa.
+  Spring, year 60: Iva brought down a mammoth.
+  Summer, year 60: Moru died of old age, 53 years old.
+  Autumn, year 60: Ruu brought down a mammoth.
+  Winter, year 60: Iva and Ban became partners.
+  Spring, year 61: Oda brought down a mammoth.
+  Spring, year 61: Kal was born to Grem and Oda.
+  Winter, year 61: Ruu died of old age, 51 years old.
+  Spring, year 62: Sela the Second was born to Joro and Tala.
+  Spring, year 62: Enko the Second was born to Ban and Iva.
+  Summer, year 62: Neva and Duro became partners.
+  Autumn, year 62: Ban brought down a mammoth.
+  Winter, year 62: A feud broke out between Enko and Hela the Second.
+  Spring, year 63: Moru the Second was born to Grem and Oda.
+  Spring, year 63: Ban brought down a mammoth.
+  Autumn, year 64: Brak the Second was born to Ban and Iva.
+  Winter, year 64: Ama the Second was born to Duro and Neva.
+  Summer, year 65: Hela the Third was born to Grem and Oda.
+  Autumn, year 65: Joro died of old age, 51 years old.
+  Spring, year 67: Iva brought down a mammoth.
+  Summer, year 67: Maa the Second was born to Grem and Oda.
+  Autumn, year 67: Neva brought down a mammoth.
+  Autumn, year 68: Neva brought down a mammoth.
+  Autumn, year 68: Neva was killed hunting a mammoth.
+  Autumn, year 68: Ban brought down a mammoth.
+  Spring, year 69: Ban brought down a mammoth.
+  Summer, year 69: Tiru died of old age, 50 years old.
+  Summer, year 69: Tala and Ruk became partners.
+  Autumn, year 69: Enko the Third was born to Grem and Oda.
+  Spring, year 70: Ossa died of old age, 49 years old.
+  Spring, year 70: Pela and Pim became partners.
+  Summer, year 70: A feud broke out between Arn and Pela.
+  Winter, year 70: Iva died of old age, 46 years old.
+  Winter, year 70: Kal the Second was born to Pim and Pela.
+  Winter, year 70: A feud broke out between Hela the Second and Pela.
+  Summer, year 71: Brak the Third was born to Grem and Oda.
+  Spring, year 72: Ysa the Second and Enko became partners.
+  Autumn, year 72: Arn died of old age, 51 years old.
+  Autumn, year 72: Sten brought down a mammoth.
+  Spring, year 73: Tala died of old age, 47 years old.
+  Summer, year 73: Oda brought down a mammoth.
+  Autumn, year 73: Ruu the Second and Duro became partners.
+  Winter, year 73: A feud broke out between Hela the Second and Oda the Second.
+  Winter, year 73: Tarek brought down a mammoth.
+  Spring, year 74: Oda the Second and Ruk became partners.
+  Summer, year 74: Awa the Third was born to Pim and Pela.
+  Autumn, year 74: Grem the Second was born to Enko and Ysa the Second.
+  Autumn, year 74: Joro the Second was killed hunting a mammoth.
+  Winter, year 74: Awa the Second and Brak became partners.
+  Spring, year 75: Ban brought down a mammoth.
+  Autumn, year 75: Hela the Fourth was born to Ruk and Oda the Second.
+  Autumn, year 75: Grem died of old age, 59 years old.
+  Winter, year 75: Oda and Sten became partners.
+  Spring, year 76: Mira the Second was born to Duro and Ruu the Second.
+  Summer, year 76: Oda brought down a mammoth.
+  Spring, year 77: Ban brought down a mammoth.
+  Summer, year 77: Duro died of old age, 49 years old.
+  Summer, year 78: A feud broke out between Enko and Sef the Second.
+  Summer, year 78: Ban the Second was born to Brak and Awa the Second.
+  Autumn, year 78: Pela the Second was born to Pim and Pela.
+  Autumn, year 78: Pela died giving birth.
+  Autumn, year 78: Hela the Second and Pim became partners.
+  Autumn, year 78: Garu the Second was born to Enko and Ysa the Second.
+  Winter, year 78: Tarek brought down a mammoth.
+  Winter, year 79: Oda died of old age, 48 years old.
+  Winter, year 79: Tarek brought down a mammoth.
+  Spring, year 80: Kal brought down a mammoth.
+  Spring, year 80: Kal was killed hunting a mammoth.
+  Summer, year 80: Enko the Fourth was born to Pim and Hela the Second.
+  Summer, year 80: Sela the Second and Tarek became partners.
+  Winter, year 80: A feud broke out between Sef the Second and Kal the Second.
+  Spring, year 81: Tarek brought down a mammoth.
+  Spring, year 81: Ama the Second and Moru the Second became partners.
+  Autumn, year 81: Ban brought down a mammoth.
+  Autumn, year 81: Oda the Third was born to Ruk and Oda the Second.
+  Autumn, year 81: Hela the Third and Hano became partners.
+  Spring, year 82: Ilka the Second was born to Tarek and Sela the Second.
+  Spring, year 82: Tiru the Second was born to Moru the Second and Ama the Second.
+  Summer, year 82: Enko died of old age, 48 years old.
+  Spring, year 83: Maa the Third was born to Pim and Hela the Second.
+  Summer, year 83: Maa the Second and Sten became partners.
+  Autumn, year 83: Tarek brought down a mammoth.
+  Winter, year 83: Enko the Second brought down a mammoth.
+  Spring, year 84: Awa the Fourth was born to Brak and Awa the Second.
+  Summer, year 84: Ban the Third was born to Sten and Maa the Second.
+  Autumn, year 84: Oda the Fourth was born to Tarek and Sela the Second.
+  Winter, year 84: Ilka the Third was born to Moru the Second and Ama the Second.
+  Autumn, year 85: Ruu the Second and Enko the Third became partners.
+  Spring, year 86: The food store ran empty; 2 went to bed hungry.
+  Spring, year 86: Kora the Second was born to Pim and Hela the Second.
+  Spring, year 86: The food store ran empty; 2 went to bed hungry.
+  Summer, year 86: Zuri the Second was born to Brak and Awa the Second.
+  Summer, year 86: Soa the Second was born to Enko the Third and Ruu the Second.
+  Autumn, year 86: Ban brought down a mammoth.
+  Winter, year 86: The food store ran empty; 16 went to bed hungry.
+  Spring, year 87: Ama the Second was killed hunting a mammoth.
+  Summer, year 87: Tarek was killed hunting a mammoth.
+  Summer, year 87: Ban died of old age, 48 years old.
+  Summer, year 87: Hela the Third brought down a mammoth.
+  Autumn, year 87: Sela the Second and Tok became partners.
+  Autumn, year 87: Ossa the Second was born to Ruk and Oda the Second.
+  Autumn, year 87: Duro the Second was born to Tarek and Sela the Second.
+  Winter, year 87: Sela the Second brought down a mammoth.
+  Spring, year 88: Enko the Second brought down a mammoth.
+  Summer, year 88: Tok the Second was born to Hano and Hela the Third.
+  Summer, year 88: Hela the Third brought down a mammoth.
+  Autumn, year 88: Mira the Third was born to Sten and Maa the Second.
+  Autumn, year 88: Enko the Fifth was born to Brak and Awa the Second.
+  Winter, year 88: Pim brought down a mammoth.
+  Winter, year 88: Maa the Second brought down a mammoth.
+  Winter, year 88: Sten brought down a mammoth.
+  Summer, year 89: Zuri the Third was born to Ruk and Oda the Second.
+  Summer, year 89: Sela the Third was born to Enko the Third and Ruu the Second.
+  Summer, year 89: Ysa the Third was born to Pim and Hela the Second.
+  Autumn, year 89: Hela the Third brought down a mammoth.
+  Winter, year 89: Ysa the Second brought down a mammoth.
+  Winter, year 89: Ulf the Second brought down a mammoth.
+  Spring, year 90: Hela the Third was killed hunting a mammoth.
+  Summer, year 90: Enko the Second brought down a mammoth.
+  Winter, year 90: Iva the Second was born to Tok and Sela the Second.
+  Winter, year 90: Joro the Third was born to Sten and Maa the Second.
+  Winter, year 90: Grem the Second brought down a mammoth.
+  Spring, year 91: Enko the Second was killed hunting a mammoth.
+  Spring, year 91: Ysa the Fourth was born to Enko the Third and Ruu the Second.
+  Autumn, year 91: Ysa the Second and Brak the Second became partners.
+  Winter, year 91: The food store ran empty; 5 went to bed hungry.
+  Winter, year 91: Hano brought down a mammoth.
+  Winter, year 91: The food store ran empty; 33 went to bed hungry.
+  Autumn, year 92: The food store ran empty; 4 went to bed hungry.
+  Winter, year 92: Awa the Second brought down a mammoth.
+  Winter, year 92: The food store ran empty; 29 went to bed hungry.
+  Winter, year 92: Ruk brought down a mammoth.
+  Winter, year 92: Awa the Third brought down a mammoth.
+  Spring, year 93: Enko the Third brought down a mammoth.
+  Autumn, year 93: Soa the Third was born to Ruk and Oda the Second.
+  Winter, year 93: The food store ran empty; 10 went to bed hungry.
+  Spring, year 94: Sela the Fourth was born to Tok and Sela the Second.
+  Spring, year 94: Enko the Third brought down a mammoth.
+  Winter, year 94: The food store ran empty; 2 went to bed hungry.
+  Winter, year 94: Kal the Second brought down a mammoth.
+  Spring, year 95: The food store ran empty; 10 went to bed hungry.
+  Autumn, year 95: Hela the Second died of old age, 47 years old.
+  Autumn, year 95: The food store ran empty; 6 went to bed hungry.
+  Winter, year 95: Pim brought down a mammoth.
+  Winter, year 95: Moru the Second brought down a mammoth.
+  Winter, year 95: Awa the Second brought down a mammoth.
+  Winter, year 95: Sten brought down a mammoth.
+  Winter, year 95: Mira the Second brought down a mammoth.
+  Autumn, year 96: Brak died of old age, 49 years old.
+  Autumn, year 96: Sten was killed hunting a mammoth.
+  Autumn, year 96: Awa the Second and Ulf the Second became partners.
+  Winter, year 96: Ruu the Second brought down a mammoth.
+  Spring, year 97: The food store ran empty; 7 went to bed hungry.
+  Spring, year 97: Enko the Third brought down a mammoth.
+  Summer, year 97: Oren the Second was born to Ruk and Oda the Second.
+  Summer, year 97: Brak the Fourth was born to Tok and Sela the Second.
+  Winter, year 97: The food store ran empty; 14 went to bed hungry.
+  Winter, year 97: Sela the Second brought down a mammoth.
+  Spring, year 98: The food store ran empty; 2 went to bed hungry.
+  Autumn, year 98: The food store ran empty; 6 went to bed hungry.
+  Winter, year 98: Enko the Fourth brought down a mammoth.
+  Winter, year 98: Tiru the Second brought down a mammoth.
+  Winter, year 98: Ban the Second brought down a mammoth.
+  Winter, year 99: Pela the Second brought down a mammoth.
+  Winter, year 99: Pim died of old age, 51 years old.
+  Winter, year 99: Awa the Third brought down a mammoth.
+  Winter, year 99: Hela the Fourth brought down a mammoth.
+  Winter, year 99: Hela the Fourth brought down a mammoth.
+  Autumn, year 100: Tok the Third was born to Tok and Sela the Second.
+  Autumn, year 100: Ruk died of old age, 55 years old.
+  Autumn, year 100: Awa the Third and Grem the Second became partners.
+  Winter, year 100: Tiru the Second brought down a mammoth.
+  Winter, year 100: Ilka the Second brought down a mammoth.
+  Winter, year 100: Pela the Second and Moru the Second became partners.
+  Winter, year 100: Mira the Second brought down a mammoth.
+  Winter, year 100: Sef the Second brought down a mammoth.

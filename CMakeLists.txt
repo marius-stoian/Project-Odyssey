@@ -112,7 +112,23 @@ add_library(odysseus_sim STATIC
     src/sim/calendar.cpp
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
-    src/sim/world.cpp)
+    src/sim/world.cpp
+    src/sim/world_story.cpp
+    src/sim/world_care.cpp
+    src/sim/world_love.cpp
+    src/sim/world_hunt.cpp
+    src/sim/episodes.cpp
+    src/sim/needs.cpp
+    src/sim/person.cpp
+    src/sim/clan.cpp
+    src/sim/chronicle.cpp
+    src/sim/actions.cpp
+    src/sim/ai.cpp
+    src/sim/memory.cpp
+    src/sim/life.cpp
+    src/sim/story.cpp
+    src/sim/report.cpp
+    src/sim/save.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -126,7 +142,9 @@ add_library(odysseus_game STATIC
     src/game/test_map.cpp
     src/game/hero.cpp
     src/game/materials.cpp
-    src/game/spear_range.cpp)
+    src/game/spear_range.cpp
+    src/game/sword.cpp
+    src/game/enemy.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -216,7 +234,7 @@ add_test(NAME luna_tests COMMAND luna_tests)
 # --- End-to-end: the real game window (US-020 Open and Close) ---
 add_test(NAME "US-020 Open and close"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us020 -DQUIT_AFTER=3
-            -P "${PROJECT_SOURCE_DIR}/tests/luna/run_game_window.cmake")
+            -DCONFIG=$<CONFIG> -P "${PROJECT_SOURCE_DIR}/tests/luna/run_game_window.cmake")
 set_tests_properties("US-020 Open and close" PROPERTIES LABELS window TIMEOUT 120)
 
 # --- Platform tests: Platform identity, may use SDL3 (US-021 event translation) ---
@@ -268,8 +286,36 @@ set_tests_properties("US-029 Throw in the game" PROPERTIES LABELS window TIMEOUT
 # --- Simulation tests: Simulation identity, headless (M2) ---
 add_executable(odysseus_sim_tests
     tests/main.cpp
-    tests/sim/world_test.cpp)
-target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest)
+    tests/sim/world_test.cpp
+    tests/sim/needs_test.cpp
+    tests/sim/ai_test.cpp
+    tests/sim/memory_test.cpp
+    tests/sim/chronicle_test.cpp
+    tests/sim/report_test.cpp
+    tests/sim/save_test.cpp
+    tests/sim/story_test.cpp
+    tests/sim/story_quarrel_test.cpp
+    tests/sim/story_care_test.cpp
+    tests/sim/story_love_test.cpp
+    tests/sim/story_hunt_test.cpp
+    tests/sim/story_episode_test.cpp)
+target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
 add_test(NAME odysseus_sim_tests COMMAND odysseus_sim_tests)
+
+# --- US-015: the headless runner from the command line (100 years; wrong input) ---
+add_test(NAME "US-015 Run"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=run
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
+set_tests_properties("US-015 Run" PROPERTIES TIMEOUT 600)
+add_test(NAME "US-015 Bad input"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=bad
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
+add_test(NAME "US-110 Traceable"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=why
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
+add_test(NAME "US-115 Both views"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=story
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
+set_tests_properties("US-115 Both views" PROPERTIES TIMEOUT 600)

@@ -1,5 +1,6 @@
 #include "game/placeholder_art.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 
@@ -178,10 +179,106 @@ void drawTarget(Image& sheet, int left, int top, bool hit) {
     }
 }
 
+// Sword in a 32x48 cell, frame 0-3 showing swing arc (0=start, 3=end).
+void drawSword(Image& sheet, int left, int top, int frame) {
+    constexpr Color kGolden{220, 180, 80};
+    constexpr Color kDarkGolden{180, 140, 40};
+    constexpr Color kHilt{138, 70, 42};
+
+    // Hilt: solid rectangle at bottom.
+    sheet.fillRect(left + 12, top + 36, 8, 12, kHilt);
+    sheet.fillRect(left + 11, top + 35, 10, 2, kHilt);
+
+    // Blade: simple rectangle that rotates based on frame.
+    // Frame 0 = horizontal, Frame 3 = vertical.
+    const double angle = (frame / 3.0) * 1.5707963267948966; // 0 to pi/2
+    const double cosA = std::cos(angle);
+    const double sinA = std::sin(angle);
+
+    // Draw blade as a filled rectangle from hilt extending outward.
+    // Use a simple approach: draw vertical blade, then rotate it mentally.
+    const int baseX = left + 16;
+    const int baseY = top + 36;
+    const int bladeLen = 24;
+
+    // Draw blade pixels: extend from base in direction determined by angle.
+    for (int i = 0; i < bladeLen; ++i) {
+        const int x = baseX + static_cast<int>(i * sinA);
+        const int y = baseY - static_cast<int>(i * cosA);
+
+        // Check bounds and draw 3-4 pixels wide.
+        for (int w = -2; w <= 1; ++w) {
+            const int px = x + static_cast<int>(w * cosA);
+            const int py = y + static_cast<int>(w * sinA);
+            if (px >= left && px < left + 32 && py >= top && py < top + 48) {
+                sheet.set(px, py, kGolden);
+            }
+        }
+    }
+
+    // Tip highlight.
+    const int tipX = baseX + static_cast<int>(bladeLen * sinA);
+    const int tipY = baseY - static_cast<int>(bladeLen * cosA);
+    if (tipX >= left && tipX < left + 32 && tipY >= top && tipY < top + 48) {
+        sheet.set(tipX, tipY, kDarkGolden);
+        if (tipX + 1 >= left && tipX + 1 < left + 32) {
+            sheet.set(tipX + 1, tipY, kDarkGolden);
+        }
+    }
+}
+
+// 3x5 pixel font: digits 0-9 then '/', each row read left to right ('#' = lit).
+constexpr const char* kGlyphs[11][5] = {
+    {"###", "#.#", "#.#", "#.#", "###"}, {".#.", "##.", ".#.", ".#.", "###"}, {"###", "..#", "###", "#..", "###"},
+    {"###", "..#", "###", "..#", "###"}, {"#.#", "#.#", "###", "..#", "..#"}, {"###", "#..", "###", "..#", "###"},
+    {"###", "#..", "###", "#.#", "###"}, {"###", "..#", "..#", "..#", "..#"}, {"###", "#.#", "###", "#.#", "###"},
+    {"###", "#.#", "###", "..#", "###"}, {"..#", "..#", ".#.", "#..", "#.."},
+};
+constexpr int kGlyphCellX = 96; // glyph cells are 5x7 (3x5 plus a 1-pixel outline), side by side
+constexpr int kGlyphCellY = 64;
+
+void drawGlyph(Image& sheet, int left, int top, int glyph) {
+    constexpr Color kInk{255, 255, 255};
+    constexpr Color kEdge{20, 20, 24};
+    for (int pass = 0; pass < 2; ++pass) {
+        for (int y = 0; y < 5; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                if (kGlyphs[glyph][y][x] != '#') {
+                    continue;
+                }
+                if (pass == 0) {
+                    sheet.fillRect(left + x, top + y, 3, 3, kEdge); // outline first, so the ink sits on top
+                } else {
+                    sheet.set(left + 1 + x, top + 1 + y, kInk);
+                }
+            }
+        }
+    }
+}
+
+// The idle south-facing figure, tinted red: the enemy's flash when it is hit.
+void drawHitFigure(Image& sheet, int left, int top) {
+    drawFigure(sheet, left, top, Facing::South, 0);
+    for (int y = top; y < top + kCharacterHeight; ++y) {
+        for (int x = left; x < left + kCharacterWidth; ++x) {
+            const Color c = sheet.get(x, y);
+            if (c.alpha > 0) {
+                sheet.set(x, y, Color{static_cast<std::uint8_t>(std::min(255, c.red / 2 + 150)),
+                                      static_cast<std::uint8_t>(c.green / 4), static_cast<std::uint8_t>(c.blue / 4), c.alpha});
+            }
+        }
+    }
+}
+
 } // namespace
 
+odysseus::core::Rect glyphFrame(char c) {
+    const int glyph = c == '/' ? 10 : c - '0';
+    return {kGlyphCellX + glyph * 5, kGlyphCellY, 5, 7};
+}
+
 luna::engine::Image makePropSheet() {
-    Image sheet(8 * kSpearFrameSize, 112);
+    Image sheet(8 * kSpearFrameSize, 160);
     for (int row = 0; row < 2; ++row) {
         for (int facing = 0; facing < static_cast<int>(Facing::Count); ++facing) {
             const Look look = lookOf(static_cast<Facing>(facing));
@@ -190,6 +287,19 @@ luna::engine::Image makePropSheet() {
     }
     drawTarget(sheet, kTargetFrame.x, kTargetFrame.y, false);
     drawTarget(sheet, kTargetHitFrame.x, kTargetHitFrame.y, true);
+    // Sword frames: one row of 4 animation frames (swing 0-3).
+    for (int frame = 0; frame < 4; ++frame) {
+        drawSword(sheet, frame * kSwordFrameSize, 112, frame);
+    }
+    drawHitFigure(sheet, kEnemyHitFrame.x, kEnemyHitFrame.y);
+    for (int glyph = 0; glyph < 11; ++glyph) {
+        drawGlyph(sheet, kGlyphCellX + glyph * 5, kGlyphCellY, glyph);
+    }
+    // Health bar: dark outline, red when empty, green when full.
+    sheet.fillRect(kHealthBarEmpty.x, kHealthBarEmpty.y, kHealthBarEmpty.width, kHealthBarEmpty.height, Color{20, 20, 24});
+    sheet.fillRect(kHealthBarEmpty.x + 1, kHealthBarEmpty.y + 1, kHealthBarEmpty.width - 2, 2, Color{150, 30, 30});
+    sheet.fillRect(kHealthBarFull.x, kHealthBarFull.y, kHealthBarFull.width, kHealthBarFull.height, Color{20, 20, 24});
+    sheet.fillRect(kHealthBarFull.x + 1, kHealthBarFull.y + 1, kHealthBarFull.width - 2, 2, Color{80, 200, 70});
     // A soft oval shadow, see-through so the ground shows.
     for (int y = 0; y < kShadowFrame.height; ++y) {
         for (int x = 0; x < kShadowFrame.width; ++x) {
@@ -205,6 +315,11 @@ luna::engine::Image makePropSheet() {
 
 odysseus::core::Rect spearFrame(Facing facing, bool flintTip) {
     return {static_cast<int>(facing) * kSpearFrameSize, flintTip ? 0 : kSpearFrameSize, kSpearFrameSize, kSpearFrameSize};
+}
+
+odysseus::core::Rect swordFrame(int frame) {
+    // Sword frames are in a single row at y=112, one 32x48 cell per frame (0-3).
+    return {frame * kSwordFrameSize, 112, kSwordFrameSize, kSwordFrameHeight};
 }
 
 Facing facingForVector(double x, double y) {

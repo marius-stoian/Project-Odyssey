@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v1.5. Edited only by mraw-orchestrator.
+Codex v1.6. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
@@ -9,6 +9,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | P-002 | - | - | Done | 2026-09-30 |
 | P-003 | - | - | Done | 2026-09-30 |
 | P-004 | - | - | Done | 2026-09-30 |
+| P-005 | - | - | Done | 2026-09-30 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -28,16 +29,24 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | S-US-027 | US-027 | M1b | Done | 2026-09-30 |
 | S-US-028 | US-028 | M1b | Done | 2026-09-30 |
 | S-US-029 | US-029 | M1b | Done | 2026-09-30 |
-| X-M1b | - | M1b | To do |  |
+| X-M1b | - | M1b | Done | 2026-09-30 |
 | K-M2 | - | M2 | Done | 2026-09-30 |
 | S-US-010 | US-010 | M2 | Done | 2026-09-30 |
-| S-US-011 | US-011 | M2 | To do (paused for M1b; work in progress on branch story/US-011) |  |
-| S-US-012 | US-012 | M2 | To do |  |
-| S-US-013 | US-013 | M2 | To do |  |
-| S-US-014 | US-014 | M2 | To do |  |
-| S-US-015 | US-015 | M2 | To do |  |
-| S-US-016 | US-016 | M2 | To do |  |
-| X-M2 | - | M2 | To do |  |
+| S-US-011 | US-011 | M2 | Done | 2026-09-30 |
+| S-US-012 | US-012 | M2 | Done | 2026-09-30 |
+| S-US-013 | US-013 | M2 | Done | 2026-09-30 |
+| S-US-014 | US-014 | M2 | Done | 2026-09-30 |
+| S-US-015 | US-015 | M2 | Done | 2026-09-30 |
+| S-US-016 | US-016 | M2 | Done | 2026-09-30 |
+| X-M2 | - | M2 | Failed: Kill Gate 1, owner verdict Pivot (D-GATE-M2); evidence docs/gates/M2.md | 2026-09-30 |
+| K-M2b | - | M2b | Done | 2026-09-30 |
+| S-US-110 | US-110 | M2b | Done | 2026-09-30 |
+| S-US-111 | US-111 | M2b | Done | 2026-09-30 |
+| S-US-112 | US-112 | M2b | Done | 2026-09-30 |
+| S-US-113 | US-113 | M2b | Done | 2026-09-30 |
+| S-US-114 | US-114 | M2b | Done | 2026-09-30 |
+| S-US-115 | US-115 | M2b | Done | 2026-09-30 |
+| X-M2b | - | M2b | Done (Go, owner 2026-09-30) | 2026-09-30 |
 | K-M3 | - | M3 | To do |  |
 | S-US-030 | US-030 | M3 | To do |  |
 | S-US-032 | US-032 | M3 | To do |  |

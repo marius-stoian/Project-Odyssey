@@ -1,0 +1,118 @@
+#include "sim/clan.h"
+
+#include "sim/json_data.h"
+
+#include <algorithm>
+#include <bit>
+
+namespace odysseus::sim {
+
+namespace {
+
+std::vector<std::string> requireNames(const nlohmann::json& json, const std::filesystem::path& file, const std::string& field) {
+    if (!json.contains(field) || !json.at(field).is_array() || json.at(field).empty()) {
+        throw DataError(file, field, "must be a list of names");
+    }
+    std::vector<std::string> names;
+    for (const auto& name : json.at(field)) {
+        if (!name.is_string() || name.get<std::string>().empty()) {
+            throw DataError(file, field, "every entry must be a name in quotes");
+        }
+        names.push_back(name.get<std::string>());
+    }
+    return names;
+}
+
+} // namespace
+
+ClanConfig loadClanConfig(const std::filesystem::path& file) {
+    const nlohmann::json json = readJsonFile(file);
+    ClanConfig config;
+    config.startingPeople = requireInt(json, file, "startingPeople", 1, 200);
+    if (!json.contains("startingAgeYears") || !json.at("startingAgeYears").is_object()) {
+        throw DataError(file, "startingAgeYears", "must be an object with minimum and maximum");
+    }
+    const nlohmann::json& ages = json.at("startingAgeYears");
+    config.minimumStartingAgeYears = requireInt(ages, file, "minimum", 0, 80);
+    config.maximumStartingAgeYears = requireInt(ages, file, "maximum", config.minimumStartingAgeYears, 80);
+    config.startingFood = requireInt(json, file, "startingFood", 0, 100'000);
+    return config;
+}
+
+NameList loadNameList(const std::filesystem::path& file) {
+    const nlohmann::json json = readJsonFile(file);
+    return {requireNames(json, file, "female"), requireNames(json, file, "male")};
+}
+
+namespace {
+
+// How many people ever carried this name, with or without an ordinal.
+int usesOf(const std::string& base, const std::vector<Person>& everyone) {
+    return static_cast<int>(std::count_if(everyone.begin(), everyone.end(), [&base](const Person& p) {
+        return p.name == base || p.name.rfind(base + " the ", 0) == 0;
+    }));
+}
+
+std::string ordinal(int number) {
+    static const char* const kWords[] = {"", "", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"};
+    return number <= 10 ? kWords[number] : std::to_string(number) + "th";
+}
+
+} // namespace
+
+std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& everyone, core::Pcg32& random) {
+    const std::vector<std::string>& pool = sex == Sex::Female ? names.female : names.male;
+    auto carriedByTheLiving = [&everyone](const std::string& base) {
+        return std::any_of(everyone.begin(), everyone.end(), [&base](const Person& p) {
+            return p.alive && (p.name == base || p.name.rfind(base + " the ", 0) == 0);
+        });
+    };
+    // First choice: a name nobody has carried. Then a name of the dead (with an ordinal, "Mira
+    // the Second"), never the name of someone alive. The pool's order keeps the choice
+    // deterministic; the seeded stream picks among the candidates.
+    std::vector<std::string> fresh;
+    std::vector<std::string> ofTheDead;
+    for (const std::string& name : pool) {
+        if (usesOf(name, everyone) == 0) {
+            fresh.push_back(name);
+        } else if (!carriedByTheLiving(name)) {
+            ofTheDead.push_back(name);
+        }
+    }
+    const std::vector<std::string>& choices = !fresh.empty() ? fresh : (!ofTheDead.empty() ? ofTheDead : pool);
+    const std::string& base = choices[random.below(static_cast<std::uint32_t>(choices.size()))];
+    const int uses = usesOf(base, everyone);
+    return uses == 0 ? base : base + " the " + ordinal(uses + 1);
+}
+
+void giveRandomTraits(Person& person, core::Pcg32& random) {
+    const int count = random.chance(50) ? 1 : 2;
+    while (std::popcount(person.traits) < count) {
+        const auto trait = static_cast<Trait>(random.below(static_cast<std::uint32_t>(kTraitCount)));
+        const bool clash = (trait == Trait::Brave && person.has(Trait::Timid)) || (trait == Trait::Timid && person.has(Trait::Brave));
+        if (!clash) {
+            person.give(trait);
+        }
+    }
+}
+
+std::vector<Person> makeStartingClan(const ClanConfig& config, const NameList& names, int daysPerYear, core::Pcg32& random) {
+    std::vector<Person> people;
+    const auto ageSpan = static_cast<std::uint32_t>((config.maximumStartingAgeYears - config.minimumStartingAgeYears + 1) * daysPerYear);
+    for (int i = 0; i < config.startingPeople; ++i) {
+        Person person;
+        person.id = i;
+        person.sex = random.chance(50) ? Sex::Female : Sex::Male;
+        person.ageDays = config.minimumStartingAgeYears * daysPerYear + static_cast<int>(random.below(ageSpan));
+        person.name = pickName(names, person.sex, people, random);
+        giveRandomTraits(person, random);
+        // Grown-ups have practised for years already.
+        const int adultYears = std::max(0, person.ageDays / daysPerYear - 12);
+        person.gatherSkill = std::min(100, 10 + adultYears * 3);
+        person.huntSkill = std::min(100, 10 + adultYears * 2);
+        people.push_back(person);
+    }
+    return people;
+}
+
+} // namespace odysseus::sim

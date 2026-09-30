@@ -19,7 +19,11 @@ const char* seasonName(Season season) {
 CalendarConfig loadCalendarConfig(const std::filesystem::path& file) {
     const nlohmann::json json = readJsonFile(file);
     CalendarConfig config;
-    config.ticksPerDay = requireInt(json, file, "ticksPerDay", 20, 1'728'000);
+    config.ticksPerDay = requireInt(json, file, "ticksPerDay", 24, 1'728'000);
+    if (config.ticksPerDay % kHoursPerDay != 0) {
+        // Needs change once per game hour, so a day must split into whole hours.
+        throw DataError(file, "ticksPerDay", std::format("must be a multiple of {} (hours per day)", kHoursPerDay));
+    }
     config.daysPerSeason = requireInt(json, file, "daysPerSeason", 1, 90);
     return config;
 }

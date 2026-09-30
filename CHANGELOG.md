@@ -4,6 +4,154 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-115 / S-US-115: Tell the clan's story in episodes (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Last story of M2b.
+
+- Simulation: episodes derived from the chronicle (no new state, so the hash and the save format are unchanged). Events and their causes are linked; the hardship events of a hard season are joined; the best groups (at least 3 events, one important) are told, at most 40 a century, each as one named paragraph: "The Hard Winter of year 2. It began in Summer, year 2: ... The turn came in Winter, year 2: ... It ended in Spring, year 3: ... Those who lived it: ...". Names by theme: hardship, feud and vengeance, hunting, sickness, love, apprenticeship.
+- Headless runner: `--story` prints the episodes, then the births, deaths, pairings, partings and feuds with their reasons; `--chronicle` still prints every event.
+- Data: `story.json` section `episodes`.
+- Code: `src/sim/episodes.{h,cpp}` (new).
+- Tests: `tests/sim/story_episode_test.cpp` (3 cases) and the command-line check `US-115 Both views`; ctest 21/21 in Debug and Release, zero warnings.
+- Balance (10 seeds x 100 years): 29 to 51 alive; every seed tells the maximum 40 episodes.
+
+
+## US-114 / S-US-114: Teach the young and hunt together (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fifth story of M2b.
+
+- Simulation: apprenticeship (a skilled well adult takes a youth of 12 to 15 in the master's better skill; the apprentice learns a point a day, master and youth grow close, graduation at 16 or near the master's skill; Apprentice and Graduation events). Hunting parties: a mammoth sighting gathers 3 to 5 well hunters (else the sighter hunts alone as before), with a leader, a hero and a coward; the party's strength decides success; danger and rescue (Rescue event, the rescued keeps a debt of gratitude for life); every member remembers what the others did (new memory kinds Heroism and Cowardice). `bringDownMammoth` now returns its event and can cite the party.
+- Data: `story.json` sections `teaching` and `hunt`.
+- Save: new person fields `master`, `apprentice`, `teachHunt`, `teachEvent` (version 3; upgrade from 2 fills defaults; validated on load). All in the world hash.
+- Code: `src/sim/world_hunt.cpp` (new); `joinNames` moved to `chronicle.cpp`.
+- Tests: `tests/sim/story_hunt_test.cpp` (6 cases); ctest 20/20 in Debug and Release, zero warnings.
+- Balance (10 seeds x 100 years): 29 to 51 alive. Seed 7: 205 apprenticeships, 73 hunting parties, 61 rescues, 2 cowards.
+
+
+## US-113 / S-US-113: Court and compete for a partner (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fourth story of M2b.
+
+- Simulation: pairing is now a courtship. An unpaired adult courts the one they like best (at least 20); gifts and time together warm the loved one by 2 a day; a loved one who thinks ill of the suitor turns them down (Rejection); two people pair only when both think enough of each other and the loved one chooses (Pairing cites the courtship). Rivals grow jealous (Jealousy event with causes, a lifelong Rejection memory, a grudge, maybe a quarrel that names the reason). Partners of whom either thinks less than -20 of the other part (Parting says why: "parted after a bitter quarrel", "over stolen meat", "as their love faded"). `World::pair` returns the event id; `World::part` is new; the dead and the exiled are no longer courted.
+- Data: `story.json` sections `courtship`, `rivals`, `parting`.
+- Save: new person fields `courting`, `courtDays`, `courtEvent`, `courtPauseDay` (version 3; upgrade from 2 fills defaults; validated on load). All in the world hash.
+- Code: `src/sim/world_love.cpp` (new); `heaviestGrudge` moved to `person.cpp`.
+- Demo (outside the Codex, owner request): hero sword on Shift, standing enemy with HP, red hit flash (branch `chore/sword-enemy-demo`); Bow stays the default weapon so the US-029 tests hold.
+- Tests: `tests/sim/story_love_test.cpp` (9 cases); ctest 20/20 in Debug and Release, zero warnings.
+- Balance (owner limit: 10 seeds x 100 years): 27 to 45 alive (before: down to 9). Seed 7 story: 109 courtships begun, 46 pairings, 4 turned down, 6 jealousies, 0 partings; partings are rare because partners rarely fall out (tuning pass before the gate).
+
+
+## US-112 / S-US-112: Share food and nurse the sick (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Third story of M2b.
+
+- Simulation: sickness (likelier when hungry or cold; the sick cannot work; it can kill, "died of the sickness, weakened by hunger"), hunting wounds, nursing by the kind and close (faster recovery, fewer deaths, gratitude kept for life), sharing food in a famine, orphans taken in (guardians count as family). New file `src/sim/world_care.cpp`; `Person` gains carer, nursing, guardian.
+- Data: `story.json` sections `sickness`, `nursing`, `sharing`, `adoption`.
+- Tuning: wound and sickness numbers chosen on 100 seeds x 100 years (9 to 53 alive, median 38); the low end is lifted by courtship (US-113) and a final pass.
+- Tests: `tests/sim/story_care_test.cpp` (11 cases).
+
+## US-111 / S-US-111: Quarrel, blame and take revenge (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Second story of M2b.
+
+- Simulation: every morning each person meets someone (often a person they hold a grudge against); people who dislike each other quarrel (more when hungry or tired); grieving kin blame the thief they know of or the one who struck the blow; a feud that keeps worsening ends in an attack: a fight (injury, sometimes death) or, when the clan is against the aggressor, an exile. New: `Health` (wounds heal or kill), exile (`Person::exiled`, counted apart from the dead), death causes "a fight" and "wounds", feud records (start event, since, last revenge).
+- Data: `story.json` sections `quarrel`, `blame`, `revenge`, `health`.
+- Code: `src/sim/world_story.cpp`; `world.{h,cpp}`, `person.h`, `memory.h`, `ai.{h,cpp}`, `save.cpp` (feud records, health, exile), `report.{h,cpp}`.
+- Tests: `tests/sim/story_quarrel_test.cpp` (8 cases), shared helpers `tests/sim/story_helpers.h`, the version-2 upgrade test now also covers feuds and health.
+- Balance: 30 seeds x 100 years, no crash or extinction (17 to 50 alive).
+
+## US-110 / S-US-110: Give every death and feud a reason (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M2b (Kill Gate 1 retry).
+
+- Simulation: chronicle entries carry an id, an `EventKind`, up to three people and the ids of their causes (`Chronicle::record`, `find`, `explainEvent`); grudges (`Grudge`) and memories know their event; thefts are events (seen or not); the empty store names the thieves and the failed harvest; deaths by hunger name the store and the thief ("Hano died of hunger in the hard winter, after Brak stole from the store."); feuds name their strongest grudge ("over stolen meat"); a lean autumn (20% a year) is a new event and the root of hard winters.
+- Data: `assets/data/sim/story.json` (season, causes), validated with errors like `season.leanAutumnPercent`.
+- Saves: version 3 (event links, grudges, story stream, lean flag); versions 1 and 2 upgrade.
+- Runner: `[#id]` in chronicle lines, `--why <id>`.
+- Tests: `US-110 ...` cases in `tests/sim/story_test.cpp`, a real version-2 upgrade in `save_test.cpp`, ctest `US-110 Traceable`; existing texts updated ("died of hunger", "over stolen meat").
+
+## Kill Gate 1 pivot: requirements v1.6, Codex v1.6, P-005 (Mraw, Anima) — 2026-09-30
+
+**State:** On `qa`.
+
+- Owner verdict on Kill Gate 1 (D-GATE-M2): Pivot. Owner's redesign choices recorded as D-18; retry gate D-GATE-M2b open.
+- Requirements v1.6 and backlog (Drive, mirrored): STO-02, STO-03, SDC-02; milestone M2b Story engine; epic E11; US-110..US-115; timeline shifted 15 weeks; 12.6 statuses updated.
+- Codex v1.6 (Anima): P-005, K-M2b, S-US-110..S-US-115, X-M2b; decision table; execution order; CI-006 resolved; header without AI-vendor names.
+- P-005: docs/status.md (X-M2 failed, M2b prompts), docs/decisions.md, CI-006 fix in `tests/luna/run_game_window.cmake` and `CMakeLists.txt` (first frame within 3 s in Release, 15 s in Debug).
+
+## X-M2: Exit review M2 = Kill Gate 1 (Mraw) — 2026-09-30
+
+**State:** On `qa`. **Waiting for the owner** (human gate D-GATE-M2); `qa` is not merged into `main` and M3 does not start until the answer.
+
+- `docs/gates/M2.md`: 100 years without crashing (13 seeds, all finished) met; determinism met (same 100-year hash in Debug and Release: 6887756077218264421); "2 of 3 readers find a story" needs people: `docs/gates/M2-reader-packet.md` (instructions, three questions, the seed-7 chronicle, 244 entries) and `docs/decision-requests/D-GATE-M2.md` (options Go / Go with a "why" layer / Pivot / Stop; recommendation: Go if 2 of 3 find a story).
+- Fixes found while preparing the gate: names are now unique among the living (`US-014 No two living people share a name`); an empty food store is a major chronicle event (importance 70) so famines show.
+- `docs/decisions.md`: D-GATE-M2 (open); `docs/status.md`: X-M2 blocked on the human gate.
+- Verification: 0 warnings; ctest 19/19 Debug and Release.
+
+## US-016 / S-US-016: Save and load the simulation (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Last story of M2.
+
+- Simulation: `save.{h,cpp}` (versioned JSON saves of the whole state, temp file then rename, three backups, fallback to the newest intact backup, upgrade from version 1, clear refusals of newer or inconsistent saves); `World` befriends `WorldArchive`.
+- `odysseus_headless --save <file>`, `--load <file>`.
+- Tests: `US-016 Round trip`, `US-016 Crash-safe`, three backups, `US-016 Old version`, inconsistent saves.
+- Evidence: 50 years + save + load + 50 years = 100 years straight (same hash).
+- Docs: plan `docs/plans/US-016.md`, teach-back entry.
+- Verification: 0 warnings; ctest 19/19 Debug and Release.
+
+## US-015 / S-US-015: Soak-test the simulation from the command line (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Simulation: `report.{h,cpp}` (population, deaths by cause, average needs, food, couples, feuds, mammoths, chronicle size); the mammoth herd passes once a year.
+- `odysseus_headless`: `--years`, `--help`, strict number parsing (`std::from_chars`), usage message and exit code 2 on bad input, report and tick time.
+- Tests: `US-015 Run` and `US-015 Bad input` (ctest, the real program), `US-015 The report adds up`.
+- Evidence: 100-year soak for seed 7 in Release and Debug (same world hash), bad-input output.
+- Docs: plan `docs/plans/US-015.md`, teach-back entry.
+- Verification: 0 warnings; ctest 19/19 Debug and Release.
+
+## US-014 / S-US-014: Write a readable chronicle (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Simulation: chronicle importance levels, `select(year, threshold)`, `formatEntry`; life events (pairing with courting, conception, pregnancy, births with inherited traits, childbirth, old age, grief, feuds and peace, first mammoth, empty-store evenings); names never repeat without an ordinal; carrying capacity (daily forage and game budgets) and cumulative hunger damage.
+- Data: `assets/data/sim/life.json` (new); `actions.json` (forage and game budgets, rarer mammoths).
+- `odysseus_headless --chronicle [year] --threshold <n>`.
+- Tests: `US-014 Record`, `US-014 Filter`, generations.
+- Docs: plan `docs/plans/US-014.md` (with the balance notes), D-02 tuning note, teach-back entry; evidence: a century's chronicle for seed 42.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
+## US-013 / S-US-013: Remember events and spread gossip (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Data: `assets/data/sim/social.json` (new).
+- Simulation: `memory.{h,cpp}` (memories, social config, forgetting, memory limit); people keep memories, opinions and last gift and theft days; new actions GiveGift and Steal; `World::giveGift`, `recordTheft`, `talk` (gossip at half strength), favourite partners by opinion, daily forgetting; memories and opinions in the world hash.
+- Tests: `US-013 Memory`, `US-013 Gossip`, `US-013 Forgetting`, memory limit, a living clan's year.
+- Docs: plan `docs/plans/US-013.md`, teach-back entry.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
+## US-012 / S-US-012: Let people choose what to do (utility AI) (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Data: `assets/data/sim/actions.json` (new); `needs.json` keeps decay, meal and death rules.
+- Simulation: `actions.{h,cpp}`, `ai.{h,cpp}` (availability, scores, decision with seeded tie-break, printable decisions); traits, skills, current action and last decision on `Person`; founders get traits and skills; the World runs hourly decisions and action effects (food store, hunting with rare mammoths, sleep, fire, talk, rest, practice), the evening meal and daily spoilage; `setDailyLife(false)` for needs-only tests.
+- `odysseus_headless --inspect <name or id>`; population and food printed.
+- Tests: `US-012 Pick best action`, `US-012 No option`, `US-012 Inspectable`, first-year survival; US-011 tests run with daily life off.
+- Docs: plan `docs/plans/US-012.md`, teach-back entry.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
+## US-011 / S-US-011: Give every person needs that change over time (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Second story of M2 (paused during M1b, resumed on its branch).
+
+- Data: `assets/data/sim/needs.json`, `clan.json`, `names.json`.
+- Simulation: `needs.{h,cpp}` (hourly decay adding up exactly to the daily rates, winter Warmth, capped satisfaction), `person.{h,cpp}`, `clan.{h,cpp}` (founders from data, names), `chronicle.{h,cpp}`; `World` holds the clan, the food store and the chronicle, decays needs every game hour, ages people and applies starvation and winter-cold deaths each morning; the world hash covers them; `calendar`: `kHoursPerDay`, `ticksPerHour()`, day length must split into hours.
+- Tests: `US-011 Decay`, `US-011 Satisfaction`, `US-011 Consequence`, starting clan from data.
+- Docs: plan `docs/plans/US-011.md`, teach-back entry.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
 ## X-M1b: Exit review M1b, Luna Physics (Mraw) — 2026-09-30
 
 **State:** On `qa`; merged into `main` and tagged `m1b-done` once CI on `main` is green.

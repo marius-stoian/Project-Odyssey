@@ -1,0 +1,9 @@
+Project Odyssey headless runner 0.1.0
+Seed 42, 28 days: now Spring, year 2, day 1, 9 C
+Population 20, food in store 192 meals
+World hash: 3372854485757162851
+
+Chronicle of year 1 (importance 50 and above):
+  Spring, year 1: Mira and Voll became partners.
+  Spring, year 1: Sela and Kesh became partners.
+  Winter, year 1: Nara and Ulf became partners.

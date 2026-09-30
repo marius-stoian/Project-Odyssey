@@ -1,0 +1,5 @@
+Project Odyssey headless runner 0.1.0
+Seed 42, 3 days: now Spring, year 1, day 4, 6 C
+Population 20, food in store 226 meals
+World hash: 13994544989524882492
+Last decision: Garu (13, Brave Talkative): Hunger 93, Energy 85, Warmth 70, Social 98 -> Gather -, Hunt -, Sleep 156 (chosen), WarmByFire 27, Talk -, Rest 11, Wander 5

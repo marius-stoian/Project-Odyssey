@@ -1,0 +1,14 @@
+{
+  "giftFeeling": 40,
+  "giftOpinion": 15,
+  "theftFeeling": -60,
+  "theftOpinion": -25,
+  "theftMeals": 2,
+  "witnessPercent": 50,
+  "theftCooldownDays": 5,
+  "talkOpinion": 2,
+  "gossipPercent": 50,
+  "talkativeGossipPercent": 80,
+  "minorMemoryDays": 60,
+  "memoryLimit": 40
+}

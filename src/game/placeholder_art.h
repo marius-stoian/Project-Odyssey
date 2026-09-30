@@ -24,6 +24,12 @@ luna::engine::Image makeCharacterSheet();
 enum class TileKind { Grass, Path, Rock, Water, Count };
 luna::engine::Image makeTileSheet();
 
+// Sword slash animation (M3 melee combat): 4 frames in a 32x48 cell, swinging from rest to fully raised.
+inline constexpr int kSwordFrameSize = 32;
+inline constexpr int kSwordFrameHeight = 48;
+odysseus::core::Rect swordFrame(int frame);
+inline constexpr odysseus::core::Rect kSwordRestFrame{0, 112, 32, 48};
+
 // Props for the spear demo (US-029): spears pointing 8 ways (row 0 flint, row 1 wooden),
 // a straw target on a post (untouched and hit), and a soft shadow.
 inline constexpr int kSpearFrameSize = 32;
@@ -32,6 +38,14 @@ odysseus::core::Rect spearFrame(Facing facing, bool flintTip);
 inline constexpr odysseus::core::Rect kTargetFrame{0, 64, 32, 48};
 inline constexpr odysseus::core::Rect kTargetHitFrame{32, 64, 32, 48};
 inline constexpr odysseus::core::Rect kShadowFrame{64, 64, 24, 8};
+
+// Enemy feedback on the prop sheet: the enemy figure tinted red for the hit flash, a 3x5 pixel
+// font (digits and '/') with a dark outline, and a health bar (full and empty).
+inline constexpr odysseus::core::Rect kEnemyHitFrame{128, 112, 32, 48};
+inline constexpr int kGlyphAdvance = 4;
+odysseus::core::Rect glyphFrame(char c);
+inline constexpr odysseus::core::Rect kHealthBarFull{160, 64, 32, 4};
+inline constexpr odysseus::core::Rect kHealthBarEmpty{160, 68, 32, 4};
 
 // The facing whose direction is closest to the vector (x, y), with y pointing down the screen.
 Facing facingForVector(double x, double y);

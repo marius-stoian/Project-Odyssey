@@ -8,13 +8,17 @@
 #include "luna/engine/renderer.h"
 #include "luna/engine/tile_map.h"
 
+#include "game/enemy.h"
 #include "game/hero.h"
 #include "game/spear_range.h"
+#include "game/sword.h"
 
 #include <cstdint>
 #include <filesystem>
 
 namespace odysseus::game {
+
+enum class WeaponType { Sword, Bow };
 
 // Project Odyssey as Luna sees it. It grows story by story: a window now, a walking
 // character by the end of M1, the living clan in M3.
@@ -46,6 +50,9 @@ private:
     luna::engine::Camera camera_;
     Hero hero_;
     SpearRange range_;
+    Sword sword_;
+    Enemy enemy_;
+    WeaponType currentWeapon_ = WeaponType::Bow; // the spear demo (US-029) is the default; Shift switches to the sword
     bool nextSpearIsFlint_ = true; // Interact alternates flint and wooden spears
     // After a throw the camera frames the hero and the target together for a while.
     int framingTicks_ = 0;

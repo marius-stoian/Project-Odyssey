@@ -1,0 +1,19 @@
+Debug:
+Project Odyssey headless runner 0.1.0
+Seed 7, 2800 days (100 years, 6720000 ticks): now Spring, year 101, day 1, 9 C
+Population: 30 alive (20 founders, 76 born, 66 died)
+Deaths by cause: starvation 7, the cold 0, old age 48, a mammoth's tusks 10, childbirth 1
+Average needs of the living: Hunger 93, Energy 85, Warmth 59, Social 63
+Food in store: 67 meals; couples 4, feuds 0, mammoths 61, chronicle entries 10255
+Tick time: 2.932 microseconds per tick (19.70 s in total)
+World hash: 6887756077218264421
+
+Release:
+Project Odyssey headless runner 0.1.0
+Seed 7, 2800 days (100 years, 6720000 ticks): now Spring, year 101, day 1, 9 C
+Population: 30 alive (20 founders, 76 born, 66 died)
+Deaths by cause: starvation 7, the cold 0, old age 48, a mammoth's tusks 10, childbirth 1
+Average needs of the living: Hunger 93, Energy 85, Warmth 59, Social 63
+Food in store: 67 meals; couples 4, feuds 0, mammoths 61, chronicle entries 10255
+Tick time: 0.057 microseconds per tick (0.38 s in total)
+World hash: 6887756077218264421
