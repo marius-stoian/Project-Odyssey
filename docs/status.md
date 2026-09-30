@@ -35,7 +35,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | S-US-012 | US-012 | M2 | Done | 2026-09-30 |
 | S-US-013 | US-013 | M2 | Done | 2026-09-30 |
 | S-US-014 | US-014 | M2 | Done | 2026-09-30 |
-| S-US-015 | US-015 | M2 | To do |  |
+| S-US-015 | US-015 | M2 | Done | 2026-09-30 |
 | S-US-016 | US-016 | M2 | To do |  |
 | X-M2 | - | M2 | To do |  |
 | K-M3 | - | M3 | To do |  |
