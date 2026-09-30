@@ -159,7 +159,8 @@ private:
     // Along a unit vector. distancePixels is how far the hero aims (the pointer); chestHeight: aimed with keys, no pointer.
     void attackWith(const WeaponDef& weapon, double dirX, double dirY, double distancePixels, bool chestHeight);
     std::vector<ArcShot> arcShots_;
-    void updateAim(const luna::engine::Pointer& pointer, bool fallen);
+    // acingBefore: how the hero faced before this tick's walking turned it (the pointer rules the facing, steadily).
+    void updateAim(const luna::engine::Pointer& pointer, bool fallen, Facing facingBefore);
     void drawAim(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     bool aiming_ = false;
     double aimDx_ = 0.0;

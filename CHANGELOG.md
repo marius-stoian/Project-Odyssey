@@ -4,9 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Hero orientation by the pointer, no sprite flicker (Avengers) — 2026-10-01 (follow-up to US-139, D-26)
+
+**State:** Done on local verification (Debug and Release, 25/25); merged into local `qa`, pushed with the M2d milestone gate.
+
+- The hero always faces the mouse pointer while it is over the picture (also with empty hands and the demo weapons); off the picture he faces the way he walks. Only a held catalog weapon still aims attacks and shows the aim line.
+- Flicker fix: the facing is measured from the chest, ignores a pointer within 16 px, and changes only when the pointer is 10 degrees past the edge of the current facing's sector (`facingToward` with hysteresis); the facing before the tick's walking is what counts.
+- Tests: US-139 The hero always faces the pointer, No flicker walking past the pointer (fails without the fix), Facing with hysteresis. Evidence `docs/evidence/US-139/walk-east-facing-pointer.png`; plan `docs/plans/US-139.md` (follow-up section).
+
 ## US-141: Bows, crossbows, thrown weapons and staff bolts (Avengers) — 2026-10-01
 
-**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+**State:** Done. Merged into `qa`, pushed; hosted CI green (run 36783802996).
 
 - `assets/data/weapons.json`: new `classes` section (launch speeds for bow, thrown, staff, gun), validated naming file and field; no speeds are hard-coded any more (`ClassDef`, `Catalogs::weaponClass`, `launchArcShot(weapon, launchSpeed, ...)`).
 - Game: bows and crossbows (class bow) and thrown weapons shoot the US-140 arcs, staffs fire flat bolts aimed at the pointer, all at the speed from the file; elements apply on hit; `OdysseyGame::cameraView()`.

@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Assembly plan / requirements | **v1.9** / **v1.9** |
-| Repository | US-141 merged into `qa` and pushed; hosted CI to confirm (also for US-140) |
-| Milestone | **M2d Content and combat**: 8 of 12 Done if CI is green; US-141 verified locally |
+| Repository | `qa` pushed; hosted CI green (run 36783802996) |
+| Milestone | **M2d Content and combat**: 8 of 12 Done; US-141 Done |
 | Next | **Stopped by the owner before S-US-136 (plants).** Confirm CI on qa first |
 
 ### What happened
@@ -24,7 +24,7 @@
 | ID | Milestone | Stories done | State |
 |---|---|---|---|
 | M0-M2c | Tooling to Level editor | 34 / 34 | Done |
-| M2d | Content and combat | 8 / 12 | US-140 and US-141 awaiting CI |
+| M2d | Content and combat | 8 / 12 | US-140 and US-141 Done, CI green |
 | M3-M6 | | 0 / 28 | Waits for your word after M2d |
 | | **MVP total** | **42 / 74** | |
 
