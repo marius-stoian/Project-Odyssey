@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-135: Elements (Avengers) — 2026-09-30
+
+**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+
+- `assets/data/weapons.json`: new `elements` section with the numbers and effect names per element; `loadCatalogs` range-checks them and requires every effect name to exist in effects.json (`ElementDef`, `Catalogs::element`).
+- `src/game/status.{h,cpp}`: `StatusEffects` (burn, poison, slow) held by every `Enemy`; a new hit restarts the timer, it never stacks.
+- Combat: fire burns 2 HP/s for 3 s, poison 1 HP/s for 5 s, ice slows to 50% for 2 s (a slowed enemy winds up at half speed), lightning jumps once to the nearest other enemy within 3 m for half damage, void heals the hero 25% of the damage. Hit and status effects come from effects.json. `Enemy::takeDamage(damage, flash)`.
+- D-24 (owner answers of this story) recorded in docs/decisions.md.
+- Tests: US-135 Numbers, Status effects, Fire, Fire shows, Poison, Ice, Lightning, Void, Bad numbers (odysseus_game_tests). Evidence `docs/evidence/US-135/` (a screenshot per element, the levels used); plan `docs/plans/US-135.md`.
+
 ## US-134: Pickups and the hotbar (Avengers) — 2026-09-30
 
 **State:** Done. Merged into `qa`, pushed; hosted CI run 36766225054 green.

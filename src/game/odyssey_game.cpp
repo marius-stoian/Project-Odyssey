@@ -240,13 +240,88 @@ void OdysseyGame::collectPickups() {
     }
 }
 
-void OdysseyGame::strike(Enemy& enemy, int damage) {
+void OdysseyGame::strike(Enemy& enemy, int damage, const WeaponDef* weapon) {
+    const int dealt = std::min(damage, enemy.hp());
     const bool defeated = enemy.takeDamage(damage);
     playEffect("spark", enemy.feetX(), enemy.feetY() - kCharacterHeight / 2.0, 24); // US-132: where the blow lands
     if (defeated) {
         playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
     } else {
         enemy.provoke();
+    }
+    if (weapon != nullptr && weapon->element != Element::None) {
+        applyElement(enemy, *weapon, dealt);
+    }
+}
+
+// US-135: what the weapon's element does at the hit. The numbers are in weapons.json.
+void OdysseyGame::applyElement(Enemy& target, const WeaponDef& weapon, int dealt) {
+    const ElementDef& numbers = catalogs_.element(weapon.element);
+    const double centreY = target.feetY() - kCharacterHeight / 2.0;
+    switch (weapon.element) {
+    case Element::Fire:
+    case Element::Ice:
+    case Element::Poison:
+        if (target.isAlive()) {
+            target.status.apply(weapon.element, numbers);
+            playEffect(numbers.hitEffect, target.feetX(), centreY, 32);
+            core::logInfo(std::format("{} is {} for {} s", target.name, weapon.element == Element::Fire ? "burning" : weapon.element == Element::Ice ? "slowed" : "poisoned", numbers.seconds));
+        }
+        break;
+    case Element::Lightning: {
+        // The jump: the nearest other living enemy within reach takes part of the damage (no second jump).
+        Enemy* next = nullptr;
+        double nearest = numbers.chainMetres * kTileSize;
+        for (Enemy& other : enemies_) {
+            if (&other == &target || !other.isAlive()) continue;
+            const double distance = std::hypot(other.feetX() - target.feetX(), other.feetY() - target.feetY());
+            if (distance < nearest || (distance == nearest && next == nullptr)) {
+                next = &other;
+                nearest = distance;
+            }
+        }
+        if (next != nullptr) {
+            const int jump = std::max(1, static_cast<int>(std::lround(weapon.damage * numbers.chainFraction)));
+            playEffect(numbers.hitEffect, (target.feetX() + next->feetX()) / 2.0, (centreY + next->feetY() - kCharacterHeight / 2.0) / 2.0, 48);
+            core::logInfo(std::format("Lightning jumped from {} to {}", target.name, next->name));
+            strike(*next, jump);
+        }
+        break;
+    }
+    case Element::Void:
+        if (dealt > 0 && respawnTicks_ == 0) {
+            const int heal = std::max(1, static_cast<int>(std::lround(dealt * numbers.drainFraction)));
+            heroHp_ = std::min(kHeroMaxHp, heroHp_ + heal);
+            playEffect(numbers.hitEffect, target.feetX(), centreY, 32);
+            playEffect(numbers.healEffect, hero_.feetX(), hero_.feetY() - kCharacterHeight / 2.0, 32);
+            core::logInfo(std::format("The void drained {} HP from {}: the hero has {} / {}", heal, target.name, heroHp_, kHeroMaxHp));
+        }
+        break;
+    case Element::None:
+        break;
+    }
+}
+
+// One tick of an enemy's statuses: burning and poison cost HP (no red flash each time), and their
+// effects are started again each time the last one ends, so they read as continuous while they last.
+void OdysseyGame::tickStatus(Enemy& enemy) {
+    if (!enemy.isAlive() || !enemy.status.any()) {
+        return;
+    }
+    const double centreY = enemy.feetY() - kCharacterHeight / 2.0;
+    const auto show = [&](Element element) {
+        const std::string& name = catalogs_.element(element).effect;
+        const EffectDef* def = catalogs_.effect(name);
+        if (def != nullptr && ticks_ % static_cast<std::uint64_t>(def->frames * def->ticksPerFrame) == 0) {
+            playEffect(name, enemy.feetX(), centreY, 24);
+        }
+    };
+    if (enemy.status.burning()) show(Element::Fire);
+    if (enemy.status.poisoned()) show(Element::Poison);
+    if (enemy.status.slowed()) show(Element::Ice);
+    const int lost = enemy.status.tick();
+    if (lost > 0 && enemy.takeDamage(lost, false)) {
+        playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
     }
 }
 
@@ -262,7 +337,7 @@ void OdysseyGame::attackWith(const WeaponDef& weapon) {
         swingTicks_ = 6;
         const auto hits = behaviour.swing(weapon, hero_.feetX(), hero_.feetY(), hero_.facing(), targets);
         core::logInfo(std::format("{} ({}) swung facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), facingName(hero_.facing()), hits.size()));
-        for (const std::size_t index : hits) strike(enemies_[index], weapon.damage);
+        for (const std::size_t index : hits) strike(enemies_[index], weapon.damage, &weapon);
     } else if (auto shot = behaviour.launch(weapon, hero_.feetX(), hero_.feetY(), hero_.facing())) {
         projectiles_.push_back(*shot);
         core::logInfo(std::format("{} ({}) shot facing {}", weapon.name, weaponClassName(weapon.weaponClass), facingName(hero_.facing())));
@@ -432,6 +507,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
     // Enemies strike back (US-131): the strike lands when the wind-up ends, if the hero is
     // still within reach; stepping away in time is how the hero dodges.
+    for (Enemy& enemy : enemies_) tickStatus(enemy); // burning and poison, before anyone strikes (US-135)
     for (Enemy& enemy : enemies_) {
         if (enemy.update() && respawnTicks_ == 0) {
             const double distance = std::hypot(enemy.feetX() - hero_.feetX(), enemy.feetY() - hero_.feetY());
@@ -472,7 +548,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         for (Projectile& shot : projectiles_) {
             bool done = false;
             if (const auto hit = stepProjectile(shot, map_, targets, done)) {
-                strike(enemies_[*hit], shot.weapon->damage);
+                strike(enemies_[*hit], shot.weapon->damage, shot.weapon);
                 targets[*hit].alive = enemies_[*hit].isAlive();
             }
             if (done) shot.maxDistance = -1.0; // spent: removed below
