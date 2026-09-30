@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-016 / S-US-016: Save and load the simulation (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Last story of M2.
+
+- Simulation: `save.{h,cpp}` (versioned JSON saves of the whole state, temp file then rename, three backups, fallback to the newest intact backup, upgrade from version 1, clear refusals of newer or inconsistent saves); `World` befriends `WorldArchive`.
+- `odysseus_headless --save <file>`, `--load <file>`.
+- Tests: `US-016 Round trip`, `US-016 Crash-safe`, three backups, `US-016 Old version`, inconsistent saves.
+- Evidence: 50 years + save + load + 50 years = 100 years straight (same hash).
+- Docs: plan `docs/plans/US-016.md`, teach-back entry.
+- Verification: 0 warnings; ctest 19/19 Debug and Release.
+
 ## US-015 / S-US-015: Soak-test the simulation from the command line (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
