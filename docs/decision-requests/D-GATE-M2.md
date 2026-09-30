@@ -15,4 +15,4 @@ How to find out: follow [the reader packet](../gates/M2-reader-packet.md) (3 peo
 | D. Stop | The idea does not work for you | The project stops or changes direction |
 
 ## Your answer
-Write here (or in docs/decisions.md, row D-GATE-M2): how many of the 3 found a story, the option (A-D), and any reader notes worth keeping.
+Not really a story, needs improvements for the event generation so more things can happen. Need reasons for death and feuds and more interaction types between people. Pivot to fewer more complex events
