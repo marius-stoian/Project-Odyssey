@@ -943,3 +943,24 @@ Two blend *modes* are used: *add* for light things (rain and sparks are added to
 **Try it (10 minutes).** Run `odysseus.exe --level docs/evidence/US-138/levels/ambient.json --weather "steady rain"`, then `--weather "dense fog"`. Change `kStrength` in `drawWeather` from `0.8` to `0.3` and see the rain thin out.
 
 **Check yourself.** Why must the two alphas of the old and the new weather add up to about 1 during the fade?
+
+
+## M3: US-030, US-032 and US-031, the clan on screen (2026-10-01)
+
+**The idea: mapping data to presentation.** The simulation knows a person only as numbers (needs, an action, an age). The player needs a face. The game keeps these two worlds apart and translates between them in one direction only: *data in, pictures out*. `emoteOf(person)` turns needs into an emote; `lookOf(person)` turns an id into a look; `ClanView::targetOf(...)` turns "hunting" into "a spot east of the camp". None of them changes the person; if the drawing is thrown away the simulation is unharmed, and the same simulation can be drawn in another way (another art style, or a text report, as the headless runner does).
+
+```cpp
+Emote emoteOf(const sim::Person& p) {
+    if (p.needs[sim::Need::Warmth] <= 20) return Emote::Cold;   // the most urgent first
+    if (p.needs[sim::Need::Hunger] <= 20) return Emote::Hungry;
+    ...
+}
+```
+
+A second idea is in the people themselves: a *layer* is just a picture of the same size as all the others, with some pixels see-through. Stack body, outfit, hair and spear, and you have a person; change one layer and you change only that part. A *palette swap* turns one picture into many: the hair drawn once in a marker colour (brown) is recoloured to black, blond, red... by replacing that exact colour. Four skins x 3 hairs x 6 hair colours x 3 outfits x 6 outfit colours x spear or not is over 2,000 different people from about 8 small pictures.
+
+**Where to look.** `recoloured` and `composed` in [src/luna/engine/sprite_layers.cpp](../src/luna/engine/sprite_layers.cpp); `composeLook` and `lookOf` in [src/game/clan_art.cpp](../src/game/clan_art.cpp); `ClanView::update` in [src/game/clan_view.cpp](../src/game/clan_view.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan-speed 40`: twenty people, each different, moving between the fire, the gathering ground and the hunting ground; hover one. Then add a fourth hair style in `drawHair` (style 3) and a colour to `kHairs`.
+
+**Check yourself.** Why does `ClanView` keep a *previous* and a *current* position for every person?

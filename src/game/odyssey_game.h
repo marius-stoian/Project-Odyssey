@@ -11,6 +11,7 @@
 #include "game/animals.h"
 #include "game/arc_shots.h"
 #include "game/art.h"
+#include "game/clan_view.h"
 #include "game/catalogs.h"
 #include "game/content_art.h"
 #include "luna/engine/effects.h"
@@ -28,10 +29,14 @@
 
 #include "core/random.h"
 
+#include "sim/world.h"
+
 #include <array>
 #include <cstdint>
 #include <filesystem>
 #include <map>
+#include <memory>
+#include <optional>
 #include <vector>
 
 namespace odysseus::game {
@@ -90,6 +95,14 @@ public:
     const std::string& inspectedName() const { return inspection_.name; }
     const std::string& inspectedText() const { return inspection_.text; }
     const PlantArt& plantArt() const { return plantArt_; }
+    // The simulated clan (US-032, D-30): on in levels marked "clan": true, or with `--clan`. It is the M2 simulation running
+    // inside the game, one simulation tick per game tick, and the view puts each person somewhere and walks them there.
+    void setClan(bool on);
+    bool clanOn() const { return clan_ != nullptr; }
+    // Runs the clan's simulation this many ticks for each game tick (fast forward, for demos and screenshots; 1 is real time).
+    void setClanSpeed(int ticksPerTick) { clanSpeed_ = ticksPerTick < 1 ? 1 : ticksPerTick; }
+    const sim::World* clan() const { return clan_.get(); }
+    const ClanView& clanView() const { return clanView_; }
     // The weather (US-138): a seeded cycle, drawn over the world and under the interface. `--seed` (or this) fixes it.
     void setWeatherSeed(std::uint64_t seed);
     // Starts under the named weather (false when weather.json has none of that name).
@@ -185,6 +198,18 @@ private:
 
     // Plants (US-136).
     PlantArt plantArt_;
+    std::filesystem::path dataDirectory_;
+    bool clanEnabled_ = false;
+    int clanSpeed_ = 1;
+    std::unique_ptr<sim::World> clan_;
+    ClanView clanView_;
+    std::optional<LayerSheets> layerSheets_;
+    std::map<LookSpec, luna::engine::Texture> lookTextures_; // one composed sheet per distinct look, made when first seen
+    void startClan();
+    void drawClan(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha, bool behindHero);
+    void drawEmote(luna::engine::Renderer& renderer, Emote emote, int x, int y) const;
+    void drawClanDetails(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    void drawClanHud(luna::engine::Renderer& renderer) const;
     EffectArt effectArt_;
     WeatherCycle weather_;
     std::uint64_t weatherSeed_ = 0;

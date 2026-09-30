@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M3: The clan on screen — US-030, US-032, US-031 (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing until M4); merged into local `qa`. Full verification and CI at the M4 gate.
+
+- Luna: `recoloured` and `composed` (`sprite_layers`). Game: layered code-drawn people (`clan_art`), `ClanView` (the simulation's actions given places, people walking at 60 px/s with interpolation), `Level::clan` and `assets/levels/camp.json`, the clan's simulation running inside the game (`--clan`, `--clan-speed`), emote bubbles and shiver, the hover panel, the date line.
+- D-30 records the choices. Tests in `tests/game/clan_test.cpp`. Evidence `docs/evidence/US-030..US-032`; plans `docs/plans/US-030.md`, `US-031.md`, `US-032.md`.
 ## US-138: Placed effects and random weather (Avengers) — 2026-10-01
 
 **State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
