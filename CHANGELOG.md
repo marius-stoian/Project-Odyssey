@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-012 / S-US-012: Let people choose what to do (utility AI) (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Data: `assets/data/sim/actions.json` (new); `needs.json` keeps decay, meal and death rules.
+- Simulation: `actions.{h,cpp}`, `ai.{h,cpp}` (availability, scores, decision with seeded tie-break, printable decisions); traits, skills, current action and last decision on `Person`; founders get traits and skills; the World runs hourly decisions and action effects (food store, hunting with rare mammoths, sleep, fire, talk, rest, practice), the evening meal and daily spoilage; `setDailyLife(false)` for needs-only tests.
+- `odysseus_headless --inspect <name or id>`; population and food printed.
+- Tests: `US-012 Pick best action`, `US-012 No option`, `US-012 Inspectable`, first-year survival; US-011 tests run with daily life off.
+- Docs: plan `docs/plans/US-012.md`, teach-back entry.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
 ## US-011 / S-US-011: Give every person needs that change over time (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Second story of M2 (paused during M1b, resumed on its branch).

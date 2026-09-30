@@ -28,10 +28,7 @@ struct NeedsConfig {
     int maximum = 100;
     std::array<int, kNeedCount> dailyDecay{30, 35, 20, 15};
     int winterWarmthDecay = 45;
-    int mealValue = 40;
-    int sleepValue = 60;
-    int fireWarmth = 50;
-    int talkSocial = 25;
+    int mealValue = 40; // Hunger gained from one meal
     int hungerDaysBeforeDeath = 3;
     int warmthDaysBeforeDeath = 3;
 };

@@ -2,8 +2,11 @@
 
 #include "boundary.h"
 
+#include "actions.h"
 #include "needs.h"
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 
@@ -18,6 +21,20 @@ enum class CauseOfDeath { None, Starvation, Cold, OldAge, Hunting, Childbirth };
 // "starvation", "the cold", ... as used in the chronicle: "Tok died of starvation."
 const char* causeName(CauseOfDeath cause);
 
+// The six traits of D-02. A person has one or two; Brave and Timid never together.
+enum class Trait { Brave, Timid, Kind, Greedy, Talkative, Diligent, Count };
+
+inline constexpr std::size_t kTraitCount = static_cast<std::size_t>(Trait::Count);
+
+const char* traitName(Trait trait);
+
+// What the AI decided last hour, with every action's score (0 = not possible), so the
+// headless runner can show why someone did what they did (US-012 "Inspectable").
+struct Decision {
+    std::array<int, kActionCount> scores{};
+    Action chosen = Action::Rest;
+};
+
 // One member of the clan. Plain data: the systems (needs, AI, memory) are functions that
 // read and change it. This "struct as component" style is what an ECS formalises later.
 struct Person {
@@ -31,7 +48,17 @@ struct Person {
     int daysAtZeroHunger = 0; // consecutive day starts with Hunger at 0
     int daysAtZeroWarmth = 0; // the same for Warmth (only winter cold kills)
 
+    std::uint8_t traits = 0; // one bit per Trait
+    int gatherSkill = 10;    // 0..100, grows with practice
+    int huntSkill = 10;
+    int gatherPractice = 0;  // hours practised towards the next skill point
+    int huntPractice = 0;
+    Action action = Action::Rest; // what they are doing this hour
+    Decision lastDecision;
+
     int ageYears(int daysPerYear) const { return ageDays / daysPerYear; }
+    bool has(Trait trait) const { return (traits & (1U << static_cast<unsigned>(trait))) != 0; }
+    void give(Trait trait) { traits = static_cast<std::uint8_t>(traits | (1U << static_cast<unsigned>(trait))); }
 };
 
 } // namespace odysseus::sim

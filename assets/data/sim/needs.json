@@ -3,8 +3,5 @@
   "dailyDecay": { "hunger": 30, "energy": 35, "warmth": 20, "social": 15 },
   "winterWarmthDecay": 45,
   "mealValue": 40,
-  "sleepValue": 60,
-  "fireWarmth": 50,
-  "talkSocial": 25,
   "daysAtZeroBeforeDeath": { "hunger": 3, "warmth": 3 }
 }

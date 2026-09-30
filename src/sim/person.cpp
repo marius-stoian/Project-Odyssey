@@ -14,4 +14,16 @@ const char* causeName(CauseOfDeath cause) {
     return "?";
 }
 
+const char* traitName(Trait trait) {
+    switch (trait) {
+    case Trait::Brave: return "Brave";
+    case Trait::Timid: return "Timid";
+    case Trait::Kind: return "Kind";
+    case Trait::Greedy: return "Greedy";
+    case Trait::Talkative: return "Talkative";
+    case Trait::Diligent: return "Diligent";
+    default: return "?";
+    }
+}
+
 } // namespace odysseus::sim
