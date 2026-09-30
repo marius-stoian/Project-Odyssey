@@ -18,7 +18,10 @@ using PersonId = int; // index into World::people(), never reused: the dead keep
 
 enum class Sex { Female, Male };
 
-enum class CauseOfDeath { None, Starvation, Cold, OldAge, Hunting, Childbirth };
+enum class CauseOfDeath { None, Starvation, Cold, OldAge, Hunting, Childbirth, Fight, Wound, Illness, Count };
+
+// How a person is: well, sick or injured (M2b). The unwell cannot work and may die of it.
+enum class Health { Well, Sick, Injured };
 
 // "starvation", "the cold", ... as used in the chronicle: "Tok died of starvation."
 const char* causeName(CauseOfDeath cause);
@@ -54,6 +57,10 @@ struct Person {
     int ageDays = 0;
     bool alive = true;
     CauseOfDeath causeOfDeath = CauseOfDeath::None;
+    bool exiled = false;      // driven out by the clan: no longer alive in the clan, but not dead (M2b)
+    Health health = Health::Well;
+    int healthDays = 0;       // days left until they recover
+    int healthEvent = -1;     // the chronicle entry that made them unwell
     Needs needs;
     int daysAtZeroHunger = 0; // consecutive day starts with Hunger at 0
     int daysAtZeroWarmth = 0; // the same for Warmth (only winter cold kills)

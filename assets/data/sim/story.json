@@ -8,5 +8,35 @@
     "starvationWindowDays": 60,
     "maxCauses": 4,
     "grudgeLimit": 16
+  },
+  "quarrel": {
+    "grudgeMeetPercent": 40,
+    "dislikeOpinion": -10,
+    "irritableBelow": 60,
+    "irritablePercent": 40,
+    "calmPercent": 6,
+    "opinionLoss": 12,
+    "feeling": -40
+  },
+  "blame": {
+    "opinionLoss": 40,
+    "feeling": -70
+  },
+  "revenge": {
+    "minFeudDays": 10,
+    "revengeOpinion": -60,
+    "percentPerDay": 8,
+    "cooldownDays": 60,
+    "exileClanOpinion": -25,
+    "fightDeathPercent": 20,
+    "winnerHurtPercent": 30,
+    "satisfaction": 30,
+    "victimOpinionLoss": 30,
+    "feeling": -80
+  },
+  "health": {
+    "woundDaysMin": 5,
+    "woundDaysMax": 12,
+    "woundDeathPerMille": 15
   }
 }

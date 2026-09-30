@@ -121,6 +121,7 @@ Situation World::situationOf(const Person& person) const {
         return other.alive && other.id != person.id && other.action != Action::Sleep;
     });
     situation.canGiveGift = situation.someoneToTalkTo && person.lastGiftDay != today();
+    situation.unwell = person.health != Health::Well;
     situation.canSteal = food_ > 0 && (person.lastTheftDay < 0 || today() - person.lastTheftDay >= config_.social.theftCooldownDays);
     return situation;
 }
@@ -328,36 +329,34 @@ void World::pairUp() {
     }
 }
 
+std::vector<std::pair<int, int>> World::feuds() const {
+    std::vector<std::pair<int, int>> pairs;
+    for (const FeudRecord& feud : feuds_) {
+        pairs.push_back({feud.a, feud.b});
+    }
+    return pairs;
+}
+
 void World::updateFeuds() {
     const int bitter = config_.life.feudOpinion;
-    // The latest event of a kind between two people (either way round), or -1.
-    auto findEvent = [this](EventKind kind, int a, int b) {
-        const auto& entries = chronicle_.entries();
-        for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
-            if (it->kind == kind && ((it->who == a && it->other == b) || (it->who == b && it->other == a))) {
-                return it->id;
-            }
-        }
-        return -1;
-    };
     // Old feuds end when one side dies or both have cooled down.
-    std::vector<std::pair<int, int>> still;
-    for (const auto& [a, b] : feuds_) {
-        const Person& first = people_[static_cast<std::size_t>(a)];
-        const Person& second = people_[static_cast<std::size_t>(b)];
+    std::vector<FeudRecord> still;
+    for (const FeudRecord& feud : feuds_) {
+        const Person& first = people_[static_cast<std::size_t>(feud.a)];
+        const Person& second = people_[static_cast<std::size_t>(feud.b)];
         if (!first.alive || !second.alive) {
             continue;
         }
-        if (opinion(a, b) > 0 && opinion(b, a) > 0) {
+        if (opinion(feud.a, feud.b) > 0 && opinion(feud.b, feud.a) > 0) {
             std::vector<int> causes;
-            if (const int feud = findEvent(EventKind::Feud, a, b); feud >= 0) {
-                causes.push_back(feud);
+            if (feud.event >= 0) {
+                causes.push_back(feud.event);
             }
-            chronicle_.record(date(), kImportancePeace, EventKind::Peace, a, b, -1, causes,
+            chronicle_.record(date(), kImportancePeace, EventKind::Peace, feud.a, feud.b, -1, causes,
                               std::format("{} and {} made peace.", first.name, second.name));
             continue;
         }
-        still.push_back({a, b});
+        still.push_back(feud);
     }
     feuds_ = still;
     // New feuds: both think badly of each other, and say why: the strongest grudges they hold
@@ -370,9 +369,8 @@ void World::updateFeuds() {
             if (second.id <= first.id || !second.alive) {
                 continue;
             }
-            if (opinion(first.id, second.id) <= bitter && opinion(second.id, first.id) <= bitter &&
-                std::find(feuds_.begin(), feuds_.end(), std::pair<int, int>{first.id, second.id}) == feuds_.end()) {
-                feuds_.push_back({first.id, second.id});
+            const bool known = std::any_of(feuds_.begin(), feuds_.end(), [&](const FeudRecord& feud) { return feud.a == first.id && feud.b == second.id; });
+            if (opinion(first.id, second.id) <= bitter && opinion(second.id, first.id) <= bitter && !known) {
                 std::vector<Grudge> reasons;
                 for (const Grudge& grudge : first.grudges) {
                     if (grudge.about == second.id) reasons.push_back(grudge);
@@ -397,13 +395,15 @@ void World::updateFeuds() {
                         reason = reasonPhrase(*top);
                     }
                 }
-                chronicle_.record(date(), kImportanceFeud, EventKind::Feud, first.id, second.id, -1, causes,
-                                  reason.empty() ? std::format("A feud broke out between {} and {}.", first.name, second.name)
-                                                 : std::format("A feud broke out between {} and {} {}.", first.name, second.name, reason));
+                const int event =
+                    chronicle_.record(date(), kImportanceFeud, EventKind::Feud, first.id, second.id, -1, causes,
+                                      reason.empty() ? std::format("A feud broke out between {} and {}.", first.name, second.name)
+                                                     : std::format("A feud broke out between {} and {} {}.", first.name, second.name, reason));
+                feuds_.push_back({first.id, second.id, event, today(), -1});
             }
         }
     }
-    std::sort(feuds_.begin(), feuds_.end());
+    std::sort(feuds_.begin(), feuds_.end(), [](const FeudRecord& x, const FeudRecord& y) { return x.a != y.a ? x.a < y.a : x.b < y.b; });
 }
 
 void World::giveBirth(Person& mother, std::vector<Person>& newborns) {
@@ -488,8 +488,11 @@ void World::lifeEvents() {
             }
         }
     }
+    updateHealth();
+    encounters();
     pairUp();
     updateFeuds();
+    considerRevenge();
 }
 
 int World::opinion(int who, int about) const {
@@ -674,10 +677,11 @@ void World::checkSurvival(Person& person, bool winter) {
 int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     person.alive = false;
     person.causeOfDeath = cause;
+    person.health = Health::Well; // nothing more to heal
     const int years = person.ageYears(calendar_.daysPerYear());
     std::string sentence;
     std::vector<int> causes;
-    int behind = -1; // the person behind the death (a thief, later a hunt's leader), if any
+    int behind = -1; // the person behind the death (a thief, the one who struck the blow), if any
     switch (cause) {
     case CauseOfDeath::Starvation: {
         // Hunger kills after an empty store: name the store's cause, a thief if there was one (US-110).
@@ -717,6 +721,26 @@ int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     case CauseOfDeath::Childbirth:
         sentence = std::format("{} died giving birth.", person.name);
         break;
+    case CauseOfDeath::Fight: {
+        // A fight is the event `causeEvent` (a revenge): the other one in it struck the blow.
+        const ChronicleEntry* fight = chronicle_.find(causeEvent);
+        if (fight != nullptr) {
+            behind = fight->who == person.id ? fight->other : fight->who;
+        }
+        sentence = behind >= 0 ? std::format("{} was killed by {} in a fight.", person.name, nameOf(behind))
+                               : std::format("{} was killed in a fight.", person.name);
+        break;
+    }
+    case CauseOfDeath::Wound: {
+        const ChronicleEntry* hurt = chronicle_.find(causeEvent);
+        if (hurt != nullptr && hurt->kind == EventKind::Revenge) {
+            behind = hurt->who == person.id ? hurt->other : hurt->who;
+            sentence = std::format("{} died of the wounds taken in the fight with {}.", person.name, nameOf(behind));
+        } else {
+            sentence = std::format("{} died of the wounds.", person.name);
+        }
+        break;
+    }
     default:
         sentence = std::format("{} died of {}.", person.name, causeName(cause));
         break;
@@ -726,6 +750,7 @@ int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     }
     const int deathEvent = chronicle_.record(date(), kImportanceDeath, EventKind::Death, person.id, behind, -1, causes, sentence);
     // Close kin grieve: a memory kept for life. A widow or widower may pair again.
+    std::vector<int> grievers;
     for (Person& kin : people_) {
         if (!kin.alive || kin.id == person.id) {
             continue;
@@ -734,9 +759,29 @@ int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
         if (close) {
             remember(kin.memories, {person.id, kin.id, MemoryKind::Death, today(), config_.life.griefFeeling, true, false, deathEvent},
                      config_.social.memoryLimit);
+            grievers.push_back(kin.id);
         }
         if (kin.partner == person.id) {
             kin.partner = -1;
+        }
+    }
+    // Grief looks for someone to blame (US-111): the thief whose theft they know of, the one
+    // who struck the blow.
+    if (behind >= 0 && behind != person.id) {
+        for (const int griever : grievers) {
+            if (griever == behind) {
+                continue;
+            }
+            if (cause == CauseOfDeath::Starvation) {
+                const Person& kin = people_[static_cast<std::size_t>(griever)];
+                const bool knows = std::any_of(kin.memories.begin(), kin.memories.end(),
+                                               [behind](const Memory& m) { return m.kind == MemoryKind::Theft && m.subject == behind; });
+                if (knows) {
+                    blame(griever, behind, person.id, deathEvent, std::format("because {} had stolen from the store", nameOf(behind)));
+                }
+            } else if (cause == CauseOfDeath::Fight || cause == CauseOfDeath::Wound) {
+                blame(griever, behind, person.id, deathEvent, std::format("because {} struck the blow", nameOf(behind)));
+            }
         }
     }
     return deathEvent;
@@ -802,9 +847,12 @@ std::uint64_t World::hash() const {
     hasher.add(forageLeft_);
     hasher.add(lastMammothYear_);
     hasher.add(gameLeft_);
-    for (const auto& [a, b] : feuds_) {
-        hasher.add(a);
-        hasher.add(b);
+    for (const FeudRecord& feud : feuds_) {
+        hasher.add(feud.a);
+        hasher.add(feud.b);
+        hasher.add(feud.event);
+        hasher.add(feud.sinceDay);
+        hasher.add(feud.lastRevengeDay);
     }
     hasher.add(hour_);
     hasher.add(food_);
@@ -815,6 +863,10 @@ std::uint64_t World::hash() const {
         hasher.add(person.ageDays);
         hasher.add(person.alive);
         hasher.add(static_cast<int>(person.causeOfDeath));
+        hasher.add(person.exiled);
+        hasher.add(static_cast<int>(person.health));
+        hasher.add(person.healthDays);
+        hasher.add(person.healthEvent);
         for (const int value : person.needs.values) {
             hasher.add(value);
         }

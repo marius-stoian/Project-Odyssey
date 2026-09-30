@@ -15,7 +15,7 @@ TEST_CASE("US-015 The report adds up") {
     CHECK(report.alive == world.population());
     CHECK(report.founders == world.config().clan.startingPeople);
     CHECK(report.founders + report.born == static_cast<int>(world.people().size()));
-    CHECK(report.alive + report.died == static_cast<int>(world.people().size()));
+    CHECK(report.alive + report.died + report.exiled == static_cast<int>(world.people().size()));
     CHECK(std::accumulate(report.deathsByCause.begin(), report.deathsByCause.end(), 0) == report.died);
     CHECK(report.deathsByCause[0] == 0); // nobody dies of "nothing"
     for (const int average : report.averageNeeds) {

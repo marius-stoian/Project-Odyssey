@@ -424,3 +424,24 @@ An `enum class` is a list of named choices (`EventKind::Theft`) that the compile
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --chronicle`, pick a "died of hunger" line, note its `[#id]`, and run the same command with `--why <id>` instead of `--chronicle`. Follow the "because" lines. Then change `leanAutumnPercent` in `assets/data/sim/story.json` to 0 and see how many hunger deaths remain.
 
 **Check yourself.** Why do we store `-1` for "nobody" in `who` and `other`, and what would go wrong if we used `0`?
+
+## US-111: Quarrel, blame and take revenge (2026-09-30)
+
+**What we built.** People now quarrel, grieve and blame, and feuds can end in a fight or an exile. A hungry, short-tempered pair who dislike each other may quarrel ("Tok and Lin quarrelled over stolen meat while hungry."); when someone's partner starves after a theft they knew of, they blame the thief for life; and a feud that keeps worsening ends with an attack, or the clan driving the aggressor out.
+
+**The idea: state machines with enums, and `std::optional`-style "maybe" values.** A person is always in exactly one health state: `Well`, `Sick` or `Injured`. An `enum class` makes that a closed list, and the daily rule `updateHealth` is a tiny state machine: an injured person either dies (a small chance each day), or counts their days down to zero and becomes `Well` again.
+
+```cpp
+enum class Health { Well, Sick, Injured };
+...
+if (person.health == Health::Injured && chance(...)) { die(...); }
+else if (--person.healthDays <= 0) { person.health = Health::Well; }
+```
+
+Some questions have "no answer": *who is the heaviest grudge against this person?* might be nobody. We return a pointer that can be `nullptr`, and every caller checks it. `std::optional<T>` does the same job with a type that forces the check; the project uses `nullptr` where the value already lives inside a container (a grudge in a list) and `optional` for a number that may be absent.
+
+**Where to look.** `World::quarrel`, `World::takeRevenge` and `World::updateHealth` in [src/sim/world_story.cpp](../src/sim/world_story.cpp); the numbers in [assets/data/sim/story.json](../assets/data/sim/story.json).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one feud from its first quarrel to its ending. Then set `"percentPerDay"` under `"revenge"` to 0 and run again: what happens to the feuds?
+
+**Check yourself.** Why does a fight's winner get *more* opinion of the victim after taking revenge (`satisfaction`), and what would happen to the feud if it did not?

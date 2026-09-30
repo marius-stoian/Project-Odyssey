@@ -83,6 +83,18 @@ public:
     // may pass on one memory the listener lacks, as a weaker copy (gossip). Returns true
     // if a memory was passed on.
     bool talk(int speaker, int listener);
+
+    // Story interactions (US-111). The daily rules call these; tests may too.
+    // Two people quarrel: both remember it and think less of each other. Returns the event's id.
+    int quarrel(int a, int b);
+    // `griever` blames `blamed` for the death of `dead` (whose death was event `deathEvent`), for
+    // the reason `why` ("because Brak had stolen from the store"). Returns the event's id.
+    int blame(int griever, int blamed, int dead, int deathEvent, const std::string& why);
+    // The aggressor of a feud takes revenge on the victim: a fight, or the clan drives the
+    // aggressor out. Returns the event's id.
+    int takeRevenge(int aggressor, int victim);
+    // Someone is hurt for `days` days, by the chronicle entry `cause`.
+    void injure(int person, int days, int cause);
     // What `who` thinks of `about`, -100..100.
     int opinion(int who, int about) const;
 
@@ -92,7 +104,7 @@ public:
     // A hunter kills a mammoth: a feast, and the clan's first is remembered.
     void bringDownMammoth(int hunter);
     // Pairs of people who feud now (smaller id first).
-    const std::vector<std::pair<int, int>>& feuds() const { return feuds_; }
+    std::vector<std::pair<int, int>> feuds() const;
     int mammothsKilled() const { return mammoths_; }
 
     // One number summarising the entire state; equal worlds have equal hashes (ADR-011).
@@ -125,6 +137,10 @@ private:
     const std::string& nameOf(int id) const { return people_[static_cast<std::size_t>(id)].name; }
     std::string seasonPhrase() const;
     void lifeEvents();
+    void encounters();      // every morning each person meets someone; quarrels may follow
+    void considerRevenge(); // feuds that keep worsening end in a fight or an exile
+    void updateHealth();    // the hurt heal, or die of their wounds
+    int exile(Person& person, int victim, std::vector<int> causes, const std::string& text);
     void pairUp();
     void updateFeuds();
     void giveBirth(Person& mother, std::vector<Person>& newborns);
@@ -140,7 +156,16 @@ private:
     core::Pcg32 huntRandom_;
     core::Pcg32 socialRandom_;
     core::Pcg32 lifeRandom_;
-    std::vector<std::pair<int, int>> feuds_;
+    // A running feud: the two people (smaller id first), the chronicle entry that started it and
+    // when, and the day revenge was last taken (-1 = never).
+    struct FeudRecord {
+        int a = 0;
+        int b = 0;
+        int event = -1;
+        std::int64_t sinceDay = 0;
+        std::int64_t lastRevengeDay = -1;
+    };
+    std::vector<FeudRecord> feuds_;
     int mammoths_ = 0;
     bool storeRanOut_ = false; // while true, another empty evening is not news
     core::Pcg32 storyRandom_;

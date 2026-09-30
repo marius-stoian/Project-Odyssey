@@ -1,0 +1,496 @@
+Project Odyssey headless runner 0.1.0
+Seed 7, 840 days (30 years, 2016000 ticks): now Spring, year 31, day 1, 6 C
+Population: 35 alive (20 founders, 29 born, 11 died, 3 exiled)
+Deaths by cause: starvation 0, the cold 0, old age 9, a mammoth's tusks 0, childbirth 1, a fight 1, wounds 0, sickness 0
+Average needs of the living: Hunger 93, Energy 91, Warmth 81, Social 84
+Food in store: 221 meals; couples 3, feuds 0, mammoths 8, chronicle entries 4620
+Tick time: 0.037 microseconds per tick (0.08 s in total)
+World hash: 14171843743927496793
+
+Chronicle (importance 30 and above):
+  [#0] Spring, year 1: Tala stole from the food store; Ilka saw it.
+  [#1] Spring, year 1: Voll stole from the food store; Kal saw it.
+  [#2] Spring, year 1: Garu stole from the food store.
+  [#8] Spring, year 1: Joro stole from the food store.
+  [#9] Spring, year 1: Tok stole from the food store.
+  [#34] Spring, year 1: Tala stole from the food store.
+  [#35] Spring, year 1: Voll stole from the food store.
+  [#36] Spring, year 1: Garu stole from the food store; Pim saw it.
+  [#38] Spring, year 1: Joro stole from the food store; Ossa saw it.
+  [#39] Spring, year 1: Tok stole from the food store.
+  [#63] Summer, year 1: Tala stole from the food store.
+  [#64] Summer, year 1: Voll stole from the food store.
+  [#65] Summer, year 1: Garu stole from the food store.
+  [#68] Summer, year 1: Joro stole from the food store; Tok saw it.
+  [#69] Summer, year 1: Tok stole from the food store; Ossa saw it.
+  [#88] Autumn, year 1: Ilka and Joro became partners.
+  [#92] Autumn, year 1: Tok stole from the food store.
+  [#93] Autumn, year 1: Sela and Tarek became partners.
+  [#98] Autumn, year 1: Joro brought down the clan's first mammoth.
+  [#104] Autumn, year 1: Joro stole from the food store.
+  [#105] Autumn, year 1: Tala stole from the food store; Kesh saw it.
+  [#106] Autumn, year 1: Voll stole from the food store; Tala saw it.
+  [#107] Autumn, year 1: Garu stole from the food store; Voll saw it.
+  [#122] Autumn, year 1: Tok stole from the food store.
+  [#132] Winter, year 1: Tala stole from the food store; Ulf saw it.
+  [#135] Winter, year 1: Joro stole from the food store.
+  [#136] Winter, year 1: Voll stole from the food store.
+  [#137] Winter, year 1: Garu stole from the food store; Kesh saw it.
+  [#138] Winter, year 1: Tala and Garu became partners.
+  [#154] Winter, year 1: Tok stole from the food store.
+  [#161] Winter, year 1: Tala stole from the food store; Garu saw it.
+  [#162] Winter, year 1: Voll stole from the food store.
+  [#163] Winter, year 1: Garu stole from the food store.
+  [#168] Winter, year 1: Joro stole from the food store.
+  [#184] Spring, year 2: Tok stole from the food store.
+  [#190] Spring, year 2: Tala stole from the food store; Ilka saw it.
+  [#195] Spring, year 2: Joro stole from the food store.
+  [#196] Spring, year 2: Voll stole from the food store; Sela saw it.
+  [#197] Spring, year 2: Garu stole from the food store.
+  [#209] Summer, year 2: Hela and Tavo became partners.
+  [#215] Summer, year 2: Tok stole from the food store.
+  [#221] Summer, year 2: Tala stole from the food store.
+  [#222] Summer, year 2: Voll stole from the food store.
+  [#223] Summer, year 2: Garu stole from the food store; Pim saw it.
+  [#229] Summer, year 2: Joro stole from the food store; Tarek saw it.
+  [#244] Summer, year 2: Tok stole from the food store.
+  [#251] Autumn, year 2: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#255] Autumn, year 2: Tala brought down a mammoth.
+  [#257] Autumn, year 2: Joro stole from the food store.
+  [#262] Autumn, year 2: Garu stole from the food store; Hela saw it.
+  [#270] Autumn, year 2: Tok stole from the food store.
+  [#280] Autumn, year 2: Joro stole from the food store.
+  [#290] Winter, year 2: Tala stole from the food store.
+  [#291] Winter, year 2: Garu stole from the food store.
+  [#292] Winter, year 2: Voll stole from the food store; Oren saw it.
+  [#297] Winter, year 2: Tok stole from the food store.
+  [#308] Winter, year 2: Joro stole from the food store.
+  [#318] Winter, year 2: Tala stole from the food store; Oren saw it.
+  [#319] Winter, year 2: Garu stole from the food store.
+  [#322] Winter, year 2: Voll stole from the food store; Garu saw it.
+  [#328] Winter, year 2: Tok stole from the food store; Ossa saw it.
+  [#339] Spring, year 3: Joro stole from the food store.
+  [#345] Spring, year 3: Tala stole from the food store.
+  [#346] Spring, year 3: Voll stole from the food store; Garu saw it.
+  [#352] Spring, year 3: Garu stole from the food store.
+  [#358] Spring, year 3: Tok stole from the food store; Ilka saw it.
+  [#369] Spring, year 3: Joro stole from the food store.
+  [#375] Summer, year 3: Tala stole from the food store.
+  [#380] Summer, year 3: Voll stole from the food store; Tavo saw it.
+  [#382] Summer, year 3: Garu stole from the food store.
+  [#388] Summer, year 3: Tok stole from the food store.
+  [#399] Summer, year 3: Joro stole from the food store; Ulf saw it.
+  [#405] Summer, year 3: Tala stole from the food store.
+  [#406] Summer, year 3: Voll stole from the food store; Kesh saw it.
+  [#412] Summer, year 3: Garu stole from the food store; Oren saw it.
+  [#413] Autumn, year 3: Oda was born to Tavo and Hela.
+  [#426] Autumn, year 3: Tok stole from the food store; Kal saw it.
+  [#427] Autumn, year 3: Moru was born to Tarek and Sela.
+  [#440] Winter, year 3: Joro stole from the food store.
+  [#441] Winter, year 3: Tala stole from the food store; Pim saw it.
+  [#443] Winter, year 3: Voll stole from the food store; Maa saw it.
+  [#444] Winter, year 3: Garu stole from the food store; Joro saw it.
+  [#450] Winter, year 3: Lin was born to Joro and Ilka.
+  [#456] Winter, year 3: Lin stole from the food store; Ulf saw it.
+  [#457] Winter, year 3: Tok stole from the food store; Tala saw it.
+  [#463] Winter, year 3: Tala died of old age, 46 years old.
+  [#470] Winter, year 3: Garu stole from the food store; Ossa saw it.
+  [#475] Winter, year 3: Voll stole from the food store; Ilka saw it.
+  [#476] Winter, year 3: Joro stole from the food store; Kal saw it.
+  [#482] Spring, year 4: Tok and Joro quarrelled over stolen meat.
+  [#486] Spring, year 4: Lin stole from the food store.
+  [#487] Spring, year 4: Tok stole from the food store; Ruk saw it.
+  [#504] Spring, year 4: Voll stole from the food store; Tavo saw it.
+  [#505] Spring, year 4: Garu stole from the food store.
+  [#507] Spring, year 4: Joro stole from the food store.
+  [#516] Spring, year 4: Tok stole from the food store; Tarek saw it.
+  [#519] Spring, year 4: Lin stole from the food store.
+  [#530] Summer, year 4: Garu stole from the food store; Maa saw it.
+  [#534] Summer, year 4: Voll stole from the food store.
+  [#537] Summer, year 4: Joro stole from the food store; Maa saw it.
+  [#538] Summer, year 4: Voll and Garu quarrelled over stolen meat.
+  [#547] Summer, year 4: Tok stole from the food store; Joro saw it.
+  [#550] Summer, year 4: Lin stole from the food store; Ulf saw it.
+  [#561] Summer, year 4: Garu stole from the food store.
+  [#567] Summer, year 4: Voll stole from the food store; Oda saw it.
+  [#568] Summer, year 4: Joro stole from the food store.
+  [#571] Autumn, year 4: Lin stole from the food store; Tarek saw it.
+  [#582] Autumn, year 4: Lin stole from the food store; Tarek saw it.
+  [#584] Autumn, year 4: Tok stole from the food store; Lin saw it.
+  [#590] Winter, year 4: Garu stole from the food store.
+  [#591] Winter, year 4: Joro stole from the food store; Kesh saw it.
+  [#592] Winter, year 4: Voll stole from the food store.
+  [#613] Winter, year 4: Lin stole from the food store; Ulf saw it.
+  [#614] Winter, year 4: Tok stole from the food store; Oren saw it.
+  [#615] Winter, year 4: Tok and Lin quarrelled over stolen meat.
+  [#616] Winter, year 4: Garu stole from the food store.
+  [#622] Winter, year 4: Voll stole from the food store.
+  [#623] Winter, year 4: Joro stole from the food store.
+  [#629] Spring, year 5: Tok and Lin quarrelled over stolen meat.
+  [#635] Spring, year 5: Voll and Garu quarrelled over stolen meat.
+  [#645] Spring, year 5: Lin stole from the food store.
+  [#647] Spring, year 5: Tok stole from the food store; Brak saw it.
+  [#648] Spring, year 5: Garu stole from the food store.
+  [#653] Spring, year 5: Voll stole from the food store; Pim saw it.
+  [#655] Spring, year 5: Joro stole from the food store.
+  [#666] Spring, year 5: Garu and Voll quarrelled over stolen meat.
+  [#667] Spring, year 5: A feud broke out between Voll and Garu over stolen meat.
+  [#677] Summer, year 5: Lin stole from the food store; Maa saw it.
+  [#679] Summer, year 5: Tok stole from the food store; Kal saw it.
+  [#683] Summer, year 5: Voll stole from the food store; Moru saw it.
+  [#684] Summer, year 5: Garu stole from the food store.
+  [#687] Summer, year 5: Joro stole from the food store.
+  [#706] Summer, year 5: Lin stole from the food store; Garu saw it.
+  [#709] Summer, year 5: Tok stole from the food store.
+  [#710] Summer, year 5: Garu stole from the food store.
+  [#714] Summer, year 5: Voll stole from the food store.
+  [#717] Summer, year 5: Joro stole from the food store.
+  [#720] Autumn, year 5: Tarek died of old age, 48 years old.
+  [#724] Autumn, year 5: Lin stole from the food store.
+  [#727] Autumn, year 5: Tok stole from the food store; Voll saw it.
+  [#728] Autumn, year 5: Ban was born to Tavo and Hela.
+  [#729] Autumn, year 5: Sela and Kesh became partners.
+  [#730] Autumn, year 5: Garu attacked Voll over stolen meat: Garu lost the fight and was badly hurt.
+  [#740] Winter, year 5: Arn was born to Tarek and Sela.
+  [#746] Winter, year 5: Joro stole from the food store.
+  [#747] Winter, year 5: Voll stole from the food store; Joro saw it.
+  [#752] Winter, year 5: Lin stole from the food store.
+  [#753] Winter, year 5: Tok stole from the food store.
+  [#766] Winter, year 5: Garu stole from the food store.
+  [#772] Winter, year 5: Enko was born to Joro and Ilka.
+  [#778] Winter, year 5: Voll stole from the food store; Ruk saw it.
+  [#779] Winter, year 5: Joro stole from the food store; Sela saw it.
+  [#785] Winter, year 5: Lin stole from the food store.
+  [#786] Winter, year 5: Tok stole from the food store.
+  [#787] Spring, year 6: Garu and Voll quarrelled after the fight.
+  [#796] Spring, year 6: Garu stole from the food store.
+  [#804] Spring, year 6: Voll stole from the food store; Joro saw it.
+  [#808] Spring, year 6: Joro stole from the food store; Soa saw it.
+  [#814] Spring, year 6: Lin stole from the food store.
+  [#817] Spring, year 6: Tok stole from the food store; Joro saw it.
+  [#823] Spring, year 6: Garu stole from the food store.
+  [#834] Summer, year 6: Voll stole from the food store; Lin saw it.
+  [#838] Summer, year 6: Joro stole from the food store.
+  [#844] Summer, year 6: Lin stole from the food store; Brak saw it.
+  [#845] Summer, year 6: Tok stole from the food store.
+  [#853] Summer, year 6: Garu stole from the food store; Ruk saw it.
+  [#864] Summer, year 6: Voll stole from the food store.
+  [#868] Summer, year 6: Joro stole from the food store.
+  [#871] Autumn, year 6: Lin stole from the food store.
+  [#878] Autumn, year 6: Lin stole from the food store.
+  [#882] Autumn, year 6: Voll brought down a mammoth.
+  [#889] Winter, year 6: Tok stole from the food store; Moru saw it.
+  [#891] Winter, year 6: Garu stole from the food store.
+  [#892] Winter, year 6: Joro stole from the food store.
+  [#893] Winter, year 6: Voll stole from the food store; Hela saw it.
+  [#894] Winter, year 6: Voll and Garu quarrelled after the fight.
+  [#910] Winter, year 6: Lin stole from the food store.
+  [#917] Winter, year 6: Garu stole from the food store; Lin saw it.
+  [#922] Winter, year 6: Joro stole from the food store; Tavo saw it.
+  [#923] Winter, year 6: Voll stole from the food store.
+  [#924] Winter, year 6: Tok stole from the food store; Kesh saw it.
+  [#940] Spring, year 7: Lin stole from the food store; Tavo saw it.
+  [#946] Spring, year 7: Voll stole from the food store; Ilka saw it.
+  [#947] Spring, year 7: Garu stole from the food store; Hela saw it.
+  [#952] Spring, year 7: Tok stole from the food store; Kesh saw it.
+  [#954] Spring, year 7: Joro stole from the food store; Tavo saw it.
+  [#969] Spring, year 7: Lin stole from the food store; Ilka saw it.
+  [#980] Summer, year 7: Voll stole from the food store; Ossa saw it.
+  [#981] Summer, year 7: Garu stole from the food store.
+  [#982] Summer, year 7: Tok stole from the food store.
+  [#984] Summer, year 7: Joro stole from the food store; Ulf saw it.
+  [#985] Summer, year 7: A feud broke out between Tok and Joro over stolen meat.
+  [#1001] Summer, year 7: Lin stole from the food store.
+  [#1002] Summer, year 7: Joro and Tok quarrelled over stolen meat.
+  [#1011] Summer, year 7: Voll stole from the food store; Ruk saw it.
+  [#1012] Summer, year 7: Garu stole from the food store.
+  [#1013] Summer, year 7: Tok stole from the food store; Kal saw it.
+  [#1016] Summer, year 7: Joro stole from the food store.
+  [#1017] Autumn, year 7: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#1021] Autumn, year 7: Lin stole from the food store.
+  [#1027] Winter, year 7: Lin stole from the food store.
+  [#1032] Winter, year 7: Garu stole from the food store; Arn saw it.
+  [#1033] Winter, year 7: Tok stole from the food store.
+  [#1034] Winter, year 7: Joro stole from the food store; Kesh saw it.
+  [#1035] Winter, year 7: Voll stole from the food store; Sela saw it.
+  [#1036] Winter, year 7: Joro attacked Tok over stolen meat: Tok lost the fight and was badly hurt.
+  [#1045] Winter, year 7: The clan drove Voll out for attacking Garu after the fight.
+  [#1050] Winter, year 7: Tok and Lin quarrelled over stolen meat.
+  [#1051] Winter, year 7: A feud broke out between Tok and Lin over stolen meat.
+  [#1056] Winter, year 7: Garu stole from the food store.
+  [#1061] Winter, year 7: Lin stole from the food store.
+  [#1072] Spring, year 8: Joro stole from the food store.
+  [#1078] Spring, year 8: Lin stole from the food store.
+  [#1082] Spring, year 8: Garu stole from the food store.
+  [#1089] Spring, year 8: Tok stole from the food store.
+  [#1099] Spring, year 8: Joro stole from the food store; Oda saw it.
+  [#1110] Summer, year 8: Lin stole from the food store.
+  [#1111] Summer, year 8: Garu stole from the food store; Tavo saw it.
+  [#1118] Summer, year 8: Tok stole from the food store; Ilka saw it.
+  [#1127] Summer, year 8: Joro stole from the food store; Ilka saw it.
+  [#1139] Summer, year 8: Lin stole from the food store.
+  [#1140] Summer, year 8: Garu stole from the food store; Ruk saw it.
+  [#1144] Autumn, year 8: Garu and Lin quarrelled over stolen meat.
+  [#1146] Autumn, year 8: Lin stole from the food store.
+  [#1157] Winter, year 8: Tok stole from the food store.
+  [#1159] Winter, year 8: Garu stole from the food store; Sela saw it.
+  [#1160] Winter, year 8: Joro stole from the food store; Kesh saw it.
+  [#1170] Winter, year 8: Lin stole from the food store; Kesh saw it.
+  [#1172] Winter, year 8: Ivo was born to Tavo and Hela.
+  [#1178] Winter, year 8: Kora was born to Kesh and Sela.
+  [#1184] Winter, year 8: Tok and Lin quarrelled over stolen meat.
+  [#1190] Winter, year 8: Garu stole from the food store.
+  [#1191] Winter, year 8: Tok stole from the food store; Ruk saw it.
+  [#1192] Winter, year 8: Joro stole from the food store; Maa saw it.
+  [#1199] Spring, year 9: Lin stole from the food store.
+  [#1209] Spring, year 9: Lin attacked Tok over stolen meat: Lin lost the fight and was killed.
+  [#1210] Spring, year 9: Lin was killed by Tok in a fight.
+  [#1211] Spring, year 9: Ilka blamed Tok for Lin's death, because Tok struck the blow.
+  [#1212] Spring, year 9: Joro blamed Tok for Lin's death, because Tok struck the blow.
+  [#1213] Spring, year 9: Enko blamed Tok for Lin's death, because Tok struck the blow.
+  [#1219] Spring, year 9: Garu stole from the food store; Kora saw it.
+  [#1224] Spring, year 9: Joro stole from the food store; Sela saw it.
+  [#1225] Spring, year 9: Tok stole from the food store.
+  [#1251] Summer, year 9: Joro stole from the food store; Kesh saw it.
+  [#1252] Summer, year 9: Garu stole from the food store; Joro saw it.
+  [#1253] Summer, year 9: Tok stole from the food store; Ivo saw it.
+  [#1275] Summer, year 9: Garu stole from the food store; Pim saw it.
+  [#1280] Summer, year 9: Joro stole from the food store; Sela saw it.
+  [#1281] Summer, year 9: Tok stole from the food store; Maa saw it.
+  [#1283] Autumn, year 9: Tok and Joro quarrelled over the death of Lin.
+  [#1288] Winter, year 9: Tok and Joro quarrelled over the death of Lin.
+  [#1294] Winter, year 9: Garu stole from the food store.
+  [#1295] Winter, year 9: Tok stole from the food store.
+  [#1296] Winter, year 9: Joro stole from the food store.
+  [#1322] Winter, year 9: Joro stole from the food store.
+  [#1323] Winter, year 9: Garu stole from the food store; Maa saw it.
+  [#1324] Winter, year 9: Tok stole from the food store; Enko saw it.
+  [#1345] Spring, year 10: Garu stole from the food store; Oren saw it.
+  [#1350] Spring, year 10: Tok stole from the food store.
+  [#1352] Spring, year 10: Joro stole from the food store; Sela saw it.
+  [#1358] Spring, year 10: The clan drove Tok out for attacking Joro after the fight.
+  [#1375] Summer, year 10: Garu stole from the food store.
+  [#1376] Summer, year 10: Joro stole from the food store; Ban saw it.
+  [#1393] Summer, year 10: Garu stole from the food store.
+  [#1398] Summer, year 10: Joro stole from the food store.
+  [#1406] Winter, year 10: Garu stole from the food store.
+  [#1407] Winter, year 10: Joro stole from the food store.
+  [#1420] Winter, year 10: Zuri was born to Kesh and Sela.
+  [#1429] Winter, year 10: Garu stole from the food store; Maa saw it.
+  [#1430] Winter, year 10: Joro stole from the food store.
+  [#1448] Spring, year 11: Garu stole from the food store; Sela saw it.
+  [#1452] Spring, year 11: Joro stole from the food store.
+  [#1472] Summer, year 11: Garu stole from the food store.
+  [#1474] Summer, year 11: Joro stole from the food store; Kesh saw it.
+  [#1479] Summer, year 11: Brak died of old age, 51 years old.
+  [#1489] Summer, year 11: Garu stole from the food store.
+  [#1493] Summer, year 11: Joro stole from the food store.
+  [#1495] Autumn, year 11: Ilka brought down a mammoth.
+  [#1501] Autumn, year 11: Garu stole from the food store; Arn saw it.
+  [#1502] Autumn, year 11: Joro stole from the food store.
+  [#1503] Autumn, year 11: Tavo died of old age, 48 years old.
+  [#1518] Winter, year 11: Garu stole from the food store.
+  [#1520] Winter, year 11: Joro stole from the food store.
+  [#1536] Spring, year 12: Joro stole from the food store; Maa saw it.
+  [#1537] Spring, year 12: Garu stole from the food store.
+  [#1553] Spring, year 12: Joro stole from the food store; Pim saw it.
+  [#1554] Spring, year 12: Garu stole from the food store.
+  [#1570] Summer, year 12: Joro stole from the food store; Maa saw it.
+  [#1571] Summer, year 12: Garu stole from the food store; Oda saw it.
+  [#1589] Winter, year 12: Garu stole from the food store; Arn saw it.
+  [#1590] Winter, year 12: Joro stole from the food store; Oren saw it.
+  [#1604] Winter, year 12: Garu stole from the food store.
+  [#1607] Winter, year 12: Joro stole from the food store; Ossa saw it.
+  [#1608] Winter, year 12: Soa and Ruk became partners.
+  [#1624] Spring, year 13: Joro stole from the food store; Moru saw it.
+  [#1625] Spring, year 13: Garu stole from the food store.
+  [#1641] Summer, year 13: Joro stole from the food store.
+  [#1642] Summer, year 13: Garu stole from the food store.
+  [#1658] Summer, year 13: Joro stole from the food store; Oda saw it.
+  [#1659] Summer, year 13: Garu stole from the food store; Sela saw it.
+  [#1668] Winter, year 13: Joro stole from the food store; Garu saw it.
+  [#1669] Winter, year 13: Garu stole from the food store; Ivo saw it.
+  [#1676] Winter, year 13: Garu and Joro quarrelled over stolen meat.
+  [#1685] Winter, year 13: Garu stole from the food store; Kesh saw it.
+  [#1687] Winter, year 13: Joro stole from the food store.
+  [#1702] Spring, year 14: Garu stole from the food store.
+  [#1704] Spring, year 14: Joro stole from the food store.
+  [#1720] Summer, year 14: Joro stole from the food store.
+  [#1721] Summer, year 14: Garu stole from the food store.
+  [#1731] Summer, year 14: Pela was born to Ruk and Soa.
+  [#1738] Summer, year 14: Garu stole from the food store.
+  [#1740] Summer, year 14: Joro stole from the food store.
+  [#1752] Winter, year 14: Grem was born to Kesh and Sela.
+  [#1758] Winter, year 14: Garu stole from the food store.
+  [#1759] Winter, year 14: Joro stole from the food store.
+  [#1775] Winter, year 14: Garu and Joro quarrelled over stolen meat.
+  [#1776] Winter, year 14: A feud broke out between Garu and Joro over stolen meat.
+  [#1784] Winter, year 14: Garu stole from the food store; Grem saw it.
+  [#1788] Winter, year 14: Joro stole from the food store; Hela saw it.
+  [#1794] Winter, year 14: Ulf brought down a mammoth.
+  [#1812] Spring, year 15: Joro stole from the food store.
+  [#1815] Spring, year 15: Garu stole from the food store.
+  [#1832] Summer, year 15: Garu and Joro quarrelled over stolen meat.
+  [#1840] Summer, year 15: Joro stole from the food store.
+  [#1843] Summer, year 15: Garu stole from the food store; Oren saw it.
+  [#1845] Summer, year 15: Joro and Garu quarrelled over stolen meat.
+  [#1866] Summer, year 15: Joro attacked Garu over stolen meat: Garu lost the fight and was badly hurt.
+  [#1893] Winter, year 15: Joro stole from the food store.
+  [#1894] Winter, year 15: Garu stole from the food store; Ivo saw it.
+  [#1920] Winter, year 15: Joro stole from the food store.
+  [#1921] Winter, year 15: Garu stole from the food store.
+  [#1947] Spring, year 16: Garu stole from the food store.
+  [#1948] Spring, year 16: Joro stole from the food store.
+  [#1954] Spring, year 16: Hano was born to Ruk and Soa.
+  [#1960] Spring, year 16: Joro and Garu quarrelled after the fight.
+  [#1975] Summer, year 16: Joro stole from the food store.
+  [#1977] Summer, year 16: Garu stole from the food store; Enko saw it.
+  [#1983] Summer, year 16: Garu and Joro quarrelled after the fight.
+  [#2004] Summer, year 16: Garu stole from the food store.
+  [#2005] Summer, year 16: Joro stole from the food store; Kesh saw it.
+  [#2025] Winter, year 16: Joro stole from the food store; Pim saw it.
+  [#2026] Winter, year 16: Garu stole from the food store; Zuri saw it.
+  [#2049] Winter, year 16: Garu stole from the food store; Joro saw it.
+  [#2053] Winter, year 16: Joro stole from the food store; Soa saw it.
+  [#2077] Spring, year 17: Joro stole from the food store; Ivo saw it.
+  [#2079] Spring, year 17: Garu stole from the food store; Ossa saw it.
+  [#2096] Summer, year 17: Garu and Joro quarrelled after the fight.
+  [#2102] Summer, year 17: Garu stole from the food store; Kal saw it.
+  [#2104] Summer, year 17: Joro stole from the food store; Arn saw it.
+  [#2129] Summer, year 17: Garu stole from the food store; Oren saw it.
+  [#2132] Summer, year 17: Joro stole from the food store.
+  [#2136] Autumn, year 17: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#2156] Winter, year 17: Garu stole from the food store.
+  [#2157] Winter, year 17: Joro stole from the food store.
+  [#2158] Winter, year 17: The clan drove Garu out for attacking Joro after the fight.
+  [#2198] Spring, year 18: Joro stole from the food store; Moru saw it.
+  [#2224] Spring, year 18: Joro stole from the food store; Kora saw it.
+  [#2250] Summer, year 18: Joro stole from the food store; Ruk saw it.
+  [#2267] Autumn, year 18: Sef was born to Ruk and Soa.
+  [#2286] Winter, year 18: Joro stole from the food store; Ivo saw it.
+  [#2311] Winter, year 18: Ulf brought down a mammoth.
+  [#2318] Winter, year 18: Joro stole from the food store; Oren saw it.
+  [#2348] Spring, year 19: Joro stole from the food store.
+  [#2376] Summer, year 19: Joro stole from the food store.
+  [#2407] Summer, year 19: Joro stole from the food store; Oren saw it.
+  [#2412] Autumn, year 19: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#2440] Winter, year 19: Joro stole from the food store; Maa saw it.
+  [#2441] Winter, year 19: Iva was born to Kesh and Sela.
+  [#2466] Winter, year 19: Oda and Ulf became partners.
+  [#2496] Spring, year 20: Joro stole from the food store; Hano saw it.
+  [#2525] Summer, year 20: Joro stole from the food store; Sela saw it.
+  [#2553] Summer, year 20: Joro stole from the food store; Enko saw it.
+  [#2559] Autumn, year 20: The autumn harvest failed: the land gave only 45% of its usual food.
+  [#2560] Autumn, year 20: Sten was born to Ruk and Soa.
+  [#2596] Winter, year 20: Joro stole from the food store.
+  [#2611] Winter, year 20: Hela died of old age, 51 years old.
+  [#2640] Spring, year 21: Ysa was born to Ulf and Oda.
+  [#2665] Spring, year 21: Joro stole from the food store.
+  [#2695] Summer, year 21: Joro stole from the food store.
+  [#2765] Winter, year 21: Joro stole from the food store; Ilka saw it.
+  [#2794] Winter, year 21: Ossa and Enko became partners.
+  [#2802] Winter, year 21: Joro stole from the food store; Sten saw it.
+  [#2833] Spring, year 22: Joro stole from the food store; Arn saw it.
+  [#2866] Summer, year 22: Joro stole from the food store; Oda saw it.
+  [#2879] Summer, year 22: Mira was born to Ruk and Soa.
+  [#2911] Summer, year 22: Joro stole from the food store; Ban saw it.
+  [#2943] Autumn, year 22: Enko brought down a mammoth.
+  [#2944] Autumn, year 22: Ilka died of old age, 56 years old.
+  [#2953] Autumn, year 22: Joro stole from the food store; Mira saw it.
+  [#2994] Winter, year 22: Joro stole from the food store.
+  [#3035] Spring, year 23: Joro stole from the food store; Enko saw it.
+  [#3052] Spring, year 23: Awa was born to Ulf and Oda.
+  [#3053] Spring, year 23: Oda died giving birth.
+  [#3078] Summer, year 23: Joro stole from the food store; Ruk saw it.
+  [#3119] Summer, year 23: Joro stole from the food store; Ruk saw it.
+  [#3163] Winter, year 23: Tiru was born to Enko and Ossa.
+  [#3172] Winter, year 23: Joro stole from the food store.
+  [#3189] Winter, year 23: Maa and Joro became partners.
+  [#3236] Spring, year 24: Joro stole from the food store; Sela saw it.
+  [#3272] Spring, year 24: Joro stole from the food store; Arn saw it.
+  [#3318] Summer, year 24: Joro stole from the food store.
+  [#3319] Summer, year 24: Ruk died of old age, 55 years old.
+  [#3356] Autumn, year 24: Duro was born to Ruk and Soa.
+  [#3380] Winter, year 24: Joro stole from the food store.
+  [#3429] Spring, year 25: Kora and Ivo became partners.
+  [#3449] Spring, year 25: Joro stole from the food store; Ossa saw it.
+  [#3466] Spring, year 25: Lott was born to Joro and Maa.
+  [#3472] Spring, year 25: Lott stole from the food store; Zuri saw it.
+  [#3492] Summer, year 25: Joro stole from the food store; Tiru saw it.
+  [#3517] Summer, year 25: Lott stole from the food store; Kesh saw it.
+  [#3534] Summer, year 25: Joro stole from the food store.
+  [#3553] Autumn, year 25: Lott stole from the food store.
+  [#3579] Autumn, year 25: Lott stole from the food store; Iva saw it.
+  [#3588] Winter, year 25: Joro stole from the food store.
+  [#3621] Winter, year 25: Lott stole from the food store; Maa saw it.
+  [#3654] Spring, year 26: Lott stole from the food store.
+  [#3658] Spring, year 26: Joro stole from the food store.
+  [#3691] Summer, year 26: Neva was born to Ivo and Kora.
+  [#3697] Summer, year 26: Lott stole from the food store.
+  [#3701] Summer, year 26: Joro stole from the food store; Ban saw it.
+  [#3741] Summer, year 26: Lott stole from the food store.
+  [#3743] Summer, year 26: Joro stole from the food store.
+  [#3768] Autumn, year 26: Lott stole from the food store.
+  [#3791] Winter, year 26: Joro stole from the food store; Lott saw it.
+  [#3800] Winter, year 26: Lott stole from the food store; Ivo saw it.
+  [#3809] Winter, year 26: Voll the Second was born to Enko and Ossa.
+  [#3841] Winter, year 26: Lott stole from the food store.
+  [#3868] Spring, year 27: Lott stole from the food store.
+  [#3883] Spring, year 27: Joro stole from the food store.
+  [#3908] Summer, year 27: Lott stole from the food store; Pim saw it.
+  [#3925] Summer, year 27: Joro stole from the food store; Moru saw it.
+  [#3945] Autumn, year 27: Lott stole from the food store; Soa saw it.
+  [#3961] Autumn, year 27: Lott stole from the food store; Grem saw it.
+  [#3973] Winter, year 27: Joro stole from the food store; Awa saw it.
+  [#3998] Winter, year 27: Lott stole from the food store; Ysa saw it.
+  [#4031] Spring, year 28: Lott stole from the food store; Tiru saw it.
+  [#4034] Spring, year 28: Ruu was born to Ivo and Kora.
+  [#4060] Spring, year 28: Lott stole from the food store; Ossa saw it.
+  [#4070] Summer, year 28: Joro stole from the food store.
+  [#4079] Summer, year 28: Ruk the Second was born to Joro and Maa.
+  [#4085] Summer, year 28: Ruk the Second stole from the food store.
+  [#4105] Summer, year 28: Lott stole from the food store; Kesh saw it.
+  [#4106] Summer, year 28: Joro stole from the food store; Sef saw it.
+  [#4126] Autumn, year 28: Ruk the Second stole from the food store; Ban saw it.
+  [#4133] Autumn, year 28: Lott stole from the food store.
+  [#4143] Autumn, year 28: Ruk the Second stole from the food store.
+  [#4144] Autumn, year 28: Sela died of old age, 50 years old.
+  [#4148] Winter, year 28: Vena was born to Enko and Ossa.
+  [#4153] Winter, year 28: Lott stole from the food store.
+  [#4159] Winter, year 28: Joro stole from the food store.
+  [#4187] Winter, year 28: Ruk the Second stole from the food store.
+  [#4206] Winter, year 28: Lott stole from the food store.
+  [#4224] Spring, year 29: Ruk the Second stole from the food store; Zuri saw it.
+  [#4225] Spring, year 29: Soa and Arn became partners.
+  [#4233] Spring, year 29: Lott stole from the food store; Moru saw it.
+  [#4235] Spring, year 29: Joro brought down a mammoth.
+  [#4241] Spring, year 29: Joro stole from the food store.
+  [#4267] Spring, year 29: Ruk the Second stole from the food store; Voll the Second saw it.
+  [#4281] Summer, year 29: Joro stole from the food store; Zuri saw it.
+  [#4289] Summer, year 29: Lott stole from the food store.
+  [#4316] Summer, year 29: Ruk the Second stole from the food store; Vena saw it.
+  [#4330] Summer, year 29: Joro stole from the food store; Pela saw it.
+  [#4337] Summer, year 29: Lott stole from the food store; Ruu saw it.
+  [#4349] Autumn, year 29: Ruk the Second stole from the food store.
+  [#4358] Autumn, year 29: Lott stole from the food store; Voll the Second saw it.
+  [#4371] Winter, year 29: Ruk the Second stole from the food store.
+  [#4378] Winter, year 29: Joro stole from the food store.
+  [#4397] Winter, year 29: Lott stole from the food store; Arn saw it.
+  [#4407] Winter, year 29: Brak the Second was born to Arn and Soa.
+  [#4417] Winter, year 29: Garu the Second was born to Ivo and Kora.
+  [#4425] Winter, year 29: Ruk the Second stole from the food store.
+  [#4440] Spring, year 30: Lott stole from the food store.
+  [#4453] Spring, year 30: Ruk the Second stole from the food store.
+  [#4463] Spring, year 30: Lott stole from the food store; Sten saw it.
+  [#4476] Summer, year 30: Ruk the Second stole from the food store; Enko saw it.
+  [#4492] Summer, year 30: Lott stole from the food store.
+  [#4496] Summer, year 30: Joro stole from the food store.
+  [#4506] Summer, year 30: Tavo the Second was born to Joro and Maa.
+  [#4520] Summer, year 30: Ruk the Second stole from the food store.
+  [#4534] Autumn, year 30: Lott stole from the food store.
+  [#4544] Autumn, year 30: Ruk the Second stole from the food store.
+  [#4552] Autumn, year 30: Lott stole from the food store.
+  [#4558] Winter, year 30: Joro stole from the food store; Ossa saw it.
+  [#4572] Winter, year 30: Joro died of old age, 50 years old.
+  [#4581] Winter, year 30: Ruk the Second stole from the food store.
+  [#4601] Winter, year 30: Lott stole from the food store.
