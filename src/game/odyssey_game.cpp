@@ -98,6 +98,7 @@ void OdysseyGame::resetPlay() {
     respawnTicks_ = 0;
     effects_.clear();
     projectiles_.clear();
+    arcShots_.clear();
     attackCooldown_ = 0;
     swingTicks_ = 0;
     hotbar_ = {};     // a restart: empty hands, and every pickup lies in the level again
@@ -326,7 +327,7 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
     }
 }
 
-void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY) {
+void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY, double distancePixels, bool chestHeight) {
     if (attackCooldown_ > 0) {
         return;
     }
@@ -339,6 +340,11 @@ void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY) 
         const auto hits = behaviour.swingToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, targets);
         core::logInfo(std::format("{} ({}) swung toward {:.0f} degrees, facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing()), hits.size()));
         for (const std::size_t index : hits) strike(enemies_[index], weapon.damage, &weapon);
+    } else if (auto arc = launchArcShot(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, distancePixels, chestHeight)) {
+        arcShots_.push_back(*arc);
+        core::logInfo(std::format("{} ({}) arced toward {:.0f} degrees, {:.1f} m away", weapon.name, weaponClassName(weapon.weaponClass),
+                                  std::atan2(dirY, dirX) * 180.0 / std::numbers::pi,
+                                  luna::engine::toDouble(luna::physics::length({arc->aimPoint.x - arc->body.position.x, arc->aimPoint.y - arc->body.position.y, luna::physics::kFixedZero}))));
     } else if (auto shot = behaviour.launchToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY)) {
         projectiles_.push_back(*shot);
         core::logInfo(std::format("{} ({}) shot toward {:.0f} degrees, facing {}", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing())));
@@ -430,6 +436,30 @@ void OdysseyGame::drawHeld(luna::engine::Renderer& renderer, const luna::engine:
         if (const auto source = content_.rect(frame)) {
             renderer.drawStyled(texture, *source,
                                 {static_cast<int>(std::lround(shot.x)) - size / 2 - view.x, static_cast<int>(std::lround(shot.y)) - size / 2 - view.y, size, size}, style);
+        }
+    }
+    // Arcs (US-140): the sprite is lifted by its height, and its shadow moves along the ground
+    // underneath, so the player can judge where it will come down.
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    for (const ArcShot& shot : arcShots_) {
+        const auto between = [&](luna::physics::Fixed before, luna::physics::Fixed after) {
+            return luna::engine::toDouble(before) + (luna::engine::toDouble(after) - luna::engine::toDouble(before)) * (shot.state == ArcState::Flying ? alpha : 1.0);
+        };
+        const luna::physics::Vec3 at{luna::engine::metresFromPixels(between(shot.previousPosition.x, shot.body.position.x) * luna::engine::kPixelsPerMetre),
+                                     luna::engine::metresFromPixels(between(shot.previousPosition.y, shot.body.position.y) * luna::engine::kPixelsPerMetre),
+                                     luna::engine::metresFromPixels(between(shot.previousPosition.z, shot.body.position.z) * luna::engine::kPixelsPerMetre)};
+        const luna::engine::ScreenPoint lifted = luna::engine::topDownPosition(at);
+        const luna::engine::ScreenPoint shadow = luna::engine::groundShadow(at);
+        if (shot.state == ArcState::Flying) {
+            painter.fill({static_cast<int>(std::lround(shadow.x)) - 3 - view.x, static_cast<int>(std::lround(shadow.y)) - 1 - view.y, 6, 2}, luna::engine::UiColor::Shade);
+        }
+        const bool thrown = shot.weapon->weaponClass == WeaponClass::Thrown;
+        const std::string frame = thrown ? shot.weapon->frame : "light arrow";
+        if (const auto source = content_.rect(frame)) {
+            const int size = thrown ? 14 : 16;
+            renderer.drawStyled(thrown ? iconsTexture_ : effectsTexture_, *source,
+                                {static_cast<int>(std::lround(lifted.x)) - size / 2 - view.x, static_cast<int>(std::lround(lifted.y)) - size / 2 - view.y, size, size},
+                                thrown ? luna::engine::DrawStyle{} : luna::engine::DrawStyle{255, luna::engine::Blend::Add});
         }
     }
 }
@@ -535,8 +565,12 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (!fallen && heldWeapon() != nullptr && (mouseAttack || intents.pressed(luna::engine::Intent::Interact))) {
         double dirX = aimDx_;
         double dirY = aimDy_;
-        if (!mouseAttack) facingVector(hero_.facing(), dirX, dirY);
-        attackWith(*heldWeapon(), dirX, dirY);
+        double distance = std::hypot(aimTargetX_ - hero_.feetX(), aimTargetY_ - hero_.feetY());
+        if (!mouseAttack) {
+            facingVector(hero_.facing(), dirX, dirY);
+            distance = heldWeapon()->range * kTileSize; // keys have no pointer: out to the weapon's range
+        }
+        attackWith(*heldWeapon(), dirX, dirY, distance, !mouseAttack);
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && !heldSlotName.empty()) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
@@ -612,6 +646,23 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             if (done) shot.maxDistance = -1.0; // spent: removed below
         }
         std::erase_if(projectiles_, [](const Projectile& shot) { return shot.maxDistance < 0.0; });
+    }
+
+    // Arcs (US-140): each shot flies one physics tick and stops at the first enemy, solid tile or the ground.
+    if (!arcShots_.empty()) {
+        std::vector<Target> targets;
+        for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
+        for (const ArcEvent& event : stepArcShots(arcShots_, map_, targets)) {
+            const luna::engine::ScreenPoint ground = luna::engine::groundShadow(event.point);
+            static constexpr const char* kEnds[] = {"hit an enemy", "stopped at a solid", "came down", "was lost"};
+            core::logInfo(std::format("{} {} at ({:.1f}, {:.1f}) m, {:.2f} m up", event.weapon->name, kEnds[static_cast<int>(event.end)], luna::engine::toDouble(event.point.x), luna::engine::toDouble(event.point.y), luna::engine::toDouble(event.point.z)));
+            if (event.end == ArcEnd::Enemy) {
+                strike(enemies_[event.enemy], event.weapon->damage, event.weapon);
+                targets[event.enemy].alive = enemies_[event.enemy].isAlive();
+            } else if (event.end != ArcEnd::Lost) {
+                playEffect("dust", ground.x, ground.y, 16); // a miss sticks in the ground or against a rock
+            }
+        }
     }
 
     // A puff of dust behind every spear in the air, every third tick: its trail (US-132).

@@ -824,3 +824,23 @@ A *unit vector* is the tidy way to say "which way" without saying "how far". The
 **Try it (10 minutes).** Run `odysseus.exe --level docs/evidence/US-139/levels/aim.json`, walk with the keys and aim with the mouse: click to swing. Notice the crosshair turns red when the goblin is out of the sword's reach. Then change the `90.0` of the sword in `behaviourOf` to `30.0`, build, and see how much more exactly you must aim.
 
 **Check yourself.** Why does the game keep a unit vector for the aim and a separate `Facing` for drawing the hero?
+
+
+## US-140: Arc ballistics for shots (2026-10-01)
+
+**The idea: fixed-point numbers versus floating point.** A computer stores most fractions as *floating point* (`double`): fast, but the result of the same sum can differ in the last digits between different machines or compilers. Luna Physics avoids that: its numbers are `Fixed`, a whole number counting 1/4,294,967,296 of a metre, so `Fixed` arithmetic gives the identical answer everywhere, every run. That matters for a game that may replay a recorded game or check a simulation hash, and it is why the tests can say "two runs land on the exact same point" with `==`.
+
+```cpp
+luna::physics::Projectile body{hand, {}, mass, dragArea};          // metres, m/s, kg: all Fixed
+const auto angle = luna::physics::aimLaunchAngle(body, air, aimPoint, speed);
+body.velocity = luna::physics::launchVelocity(hand, aimPoint, speed, *angle);
+// each tick: flyTick(body, air, tipRadius, obstacles) moves it in 10 small sub-steps
+```
+
+The only floating point is at the edges: the mouse (pixels, a `double`) is rounded to 1/1024 m when it enters the physics, and the position is turned back into pixels only to draw. The arrow's *height* is physics (z); the screen shows it by lifting the sprite, with a shadow left on the ground so your eye can judge the distance.
+
+**Where to look.** `launchArcShot` and `stepArcShots` in [src/game/arc_shots.cpp](../src/game/arc_shots.cpp); the drawing at the end of `OdysseyGame::drawHeld` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --level docs/evidence/US-140/levels/arc-rock.json`, aim just behind the rock and click, then aim far past it. Watch the shadow. Then change `kSolidHeightMetres` in `arc_shots.h` to `2.0`, build, and see which shots still clear the rock.
+
+**Check yourself.** Why can a bow shot aimed at the ground 4 m away be stopped by a 1 m rock 2 m in front of you, while one aimed 9 m away flies over it?
