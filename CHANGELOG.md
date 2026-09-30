@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-111 / S-US-111: Quarrel, blame and take revenge (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Second story of M2b.
+
+- Simulation: every morning each person meets someone (often a person they hold a grudge against); people who dislike each other quarrel (more when hungry or tired); grieving kin blame the thief they know of or the one who struck the blow; a feud that keeps worsening ends in an attack: a fight (injury, sometimes death) or, when the clan is against the aggressor, an exile. New: `Health` (wounds heal or kill), exile (`Person::exiled`, counted apart from the dead), death causes "a fight" and "wounds", feud records (start event, since, last revenge).
+- Data: `story.json` sections `quarrel`, `blame`, `revenge`, `health`.
+- Code: `src/sim/world_story.cpp`; `world.{h,cpp}`, `person.h`, `memory.h`, `ai.{h,cpp}`, `save.cpp` (feud records, health, exile), `report.{h,cpp}`.
+- Tests: `tests/sim/story_quarrel_test.cpp` (8 cases), shared helpers `tests/sim/story_helpers.h`, the version-2 upgrade test now also covers feuds and health.
+- Balance: 30 seeds x 100 years, no crash or extinction (17 to 50 alive).
+
 ## US-110 / S-US-110: Give every death and feud a reason (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2b (Kill Gate 1 retry).

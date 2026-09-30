@@ -13,6 +13,11 @@ namespace odysseus::sim {
 // only entries at or above a threshold, so everyday gifts and thefts do not drown the births,
 // deaths and feuds.
 inline constexpr int kImportanceGift = 10;
+inline constexpr int kImportanceQuarrel = 30;
+inline constexpr int kImportanceRecovery = 25;
+inline constexpr int kImportanceBlame = 60;
+inline constexpr int kImportanceRevenge = 80;
+inline constexpr int kImportanceExile = 80;
 inline constexpr int kImportanceTheft = 35;
 inline constexpr int kImportanceLean = 55;       // a failed harvest: the root of many hard winters
 inline constexpr int kImportanceStoreEmpty = 70; // hunger in the clan is a turn in its story

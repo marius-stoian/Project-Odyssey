@@ -22,6 +22,7 @@ struct Situation {
     bool fireLit = true;
     bool canGiveGift = true; // someone is awake and no gift was given today
     bool canSteal = false;   // there is food in the store and the last theft is long enough ago
+    bool unwell = false;     // sick or injured: no work, no hunting, no stealing (M2b)
 };
 
 // Utility AI (US-012): every action gets a whole-number score from the person's needs,

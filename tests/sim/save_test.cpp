@@ -165,14 +165,23 @@ TEST_CASE("US-016 Old version") {
         // Turn the file into what version 2 wrote: no event links in the chronicle, no grudges,
         // no event ids in memories, no story stream, no lean-season flag.
         sim::World lived(42, realConfig());
+        for (int i = 0; i < 3; ++i) {
+            lived.recordTheft(4, 5);
+            lived.recordTheft(5, 4);
+        }
         lived.runTicks(lived.calendar().ticksPerYear());
         sim::saveWorld(lived, file);
         nlohmann::json save = nlohmann::json::parse(readAll(file));
         save["saveVersion"] = 2;
         save.erase("leanEvent");
+        for (auto& feud : save["feuds"]) {
+            feud = nlohmann::json::array({feud[0], feud[1]}); // version 2 knew only the two people
+        }
         save["random"].erase("story");
         for (auto& person : save["people"]) {
-            person.erase("grudges");
+            for (const char* key : {"grudges", "exiled", "health", "healthDays", "healthEvent"}) {
+                person.erase(key);
+            }
             for (auto& memory : person["memories"]) {
                 memory.erase("event");
             }
@@ -186,6 +195,7 @@ TEST_CASE("US-016 Old version") {
         const sim::LoadedWorld loaded = sim::loadWorld(file, realConfig());
         REQUIRE_FALSE(loaded.notes.empty());
         CHECK(loaded.notes.front().find("upgraded from save version 2 to 3") != std::string::npos);
+        CHECK(loaded.world.feuds() == lived.feuds()); // running feuds survive the upgrade
         REQUIRE(loaded.world.chronicle().entries().size() == lived.chronicle().entries().size());
         for (std::size_t i = 0; i < lived.chronicle().entries().size(); ++i) {
             CHECK(loaded.world.chronicle().entries()[i].text == lived.chronicle().entries()[i].text); // the past is kept word for word

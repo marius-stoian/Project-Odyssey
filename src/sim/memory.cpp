@@ -11,6 +11,13 @@ const char* memoryKindName(MemoryKind kind) {
     case MemoryKind::Gift: return "gift";
     case MemoryKind::Theft: return "theft";
     case MemoryKind::Death: return "death";
+    case MemoryKind::Quarrel: return "quarrel";
+    case MemoryKind::Blame: return "blame";
+    case MemoryKind::Fight: return "fight";
+    case MemoryKind::Nursing: return "nursing";
+    case MemoryKind::Sharing: return "sharing";
+    case MemoryKind::Rescue: return "rescue";
+    case MemoryKind::Rejection: return "rejection";
     default: return "?";
     }
 }

@@ -14,7 +14,7 @@ namespace odysseus::sim {
 
 class World;
 
-inline constexpr std::size_t kCauseCount = static_cast<std::size_t>(CauseOfDeath::Childbirth) + 1;
+inline constexpr std::size_t kCauseCount = static_cast<std::size_t>(CauseOfDeath::Count);
 
 // The numbers a soak test prints (US-015): how the clan is doing after a long run.
 struct SimReport {
@@ -22,6 +22,7 @@ struct SimReport {
     int founders = 0;
     int born = 0;
     int died = 0;
+    int exiled = 0;                                  // driven out by the clan (not counted as dead)
     std::array<int, kCauseCount> deathsByCause{};  // indexed by CauseOfDeath
     std::array<int, kNeedCount> averageNeeds{};     // of the living, 0..100
     int food = 0;

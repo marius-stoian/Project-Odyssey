@@ -5,6 +5,8 @@
 #include "sim/save.h"
 #include "sim/world.h"
 
+#include "story_helpers.h"
+
 #include <doctest/doctest.h>
 
 #include <algorithm>
@@ -17,38 +19,7 @@ using odysseus::sim::EventKind;
 using odysseus::sim::World;
 namespace sim = odysseus::sim;
 
-namespace {
-
-sim::SimConfig realConfig() {
-    return sim::loadSimConfig(ODYSSEUS_DATA_DIR);
-}
-
-void runDays(World& world, int days) {
-    world.runTicks(static_cast<std::uint64_t>(world.calendar().ticksPerDay()) * static_cast<std::uint64_t>(days));
-}
-
-// Every entry of one kind, in order.
-std::vector<const sim::ChronicleEntry*> entriesOf(const World& world, EventKind kind) {
-    std::vector<const sim::ChronicleEntry*> found;
-    for (const auto& entry : world.chronicle().entries()) {
-        if (entry.kind == kind) {
-            found.push_back(&entry);
-        }
-    }
-    return found;
-}
-
-// A world where the land gives nothing, so the store empties and people starve.
-sim::SimConfig barrenConfig() {
-    sim::SimConfig config = realConfig();
-    config.clan.startingFood = 0;
-    config.actions.forageDaily = {0, 0, 0, 0};
-    config.actions.gameDaily = 0;
-    config.actions.mammothPerMille = 0;
-    return config;
-}
-
-} // namespace
+using namespace story_test;
 
 TEST_CASE("US-110 Death with a cause") {
     World world(42, barrenConfig());

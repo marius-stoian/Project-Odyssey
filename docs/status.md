@@ -41,7 +41,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | X-M2 | - | M2 | Failed: Kill Gate 1, owner verdict Pivot (D-GATE-M2); evidence docs/gates/M2.md | 2026-09-30 |
 | K-M2b | - | M2b | Done | 2026-09-30 |
 | S-US-110 | US-110 | M2b | Done | 2026-09-30 |
-| S-US-111 | US-111 | M2b | To do |  |
+| S-US-111 | US-111 | M2b | Done | 2026-09-30 |
 | S-US-112 | US-112 | M2b | To do |  |
 | S-US-113 | US-113 | M2b | To do |  |
 | S-US-114 | US-114 | M2b | To do |  |

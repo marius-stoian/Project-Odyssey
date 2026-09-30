@@ -16,8 +16,12 @@ SimReport makeReport(const World& world) {
             ++report.founders;
         }
         if (!person.alive) {
-            ++report.died;
-            ++report.deathsByCause[static_cast<std::size_t>(person.causeOfDeath)];
+            if (person.exiled) {
+                ++report.exiled; // driven out, not dead
+            } else {
+                ++report.died;
+                ++report.deathsByCause[static_cast<std::size_t>(person.causeOfDeath)];
+            }
             continue;
         }
         ++report.alive;
@@ -38,8 +42,8 @@ SimReport makeReport(const World& world) {
 
 std::vector<std::string> formatReport(const SimReport& report) {
     std::vector<std::string> lines;
-    lines.push_back(std::format("Population: {} alive ({} founders, {} born, {} died)", report.alive, report.founders, report.born,
-                                report.died));
+    lines.push_back(std::format("Population: {} alive ({} founders, {} born, {} died, {} exiled)", report.alive, report.founders, report.born,
+                                report.died, report.exiled));
     std::string causes = "Deaths by cause:";
     for (std::size_t i = 1; i < kCauseCount; ++i) { // 0 is "nothing": the living
         causes += std::format("{} {} {}", i == 1 ? "" : ",", causeName(static_cast<CauseOfDeath>(i)), report.deathsByCause[i]);

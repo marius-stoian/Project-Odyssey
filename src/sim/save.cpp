@@ -67,6 +67,10 @@ json savePerson(const Person& p) {
                 {"ageDays", p.ageDays},
                 {"alive", p.alive},
                 {"causeOfDeath", static_cast<int>(p.causeOfDeath)},
+                {"exiled", p.exiled},
+                {"health", static_cast<int>(p.health)},
+                {"healthDays", p.healthDays},
+                {"healthEvent", p.healthEvent},
                 {"needs", p.needs.values},
                 {"daysAtZeroHunger", p.daysAtZeroHunger},
                 {"daysAtZeroWarmth", p.daysAtZeroWarmth},
@@ -99,6 +103,10 @@ Person loadPerson(const json& value) {
     p.ageDays = value.at("ageDays").get<int>();
     p.alive = value.at("alive").get<bool>();
     p.causeOfDeath = static_cast<CauseOfDeath>(value.at("causeOfDeath").get<int>());
+    p.exiled = value.at("exiled").get<bool>();
+    p.health = static_cast<Health>(value.at("health").get<int>());
+    p.healthDays = value.at("healthDays").get<int>();
+    p.healthEvent = value.at("healthEvent").get<int>();
     p.needs.values = value.at("needs").get<std::array<int, kNeedCount>>();
     p.daysAtZeroHunger = value.at("daysAtZeroHunger").get<int>();
     p.daysAtZeroWarmth = value.at("daysAtZeroWarmth").get<int>();
@@ -175,6 +183,10 @@ void upgradeFrom2(json& save) {
     const std::uint64_t seed = save.at("seed").get<std::uint64_t>();
     for (json& person : save.at("people")) {
         person["grudges"] = json::array();
+        person["exiled"] = false;
+        person["health"] = static_cast<int>(Health::Well);
+        person["healthDays"] = 0;
+        person["healthEvent"] = -1;
         for (json& memory : person.at("memories")) {
             memory["event"] = -1;
         }
@@ -188,6 +200,11 @@ void upgradeFrom2(json& save) {
     }
     save["random"]["story"] = saveRandom(core::Pcg32(seed, static_cast<std::uint64_t>(Stream::Story)));
     save["leanEvent"] = -1;
+    for (json& feud : save.at("feuds")) {
+        feud.push_back(-1); // the event that started it: unknown
+        feud.push_back(0);  // since day: long ago
+        feud.push_back(-1); // revenge: never
+    }
     save["saveVersion"] = 3;
 }
 
@@ -218,8 +235,8 @@ struct WorldArchive {
                                      {"causes", entry.causes}});
         }
         json feuds = json::array();
-        for (const auto& [a, b] : world.feuds_) {
-            feuds.push_back(json::array({a, b}));
+        for (const auto& feud : world.feuds_) {
+            feuds.push_back(json::array({feud.a, feud.b, feud.event, feud.sinceDay, feud.lastRevengeDay}));
         }
         return json{{"saveVersion", kSaveVersion},
                     {"game", "Project Odyssey"},
@@ -266,7 +283,8 @@ struct WorldArchive {
         world.food_ = save.at("food").get<int>();
         world.feuds_.clear();
         for (const json& pair : save.at("feuds")) {
-            world.feuds_.push_back({pair.at(0).get<int>(), pair.at(1).get<int>()});
+            world.feuds_.push_back({pair.at(0).get<int>(), pair.at(1).get<int>(), pair.at(2).get<int>(),
+                                    pair.at(3).get<std::int64_t>(), pair.at(4).get<std::int64_t>()});
         }
         world.mammoths_ = save.at("mammoths").get<int>();
         world.lastMammothYear_ = save.at("lastMammothYear").get<int>();
@@ -305,6 +323,9 @@ struct WorldArchive {
             if (static_cast<int>(p.opinions.size()) != count) {
                 return std::format("people[{}].opinions has {} entries for {} people", i, p.opinions.size(), count);
             }
+            if (p.healthEvent >= events) {
+                return std::format("people[{}].healthEvent names an event that does not exist", i);
+            }
             if (!validId(p.mother) || !validId(p.father) || !validId(p.partner) || !validId(p.childFather)) {
                 return std::format("people[{}] names a person who does not exist", i);
             }
@@ -335,9 +356,9 @@ struct WorldArchive {
         if (world.leanEvent_ >= events) {
             return "leanEvent names an event that does not exist";
         }
-        for (const auto& [a, b] : world.feuds_) {
-            if (a < 0 || b < 0 || a >= count || b >= count) {
-                return "feuds names a person who does not exist";
+        for (const auto& feud : world.feuds_) {
+            if (feud.a < 0 || feud.b < 0 || feud.a >= count || feud.b >= count || feud.event >= events) {
+                return "feuds names a person or event that does not exist";
             }
         }
         if (world.hour_ < 1 || world.hour_ > kHoursPerDay) {

@@ -10,6 +10,10 @@ const char* causeName(CauseOfDeath cause) {
     case CauseOfDeath::OldAge: return "old age";
     case CauseOfDeath::Hunting: return "a mammoth's tusks";
     case CauseOfDeath::Childbirth: return "childbirth";
+    case CauseOfDeath::Fight: return "a fight";
+    case CauseOfDeath::Wound: return "wounds";
+    case CauseOfDeath::Illness: return "sickness";
+    case CauseOfDeath::Count: return "?";
     }
     return "?";
 }
