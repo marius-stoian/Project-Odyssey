@@ -18,6 +18,7 @@
 #include "game/level.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
+#include "game/weapons.h"
 
 #include <cstdint>
 #include <filesystem>
@@ -51,6 +52,13 @@ public:
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }
+    // What the hero carries (US-133): the spear throw and sword of the demos first, then the
+    // starter weapons; Shift picks the next. The held one's name ("spear throw", "sword",
+    // "iron sword", ...), and the catalog weapon when it is one.
+    std::string heldName() const;
+    const WeaponDef* heldWeapon() const;
+    std::size_t carriedCount() const { return 2 + starters_.size(); }
+    const std::vector<Projectile>& projectiles() const { return projectiles_; }
     // Starts the named effect (effects.json) centred on a world point, `size` pixels across.
     // Does nothing when the content atlas or the effect is missing.
     void playEffect(const std::string& name, double x, double y, int size = 0);
@@ -105,6 +113,16 @@ private:
     bool contentLoaded_ = false;
     luna::engine::Texture effectsTexture_;
     luna::engine::EffectPlayer effects_;
+    std::vector<const WeaponDef*> starters_; // catalog weapons marked "starter"
+    std::size_t held_ = 0;                   // 0: spear throw, 1: sword, 2..: starters_
+    int attackCooldown_ = 0;                 // ticks until the held catalog weapon can attack again
+    int swingTicks_ = 0;                     // a melee swing being drawn
+    std::vector<Projectile> projectiles_;
+    luna::engine::Texture iconsTexture_;
+    luna::engine::Texture iconsMirrored_;    // the same icons facing the other way (west)
+    void attackWith(const WeaponDef& weapon);
+    void strike(Enemy& enemy, int damage);   // a hit: damage, spark, then death smoke or strike back
+    void drawHeld(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     int heroHp_ = kHeroMaxHp;
     int respawnTicks_ = 0; // counting down the fade after the hero falls
     static constexpr int kRespawnTicks = 20; // one second of fade

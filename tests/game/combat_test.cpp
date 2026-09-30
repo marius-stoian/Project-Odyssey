@@ -148,7 +148,7 @@ TEST_CASE("US-132 Combat effects") {
     play.tick(20);
     CHECK(play.odyssey.effects().count() == 0); // one-shot: gone when played
     // A throw: dust puffs trail the spear while it flies.
-    play.tick(1, pressing(Intent::SwitchWeapon));
+    while (play.odyssey.heldName() != "Spear throw") play.tick(1, pressing(Intent::SwitchWeapon));
     play.tick(1, pressing(Intent::Interact));
     int most = 0;
     for (int i = 0; i < 20; ++i) {
