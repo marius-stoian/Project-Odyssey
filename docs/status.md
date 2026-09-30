@@ -31,7 +31,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | X-M1b | - | M1b | Done | 2026-09-30 |
 | K-M2 | - | M2 | Done | 2026-09-30 |
 | S-US-010 | US-010 | M2 | Done | 2026-09-30 |
-| S-US-011 | US-011 | M2 | In progress (branch story/US-011) |  |
+| S-US-011 | US-011 | M2 | Done | 2026-09-30 |
 | S-US-012 | US-012 | M2 | To do |  |
 | S-US-013 | US-013 | M2 | To do |  |
 | S-US-014 | US-014 | M2 | To do |  |
