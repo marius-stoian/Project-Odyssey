@@ -70,6 +70,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
+    dataDirectory_ = dataDirectory;
+    clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
     std::vector<std::string> palette;
@@ -85,6 +87,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editor_.setWeaponPalette(std::move(palette));
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
+    if (clanEnabled_) startClan();
 }
 
 void OdysseyGame::resetPlay() {
@@ -100,6 +103,7 @@ void OdysseyGame::resetPlay() {
     respawnTicks_ = 0;
     effects_.clear();
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
+    if (clanEnabled_) startClan();
     projectiles_.clear();
     arcShots_.clear();
     attackCooldown_ = 0;
@@ -332,6 +336,136 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
     if (lost > 0 && enemy.takeDamage(lost, false)) {
         playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
     }
+}
+
+// The clan's simulation: the same world for the same level every time (its seed is the hash of the level's name).
+void OdysseyGame::startClan() {
+    clan_ = std::make_unique<sim::World>(WeatherCycle::seedFromText(level_.name) ^ 0x9E3779B97F4A7C15ULL, sim::loadSimConfig(dataDirectory_));
+    // The camp is where the fire burns: the first flame placed in the level, else where the hero starts.
+    PixelPoint camp = level_.heroStart;
+    for (const PlacedEffect& placed : level_.effects) {
+        if (placed.name == "flame" || placed.name == "big fire") {
+            camp = placed.at;
+            break;
+        }
+    }
+    clanView_ = ClanView(camp);
+    clanView_.update(*clan_, map_); // everybody appears at the fire at once
+    if (!layerSheets_) {
+        layerSheets_ = makeLayerSheets();
+    }
+}
+
+void OdysseyGame::setClan(bool on) {
+    clanEnabled_ = on;
+    if (on) {
+        startClan();
+    } else {
+        clan_.reset();
+    }
+}
+
+// People drawn from their layers: each distinct look is composed once into a sheet; the figure picks its frame by
+// facing and walking step. Figures above the hero's feet are drawn before him, the others after.
+void OdysseyGame::drawClan(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha, bool behindHero) {
+    if (!clan_) return;
+    const double heroY = hero_.feetY(alpha);
+    std::vector<const Figure*> order;
+    for (const Figure& figure : clanView_.figures()) {
+        if (figure.present && (figure.feetY(alpha) <= heroY) == behindHero) order.push_back(&figure);
+    }
+    std::sort(order.begin(), order.end(), [alpha](const Figure* a, const Figure* b) { return a->feetY(alpha) < b->feetY(alpha); });
+    for (const Figure* figure : order) {
+        auto found = lookTextures_.find(figure->look);
+        if (found == lookTextures_.end()) found = lookTextures_.emplace(figure->look, renderer.createTexture(composeLook(*layerSheets_, figure->look))).first;
+        const int width = figure->child ? kCharacterWidth * 3 / 4 : kCharacterWidth;
+        const int height = figure->child ? kCharacterHeight * 3 / 4 : kCharacterHeight;
+        const int shiver = figure->emote == Emote::Cold ? ((ticks_ / 2) % 2 == 0 ? -1 : 1) : 0; // the cold makes them shake
+        const int feetX = static_cast<int>(std::lround(figure->feetX(alpha))) - view.x + shiver;
+        const int feetY = static_cast<int>(std::lround(figure->feetY(alpha))) - view.y;
+        const luna::engine::Rect source{figure->animationFrame() * kCharacterWidth, static_cast<int>(figure->facing) * kCharacterHeight, kCharacterWidth, kCharacterHeight};
+        renderer.drawStyled(found->second, source, {feetX - width / 2, feetY - height, width, height}, {});
+        if (figure->emote != Emote::None) drawEmote(renderer, figure->emote, feetX, feetY - height - 14);
+    }
+}
+
+// A small speech bubble over the head: a snowflake when cold, food when hungry, + when unwell, z when tired, ? when lonely.
+void OdysseyGame::drawEmote(luna::engine::Renderer& renderer, Emote emote, int x, int y) const {
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const luna::engine::Rect bubble{x - 7, y, 14, 12};
+    painter.fill(bubble, luna::engine::UiColor::Shade);
+    painter.outline(bubble, luna::engine::UiColor::Border);
+    const luna::engine::Rect inside{bubble.x + 1, bubble.y + 1, bubble.width - 2, bubble.height - 2};
+    switch (emote) {
+    case Emote::Cold:
+        drawEffectPicture(renderer, effectArt_, "ice shards", inside);
+        break;
+    case Emote::Hungry:
+        drawPlantIcon(renderer, plantArt_, "carrot top", inside);
+        break;
+    case Emote::Sick: painter.text(bubble.x + 4, bubble.y + 3, "+", luna::engine::UiColor::Red); break;
+    case Emote::Tired: painter.text(bubble.x + 4, bubble.y + 3, "z", luna::engine::UiColor::Gold); break;
+    case Emote::Lonely: painter.text(bubble.x + 4, bubble.y + 3, "?", luna::engine::UiColor::Dim); break;
+    default: break;
+    }
+}
+
+// Hover a person: their exact needs and what they are doing now.
+void OdysseyGame::drawClanDetails(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
+    if (!clan_ || pointerX_ < 0) return;
+    const Figure* hovered = nullptr;
+    std::size_t index = 0;
+    for (std::size_t i = 0; i < clanView_.figures().size(); ++i) {
+        const Figure& figure = clanView_.figures()[i];
+        if (!figure.present) continue;
+        const int feetX = static_cast<int>(std::lround(figure.feetX(alpha))) - view.x;
+        const int feetY = static_cast<int>(std::lround(figure.feetY(alpha))) - view.y;
+        const int height = figure.child ? kCharacterHeight * 3 / 4 : kCharacterHeight;
+        const int halfWidth = (figure.child ? kCharacterWidth * 3 / 4 : kCharacterWidth) / 2;
+        if (pointerX_ >= feetX - halfWidth && pointerX_ < feetX + halfWidth && pointerY_ >= feetY - height && pointerY_ <= feetY &&
+            (hovered == nullptr || figure.feetY(alpha) > hovered->feetY(alpha))) {
+            hovered = &figure;
+            index = i;
+        }
+    }
+    if (hovered == nullptr) return;
+    const sim::Person& person = clan_->people().at(index);
+    const int daysPerYear = clan_->calendar().daysPerYear();
+    std::vector<std::pair<std::string, luna::engine::UiColor>> lines;
+    lines.push_back({person.name, luna::engine::UiColor::Gold});
+    lines.push_back({std::format("{}, age {}", person.sex == sim::Sex::Female ? "woman" : "man", person.ageYears(daysPerYear)), luna::engine::UiColor::Text});
+    lines.push_back({std::format("now: {}", sim::actionName(person.action)), luna::engine::UiColor::Text});
+    lines.push_back({std::format("Hunger {}  Energy {}", person.needs[sim::Need::Hunger], person.needs[sim::Need::Energy]), luna::engine::UiColor::Text});
+    lines.push_back({std::format("Warmth {}  Social {}", person.needs[sim::Need::Warmth], person.needs[sim::Need::Social]), luna::engine::UiColor::Text});
+    if (hovered->emote != Emote::None) lines.push_back({std::string("feels ") + emoteName(hovered->emote), luna::engine::UiColor::Red});
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    int width = 0;
+    for (const auto& line : lines) width = std::max(width, luna::engine::UiPainter::textWidth(line.first));
+    width += 8;
+    const int height = static_cast<int>(lines.size()) * luna::engine::kLineHeight + 4;
+    luna::engine::Rect box{pointerX_ + 10, pointerY_ + 10, width, height};
+    box.x = std::min(box.x, kVirtualWidth - width - 2);
+    box.y = std::min(box.y, kVirtualHeight - height - 2);
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.outline(box, luna::engine::UiColor::Gold);
+    int y = box.y + 3;
+    for (const auto& line : lines) {
+        painter.text(box.x + 4, y, line.first, line.second);
+        y += luna::engine::kLineHeight;
+    }
+}
+
+// The date, the weather and the clan's numbers, top centre.
+void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
+    if (!clan_) return;
+    const int hour = static_cast<int>((clan_->ticks() % static_cast<std::uint64_t>(clan_->calendar().ticksPerDay())) / static_cast<std::uint64_t>(clan_->calendar().ticksPerHour()));
+    const std::string line = std::format("{} {}  {:02}:00  {}C  pop {}  food {}", sim::seasonName(clan_->date().season), clan_->date().dayOfSeason, hour, clan_->temperature(),
+                                         clan_->population(), clan_->food());
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const int width = luna::engine::UiPainter::textWidth(line) + 8;
+    const luna::engine::Rect box{(kVirtualWidth - width) / 2, 20, width, luna::engine::kGlyphHeight + 6};
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
 }
 
 void OdysseyGame::setWeatherSeed(std::uint64_t seed) {
@@ -771,6 +905,10 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     }
     ++ticks_;
     weather_.update();
+    if (clan_) {
+        for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
+        clanView_.update(*clan_, map_);
+    }
     // After a fall the hero waits out a short fade, then starts again at the hero start.
     const bool fallen = respawnTicks_ > 0;
     if (fallen && --respawnTicks_ == 0) {
@@ -1059,6 +1197,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         }
     }
     drawPlants(renderer, view, alpha, true); // plants whose feet are above the hero's are behind him
+    drawClan(renderer, view, alpha, true);
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     renderer.draw(characters_, hero_.spriteFrame(),
                   screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
@@ -1108,6 +1247,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     }
 
     drawPlants(renderer, view, alpha, false); // the plants in front of the hero and the enemies
+    drawClan(renderer, view, alpha, false);
 
     // Draw sword if it's the current weapon and actively attacking.
     if (currentWeapon_ == WeaponType::Sword && sword_.isAttacking()) {
@@ -1134,7 +1274,9 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     effects_.draw(renderer, view);
     drawWeather(renderer);
     drawInspection(renderer, view);
+    drawClanDetails(renderer, view, alpha);
     drawHud(renderer);
+    drawClanHud(renderer);
     drawModeLabel(renderer);
 }
 

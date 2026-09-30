@@ -73,11 +73,11 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-137 | US-137 | M2d | Done | 2026-10-01 |
 | S-US-138 | US-138 | M2d | Done | 2026-10-01 |
 | X-M2d | - | M2d | Built, exit checks owed at M4 | 2026-10-01 |
-| K-M3 | - | M3 | To do |  |
-| S-US-030 | US-030 | M3 | To do |  |
-| S-US-032 | US-032 | M3 | To do |  |
-| S-US-031 | US-031 | M3 | To do |  |
-| X-M3 | - | M3 | To do |  |
+| K-M3 | - | M3 | Done | 2026-10-01 |
+| S-US-030 | US-030 | M3 | Done | 2026-10-01 |
+| S-US-032 | US-032 | M3 | Done | 2026-10-01 |
+| S-US-031 | US-031 | M3 | Done | 2026-10-01 |
+| X-M3 | - | M3 | Done (exit checks owed at M4) | 2026-10-01 |
 | K-M4 | - | M4 | To do |  |
 | S-US-040 | US-040 | M4 | To do |  |
 | S-US-041 | US-041 | M4 | To do |  |

@@ -4,6 +4,8 @@
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
+//   --clan-speed <n>         run the clan's simulation n ticks per game tick (fast forward for demos)
+//   --clan                   run the simulated clan in this level (levels marked "clan": true do it by themselves)
 //   --weather <name>         start under that weather, for example `steady rain` (screenshots and demos)
 //   --seed <number>          fix the weather sequence (the same seed gives the same weathers in the same order)
 //   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
@@ -42,6 +44,8 @@ struct Arguments {
     bool editor = false;
     std::optional<std::uint64_t> seed; // fixes the weather sequence (US-138)
     std::string weather;               // start under this weather (screenshots)
+    bool clan = false;                 // run the simulated clan in this level
+    int clanSpeed = 1;                 // clan simulation ticks per game tick (fast forward)
     std::vector<luna::engine::ScriptedHold> holds;
     std::vector<luna::engine::ScriptedPointer> pointer;
     std::vector<luna::engine::ScriptedText> typing;
@@ -90,7 +94,11 @@ Arguments parseArguments(int argc, char* argv[]) {
     Arguments arguments;
     for (int i = 1; i < argc; ++i) {
         const std::string_view name = argv[i];
-        if (name == "--editor") { // the one flag without a value
+        if (name == "--clan") { // a flag without a value: run the simulated clan in this level
+            arguments.clan = true;
+            continue;
+        }
+        if (name == "--editor") { // a flag without a value
             arguments.editor = true;
             continue;
         }
@@ -101,6 +109,8 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.quitAfterSeconds = std::stod(argv[++i]);
         } else if (name == "--log-dir") {
             arguments.logDirectory = argv[++i];
+        } else if (name == "--clan-speed") {
+            arguments.clanSpeed = std::stoi(argv[++i]);
         } else if (name == "--weather") {
             arguments.weather = argv[++i];
         } else if (name == "--seed") {
@@ -154,6 +164,10 @@ int main(int argc, char* argv[]) {
 
     try {
         odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR, arguments.level);
+        if (arguments.clan) {
+            game.setClan(true);
+        }
+        game.setClanSpeed(arguments.clanSpeed);
         if (arguments.seed) {
             game.setWeatherSeed(*arguments.seed);
         }

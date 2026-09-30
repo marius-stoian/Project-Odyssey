@@ -344,6 +344,7 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.plants.push_back(plant);
         }
     }
+    level.clan = data.value("clan", false);
     if (data.contains("effects")) { // level version 2 (US-138); a version 1 file has none
         if (!data.at("effects").is_array()) throw DataError(file, "effects", "must be a list");
         for (std::size_t i = 0; i < data.at("effects").size(); ++i) {
@@ -421,7 +422,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     for (const PlacedEffect& e : level.effects) effects.push_back({{"id", e.id}, {"name", e.name}, {"x", e.at.x}, {"y", e.at.y}});
     json targets = json::array();
     for (const PixelPoint& t : level.targets) targets.push_back({t.x, t.y});
-    const json data{{"levelVersion", kLevelVersion},
+    json data{{"levelVersion", kLevelVersion},
                     {"name", level.name},
                     {"width", level.width},
                     {"height", level.height},
@@ -434,6 +435,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"effects", effects},
                     {"targets", targets},
                     {"ground", ground}};
+    if (level.clan) data["clan"] = true;
     fs::create_directories(file.parent_path());
     const fs::path temporary = fs::path(file.string() + ".tmp");
     {

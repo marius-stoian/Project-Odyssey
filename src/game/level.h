@@ -112,6 +112,7 @@ struct Level {
     std::vector<PlacedPickup> pickups;
     std::vector<PlacedPlant> plants;
     std::vector<PlacedEffect> effects;
+    bool clan = false;                   // the simulated clan lives here (US-032); written only when true
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
     int nextId = 1;
