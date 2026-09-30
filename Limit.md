@@ -2,7 +2,7 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after X-M1b (Milestone-16.md, AP-017).
+**Last updated:** 2026-09-30, after US-011 (Milestone-17.md, AP-018).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
@@ -11,7 +11,7 @@ This file is kept current after every story, so if a session stops (usage limit,
 - K-M1b Done: the physics design is `docs/plans/M1b-physics-design.md` (read it first).
 - US-025..US-029 Done: Luna Physics complete (Fixed 32.32, Vec3, Quat, shapes, sweeps, spatial grid, ballistics, aim solver, rigid bodies, materials) and the spear throw in the demo.
 - X-M1b Done: `main` tagged `m1b-done`, CI green on main.
-- **Next prompt: S-US-011** (M2 resumed): branch `story/US-011` has the needs system, starting clan, chronicle and tests, verified locally (0 warnings, 17/17); left: merge into qa, CI, snapshot. Then US-012..US-016 and X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
+- **Next prompt: S-US-012** (Let people choose what to do (utility AI); work may already be on branch `story/US-012`: check `git log qa..story/US-012`). Then US-013..US-016 and X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue
