@@ -1,0 +1,184 @@
+#include "game/catalogs.h"
+
+#include "game/content_art.h"
+#include "sim/data.h"
+#include "sim/json_data.h"
+
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <array>
+#include <format>
+#include <set>
+
+namespace odysseus::game {
+
+using nlohmann::json;
+
+namespace {
+
+constexpr std::array<const char*, 8> kClassNames{"sword", "axe", "spear", "bow", "thrown", "whip", "staff", "gun"};
+constexpr std::array<const char*, 6> kElementNames{"none", "fire", "ice", "lightning", "poison", "void"};
+
+// Reads one catalog file: the list under `key`, each entry checked by `read`, names unique.
+template <typename Def, typename Read>
+std::vector<Def> readList(const std::filesystem::path& file, const std::string& key, Read read) {
+    const json data = sim::readJsonFile(file);
+    if (!data.contains(key) || !data.at(key).is_array()) {
+        throw sim::DataError(file, key, "must be a list");
+    }
+    std::vector<Def> list;
+    std::set<std::string> names;
+    for (std::size_t i = 0; i < data.at(key).size(); ++i) {
+        const json& entry = data.at(key).at(i);
+        const std::string where = std::format("{}[{}]", key, i);
+        if (!entry.is_object() || !entry.contains("name") || !entry.at("name").is_string() || entry.at("name").get<std::string>().empty()) {
+            throw sim::DataError(file, where + ".name", "must be a name in quotes");
+        }
+        Def def = read(entry, where);
+        def.name = entry.at("name").get<std::string>();
+        if (!names.insert(def.name).second) {
+            throw sim::DataError(file, where + ".name", "\"" + def.name + "\" is listed twice");
+        }
+        list.push_back(std::move(def));
+    }
+    return list;
+}
+
+struct Fields {
+    const std::filesystem::path& file;
+    const json& entry;
+    const std::string& where;
+
+    std::string text(const std::string& field) const {
+        if (!entry.contains(field) || !entry.at(field).is_string()) throw sim::DataError(file, where + "." + field, "must be text in quotes");
+        return entry.at(field).get<std::string>();
+    }
+    bool flag(const std::string& field) const {
+        if (!entry.contains(field) || !entry.at(field).is_boolean()) throw sim::DataError(file, where + "." + field, "must be true or false");
+        return entry.at(field).get<bool>();
+    }
+    int whole(const std::string& field, int low, int high) const {
+        if (!entry.contains(field) || !entry.at(field).is_number_integer() || entry.at(field).get<int>() < low || entry.at(field).get<int>() > high) {
+            throw sim::DataError(file, where + "." + field, std::format("must be a whole number from {} to {}", low, high));
+        }
+        return entry.at(field).get<int>();
+    }
+    double number(const std::string& field, double low, double high) const {
+        if (!entry.contains(field) || !entry.at(field).is_number() || entry.at(field).get<double>() < low || entry.at(field).get<double>() > high) {
+            throw sim::DataError(file, where + "." + field, std::format("must be a number from {} to {}", low, high));
+        }
+        return entry.at(field).get<double>();
+    }
+    template <std::size_t N>
+    int choice(const std::string& field, const std::array<const char*, N>& options) const {
+        const std::string value = text(field);
+        for (std::size_t i = 0; i < N; ++i) {
+            if (value == options[i]) return static_cast<int>(i);
+        }
+        std::string list;
+        for (const char* option : options) list += std::string(list.empty() ? "" : ", ") + "\"" + option + "\"";
+        throw sim::DataError(file, where + "." + field, "must be one of " + list);
+    }
+};
+
+template <typename Def>
+const Def* byName(const std::vector<Def>& list, const std::string& name) {
+    const auto it = std::find_if(list.begin(), list.end(), [&](const Def& def) { return def.name == name; });
+    return it == list.end() ? nullptr : &*it;
+}
+
+} // namespace
+
+const char* weaponClassName(WeaponClass weaponClass) { return kClassNames.at(static_cast<std::size_t>(weaponClass)); }
+const char* elementName(Element element) { return kElementNames.at(static_cast<std::size_t>(element)); }
+
+const WeaponDef* Catalogs::weapon(const std::string& name) const { return byName(weapons, name); }
+const PlantDef* Catalogs::plant(const std::string& name) const { return byName(plants, name); }
+const AnimalDef* Catalogs::animal(const std::string& name) const { return byName(animals, name); }
+const EffectDef* Catalogs::effect(const std::string& name) const { return byName(effects, name); }
+
+Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentAtlas* atlas) {
+    Catalogs catalogs;
+    // A frame named in a catalog must exist in the atlas (when one is given to check against).
+    auto checkFrame = [&](const std::filesystem::path& file, const std::string& where, const std::string& frame) {
+        if (atlas != nullptr && !atlas->frameCounts.contains(frame)) {
+            throw sim::DataError(file, where + ".frame", "\"" + frame + "\" is not in the content atlas");
+        }
+    };
+
+    const auto weaponsFile = dataDirectory / "weapons.json";
+    catalogs.weapons = readList<WeaponDef>(weaponsFile, "weapons", [&](const json& entry, const std::string& where) {
+        const Fields f{weaponsFile, entry, where};
+        WeaponDef def;
+        def.frame = f.text("frame");
+        checkFrame(weaponsFile, where, def.frame);
+        def.weaponClass = static_cast<WeaponClass>(f.choice("class", kClassNames));
+        def.element = static_cast<Element>(f.choice("element", kElementNames));
+        def.future = f.choice("era", std::array<const char*, 2>{"fantasy", "future"}) == 1;
+        def.starter = f.flag("starter");
+        def.damage = f.whole("damage", 0, 1000);
+        def.speed = f.number("speed", 0.1, 20.0);
+        def.range = f.number("range", 0.5, 50.0);
+        return def;
+    });
+
+    const auto plantsFile = dataDirectory / "plants.json";
+    catalogs.plants = readList<PlantDef>(plantsFile, "plants", [&](const json& entry, const std::string& where) {
+        const Fields f{plantsFile, entry, where};
+        PlantDef def;
+        def.frame = f.text("frame");
+        checkFrame(plantsFile, where, def.frame);
+        constexpr std::array<const char*, 3> kSizes{"small", "tall", "tree"};
+        def.size = kSizes[static_cast<std::size_t>(f.choice("size", kSizes))];
+        def.blocks = f.flag("blocks");
+        def.edible = f.flag("edible");
+        def.inspect = f.text("inspect");
+        return def;
+    });
+
+    const auto animalsFile = dataDirectory / "animals.json";
+    catalogs.animals = readList<AnimalDef>(animalsFile, "animals", [&](const json& entry, const std::string& where) {
+        const Fields f{animalsFile, entry, where};
+        AnimalDef def;
+        def.frame = f.text("frame");
+        checkFrame(animalsFile, where, def.frame);
+        def.hp = f.whole("hp", 1, 10000);
+        def.enemy = f.flag("enemy");
+        def.strikeDamage = f.whole("strikeDamage", 0, 1000);
+        def.reach = f.number("reach", 0.5, 10.0);
+        return def;
+    });
+
+    const auto effectsFile = dataDirectory / "effects.json";
+    catalogs.effects = readList<EffectDef>(effectsFile, "effects", [&](const json& entry, const std::string& where) {
+        const Fields f{effectsFile, entry, where};
+        EffectDef def;
+        def.frames = f.whole("frames", 1, 16);
+        def.ticksPerFrame = f.whole("ticksPerFrame", 1, 60);
+        def.loop = f.flag("loop");
+        return def;
+    });
+    if (atlas != nullptr) {
+        for (std::size_t i = 0; i < catalogs.effects.size(); ++i) {
+            const auto count = atlas->frameCounts.find(catalogs.effects[i].name);
+            if (count == atlas->frameCounts.end() || count->second != catalogs.effects[i].frames) {
+                throw sim::DataError(effectsFile, std::format("effects[{}].frames", i), "must match the frames cut for \"" + catalogs.effects[i].name + "\"");
+            }
+        }
+    }
+
+    const auto weatherFile = dataDirectory / "weather.json";
+    catalogs.weather = readList<WeatherDef>(weatherFile, "weather", [&](const json& entry, const std::string& where) {
+        const Fields f{weatherFile, entry, where};
+        WeatherDef def;
+        def.frames = f.whole("frames", 0, 16);
+        def.ticksPerFrame = f.whole("ticksPerFrame", 1, 60);
+        def.weight = f.whole("weight", 0, 1000);
+        def.additive = f.choice("blend", std::array<const char*, 2>{"alpha", "add"}) == 1;
+        return def;
+    });
+    return catalogs;
+}
+
+} // namespace odysseus::game

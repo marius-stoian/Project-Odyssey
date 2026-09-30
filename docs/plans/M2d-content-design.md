@@ -19,7 +19,7 @@ Today an `Atlas` has two fixed pictures (characters 32x48, tiles 32x32). M2d nee
 | `effects` | 48x48 | 100 animated x 4 frames, 100 elemental | centred |
 | `weather` | 160x90 | 100 weather x 4 frames | fill |
 
-`atlas.json` lists every page (file, cell size, columns) and every frame (name -> page and cell). `characters` and `tiles` keep their names and files, so the M2c code and tests keep working; `ArtSet` gains a lookup by frame name that answers page and rectangle. A page wider than 16 cells wraps to more rows, as now.
+As built (US-130): the M2d pages live in a second index, `content.json` with `content-<page>.png`, beside the M2c `atlas.json` (characters and tiles untouched); `ContentAtlas` answers page and rectangle by frame name. The cut list is `assets/sprites/content-cuts.json`. Animals have their own `animals.json` until US-137 merges them into the character palette.
 
 ### Cut list additions
 - `kind` gains `icon`, `plant-small`, `plant-tall`, `tree`, `animal`, `effect`, `weather` (the page it goes to).

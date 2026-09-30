@@ -1,0 +1,84 @@
+#pragma once
+
+#include "boundary.h"
+
+#include <filesystem>
+#include <string>
+#include <vector>
+
+namespace odysseus::game {
+
+struct ContentAtlas;
+
+// The M2d content catalogs (US-130), read from assets/data/. Each entry names its frame in the
+// content atlas (content_art.h); the numbers are first guesses the owner can tune in the JSON.
+
+enum class WeaponClass { Sword, Axe, Spear, Bow, Thrown, Whip, Staff, Gun };
+enum class Element { None, Fire, Ice, Lightning, Poison, Void };
+
+struct WeaponDef {
+    std::string name;
+    std::string frame;
+    WeaponClass weaponClass = WeaponClass::Sword;
+    Element element = Element::None;
+    bool future = false;   // era "future": guns and energy weapons, for later Ages
+    bool starter = false;  // playable in M2d (D-21)
+    int damage = 5;
+    double speed = 1.0;    // attacks per second
+    double range = 1.5;    // metres
+};
+
+struct PlantDef {
+    std::string name;
+    std::string frame;
+    std::string size;      // "small", "tall" or "tree"
+    bool blocks = false;   // blocks walking like a rock
+    bool edible = false;   // heals the hero when destroyed
+    std::string inspect;   // shown on Interact
+};
+
+struct AnimalDef {
+    std::string name;
+    std::string frame;
+    int hp = 80;
+    bool enemy = false;    // can be hit and strikes back (D-21: predators and boars)
+    int strikeDamage = 0;
+    double reach = 1.5;    // metres
+};
+
+struct EffectDef {
+    std::string name;
+    int frames = 1;
+    int ticksPerFrame = 3;
+    bool loop = false;
+};
+
+struct WeatherDef {
+    std::string name;
+    int frames = 4;        // 0: nothing is drawn ("clear")
+    int ticksPerFrame = 4;
+    int weight = 1;        // how often it is picked, against the others
+    bool additive = true;  // light weather adds light; fog and clouds are drawn see-through
+};
+
+struct Catalogs {
+    std::vector<WeaponDef> weapons;
+    std::vector<PlantDef> plants;
+    std::vector<AnimalDef> animals;
+    std::vector<EffectDef> effects;
+    std::vector<WeatherDef> weather;
+
+    const WeaponDef* weapon(const std::string& name) const;
+    const PlantDef* plant(const std::string& name) const;
+    const AnimalDef* animal(const std::string& name) const;
+    const EffectDef* effect(const std::string& name) const;
+};
+
+// Reads weapons.json, plants.json, animals.json, effects.json and weather.json. Every problem
+// is a DataError naming the file and the field. With an atlas, every frame must exist in it.
+Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentAtlas* atlas = nullptr);
+
+const char* weaponClassName(WeaponClass weaponClass);
+const char* elementName(Element element);
+
+} // namespace odysseus::game
