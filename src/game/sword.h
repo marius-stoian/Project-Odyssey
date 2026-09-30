@@ -13,7 +13,7 @@ struct SwordConfig {
     double slashDurationTicks = 10.0;  // how long a slash animation lasts
     double slashRangeMetres = 1.5;     // reach of a sword slash
     int slashCooldownTicks = 15;       // ticks between allowed slashes
-    int damagePerHit = 20;
+    int damagePerHit = 5;
 };
 
 enum class SlashState { Idle, Slashing, Cooldown };
@@ -45,10 +45,15 @@ public:
     // Is the sword currently attacking (slashing)?
     bool isAttacking() const { return state_.state == SlashState::Slashing; }
 
+    // Has the sword already hit in this slash? (to prevent hitting multiple times per swing)
+    bool hasHitInThisSlash() const { return hasHitInThisSlash_; }
+    void markHit() { hasHitInThisSlash_ = true; }
+
 private:
     SwordConfig config_;
     SwordSlash state_;
     Facing lastSlashFacing_ = Facing::South;
+    bool hasHitInThisSlash_ = false;
 };
 
 } // namespace odysseus::game

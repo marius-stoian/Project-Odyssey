@@ -42,7 +42,8 @@ Vec3 OdysseyGame::blockedTargetBase() {
 OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory)
     : map_(makeTestMap()), camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
       hero_(map_.pixelWidth() / 2.0 + kTileSize / 2.0, map_.pixelHeight() / 2.0 + kTileSize * 0.75),
-      range_(map_, loadMaterials(dataDirectory)) {
+      range_(map_, loadMaterials(dataDirectory)),
+      enemy_(hero_.feetX() + 2 * kTileSize, hero_.feetY(), 100) { // two tiles east of the hero
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     range_.addTarget(openTargetBase());
     range_.addTarget(blockedTargetBase());
@@ -84,6 +85,19 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
     // Update sword state every tick.
     sword_.update();
+
+    // Update enemy state.
+    enemy_.update();
+
+    // One hit per swing, if the enemy is within reach. Range is in metres; one tile is one metre.
+    if (sword_.isAttacking() && !sword_.hasHitInThisSlash() && enemy_.isAlive()) {
+        const double dx = enemy_.feetX() - hero_.feetX();
+        const double dy = enemy_.feetY() - hero_.feetY();
+        if (std::sqrt(dx * dx + dy * dy) <= sword_.config().slashRangeMetres * kTileSize) {
+            enemy_.takeDamage(sword_.config().damagePerHit);
+            sword_.markHit();
+        }
+    }
 
     // Update spear physics.
     for (const SpearHit& hit : range_.update()) {
@@ -131,12 +145,43 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     renderer.draw(characters_, hero_.spriteFrame(),
                   screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
 
-    // Draw sword if it's the current weapon.
-    if (currentWeapon_ == WeaponType::Sword && sword_.state().state != SlashState::Idle) {
+    // The enemy: red while the hit flash lasts, with a health bar and "HP/max" above its head.
+    if (enemy_.isAlive()) {
+        const double left = enemy_.feetX() - kCharacterWidth / 2.0;
+        const double top = enemy_.feetY() - kCharacterHeight;
+        if (enemy_.isFlashing()) {
+            renderer.draw(props_, kEnemyHitFrame, screen(left, top));
+        } else {
+            renderer.draw(characters_, luna::engine::Rect{0, 0, kCharacterWidth, kCharacterHeight}, screen(left, top));
+        }
+
+        const double barLeft = enemy_.feetX() - kHealthBarEmpty.width / 2.0;
+        const double barTop = top - 6;
+        renderer.draw(props_, kHealthBarEmpty, screen(barLeft, barTop));
+        const int filled = kHealthBarFull.width * enemy_.hp() / enemy_.maxHp();
+        renderer.draw(props_, luna::engine::Rect{kHealthBarFull.x, kHealthBarFull.y, filled, kHealthBarFull.height},
+                      screen(barLeft, barTop));
+
+        const std::string label = std::format("{}/{}", enemy_.hp(), enemy_.maxHp());
+        const double labelWidth = static_cast<double>(label.size()) * kGlyphAdvance + 1;
+        double x = enemy_.feetX() - labelWidth / 2.0;
+        for (const char c : label) {
+            renderer.draw(props_, glyphFrame(c), screen(x, barTop - 8));
+            x += kGlyphAdvance;
+        }
+    }
+
+    // Draw sword if it's the current weapon and actively attacking.
+    if (currentWeapon_ == WeaponType::Sword && sword_.isAttacking()) {
         const int frame = sword_.animationFrame();
-        const luna::engine::Rect swordFrame = kSwordFrames[static_cast<std::size_t>(sword_.lastSlashFacing())][frame];
-        renderer.draw(characters_, swordFrame,
-                      screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
+        const luna::engine::Rect swordSpriteFrame = swordFrame(frame);
+        // Position sword at character's right hand. Character center is at feetX, feetY.
+        // Right hand is roughly at character_center_x + 8, character_top_y + 20.
+        // Sword sprite hilt is at x=16 (middle of 32-wide sprite), y=36 (lower part of 48-tall sprite).
+        // So position sprite so its hilt aligns with hand position.
+        const double heroWorldX = hero_.feetX(alpha) + 8 - 16;      // Center hilt at right hand x
+        const double heroWorldY = hero_.feetY(alpha) - 48 + 20 - 36; // Align hilt at hand y
+        renderer.draw(props_, swordSpriteFrame, screen(heroWorldX, heroWorldY));
     }
 
     // Spears: height lifts the sprite up the screen, while the shadow stays on the ground.

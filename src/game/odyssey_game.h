@@ -8,6 +8,7 @@
 #include "luna/engine/renderer.h"
 #include "luna/engine/tile_map.h"
 
+#include "game/enemy.h"
 #include "game/hero.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
@@ -50,6 +51,7 @@ private:
     Hero hero_;
     SpearRange range_;
     Sword sword_;
+    Enemy enemy_;
     WeaponType currentWeapon_ = WeaponType::Sword;
     bool nextSpearIsFlint_ = true; // Interact alternates flint and wooden spears
     // After a throw the camera frames the hero and the target together for a while.

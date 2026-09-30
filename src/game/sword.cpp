@@ -13,6 +13,7 @@ void Sword::slash(Facing facing) {
         state_.slashTicks = 0;
         state_.cooldownTicks = 0;
         lastSlashFacing_ = facing;
+        hasHitInThisSlash_ = false;
     }
 }
 
