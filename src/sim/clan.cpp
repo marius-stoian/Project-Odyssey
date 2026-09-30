@@ -62,16 +62,27 @@ std::string ordinal(int number) {
 
 std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& everyone, core::Pcg32& random) {
     const std::vector<std::string>& pool = sex == Sex::Female ? names.female : names.male;
-    // Try a few random names for one nobody has carried; otherwise reuse one with an ordinal.
-    std::string name;
-    for (int attempt = 0; attempt < 8; ++attempt) {
-        name = pool[random.below(static_cast<std::uint32_t>(pool.size()))];
+    auto carriedByTheLiving = [&everyone](const std::string& base) {
+        return std::any_of(everyone.begin(), everyone.end(), [&base](const Person& p) {
+            return p.alive && (p.name == base || p.name.rfind(base + " the ", 0) == 0);
+        });
+    };
+    // First choice: a name nobody has carried. Then a name of the dead (with an ordinal, "Mira
+    // the Second"), never the name of someone alive. The pool's order keeps the choice
+    // deterministic; the seeded stream picks among the candidates.
+    std::vector<std::string> fresh;
+    std::vector<std::string> ofTheDead;
+    for (const std::string& name : pool) {
         if (usesOf(name, everyone) == 0) {
-            return name;
+            fresh.push_back(name);
+        } else if (!carriedByTheLiving(name)) {
+            ofTheDead.push_back(name);
         }
     }
-    const int uses = usesOf(name, everyone);
-    return uses == 0 ? name : name + " the " + ordinal(uses + 1);
+    const std::vector<std::string>& choices = !fresh.empty() ? fresh : (!ofTheDead.empty() ? ofTheDead : pool);
+    const std::string& base = choices[random.below(static_cast<std::uint32_t>(choices.size()))];
+    const int uses = usesOf(base, everyone);
+    return uses == 0 ? base : base + " the " + ordinal(uses + 1);
 }
 
 void giveRandomTraits(Person& person, core::Pcg32& random) {
