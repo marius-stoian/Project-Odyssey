@@ -58,7 +58,58 @@ struct RevengeStory {
 struct HealthStory {
     int woundDaysMin = 5;         // an injury lasts this many days at least...
     int woundDaysMax = 12;        // ...and at most this many
-    int woundDeathPerMille = 15;  // chance per day, in thousandths, that a wound kills
+    int woundDeathPerMille = 10;  // chance per day, in thousandths, that a wound kills
+};
+
+// Sickness strikes the weak (US-112). Wounds are told under HealthStory.
+struct SicknessStory {
+    int basePerMille = 1;         // chance a day, in thousandths, that anyone falls sick
+    int hungerBelow = 25;         // Hunger this low weakens a person...
+    int hungerPerMille = 25;      // ...and adds this to the chance
+    int coldBelow = 25;           // so does Warmth this low
+    int coldPerMille = 25;
+    int daysMin = 3;              // a sickness lasts this many days at least...
+    int daysMax = 9;              // ...and at most this many
+    int deathPerMille = 12;       // chance a day that a sickness kills
+    int huntWoundPerMille = 1;    // chance per hour of hunting that a hunter is hurt
+};
+
+// A kind or close person nurses the sick and hurt (US-112).
+struct NursingStory {
+    int minScore = 30;            // opinion + bonuses a carer needs to come forward
+    int kinBonus = 40;            // partner, parent, child, sibling, guardian
+    int kindBonus = 30;           // a Kind carer
+    int percent = 80;             // chance a day that the best carer comes
+    int extraHealPerDay = 1;      // a nursed patient mends this many days faster each day
+    int deathPercentWhenNursed = 40; // the death chance is only this share of the usual one
+    int opinionGain = 20;         // the patient thinks better of the carer
+    int carerOpinionGain = 5;     // and the carer of the patient
+    int feeling = 60;             // the patient's memory of it: gratitude
+};
+
+// Sharing food in a famine (US-112).
+struct SharingStory {
+    int giverHungerMin = 40;      // only someone this well fed can spare food...
+    int gapMin = 20;              // ...and only for someone at least this much hungrier
+    int receiverHungerMax = 35;   // only someone this hungry is helped
+    int amount = 15;              // Hunger moved from giver to receiver
+    int repeatDays = 30;          // the same giver feeding the same person again within this many days is not news
+    int minScore = 20;            // opinion + bonuses a giver needs
+    int kinBonus = 30;
+    int kindBonus = 20;
+    int childBonus = 30;          // for a child who cannot work yet
+    int opinionGain = 15;
+    int feeling = 50;
+};
+
+// Orphans are taken in (US-112).
+struct AdoptionStory {
+    int minScore = 20;            // opinion + bonuses an adopter needs
+    int kinBonus = 50;            // a brother or sister
+    int kindBonus = 20;
+    int limit = 2;                // children a person takes in at most
+    int opinionGain = 30;         // both ways
+    int feeling = 80;             // the child's memory of being taken in
 };
 
 struct StoryConfig {
@@ -68,6 +119,10 @@ struct StoryConfig {
     BlameStory blame;
     RevengeStory revenge;
     HealthStory health;
+    SicknessStory sickness;
+    NursingStory nursing;
+    SharingStory sharing;
+    AdoptionStory adoption;
 };
 
 StoryConfig loadStoryConfig(const std::filesystem::path& file);

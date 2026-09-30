@@ -73,45 +73,10 @@ int World::blame(int griever, int blamed, int dead, int deathEvent, const std::s
     return event;
 }
 
-void World::injure(int person, int days, int cause) {
-    Person& hurt = people_[static_cast<std::size_t>(person)];
-    if (!hurt.alive) {
-        return;
-    }
-    hurt.health = Health::Injured;
-    hurt.healthDays = std::max(hurt.healthDays, days);
-    hurt.healthEvent = cause;
-}
-
-void World::updateHealth() {
-    for (Person& person : people_) {
-        if (!person.alive || person.health == Health::Well) {
-            continue;
-        }
-        // A wound can kill; otherwise a day passes and the hurt person mends.
-        if (person.health == Health::Injured &&
-            storyRandom_.below(1000) < static_cast<std::uint32_t>(config_.story.health.woundDeathPerMille)) {
-            die(person, CauseOfDeath::Wound, person.healthEvent);
-            continue;
-        }
-        if (--person.healthDays <= 0) {
-            std::vector<int> causes;
-            if (person.healthEvent >= 0) {
-                causes.push_back(person.healthEvent);
-            }
-            chronicle_.record(date(), kImportanceRecovery, EventKind::Recovery, person.id, -1, -1, causes,
-                              person.health == Health::Injured ? std::format("{} recovered from the wounds.", person.name)
-                                                               : std::format("{} got well again.", person.name));
-            person.health = Health::Well;
-            person.healthDays = 0;
-            person.healthEvent = -1;
-        }
-    }
-}
-
 int World::exile(Person& person, int victim, std::vector<int> causes, const std::string& text) {
     person.alive = false;
     person.exiled = true;
+    releaseCare(person);
     person.health = Health::Well;
     const int event = chronicle_.record(date(), kImportanceExile, EventKind::Exile, person.id, victim, -1, std::move(causes), text);
     // The clan remembers an exile like a loss: kin and partner grieve, a partner is free again.

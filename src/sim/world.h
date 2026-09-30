@@ -95,6 +95,16 @@ public:
     int takeRevenge(int aggressor, int victim);
     // Someone is hurt for `days` days, by the chronicle entry `cause`.
     void injure(int person, int days, int cause);
+    // Someone falls sick for `days` days, by the chronicle entry `cause`.
+    void sicken(int person, int days, int cause);
+    // `giver` shares part of their food with hungry `receiver`. Returns the event's id.
+    int share(int giver, int receiver);
+    // `adopter` takes in the orphan `child`. Returns the event's id, or -1 if the child is no orphan.
+    int adopt(int adopter, int child);
+    // A child whose known parents are all gone (dead or driven out).
+    bool isOrphan(const Person& person) const;
+    // A death from outside the daily rules (an accident in a test, a story event). Returns the event's id.
+    int kill(int person, CauseOfDeath cause, int causeEvent = -1);
     // What `who` thinks of `about`, -100..100.
     int opinion(int who, int about) const;
 
@@ -140,6 +150,11 @@ private:
     void encounters();      // every morning each person meets someone; quarrels may follow
     void considerRevenge(); // feuds that keep worsening end in a fight or an exile
     void updateHealth();    // the hurt heal, or die of their wounds
+    void assignCarers();    // the sick and hurt find someone to nurse them
+    void shareFood();       // in a famine the better fed feed the hungriest
+    void adoptOrphans();    // children whose parents are gone are taken in
+    void releaseCare(Person& person); // a death or exile ends any nursing they gave or needed
+    void hurtOnHunt(Person& hunter);  // a small-game hunt can end in a wound
     int exile(Person& person, int victim, std::vector<int> causes, const std::string& text);
     void pairUp();
     void updateFeuds();

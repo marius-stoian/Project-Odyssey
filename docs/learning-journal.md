@@ -445,3 +445,25 @@ Some questions have "no answer": *who is the heaviest grudge against this person
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one feud from its first quarrel to its ending. Then set `"percentPerDay"` under `"revenge"` to 0 and run again: what happens to the feuds?
 
 **Check yourself.** Why does a fight's winner get *more* opinion of the victim after taking revenge (`satisfaction`), and what would happen to the feud if it did not?
+
+## US-112: Share food and nurse the sick (2026-09-30)
+
+**What we built.** People fall sick (more often when hungry or cold) and get hurt hunting; the kind and the close nurse them, and the patient remembers it for life. In a famine the better fed spare food for the hungriest, and orphans are taken in. Each of these says why in the chronicle.
+
+**The idea: standard algorithms.** Choosing "the best carer" or "the hungriest person first" is a small search or sort, and the standard library already has them: `std::sort` orders a list, `std::find_if` finds the first match, `std::count_if` counts, `std::min_element` picks the smallest.
+
+```cpp
+std::sort(hungry.begin(), hungry.end(), [this](int a, int b) {
+    const int ha = people_[a].needs[Need::Hunger];
+    const int hb = people_[b].needs[Need::Hunger];
+    return ha != hb ? ha < hb : a < b;   // hungriest first; a tie goes to the lower id
+});
+```
+
+The little function in `[...]` is a *lambda*: a comparison written on the spot. The tie-break (`a < b`) matters here: without it two equally hungry people could swap places from one run to the next, and the same seed would no longer give the same history (Charter rule 6).
+
+**Where to look.** `World::assignCarers`, `World::shareFood` and `World::adoptOrphans` in [src/sim/world_care.cpp](../src/sim/world_care.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --chronicle --threshold 30` and find a "fell sick" line followed by "nursed ... back to health". Then set `"percent"` under `"nursing"` in `assets/data/sim/story.json` to 0 and compare how many people died of sickness (the report line "sickness N").
+
+**Check yourself.** In `assignCarers` we only replace the best score when the new one is *strictly greater* (`>`). Which carer wins when two people have the same score, and why does that keep the run repeatable?

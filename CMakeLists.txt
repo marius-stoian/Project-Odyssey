@@ -114,6 +114,7 @@ add_library(odysseus_sim STATIC
     src/sim/json_data.cpp
     src/sim/world.cpp
     src/sim/world_story.cpp
+    src/sim/world_care.cpp
     src/sim/needs.cpp
     src/sim/person.cpp
     src/sim/clan.cpp
@@ -288,7 +289,8 @@ add_executable(odysseus_sim_tests
     tests/sim/report_test.cpp
     tests/sim/save_test.cpp
     tests/sim/story_test.cpp
-    tests/sim/story_quarrel_test.cpp)
+    tests/sim/story_quarrel_test.cpp
+    tests/sim/story_care_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
