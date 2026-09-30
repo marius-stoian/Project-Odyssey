@@ -134,7 +134,19 @@ TEST_CASE("US-133 Starters fight") {
         const double stand = game::behaviourOf(weapon->weaponClass).melee() ? 40.0 : 64.0;
         while (goblin.feetX() - play.odyssey.hero().feetX() > stand) play.tick(1, holding({Intent::MoveRight}));
         play.tick(1, holding({Intent::MoveRight})); // face east
-        play.tick(1, pressing(Intent::Interact));
+        if (weapon->weaponClass == game::WeaponClass::Thrown) {
+            // Thrown weapons fly in arcs (US-140): they land where the pointer is, so aim at the goblin's feet.
+            play.tick(30); // the camera settles on the hero, who then stands at the middle of the picture
+            luna::engine::Pointer pointer;
+            pointer.x = 240 + static_cast<int>(std::lround(goblin.feetX() - play.odyssey.hero().feetX()));
+            pointer.y = 135 + static_cast<int>(std::lround(goblin.feetY() - play.odyssey.hero().feetY()));
+            Intents aim;
+            aim.set(Intent::Attack, true, true);
+            aim.setPointer(pointer);
+            play.tick(1, aim);
+        } else {
+            play.tick(1, pressing(Intent::Interact));
+        }
         play.tick(12); // shots fly
         // Fire and poison go on hurting after the hit (US-135); the others do exactly their damage.
         if (weapon->element == game::Element::Fire || weapon->element == game::Element::Poison) {

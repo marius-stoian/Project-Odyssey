@@ -157,6 +157,7 @@ add_library(odysseus_game STATIC
     src/game/content_art.cpp
     src/game/catalogs.cpp
     src/game/weapons.cpp
+    src/game/arc_shots.cpp
     src/game/pickups.cpp
     src/game/level.cpp
     src/game/editor.cpp
@@ -295,6 +296,7 @@ add_executable(odysseus_game_tests
     tests/game/weapons_test.cpp
     tests/game/elements_test.cpp
     tests/game/aiming_test.cpp
+    tests/game/arc_test.cpp
     tests/game/pickups_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"

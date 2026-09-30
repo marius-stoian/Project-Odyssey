@@ -8,6 +8,7 @@
 #include "luna/engine/renderer.h"
 #include "luna/engine/tile_map.h"
 
+#include "game/arc_shots.h"
 #include "game/art.h"
 #include "game/catalogs.h"
 #include "game/content_art.h"
@@ -73,6 +74,8 @@ public:
     // "Hotbar full" is shown for a moment when a pickup is touched with no free slot.
     bool hotbarFullShown() const { return fullTicks_ > 0; }
     const std::vector<Projectile>& projectiles() const { return projectiles_; }
+    // Arrows, bolts and thrown weapons in flight or stuck in the ground (US-140): physics arcs with height.
+    const std::vector<ArcShot>& arcShots() const { return arcShots_; }
     // Mouse aiming (US-139): while a catalog weapon is held and the pointer is over the picture,
     // the hero faces the pointer and Attack (the left button) goes toward it, at any angle.
     bool aiming() const { return aiming_; }
@@ -151,7 +154,9 @@ private:
     std::vector<Projectile> projectiles_;
     luna::engine::Texture iconsTexture_;
     luna::engine::Texture iconsMirrored_;    // the same icons facing the other way (west)
-    void attackWith(const WeaponDef& weapon, double dirX, double dirY); // along a unit vector
+    // Along a unit vector. distancePixels is how far the hero aims (the pointer); chestHeight: aimed with keys, no pointer.
+    void attackWith(const WeaponDef& weapon, double dirX, double dirY, double distancePixels, bool chestHeight);
+    std::vector<ArcShot> arcShots_;
     void updateAim(const luna::engine::Pointer& pointer, bool fallen);
     void drawAim(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     bool aiming_ = false;
