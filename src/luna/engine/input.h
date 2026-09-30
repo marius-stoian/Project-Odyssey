@@ -23,6 +23,8 @@ enum class Intent {
     Slot1, Slot2, Slot3, Slot4, Slot5, Slot6, Slot7, Slot8, Slot9,
     // Attack (US-139): the left mouse button, or scripted; the weapon goes toward the pointer.
     Attack,
+    // Inspect (US-136): the right mouse button, or scripted; look at the plant next to the hero.
+    Inspect,
     Count
 };
 
@@ -77,7 +79,7 @@ private:
 // Turns Luna platform events into intents using bindings. Default bindings:
 // W/Up, A/Left, S/Down, D/Right, E/Space/Enter = Interact, Escape = OpenMenu, Shift/Tab =
 // SwitchWeapon; F1 = ModeGame, F2 = ModeEditor, Ctrl+Z = Undo, Ctrl+Y = Redo, Ctrl+S = Save,
-// Delete, G = ToggleGrid, R = Rotate, Backspace = Erase, 1-9 = Slot1-Slot9, left mouse button = Attack; gamepad left stick and D-pad move,
+// Delete, G = ToggleGrid, R = Rotate, Backspace = Erase, 1-9 = Slot1-Slot9, left mouse button = Attack, right mouse button = Inspect; gamepad left stick and D-pad move,
 // South button = Interact, Start = OpenMenu. The mouse becomes the Pointer.
 class InputMap {
 public:

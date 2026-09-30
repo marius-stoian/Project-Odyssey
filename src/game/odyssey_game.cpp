@@ -135,6 +135,7 @@ void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
 }
 
 void OdysseyGame::populate() {
+    populatePlants();
     enemies_.clear();
     bystanders_.clear();
     pickups_.clear();
@@ -327,6 +328,157 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
     }
 }
 
+std::size_t OdysseyGame::plantsGrowing() const {
+    return static_cast<std::size_t>(std::count_if(plants_.begin(), plants_.end(), [](const WorldPlant& plant) { return plant.alive; }));
+}
+
+// US-136: the level's plants stand in the play state; big ones block their foot cell like a rock.
+void OdysseyGame::populatePlants() {
+    plants_.clear();
+    inspection_ = {};
+    plantRng_ = core::Pcg32(1, 5); // the same seed every start, so a replay grows the same plants back in the same places
+    for (const PlacedPlant& placed : level_.plants) {
+        const PlantDef* def = catalogs_.plant(placed.kind);
+        if (def == nullptr) continue; // the level names a plant the catalog lost: skipped
+        plants_.push_back({placed.id, placed.kind, def, placed.feet, true, 0});
+        if (const double height = plantObstacleHeight(*def); height > 0.0) {
+            const PixelPoint cell = plantCell(placed.feet);
+            map_.setObstacle(cell.x, cell.y, height);
+        }
+    }
+}
+
+// A weapon hit destroys a plant: leaves fly, an edible one heals the hero, and 15 s later it grows back elsewhere.
+void OdysseyGame::destroyPlant(std::size_t index) {
+    WorldPlant& plant = plants_.at(index);
+    if (!plant.alive) return;
+    plant.alive = false;
+    plant.regrowTicks = kRegrowTicks;
+    if (plant.def != nullptr && plant.def->blocks) {
+        const PixelPoint cell = plantCell(plant.feet);
+        map_.setObstacle(cell.x, cell.y, 0.0);
+    }
+    const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
+    playEffect("nature leaf", plant.feet.x, plant.feet.y - extent.height / 2.0, 40);
+    core::logInfo(std::format("The {} was destroyed", plant.kind));
+    if (plant.def != nullptr && plant.def->edible && respawnTicks_ == 0) {
+        const int before = heroHp_;
+        heroHp_ = std::min(kHeroMaxHp, heroHp_ + kPlantHeal);
+        playEffect("healing glow", hero_.feetX(), hero_.feetY() - kCharacterHeight / 2.0, 32);
+        core::logInfo(std::format("Eating the {} healed the hero: {} to {} HP", plant.kind, before, heroHp_));
+    }
+    if (inspection_.plantId == plant.id) inspection_.ticks = 0;
+}
+
+bool OdysseyGame::plantSpotFree(int cellX, int cellY) const {
+    if (!map_.inside(cellX, cellY) || map_.isSolid(cellX, cellY)) return false;
+    const double centreX = cellX * kTileSize + kTileSize / 2.0;
+    const double centreY = cellY * kTileSize + kTileSize / 2.0;
+    if (std::hypot(hero_.feetX() - centreX, hero_.feetY() - centreY) < 40.0) return false; // not under the hero
+    for (const WorldPlant& plant : plants_) {
+        if (!plant.alive) continue;
+        const PixelPoint cell = plantCell(plant.feet);
+        if (cell.x == cellX && cell.y == cellY) return false;
+    }
+    for (const Enemy& enemy : enemies_) {
+        if (enemy.isAlive() && static_cast<int>(enemy.feetX()) / kTileSize == cellX && static_cast<int>(enemy.feetY()) / kTileSize == cellY) return false;
+    }
+    for (const PlacedCharacter& other : bystanders_) {
+        if (other.feet.x / kTileSize == cellX && other.feet.y / kTileSize == cellY) return false;
+    }
+    return true;
+}
+
+// Destroyed plants count down; at zero the same plant grows back at a random free spot inside the camera view.
+void OdysseyGame::tickPlants() {
+    for (WorldPlant& plant : plants_) {
+        if (plant.alive || --plant.regrowTicks > 0) continue;
+        const luna::engine::Rect view = camera_.view();
+        const int firstX = std::max(0, view.x / kTileSize);
+        const int firstY = std::max(0, view.y / kTileSize);
+        const int cellsX = std::max(1, std::min(map_.width() - 1, (view.x + view.width - 1) / kTileSize) - firstX + 1);
+        const int cellsY = std::max(1, std::min(map_.height() - 1, (view.y + view.height - 1) / kTileSize) - firstY + 1);
+        bool grown = false;
+        for (int attempt = 0; attempt < kRegrowTries && !grown; ++attempt) {
+            const int cellX = firstX + static_cast<int>(plantRng_.below(static_cast<std::uint32_t>(cellsX)));
+            const int cellY = firstY + static_cast<int>(plantRng_.below(static_cast<std::uint32_t>(cellsY)));
+            if (!plantSpotFree(cellX, cellY)) continue;
+            plant.feet = {cellX * kTileSize + kTileSize / 2, cellY * kTileSize + kTileSize - 4};
+            plant.alive = true;
+            if (plant.def != nullptr) {
+                if (const double height = plantObstacleHeight(*plant.def); height > 0.0) map_.setObstacle(cellX, cellY, height);
+            }
+            const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
+            playEffect("tree growth", plant.feet.x, plant.feet.y - extent.height / 2.0, 48);
+            core::logInfo(std::format("A {} grew back at tile ({}, {})", plant.kind, cellX, cellY));
+            grown = true;
+        }
+        if (!grown) plant.regrowTicks = kRegrowRetryTicks; // no free spot in view: look again in a second
+    }
+}
+
+// Interact and Inspect: the nearest plant within 1.5 m tells its name and a line about itself for 3 seconds.
+bool OdysseyGame::inspectNearestPlant() {
+    const WorldPlant* nearest = nullptr;
+    double best = kInspectReachPixels;
+    for (const WorldPlant& plant : plants_) {
+        if (!plant.alive) continue;
+        const double distance = std::hypot(plant.feet.x - hero_.feetX(), plant.feet.y - hero_.feetY());
+        if (distance <= best) {
+            best = distance;
+            nearest = &plant;
+        }
+    }
+    if (nearest == nullptr || nearest->def == nullptr) return false;
+    inspection_ = {nearest->def->name, nearest->def->inspect, nearest->id, kInspectTicks};
+    core::logInfo(std::format("{}: {}", nearest->def->name, nearest->def->inspect));
+    return true;
+}
+
+std::vector<Target> OdysseyGame::shotTargets(std::vector<std::size_t>& plantOf) const {
+    std::vector<Target> targets;
+    for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
+    plantOf.clear();
+    for (std::size_t i = 0; i < plants_.size(); ++i) {
+        if (!plants_[i].alive || plants_[i].def == nullptr || !plants_[i].def->blocks) continue; // shots fly through grass and flowers
+        targets.push_back({static_cast<double>(plants_[i].feet.x), static_cast<double>(plants_[i].feet.y), true});
+        plantOf.push_back(i);
+    }
+    return targets;
+}
+
+void OdysseyGame::drawPlants(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha, bool behindHero) const {
+    std::vector<const WorldPlant*> order;
+    const double heroY = hero_.feetY(alpha);
+    for (const WorldPlant& plant : plants_) {
+        if (plant.alive && (plant.feet.y <= heroY) == behindHero) order.push_back(&plant);
+    }
+    std::sort(order.begin(), order.end(), [](const WorldPlant* a, const WorldPlant* b) { return a->feet.y != b->feet.y ? a->feet.y < b->feet.y : a->id < b->id; });
+    for (const WorldPlant* plant : order) {
+        drawPlant(renderer, plantArt_, plant->kind, plant->feet.x - view.x, plant->feet.y - view.y);
+    }
+}
+
+// The plant's name and its line in a small box above it.
+void OdysseyGame::drawInspection(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const {
+    if (inspection_.ticks <= 0) return;
+    for (const WorldPlant& plant : plants_) {
+        if (plant.id != inspection_.plantId || !plant.alive) continue;
+        luna::engine::UiPainter painter(renderer, uiSheet_);
+        const int width = std::max(luna::engine::UiPainter::textWidth(inspection_.name), luna::engine::UiPainter::textWidth(inspection_.text)) + 8;
+        const int height = 2 * luna::engine::kLineHeight + 4;
+        const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
+        luna::engine::Rect box{plant.feet.x - view.x - width / 2, plant.feet.y - view.y - extent.height - height - 2, width, height};
+        box.x = std::clamp(box.x, 2, kVirtualWidth - width - 2);
+        box.y = std::max(box.y, 2);
+        painter.fill(box, luna::engine::UiColor::Shade);
+        painter.outline(box, luna::engine::UiColor::Gold);
+        painter.text(box.x + 4, box.y + 3, inspection_.name, luna::engine::UiColor::Gold);
+        painter.text(box.x + 4, box.y + 3 + luna::engine::kLineHeight, inspection_.text, luna::engine::UiColor::Text);
+        return;
+    }
+}
+
 void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY, double distancePixels, bool chestHeight) {
     if (attackCooldown_ > 0) {
         return;
@@ -340,6 +492,15 @@ void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY, 
         const auto hits = behaviour.swingToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, targets);
         core::logInfo(std::format("{} ({}) swung toward {:.0f} degrees, facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing()), hits.size()));
         for (const std::size_t index : hits) strike(enemies_[index], weapon.damage, &weapon);
+        // The same swing also cuts the plants in its arc (the nearest one for a sword or spear, all for an axe or whip).
+        std::vector<Target> plantTargets;
+        std::vector<std::size_t> plantOf;
+        for (std::size_t i = 0; i < plants_.size(); ++i) {
+            if (!plants_[i].alive) continue;
+            plantTargets.push_back({static_cast<double>(plants_[i].feet.x), static_cast<double>(plants_[i].feet.y), true});
+            plantOf.push_back(i);
+        }
+        for (const std::size_t index : behaviour.swingToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, plantTargets)) destroyPlant(plantOf[index]);
     } else if (auto arc = launchArcShot(weapon, catalogs_.weaponClass(weapon.weaponClass).launchSpeed, hero_.feetX(), hero_.feetY(), dirX, dirY, distancePixels, chestHeight)) {
         arcShots_.push_back(*arc);
         core::logInfo(std::format("{} ({}) arced toward {:.0f} degrees, {:.1f} m away", weapon.name, weaponClassName(weapon.weaponClass),
@@ -582,6 +743,13 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     currentWeapon_ = heldSlotName == kSwordSlashName ? WeaponType::Sword : WeaponType::Bow; // the demos' own two
 
     // Handle attacks based on the held weapon.
+    // Plants (US-136): Interact with empty hands, or the right mouse button, looks at the plant next to the hero.
+    if (!fallen && (intents.pressed(luna::engine::Intent::Inspect) || (intents.pressed(luna::engine::Intent::Interact) && heldSlotName.empty()))) {
+        inspectNearestPlant();
+    }
+    if (inspection_.ticks > 0) --inspection_.ticks;
+    tickPlants();
+
     // Attack (the left button) goes toward the pointer; Interact goes along the facing, as before.
     const bool mouseAttack = heldWeapon() != nullptr && aiming_ && intents.held(luna::engine::Intent::Attack);
     if (!fallen && heldWeapon() != nullptr && (mouseAttack || intents.pressed(luna::engine::Intent::Interact))) {
@@ -657,13 +825,29 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (attackCooldown_ > 0) --attackCooldown_;
     if (swingTicks_ > 0) --swingTicks_;
     if (!projectiles_.empty()) {
-        std::vector<Target> targets;
-        for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
+        std::vector<std::size_t> plantOf;
+        std::vector<Target> targets = shotTargets(plantOf);
         for (Projectile& shot : projectiles_) {
             bool done = false;
             if (const auto hit = stepProjectile(shot, map_, targets, done)) {
-                strike(enemies_[*hit], shot.weapon->damage, shot.weapon);
-                targets[*hit].alive = enemies_[*hit].isAlive();
+                if (*hit < enemies_.size()) {
+                    strike(enemies_[*hit], shot.weapon->damage, shot.weapon);
+                    targets[*hit].alive = enemies_[*hit].isAlive();
+                } else {
+                    destroyPlant(plantOf[*hit - enemies_.size()]);
+                    targets[*hit].alive = false;
+                }
+            } else if (done) {
+                // Stopped by something solid: if a big plant stands there, the shot cuts it down.
+                const int cellX = static_cast<int>(std::floor(shot.x / kTileSize));
+                const int cellY = static_cast<int>(std::floor((shot.y + 20.0) / kTileSize));
+                for (std::size_t i = 0; i < plants_.size(); ++i) {
+                    const PixelPoint cell = plantCell(plants_[i].feet);
+                    if (plants_[i].alive && plants_[i].def != nullptr && plants_[i].def->blocks && cell.x == cellX && cell.y == cellY) {
+                        destroyPlant(i);
+                        break;
+                    }
+                }
             }
             if (done) shot.maxDistance = -1.0; // spent: removed below
         }
@@ -672,15 +856,18 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
     // Arcs (US-140): each shot flies one physics tick and stops at the first enemy, solid tile or the ground.
     if (!arcShots_.empty()) {
-        std::vector<Target> targets;
-        for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
+        std::vector<std::size_t> plantOf;
+        std::vector<Target> targets = shotTargets(plantOf);
         for (const ArcEvent& event : stepArcShots(arcShots_, map_, targets)) {
             const luna::engine::ScreenPoint ground = luna::engine::groundShadow(event.point);
             static constexpr const char* kEnds[] = {"hit an enemy", "stopped at a solid", "came down", "was lost"};
             core::logInfo(std::format("{} {} at ({:.1f}, {:.1f}) m, {:.2f} m up", event.weapon->name, kEnds[static_cast<int>(event.end)], luna::engine::toDouble(event.point.x), luna::engine::toDouble(event.point.y), luna::engine::toDouble(event.point.z)));
-            if (event.end == ArcEnd::Enemy) {
+            if (event.end == ArcEnd::Enemy && event.enemy < enemies_.size()) {
                 strike(enemies_[event.enemy], event.weapon->damage, event.weapon);
                 targets[event.enemy].alive = enemies_[event.enemy].isAlive();
+            } else if (event.end == ArcEnd::Enemy) {
+                destroyPlant(plantOf[event.enemy - enemies_.size()]);
+                targets[event.enemy].alive = false;
             } else if (event.end != ArcEnd::Lost) {
                 playEffect("dust", ground.x, ground.y, 16); // a miss sticks in the ground or against a rock
             }
@@ -743,10 +930,18 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         iconsTexture_ = renderer.createTexture(content_.pictures.at("icons"));
         iconsMirrored_ = renderer.createTexture(luna::engine::mirrored(content_.pictures.at("icons")));
         weaponArt_.icons = iconsTexture_;
+        for (const char* page : {"plants-small", "plants-tall", "trees"}) {
+            if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) plantArt_.pages[page] = renderer.createTexture(found->second);
+        }
+        for (const PlantDef& plant : catalogs_.plants) {
+            const auto frame = content_.frames.find(plant.frame);
+            const auto rect = content_.rect(plant.frame);
+            if (frame != content_.frames.end() && rect) plantArt_.sources[plant.name] = {frame->second.page, *rect};
+        }
         for (const WeaponDef& weapon : catalogs_.weapons) {
             if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
         }
-        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_});
+        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_});
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
@@ -785,6 +980,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
             drawWeaponIcon(renderer, painter, weaponArt_, lying.pickup.weapon, {corner.x, corner.y, kPickupSize, kPickupSize});
         }
     }
+    drawPlants(renderer, view, alpha, true); // plants whose feet are above the hero's are behind him
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     renderer.draw(characters_, hero_.spriteFrame(),
                   screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
@@ -823,6 +1019,8 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         }
     }
 
+    drawPlants(renderer, view, alpha, false); // the plants in front of the hero and the enemies
+
     // Draw sword if it's the current weapon and actively attacking.
     if (currentWeapon_ == WeaponType::Sword && sword_.isAttacking()) {
         const int frame = sword_.animationFrame();
@@ -846,6 +1044,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawHeld(renderer, view, alpha);
     drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
+    drawInspection(renderer, view);
     drawHud(renderer);
     drawModeLabel(renderer);
 }

@@ -65,6 +65,10 @@ bool Definitions::hasWeapon(const std::string& name) const {
     return std::find(weapons.begin(), weapons.end(), name) != weapons.end();
 }
 
+bool Definitions::hasPlant(const std::string& name) const {
+    return std::find(plants.begin(), plants.end(), name) != plants.end();
+}
+
 const CharacterKindDef* Definitions::character(const std::string& name) const {
     for (const CharacterKindDef& kind : characters) {
         if (kind.name == name) return &kind;
@@ -129,6 +133,16 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             definitions.weapons.push_back(text(weapons.at("weapons").at(i), weaponsFile, "name"));
         }
     }
+    const std::filesystem::path plantsFile = dataDirectory / "plants.json";
+    if (std::filesystem::exists(plantsFile)) {
+        const json plants = sim::readJsonFile(plantsFile);
+        if (!plants.contains("plants") || !plants.at("plants").is_array()) {
+            throw DataError(plantsFile, "plants", "must be a list of plants");
+        }
+        for (std::size_t i = 0; i < plants.at("plants").size(); ++i) {
+            definitions.plants.push_back(text(plants.at("plants").at(i), plantsFile, "name"));
+        }
+    }
     definitions.weapons.push_back(kSpearThrowName);
     definitions.weapons.push_back(kSwordSlashName);
     return definitions;
@@ -161,6 +175,7 @@ Level resized(const Level& level, int width, int height) {
     std::erase_if(out.characters, [&](const PlacedCharacter& c) { return !inside(c.feet); });
     std::erase_if(out.targets, [&](const PixelPoint& p) { return !inside(p); });
     std::erase_if(out.pickups, [&](const PlacedPickup& p) { return !inside(p.at); });
+    std::erase_if(out.plants, [&](const PlacedPlant& p) { return !inside(p.feet); });
     out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
     return out;
 }
@@ -269,6 +284,25 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.pickups.push_back(pickup);
         }
     }
+    if (data.contains("plants")) { // level version 2 (US-136); a version 1 file has none
+        if (!data.at("plants").is_array()) throw DataError(file, "plants", "must be a list");
+        for (std::size_t i = 0; i < data.at("plants").size(); ++i) {
+            const json& entry = data.at("plants").at(i);
+            const std::string where = std::format("plants[{}]", i);
+            PlacedPlant plant;
+            plant.id = whole(entry, file, "id", 1, level.nextId - 1);
+            const auto used = [&] { return DataError(file, where + ".id", std::format("{} is used twice", plant.id)); };
+            for (const PlacedCharacter& other : level.characters) if (other.id == plant.id) throw used();
+            for (const PlacedPickup& other : level.pickups) if (other.id == plant.id) throw used();
+            for (const PlacedPlant& other : level.plants) if (other.id == plant.id) throw used();
+            plant.kind = text(entry, file, "kind");
+            if (!definitions.hasPlant(plant.kind)) {
+                throw DataError(file, where + ".kind", "\"" + plant.kind + "\" is not a plant in plants.json");
+            }
+            plant.feet = point(json::array({entry.value("x", -1), entry.value("y", -1)}), file, where + ".x/y", level);
+            level.plants.push_back(plant);
+        }
+    }
     if (data.contains("targets")) {
         if (!data.at("targets").is_array()) throw DataError(file, "targets", "must be a list of [x, y]");
         for (std::size_t i = 0; i < data.at("targets").size(); ++i) {
@@ -320,6 +354,8 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     }
     json pickups = json::array();
     for (const PlacedPickup& p : level.pickups) pickups.push_back({{"id", p.id}, {"weapon", p.weapon}, {"x", p.at.x}, {"y", p.at.y}});
+    json plants = json::array();
+    for (const PlacedPlant& p : level.plants) plants.push_back({{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}});
     json targets = json::array();
     for (const PixelPoint& t : level.targets) targets.push_back({t.x, t.y});
     const json data{{"levelVersion", kLevelVersion},
@@ -331,6 +367,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"nextId", level.nextId},
                     {"characters", characters},
                     {"pickups", pickups},
+                    {"plants", plants},
                     {"targets", targets},
                     {"ground", ground}};
     fs::create_directories(file.parent_path());

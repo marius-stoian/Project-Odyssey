@@ -34,6 +34,7 @@ const char* toolName(EditorTool tool) {
     case EditorTool::Place: return "Place";
     case EditorTool::Select: return "Select";
     case EditorTool::Weapon: return "Weapon";
+    case EditorTool::Plant: return "Plant";
     }
     return "?";
 }
@@ -82,11 +83,12 @@ void Editor::buildPanels() {
     button("Rect", "Fill a rectangle: drag from corner to corner", [this] { tool_ = EditorTool::Rectangle; });
     button("Fill", "Fill the connected area of the same ground", [this] { tool_ = EditorTool::Fill; });
     button("Erase", "Paint the level's default ground", [this] { tool_ = EditorTool::Eraser; });
-    x += 4;
+    x += 2;
     button("Place", "Place a character: choose one, click the map", [this] { tool_ = EditorTool::Place; });
-    button("Weapon", "Place a weapon pickup: choose one, click the map", [this] { tool_ = EditorTool::Weapon; });
-    button("Select", "Select a character or pickup: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
-    x += 4;
+    button("Arms", "Place a weapon pickup: choose one, click the map", [this] { tool_ = EditorTool::Weapon; });
+    button("Plant", "Place a plant: choose one (pages with the arrows), click the map", [this] { tool_ = EditorTool::Plant; });
+    button("Select", "Select a character, pickup or plant: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
+    x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
     button("Grid", "Show or hide the grid (G)", [this] { grid_ = !grid_; });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -140,10 +142,63 @@ void Editor::buildPanels() {
         });
         weapon.hint = weaponNames_[static_cast<std::size_t>(i)];
     }
+    buildPlantPalette();
     buildProperties();
     buildSettings();
     buildOpenList();
     buildQuestion();
+}
+
+// One page of the plant palette: two arrows, then up to 36 plants by picture (drawn in render()).
+void Editor::buildPlantPalette() {
+    const int plants = static_cast<int>(definitions_.plants.size());
+    const int pages = std::max(1, (plants + kPlantsPerPage - 1) / kPlantsPerPage);
+    plantPage_ = std::clamp(plantPageWanted_, 0, pages - 1);
+    plantPageWanted_ = plantPage_;
+    const int columns = 4;
+    const int rows = kPlantsPerPage / columns;
+    plantPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, columns * kPaletteCell + 4, rows * kPaletteCell + 4 + 14});
+    const int top = kToolbarHeight + 6;
+    Button& previous = plantPalette_->add<Button>(Rect{4, top, 20, 12}, "<", [this] { plantPageWanted_ = plantPage_ - 1; });
+    previous.hint = "Previous page of plants";
+    Button& next = plantPalette_->add<Button>(Rect{4 + columns * kPaletteCell - 22, top, 20, 12}, ">", [this] { plantPageWanted_ = plantPage_ + 1; });
+    next.hint = "Next page of plants";
+    for (int i = 0; i < kPlantsPerPage; ++i) {
+        const int index = plantPage_ * kPlantsPerPage + i;
+        if (index >= plants) break;
+        const Rect cell{4 + (i % columns) * kPaletteCell, top + 14 + (i / columns) * kPaletteCell, kPaletteCell - 2, kPaletteCell - 2};
+        Button& button = plantPalette_->add<Button>(cell, "", [this, index] {
+            plant_ = index;
+            tool_ = EditorTool::Plant; // choosing a plant means placing it
+        });
+        button.hint = definitions_.plants[static_cast<std::size_t>(index)];
+    }
+}
+
+const PlacedPlant* Editor::findPlant(int id) const {
+    for (const PlacedPlant& plant : level_.plants) {
+        if (plant.id == id) return &plant;
+    }
+    return nullptr;
+}
+
+void Editor::changePlants(const std::string& what, std::vector<PlacedPlant> after, int nextIdAfter) {
+    run(std::make_unique<PlantsCommand>(what, level_.plants, std::move(after), level_.nextId, nextIdAfter));
+}
+
+std::optional<int> Editor::plantAt(int screenX, int screenY) const {
+    if (screenX < 0 || screenY < 0 || textures_.plants == nullptr) return std::nullopt;
+    const auto [wx, wy] = toWorld(screenX, screenY);
+    std::optional<int> best;
+    int bestY = -1;
+    for (const PlacedPlant& plant : level_.plants) {
+        const Rect extent = plantExtent(*textures_.plants, plant.kind);
+        if (wx >= plant.feet.x - extent.width / 2 && wx < plant.feet.x + extent.width / 2 && wy >= plant.feet.y - extent.height && wy <= plant.feet.y && plant.feet.y >= bestY) {
+            best = plant.id; // the one drawn last (lowest on the screen) is on top
+            bestY = plant.feet.y;
+        }
+    }
+    return best;
 }
 
 void Editor::setWeaponPalette(std::vector<std::string> names) {
@@ -185,6 +240,14 @@ void Editor::removeSelected() {
         select(std::nullopt);
         return;
     }
+    if (const PlacedPlant* gone = findPlant(*selected_)) {
+        const std::string what = "remove " + gone->kind;
+        auto after = level_.plants;
+        std::erase_if(after, [this](const PlacedPlant& p) { return p.id == *selected_; });
+        changePlants(what, std::move(after), level_.nextId);
+        select(std::nullopt);
+        return;
+    }
     const PlacedCharacter* gone = find(*selected_);
     const std::string what = gone == nullptr ? "remove" : "remove " + gone->name;
     auto after = level_.characters;
@@ -222,7 +285,7 @@ PlacedCharacter* Editor::find(int id) {
 }
 
 void Editor::select(std::optional<int> id) {
-    if (id && find(*id) == nullptr && findPickup(*id) == nullptr) id.reset();
+    if (id && find(*id) == nullptr && findPickup(*id) == nullptr && findPlant(*id) == nullptr) id.reset();
     if (id == selected_ && !propertiesStale_) return;
     selected_ = id;
     buildProperties();
@@ -555,12 +618,13 @@ void Editor::finishStroke() {
 }
 
 bool Editor::handlePanels(const luna::engine::UiInput& input) {
+    if (plantPageWanted_ != plantPage_) buildPlantPalette(); // a page arrow was pressed last tick
     for (auto& button : toolbar_->children()) {
         auto* b = dynamic_cast<Button*>(button.get());
         if (b == nullptr) continue;
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
-                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Weapon" && tool_ == EditorTool::Weapon) || (b->label == "Level" && settingsShown_) ||
+                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) ||
                       (b->label == "Grid" && grid_);
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
@@ -572,10 +636,14 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     for (std::size_t i = 0; i < weaponPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(weaponPalette_->children()[i].get())) b->selected = static_cast<int>(i) == weapon_;
     }
+    for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(plantPalette_->children()[i].get())) b->selected = plantPage_ * kPlantsPerPage + static_cast<int>(i) - 2 == plant_;
+    }
     // Painting tools show the ground palette, Weapon the weapons; Place and Select the characters.
     palette_->visible = paints(tool_);
     weaponPalette_->visible = tool_ == EditorTool::Weapon;
-    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon;
+    plantPalette_->visible = tool_ == EditorTool::Plant;
+    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant;
     if (propertiesStale_ && !properties_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
@@ -595,7 +663,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     const bool onToolbar = toolbar_->handle(input);
-    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input);
+    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input);
     const bool onProperties = properties_->handle(input);
     const bool onSettings = settings_->handle(input);
     return onToolbar || onPalette || onProperties || onSettings;
@@ -630,6 +698,24 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         }
         return;
     }
+    if (tool_ == EditorTool::Plant) {
+        if (pressed && hover_ && !definitions_.plants.empty()) {
+            const std::string& kind = definitions_.plants[static_cast<std::size_t>(plant_)];
+            const PixelPoint feet{hover_->first * kTileSize + kTileSize / 2, hover_->second * kTileSize + kTileSize - 4};
+            for (const PlacedPlant& there : level_.plants) {
+                if (plantCell(there.feet) == plantCell(feet)) {
+                    say(std::format("a {} already grows there", there.kind));
+                    return;
+                }
+            }
+            auto after = level_.plants;
+            const int id = level_.nextId;
+            after.push_back({id, kind, feet});
+            changePlants(std::format("place {} #{}", kind, id), std::move(after), level_.nextId + 1);
+            select(id);
+        }
+        return;
+    }
     // Select, first the hero start marker: drag it to where the hero should begin.
     const PixelPoint start = level_.heroStart;
     const bool onStart = wx >= start.x - kCharacterWidth / 2 && wx < start.x + kCharacterWidth / 2 && wy >= start.y - kCharacterHeight && wy <= start.y;
@@ -659,8 +745,17 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         std::optional<int> hit = characterAt(pointer.x, pointer.y);
         const bool character = hit.has_value();
         if (!hit) hit = pickupAt(pointer.x, pointer.y); // pickups lie on the ground, under the characters
+        const bool pickup = hit.has_value() && !character;
+        if (!hit) hit = plantAt(pointer.x, pointer.y);   // plants stand under everything
         select(hit);
-        if (hit && !character) {
+        if (hit && !character && !pickup) {
+            const PlacedPlant& grabbed = *findPlant(*hit);
+            movingPlant_ = true;
+            movingPlantsBefore_ = level_.plants;
+            grabX_ = grabbed.feet.x - wx;
+            grabY_ = grabbed.feet.y - wy;
+        }
+        if (hit && pickup) {
             const PlacedPickup& grabbed = *findPickup(*hit);
             movingPickup_ = true;
             movingPickupsBefore_ = level_.pickups;
@@ -679,6 +774,26 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         if (PlacedCharacter* dragged = find(*selected_)) {
             const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
             dragged->feet = {x, y}; // moved at once, so the owner sees it follow the pointer
+        }
+    }
+    if (movingPlant_ && held && pointer.inside() && selected_) {
+        for (PlacedPlant& plant : level_.plants) {
+            if (plant.id == *selected_) {
+                // A plant keeps to the grid: feet in the middle of the bottom edge of the cell under the pointer.
+                const int cellX = std::clamp((wx + grabX_) / kTileSize, 0, level_.width - 1);
+                const int cellY = std::clamp((wy + grabY_ - 1) / kTileSize, 0, level_.height - 1);
+                plant.feet = {cellX * kTileSize + kTileSize / 2, cellY * kTileSize + kTileSize - 4};
+            }
+        }
+    }
+    if (movingPlant_ && (released || !held)) {
+        movingPlant_ = false;
+        if (level_.plants != movingPlantsBefore_) {
+            const PlacedPlant* moved = selected_ ? findPlant(*selected_) : nullptr;
+            const std::string what = moved == nullptr ? "move" : std::format("move {} to ({}, {})", moved->kind, moved->feet.x, moved->feet.y);
+            history_.record(std::make_unique<PlantsCommand>(what, movingPlantsBefore_, level_.plants, level_.nextId, level_.nextId));
+            unsaved_ = true;
+            say(what);
         }
     }
     if (movingPickup_ && held && pointer.inside() && selected_) {
@@ -819,6 +934,15 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
             drawWeaponIcon(renderer, painter, *textures_.weapons, pickup.weapon, {corner.x, corner.y, kPickupSize, kPickupSize});
         }
     }
+    if (textures_.plants != nullptr) {
+        std::vector<const PlacedPlant*> order;
+        for (const PlacedPlant& plant : level_.plants) order.push_back(&plant);
+        std::sort(order.begin(), order.end(), [](const PlacedPlant* a, const PlacedPlant* b) { return a->feet.y != b->feet.y ? a->feet.y < b->feet.y : a->id < b->id; });
+        for (const PlacedPlant* plant : order) {
+            const auto feet = screen(plant->feet.x, plant->feet.y);
+            drawPlant(renderer, *textures_.plants, plant->kind, feet.x, feet.y);
+        }
+    }
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
         if (kind == nullptr || textures_.art == nullptr) continue;
@@ -862,9 +986,33 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         }
     }
 
+    if (selected_ && textures_.plants != nullptr) {
+        if (const PlacedPlant* plant = findPlant(*selected_)) {
+            const Rect extent = plantExtent(*textures_.plants, plant->kind);
+            const auto corner = screen(plant->feet.x - extent.width / 2, plant->feet.y - extent.height);
+            painter.outline({corner.x - 1, corner.y - 1, extent.width + 2, extent.height + 2}, UiColor::Gold);
+            painter.text(corner.x + (extent.width - UiPainter::textWidth(plant->kind)) / 2, corner.y - 10, plant->kind, UiColor::Gold);
+        }
+    }
+
     toolbar_->draw(painter);
     palette_->draw(painter);
     characterPalette_->draw(painter);
+    plantPalette_->draw(painter);
+    if (plantPalette_->visible && textures_.plants != nullptr) {
+        const int plants = static_cast<int>(definitions_.plants.size());
+        const int pages = std::max(1, (plants + kPlantsPerPage - 1) / kPlantsPerPage);
+        const std::string label = std::format("{}/{}", plantPage_ + 1, pages);
+        const Rect& panel = plantPalette_->bounds;
+        painter.text(panel.x + (panel.width - UiPainter::textWidth(label)) / 2, panel.y + 4, label, UiColor::Text);
+        for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
+            const Rect& cell = plantPalette_->children()[i]->bounds;
+            const std::size_t index = static_cast<std::size_t>(plantPage_ * kPlantsPerPage) + i - 2;
+            if (index < definitions_.plants.size()) {
+                drawPlantIcon(renderer, *textures_.plants, definitions_.plants[index], {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
+            }
+        }
+    }
     weaponPalette_->draw(painter);
     if (weaponPalette_->visible && textures_.weapons != nullptr) {
         for (std::size_t i = 0; i < weaponPalette_->children().size() && i < weaponNames_.size(); ++i) {
@@ -884,6 +1032,10 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         what = definitions_.characters[static_cast<std::size_t>(kind_)].name;
     } else if (tool_ == EditorTool::Weapon) {
         what = weaponNames_.empty() ? "no weapons" : weaponNames_[static_cast<std::size_t>(weapon_)];
+    } else if (tool_ == EditorTool::Plant) {
+        what = definitions_.plants.empty() ? "no plants" : definitions_.plants[static_cast<std::size_t>(plant_)];
+    } else if (selected_ && findPlant(*selected_) != nullptr) {
+        what = findPlant(*selected_)->kind;
     } else if (selected_ && findPickup(*selected_) != nullptr) {
         what = findPickup(*selected_)->weapon;
     } else {
@@ -904,6 +1056,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         palette_->drawOverlay(painter);
         characterPalette_->drawOverlay(painter);
         weaponPalette_->drawOverlay(painter);
+        plantPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         settings_->drawOverlay(painter);
     }

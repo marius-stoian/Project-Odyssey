@@ -11,7 +11,7 @@
 //   --type <text>:<time>     type the text at that time
 //   --hold <Intent>:<from>:<to>  hold an intent (MoveUp, MoveDown, MoveLeft, MoveRight, Interact,
 //                            OpenMenu, SwitchWeapon, ModeGame, ModeEditor, Undo, Redo, Save, Delete,
-//                            ToggleGrid, Rotate, Erase, Confirm, Attack, Slot1..Slot9) between two times in seconds: scripted play for tests
+//                            ToggleGrid, Rotate, Erase, Confirm, Attack, Inspect, Slot1..Slot9) between two times in seconds: scripted play for tests
 #include "core/log.h"
 #include "core/version.h"
 #include "game/odyssey_game.h"
@@ -62,6 +62,7 @@ luna::engine::Intent intentNamed(std::string_view name) {
     if (name == "Erase") return Intent::Erase;
     if (name == "Confirm") return Intent::Confirm;
     if (name == "Attack") return Intent::Attack;
+    if (name == "Inspect") return Intent::Inspect;
     if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
         return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
     }

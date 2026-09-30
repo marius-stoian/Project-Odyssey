@@ -885,3 +885,25 @@ Two smaller ingredients: a *dead zone* (a pointer within 16 pixels of his chest 
 **Try it (10 minutes).** In `odyssey_game.cpp` change `kFacingHysteresisDegrees` to `0.0` and `kFacingDeadZonePixels` to `0.0`, build, and walk sideways with the mouse near the hero: watch him flicker. Then run the test `US-139 No flicker walking past the pointer`: it fails. Put the numbers back.
 
 **Check yourself.** Why is the facing compared with the facing *before* this tick's walking, and not the facing after it?
+
+
+
+## US-136: Plants (2026-10-01)
+
+**The idea: random numbers from a seeded stream, and spatial queries.** When you cut a plant down, it must grow back at a random place, but the game must still be replayable: the same play must give the same result. The trick is that a computer's "random" numbers are a recipe, not chance. `Pcg32(1, 5)` is a recipe started from the *seed* 1 on *stream* 5; every call to `below(n)` gives the next number of the recipe. Start the game again and the recipe restarts, so the plant grows back in the same places. (In Charter rule 6 every system has its own stream, so adding a new random thing in another system never changes where plants grow.)
+
+```cpp
+const int cellX = firstX + plantRng_.below(cellsX);     // a random column inside the camera view
+const int cellY = firstY + plantRng_.below(cellsY);
+if (!plantSpotFree(cellX, cellY)) continue;              // try another; give up after 64 tries
+```
+
+`plantSpotFree` is a *spatial query*: "is anything near this place?" It asks the map (solid?), the other plants (same cell?), the characters, and the hero (distance). Whenever the game needs to know "what is here", it asks such a question instead of keeping a big table of everything.
+
+A second idea hides in the trees: a tree is not a tile, but it must block like one. So the map got a small extra layer, `setObstacle(x, y, height)`: "something this tall stands on this cell". Walking and flat shots ask `isSolid`, which now also answers yes for an obstacle cell. The same question, one more reason to say yes.
+
+**Where to look.** `OdysseyGame::tickPlants`, `plantSpotFree` and `destroyPlant` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `setObstacle` in [src/luna/engine/tile_map.cpp](../src/luna/engine/tile_map.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --level docs/evidence/US-136/levels/garden.json`, cut down a flower with the sword (click toward it), and watch where it comes back 15 seconds later. Restart the level and cut it again: it comes back in the very same place. Then change the seed `core::Pcg32(1, 5)` in `populatePlants` to `Pcg32(2, 5)`, build, and see it move.
+
+**Check yourself.** Why does the regrow test run the same scenario twice and expect the same position, and what would make it fail?
