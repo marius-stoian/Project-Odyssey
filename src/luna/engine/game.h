@@ -5,6 +5,8 @@
 #include "input.h"
 #include "renderer.h"
 
+#include <optional>
+
 namespace luna::engine {
 
 // What a game gives Luna. Luna owns the window and the loop and calls these; the game
@@ -23,6 +25,15 @@ public:
     // Called once per frame. `alpha` (0..1) says how far we are towards the next tick,
     // so movement can be drawn smoothly between ticks.
     virtual void render(Renderer& renderer, double alpha) = 0;
+
+    // A change of the window the game asks for (US-081): full screen or windowed, and the size of the window. Luna polls this
+    // after every tick and applies what it finds once.
+    struct WindowChange {
+        bool fullscreen = false;
+        int width = 0;   // 0: keep the size
+        int height = 0;
+    };
+    virtual std::optional<WindowChange> takeWindowChange() { return std::nullopt; }
 };
 
 } // namespace luna::engine

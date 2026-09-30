@@ -140,7 +140,9 @@ add_library(odysseus_sim STATIC
     src/sim/save.cpp
     src/sim/region.cpp
     src/sim/rivals.cpp
-    src/sim/region_save.cpp)
+    src/sim/region_save.cpp
+    src/sim/hero_data.cpp
+    src/sim/hero_life.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -170,6 +172,8 @@ add_library(odysseus_game STATIC
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
+    src/game/run_flow.cpp
+    src/game/settings.cpp
     src/game/level.cpp
     src/game/editor.cpp
     src/game/editor_history.cpp)
@@ -349,7 +353,8 @@ add_executable(odysseus_sim_tests
     tests/sim/story_love_test.cpp
     tests/sim/story_hunt_test.cpp
     tests/sim/story_episode_test.cpp
-    tests/sim/region_test.cpp)
+    tests/sim/region_test.cpp
+    tests/sim/hero_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

@@ -72,6 +72,9 @@ public:
     odysseus::core::Rect presentationRect() const;
 
     void setSize(int width, int height);
+    // Full screen or a window (US-081): takes effect at once; the window keeps its size for going back.
+    void setFullscreen(bool fullscreen);
+    bool fullscreen() const;
 
     // The size of the drawing surface in real pixels (can differ from the requested
     // window size on high-DPI screens).

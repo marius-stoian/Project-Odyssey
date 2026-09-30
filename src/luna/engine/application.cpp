@@ -117,6 +117,13 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
         const int ticks = clock.advance(elapsed);
         for (int tick = 0; tick < ticks; ++tick) {
             game.update(input.nextTick());
+            if (const auto change = game.takeWindowChange()) {
+                window.setFullscreen(change->fullscreen);
+                if (!change->fullscreen && change->width > 0 && change->height > 0) window.setSize(change->width, change->height);
+                const odysseus::core::Rect out = window.outputRect();
+                logScale(out.width, out.height);
+                logInfo(std::format("Window change: {} {}x{}", change->fullscreen ? "full screen" : "windowed", out.width, out.height));
+            }
         }
 
         window.clear(config.clearRed, config.clearGreen, config.clearBlue);

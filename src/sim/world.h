@@ -106,7 +106,16 @@ public:
     // A death from outside the daily rules (an accident in a test, a story event). Returns the event's id.
     int kill(int person, CauseOfDeath cause, int causeEvent = -1);
     // What `who` thinks of `about`, -100..100.
+
     int opinion(int who, int about) const;
+
+    // The hero of a run (M5) is one of the clan. The run layer (hero_life.h) changes what is theirs through these, so the world
+    // keeps its own rules: a person by id to change (age, traits), a change of opinion, the store, and a line in the chronicle.
+    Person* personMutable(int id) { return id >= 0 && static_cast<std::size_t>(id) < people_.size() ? &people_[static_cast<std::size_t>(id)] : nullptr; }
+    void adjustOpinion(int who, int about, int delta);
+    void adjustFood(int meals) { food_ = food_ + meals < 0 ? 0 : food_ + meals; }
+    // Writes an entry in the chronicle now; returns its id.
+    int note(const std::string& text, int importance, EventKind kind = EventKind::Note, int who = -1, int other = -1);
 
     // Life events (US-014), called by the daily rules; tests may call them too.
     // Two adults become partners. Any courtship behind it is a cause of the Pairing event, and

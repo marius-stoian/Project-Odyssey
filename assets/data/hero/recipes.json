@@ -1,0 +1,11 @@
+{
+  "recipes": [
+    { "id": "hammerstone", "name": "Hammerstone", "station": "knapping-stone", "skill": "flint-knapper", "inputs": { "flint": 1 }, "tools": [], "output": "hammerstone", "count": 1 },
+    { "id": "spearhead", "name": "Spearhead", "station": "knapping-stone", "skill": "flint-knapper", "inputs": { "flint": 2 }, "tools": ["hammerstone"], "output": "spearhead", "count": 1 },
+    { "id": "flint-tool", "name": "Flint tool", "station": "knapping-stone", "skill": "flint-knapper", "inputs": { "flint": 1 }, "tools": ["hammerstone"], "output": "flint-tool", "count": 1 },
+    { "id": "spear", "name": "Spear", "station": "knapping-stone", "skill": "flint-knapper", "inputs": { "spearhead": 1, "wood": 1 }, "tools": [], "output": "spear", "count": 1 },
+    { "id": "basket", "name": "Basket", "station": "fire", "skill": "gatherer", "inputs": { "wood": 2 }, "tools": [], "output": "basket", "count": 1 },
+    { "id": "fire-drill", "name": "Fire drill", "station": "fire", "skill": "fire-keeper", "inputs": { "wood": 1, "flint": 1 }, "tools": [], "output": "fire-drill", "count": 1 },
+    { "id": "medicine-bag", "name": "Medicine bag", "station": "fire", "skill": "shaman-healer", "inputs": { "herbs": 2 }, "tools": [], "output": "medicine-bag", "count": 1 }
+  ]
+}

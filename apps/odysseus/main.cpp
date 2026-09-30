@@ -4,6 +4,7 @@
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
+//   --new-game               start at the New Game screen (seed, Growing Period, Comfort)
 //   --region <seed>          play a generated region: land, resources, the clan at its start and two rival clans
 //   --save-dir <folder>      where the autosaves go (default: the user's save folder); --load brings the autosave back
 //   --clan-speed <n>         run the clan's simulation n ticks per game tick (fast forward for demos)
@@ -17,7 +18,7 @@
 //   --type <text>:<time>     type the text at that time
 //   --hold <Intent>:<from>:<to>  hold an intent (MoveUp, MoveDown, MoveLeft, MoveRight, Interact,
 //                            OpenMenu, SwitchWeapon, ModeGame, ModeEditor, Undo, Redo, Save, Delete,
-//                            ToggleGrid, Rotate, Erase, Confirm, Attack, Inspect, DevTools, Slot1..Slot9) between two times in seconds: scripted play for tests
+//                            ToggleGrid, Rotate, Erase, Confirm, Attack, Inspect, DevTools, Overlay, Slot1..Slot9) between two times in seconds: scripted play for tests
 #include "core/log.h"
 #include "core/version.h"
 #include "game/odyssey_game.h"
@@ -51,6 +52,7 @@ struct Arguments {
     std::optional<std::uint64_t> region; // play a generated region
     std::filesystem::path saveDirectory; // where autosaves go
     bool load = false;                 // load the autosave at start
+    bool newGame = false;              // open the New Game screen
     std::vector<luna::engine::ScriptedHold> holds;
     std::vector<luna::engine::ScriptedPointer> pointer;
     std::vector<luna::engine::ScriptedText> typing;
@@ -78,6 +80,7 @@ luna::engine::Intent intentNamed(std::string_view name) {
     if (name == "Attack") return Intent::Attack;
     if (name == "Inspect") return Intent::Inspect;
     if (name == "DevTools") return Intent::DevTools;
+    if (name == "Overlay") return Intent::Overlay;
     if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
         return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
     }
@@ -100,6 +103,10 @@ Arguments parseArguments(int argc, char* argv[]) {
     Arguments arguments;
     for (int i = 1; i < argc; ++i) {
         const std::string_view name = argv[i];
+        if (name == "--new-game") { // a flag without a value: start at the New Game screen
+            arguments.newGame = true;
+            continue;
+        }
         if (name == "--load") { // a flag without a value: bring back the autosave
             arguments.load = true;
             continue;
@@ -186,6 +193,9 @@ int main(int argc, char* argv[]) {
         }
         if (arguments.load && !game.loadAutosave()) {
             odysseus::core::logWarning("--load found nothing to load");
+        }
+        if (arguments.newGame) {
+            game.run().openNewGame();
         }
         if (arguments.clan) {
             game.setClan(true);

@@ -137,6 +137,15 @@ odysseus::core::Rect Window::presentationRect() const {
     return {static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.w), static_cast<int>(rect.h)};
 }
 
+void Window::setFullscreen(bool fullscreen) {
+    SDL_SetWindowFullscreen(window_.get(), fullscreen);
+    SDL_SyncWindow(window_.get());
+}
+
+bool Window::fullscreen() const {
+    return (SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0;
+}
+
 void Window::setSize(int width, int height) {
     SDL_SetWindowSize(window_.get(), width, height);
     SDL_SyncWindow(window_.get()); // wait until the operating system has applied it

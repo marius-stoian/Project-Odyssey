@@ -61,6 +61,8 @@ public:
     // Indexed by person id (the dead and the exiled are not present).
     const std::vector<Figure>& figures() const { return figures_; }
     PixelPoint camp() const { return camp_; }
+    // The person the player plays is drawn as the hero avatar, not as a clan member: no figure for them.
+    void setHidden(int personId) { hidden_ = personId; }
 
     // Where a person doing `action` goes, in world pixels (before nudging it onto free ground): the place of the action
     // plus the person's own spot there.
@@ -68,6 +70,7 @@ public:
 
 private:
     PixelPoint camp_;
+    int hidden_ = -1;
     std::vector<Figure> figures_;
 };
 

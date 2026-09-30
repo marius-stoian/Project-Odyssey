@@ -1,0 +1,72 @@
+{
+  "events": [
+    { "id": "wolf-at-the-fire", "title": "A wolf at the fire", "text": "A lone wolf circles the camp at dusk, drawn by the smell of the store. The hunters are away.", "minAge": 12, "maxAge": 25, "role": "elder",
+      "options": [
+        { "text": "Drive it off with a burning branch.", "affinity": { "fireKeeper": 6, "hunter": 2 }, "opinion": 8, "trait": "brave", "note": "{hero} drove a wolf from the fire with a burning branch, and {other} saw it." },
+        { "text": "Wake the elders and stay behind them.", "affinity": { "trade": 2, "religion": 2 }, "opinion": 5, "note": "{hero} woke {other} when a wolf came to the fire." },
+        { "text": "Throw it a share of the store.", "affinity": { "gatherer": 3, "trade": 4 }, "opinion": -5, "note": "{hero} bought off a hungry wolf with the clan's food, and {other} did not approve." }
+      ] },
+    { "id": "lost-flint", "title": "The lost flint", "text": "You find a fine piece of flint in the riverbed that belongs to no one, or to whoever comes for it.", "minAge": 12, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Keep it and learn to work it.", "affinity": { "knapper": 7 }, "opinion": 0, "note": "{hero} found a good piece of flint and kept it." },
+        { "text": "Trade it for a favour.", "affinity": { "trade": 7 }, "opinion": 6, "note": "{hero} traded a piece of flint to {other} for a favour." },
+        { "text": "Give it to the clan's knapper.", "affinity": { "knapper": 3, "religion": 2 }, "opinion": 8, "trait": "kind", "note": "{hero} gave a fine piece of flint away, and {other} was glad." }
+      ] },
+    { "id": "sick-child", "title": "A sick child", "text": "A small child burns with fever. The healer is far away, and someone must sit through the night.", "minAge": 12, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Sit with the child all night.", "affinity": { "shaman": 7, "religion": 3 }, "opinion": 10, "trait": "kind", "note": "{hero} sat through the night with a sick child, and {other} never forgot it." },
+        { "text": "Search the hills for herbs.", "affinity": { "gatherer": 5, "shaman": 4 }, "opinion": 6, "note": "{hero} went into the hills for herbs for a sick child, for {other}." }
+      ] },
+    { "id": "the-old-song", "title": "The old song", "text": "An old woman by the fire begins a song about how the world began and invites you to learn it.", "minAge": 12, "maxAge": 25, "role": "elder",
+      "options": [
+        { "text": "Learn every word.", "affinity": { "religion": 8, "fireKeeper": 3 }, "opinion": 8, "note": "{hero} learned the old song from {other}." },
+        { "text": "Listen, but slip away early.", "affinity": { "hunter": 2, "religion": 1 }, "opinion": -2, "note": "{hero} left {other}'s song before its end." },
+        { "text": "Ask what the song is worth.", "affinity": { "trade": 6 }, "opinion": -6, "trait": "greedy", "note": "{hero} asked {other} what the old song was worth, and was not thanked." }
+      ] },
+    { "id": "river-crossing", "title": "The river crossing", "text": "The river is high. Across it, a herd grazes; behind you, the clan is hungry.", "minAge": 14, "maxAge": 25, "requires": { "affinity": "hunter", "min": 12 }, "role": "elder",
+      "options": [
+        { "text": "Swim across and stalk the herd.", "affinity": { "hunter": 8 }, "opinion": 6, "trait": "brave", "note": "{hero} swam the high river to hunt, and {other} watched from the bank." },
+        { "text": "Wait for the water to fall.", "affinity": { "gatherer": 3, "trade": 2 }, "opinion": 3, "note": "{hero} waited out the river with {other}." }
+      ] },
+    { "id": "rival-child", "title": "A stranger's child", "text": "A child from another clan wanders into your camp, lost and hungry.", "minAge": 12, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Feed the child and bring it home.", "affinity": { "religion": 4, "trade": 4 }, "opinion": 8, "trait": "kind", "note": "{hero} fed a lost child of another clan and led it home." },
+        { "text": "Trade it for food and leave.", "affinity": { "trade": 5 }, "opinion": -10, "trait": "greedy", "note": "{hero} sent a lost child away for a meal, and {other} heard of it." },
+        { "text": "Take it to the elders.", "affinity": { "religion": 3 }, "opinion": 3, "note": "{hero} brought a lost child to {other}." }
+      ] },
+    { "id": "the-fire-goes-out", "title": "The fire goes out", "text": "You were to watch the fire. You slept, and in the grey morning the coals are cold.", "minAge": 12, "maxAge": 25, "requires": { "affinity": "fireKeeper", "min": 8 }, "role": "elder",
+      "options": [
+        { "text": "Confess and rebuild it yourself.", "affinity": { "fireKeeper": 8, "religion": 2 }, "opinion": 5, "note": "{hero} let the fire go out, confessed to {other}, and lit it again." },
+        { "text": "Borrow fire from another camp before anyone wakes.", "affinity": { "trade": 4, "fireKeeper": 2 }, "opinion": -3, "note": "{hero} borrowed a flame in secret after the fire died." },
+        { "text": "Say it was the wind.", "affinity": { "trade": 2 }, "opinion": -12, "trait": "greedy", "note": "{hero} lied to {other} about the cold fire." }
+      ] },
+    { "id": "market-day", "title": "Market day", "text": "Traders from the other clan camp at the ford with furs and worked stone. They will deal with anyone who is bold enough.", "minAge": 15, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Haggle for a good price on the clan's behalf.", "affinity": { "trade": 8 }, "opinion": 5, "trait": "talkative", "note": "{hero} haggled with the traders and came home with a good price, and {other} was pleased." },
+        { "text": "Watch and learn how they trade.", "affinity": { "trade": 4, "knapper": 2 }, "opinion": 2, "note": "{hero} watched the traders with {other}." }
+      ] },
+    { "id": "a-hard-winter", "title": "A hard winter", "text": "Snow has lain for weeks. The store is low and people are quiet.", "minAge": 12, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Give up your own share for someone weaker.", "affinity": { "religion": 5, "shaman": 3 }, "opinion": 12, "trait": "kind", "note": "{hero} gave up a share of food in a hard winter for {other}." },
+        { "text": "Go out and hunt in the snow.", "affinity": { "hunter": 7 }, "opinion": 6, "trait": "brave", "note": "{hero} hunted through the snow for the clan, with {other} waiting." },
+        { "text": "Keep your head down and save your strength.", "affinity": { "gatherer": 2 }, "opinion": -4, "note": "{hero} kept to the furs through the hard winter." }
+      ] },
+    { "id": "the-cave-paintings", "title": "The cave paintings", "text": "In a cave above the river you find old paintings of animals and hands, and a place where someone once kept a fire.", "minAge": 12, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Add your own hand to the wall.", "affinity": { "religion": 6, "shaman": 3 }, "opinion": 5, "note": "{hero} left a hand on the cave wall, with {other} beside." },
+        { "text": "Gather the flint from the cave floor.", "affinity": { "knapper": 5, "gatherer": 2 }, "opinion": 2, "note": "{hero} took flint from the cave floor." },
+        { "text": "Leave, uneasy.", "affinity": { "hunter": 2 }, "opinion": 0, "trait": "timid", "note": "{hero} left the painted cave, uneasy." }
+      ] },
+    { "id": "the-quarrel", "title": "The quarrel at the store", "text": "Two people shout over the last of the dried berries. Everyone looks at you.", "minAge": 14, "maxAge": 25, "role": "friend",
+      "options": [
+        { "text": "Split the berries fairly.", "affinity": { "trade": 4, "gatherer": 3 }, "opinion": 6, "trait": "kind", "note": "{hero} split the berries between quarrelling people, and {other} was grateful." },
+        { "text": "Take their side against the stronger.", "affinity": { "hunter": 3, "religion": 2 }, "opinion": 4, "note": "{hero} took {other}'s side in a quarrel at the store." },
+        { "text": "Walk away.", "affinity": {}, "opinion": -3, "note": "{hero} walked away from a quarrel at the store." }
+      ] },
+    { "id": "first-blood", "title": "The first kill", "text": "The hunters give you the spear for the last throw at a wounded deer.", "minAge": 14, "maxAge": 25, "requires": { "affinity": "hunter", "min": 10 }, "role": "elder",
+      "options": [
+        { "text": "Throw true.", "affinity": { "hunter": 9 }, "opinion": 8, "trait": "brave", "note": "{hero} made a first kill with a spear throw, and {other} was proud." },
+        { "text": "Hand the spear back: the deer should be spared.", "affinity": { "religion": 5, "shaman": 3 }, "opinion": -2, "trait": "kind", "note": "{hero} would not make the last throw, and {other} shrugged." }
+      ] }
+  ]
+}

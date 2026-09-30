@@ -75,6 +75,13 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
+    if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
+    {
+        std::string note;
+        settings_ = loadSettings(saveDirectory_ / "settings.json", &note);
+        if (settings_.fullscreen || settings_.width != 1280 || settings_.height != 720) pendingWindow_ = WindowChange{settings_.fullscreen, settings_.width, settings_.height};
+        if (!note.empty()) message_ = note;
+    }
     clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
@@ -479,11 +486,167 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
     painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
     if (!message_.empty()) {
         const int messageWidth = luna::engine::UiPainter::textWidth(message_) + 8;
-        const luna::engine::Rect messageBox{std::max(2, (kVirtualWidth - messageWidth) / 2), 34, std::min(messageWidth, kVirtualWidth - 4), luna::engine::kGlyphHeight + 6};
+        const luna::engine::Rect messageBox{std::max(2, (kVirtualWidth - messageWidth) / 2), 48, std::min(messageWidth, kVirtualWidth - 4), luna::engine::kGlyphHeight + 6};
         painter.fill(messageBox, luna::engine::UiColor::Shade);
         painter.outline(messageBox, luna::engine::UiColor::Gold);
         painter.text(messageBox.x + 4, messageBox.y + 3, message_.substr(0, static_cast<std::size_t>((messageBox.width - 8) / luna::engine::kTextAdvance)), luna::engine::UiColor::Gold);
     }
+}
+
+// Starts a run (US-050): the region of the seed, a clan made for the Comfort level, a hero of it at the preset's age.
+void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion) {
+    if (!heroData_) return;
+    if (useRegion) loadRegion(game.seed);
+    clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
+    life_ = std::make_unique<sim::HeroLife>(*heroData_, *clan_, game);
+    clanEnabled_ = true;
+    clanView_ = ClanView(clanView_.camp());
+    clanView_.setHidden(life_->personId());
+    clanView_.update(*clan_, map_);
+    lastSavedDay_ = -1;
+    if (life_->phase() == sim::Phase::Growing) {
+        runFlow_.openFocus();
+    } else {
+        runFlow_.openMantle();
+    }
+    core::logInfo(std::format("New run: seed {}, {} preset, {} comfort; the hero is {}, age {}, {}", game.seed, life_->preset().name, heroData_->config.comforts.at(static_cast<std::size_t>(life_->game().comfort)).name,
+                              life_->name(), life_->ageYears(), life_->origin()));
+}
+
+void OdysseyGame::afterYear() {
+    if (!clan_) return;
+    clanView_.update(*clan_, map_);
+    lastSavedDay_ = clan_->date().day;
+}
+
+// Gathering takes a plant without the healing and the leaves of hitting it; it grows back as any plant does.
+bool OdysseyGame::harvestPlant(std::size_t index) {
+    if (index >= plants_.size() || !plants_[index].alive) return false;
+    destroyPlant(index, false);
+    return true;
+}
+
+int OdysseyGame::plantAtWorld(double x, double y) const {
+    int found = -1;
+    int bestY = -1;
+    for (std::size_t i = 0; i < plants_.size(); ++i) {
+        const WorldPlant& plant = plants_[i];
+        if (!plant.alive) continue;
+        const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
+        if (x >= plant.feet.x - extent.width / 2.0 && x < plant.feet.x + extent.width / 2.0 && y >= plant.feet.y - extent.height && y <= plant.feet.y && plant.feet.y > bestY) {
+            found = static_cast<int>(i);
+            bestY = plant.feet.y;
+        }
+    }
+    return found;
+}
+
+int OdysseyGame::personAtWorld(double x, double y) const {
+    int found = -1;
+    double bestY = -1.0;
+    for (std::size_t i = 0; i < clanView_.figures().size(); ++i) {
+        const Figure& figure = clanView_.figures()[i];
+        if (!figure.present) continue;
+        const double halfWidth = (figure.child ? kCharacterWidth * 3 / 4 : kCharacterWidth) / 2.0;
+        const double height = figure.child ? kCharacterHeight * 3 / 4 : kCharacterHeight;
+        if (x >= figure.x - halfWidth && x < figure.x + halfWidth && y >= figure.y - height && y <= figure.y && figure.y > bestY) {
+            found = static_cast<int>(i);
+            bestY = figure.y;
+        }
+    }
+    return found;
+}
+
+std::vector<int> OdysseyGame::attendeesAt(double x, double y, int radiusTiles) const {
+    std::vector<int> near;
+    for (std::size_t i = 0; i < clanView_.figures().size(); ++i) {
+        const Figure& figure = clanView_.figures()[i];
+        if (figure.present && std::hypot(figure.x - x, figure.y - y) <= radiusTiles * kTileSize) near.push_back(static_cast<int>(i));
+    }
+    return near;
+}
+
+void OdysseyGame::applySettings(const GameSettings& settings) {
+    settings_ = settings;
+    saveSettings(settings_, saveDirectory_ / "settings.json");
+    pendingWindow_ = WindowChange{settings_.fullscreen, settings_.width, settings_.height};
+}
+
+std::optional<luna::engine::Game::WindowChange> OdysseyGame::takeWindowChange() {
+    const auto change = pendingWindow_;
+    pendingWindow_.reset();
+    return change;
+}
+
+// The hero's name, age and standing, under the date line.
+void OdysseyGame::drawRunHud(luna::engine::Renderer& renderer) const {
+    if (!life_ || runFlow_.modal()) return;
+    std::string specialty;
+    for (const std::string& n : life_->specialtyNames()) specialty += (specialty.empty() ? "" : "/") + n;
+    const std::string line = std::format("{}, {}{}  Trade {}%  Religion {}%", life_->name(), life_->ageYears(), specialty.empty() ? "" : " " + specialty, life_->tradePercent(), life_->religionPercent());
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const int width = luna::engine::UiPainter::textWidth(line) + 8;
+    const luna::engine::Rect box{(kVirtualWidth - width) / 2, 34, width, luna::engine::kGlyphHeight + 6};
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Gold);
+}
+
+// Things of the run standing in the world: the knapping stone at the camp and the sacred fire.
+void OdysseyGame::drawRunWorld(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const {
+    if (!life_) return;
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const PixelPoint stone = knappingStone();
+    const int sx = stone.x - view.x;
+    const int sy = stone.y - view.y;
+    if (sx > -40 && sy > -40 && sx < kVirtualWidth + 40 && sy < kVirtualHeight + 40) {
+        renderer.draw(tiles_, {static_cast<int>(TileKind::Rock) * kTileSize, 0, kTileSize, kTileSize}, {sx - 16, sy - 28});
+        painter.text(sx - luna::engine::UiPainter::textWidth("knapping stone") / 2, sy - 38, "knapping stone", luna::engine::UiColor::Dim);
+    }
+    const sim::SacredFire& fire = life_->fire();
+    if (fire.founded) {
+        const int fx = fire.tileX * kTileSize + 16 - view.x;
+        const int fy = fire.tileY * kTileSize + 16 - view.y;
+        if (fx > -60 && fy > -40 && fx < kVirtualWidth + 60 && fy < kVirtualHeight + 40) {
+            if (fire.lit) drawEffectPicture(renderer, effectArt_, "flame", {fx - 14, fy - 28, 28, 28});
+            painter.text(fx - luna::engine::UiPainter::textWidth(fire.name) / 2, fy - 38, fire.name, fire.lit ? luna::engine::UiColor::Gold : luna::engine::UiColor::Dim);
+        }
+    }
+}
+
+double OdysseyGame::frameMilliseconds() const {
+    if (frameTimesFilled_ == 0) return 0.0;
+    double total = 0.0;
+    for (std::size_t i = 0; i < frameTimesFilled_; ++i) total += frameTimes_[i];
+    return total / static_cast<double>(frameTimesFilled_);
+}
+
+double OdysseyGame::framesPerSecond() const {
+    const double ms = frameMilliseconds();
+    return ms > 0.0 ? 1000.0 / ms : 0.0;
+}
+
+double OdysseyGame::tickMilliseconds() const {
+    if (tickTimesFilled_ == 0) return 0.0;
+    double total = 0.0;
+    for (std::size_t i = 0; i < tickTimesFilled_; ++i) total += tickTimes_[i];
+    return total / static_cast<double>(tickTimesFilled_);
+}
+
+double OdysseyGame::worstTickMilliseconds() const {
+    double worst = 0.0;
+    for (std::size_t i = 0; i < tickTimesFilled_; ++i) worst = std::max(worst, tickTimes_[i]);
+    return worst;
+}
+
+// F3: the numbers a slow game shows first (US-082).
+void OdysseyGame::drawOverlay(luna::engine::Renderer& renderer) const {
+    if (!overlayOn_) return;
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const std::string line = std::format("FPS {:.0f}  frame {:.1f} ms  tick {:.2f} ms (worst {:.2f})  people {}", framesPerSecond(), frameMilliseconds(), tickMilliseconds(), worstTickMilliseconds(),
+                                         clan_ ? clan_->population() : 0);
+    const luna::engine::Rect box{2, kVirtualHeight - luna::engine::kGlyphHeight - 8, luna::engine::UiPainter::textWidth(line) + 8, luna::engine::kGlyphHeight + 6};
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
 }
 
 void OdysseyGame::say(const std::string& text) {
@@ -513,6 +676,7 @@ bool OdysseyGame::autosave() {
     try {
         sim::saveWorld(*clan_, saveDirectory_ / "clan.json");
         if (region_) sim::saveRegion(*region_, saveDirectory_ / "region.json");
+        if (life_) life_->save(saveDirectory_ / "hero.json");
     } catch (const std::exception& error) {
         say(std::string("Autosave failed: ") + error.what());
         return false;
@@ -560,6 +724,11 @@ bool OdysseyGame::loadAutosave() {
         clanView_ = ClanView(camp);
         clanView_.update(*clan_, map_);
         lastSavedDay_ = clan_->date().day;
+        if (heroData_ && std::filesystem::exists(saveDirectory_ / "hero.json")) {
+            life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
+            clanView_.setHidden(life_->personId());
+            clanView_.update(*clan_, map_);
+        }
         say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
         return true;
     } catch (const std::exception& error) {
@@ -792,7 +961,7 @@ void OdysseyGame::populatePlants() {
 }
 
 // A weapon hit destroys a plant: leaves fly, an edible one heals the hero, and 15 s later it grows back elsewhere.
-void OdysseyGame::destroyPlant(std::size_t index) {
+void OdysseyGame::destroyPlant(std::size_t index, bool heal) {
     WorldPlant& plant = plants_.at(index);
     if (!plant.alive) return;
     plant.alive = false;
@@ -804,7 +973,7 @@ void OdysseyGame::destroyPlant(std::size_t index) {
     const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
     playEffect("nature leaf", plant.feet.x, plant.feet.y - extent.height / 2.0, 40);
     core::logInfo(std::format("The {} was destroyed", plant.kind));
-    if (plant.def != nullptr && plant.def->edible && respawnTicks_ == 0) {
+    if (heal && plant.def != nullptr && plant.def->edible && respawnTicks_ == 0) {
         const int before = heroHp_;
         heroHp_ = std::min(kHeroMaxHp, heroHp_ + kPlantHeal);
         playEffect("healing glow", hero_.feetX(), hero_.feetY() - kCharacterHeight / 2.0, 32);
@@ -1156,7 +1325,16 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         editor_.update(intents); // the world stands still
         return;
     }
+    // The screens of the run (New Game, Focus, menu, crafting...) stop the world while they are open.
+    if (intents.pressed(luna::engine::Intent::Overlay)) overlayOn_ = !overlayOn_;
+    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) runFlow_.openMenu();
+    if (runFlow_.modal()) {
+        updateAim(intents.pointer(), true, hero_.facing()); // keeps the pointer for drawing
+        runFlow_.update(*this, intents);
+        return;
+    }
     ++ticks_;
+    const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
@@ -1169,6 +1347,18 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         }
     }
     if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});
+    if (life_ && clan_) {
+        std::vector<sim::RivalSummary> summaries;
+        if (rivals_) {
+            for (const sim::RivalClan& clan : rivals_->clans()) summaries.push_back({clan.name, clan.world->population()});
+        }
+        life_->setRivals(std::move(summaries));
+        life_->update();
+        if (life_->phase() == sim::Phase::Ended && runFlow_.screen() != Screen::Ended) runFlow_.openEnded();
+    }
+    tickTimes_[tickTimeAt_] = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tickStarted).count();
+    tickTimeAt_ = (tickTimeAt_ + 1) % tickTimes_.size();
+    tickTimesFilled_ = std::min(tickTimesFilled_ + 1, tickTimes_.size());
     if (messageTicks_ > 0 && --messageTicks_ == 0) message_.clear();
     updateDevTools(intents);
     // After a fall the hero waits out a short fade, then starts again at the hero start.
@@ -1201,7 +1391,12 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
     // Handle attacks based on the held weapon.
     // Plants (US-136): Interact with empty hands, or the right mouse button, looks at the plant next to the hero.
-    if (!fallen && (intents.pressed(luna::engine::Intent::Inspect) || (intents.pressed(luna::engine::Intent::Interact) && heldSlotName.empty()))) {
+    if (!fallen && intents.pressed(luna::engine::Intent::Inspect)) {
+        // A right click on something in the world offers its actions (US-061); on nothing it looks at the nearest plant.
+        const luna::engine::Pointer& p = intents.pointer();
+        const luna::engine::Rect view = camera_.view();
+        if (!(life_ && p.inside() && runFlow_.openContext(*this, view.x + p.x, view.y + p.y))) inspectNearestPlant();
+    } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldSlotName.empty()) {
         inspectNearestPlant();
     }
     if (inspection_.ticks > 0) --inspection_.ticks;
@@ -1426,6 +1621,13 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
 }
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
+    const auto renderStarted = std::chrono::steady_clock::now();
+    if (lastRender_.time_since_epoch().count() != 0) {
+        frameTimes_[frameTimeAt_] = std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count();
+        frameTimeAt_ = (frameTimeAt_ + 1) % frameTimes_.size();
+        frameTimesFilled_ = std::min(frameTimesFilled_ + 1, frameTimes_.size());
+    }
+    lastRender_ = renderStarted;
     if (mode_ == Mode::Editor) {
         editor_.render(renderer, alpha);
         drawModeLabel(renderer);
@@ -1537,10 +1739,14 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawWeather(renderer);
     drawInspection(renderer, view);
     drawRivals(renderer, view);
+    drawRunWorld(renderer, view);
     drawClanDetails(renderer, view, alpha);
     drawHud(renderer);
     drawClanHud(renderer);
+    drawRunHud(renderer);
     drawDevTools(renderer, view, alpha);
+    runFlow_.draw(renderer, uiSheet_);
+    drawOverlay(renderer);
     drawModeLabel(renderer);
 }
 

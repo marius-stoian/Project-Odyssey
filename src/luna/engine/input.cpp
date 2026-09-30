@@ -49,6 +49,7 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::F1: return KeyBinding{Intent::ModeGame, kKeyboardA};
     case Key::F2: return KeyBinding{Intent::ModeEditor, kKeyboardA};
     case Key::F12: return KeyBinding{Intent::DevTools, kKeyboardA};
+    case Key::F3: return KeyBinding{Intent::Overlay, kKeyboardA};
     case Key::Delete: return KeyBinding{Intent::Delete, kKeyboardA};
     case Key::Backspace: return KeyBinding{Intent::Erase, kKeyboardA};
     case Key::G: return KeyBinding{Intent::ToggleGrid, kKeyboardA};
