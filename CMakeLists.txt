@@ -120,7 +120,8 @@ add_library(odysseus_sim STATIC
     src/sim/actions.cpp
     src/sim/ai.cpp
     src/sim/memory.cpp
-    src/sim/life.cpp)
+    src/sim/life.cpp
+    src/sim/report.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -280,8 +281,18 @@ add_executable(odysseus_sim_tests
     tests/sim/needs_test.cpp
     tests/sim/ai_test.cpp
     tests/sim/memory_test.cpp
-    tests/sim/chronicle_test.cpp)
+    tests/sim/chronicle_test.cpp
+    tests/sim/report_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
 add_test(NAME odysseus_sim_tests COMMAND odysseus_sim_tests)
+
+# --- US-015: the headless runner from the command line (100 years; wrong input) ---
+add_test(NAME "US-015 Run"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=run
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
+set_tests_properties("US-015 Run" PROPERTIES TIMEOUT 600)
+add_test(NAME "US-015 Bad input"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=bad
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")

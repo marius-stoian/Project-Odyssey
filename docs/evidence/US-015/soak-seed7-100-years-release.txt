@@ -1,0 +1,8 @@
+Project Odyssey headless runner 0.1.0
+Seed 7, 2800 days (100 years, 6720000 ticks): now Spring, year 101, day 1, 9 C
+Population: 47 alive (20 founders, 93 born, 66 died)
+Deaths by cause: starvation 0, the cold 0, old age 53, a mammoth's tusks 8, childbirth 5
+Average needs of the living: Hunger 54, Energy 86, Warmth 53, Social 49
+Food in store: 0 meals; couples 9, feuds 0, mammoths 71, chronicle entries 14353
+Tick time: 0.067 microseconds per tick (0.45 s in total)
+World hash: 10149270126131427195

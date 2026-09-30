@@ -128,6 +128,7 @@ private:
     int mammoths_ = 0;
     bool storeRanOut_ = false; // while true, another empty evening is not news
     int forageLeft_ = 0;       // what the land still offers today (carrying capacity)
+    int lastMammothYear_ = 0;  // the herd passes the valley once a year: one mammoth at most
     int gameLeft_ = 0;
     int hour_ = 1; // the hour of the day now starting (1..24)
     bool dailyLife_ = true;
