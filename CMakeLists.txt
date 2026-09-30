@@ -27,6 +27,7 @@ endforeach()
 find_package(doctest CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Stb REQUIRED) # PNG reading and writing (ADR-018)
 
 # Content (JSON, sprites) lives in assets/; programs find it here during development.
 set(ODYSSEUS_DATA_DIR "${PROJECT_SOURCE_DIR}/assets/data")
@@ -102,8 +103,13 @@ add_library(luna_engine STATIC
     src/luna/engine/camera.cpp
     src/luna/engine/tile_map.cpp
     src/luna/engine/collision.cpp
-    src/luna/engine/physics_view.cpp)
+    src/luna/engine/physics_view.cpp
+    src/luna/engine/image_ops.cpp
+    src/luna/engine/image_io.cpp
+    src/luna/engine/ui.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
+# PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
+target_include_directories(luna_engine SYSTEM PRIVATE ${Stb_INCLUDE_DIR})
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
 
@@ -144,7 +150,11 @@ add_library(odysseus_game STATIC
     src/game/materials.cpp
     src/game/spear_range.cpp
     src/game/sword.cpp
-    src/game/enemy.cpp)
+    src/game/enemy.cpp
+    src/game/art.cpp
+    src/game/level.cpp
+    src/game/editor.cpp
+    src/game/editor_history.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -225,7 +235,8 @@ add_executable(luna_tests
     tests/luna/loop_test.cpp
     tests/luna/pixel_scale_test.cpp
     tests/luna/tile_map_test.cpp
-    tests/luna/collision_test.cpp)
+    tests/luna/collision_test.cpp
+    tests/luna/ui_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
@@ -265,21 +276,28 @@ set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
 add_executable(odysseus_game_tests
     tests/main.cpp
     tests/game/hero_test.cpp
-    tests/game/spear_test.cpp)
+    tests/game/spear_test.cpp
+    tests/game/art_test.cpp
+    tests/game/level_test.cpp
+    tests/game/modes_test.cpp
+    tests/game/paint_test.cpp
+    tests/game/place_test.cpp
+    tests/game/settings_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
-target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
+target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
+    ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
 add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
 
 # --- End-to-end: walk right into the boulder in the real window (US-024) ---
 add_test(NAME "US-024 Walk to the rock"
-    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024 -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_walk_to_rock.cmake")
 set_tests_properties("US-024 Walk to the rock" PROPERTIES LABELS window TIMEOUT 120)
 
 # --- End-to-end: throw a spear at the straw target in the real window (US-029) ---
 add_test(NAME "US-029 Throw in the game"
-    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us029
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us029 -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_throw_spear.cmake")
 set_tests_properties("US-029 Throw in the game" PROPERTIES LABELS window TIMEOUT 120)
 
@@ -319,3 +337,33 @@ add_test(NAME "US-115 Both views"
     COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=story
             -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
 set_tests_properties("US-115 Both views" PROPERTIES TIMEOUT 600)
+
+# --- US-120: the atlas cutter, turning the owner's sprite sheets into game-ready atlases ---
+add_executable(odysseus_atlas apps/atlas/main.cpp)
+target_link_libraries(odysseus_atlas PRIVATE odysseus_game)
+target_compile_definitions(odysseus_atlas PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_ASSETS_DIR="${PROJECT_SOURCE_DIR}/assets")
+odysseus_apply_settings(odysseus_atlas)
+
+# --- End-to-end: Game mode and Editor mode in the real window (US-123) ---
+add_test(NAME "US-123 Modes in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us123 -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json
+            -P "${PROJECT_SOURCE_DIR}/tests/game/run_modes.cmake")
+set_tests_properties("US-123 Modes in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- End-to-end: paint a tile and save, in the real window, on a copy of the valley (US-124) ---
+add_test(NAME "US-124 Paint in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us124
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_paint.cmake")
+set_tests_properties("US-124 Paint in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- End-to-end: place a character, save, play and strike it, in the real window (US-125) ---
+add_test(NAME "US-125 Place in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us125
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_place.cmake")
+set_tests_properties("US-125 Place in the game" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- Scripted input: two holds of one intent are exactly two presses (found at X-M2c) ---
+add_test(NAME "X-M2c Two scripted presses"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/twopresses
+            -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_two_presses.cmake")
+set_tests_properties("X-M2c Two scripted presses" PROPERTIES LABELS window TIMEOUT 120)

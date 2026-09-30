@@ -528,3 +528,146 @@ Data first, wording last: the groups and the scores are just numbers; only the f
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 100 --story` and read three episodes. Then set `"maxPerCentury"` under `"episodes"` in `assets/data/sim/story.json` to 10 and see which episodes survive.
 
 **Check yourself.** Why can `findEpisodes` be called twice on the same world and always give the same answer, and what would break that?
+
+## US-120: Real art in the game (2026-09-30)
+
+**What we built.** Your sprite sheets are pictures for people, with labels and dark backgrounds. A small program, `odysseus_atlas`, cuts each figure and tile out by rectangles listed in `assets/sprites/cuts.json`, clears the background, shrinks them to the game's sizes (32x48 people, 32x32 tiles) and packs them into two atlas pictures. The game draws those.
+
+**The idea: reading binary files; structs of rectangles.** A PNG is bytes, not text: we read it whole into a `std::vector<unsigned char>` and let stb decode it into pixels. Every cut is described by a tiny struct, a rectangle:
+
+```cpp
+struct Rect { int x, y, width, height; };
+```
+
+Everything else (crop, fit, mirror) is a function from one picture and a rectangle to another picture. Small structs plus pure functions keep the art pipeline easy to test: the tests build a fake sheet in memory and check every pixel.
+
+**Where to look.** `cutAtlas` in [src/game/art.cpp](../src/game/art.cpp); `fitInto` and `removeBackground` in [src/luna/engine/image_ops.cpp](../src/luna/engine/image_ops.cpp).
+
+**Try it (15 minutes).** Run `odysseus_atlas.exe --preview preview.png` from the build folder and open the picture. Then run `odysseus_atlas.exe --find "assets/sprites/Retro RPG Heroes, Terrain & Monsters Sheet.png" 12 40 1515 180 12 45` and see the 20 heroes of that sheet measured.
+
+**Check yourself.** Why does `fitInto` weight each colour by its alpha before averaging, and what would the edges of a figure look like if it did not?
+
+## US-121: Point, click and read on screen (2026-09-30)
+
+**What we built.** The mouse reaches the game as a *pointer* in the game's own pixels, keyboard shortcuts arrive as intents (F2 = Editor, Ctrl+Z = Undo...), and Luna has a small UI toolkit: a pixel font and widgets (buttons, lists, number and text fields, panels).
+
+**The idea: classes with virtual functions.** A panel holds many kinds of widget but treats them all alike. Each widget is a class that *derives* from `Widget` and answers the same questions its own way:
+
+```cpp
+class Widget {
+public:
+    virtual ~Widget() = default;
+    virtual bool handle(const UiInput& input) { return false; }
+    virtual void draw(UiPainter& painter) const = 0;   // "= 0": every widget must say how
+};
+class Button final : public Widget { ... bool handle(...) override; void draw(...) const override; };
+```
+
+The panel keeps `std::unique_ptr<Widget>` and calls `child->draw(painter)`; C++ picks `Button::draw` or `ListBox::draw` at run time. The `virtual ~Widget()` matters: deleting a Button through a `Widget` pointer must run the Button's destructor too.
+
+**Where to look.** [src/luna/engine/ui.h](../src/luna/engine/ui.h) and [ui.cpp](../src/luna/engine/ui.cpp).
+
+**Try it (15 minutes).** Open [ui-showcase.png](evidence/US-121/ui-showcase.png), then change the `Gold` colour in `colorOf` in ui.cpp, rebuild, run `luna_tests.exe -tc="US-121 Showcase"` and look at the picture it names.
+
+**Check yourself.** Why does a `Button` run its action when the mouse button is *let go* over it, and not when it is pressed?
+
+## US-122: Levels as data (2026-09-30)
+
+**What we built.** The demo world used to be built in code. Now it lives in `assets/levels/valley.json`: the ground, the hero's start, the straw targets and the goblin. The game reads any level file, and saves them safely.
+
+**The idea: reading and writing JSON with validation.** A file comes from outside the program, so nothing in it is trusted. Every field is checked before use, and every error says *which file* and *which field*:
+
+```cpp
+if (definitions.character(placed.kind) == nullptr) {
+    throw DataError(file, "characters[0].kind", "\"dragon\" is not a character kind in characters.json");
+}
+```
+
+Saving is the mirror image, with one more rule: never leave a half-written file. We write `valley.json.tmp` first and rename it at the end; the old file becomes `valley.json.bak1`. If a crash damages a save, `loadLevel` quietly uses the last good backup and says so.
+
+**Where to look.** `readLevelFile`, `loadLevel` and `saveLevel` in [src/game/level.cpp](../src/game/level.cpp).
+
+**Try it (15 minutes).** Copy `assets/levels/valley.json`, change `"heroStart"` and the goblin's `"hp"`, and run `odysseus.exe --level <your copy>`. Then misspell a tile name and read the log.
+
+**Check yourself.** Why is the ground saved as runs (`["grass", 30]`) instead of one name per cell?
+
+## US-123: Game mode and Editor mode (2026-09-30)
+
+**What we built.** F2 stops the world and opens the Editor; F1 plays the level again. The game now has two states, and what it does each tick depends on which one it is in.
+
+**The idea: state machines with `enum class`.** A state machine is a value that says "what mode we are in" plus rules for moving between modes:
+
+```cpp
+enum class Mode { Game, Editor };
+
+if (intents.pressed(Intent::ModeEditor)) switchMode(Mode::Editor);
+if (mode_ == Mode::Editor) { editor_.update(intents); return; } // the world stands still
+```
+
+`enum class` (not plain `enum`) keeps the names inside `Mode::` and refuses to mix with numbers, so `mode_ == 1` does not compile. All the work of *changing* state lives in one function, `switchMode`: entering the Editor points its camera where the game looked; leaving it rebuilds the play state from the level.
+
+**Where to look.** `OdysseyGame::switchMode` and `resetPlay` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); [src/game/editor.cpp](../src/game/editor.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe`, press F2, pan around with WASD and the right mouse button, then F1. Throw a spear, press F2 and F1 again: the level starts fresh.
+
+**Check yourself.** Why does going back to Game rebuild the whole play state instead of carrying on where the player was?
+
+## US-124: Paint ground tiles (2026-09-30)
+
+**What we built.** In the Editor you paint the ground: a brush, a rectangle, a flood fill and an eraser, with a tile palette, a grid, Undo and Redo, and Ctrl+S to save.
+
+**The idea: the command pattern (undo and redo).** Every change is an object that knows how to do itself *and* how to take itself back:
+
+```cpp
+class Command {
+public:
+    virtual void apply(Level& level) const = 0;
+    virtual void undo(Level& level) const = 0;
+};
+```
+
+A `PaintCommand` just remembers, for each cell, what it was before and what it became. The `History` keeps two stacks: done and undone. Undo moves the top command from one to the other and calls `undo`; Redo moves it back and calls `apply`. A brand-new edit empties the undone stack: you cannot redo a future you have just replaced. The test plays hundreds of random edits, undos and redos and checks the level against snapshots at every step.
+
+**Where to look.** [src/game/editor_history.cpp](../src/game/editor_history.cpp); `Editor::useTool` in [src/game/editor.cpp](../src/game/editor.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --editor`, paint a moat of water around the start, press F1 and try to walk out. Press F2, Ctrl+Z a few times, F1 again.
+
+**Check yourself.** Why does `PaintCommand::undo` go through its cells *backwards*?
+
+## US-125: Place characters (2026-09-30)
+
+**What we built.** The Editor places heroes and monsters, selects them, moves, turns and deletes them, and edits their name, HP and sword damage. In Game mode your sword finds them.
+
+**The idea: owning objects in a `std::vector`; ids instead of pointers.** The level owns its characters by value: `std::vector<PlacedCharacter>`. It is tempting to remember "the selected character" as a pointer into that vector, but a vector moves its elements when it grows or shrinks, and Undo replaces the whole list, so an old pointer would point at garbage. Instead each character has an `id` that is never reused, and the editor remembers the id:
+
+```cpp
+std::optional<int> selected_;          // an id, or nothing
+PlacedCharacter* find(int id);         // look it up when needed, fresh each time
+```
+
+`std::optional` says "maybe there is one" without a magic value like -1.
+
+**Where to look.** `Editor::usePlaceOrSelect`, `Editor::find` and `CharactersCommand` in [src/game/editor.cpp](../src/game/editor.cpp) and [editor_history.cpp](../src/game/editor_history.cpp).
+
+**Try it (15 minutes).** `odysseus.exe --editor`: choose Place, then the troll, put it on the path; choose Select, give it 20 HP; F1, Shift for the sword, and defeat it.
+
+**Check yourself.** Why does `CharactersCommand::undo` keep `nextId` at its highest value instead of putting it back?
+
+## US-126: Level and character settings (2026-09-30)
+
+**What we built.** A Level panel in the Editor: name, width, height and default ground; New and Open for other levels, with a "Save the changes first?" question; the hero's start dragged by its marker. And the guide, `docs/guides/editor.md`.
+
+**The idea: resizing a 2D grid stored in one vector.** The ground is one `std::vector<int>`, row after row: cell (x, y) lives at `y * width + x`. Change the width and every index moves, so you cannot just `resize()` the vector: the rows would slide into each other. Instead we build a new grid and copy the part both sizes share:
+
+```cpp
+out.ground.assign(newWidth * newHeight, level.defaultGround);   // all default ground
+for (int y = 0; y < std::min(level.height, out.height); ++y)
+    for (int x = 0; x < std::min(level.width, out.width); ++x)
+        out.set(x, y, level.at(x, y));                           // the overlap, cell by cell
+```
+
+**Where to look.** `resized` in [src/game/level.cpp](../src/game/level.cpp); `Editor::requestOpen` and `Editor::answer` in [src/game/editor.cpp](../src/game/editor.cpp).
+
+**Try it (15 minutes).** Follow [the Editor guide](guides/editor.md): make a new level, paint a lake, place a troll, move the START marker, save, and press F1.
+
+**Check yourself.** What would go wrong if `resized` called `ground.resize(newWidth * newHeight)` and nothing else?

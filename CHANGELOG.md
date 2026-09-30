@@ -4,6 +4,81 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M2c: Exit review M2c (Mraw) — 2026-09-30
+
+**State:** Done; `qa` merged into `main`, tag `m2c-done`.
+
+- Evidence: `docs/gates/M2c.md`, `docs/evidence/X-M2c/` (a scripted session: paint, place, rename, save; then load, play and strike).
+- Fix: scripted input with two holds of the same intent no longer presses it on every tick (`src/luna/engine/application.cpp`); regression ctest `X-M2c Two scripted presses`; ctest 25/25 in Debug and Release, zero warnings.
+
+
+## US-126 / S-US-126: Level and character settings (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Last story of M2c.
+
+- Game: the Editor's Level panel sets the level's name, width and height (a resize keeps what was painted and drops characters that fall outside) and the default ground; the hero start marker is dragged with Select; New and Open switch levels and ask first about unsaved changes (Save, Discard, Cancel); every setting is one step of Undo. The game plays the level the Editor has open.
+- Engine: hover hints stay on screen (`UiPainter::setScreen`, `keepOnScreen`).
+- Docs: `docs/guides/editor.md`, the owner's guide to every control.
+- Tests: `tests/game/settings_test.cpp` (4 cases) and a UI case; ctest 24/24 in Debug and Release, zero warnings.
+
+
+## US-125 / S-US-125: Place characters (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Sixth story of M2c.
+
+- Game: the Editor places characters from a palette of every kind (hero, wanderer, 10 monsters); Select picks one by clicking it, drags it to move it, R turns it, Delete removes it; a properties panel edits its name, HP and sword damage; every change is one step of Undo; saved with the level. In Game mode placed enemies take sword hits, flash red and are defeated; other placed characters stand where they were put.
+- Levels: `assets/levels/demo.json` (the original demo) is what every test plays; the owner's edited `valley.json` stays the game's level (delegated decision D-20); level backups are not committed.
+- Tests: `tests/game/place_test.cpp` (3 cases), end-to-end `US-125 Place in the game`; the end-to-end tests of US-024, US-029, US-123 and US-124 now play demo.json; ctest 24/24 in Debug and Release, zero warnings.
+
+
+## US-124 / S-US-124: Paint ground tiles (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fifth story of M2c.
+
+- Game: the Editor paints ground: brush (click or drag), rectangle, flood fill and eraser; a toolbar and a tile palette with hints; a grid (G); undo and redo (Ctrl+Z, Ctrl+Y, 100 steps, one step per stroke or fill); Ctrl+S saves the level safely; a status line. Solid ground blocks walking in Game mode.
+- Code: `src/game/editor_history.{h,cpp}` (commands, history, line, rectangle and flood fill); `src/game/editor.{h,cpp}` extended.
+- Tests: `tests/game/paint_test.cpp` (4 cases, including random undo and redo sequences), end-to-end `US-124 Paint in the game`; ctest 23/23 in Debug and Release, zero warnings.
+
+
+## US-123 / S-US-123: Game mode and Editor mode (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fourth story of M2c.
+
+- Game: F2 opens the Editor (the world pauses; the camera pans with the move keys or a right-button drag; the level, its characters, targets and hero start are shown); F1 plays the level again from the hero start (the play state is rebuilt from the level). The mode is shown in the top-right corner. `odysseus.exe --editor` starts in the Editor.
+- Code: `src/game/editor.{h,cpp}` (codex issue CI-007: not in a sub-folder, because of ADR-016).
+- Tests: `tests/game/modes_test.cpp` (3 cases), end-to-end `US-123 Modes in the game`; ctest 22/22 in Debug and Release, zero warnings.
+
+
+## US-122 / S-US-122: Levels as data (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Third story of M2c.
+
+- Data: `assets/data/tiles.json` (16 ground kinds), `assets/data/characters.json` (12 character kinds), `assets/levels/valley.json` (the demo that used to be code).
+- Game: `level.{h,cpp}` (definitions; level model; validated reading with file and field in every error; safe saving with 3 backups; falling back to a backup when damaged); the game starts from a level (`--level <file>`); enemies are the level's placed characters, each drawn with its own art; the ground strip follows tiles.json.
+- Tests: `tests/game/level_test.cpp` (3 cases), US-120 tests adapted; ctest 21/21 in Debug and Release, zero warnings.
+
+
+## US-121 / S-US-121: Point, click and read on screen (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Second story of M2c.
+
+- Platform: mouse movement, buttons and wheel, typed text, and the editor's keys (F1, F2, Delete, Backspace, Ctrl, Z, Y, G, R).
+- Engine: new intents (ModeGame, ModeEditor, Undo, Redo, Save, Delete, ToggleGrid, Rotate, Erase, Confirm) and the `Pointer` in virtual pixels; scripted pointer and typing; the UI toolkit (`ui.{h,cpp}`: 5x7 font, 12 colours, button, list, number and text fields, panel) and `ImageRenderer` for pixel tests.
+- Program: `odysseus.exe --click / --drag / --point / --type`; every intent usable with `--hold`.
+- Tests: `tests/luna/ui_test.cpp` (4 cases), SDL mouse and text translation; ctest 21/21 in Debug and Release, zero warnings.
+
+
+## US-120 / S-US-120: Real art in the game (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M2c.
+
+- Engine: PNG reading and writing (stb from vcpkg, ADR-018) and image operations (crop, box-filter fit, mirror, background removal, blob finding).
+- Game: `art.{h,cpp}` cuts the owner's sheets by `assets/sprites/cuts.json` into atlases, loads them, and gives the game its pictures (programmer art when the atlas is missing or damaged, with the file and reason logged). The hero, the ground and the demo enemy now come from the owner's art.
+- Program: `odysseus_atlas` (writes `assets/sprites/atlas/`, `--preview` contact sheet, `--find` to measure a sheet).
+- Data: the owner's sheets committed unchanged; `cuts.json` (74 character frames, 16 tiles); the atlas.
+- Tests: `tests/game/art_test.cpp` (5 cases); ctest 21/21 in Debug and Release, zero warnings.
+
+
 ## US-115 / S-US-115: Tell the clan's story in episodes (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2b.

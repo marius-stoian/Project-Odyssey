@@ -16,9 +16,9 @@ Enemy::Enemy(double feetX, double feetY, int maxHp) : feetX_(feetX), feetY_(feet
 bool Enemy::takeDamage(int damage) {
     hp_ = std::max(0, hp_ - damage);
     damageFlashTicks_ = kFlashTicks;
-    core::logInfo(std::format("Enemy took {} damage, HP {} / {}", damage, hp_, maxHp_));
+    core::logInfo(std::format("{} took {} damage, HP {} / {}", name, damage, hp_, maxHp_));
     if (hp_ == 0) {
-        core::logInfo("Enemy defeated");
+        core::logInfo(name + " was defeated");
         return true;
     }
     return false;

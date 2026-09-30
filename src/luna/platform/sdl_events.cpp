@@ -21,6 +21,16 @@ Key toKey(SDL_Scancode scancode) {
     case SDL_SCANCODE_LSHIFT: return Key::LShift;
     case SDL_SCANCODE_RSHIFT: return Key::RShift;
     case SDL_SCANCODE_TAB: return Key::Tab;
+    case SDL_SCANCODE_F1: return Key::F1;
+    case SDL_SCANCODE_F2: return Key::F2;
+    case SDL_SCANCODE_DELETE: return Key::Delete;
+    case SDL_SCANCODE_BACKSPACE: return Key::Backspace;
+    case SDL_SCANCODE_LCTRL: return Key::LCtrl;
+    case SDL_SCANCODE_RCTRL: return Key::RCtrl;
+    case SDL_SCANCODE_Z: return Key::Z;
+    case SDL_SCANCODE_Y: return Key::Y;
+    case SDL_SCANCODE_G: return Key::G;
+    case SDL_SCANCODE_R: return Key::R;
     default: return Key::Unknown;
     }
 }
@@ -88,6 +98,40 @@ std::optional<Event> translateEvent(const SDL_Event& event) {
         out.type = EventType::GamepadRemoved;
         out.gamepad = static_cast<int>(event.gdevice.which);
         return out;
+    case SDL_EVENT_MOUSE_MOTION:
+        out.type = EventType::MouseMoved;
+        out.x = event.motion.x;
+        out.y = event.motion.y;
+        return out;
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
+        out.type = event.type == SDL_EVENT_MOUSE_BUTTON_DOWN ? EventType::MouseButtonDown : EventType::MouseButtonUp;
+        out.mouseButton = event.button.button == SDL_BUTTON_LEFT    ? MouseButton::Left
+                          : event.button.button == SDL_BUTTON_RIGHT  ? MouseButton::Right
+                          : event.button.button == SDL_BUTTON_MIDDLE ? MouseButton::Middle
+                                                                     : MouseButton::Unknown;
+        out.x = event.button.x;
+        out.y = event.button.y;
+        return out;
+    case SDL_EVENT_MOUSE_WHEEL:
+        out.type = EventType::MouseWheel;
+        // "Flipped" wheels (natural scrolling) report the other way round; Luna always means
+        // + = scroll up.
+        out.wheel = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+        return out;
+    case SDL_EVENT_TEXT_INPUT: {
+        // Only printable ASCII: the bitmap font has nothing else.
+        for (const char* c = event.text.text; c != nullptr && *c != '\0'; ++c) {
+            if (*c >= 32 && *c <= 126) {
+                out.text += *c;
+            }
+        }
+        if (out.text.empty()) {
+            return std::nullopt;
+        }
+        out.type = EventType::TextInput;
+        return out;
+    }
     case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
         out.type = EventType::WindowResized;
         out.width = event.window.data1;

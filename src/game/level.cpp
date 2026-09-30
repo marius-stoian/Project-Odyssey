@@ -1,0 +1,306 @@
+#include "game/level.h"
+
+#include "sim/data.h"
+#include "sim/json_data.h"
+
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <format>
+#include <fstream>
+#include <system_error>
+
+namespace odysseus::game {
+
+using nlohmann::json;
+using sim::DataError;
+
+namespace {
+
+constexpr const char* kFacingCodes[] = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+
+std::string text(const json& object, const std::filesystem::path& file, const std::string& field) {
+    if (!object.contains(field) || !object.at(field).is_string() || object.at(field).get<std::string>().empty()) {
+        throw DataError(file, field, "must be a text in quotes");
+    }
+    return object.at(field).get<std::string>();
+}
+
+int whole(const json& object, const std::filesystem::path& file, const std::string& field, int minimum, int maximum) {
+    if (!object.contains(field) || !object.at(field).is_number_integer()) {
+        throw DataError(file, field, "must be a whole number");
+    }
+    const auto value = object.at(field).get<long long>();
+    if (value < minimum || value > maximum) {
+        throw DataError(file, field, std::format("must be between {} and {} (is {})", minimum, maximum, value));
+    }
+    return static_cast<int>(value);
+}
+
+PixelPoint point(const json& value, const std::filesystem::path& file, const std::string& field, const Level& level) {
+    if (!value.is_array() || value.size() != 2 || !value.at(0).is_number_integer() || !value.at(1).is_number_integer()) {
+        throw DataError(file, field, "must be [x, y] in whole pixels");
+    }
+    const PixelPoint p{value.at(0).get<int>(), value.at(1).get<int>()};
+    if (p.x < 0 || p.y < 0 || p.x >= level.width * kTileSize || p.y >= level.height * kTileSize) {
+        throw DataError(file, field, std::format("({}, {}) is outside the level", p.x, p.y));
+    }
+    return p;
+}
+
+} // namespace
+
+const char* facingCode(Facing facing) {
+    return kFacingCodes[static_cast<std::size_t>(facing)];
+}
+
+int Definitions::tileNumber(const std::string& name) const {
+    for (std::size_t i = 0; i < tiles.size(); ++i) {
+        if (tiles[i].name == name) return static_cast<int>(i);
+    }
+    return -1;
+}
+
+const CharacterKindDef* Definitions::character(const std::string& name) const {
+    for (const CharacterKindDef& kind : characters) {
+        if (kind.name == name) return &kind;
+    }
+    return nullptr;
+}
+
+Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
+    Definitions definitions;
+    const std::filesystem::path tilesFile = dataDirectory / "tiles.json";
+    const json tiles = sim::readJsonFile(tilesFile);
+    if (!tiles.contains("tiles") || !tiles.at("tiles").is_array() || tiles.at("tiles").empty()) {
+        throw DataError(tilesFile, "tiles", "must be a list of tile kinds");
+    }
+    for (std::size_t i = 0; i < tiles.at("tiles").size(); ++i) {
+        const json& entry = tiles.at("tiles").at(i);
+        const std::string where = std::format("tiles[{}]", i);
+        TileKindDef kind{text(entry, tilesFile, "name"), text(entry, tilesFile, "atlas"), entry.value("solid", false)};
+        if (definitions.tileNumber(kind.name) >= 0) {
+            throw DataError(tilesFile, where + ".name", "\"" + kind.name + "\" is listed twice");
+        }
+        definitions.tiles.push_back(kind);
+    }
+    const std::filesystem::path charactersFile = dataDirectory / "characters.json";
+    const json characters = sim::readJsonFile(charactersFile);
+    if (!characters.contains("characters") || !characters.at("characters").is_array() || characters.at("characters").empty()) {
+        throw DataError(charactersFile, "characters", "must be a list of character kinds");
+    }
+    for (std::size_t i = 0; i < characters.at("characters").size(); ++i) {
+        const json& entry = characters.at("characters").at(i);
+        const std::string where = std::format("characters[{}]", i);
+        CharacterKindDef kind;
+        kind.name = text(entry, charactersFile, "name");
+        kind.frames = text(entry, charactersFile, "frames");
+        kind.directions = whole(entry, charactersFile, "directions", 1, 8);
+        if (kind.directions != 1 && kind.directions != 8) {
+            throw DataError(charactersFile, where + ".directions", "must be 1 (front view) or 8");
+        }
+        kind.hp = whole(entry, charactersFile, "hp", 1, 9999);
+        kind.swordDamage = whole(entry, charactersFile, "swordDamage", 0, 999);
+        kind.enemy = entry.value("enemy", true);
+        if (definitions.character(kind.name) != nullptr) {
+            throw DataError(charactersFile, where + ".name", "\"" + kind.name + "\" is listed twice");
+        }
+        definitions.characters.push_back(kind);
+    }
+    return definitions;
+}
+
+Level makeLevel(std::string name, int width, int height, int ground) {
+    Level level;
+    level.name = std::move(name);
+    level.width = width;
+    level.height = height;
+    level.defaultGround = ground;
+    level.ground.assign(static_cast<std::size_t>(width) * static_cast<std::size_t>(height), ground);
+    level.heroStart = {width * kTileSize / 2 + kTileSize / 2, height * kTileSize / 2 + kTileSize * 3 / 4};
+    return level;
+}
+
+Level resized(const Level& level, int width, int height) {
+    Level out = level;
+    out.width = std::clamp(width, kLevelMinSize, kLevelMaxSize);
+    out.height = std::clamp(height, kLevelMinSize, kLevelMaxSize);
+    out.ground.assign(static_cast<std::size_t>(out.width) * static_cast<std::size_t>(out.height), level.defaultGround);
+    for (int y = 0; y < std::min(level.height, out.height); ++y) {
+        for (int x = 0; x < std::min(level.width, out.width); ++x) {
+            out.set(x, y, level.at(x, y));
+        }
+    }
+    const int pixelsWide = out.width * kTileSize;
+    const int pixelsHigh = out.height * kTileSize;
+    auto inside = [&](const PixelPoint& p) { return p.x < pixelsWide && p.y < pixelsHigh; };
+    std::erase_if(out.characters, [&](const PlacedCharacter& c) { return !inside(c.feet); });
+    std::erase_if(out.targets, [&](const PixelPoint& p) { return !inside(p); });
+    out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
+    return out;
+}
+
+luna::engine::TileMap buildTileMap(const Level& level, const Definitions& definitions) {
+    luna::engine::TileMap map(level.width, level.height, kTileSize, level.defaultGround);
+    for (std::size_t i = 0; i < definitions.tiles.size(); ++i) {
+        map.setSolid(static_cast<int>(i), definitions.tiles[i].solid);
+    }
+    for (int y = 0; y < level.height; ++y) {
+        for (int x = 0; x < level.width; ++x) {
+            map.set(x, y, level.at(x, y));
+        }
+    }
+    return map;
+}
+
+Level readLevelFile(const std::filesystem::path& file, const Definitions& definitions) {
+    const json data = sim::readJsonFile(file);
+    if (!data.is_object()) {
+        throw DataError(file, "(file)", "is not a level");
+    }
+    const int version = whole(data, file, "levelVersion", 1, 1'000'000);
+    if (version > kLevelVersion) {
+        throw DataError(file, "levelVersion", std::format("is {}: the level was made by a newer version of the game (this one reads up to {})",
+                                                          version, kLevelVersion));
+    }
+    Level level;
+    level.name = text(data, file, "name");
+    level.width = whole(data, file, "width", kLevelMinSize, kLevelMaxSize);
+    level.height = whole(data, file, "height", kLevelMinSize, kLevelMaxSize);
+    auto tile = [&](const std::string& name, const std::string& field) {
+        const int number = definitions.tileNumber(name);
+        if (number < 0) throw DataError(file, field, "\"" + name + "\" is not a tile kind in tiles.json");
+        return number;
+    };
+    level.defaultGround = tile(text(data, file, "defaultGround"), "defaultGround");
+    // Ground: one list per row of [kind, how many] runs, so a big grass field is one entry.
+    if (!data.contains("ground") || !data.at("ground").is_array() || static_cast<int>(data.at("ground").size()) != level.height) {
+        throw DataError(file, "ground", std::format("must be a list of {} rows", level.height));
+    }
+    for (int y = 0; y < level.height; ++y) {
+        const json& row = data.at("ground").at(static_cast<std::size_t>(y));
+        const std::string rowField = std::format("ground[{}]", y);
+        int cells = 0;
+        if (!row.is_array()) throw DataError(file, rowField, "must be a list of [kind, count] runs");
+        for (std::size_t r = 0; r < row.size(); ++r) {
+            const json& run = row.at(r);
+            const std::string runField = std::format("{}[{}]", rowField, r);
+            if (!run.is_array() || run.size() != 2 || !run.at(0).is_string() || !run.at(1).is_number_integer() || run.at(1).get<int>() < 1) {
+                throw DataError(file, runField, "must be [\"kind\", count] with a count of at least 1");
+            }
+            const int number = tile(run.at(0).get<std::string>(), runField);
+            const int count = run.at(1).get<int>();
+            if (cells + count > level.width) throw DataError(file, rowField, std::format("is longer than the level's width {}", level.width));
+            level.ground.insert(level.ground.end(), static_cast<std::size_t>(count), number);
+            cells += count;
+        }
+        if (cells != level.width) throw DataError(file, rowField, std::format("has {} cells, the level is {} wide", cells, level.width));
+    }
+    level.heroStart = point(data.value("heroStart", json()), file, "heroStart", level);
+    level.nextId = whole(data, file, "nextId", 1, 1'000'000'000);
+    if (!data.contains("characters") || !data.at("characters").is_array()) {
+        throw DataError(file, "characters", "must be a list (it may be empty)");
+    }
+    for (std::size_t i = 0; i < data.at("characters").size(); ++i) {
+        const json& entry = data.at("characters").at(i);
+        const std::string where = std::format("characters[{}]", i);
+        PlacedCharacter placed;
+        placed.id = whole(entry, file, "id", 1, level.nextId - 1);
+        for (const PlacedCharacter& earlier : level.characters) {
+            if (earlier.id == placed.id) throw DataError(file, where + ".id", std::format("{} is used twice", placed.id));
+        }
+        placed.kind = text(entry, file, "kind");
+        if (definitions.character(placed.kind) == nullptr) {
+            throw DataError(file, where + ".kind", "\"" + placed.kind + "\" is not a character kind in characters.json");
+        }
+        placed.feet = point(json::array({entry.value("x", -1), entry.value("y", -1)}), file, where + ".x/y", level);
+        const std::string facing = entry.value("facing", std::string());
+        const auto* code = std::find_if(std::begin(kFacingCodes), std::end(kFacingCodes), [&](const char* c) { return facing == c; });
+        if (code == std::end(kFacingCodes)) throw DataError(file, where + ".facing", "must be S, SW, W, NW, N, NE, E or SE");
+        placed.facing = static_cast<Facing>(code - std::begin(kFacingCodes));
+        placed.name = text(entry, file, "name");
+        placed.hp = whole(entry, file, "hp", 1, 9999);
+        placed.swordDamage = whole(entry, file, "swordDamage", 0, 999);
+        level.characters.push_back(placed);
+    }
+    if (data.contains("targets")) {
+        if (!data.at("targets").is_array()) throw DataError(file, "targets", "must be a list of [x, y]");
+        for (std::size_t i = 0; i < data.at("targets").size(); ++i) {
+            level.targets.push_back(point(data.at("targets").at(i), file, std::format("targets[{}]", i), level));
+        }
+    }
+    return level;
+}
+
+LoadedLevel loadLevel(const std::filesystem::path& file, const Definitions& definitions) {
+    LoadedLevel loaded;
+    std::string problems;
+    for (int number = 0; number <= kLevelBackups; ++number) {
+        const std::filesystem::path candidate = number == 0 ? file : std::filesystem::path(file.string() + ".bak" + std::to_string(number));
+        if (!std::filesystem::exists(candidate)) continue;
+        try {
+            loaded.level = readLevelFile(candidate, definitions);
+            loaded.loadedFrom = candidate;
+            return loaded;
+        } catch (const DataError& error) {
+            if (std::string(error.what()).find("newer version") != std::string::npos) throw; // never silently lose newer work
+            loaded.notes.push_back(std::format("skipped {}: {}", candidate.filename().string(), error.what()));
+            problems += std::string("\n  ") + error.what();
+        }
+    }
+    throw DataError(file, "(file)", problems.empty() ? "no level found" : "no level could be loaded:" + problems);
+}
+
+void saveLevel(const Level& level, const Definitions& definitions, const std::filesystem::path& file) {
+    namespace fs = std::filesystem;
+    json ground = json::array();
+    for (int y = 0; y < level.height; ++y) {
+        json row = json::array();
+        for (int x = 0; x < level.width;) {
+            const int kind = level.at(x, y);
+            int count = 0;
+            while (x < level.width && level.at(x, y) == kind) {
+                ++count;
+                ++x;
+            }
+            row.push_back(json::array({definitions.tiles.at(static_cast<std::size_t>(kind)).name, count}));
+        }
+        ground.push_back(row);
+    }
+    json characters = json::array();
+    for (const PlacedCharacter& c : level.characters) {
+        characters.push_back({{"id", c.id}, {"kind", c.kind}, {"x", c.feet.x}, {"y", c.feet.y}, {"facing", facingCode(c.facing)},
+                              {"name", c.name}, {"hp", c.hp}, {"swordDamage", c.swordDamage}});
+    }
+    json targets = json::array();
+    for (const PixelPoint& t : level.targets) targets.push_back({t.x, t.y});
+    const json data{{"levelVersion", kLevelVersion},
+                    {"name", level.name},
+                    {"width", level.width},
+                    {"height", level.height},
+                    {"defaultGround", definitions.tiles.at(static_cast<std::size_t>(level.defaultGround)).name},
+                    {"heroStart", {level.heroStart.x, level.heroStart.y}},
+                    {"nextId", level.nextId},
+                    {"characters", characters},
+                    {"targets", targets},
+                    {"ground", ground}};
+    fs::create_directories(file.parent_path());
+    const fs::path temporary = fs::path(file.string() + ".tmp");
+    {
+        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
+        if (!out) throw DataError(temporary, "(file)", "cannot be written");
+        out << data.dump(1) << '\n';
+        out.flush();
+        if (!out) throw DataError(temporary, "(file)", "could not be written completely (is the disk full?)");
+    }
+    auto backup = [&](int number) { return fs::path(file.string() + ".bak" + std::to_string(number)); };
+    std::error_code ignored;
+    fs::remove(backup(kLevelBackups), ignored);
+    for (int number = kLevelBackups - 1; number >= 1; --number) {
+        if (fs::exists(backup(number))) fs::rename(backup(number), backup(number + 1));
+    }
+    if (fs::exists(file)) fs::rename(file, backup(1));
+    fs::rename(temporary, file);
+}
+
+} // namespace odysseus::game

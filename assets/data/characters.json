@@ -1,0 +1,16 @@
+{
+  "characters": [
+    { "name": "hero", "frames": "hero", "directions": 8, "hp": 100, "swordDamage": 5, "enemy": false },
+    { "name": "wanderer", "frames": "wanderer", "directions": 8, "hp": 100, "swordDamage": 5, "enemy": false },
+    { "name": "goblin", "frames": "goblin", "directions": 1, "hp": 60, "swordDamage": 4, "enemy": true },
+    { "name": "skeleton", "frames": "skeleton", "directions": 1, "hp": 70, "swordDamage": 5, "enemy": true },
+    { "name": "wolf", "frames": "wolf", "directions": 1, "hp": 50, "swordDamage": 6, "enemy": true },
+    { "name": "spider", "frames": "spider", "directions": 1, "hp": 40, "swordDamage": 4, "enemy": true },
+    { "name": "slime", "frames": "slime", "directions": 1, "hp": 30, "swordDamage": 2, "enemy": true },
+    { "name": "orc", "frames": "orc", "directions": 1, "hp": 120, "swordDamage": 8, "enemy": true },
+    { "name": "troll", "frames": "troll", "directions": 1, "hp": 200, "swordDamage": 12, "enemy": true },
+    { "name": "bat", "frames": "bat", "directions": 1, "hp": 20, "swordDamage": 2, "enemy": true },
+    { "name": "plant monster", "frames": "plant_monster", "directions": 1, "hp": 80, "swordDamage": 5, "enemy": true },
+    { "name": "ghost", "frames": "ghost", "directions": 1, "hp": 60, "swordDamage": 6, "enemy": true }
+  ]
+}

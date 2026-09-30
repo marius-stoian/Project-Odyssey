@@ -1,0 +1,36 @@
+# End-to-end US-123 in the real game window: F2 opens the Editor (the world pauses, the camera
+# pans), F1 plays again from the level. Screenshots are saved for review.
+if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR OR NOT DEFINED LEVEL)
+    message(FATAL_ERROR "run_modes.cmake needs GAME, WORK_DIR and LEVEL")
+endif()
+file(REMOVE_RECURSE "${WORK_DIR}")
+file(MAKE_DIRECTORY "${WORK_DIR}/editor" "${WORK_DIR}/back")
+
+function(run_game folder)
+    execute_process(COMMAND "${GAME}" --level "${LEVEL}" ${ARGN} --log-dir "${WORK_DIR}/${folder}"
+        RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
+    file(GLOB logs "${WORK_DIR}/${folder}/session-*.log")
+    file(READ "${logs}" log)
+    message(STATUS "Game log (${folder}):\n${log}")
+    if(NOT result EQUAL 0 OR log MATCHES "\\[ERROR\\]")
+        message(FATAL_ERROR "The game failed (exit ${result})")
+    endif()
+    set(log "${log}" PARENT_SCOPE)
+endfunction()
+
+run_game(editor --quit-after 2 --hold ModeEditor:0.5:0.6 --hold MoveRight:0.8:1.2 --screenshot "${WORK_DIR}/editor.bmp")
+if(NOT log MATCHES "Mode: Editor")
+    message(FATAL_ERROR "F2 did not open the Editor")
+endif()
+if(NOT log MATCHES "Hero at \\(1040\\.0, 1048\\.0\\)")
+    message(FATAL_ERROR "The hero moved while the Editor was open")
+endif()
+
+run_game(back --quit-after 2 --hold ModeEditor:0.4:0.5 --hold ModeGame:0.9:1.0 --hold MoveLeft:1.2:1.5 --screenshot "${WORK_DIR}/game.bmp")
+if(NOT log MATCHES "Mode: Game \\(level \"The Valley\", hero at \\(1040, 1048\\)\\)")
+    message(FATAL_ERROR "F1 did not play the level again")
+endif()
+if(log MATCHES "Hero at \\(1040\\.0, 1048\\.0\\)")
+    message(FATAL_ERROR "The hero did not walk after going back to Game mode")
+endif()
+message(STATUS "US-123 end to end: F2 edits (the world pauses), F1 plays the level again")
