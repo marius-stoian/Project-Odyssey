@@ -1,0 +1,5 @@
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\memory_test.cpp(48): MESSAGE: Voll remembers: Garu gave a gift on day 0, feeling 40
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\memory_test.cpp(128): MESSAGE: after a year: 85 gift memories, 26 theft memories, 14 heard second-hand
+[doctest] test cases:  5 |  5 passed | 0 failed | 12 skipped
+[doctest] assertions: 34 | 34 passed | 0 failed |
+[doctest] Status: SUCCESS!

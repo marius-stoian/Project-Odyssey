@@ -11,6 +11,8 @@ const char* actionName(Action action) {
     case Action::Sleep: return "Sleep";
     case Action::WarmByFire: return "WarmByFire";
     case Action::Talk: return "Talk";
+    case Action::GiveGift: return "GiveGift";
+    case Action::Steal: return "Steal";
     case Action::Rest: return "Rest";
     case Action::Wander: return "Wander";
     default: return "?";

@@ -12,7 +12,7 @@ namespace odysseus::sim {
 
 // What a person can spend a game hour doing (US-012). Eating happens at the clan's
 // evening meal, so the food actions are Gather and Hunt: they fill the shared store.
-enum class Action { Gather, Hunt, Sleep, WarmByFire, Talk, Rest, Wander, Count };
+enum class Action { Gather, Hunt, Sleep, WarmByFire, Talk, GiveGift, Steal, Rest, Wander, Count };
 
 inline constexpr std::size_t kActionCount = static_cast<std::size_t>(Action::Count);
 

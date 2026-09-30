@@ -118,7 +118,8 @@ add_library(odysseus_sim STATIC
     src/sim/clan.cpp
     src/sim/chronicle.cpp
     src/sim/actions.cpp
-    src/sim/ai.cpp)
+    src/sim/ai.cpp
+    src/sim/memory.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -276,7 +277,8 @@ add_executable(odysseus_sim_tests
     tests/main.cpp
     tests/sim/world_test.cpp
     tests/sim/needs_test.cpp
-    tests/sim/ai_test.cpp)
+    tests/sim/ai_test.cpp
+    tests/sim/memory_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

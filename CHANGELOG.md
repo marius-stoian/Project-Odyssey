@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-013 / S-US-013: Remember events and spread gossip (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Data: `assets/data/sim/social.json` (new).
+- Simulation: `memory.{h,cpp}` (memories, social config, forgetting, memory limit); people keep memories, opinions and last gift and theft days; new actions GiveGift and Steal; `World::giveGift`, `recordTheft`, `talk` (gossip at half strength), favourite partners by opinion, daily forgetting; memories and opinions in the world hash.
+- Tests: `US-013 Memory`, `US-013 Gossip`, `US-013 Forgetting`, memory limit, a living clan's year.
+- Docs: plan `docs/plans/US-013.md`, teach-back entry.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
 ## US-012 / S-US-012: Let people choose what to do (utility AI) (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
