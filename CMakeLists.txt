@@ -226,7 +226,7 @@ add_test(NAME luna_tests COMMAND luna_tests)
 # --- End-to-end: the real game window (US-020 Open and Close) ---
 add_test(NAME "US-020 Open and close"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us020 -DQUIT_AFTER=3
-            -P "${PROJECT_SOURCE_DIR}/tests/luna/run_game_window.cmake")
+            -DCONFIG=$<CONFIG> -P "${PROJECT_SOURCE_DIR}/tests/luna/run_game_window.cmake")
 set_tests_properties("US-020 Open and close" PROPERTIES LABELS window TIMEOUT 120)
 
 # --- Platform tests: Platform identity, may use SDL3 (US-021 event translation) ---

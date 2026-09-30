@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Kill Gate 1 pivot: requirements v1.6, Codex v1.6, P-005 (Mraw, Anima) — 2026-09-30
+
+**State:** On `qa`.
+
+- Owner verdict on Kill Gate 1 (D-GATE-M2): Pivot. Owner's redesign choices recorded as D-18; retry gate D-GATE-M2b open.
+- Requirements v1.6 and backlog (Drive, mirrored): STO-02, STO-03, SDC-02; milestone M2b Story engine; epic E11; US-110..US-115; timeline shifted 15 weeks; 12.6 statuses updated.
+- Codex v1.6 (Anima): P-005, K-M2b, S-US-110..S-US-115, X-M2b; decision table; execution order; CI-006 resolved; header without AI-vendor names.
+- P-005: docs/status.md (X-M2 failed, M2b prompts), docs/decisions.md, CI-006 fix in `tests/luna/run_game_window.cmake` and `CMakeLists.txt` (first frame within 3 s in Release, 15 s in Debug).
+
 ## X-M2: Exit review M2 = Kill Gate 1 (Mraw) — 2026-09-30
 
 **State:** On `qa`. **Waiting for the owner** (human gate D-GATE-M2); `qa` is not merged into `main` and M3 does not start until the answer.
