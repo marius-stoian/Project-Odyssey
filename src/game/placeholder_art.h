@@ -2,6 +2,7 @@
 
 #include "boundary.h"
 
+#include "core/geometry.h"
 #include "luna/engine/image.h"
 
 namespace odysseus::game {
@@ -22,5 +23,17 @@ luna::engine::Image makeCharacterSheet();
 // One row of 32x32 tiles, in this order.
 enum class TileKind { Grass, Path, Rock, Water, Count };
 luna::engine::Image makeTileSheet();
+
+// Props for the spear demo (US-029): spears pointing 8 ways (row 0 flint, row 1 wooden),
+// a straw target on a post (untouched and hit), and a soft shadow.
+inline constexpr int kSpearFrameSize = 32;
+luna::engine::Image makePropSheet();
+odysseus::core::Rect spearFrame(Facing facing, bool flintTip);
+inline constexpr odysseus::core::Rect kTargetFrame{0, 64, 32, 48};
+inline constexpr odysseus::core::Rect kTargetHitFrame{32, 64, 32, 48};
+inline constexpr odysseus::core::Rect kShadowFrame{64, 64, 24, 8};
+
+// The facing whose direction is closest to the vector (x, y), with y pointing down the screen.
+Facing facingForVector(double x, double y);
 
 } // namespace odysseus::game

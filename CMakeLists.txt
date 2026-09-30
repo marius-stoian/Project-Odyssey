@@ -86,7 +86,8 @@ add_library(luna_physics STATIC
     src/luna/physics/shapes.cpp
     src/luna/physics/spatial_grid.cpp
     src/luna/physics/ballistics.cpp
-    src/luna/physics/rigid_body.cpp)
+    src/luna/physics/rigid_body.cpp
+    src/luna/physics/material.cpp)
 target_link_libraries(luna_physics PUBLIC odysseus_core)
 odysseus_register_layer(luna_physics physics luna/physics)
 odysseus_apply_settings(luna_physics)
@@ -100,7 +101,8 @@ add_library(luna_engine STATIC
     src/luna/engine/renderer.cpp
     src/luna/engine/camera.cpp
     src/luna/engine/tile_map.cpp
-    src/luna/engine/collision.cpp)
+    src/luna/engine/collision.cpp
+    src/luna/engine/physics_view.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 odysseus_register_layer(luna_engine engine luna/engine)
 odysseus_apply_settings(luna_engine)
@@ -122,15 +124,19 @@ add_library(odysseus_game STATIC
     src/game/odyssey_game.cpp
     src/game/placeholder_art.cpp
     src/game/test_map.cpp
-    src/game/hero.cpp)
+    src/game/hero.cpp
+    src/game/materials.cpp
+    src/game/spear_range.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
+# PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
+target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
 
 # --- Programs ---
 add_executable(odysseus apps/odysseus/main.cpp)
 target_link_libraries(odysseus PRIVATE odysseus_game)
-target_compile_definitions(odysseus PRIVATE ODYSSEUS_LAYER_GAME)
+target_compile_definitions(odysseus PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus)
 
 add_executable(odysseus_headless apps/headless/main.cpp)
@@ -240,9 +246,10 @@ set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
 # --- Game tests: Game identity (US-024 the hero) ---
 add_executable(odysseus_game_tests
     tests/main.cpp
-    tests/game/hero_test.cpp)
+    tests/game/hero_test.cpp
+    tests/game/spear_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
-target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME)
+target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_game_tests)
 add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
 
@@ -251,6 +258,12 @@ add_test(NAME "US-024 Walk to the rock"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us024
             -P "${PROJECT_SOURCE_DIR}/tests/game/run_walk_to_rock.cmake")
 set_tests_properties("US-024 Walk to the rock" PROPERTIES LABELS window TIMEOUT 120)
+
+# --- End-to-end: throw a spear at the straw target in the real window (US-029) ---
+add_test(NAME "US-029 Throw in the game"
+    COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/us029
+            -P "${PROJECT_SOURCE_DIR}/tests/game/run_throw_spear.cmake")
+set_tests_properties("US-029 Throw in the game" PROPERTIES LABELS window TIMEOUT 120)
 
 # --- Simulation tests: Simulation identity, headless (M2) ---
 add_executable(odysseus_sim_tests

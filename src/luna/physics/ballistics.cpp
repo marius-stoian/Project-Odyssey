@@ -74,8 +74,20 @@ std::optional<ProjectileHit> flyTick(Projectile& projectile, const Air& air, Fix
         const Vec3 before = projectile.position;
         stepProjectile(projectile, air, dt);
         const Vec3 moved = projectile.position - before;
+        // The box around this sub-step's path: obstacles outside it cannot be hit, which
+        // skips almost every rock on the map with a few comparisons.
+        const Vec3 reach{tipRadius, tipRadius, tipRadius};
+        const Vec3 pathMin = Vec3{min(before.x, projectile.position.x), min(before.y, projectile.position.y),
+                                  min(before.z, projectile.position.z)} - reach;
+        const Vec3 pathMax = Vec3{max(before.x, projectile.position.x), max(before.y, projectile.position.y),
+                                  max(before.z, projectile.position.z)} + reach;
         std::optional<ProjectileHit> earliest;
         for (std::size_t i = 0; i < obstacles.size(); ++i) {
+            const Box around = bounds(obstacles[i]);
+            if (around.max.x < pathMin.x || around.min.x > pathMax.x || around.max.y < pathMin.y ||
+                around.min.y > pathMax.y || around.max.z < pathMin.z || around.min.z > pathMax.z) {
+                continue;
+            }
             const auto hit = sweep(Sphere{before, tipRadius}, moved, obstacles[i]);
             if (hit && (!earliest || hit->time < earliest->hit.time)) {
                 earliest = ProjectileHit{i, *hit, dt * step + dt * hit->time};
