@@ -20,4 +20,8 @@ nlohmann::json readJsonFile(const std::filesystem::path& file);
 int requireInt(const nlohmann::json& object, const std::filesystem::path& file, const std::string& field, int minimum,
                int maximum);
 
+// The same for a field inside a named section of the file; errors say "section.field".
+int requireInt(const nlohmann::json& object, const std::filesystem::path& file, const std::string& section, const std::string& field,
+               int minimum, int maximum);
+
 } // namespace odysseus::sim

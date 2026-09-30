@@ -94,7 +94,7 @@ TEST_CASE("US-011 Consequence") {
     REQUIRE(world.chronicle().entries().size() == world.people().size());
     const sim::ChronicleEntry& first = world.chronicle().entries().front();
     MESSAGE(sim::describe(first.date), ": ", first.text);
-    CHECK(first.text == world.people().front().name + " died of starvation.");
+    CHECK(first.text == world.people().front().name + " died of hunger in the dry summer."); // no store, so no reason beyond the season
     CHECK(first.date.day == deathMorning);
     CHECK(first.importance >= 50);
 }

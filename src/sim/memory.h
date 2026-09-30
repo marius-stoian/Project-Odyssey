@@ -24,6 +24,7 @@ struct Memory {
     int feeling = 0;       // -100 (hateful) .. +100 (wonderful)
     bool major = false;    // major memories are kept for life; minor ones fade
     bool secondHand = false;
+    int event = -1;        // the chronicle entry this memory is about, -1 = none (M2b): causes can be traced
 
     // The same event, however it was heard: gossip never copies an event twice.
     bool sameEvent(const Memory& other) const {

@@ -102,7 +102,7 @@ TEST_CASE("US-014 Record") {
     for (std::size_t i = entries; i < count(feuding); ++i) {
         const auto& entry = feuding.chronicle().entries()[i];
         if (entry.importance == sim::kImportanceFeud) {
-            feudRecorded = entry.text == "A feud broke out between " + feuding.people()[4].name + " and " + feuding.people()[5].name + ".";
+            feudRecorded = entry.text == "A feud broke out between " + feuding.people()[4].name + " and " + feuding.people()[5].name + " over stolen meat.";
             MESSAGE(sim::formatEntry(entry));
         }
     }
@@ -115,7 +115,7 @@ TEST_CASE("US-014 Record") {
     runDays(starving, 8);
     REQUIRE(count(starving) > 0);
     CHECK(starving.chronicle().entries().front().importance == sim::kImportanceDeath);
-    CHECK(starving.chronicle().entries().front().text.find("died of starvation.") != std::string::npos);
+    CHECK(starving.chronicle().entries().front().text.find("died of hunger in ") != std::string::npos);
 }
 
 TEST_CASE("US-014 Filter") {

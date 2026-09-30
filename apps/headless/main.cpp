@@ -7,10 +7,12 @@
 //   --inspect <name or id>   print that person's last decision: every action's score (US-012)
 //   --chronicle [year]       print the chronicle (one year, or all years) (US-014)
 //   --threshold <0..100>     the importance an event needs to be printed (default 50)
+//   --why <event id>         print that event and the earlier events that caused it (US-110)
 //   --load <file>            continue a saved world instead of founding a new one (US-016)
 //   --save <file>            save the world at the end (safely, with 3 backups)
 //   --help                   print this list
 #include "core/version.h"
+#include "sim/chronicle.h"
 #include "sim/ai.h"
 #include "sim/report.h"
 #include "sim/save.h"
@@ -39,6 +41,7 @@ struct Options {
     bool chronicle = false;
     int chronicleYear = 0;
     int threshold = odysseus::sim::kDefaultChronicleThreshold;
+    int why = -1;
     bool help = false;
     std::string loadFile;
     std::string saveFile;
@@ -47,7 +50,7 @@ struct Options {
 void printUsage(std::ostream& out) {
     out << "Usage: odysseus_headless [--seed N] [--years N | --days N] [--data FOLDER]\n"
            "                         [--inspect NAME] [--chronicle [YEAR]] [--threshold 0..100]\n"
-           "                         [--load FILE] [--save FILE]\n"
+           "                         [--why EVENT] [--load FILE] [--save FILE]\n"
            "  --years and --days take a whole number from 1 to 10000; --seed a whole number 0 or more.\n"
            "Example: odysseus_headless --seed 7 --years 100\n";
 }
@@ -95,6 +98,10 @@ std::optional<std::string> parse(int argc, char* argv[], Options& options) {
             options.loadFile = value();
         } else if (flag == "--save") {
             options.saveFile = value();
+        } else if (flag == "--why") {
+            const auto number = readNumber(value(), 0, 100'000'000);
+            if (!number) return std::format("--why must be an event number (got {})", argv[i]);
+            options.why = static_cast<int>(*number);
         } else if (flag == "--threshold") {
             const auto number = readNumber(value(), 0, 100);
             if (!number) return std::format("--threshold must be a whole number from 0 to 100 (got {})", argv[i]);
@@ -159,7 +166,18 @@ int main(int argc, char* argv[]) {
             std::cout << "\nChronicle" << (options.chronicleYear > 0 ? " of year " + std::to_string(options.chronicleYear) : std::string())
                       << " (importance " << options.threshold << " and above):\n";
             for (const auto& entry : world.chronicle().select(options.chronicleYear, options.threshold)) {
-                std::cout << "  " << odysseus::sim::formatEntry(entry) << '\n';
+                std::cout << std::format("  [#{}] ", entry.id) << odysseus::sim::formatEntry(entry) << '\n';
+            }
+        }
+        if (options.why >= 0) {
+            const auto lines = odysseus::sim::explainEvent(world.chronicle(), options.why);
+            if (lines.empty()) {
+                std::cerr << "No event #" << options.why << " (the chronicle has " << world.chronicle().entries().size() << " events)\n";
+                return 1;
+            }
+            std::cout << "\nWhy:\n";
+            for (const std::string& line : lines) {
+                std::cout << "  " << line << '\n';
             }
         }
         if (!options.saveFile.empty()) {

@@ -121,6 +121,7 @@ add_library(odysseus_sim STATIC
     src/sim/ai.cpp
     src/sim/memory.cpp
     src/sim/life.cpp
+    src/sim/story.cpp
     src/sim/report.cpp
     src/sim/save.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
@@ -284,7 +285,8 @@ add_executable(odysseus_sim_tests
     tests/sim/memory_test.cpp
     tests/sim/chronicle_test.cpp
     tests/sim/report_test.cpp
-    tests/sim/save_test.cpp)
+    tests/sim/save_test.cpp
+    tests/sim/story_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
@@ -297,4 +299,7 @@ add_test(NAME "US-015 Run"
 set_tests_properties("US-015 Run" PROPERTIES TIMEOUT 600)
 add_test(NAME "US-015 Bad input"
     COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=bad
+            -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
+add_test(NAME "US-110 Traceable"
+    COMMAND "${CMAKE_COMMAND}" -DHEADLESS=$<TARGET_FILE:odysseus_headless> -DCHECK=why
             -P "${PROJECT_SOURCE_DIR}/tests/sim/run_headless_soak.cmake")
