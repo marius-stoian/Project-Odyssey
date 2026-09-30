@@ -3,6 +3,15 @@
 Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
+## M2d planning: brief, requirements v1.8, Codex v1.8 (Mraw, Anima) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `docs/plans/M2d-content-brief.md`: the owner's seven new sprite sheets and every design decision from six chat rounds (D-21), and the new rule that design decisions are the owner's (D-22).
+- Requirements v1.8 synced from Drive (`docs/project/requirements/`): epic E13, milestone M2d before M3, stories US-130..US-138, D-21, D-22, resolution-log round 11.
+- Codex v1.8 by Anima (`docs/Codex.md`, `CLAUDE.md` regenerated): P-007, the M2d section (K-M2d, S-US-130..S-US-138, X-M2d), Charter human gate 3, D-15 chain, execution order, amendment log.
+- Verification: docs only; no code changed.
+
 
 ## X-M2c: Exit review M2c (Mraw) — 2026-09-30
 
