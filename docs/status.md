@@ -28,7 +28,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | S-US-027 | US-027 | M1b | Done | 2026-09-30 |
 | S-US-028 | US-028 | M1b | Done | 2026-09-30 |
 | S-US-029 | US-029 | M1b | Done | 2026-09-30 |
-| X-M1b | - | M1b | To do |  |
+| X-M1b | - | M1b | Done | 2026-09-30 |
 | K-M2 | - | M2 | Done | 2026-09-30 |
 | S-US-010 | US-010 | M2 | Done | 2026-09-30 |
 | S-US-011 | US-011 | M2 | In progress (branch story/US-011) |  |
