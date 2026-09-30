@@ -154,3 +154,59 @@ TEST_CASE("US-139 Interact goes along the facing even with the pointer elsewhere
     CHECK(play.odyssey.hero().facing() == game::Facing::South);
     CHECK(play.goblin().hp() == 100 - play.odyssey.catalogs().weapon("iron sword")->damage);
 }
+
+TEST_CASE("US-139 The hero always faces the pointer") {
+    // Even with empty hands: walking does not turn him away from the pointer.
+    Play play(levelWithGoblinAt("empty-hands", 200, 0));
+    Intents walkEastPointingWest = pointingAt(kHeroScreenX - 80, kHeroScreenY - 20);
+    walkEastPointingWest.set(Intent::MoveRight, true, false);
+    play.tick(10, walkEastPointingWest);
+    CHECK_FALSE(play.odyssey.aiming()); // nothing is held, so no aim line...
+    CHECK(play.odyssey.hero().facing() == game::Facing::West); // ...but he faces the pointer while walking east
+    // With the pointer off the picture he faces the way he walks again.
+    Intents walkEast;
+    walkEast.set(Intent::MoveRight, true, false);
+    play.tick(2, walkEast);
+    CHECK(play.odyssey.hero().facing() == game::Facing::East);
+}
+
+TEST_CASE("US-139 No flicker walking past the pointer") {
+    // Walking sideways with the pointer near the hero's chest, or near the edge of a facing, must not
+    // make the sprite flip from side to side: count how often the facing changes over 3 seconds.
+    const int offsets[] = {-40, -24, -12, -6, 0, 6, 12, 24, 40};
+    for (const bool armed : {false, true}) {
+        for (const Intent direction : {Intent::MoveRight, Intent::MoveLeft}) {
+            for (const int dx : offsets) {
+                for (const int dy : {-30, -20, -10}) {
+                    CAPTURE(armed);
+                    CAPTURE(dx);
+                    CAPTURE(dy);
+                    Play play(levelWithGoblinAt("flicker", 400, 0));
+                    if (armed) play.hold("iron sword");
+                    play.tick(30); // the camera settles
+                    int changes = 0;
+                    game::Facing last = play.odyssey.hero().facing();
+                    for (int tick = 0; tick < 60; ++tick) {
+                        Intents intents = pointingAt(kHeroScreenX + dx, kHeroScreenY + dy);
+                        intents.set(direction, true, false);
+                        play.tick(1, intents);
+                        if (play.odyssey.hero().facing() != last) {
+                            ++changes;
+                            last = play.odyssey.hero().facing();
+                        }
+                    }
+                    CHECK(changes <= 2);
+                }
+            }
+        }
+    }
+}
+
+TEST_CASE("US-139 Facing with hysteresis") {
+    // 27 degrees south of east is past the 22.5-degree edge, but a hero already facing east keeps facing east
+    // until the pointer is 10 degrees further; one facing south-east does not turn back either.
+    CHECK(game::facingToward(1.0, 0.5, game::Facing::East, 10.0) == game::Facing::East);
+    CHECK(game::facingToward(1.0, 0.75, game::Facing::East, 10.0) == game::Facing::SouthEast); // 37 degrees: turns
+    CHECK(game::facingToward(1.0, 0.45, game::Facing::SouthEast, 10.0) == game::Facing::SouthEast);
+    CHECK(game::facingToward(1.0, 0.0, game::Facing::SouthEast, 10.0) == game::Facing::East); // 45 degrees off: turns
+}

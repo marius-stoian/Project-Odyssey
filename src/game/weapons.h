@@ -94,5 +94,9 @@ std::optional<std::size_t> stepProjectile(Projectile& projectile, const luna::en
 void facingVector(Facing facing, double& x, double& y);
 // The nearest of the 8 facings to a direction (the hero faces the mouse pointer that way).
 Facing facingToward(double dirX, double dirY);
+// The same, but the hero keeps current until the direction is more than hysteresisDegrees beyond the edge of
+// its 45-degree sector. Without this, a pointer close to a sector edge (or a hero walking past the pointer)
+// makes the sprite flicker between two facings.
+Facing facingToward(double dirX, double dirY, Facing current, double hysteresisDegrees);
 
 } // namespace odysseus::game

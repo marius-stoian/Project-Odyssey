@@ -33,6 +33,21 @@ Facing facingToward(double dirX, double dirY) {
     return kBySector.at(static_cast<std::size_t>((sector + 8) % 8));
 }
 
+Facing facingToward(double dirX, double dirY, Facing current, double hysteresisDegrees) {
+    double cx = 0.0;
+    double cy = 0.0;
+    facingVector(current, cx, cy);
+    const double length = std::hypot(dirX, dirY);
+    if (length > 0.0) {
+        const double cosine = std::clamp((dirX * cx + dirY * cy) / length, -1.0, 1.0);
+        const double offDegrees = std::acos(cosine) * 180.0 / std::numbers::pi;
+        if (offDegrees <= 22.5 + hysteresisDegrees) {
+            return current; // still close enough to the way the hero already faces
+        }
+    }
+    return facingToward(dirX, dirY);
+}
+
 std::vector<std::size_t> WeaponBehaviour::swingToward(const WeaponDef&, double, double, double, double, const std::vector<Target>&) const {
     return {};
 }

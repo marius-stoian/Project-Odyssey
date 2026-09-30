@@ -867,3 +867,21 @@ Notice that crossbows are in the `bow` class: one set of numbers and one behavio
 **Try it (10 minutes).** Open `assets/levels/range.json` in the game (`odysseus.exe --level assets/levels/range.json`), walk east along the weapons, and shoot the goblins with keys 1-7 and the mouse. Then set the bow's `launchSpeed` to `8`, build (the build copies the assets), and notice how far the arrows now fall short of a far pointer.
 
 **Check yourself.** Why is a missing `"bow"` entry reported as an error when the game starts, instead of the bow quietly using speed 0?
+
+
+## Follow-up to US-139: steady orientation, hysteresis (2026-10-01)
+
+**The idea: hysteresis.** A thermostat that switches the heating on at 20.0 degrees and off at 20.0 degrees would click on and off all day as the temperature wobbles around 20. Real ones switch on at 19.5 and off at 20.5: the gap is *hysteresis*. The hero's facing had the same problem: the pointer decides between "east" and "north-east" at exactly 22.5 degrees, so a pointer near that edge (or a hero walking past it, the camera lagging behind him) flipped the sprite back and forth. The fix is the same gap:
+
+```cpp
+if (offDegrees <= 22.5 + hysteresisDegrees) return current;   // close enough: keep facing this way
+return facingToward(dirX, dirY);                              // clearly somewhere else: turn
+```
+
+Two smaller ingredients: a *dead zone* (a pointer within 16 pixels of his chest means nothing, because its direction changes wildly for tiny moves), and measuring from the chest instead of the feet, because the pointer is usually level with the sprite's body. And the order of the tick matters: walking used to set the facing first and the pointer overwrote it, so the "current" facing was never the last one shown; now the facing from before the tick is what we compare with.
+
+**Where to look.** `facingToward` (the second version) in [src/game/weapons.cpp](../src/game/weapons.cpp); `OdysseyGame::updateAim` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (10 minutes).** In `odyssey_game.cpp` change `kFacingHysteresisDegrees` to `0.0` and `kFacingDeadZonePixels` to `0.0`, build, and walk sideways with the mouse near the hero: watch him flicker. Then run the test `US-139 No flicker walking past the pointer`: it fails. Put the numbers back.
+
+**Check yourself.** Why is the facing compared with the facing *before* this tick's walking, and not the facing after it?

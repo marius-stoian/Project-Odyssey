@@ -352,18 +352,40 @@ void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY, 
     }
 }
 
-// US-139: where the pointer points in the world, and the hero turned to it. Only a held catalog
-// weapon aims; the demo sword and spear keep their own facing rules.
-void OdysseyGame::updateAim(const luna::engine::Pointer& pointer, bool fallen) {
+// US-139: where the pointer points in the world, and the hero turned to it. The hero always faces the
+// pointer while it is over the picture (walking does not turn him); only a held catalog weapon also
+// aims its attacks there and shows the aim line. Near the hero, and near the edge between two facings,
+// he keeps his facing, so walking past the pointer never makes the sprite flicker from side to side.
+namespace {
+constexpr double kChestHeightPixels = 20.0;       // the middle of the hero's body above his feet
+constexpr double kFacingDeadZonePixels = 16.0;    // a pointer this close to his chest does not turn him
+constexpr double kFacingHysteresisDegrees = 10.0; // how far past a sector's edge before he turns
+} // namespace
+
+void OdysseyGame::updateAim(const luna::engine::Pointer& pointer, bool fallen, Facing facingBefore) {
     aiming_ = false;
     pointerX_ = pointer.x;
     pointerY_ = pointer.y;
-    if (fallen || heldWeapon() == nullptr || !pointer.inside()) {
-        return;
+    if (fallen || !pointer.inside()) {
+        return; // no pointer: the hero faces the way he walks
     }
     const luna::engine::Rect view = camera_.view();
     aimTargetX_ = view.x + pointer.x;
     aimTargetY_ = view.y + pointer.y;
+
+    // Facing: seen from the hero's chest, so a pointer level with the sprite means "sideways".
+    const double chestDx = aimTargetX_ - hero_.feetX();
+    const double chestDy = aimTargetY_ - (hero_.feetY() - kChestHeightPixels);
+    if (std::hypot(chestDx, chestDy) < kFacingDeadZonePixels) {
+        hero_.face(facingBefore); // the pointer is on him: keep facing the same way
+    } else {
+        hero_.face(facingToward(chestDx, chestDy, facingBefore, kFacingHysteresisDegrees));
+    }
+
+    // Aim of the attacks: from the feet, as the weapons measure (only with a catalog weapon in hand).
+    if (heldWeapon() == nullptr) {
+        return;
+    }
     const double dx = aimTargetX_ - hero_.feetX();
     const double dy = aimTargetY_ - hero_.feetY();
     const double length = std::hypot(dx, dy);
@@ -373,9 +395,7 @@ void OdysseyGame::updateAim(const luna::engine::Pointer& pointer, bool fallen) {
     aimDx_ = dx / length;
     aimDy_ = dy / length;
     aiming_ = true;
-    hero_.face(facingToward(aimDx_, aimDy_));
 }
-
 // The aim line (dots from the hand toward the pointer, up to the weapon's range) and a crosshair.
 void OdysseyGame::drawAim(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
     const WeaponDef* weapon = heldWeapon();
@@ -541,10 +561,11 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         camera_.centreOn(hero_.feetX(), hero_.feetY());
         core::logInfo(std::format("The hero is back at the start with {} HP", heroHp_));
     }
+    const Facing facingBefore = hero_.facing();
     if (!fallen) {
         hero_.update(intents, map_);
     }
-    updateAim(intents.pointer(), fallen);
+    updateAim(intents.pointer(), fallen, facingBefore);
 
     // Pickups first (US-134), so a weapon picked up this tick can be chosen and used this tick.
     if (fullTicks_ > 0) --fullTicks_;
