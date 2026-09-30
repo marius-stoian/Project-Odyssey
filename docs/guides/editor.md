@@ -49,7 +49,15 @@ With **Brush**, **Rect**, **Fill** or **Erase** chosen, the palette on the left 
    - press **Delete** to remove it;
    - change its **Name**, **HP** and **Sword** damage in the panel on the right: click a field, type, press **Enter** (or click somewhere else).
 
-In the game, take the sword (**Shift**) and strike (**E**, **Space** or **Enter**): monsters lose HP, flash red and fall at 0. A monster you hit strikes back: a red **!** appears over it, and half a second later its **Sword** damage hits you if you are still within 1.5 m, so step away in time. Your HP is shown top left; at 0 you start again at the START marker. The heroes you place just stand there for now.
+In the game, pick up the sword (see Weapon pickups below), hold it (**Shift** or **1-9**) and strike (**E**, **Space** or **Enter**): monsters lose HP, flash red and fall at 0. A monster you hit strikes back: a red **!** appears over it, and half a second later its **Sword** damage hits you if you are still within 1.5 m, so step away in time. Your HP is shown top left; at 0 you start again at the START marker. The heroes you place just stand there for now.
+
+## Weapon pickups and the hotbar
+1. Click **Weapon**. The palette shows the 16 starter weapons by their icons, then **Sp** (the old spear throw) and **Sw** (the old plain sword slash).
+2. Click one, then click the map. The weapon lies there on the ground, with a shadow, and is selected at once.
+3. With **Select** you can click a pickup, drag it to move it, and press **Delete** to remove it. **Ctrl+Z** and **Ctrl+Y** undo and redo every one of these, like characters.
+4. Save with **Ctrl+S**. The level file is now version 2 and lists the pickups; older (version 1) files still open, with no pickups.
+
+In the game the hero starts with empty hands. Walk over a pickup and its weapon goes into the first free slot of the **hotbar** (nine boxes, bottom centre) and the pickup is gone until the level restarts (F2, then F1). Keys **1** to **9** hold that slot; **Shift** holds the next filled one. With all nine slots full a pickup stays where it is and "Hotbar full" flashes. **E**, **Space** or **Enter** attack with the held weapon. Your valley has no pickups until you place some; `demo.json` has the old spear and sword by the hero.
 
 ## The hero's start
 The hero begins where the gold **START** marker stands. With **Select**, drag the marker to move it. Press **F1** and the hero starts there.

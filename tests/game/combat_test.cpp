@@ -142,6 +142,7 @@ TEST_CASE("US-132 Combat effects") {
     Play play(demoCopy("effects", -1));
     REQUIRE(play.odyssey.catalogs().effect("spark") != nullptr);
     play.closeIn();
+    play.tick(20); // Let the two demo pickup sparks finish before checking the combat effect.
     CHECK(play.odyssey.effects().count() == 0);
     play.tick(1, pressing(Intent::Interact));
     CHECK(play.odyssey.effects().count() == 1); // a hit spark where the blade landed

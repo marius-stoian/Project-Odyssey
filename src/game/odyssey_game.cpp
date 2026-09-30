@@ -9,6 +9,7 @@
 #include "luna/engine/physics_view.h"
 #include "luna/engine/ui.h"
 
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <string>
@@ -68,9 +69,17 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
+    std::vector<std::string> palette;
     for (const WeaponDef& weapon : catalogs_.weapons) {
-        if (weapon.starter) starters_.push_back(&weapon);
+        if (weapon.starter) {
+            starters_.push_back(&weapon);
+            palette.push_back(weapon.name);
+        }
     }
+    // The Editor offers the starters, then the two demo weapons (D-23).
+    palette.push_back(kSpearThrowName);
+    palette.push_back(kSwordSlashName);
+    editor_.setWeaponPalette(std::move(palette));
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -90,6 +99,9 @@ void OdysseyGame::resetPlay() {
     projectiles_.clear();
     attackCooldown_ = 0;
     swingTicks_ = 0;
+    hotbar_ = {};     // a restart: empty hands, and every pickup lies in the level again
+    heldSlot_ = 0;
+    fullTicks_ = 0;
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -123,6 +135,8 @@ void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
 void OdysseyGame::populate() {
     enemies_.clear();
     bystanders_.clear();
+    pickups_.clear();
+    for (const PlacedPickup& pickup : level_.pickups) pickups_.push_back({pickup, false});
     for (const PixelPoint& target : level_.targets) {
         range_.addTarget({luna::engine::metresFromPixels(target.x), luna::engine::metresFromPixels(target.y), luna::physics::kFixedZero});
     }
@@ -162,14 +176,68 @@ void OdysseyGame::playEffect(const std::string& name, double x, double y, int si
     effects_.start(spec, x, y, size);
 }
 
+std::size_t OdysseyGame::carriedCount() const {
+    return static_cast<std::size_t>(std::count_if(hotbar_.begin(), hotbar_.end(), [](const std::string& slot) { return !slot.empty(); }));
+}
+
+bool OdysseyGame::pickUp(const std::string& weapon) {
+    for (std::string& slot : hotbar_) {
+        if (slot.empty()) {
+            slot = weapon;
+            return true;
+        }
+    }
+    return false;
+}
+
+void OdysseyGame::selectSlot(int slot) {
+    if (slot < 0 || slot >= kHotbarSlots || slot == heldSlot_) return;
+    heldSlot_ = slot;
+    attackCooldown_ = 0;
+    core::logInfo(std::format("Switched to {} (slot {})", heldName(), slot + 1));
+}
+
+// Shift: the next filled slot after the held one, wrapping round; nothing when none is filled.
+void OdysseyGame::cycleSlot() {
+    for (int step = 1; step <= kHotbarSlots; ++step) {
+        const int slot = (heldSlot_ + step) % kHotbarSlots;
+        if (!hotbar_[static_cast<std::size_t>(slot)].empty()) {
+            selectSlot(slot);
+            return;
+        }
+    }
+}
+
 std::string OdysseyGame::heldName() const {
-    if (held_ == 0) return "Spear throw";
-    if (held_ == 1) return "Sword";
-    return starters_.at(held_ - 2)->name;
+    const std::string& name = hotbar_[static_cast<std::size_t>(heldSlot_)];
+    return name.empty() ? "Empty hands" : name;
 }
 
 const WeaponDef* OdysseyGame::heldWeapon() const {
-    return held_ >= 2 ? starters_.at(held_ - 2) : nullptr;
+    return catalogs_.weapon(hotbar_[static_cast<std::size_t>(heldSlot_)]);
+}
+
+std::size_t OdysseyGame::pickupsLeft() const {
+    return static_cast<std::size_t>(std::count_if(pickups_.begin(), pickups_.end(), [](const WorldPickup& p) { return !p.taken; }));
+}
+
+// Walking over a pickup puts its weapon in the first free slot and removes it until the level
+// restarts; with no free slot it stays, and the player is told.
+void OdysseyGame::collectPickups() {
+    for (WorldPickup& lying : pickups_) {
+        if (lying.taken) continue;
+        const double distance = std::hypot(lying.pickup.at.x - hero_.feetX(), lying.pickup.at.y - hero_.feetY());
+        if (distance > kPickupReach) continue;
+        if (pickUp(lying.pickup.weapon)) {
+            lying.taken = true;
+            playEffect("spark", lying.pickup.at.x, lying.pickup.at.y, 20);
+            core::logInfo(std::format("Picked up {} (slot {} of {})", lying.pickup.weapon,
+                                      carriedCount(), kHotbarSlots));
+        } else {
+            if (fullTicks_ == 0) core::logInfo("Hotbar full: " + lying.pickup.weapon + " stays where it is");
+            fullTicks_ = 40;
+        }
+    }
 }
 
 void OdysseyGame::strike(Enemy& enemy, int damage) {
@@ -270,6 +338,26 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
     const luna::engine::Rect heldBox{2, box.y + box.height + 1, luna::engine::UiPainter::textWidth(held) + 6, luna::engine::kGlyphHeight + 6};
     painter.fill(heldBox, luna::engine::UiColor::Shade);
     painter.text(heldBox.x + 3, heldBox.y + 3, held, luna::engine::UiColor::Gold);
+    // The hotbar (US-134), bottom centre: nine slots, the number in the corner, the held slot framed in gold.
+    constexpr int kSlot = 22;
+    constexpr int kGap = 2;
+    const int left = (kVirtualWidth - (kHotbarSlots * kSlot + (kHotbarSlots - 1) * kGap)) / 2;
+    const int top = kVirtualHeight - kSlot - 4;
+    for (int slot = 0; slot < kHotbarSlots; ++slot) {
+        const luna::engine::Rect cell{left + slot * (kSlot + kGap), top, kSlot, kSlot};
+        painter.fill(cell, luna::engine::UiColor::Shade);
+        const std::string& weapon = hotbar_[static_cast<std::size_t>(slot)];
+        if (!weapon.empty()) {
+            drawWeaponIcon(renderer, painter, weaponArt_, weapon, {cell.x + 2, cell.y + 2, kSlot - 4, kSlot - 4});
+        }
+        painter.outline(cell, slot == heldSlot_ ? luna::engine::UiColor::Gold : luna::engine::UiColor::Grid);
+        if (slot == heldSlot_) painter.outline({cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2}, luna::engine::UiColor::Gold);
+        painter.text(cell.x + 2, cell.y + 2, std::to_string(slot + 1), slot == heldSlot_ ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
+    }
+    if (fullTicks_ > 0) {
+        const char* message = "Hotbar full";
+        painter.text((kVirtualWidth - luna::engine::UiPainter::textWidth(message)) / 2, top - luna::engine::kGlyphHeight - 3, message, luna::engine::UiColor::Red);
+    }
     // After a fall the screen darkens, more with every step of the fade.
     for (int layer = 0; layer < (kRespawnTicks - respawnTicks_) / 4 + 1 && respawnTicks_ > 0; ++layer) {
         painter.fill({0, 0, kVirtualWidth, kVirtualHeight}, luna::engine::UiColor::Shade);
@@ -299,17 +387,24 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         hero_.update(intents, map_);
     }
 
-    // Handle weapon switching (Shift key).
-    if (!fallen && intents.pressed(luna::engine::Intent::SwitchWeapon)) {
-        held_ = (held_ + 1) % carriedCount();
-        currentWeapon_ = held_ == 1 ? WeaponType::Sword : WeaponType::Bow; // the demos' own two
-        core::logInfo("Switched to " + heldName());
-    }
+    // Pickups first (US-134), so a weapon picked up this tick can be chosen and used this tick.
+    if (fullTicks_ > 0) --fullTicks_;
+    if (!fallen) collectPickups();
 
-    // Handle attacks based on current weapon.
+    // Hotbar: keys 1-9 hold a slot, Shift the next filled one.
+    if (!fallen) {
+        for (int slot = 0; slot < kHotbarSlots; ++slot) {
+            if (intents.pressed(static_cast<luna::engine::Intent>(static_cast<int>(luna::engine::Intent::Slot1) + slot))) selectSlot(slot);
+        }
+        if (intents.pressed(luna::engine::Intent::SwitchWeapon)) cycleSlot();
+    }
+    const std::string& heldSlotName = hotbar_[static_cast<std::size_t>(heldSlot_)];
+    currentWeapon_ = heldSlotName == kSwordSlashName ? WeaponType::Sword : WeaponType::Bow; // the demos' own two
+
+    // Handle attacks based on the held weapon.
     if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldWeapon() != nullptr) {
         attackWith(*heldWeapon());
-    } else if (!fallen && intents.pressed(luna::engine::Intent::Interact)) {
+    } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && !heldSlotName.empty()) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
             sword_.slash(hero_.facing());
@@ -440,6 +535,11 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         effectsTexture_ = renderer.createTexture(content_.pictures.at("effects"));
         iconsTexture_ = renderer.createTexture(content_.pictures.at("icons"));
         iconsMirrored_ = renderer.createTexture(luna::engine::mirrored(content_.pictures.at("icons")));
+        weaponArt_.icons = iconsTexture_;
+        for (const WeaponDef& weapon : catalogs_.weapons) {
+            if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
+        }
+        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_});
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
@@ -467,6 +567,16 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         const luna::engine::ScreenPoint base = luna::engine::topDownPosition(target.base);
         renderer.draw(props_, target.hits > 0 ? kTargetHitFrame : kTargetFrame,
                       screen(base.x - kTargetFrame.width / 2.0, base.y - kTargetFrame.height));
+    }
+    // Weapons lying in the level: a shadow on the ground and the icon, until picked up (US-134).
+    {
+        luna::engine::UiPainter painter(renderer, uiSheet_);
+        for (const WorldPickup& lying : pickups_) {
+            if (lying.taken) continue;
+            renderer.draw(props_, kShadowFrame, screen(lying.pickup.at.x - kShadowFrame.width / 2.0, lying.pickup.at.y + 4.0));
+            const luna::engine::Point corner = screen(lying.pickup.at.x - kPickupSize / 2.0, lying.pickup.at.y - kPickupSize / 2.0);
+            drawWeaponIcon(renderer, painter, weaponArt_, lying.pickup.weapon, {corner.x, corner.y, kPickupSize, kPickupSize});
+        }
     }
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     renderer.draw(characters_, hero_.spriteFrame(),

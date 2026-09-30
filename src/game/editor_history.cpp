@@ -33,6 +33,16 @@ void CharactersCommand::undo(Level& level) const {
     level.nextId = std::max(level.nextId, std::max(nextIdBefore_, nextIdAfter_));
 }
 
+void PickupsCommand::apply(Level& level) const {
+    level.pickups = after_;
+    level.nextId = std::max(level.nextId, nextIdAfter_);
+}
+
+void PickupsCommand::undo(Level& level) const {
+    level.pickups = before_;
+    level.nextId = std::max(level.nextId, std::max(nextIdBefore_, nextIdAfter_));
+}
+
 void History::run(std::unique_ptr<Command> command, Level& level) {
     command->apply(level);
     record(std::move(command));

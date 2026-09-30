@@ -5,6 +5,7 @@
 #include "game/art.h"
 #include "game/editor_history.h"
 #include "game/level.h"
+#include "game/pickups.h"
 #include "luna/engine/camera.h"
 #include "luna/engine/input.h"
 #include "luna/engine/renderer.h"
@@ -29,10 +30,11 @@ struct EditorTextures {
     luna::engine::Texture props;
     luna::engine::Texture ui;
     const ArtSet* art = nullptr;
+    const WeaponArt* weapons = nullptr; // the weapon icons, for pickups and the weapon palette (US-134)
 };
 
 // What a left click on the map does.
-enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select };
+enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon };
 
 const char* toolName(EditorTool tool);
 
@@ -67,6 +69,14 @@ public:
     // The character kind the Place tool puts down (an index into Definitions::characters).
     int kind() const { return kind_; }
     void setKind(int kind) { kind_ = kind; }
+    // Weapon pickups (US-134): the weapons the palette offers, in order (names that are in weapons.json
+    // or built in); the Weapon tool places the chosen one.
+    void setWeaponPalette(std::vector<std::string> names);
+    const std::vector<std::string>& weaponPalette() const { return weaponNames_; }
+    int weapon() const { return weapon_; }
+    void setWeapon(int weapon) { weapon_ = weapon; }
+    // The pickup whose icon covers a screen point, if any.
+    std::optional<int> pickupAt(int screenX, int screenY) const;
     // The placed character selected with the Select tool (its id), if any.
     std::optional<int> selected() const { return selected_; }
     void select(std::optional<int> id);
@@ -122,6 +132,9 @@ private:
     void usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released);
     void changeCharacters(const std::string& what, std::vector<PlacedCharacter> after, int nextIdAfter);
     PlacedCharacter* find(int id);
+    const PlacedPickup* findPickup(int id) const;
+    void changePickups(const std::string& what, std::vector<PlacedPickup> after, int nextIdAfter);
+    void removeSelected();
     void buildProperties();
     std::pair<int, int> toWorld(int screenX, int screenY) const;
     void changeLevel(const std::string& what, Level after);
@@ -166,6 +179,9 @@ private:
     std::unique_ptr<luna::engine::Panel> toolbar_;
     std::unique_ptr<luna::engine::Panel> palette_;
     std::unique_ptr<luna::engine::Panel> characterPalette_;
+    std::unique_ptr<luna::engine::Panel> weaponPalette_;
+    std::vector<std::string> weaponNames_;
+    int weapon_ = 0;
     std::unique_ptr<luna::engine::Panel> properties_;
     int propertiesFor_ = -1;       // the character the properties panel shows (-1: none)
     bool propertiesStale_ = false; // the character changed (undo, redo): show its values again
@@ -175,6 +191,9 @@ private:
     // A character being dragged with the Select tool: the list before, and where it was grabbed.
     bool moving_ = false;
     std::vector<PlacedCharacter> movingBefore_;
+    // A pickup being dragged with the Select tool: the list before.
+    bool movingPickup_ = false;
+    std::vector<PlacedPickup> movingPickupsBefore_;
     bool movingStart_ = false; // the hero start marker is being dragged
     PixelPoint startBefore_;
 

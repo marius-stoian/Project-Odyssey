@@ -1943,9 +1943,23 @@
   1040,
   1048
  ],
- "levelVersion": 1,
+ "levelVersion": 2,
  "name": "The Valley",
- "nextId": 2,
+ "nextId": 4,
+ "pickups": [
+  {
+   "id": 2,
+   "weapon": "Spear throw",
+   "x": 1034,
+   "y": 1044
+  },
+  {
+   "id": 3,
+   "weapon": "Sword",
+   "x": 1046,
+   "y": 1044
+  }
+ ],
  "targets": [
   [
    784,

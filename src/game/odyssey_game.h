@@ -15,11 +15,13 @@
 #include "game/editor.h"
 #include "game/enemy.h"
 #include "game/hero.h"
+#include "game/pickups.h"
 #include "game/level.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
 #include "game/weapons.h"
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <vector>
@@ -52,12 +54,24 @@ public:
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }
-    // What the hero carries (US-133): the spear throw and sword of the demos first, then the
-    // starter weapons; Shift picks the next. The held one's name ("spear throw", "sword",
-    // "iron sword", ...), and the catalog weapon when it is one.
+    // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
+    // pickup puts its weapon in the first free slot; keys 1-9 hold a slot, Shift the next filled one.
+    static constexpr int kHotbarSlots = 9;
+    using Hotbar = std::array<std::string, kHotbarSlots>; // "" is a free slot
+    const Hotbar& hotbar() const { return hotbar_; }
+    int heldSlot() const { return heldSlot_; }
+    std::size_t carriedCount() const; // filled slots
+    // Puts a weapon (a name of weapons.json, or a demo weapon) in the first free slot; false when full.
+    bool pickUp(const std::string& weapon);
+    void selectSlot(int slot);
+    // The held weapon's name ("Spear throw", "Sword", "iron sword", ...; "Empty hands" when the slot
+    // is free), and the catalog weapon when it is one.
     std::string heldName() const;
     const WeaponDef* heldWeapon() const;
-    std::size_t carriedCount() const { return 2 + starters_.size(); }
+    // Pickups still lying in the level (those not yet picked up).
+    std::size_t pickupsLeft() const;
+    // "Hotbar full" is shown for a moment when a pickup is touched with no free slot.
+    bool hotbarFullShown() const { return fullTicks_ > 0; }
     const std::vector<Projectile>& projectiles() const { return projectiles_; }
     // Starts the named effect (effects.json) centred on a world point, `size` pixels across.
     // Does nothing when the content atlas or the effect is missing.
@@ -114,7 +128,17 @@ private:
     luna::engine::Texture effectsTexture_;
     luna::engine::EffectPlayer effects_;
     std::vector<const WeaponDef*> starters_; // catalog weapons marked "starter"
-    std::size_t held_ = 0;                   // 0: spear throw, 1: sword, 2..: starters_
+    Hotbar hotbar_;
+    int heldSlot_ = 0;
+    struct WorldPickup {
+        PlacedPickup pickup;
+        bool taken = false;
+    };
+    std::vector<WorldPickup> pickups_; // the level's pickups, until the level restarts
+    int fullTicks_ = 0;
+    WeaponArt weaponArt_;
+    void collectPickups();
+    void cycleSlot();
     int attackCooldown_ = 0;                 // ticks until the held catalog weapon can attack again
     int swingTicks_ = 0;                     // a melee swing being drawn
     std::vector<Projectile> projectiles_;

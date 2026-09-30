@@ -33,6 +33,7 @@ const char* toolName(EditorTool tool) {
     case EditorTool::Eraser: return "Eraser";
     case EditorTool::Place: return "Place";
     case EditorTool::Select: return "Select";
+    case EditorTool::Weapon: return "Weapon";
     }
     return "?";
 }
@@ -83,7 +84,8 @@ void Editor::buildPanels() {
     button("Erase", "Paint the level's default ground", [this] { tool_ = EditorTool::Eraser; });
     x += 4;
     button("Place", "Place a character: choose one, click the map", [this] { tool_ = EditorTool::Place; });
-    button("Select", "Select a character: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
+    button("Weapon", "Place a weapon pickup: choose one, click the map", [this] { tool_ = EditorTool::Weapon; });
+    button("Select", "Select a character or pickup: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 4;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
     button("Grid", "Show or hide the grid (G)", [this] { grid_ = !grid_; });
@@ -126,10 +128,69 @@ void Editor::buildPanels() {
                                kKindHeight - 4};
         }
     }
+    // Weapons (US-134): every weapon a pickup may carry, shown by its icon (drawn in render()).
+    const int weapons = static_cast<int>(weaponNames_.size());
+    const int weaponRows = std::max(1, (weapons + kPaletteColumns - 1) / kPaletteColumns);
+    weaponPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, kPaletteColumns * kPaletteCell + 4, weaponRows * kPaletteCell + 4});
+    for (int i = 0; i < weapons; ++i) {
+        const Rect cell{4 + (i % kPaletteColumns) * kPaletteCell, kToolbarHeight + 6 + (i / kPaletteColumns) * kPaletteCell, kPaletteCell - 2, kPaletteCell - 2};
+        Button& weapon = weaponPalette_->add<Button>(cell, "", [this, i] {
+            weapon_ = i;
+            tool_ = EditorTool::Weapon; // choosing a weapon means placing it
+        });
+        weapon.hint = weaponNames_[static_cast<std::size_t>(i)];
+    }
     buildProperties();
     buildSettings();
     buildOpenList();
     buildQuestion();
+}
+
+void Editor::setWeaponPalette(std::vector<std::string> names) {
+    weaponNames_ = std::move(names);
+    weapon_ = std::clamp(weapon_, 0, std::max(0, static_cast<int>(weaponNames_.size()) - 1));
+    buildPanels();
+}
+
+const PlacedPickup* Editor::findPickup(int id) const {
+    for (const PlacedPickup& pickup : level_.pickups) {
+        if (pickup.id == id) return &pickup;
+    }
+    return nullptr;
+}
+
+void Editor::changePickups(const std::string& what, std::vector<PlacedPickup> after, int nextIdAfter) {
+    run(std::make_unique<PickupsCommand>(what, level_.pickups, std::move(after), level_.nextId, nextIdAfter));
+}
+
+std::optional<int> Editor::pickupAt(int screenX, int screenY) const {
+    if (screenX < 0 || screenY < 0) return std::nullopt;
+    const auto [wx, wy] = toWorld(screenX, screenY);
+    for (auto it = level_.pickups.rbegin(); it != level_.pickups.rend(); ++it) {
+        if (wx >= it->at.x - kPickupSize / 2 && wx < it->at.x + kPickupSize / 2 && wy >= it->at.y - kPickupSize / 2 && wy < it->at.y + kPickupSize / 2) {
+            return it->id;
+        }
+    }
+    return std::nullopt;
+}
+
+// Delete: the selected character or pickup goes, as one step of Undo.
+void Editor::removeSelected() {
+    if (!selected_) return;
+    if (const PlacedPickup* gone = findPickup(*selected_)) {
+        const std::string what = "remove " + gone->weapon;
+        auto after = level_.pickups;
+        std::erase_if(after, [this](const PlacedPickup& p) { return p.id == *selected_; });
+        changePickups(what, std::move(after), level_.nextId);
+        select(std::nullopt);
+        return;
+    }
+    const PlacedCharacter* gone = find(*selected_);
+    const std::string what = gone == nullptr ? "remove" : "remove " + gone->name;
+    auto after = level_.characters;
+    std::erase_if(after, [this](const PlacedCharacter& c) { return c.id == *selected_; });
+    changeCharacters(what, std::move(after), level_.nextId);
+    select(std::nullopt);
 }
 
 void Editor::buildProperties() {
@@ -161,7 +222,7 @@ PlacedCharacter* Editor::find(int id) {
 }
 
 void Editor::select(std::optional<int> id) {
-    if (id && find(*id) == nullptr) id.reset();
+    if (id && find(*id) == nullptr && findPickup(*id) == nullptr) id.reset();
     if (id == selected_ && !propertiesStale_) return;
     selected_ = id;
     buildProperties();
@@ -499,7 +560,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         if (b == nullptr) continue;
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
-                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Level" && settingsShown_) ||
+                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Weapon" && tool_ == EditorTool::Weapon) || (b->label == "Level" && settingsShown_) ||
                       (b->label == "Grid" && grid_);
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
@@ -508,9 +569,13 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     for (std::size_t i = 0; i < characterPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(characterPalette_->children()[i].get())) b->selected = static_cast<int>(i) == kind_;
     }
-    // Painting tools show the ground palette; Place and Select show the characters.
+    for (std::size_t i = 0; i < weaponPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(weaponPalette_->children()[i].get())) b->selected = static_cast<int>(i) == weapon_;
+    }
+    // Painting tools show the ground palette, Weapon the weapons; Place and Select the characters.
     palette_->visible = paints(tool_);
-    characterPalette_->visible = !paints(tool_);
+    weaponPalette_->visible = tool_ == EditorTool::Weapon;
+    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon;
     if (propertiesStale_ && !properties_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
@@ -530,7 +595,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     const bool onToolbar = toolbar_->handle(input);
-    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input);
+    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input);
     const bool onProperties = properties_->handle(input);
     const bool onSettings = settings_->handle(input);
     return onToolbar || onPalette || onProperties || onSettings;
@@ -549,6 +614,18 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
             after.push_back({level_.nextId, kind.name, {x, y}, Facing::South, capitalised(kind.name), kind.hp, kind.swordDamage});
             const int id = level_.nextId;
             changeCharacters(std::format("place {} #{}", kind.name, id), std::move(after), level_.nextId + 1);
+            select(id);
+        }
+        return;
+    }
+    if (tool_ == EditorTool::Weapon) {
+        if (pressed && hover_ && !weaponNames_.empty()) {
+            const std::string& weapon = weaponNames_[static_cast<std::size_t>(weapon_)];
+            auto after = level_.pickups;
+            const auto [x, y] = insideLevel(wx, wy);
+            const int id = level_.nextId;
+            after.push_back({id, weapon, {x, y}});
+            changePickups(std::format("place {} #{}", weapon, id), std::move(after), level_.nextId + 1);
             select(id);
         }
         return;
@@ -579,9 +656,18 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
     }
     // Then characters: click one to select it and drag it to move it (one step of Undo).
     if (pressed) {
-        const std::optional<int> hit = characterAt(pointer.x, pointer.y);
+        std::optional<int> hit = characterAt(pointer.x, pointer.y);
+        const bool character = hit.has_value();
+        if (!hit) hit = pickupAt(pointer.x, pointer.y); // pickups lie on the ground, under the characters
         select(hit);
-        if (hit) {
+        if (hit && !character) {
+            const PlacedPickup& grabbed = *findPickup(*hit);
+            movingPickup_ = true;
+            movingPickupsBefore_ = level_.pickups;
+            grabX_ = grabbed.at.x - wx;
+            grabY_ = grabbed.at.y - wy;
+        }
+        if (hit && character) {
             const PlacedCharacter& grabbed = *find(*hit);
             moving_ = true;
             movingBefore_ = level_.characters;
@@ -593,6 +679,24 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         if (PlacedCharacter* dragged = find(*selected_)) {
             const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
             dragged->feet = {x, y}; // moved at once, so the owner sees it follow the pointer
+        }
+    }
+    if (movingPickup_ && held && pointer.inside() && selected_) {
+        for (PlacedPickup& pickup : level_.pickups) {
+            if (pickup.id == *selected_) {
+                const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
+                pickup.at = {x, y};
+            }
+        }
+    }
+    if (movingPickup_ && (released || !held)) {
+        movingPickup_ = false;
+        if (level_.pickups != movingPickupsBefore_) {
+            const PlacedPickup* moved = selected_ ? findPickup(*selected_) : nullptr;
+            const std::string what = moved == nullptr ? "move" : std::format("move {} to ({}, {})", moved->weapon, moved->at.x, moved->at.y);
+            history_.record(std::make_unique<PickupsCommand>(what, movingPickupsBefore_, level_.pickups, level_.nextId, level_.nextId));
+            unsaved_ = true;
+            say(what);
         }
     }
     if (moving_ && (released || !held)) {
@@ -659,15 +763,8 @@ void Editor::update(const Intents& intents) {
         if (intents.pressed(Intent::Redo)) redo();
         if (intents.pressed(Intent::Save)) save();
         if (intents.pressed(Intent::ToggleGrid)) grid_ = !grid_;
-        if (selected_ && intents.pressed(Intent::Delete)) {
-            const PlacedCharacter* gone = find(*selected_);
-            const std::string what = gone == nullptr ? "remove" : "remove " + gone->name;
-            auto after = level_.characters;
-            std::erase_if(after, [this](const PlacedCharacter& c) { return c.id == *selected_; });
-            changeCharacters(what, std::move(after), level_.nextId);
-            select(std::nullopt);
-        }
-        if (selected_ && intents.pressed(Intent::Rotate)) {
+        if (selected_ && intents.pressed(Intent::Delete)) removeSelected();
+        if (selected_ && find(*selected_) != nullptr && intents.pressed(Intent::Rotate)) {
             auto after = level_.characters;
             for (PlacedCharacter& c : after) {
                 if (c.id == *selected_) c.facing = static_cast<Facing>((static_cast<int>(c.facing) + 1) % static_cast<int>(Facing::Count)); // clockwise
@@ -714,6 +811,14 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     for (const PixelPoint& target : level_.targets) {
         renderer.draw(textures_.props, kTargetFrame, screen(target.x - kTargetFrame.width / 2, target.y - kTargetFrame.height));
     }
+    // Pickups lie on the ground: a shadow, then the weapon.
+    for (const PlacedPickup& pickup : level_.pickups) {
+        renderer.draw(textures_.props, kShadowFrame, screen(pickup.at.x - kShadowFrame.width / 2, pickup.at.y + 4));
+        if (textures_.weapons != nullptr) {
+            const auto corner = screen(pickup.at.x - kPickupSize / 2, pickup.at.y - kPickupSize / 2);
+            drawWeaponIcon(renderer, painter, *textures_.weapons, pickup.weapon, {corner.x, corner.y, kPickupSize, kPickupSize});
+        }
+    }
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
         if (kind == nullptr || textures_.art == nullptr) continue;
@@ -749,9 +854,24 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         }
     }
 
+    if (selected_) {
+        if (const PlacedPickup* pickup = findPickup(*selected_)) {
+            const auto corner = screen(pickup->at.x - kPickupSize / 2, pickup->at.y - kPickupSize / 2);
+            painter.outline({corner.x - 1, corner.y - 1, kPickupSize + 2, kPickupSize + 2}, UiColor::Gold);
+            painter.text(corner.x + (kPickupSize - UiPainter::textWidth(pickup->weapon)) / 2, corner.y - 10, pickup->weapon, UiColor::Gold);
+        }
+    }
+
     toolbar_->draw(painter);
     palette_->draw(painter);
     characterPalette_->draw(painter);
+    weaponPalette_->draw(painter);
+    if (weaponPalette_->visible && textures_.weapons != nullptr) {
+        for (std::size_t i = 0; i < weaponPalette_->children().size() && i < weaponNames_.size(); ++i) {
+            const Rect& cell = weaponPalette_->children()[i]->bounds;
+            drawWeaponIcon(renderer, painter, *textures_.weapons, weaponNames_[i], {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
+        }
+    }
     properties_->draw(painter);
     settings_->draw(painter);
     // The status line: tool, what it uses, cell, and the last thing done.
@@ -762,6 +882,10 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         what = definitions_.tiles[static_cast<std::size_t>(tile_)].name;
     } else if (tool_ == EditorTool::Place) {
         what = definitions_.characters[static_cast<std::size_t>(kind_)].name;
+    } else if (tool_ == EditorTool::Weapon) {
+        what = weaponNames_.empty() ? "no weapons" : weaponNames_[static_cast<std::size_t>(weapon_)];
+    } else if (selected_ && findPickup(*selected_) != nullptr) {
+        what = findPickup(*selected_)->weapon;
     } else {
         const auto shown = std::find_if(level_.characters.begin(), level_.characters.end(), [this](const PlacedCharacter& c) { return selected_ && c.id == *selected_; });
         what = shown == level_.characters.end() ? "nothing selected" : shown->name;
@@ -779,6 +903,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         toolbar_->drawOverlay(painter);
         palette_->drawOverlay(painter);
         characterPalette_->drawOverlay(painter);
+        weaponPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         settings_->drawOverlay(painter);
     }
