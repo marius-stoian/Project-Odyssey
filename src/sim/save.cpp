@@ -93,6 +93,10 @@ json savePerson(const Person& p) {
                 {"mother", p.mother},
                 {"father", p.father},
                 {"partner", p.partner},
+                {"courting", p.courting},
+                {"courtDays", p.courtDays},
+                {"courtEvent", p.courtEvent},
+                {"courtPauseDay", p.courtPauseDay},
                 {"pregnantDays", p.pregnantDays},
                 {"childFather", p.childFather},
                 {"lastBirthDay", p.lastBirthDay}};
@@ -136,6 +140,10 @@ Person loadPerson(const json& value) {
     p.mother = value.at("mother").get<int>();
     p.father = value.at("father").get<int>();
     p.partner = value.at("partner").get<int>();
+    p.courting = value.at("courting").get<int>();
+    p.courtDays = value.at("courtDays").get<int>();
+    p.courtEvent = value.at("courtEvent").get<int>();
+    p.courtPauseDay = value.at("courtPauseDay").get<std::int64_t>();
     p.pregnantDays = value.at("pregnantDays").get<int>();
     p.childFather = value.at("childFather").get<int>();
     p.lastBirthDay = value.at("lastBirthDay").get<std::int64_t>();
@@ -196,6 +204,10 @@ void upgradeFrom2(json& save) {
         person["carer"] = -1;
         person["nursing"] = -1;
         person["guardian"] = -1;
+        person["courting"] = -1;
+        person["courtDays"] = 0;
+        person["courtEvent"] = -1;
+        person["courtPauseDay"] = -1;
         for (json& memory : person.at("memories")) {
             memory["event"] = -1;
         }
@@ -334,6 +346,9 @@ struct WorldArchive {
             }
             if (p.healthEvent >= events) {
                 return std::format("people[{}].healthEvent names an event that does not exist", i);
+            }
+            if (!validId(p.courting) || p.courtEvent >= events) {
+                return std::format("people[{}].courting names a person or event that does not exist", i);
             }
             if (!validId(p.carer) || !validId(p.nursing) || !validId(p.guardian)) {
                 return std::format("people[{}] names a carer, patient or guardian who does not exist", i);

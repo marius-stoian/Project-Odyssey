@@ -4,6 +4,19 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-113 / S-US-113: Court and compete for a partner (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fourth story of M2b.
+
+- Simulation: pairing is now a courtship. An unpaired adult courts the one they like best (at least 20); gifts and time together warm the loved one by 2 a day; a loved one who thinks ill of the suitor turns them down (Rejection); two people pair only when both think enough of each other and the loved one chooses (Pairing cites the courtship). Rivals grow jealous (Jealousy event with causes, a lifelong Rejection memory, a grudge, maybe a quarrel that names the reason). Partners of whom either thinks less than -20 of the other part (Parting says why: "parted after a bitter quarrel", "over stolen meat", "as their love faded"). `World::pair` returns the event id; `World::part` is new; the dead and the exiled are no longer courted.
+- Data: `story.json` sections `courtship`, `rivals`, `parting`.
+- Save: new person fields `courting`, `courtDays`, `courtEvent`, `courtPauseDay` (version 3; upgrade from 2 fills defaults; validated on load). All in the world hash.
+- Code: `src/sim/world_love.cpp` (new); `heaviestGrudge` moved to `person.cpp`.
+- Demo (outside the Codex, owner request): hero sword on Shift, standing enemy with HP, red hit flash (branch `chore/sword-enemy-demo`); Bow stays the default weapon so the US-029 tests hold.
+- Tests: `tests/sim/story_love_test.cpp` (9 cases); ctest 20/20 in Debug and Release, zero warnings.
+- Balance (owner limit: 10 seeds x 100 years): 27 to 45 alive (before: down to 9). Seed 7 story: 109 courtships begun, 46 pairings, 4 turned down, 6 jealousies, 0 partings; partings are rare because partners rarely fall out (tuning pass before the gate).
+
+
 ## US-112 / S-US-112: Share food and nurse the sick (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Third story of M2b.

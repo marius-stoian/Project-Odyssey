@@ -18,6 +18,16 @@ const char* causeName(CauseOfDeath cause) {
     return "?";
 }
 
+const Grudge* heaviestGrudge(const Person& holder, int other, const Grudge* best) {
+    for (const Grudge& grudge : holder.grudges) {
+        if (grudge.about == other &&
+            (best == nullptr || grudge.weight > best->weight || (grudge.weight == best->weight && grudge.event < best->event))) {
+            best = &grudge;
+        }
+    }
+    return best;
+}
+
 const char* traitName(Trait trait) {
     switch (trait) {
     case Trait::Brave: return "Brave";

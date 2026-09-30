@@ -81,5 +81,26 @@
     "limit": 2,
     "opinionGain": 30,
     "feeling": 80
+  },
+  "courtship": {
+    "favourOpinion": 20,
+    "opinionPerDay": 2,
+    "suitorOpinionPerDay": 1,
+    "rejectBelow": 0,
+    "giveUpDays": 40,
+    "rejectionOpinionLoss": 15,
+    "rejectionFeeling": -50,
+    "pauseDays": 30
+  },
+  "rivals": {
+    "minCourtDays": 2,
+    "opinionLoss": 25,
+    "feeling": -60,
+    "quarrelPercent": 50,
+    "pauseDays": 30
+  },
+  "parting": {
+    "partingOpinion": -20,
+    "pauseDays": 30
   }
 }
