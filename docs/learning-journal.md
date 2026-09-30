@@ -570,3 +570,23 @@ The panel keeps `std::unique_ptr<Widget>` and calls `child->draw(painter)`; C++ 
 **Try it (15 minutes).** Open [ui-showcase.png](evidence/US-121/ui-showcase.png), then change the `Gold` colour in `colorOf` in ui.cpp, rebuild, run `luna_tests.exe -tc="US-121 Showcase"` and look at the picture it names.
 
 **Check yourself.** Why does a `Button` run its action when the mouse button is *let go* over it, and not when it is pressed?
+
+## US-122: Levels as data (2026-09-30)
+
+**What we built.** The demo world used to be built in code. Now it lives in `assets/levels/valley.json`: the ground, the hero's start, the straw targets and the goblin. The game reads any level file, and saves them safely.
+
+**The idea: reading and writing JSON with validation.** A file comes from outside the program, so nothing in it is trusted. Every field is checked before use, and every error says *which file* and *which field*:
+
+```cpp
+if (definitions.character(placed.kind) == nullptr) {
+    throw DataError(file, "characters[0].kind", "\"dragon\" is not a character kind in characters.json");
+}
+```
+
+Saving is the mirror image, with one more rule: never leave a half-written file. We write `valley.json.tmp` first and rename it at the end; the old file becomes `valley.json.bak1`. If a crash damages a save, `loadLevel` quietly uses the last good backup and says so.
+
+**Where to look.** `readLevelFile`, `loadLevel` and `saveLevel` in [src/game/level.cpp](../src/game/level.cpp).
+
+**Try it (15 minutes).** Copy `assets/levels/valley.json`, change `"heroStart"` and the goblin's `"hp"`, and run `odysseus.exe --level <your copy>`. Then misspell a tile name and read the log.
+
+**Check yourself.** Why is the ground saved as runs (`["grass", 30]`) instead of one name per cell?

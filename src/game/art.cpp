@@ -256,50 +256,88 @@ Image redTint(const Image& source) {
     return out;
 }
 
-ArtSet programmerArt(std::string problem) {
+// A flat, speckled tile for ground kinds the programmer art never drew.
+Image plainTile(const std::string& name) {
+    std::uint32_t h = 2166136261U;
+    for (const char c : name) h = (h ^ static_cast<unsigned char>(c)) * 16777619U;
+    const luna::engine::Color base{static_cast<std::uint8_t>(80 + h % 120), static_cast<std::uint8_t>(80 + (h >> 8) % 120),
+                                   static_cast<std::uint8_t>(80 + (h >> 16) % 120)};
+    Image tile(kTileSize, kTileSize);
+    tile.fillRect(0, 0, kTileSize, kTileSize, base);
+    for (int i = 0; i < 24; ++i) {
+        tile.set((i * 7 + 3) % kTileSize, (i * 13 + 5) % kTileSize,
+                 {static_cast<std::uint8_t>(base.red * 3 / 4), static_cast<std::uint8_t>(base.green * 3 / 4), static_cast<std::uint8_t>(base.blue * 3 / 4)});
+    }
+    return tile;
+}
+
+ArtSet programmerArt(std::string problem, const std::vector<std::string>& groundFrames) {
     ArtSet art;
     art.heroSheet = makeCharacterSheet();
-    art.tileStrip = makeTileSheet();
-    art.enemy = luna::engine::crop(art.heroSheet, {0, 0, kCharacterWidth, kCharacterHeight});
-    art.enemyHit = luna::engine::crop(makePropSheet(), kEnemyHitFrame);
+    // The four grounds the programmer art knows, by their atlas names; plain tiles for the rest.
+    const Image drawn = makeTileSheet();
+    const std::map<std::string, int> known = {{"grass", 0}, {"path", 1}, {"stone", 2}, {"water", 3}};
+    art.tileStrip = Image(std::max<int>(1, static_cast<int>(groundFrames.size())) * kTileSize, kTileSize);
+    for (std::size_t i = 0; i < groundFrames.size(); ++i) {
+        const auto it = known.find(groundFrames[i]);
+        if (it != known.end()) {
+            paste(art.tileStrip, static_cast<int>(i) * kTileSize, 0, drawn, {it->second * kTileSize, 0, kTileSize, kTileSize});
+        } else {
+            paste(art.tileStrip, static_cast<int>(i) * kTileSize, 0, plainTile(groundFrames[i]), {0, 0, kTileSize, kTileSize});
+        }
+    }
+    // Every character is the programmer figure; its red flash is the one the prop sheet has.
+    art.characters = luna::engine::crop(art.heroSheet, {0, 0, kCharacterWidth, kCharacterHeight});
+    art.charactersHit = luna::engine::crop(makePropSheet(), kEnemyHitFrame);
     art.problem = std::move(problem);
     return art;
 }
 
 } // namespace
 
-ArtSet makeArtSet(const std::filesystem::path& spritesFolder) {
-    std::string problem;
-    const auto atlas = loadAtlas(spritesFolder / "atlas", problem);
-    if (!atlas) {
-        return programmerArt(problem);
-    }
-    // The owner's sheets show a hero from the front (S), the side (E) and the back (N); the
+core::Rect ArtSet::frame(const std::string& frames, int directions, Facing facing, int walkFrame) const {
+    // The owner's sheets show a figure from the front (S), the side (E) and the back (N); the
     // other side (W) is mirrored. Diagonals use the side view they move towards.
     constexpr const char* kView[] = {"S", "W", "W", "W", "N", "E", "E", "E"}; // by Facing
     constexpr int kSheetFrame[] = {0, 2, 4, 6};                               // walk frames used
-    static_assert(sizeof(kSheetFrame) / sizeof(kSheetFrame[0]) == kWalkFrames);
-    const std::vector<std::string> ground = {"grass", "path", "stone", "water"}; // TileKind order
-    try {
-        ArtSet art;
-        art.ownArt = true;
-        art.heroSheet = Image(kWalkFrames * kCharacterWidth, static_cast<int>(Facing::Count) * kCharacterHeight);
-        for (int facing = 0; facing < static_cast<int>(Facing::Count); ++facing) {
-            for (int frame = 0; frame < kWalkFrames; ++frame) {
-                const int index = atlas->characterCells.at(std::format("hero.{}.{}", kView[facing], kSheetFrame[frame]));
-                paste(art.heroSheet, frame * kCharacterWidth, facing * kCharacterHeight, atlas->characters, atlas->characterFrame(index));
-            }
-        }
-        art.tileStrip = Image(static_cast<int>(ground.size()) * kTileSize, kTileSize);
-        for (std::size_t i = 0; i < ground.size(); ++i) {
-            paste(art.tileStrip, static_cast<int>(i) * kTileSize, 0, atlas->tiles, atlas->tileFrame(atlas->tileCells.at(ground[i])));
-        }
-        art.enemy = luna::engine::crop(atlas->characters, atlas->characterFrame(atlas->characterCells.at("goblin")));
-        art.enemyHit = redTint(art.enemy);
-        return art;
-    } catch (const std::out_of_range&) {
-        return programmerArt((spritesFolder / "atlas" / "atlas.json").string() + ": a frame the game needs is missing (hero, goblin, grass, path, stone or water)");
+    const std::string name = directions == 8 ? std::format("{}.{}.{}", frames, kView[static_cast<std::size_t>(facing)],
+                                                           kSheetFrame[std::clamp(walkFrame, 0, 3)])
+                                             : frames;
+    const auto it = cells.find(name);
+    const int cell = it == cells.end() ? 0 : it->second;
+    return {cell % kAtlasColumns * kAtlasCharacterWidth, cell / kAtlasColumns * kAtlasCharacterHeight, kAtlasCharacterWidth, kAtlasCharacterHeight};
+}
+
+ArtSet makeArtSet(const std::filesystem::path& spritesFolder, const std::vector<std::string>& groundFrames) {
+    std::string problem;
+    const auto atlas = loadAtlas(spritesFolder / "atlas", problem);
+    if (!atlas) {
+        return programmerArt(problem, groundFrames);
     }
+    for (const std::string& name : groundFrames) {
+        if (!atlas->tileCells.contains(name)) {
+            return programmerArt((spritesFolder / "atlas" / "atlas.json").string() + ": no ground frame \"" + name + "\"", groundFrames);
+        }
+    }
+    if (!atlas->characterCells.contains("hero.S.0")) {
+        return programmerArt((spritesFolder / "atlas" / "atlas.json").string() + ": no hero frames", groundFrames);
+    }
+    ArtSet art;
+    art.ownArt = true;
+    art.cells = atlas->characterCells;
+    art.characters = atlas->characters;
+    art.charactersHit = redTint(atlas->characters);
+    art.heroSheet = Image(kWalkFrames * kCharacterWidth, static_cast<int>(Facing::Count) * kCharacterHeight);
+    for (int facing = 0; facing < static_cast<int>(Facing::Count); ++facing) {
+        for (int walk = 0; walk < kWalkFrames; ++walk) {
+            paste(art.heroSheet, walk * kCharacterWidth, facing * kCharacterHeight, art.characters, art.frame("hero", 8, static_cast<Facing>(facing), walk));
+        }
+    }
+    art.tileStrip = Image(std::max<int>(1, static_cast<int>(groundFrames.size())) * kTileSize, kTileSize);
+    for (std::size_t i = 0; i < groundFrames.size(); ++i) {
+        paste(art.tileStrip, static_cast<int>(i) * kTileSize, 0, atlas->tiles, atlas->tileFrame(atlas->tileCells.at(groundFrames[i])));
+    }
+    return art;
 }
 
 } // namespace odysseus::game

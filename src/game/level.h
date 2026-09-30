@@ -1,0 +1,105 @@
+#pragma once
+
+#include "boundary.h"
+
+#include "game/placeholder_art.h"
+#include "luna/engine/tile_map.h"
+
+#include <filesystem>
+#include <string>
+#include <vector>
+
+namespace odysseus::game {
+
+// What kinds of ground and characters exist (US-122), from assets/data/tiles.json and
+// characters.json. Levels name them; the order here is the tile number used in memory.
+struct TileKindDef {
+    std::string name;       // "grass"
+    std::string atlas;      // its frame in the art atlas
+    bool solid = false;     // blocks walking and spears
+};
+
+struct CharacterKindDef {
+    std::string name;       // "goblin"
+    std::string frames;     // atlas frame, or the frame set of an 8-direction figure
+    int directions = 1;     // 8: frames "<frames>.S.0" ...; 1: a single front view "<frames>"
+    int hp = 100;
+    int swordDamage = 5;
+    bool enemy = true;      // the hero's sword can hit it
+};
+
+struct Definitions {
+    std::vector<TileKindDef> tiles;
+    std::vector<CharacterKindDef> characters;
+
+    int tileNumber(const std::string& name) const;                     // -1 when unknown
+    const CharacterKindDef* character(const std::string& name) const;  // nullptr when unknown
+};
+
+Definitions loadDefinitions(const std::filesystem::path& dataDirectory);
+
+struct PixelPoint {
+    int x = 0;
+    int y = 0;
+    friend bool operator==(const PixelPoint&, const PixelPoint&) = default;
+};
+
+// A character someone placed in the level. Ids are never reused within a level.
+struct PlacedCharacter {
+    int id = 0;
+    std::string kind;
+    PixelPoint feet;        // world pixels
+    Facing facing = Facing::South;
+    std::string name;
+    int hp = 100;
+    int swordDamage = 5;
+    friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
+};
+
+inline constexpr int kLevelVersion = 1;
+inline constexpr int kLevelBackups = 3;
+inline constexpr int kLevelMinSize = 8;
+inline constexpr int kLevelMaxSize = 256;
+
+// A level: the ground, who stands where, and where the hero begins. Plain data.
+struct Level {
+    std::string name = "Untitled";
+    int width = 0;
+    int height = 0;
+    int defaultGround = 0;               // tile number
+    std::vector<int> ground;             // tile numbers, row after row
+    std::vector<PlacedCharacter> characters;
+    PixelPoint heroStart;
+    std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
+    int nextId = 1;
+
+    int at(int x, int y) const { return ground[static_cast<std::size_t>(y * width + x)]; }
+    void set(int x, int y, int tile) { ground[static_cast<std::size_t>(y * width + x)] = tile; }
+    bool inside(int x, int y) const { return x >= 0 && y >= 0 && x < width && y < height; }
+    friend bool operator==(const Level&, const Level&) = default;
+};
+
+// A new level filled with one ground.
+Level makeLevel(std::string name, int width, int height, int ground);
+
+// The tile map the game draws and walks on.
+luna::engine::TileMap buildTileMap(const Level& level, const Definitions& definitions);
+
+// Reads one level file; every problem is a DataError naming the file and the field.
+Level readLevelFile(const std::filesystem::path& file, const Definitions& definitions);
+
+// Reads a level, falling back to its backups (.bak1 .. .bak3) when the file is damaged.
+struct LoadedLevel {
+    Level level;
+    std::filesystem::path loadedFrom;
+    std::vector<std::string> notes; // which files were skipped, and why
+};
+LoadedLevel loadLevel(const std::filesystem::path& file, const Definitions& definitions);
+
+// Saves safely: a temporary file, then a rename; the last three saves are kept as backups.
+void saveLevel(const Level& level, const Definitions& definitions, const std::filesystem::path& file);
+
+// "S", "SW", ... as written in level files.
+const char* facingCode(Facing facing);
+
+} // namespace odysseus::game

@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 namespace game = odysseus::game;
@@ -17,6 +18,8 @@ using luna::engine::Color;
 using luna::engine::Image;
 
 namespace {
+
+const std::vector<std::string> kGround = {"grass", "path", "stone", "water"};
 
 fs::path sprites() {
     return fs::path(ODYSSEUS_DATA_DIR).parent_path() / "sprites";
@@ -129,22 +132,25 @@ TEST_CASE("US-120 The committed atlas is the owner's sheets, cut") {
 }
 
 TEST_CASE("US-120 Heroes and ground") {
-    const game::ArtSet art = game::makeArtSet(sprites());
+    const game::ArtSet art = game::makeArtSet(sprites(), kGround);
     REQUIRE_MESSAGE(art.ownArt, art.problem);
     CHECK(art.heroSheet.width() == game::kWalkFrames * game::kCharacterWidth);
     CHECK(art.heroSheet.height() == static_cast<int>(game::Facing::Count) * game::kCharacterHeight);
-    CHECK(art.tileStrip.width() == static_cast<int>(game::TileKind::Count) * game::kTileSize);
+    CHECK(art.tileStrip.width() == static_cast<int>(kGround.size()) * game::kTileSize);
     // The owner's art, not the programmer art.
     CHECK_FALSE(sameImage(art.heroSheet, game::makeCharacterSheet()));
     CHECK_FALSE(sameImage(art.tileStrip, game::makeTileSheet()));
-    CHECK(art.enemy.width() == game::kCharacterWidth);
-    CHECK_FALSE(sameImage(art.enemy, art.enemyHit)); // the hit flash is red
+    CHECK(art.characters.width() == game::kAtlasColumns * game::kCharacterWidth);
+    const auto goblin = art.frame("goblin", 1, game::Facing::West, 0);
+    CHECK(art.characters.get(goblin.x, goblin.y).alpha == 0); // a real figure, standing free
+    CHECK(goblin != art.frame("hero", 8, game::Facing::South, 0));
+    CHECK_FALSE(sameImage(art.characters, art.charactersHit)); // the hit flash is red
 }
 
 TEST_CASE("US-120 Missing art") {
     SUBCASE("no atlas at all") {
         const fs::path folder = freshFolder("missing");
-        const game::ArtSet art = game::makeArtSet(folder);
+        const game::ArtSet art = game::makeArtSet(folder, kGround);
         CHECK_FALSE(art.ownArt);
         MESSAGE(art.problem);
         CHECK(art.problem.find("atlas.json") != std::string::npos);
@@ -154,7 +160,7 @@ TEST_CASE("US-120 Missing art") {
         const fs::path folder = freshFolder("damaged");
         fs::copy(sprites() / "atlas", folder / "atlas");
         write(folder / "atlas" / "characters.png", "not a picture");
-        const game::ArtSet art = game::makeArtSet(folder);
+        const game::ArtSet art = game::makeArtSet(folder, kGround);
         CHECK_FALSE(art.ownArt);
         MESSAGE(art.problem);
         CHECK(art.problem.find("characters.png") != std::string::npos);

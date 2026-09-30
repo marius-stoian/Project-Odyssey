@@ -4,7 +4,6 @@
 #include "core/version.h"
 #include "game/art.h"
 #include "game/placeholder_art.h"
-#include "game/test_map.h"
 #include "luna/engine/physics_view.h"
 
 #include <cmath>
@@ -40,14 +39,49 @@ Vec3 OdysseyGame::blockedTargetBase() {
     return {Fixed::fromRatio(65, 2), Fixed::fromRatio(49, 2), luna::physics::kFixedZero}; // (32.5, 24.5)
 }
 
-OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory)
-    : map_(makeTestMap()), camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
-      hero_(map_.pixelWidth() / 2.0 + kTileSize / 2.0, map_.pixelHeight() / 2.0 + kTileSize * 0.75),
-      range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
-      enemy_(hero_.feetX() + 2 * kTileSize, hero_.feetY(), 100) { // two tiles east of the hero
+namespace {
+
+std::filesystem::path chosenLevel(const std::filesystem::path& dataDirectory, const std::filesystem::path& levelFile) {
+    return levelFile.empty() ? dataDirectory.parent_path() / "levels" / "valley.json" : levelFile;
+}
+
+Level loadAndReport(const std::filesystem::path& file, const Definitions& definitions) {
+    LoadedLevel loaded = loadLevel(file, definitions);
+    for (const std::string& note : loaded.notes) {
+        core::logWarning("Level: " + note);
+    }
+    core::logInfo(std::format("Level \"{}\" ({}x{} tiles, {} characters) from {}", loaded.level.name, loaded.level.width, loaded.level.height,
+                              loaded.level.characters.size(), loaded.loadedFrom.string()));
+    return std::move(loaded.level);
+}
+
+} // namespace
+
+OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::filesystem::path& levelFile)
+    : definitions_(loadDefinitions(dataDirectory)), levelFile_(chosenLevel(dataDirectory, levelFile)),
+      level_(loadAndReport(levelFile_, definitions_)), map_(buildTileMap(level_, definitions_)),
+      camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
+      hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
+      range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites") {
     camera_.centreOn(hero_.feetX(), hero_.feetY());
-    range_.addTarget(openTargetBase());
-    range_.addTarget(blockedTargetBase());
+    for (const PixelPoint& target : level_.targets) {
+        range_.addTarget({luna::engine::metresFromPixels(target.x), luna::engine::metresFromPixels(target.y), luna::physics::kFixedZero});
+    }
+    // Every placed character the sword can hit stands in the world (M2c: they stand still, D-19).
+    for (const PlacedCharacter& placed : level_.characters) {
+        const CharacterKindDef* kind = definitions_.character(placed.kind);
+        if (kind == nullptr || !kind->enemy) {
+            continue;
+        }
+        Enemy enemy(placed.feet.x, placed.feet.y, placed.hp);
+        enemy.id = placed.id;
+        enemy.name = placed.name;
+        enemy.frames = kind->frames;
+        enemy.directions = kind->directions;
+        enemy.facing = placed.facing;
+        enemy.swordDamage = placed.swordDamage;
+        enemies_.push_back(enemy);
+    }
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
@@ -87,15 +121,26 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     // Update sword state every tick.
     sword_.update();
 
-    // Update enemy state.
-    enemy_.update();
+    for (Enemy& enemy : enemies_) {
+        enemy.update();
+    }
 
-    // One hit per swing, if the enemy is within reach. Range is in metres; one tile is one metre.
-    if (sword_.isAttacking() && !sword_.hasHitInThisSlash() && enemy_.isAlive()) {
-        const double dx = enemy_.feetX() - hero_.feetX();
-        const double dy = enemy_.feetY() - hero_.feetY();
-        if (std::sqrt(dx * dx + dy * dy) <= sword_.config().slashRangeMetres * kTileSize) {
-            enemy_.takeDamage(sword_.config().damagePerHit);
+    // One hit per swing, on the nearest living enemy within reach. Range is in metres; one tile
+    // is one metre. Ties go to the lower id, so the same play always hits the same enemy.
+    if (sword_.isAttacking() && !sword_.hasHitInThisSlash()) {
+        Enemy* nearest = nullptr;
+        double nearestDistance = sword_.config().slashRangeMetres * kTileSize;
+        for (Enemy& enemy : enemies_) {
+            const double dx = enemy.feetX() - hero_.feetX();
+            const double dy = enemy.feetY() - hero_.feetY();
+            const double distance = std::sqrt(dx * dx + dy * dy);
+            if (enemy.isAlive() && (distance < nearestDistance || (distance == nearestDistance && nearest == nullptr))) {
+                nearest = &enemy;
+                nearestDistance = distance;
+            }
+        }
+        if (nearest != nullptr) {
+            nearest->takeDamage(sword_.config().damagePerHit);
             sword_.markHit();
         }
     }
@@ -120,17 +165,21 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {
     // The owner's art when its atlas loads, else the programmer art (US-120).
-    const ArtSet art = makeArtSet(spritesDirectory_);
-    if (art.ownArt) {
+    std::vector<std::string> groundFrames;
+    for (const TileKindDef& kind : definitions_.tiles) {
+        groundFrames.push_back(kind.atlas);
+    }
+    art_ = makeArtSet(spritesDirectory_, groundFrames);
+    if (art_.ownArt) {
         core::logInfo("Art: the owner's atlas");
     } else {
-        core::logWarning("Art: programmer art, because " + art.problem);
+        core::logWarning("Art: programmer art, because " + art_.problem);
     }
-    characters_ = renderer.createTexture(art.heroSheet);
-    tiles_ = renderer.createTexture(art.tileStrip);
+    characters_ = renderer.createTexture(art_.heroSheet);
+    tiles_ = renderer.createTexture(art_.tileStrip);
     props_ = renderer.createTexture(makePropSheet()); // texture 2: tests find props by this number
-    enemyTexture_ = renderer.createTexture(art.enemy);
-    enemyHitTexture_ = renderer.createTexture(art.enemyHit);
+    charactersAtlas_ = renderer.createTexture(art_.characters);
+    charactersHitAtlas_ = renderer.createTexture(art_.charactersHit);
 }
 
 void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
@@ -155,22 +204,26 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     renderer.draw(characters_, hero_.spriteFrame(),
                   screen(hero_.feetX(alpha) - kCharacterWidth / 2.0, hero_.feetY(alpha) - kCharacterHeight));
 
-    // The enemy: red while the hit flash lasts, with a health bar and "HP/max" above its head.
-    if (enemy_.isAlive()) {
-        const double left = enemy_.feetX() - kCharacterWidth / 2.0;
-        const double top = enemy_.feetY() - kCharacterHeight;
-        renderer.draw(enemy_.isFlashing() ? enemyHitTexture_ : enemyTexture_, {0, 0, kCharacterWidth, kCharacterHeight}, screen(left, top));
+    // Enemies: red while the hit flash lasts, with a health bar and "HP/max" above their heads.
+    for (const Enemy& enemy : enemies_) {
+        if (!enemy.isAlive()) {
+            continue;
+        }
+        const double left = enemy.feetX() - kCharacterWidth / 2.0;
+        const double top = enemy.feetY() - kCharacterHeight;
+        renderer.draw(enemy.isFlashing() ? charactersHitAtlas_ : charactersAtlas_, art_.frame(enemy.frames, enemy.directions, enemy.facing, 0),
+                      screen(left, top));
 
-        const double barLeft = enemy_.feetX() - kHealthBarEmpty.width / 2.0;
+        const double barLeft = enemy.feetX() - kHealthBarEmpty.width / 2.0;
         const double barTop = top - 6;
         renderer.draw(props_, kHealthBarEmpty, screen(barLeft, barTop));
-        const int filled = kHealthBarFull.width * enemy_.hp() / enemy_.maxHp();
+        const int filled = kHealthBarFull.width * enemy.hp() / enemy.maxHp();
         renderer.draw(props_, luna::engine::Rect{kHealthBarFull.x, kHealthBarFull.y, filled, kHealthBarFull.height},
                       screen(barLeft, barTop));
 
-        const std::string label = std::format("{}/{}", enemy_.hp(), enemy_.maxHp());
+        const std::string label = std::format("{}/{}", enemy.hp(), enemy.maxHp());
         const double labelWidth = static_cast<double>(label.size()) * kGlyphAdvance + 1;
-        double x = enemy_.feetX() - labelWidth / 2.0;
+        double x = enemy.feetX() - labelWidth / 2.0;
         for (const char c : label) {
             renderer.draw(props_, glyphFrame(c), screen(x, barTop - 8));
             x += kGlyphAdvance;
