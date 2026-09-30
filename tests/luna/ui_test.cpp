@@ -108,6 +108,15 @@ TEST_CASE("US-121 Pointer") {
             CHECK(input.nextTick().pressed(intent));
             input.handle(key(k, false));
         }
+        // US-134: the number keys 1-9 are Slot1-Slot9.
+        for (int i = 0; i < 9; ++i) {
+            const Key number = static_cast<Key>(static_cast<int>(Key::Num1) + i);
+            input.handle(key(number, true));
+            const auto numberTick = input.nextTick();
+            CHECK(numberTick.pressed(static_cast<Intent>(static_cast<int>(Intent::Slot1) + i)));
+            input.handle(key(number, false));
+            input.nextTick();
+        }
     }
     SUBCASE("typed text and scripted input") {
         Event text;

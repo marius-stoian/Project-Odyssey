@@ -757,3 +757,22 @@ The game calls `swing` or `launch` on the base, and C++ picks the right version 
 **Try it (15 minutes).** Press Shift to cycle the starters and attack a goblin with each. Then set `"starter"` on another weapon in `assets/data/weapons.json` and rerun.
 
 **Check yourself.** Why does `WeaponBehaviour` need a virtual destructor?
+
+## US-134: Pickups and the hotbar (2026-09-30)
+
+**What we built.** You can now place weapons in a level with the editor's new Weapon tool. In the game the hero starts empty-handed, walks over a weapon to put it in the first free box of a nine-box hotbar, presses 1-9 to hold one, and Shift to go to the next filled box.
+
+**The idea: upgrading a saved file format.** Your levels live in files, and a file written today must still open after the game grows. So every level file says which version it is (`"levelVersion": 2`). Version 2 only *adds* a list, `pickups`. The reader follows two rules:
+
+```cpp
+if (version > kLevelVersion) throw ...;        // made by a newer game: refuse, never guess
+if (data.contains("pickups")) { ... }           // a version 1 file simply has none
+```
+
+Old files load as they are, with no pickups. The next time you save, the game writes version 2. Nobody has to convert anything. The one thing we never do is open a file from a *newer* game: we stop and say so, so its extra data is never silently thrown away. Adding fields is easy; renaming or removing them would need a real conversion step.
+
+**Where to look.** `readLevelFile` and `saveLevel` in [src/game/level.cpp](../src/game/level.cpp); `OdysseyGame::collectPickups` and `cycleSlot` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** Open the editor (F2), choose Weapon, place three weapons by the START marker and save. Open `valley.json` in a text editor and find the new `pickups` list. Then change `"levelVersion": 2` to `9` and start the game: read the error.
+
+**Check yourself.** Why does a pickup list that is missing entirely count as "no pickups" and not as an error?

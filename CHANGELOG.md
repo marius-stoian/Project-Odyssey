@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-134: Pickups and the hotbar (Avengers) — 2026-09-30
+
+**State:** In progress; local verification passed; integration pending.
+
+- Level format version 2 (`pickups`: weapon name and position); version 1 files load unchanged; unknown weapon names are refused with the field named. `Definitions::weapons`.
+- Editor: Weapon tool and palette (16 starters + the two demo weapons), Select moves, Delete removes, Undo and Redo through `PickupsCommand`.
+- Platform and Engine: keys 1-9, intents `Slot1..Slot9` (scriptable with `--hold Slot3`).
+- Game: 9-slot hotbar at the bottom centre, pickups lying in the world, first free slot, "Hotbar full", 1-9 and Shift; the starters no longer cycle with Shift. `pickups.{h,cpp}`.
+- `assets/levels/demo.json` is version 2 with the spear throw and sword as pickups. D-23 recorded in docs/decisions.md. docs/guides/editor.md explains pickups.
+- Tests: US-134 Place, Move and delete, Level versions, Pick up, Full hotbar, Select, Hotbar drawn (odysseus_game_tests); number keys (luna_tests). Evidence `docs/evidence/US-134/`; plan `docs/plans/US-134.md`.
+- Verification: zero warnings; 25/25 checks passed in Debug and Release, including simulation determinism and the earlier end-to-end tests. The first run exposed stale ID/effect assumptions and one missed scripted paint click; the full rerun passed.
+
 ## US-133: Weapon classes and the starter set (Mraw) — 2026-09-30
 
 **State:** Done; merged into `qa`.

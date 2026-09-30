@@ -32,10 +32,17 @@ struct CharacterKindDef {
 struct Definitions {
     std::vector<TileKindDef> tiles;
     std::vector<CharacterKindDef> characters;
+    std::vector<std::string> weapons;   // names a pickup may carry (US-134): the weapons of weapons.json, then the built-in demo weapons
 
     int tileNumber(const std::string& name) const;                     // -1 when unknown
     const CharacterKindDef* character(const std::string& name) const;  // nullptr when unknown
+    bool hasWeapon(const std::string& name) const;
 };
+
+// The demo weapons of M1b and US-029 (the physics spear throw, the plain sword slash) are not in
+// weapons.json; a pickup may still carry them (D-23).
+inline constexpr const char* kSpearThrowName = "Spear throw";
+inline constexpr const char* kSwordSlashName = "Sword";
 
 Definitions loadDefinitions(const std::filesystem::path& dataDirectory);
 
@@ -57,10 +64,20 @@ struct PlacedCharacter {
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 
-inline constexpr int kLevelVersion = 1;
+// Version 2 (US-134) adds weapon pickups; version 1 files still load, without any.
+inline constexpr int kLevelVersion = 2;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;
+
+// A weapon lying in the level for the hero to find (US-134). Ids come from the same counter as
+// the characters' and are never reused within a level.
+struct PlacedPickup {
+    int id = 0;
+    std::string weapon;   // a name from weapons.json, or a built-in demo weapon
+    PixelPoint at;        // world pixels: the middle of the icon
+    friend bool operator==(const PlacedPickup&, const PlacedPickup&) = default;
+};
 
 // A level: the ground, who stands where, and where the hero begins. Plain data.
 struct Level {
@@ -70,6 +87,7 @@ struct Level {
     int defaultGround = 0;               // tile number
     std::vector<int> ground;             // tile numbers, row after row
     std::vector<PlacedCharacter> characters;
+    std::vector<PlacedPickup> pickups;
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
     int nextId = 1;

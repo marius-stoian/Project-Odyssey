@@ -7,6 +7,7 @@
 
 #include <doctest/doctest.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <set>
@@ -48,8 +49,11 @@ struct Play {
     void tick(int count = 1, Intents intents = {}) {
         for (int i = 0; i < count; ++i) odyssey.update(intents);
     }
+    // Puts the weapon in the hotbar (US-134 replaced cycling through every starter) and holds it.
     void hold(const std::string& name) {
-        for (std::size_t i = 0; i < odyssey.carriedCount() && odyssey.heldName() != name; ++i) tick(1, pressing(Intent::SwitchWeapon));
+        auto slot = [&] { return std::find(odyssey.hotbar().begin(), odyssey.hotbar().end(), name) - odyssey.hotbar().begin(); };
+        if (slot() == game::OdysseyGame::kHotbarSlots) REQUIRE(odyssey.pickUp(name));
+        odyssey.selectSlot(static_cast<int>(slot()));
         REQUIRE(odyssey.heldName() == name);
     }
 };
@@ -155,18 +159,20 @@ TEST_CASE("US-133 Starter set") {
     swap("katana", true);
     std::ofstream(data / "weapons.json", std::ios::trunc) << json;
     Play play(data);
-    std::set<std::string> carried;
-    for (std::size_t i = 0; i < play.odyssey.carriedCount(); ++i) {
-        carried.insert(play.odyssey.heldName());
-        play.tick(1, pressing(Intent::SwitchWeapon));
-    }
-    CHECK(carried.size() == 18); // spear throw, sword, 16 starters
-    CHECK(carried.contains("katana"));
-    CHECK_FALSE(carried.contains("iron sword"));
+    // The Editor's weapon palette lists the starters, then the two demo weapons.
+    const auto& palette = play.odyssey.editor().weaponPalette();
+    const std::set<std::string> offered(palette.begin(), palette.end());
+    CHECK(palette.size() == 18);
+    CHECK(offered.contains("katana"));
+    CHECK_FALSE(offered.contains("iron sword"));
+    CHECK(offered.contains("Spear throw"));
+    CHECK(offered.contains("Sword"));
 }
 
 TEST_CASE("US-133 In hand") {
     Play play;
+    play.tick(20); // Collect the demo pickups and let their sparks finish; count only held icons below.
+    REQUIRE(play.odyssey.effects().count() == 0);
     play.hold("iron sword");
     // Walking in each of the 8 directions, the icon is drawn at the hand, 20 pixels across,
     // from the mirrored icons when the hero faces west.
