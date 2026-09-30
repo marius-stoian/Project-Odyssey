@@ -1,6 +1,6 @@
-# Project Odyssey Codex v1.8
+# Project Odyssey Codex v1.9
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-30 | Source of truth: Project Odyssey.docx v1.8 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-30 | Source of truth: Project Odyssey.docx v1.9 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -21,7 +21,7 @@ Hybrid: **stage gates** at milestones M0-M6 (with kill gates at M2 and M6) and *
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.8)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.9)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -29,7 +29,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v1.8 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v1.9 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -239,13 +239,14 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-19 | Level editor scope v1: settings are level and character properties (level name, map size, default ground, hero start; per character name, HP, facing, sword damage); placed characters stand still with properties; new milestone M2c before M3 | M2c | US-120..US-126 | Decided (owner, 2026-09-30) |
 | D-21 | M2d content and combat (owner, six rounds in chat): full gameplay; all 150 weapons catalogued, 16 starters (one plain and one elemental per class) placed as pickups, 9-slot hotbar (1-9, Shift cycles); 8 weapon classes; elements with status effects; hero 100 HP, respawn at the start; enemies (goblins, predators, boars) strike back after a 0.5 s wind-up within 1.5 m; deaths drop nothing; plants block (big ones), are inspected, chopped, heal 10 when edible and regrow after 15 s at a random free spot in camera view; effects on hits, plant actions and placed in the Editor; random weather every 60-120 s with a 3 s fade | M2d | US-130..US-138 | Decided (owner, 2026-09-30) |
 | D-22 | Design decisions are taken by the owner in interactive question rounds in chat; Dominus no longer delegates design or scope questions (Charter human gate 3) | All | All | Decided (owner, 2026-09-30) |
+| D-25 | Aiming and ballistics (owner, two rounds in chat, 2026-10-01): free aim at the mouse cursor (the hero faces it, melee swings toward it, aim line and crosshair); full arcs from Luna Physics that land at the cursor (clamped to range), hit anything in their path at body height, are blocked by rocks and trees when low and clear them when high; bows, crossbows, thrown weapons and staffs (staff bolts flat and fast) are shootable, guns are out of scope; no ammo, only rate-of-fire cooldown; three stories US-139..US-141 before plants | M2d | US-139..US-141 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.8 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.9 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -401,6 +402,22 @@ M2c is done (`main` tagged m2c-done). The owner added seven sprite sheets (150 w
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
 ```
+### P-008 Adopt Codex v1.9 (Aiming and ballistics)
+```xml
+<prompt id="P-008" codex="1.9" name="Adopt Codex v1.9 in an existing workspace">
+<context>
+US-130..US-135 are done. Before plants the owner asked to aim weapons with the mouse, to have ballistics and several shootable ranged weapons (requirements v1.9: US-139..US-141 in epic E13; D-25, two question rounds in chat). Mraw's brief: docs/plans/M2d-aiming-brief.md.
+</context>
+<instructions>
+1. CLAUDE.md: regenerate from the Charter C-01 (tools/sync-codex.ps1 does it): version references v1.9.
+2. docs/status.md: add P-008 after P-007 (Done); add S-US-139, S-US-140 and S-US-141 (To do) between S-US-135 and S-US-136.
+3. docs/decisions.md: D-25 as in section 5.
+4. Update Limit.md (next prompt S-US-139) and commit on qa "P-008: adopt Codex v1.9 (aiming and ballistics)", push, and wait for green CI.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
 ### M0 Tooling ready
 Exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 
@@ -2229,7 +2246,7 @@ Manual checks in docs/plans/US-126.md done, with results recorded there: the gui
 ```
 
 ### M2d Content and combat (weapons, nature, effects, weather)
-Exit criteria: The owner places weapon pickups, plants, animals and looping effects with the Editor, saves and plays the level; the hero picks weapons into a 9-slot hotbar and fights with the 16 starter weapons of 8 classes, elements included; enemies (goblins, predators and boars) strike back when hit and in reach, and die; the hero respawns at 0 HP; plants block, are inspected, chopped and eaten and regrow; effects play on hits, deaths and plant actions; the weather changes by itself; every M2c feature and the spear and sword demos still work.
+Exit criteria: The owner places weapon pickups, plants, animals and looping effects with the Editor, saves and plays the level; the hero picks weapons into a 9-slot hotbar and fights with the 16 starter weapons of 8 classes, elements included, aiming them with the mouse and shooting arcs with bows, crossbows, thrown weapons and staffs; enemies (goblins, predators and boars) strike back when hit and in reach, and die; the hero respawns at 0 HP; plants block, are inspected, chopped and eaten and regrow; effects play on hits, deaths and plant actions; the weather changes by itself; every M2c feature and the spear and sword demos still work.
 
 Why this milestone exists: after M2c the owner added seven sprite sheets and asked for them to be processed and added to the game with full gameplay, before M3 (D-21). Every design choice below was taken by the owner in chat (D-22); none is open.
 
@@ -2244,6 +2261,7 @@ Design notes for every M2d prompt (Anima, from the brief docs/plans/M2d-content-
 - Effects: a Luna Engine effect player (game-agnostic: frames, frame time, loop or once, world or screen space) draws effects; the Game decides which plays when: hit sparks, element effects, death smoke, projectile trails, leaf burst, healing glow, growth, and Editor-placed looping effects saved in the level.
 - Weather: visual only. A random weather every 60-120 s of play, cross-fading over 3 s, from weather.json weights; drawn as a screen overlay above the world and below the UI; its random stream is a seeded PCG32 stream (Charter rule 6), so a test with a seed sees the same weathers in the same order.
 - Hotbar and intents (Charter rule 4): new intents Slot1..Slot9 (keys 1-9); Shift keeps cycling weapons; walking over a pickup puts it in the first free slot (a full hotbar leaves the pickup lying). The hotbar and the hero's HP are drawn with the Luna UI toolkit.
+- Aiming and ballistics (D-25, stories US-139..US-141, before plants): free aim at the mouse cursor; the hero faces the pointer (8 facings) and melee arcs are centred on the exact angle to it; shots are Luna Physics arcs (fixed-point, height, gravity) whose launch angle is solved to land at the pointer, clamped to the weapon's range; a shot hits the first enemy whose body (feet to about 1.5 m) it passes through, is blocked by rocks and trees when low and clears them when high, and a miss sticks in the ground and vanishes; a ground shadow and a lifted sprite show the height. Bows, crossbows and thrown weapons arc, staff bolts fly flat and fast, guns are not part of this scope; no ammo, only the rate-of-fire cooldown.
 - Tests: logic headless in odysseus_game_tests (catalog validation, level v1 to v2, strike-back timing, death and respawn, each weapon class, each element, plant block, chop, heal and regrow placement, weather sequence per seed); the window end to end with scripted input and screenshots, as in M2c.
 
 ```xml
@@ -2251,7 +2269,7 @@ Design notes for every M2d prompt (Anima, from the brief docs/plans/M2d-content-
 <instructions>
 1. Confirm docs/gates/M2c.md records M2c done and that D-21 and D-22 are Decided in docs/decisions.md.
 2. Architect: write docs/plans/M2d-content-design.md before US-130, following the design notes above: the cut plan per sheet (grid or labelled, frame sizes, background handling), the catalog formats, level format version 2, the combat model (HP, strike-back state machine, death and respawn), the weapon class interface and projectiles, status effects, plants in the world (blocking, interaction, regrow), the effect player, and the weather cycle.
-3. Set this milestone's stories to To do in docs/status.md in this order: US-130, US-131, US-132, US-133, US-134, US-135, US-136, US-137, US-138.
+3. Set this milestone's stories to To do in docs/status.md in this order: US-130, US-131, US-132, US-133, US-134, US-135, US-139, US-140, US-141, US-136, US-137, US-138.
 4. Continue with the first story prompt.
 </instructions>
 <output_format>Short kickoff note in the assembly report: milestone goal, stories, decisions requested.</output_format>
@@ -2531,6 +2549,144 @@ Debug and Release builds with zero warnings; ctest in both presets passes, inclu
 Manual checks in docs/plans/US-135.md done, with results recorded there: a screenshot per element.
 </verification>
 <teach_back>C++ concept for the owner: Components: small structs attached to characters.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-139 Mouse aiming
+```xml
+<prompt id="S-US-139" codex="1.9" milestone="M2d" story="US-139" priority="Must" size="M">
+<context>
+Story US-139: Mouse aiming.
+As the player, I want to aim my weapon with the mouse, so that I can attack exactly where I point.
+Epic E13 Content and combat. Traces to: D-25 (owner, 2026-10-01). Brief: docs/plans/M2d-aiming-brief.md.
+</context>
+<dependencies>
+Stories that must be Done: US-133, US-134.
+Owner decisions that must be Decided: D-25.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna Engine gives the Game the pointer's world position (pointer plus camera; Luna stays game-agnostic) and an Intent for the attack button (left mouse button; Charter rule 4: Game code reads intents, never raw buttons). Game code: in Game mode, the hero faces the pointer (the nearest of the 8 facings) and keeps walking with the keys; the attack intent uses the held catalog weapon toward the pointer (the Interact key keeps attacking toward the facing, so today's tests and scripts still work); melee arcs (MeleeBehaviour) are centred on the exact angle to the pointer, not on the facing; a small aim line from the hero and a crosshair at the pointer are drawn while a catalog weapon is held; the Editor keeps using the pointer for its tools, unchanged. Add a scripted `--aim <x>:<y>:<from>:<to>` flag to apps/odysseus/main.cpp (like --point) so tests and screenshots can aim. Do not change projectile flight yet (US-140).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Face the cursor">
+Given a weapon is held in Game mode
+When the mouse pointer moves around the hero
+Then the hero faces the pointer's nearest of the 8 directions and an aim line and crosshair follow the pointer
+</scenario>
+<scenario name="Swing toward the cursor">
+Given a melee weapon is held and an enemy stands to the north-east
+When the pointer is north-east of the hero and the attack button is pressed
+Then the swing hits the enemy; with the pointer to the south-west the same swing misses it
+</scenario>
+<scenario name="Keys still work">
+Given the Interact key
+When it is pressed with no pointer movement
+Then the attack goes toward the hero's facing as before, and every earlier test still passes
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-139 ..." cases and all earlier weapon, combat and spear tests.
+Manual checks in docs/plans/US-139.md done, with results recorded there: screenshots of the hero facing two different pointer positions with the aim line, and a melee swing toward the pointer hitting a goblin.
+</verification>
+<teach_back>C++ concept for the owner: Converting between coordinate spaces (screen, world) and angles with atan2.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-140 Arc ballistics for shots
+```xml
+<prompt id="S-US-140" codex="1.9" milestone="M2d" story="US-140" priority="Must" size="L">
+<context>
+Story US-140: Arc ballistics for shots.
+As the player, I want shots to fly as real arcs that land where I aim, so that aiming and distance matter.
+Epic E13 Content and combat. Traces to: D-25 (owner, 2026-10-01), ARC-10, ADR-017.
+</context>
+<dependencies>
+Stories that must be Done: US-139.
+Owner decisions that must be Decided: D-25.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code using Luna Physics (fixed-point 32.32, SI units, 1 tile = 1 m; Charter rule 10). Reuse the functions of the US-027 and US-029 work (ballistics flight per tick, aimLaunchAngle, launchVelocity, the world collision and material hits) instead of copying them; add a Game-side `ArcShot` that holds a Luna Physics projectile with height. At launch the angle is solved so the shot lands at the pointer, with the distance clamped to the weapon's range (an unreachable pointer lands at the range limit). Each tick the shot advances one physics tick; it hits the first enemy whose body it passes through (feet to about 1.5 m high; the enemy's position is its feet, as today), hits solids (rock, tree, wall tiles) when it is below their height and flies over them when above, and otherwise ends at the ground: a miss sticks in the ground briefly (an effect) and is removed. Drawing: the sprite is lifted by its height and a small shadow is drawn on the ground; the conversion from physics position to screen stays in one place (luna/engine/physics_view). Damage, elements and the provoke rule reuse the existing strike path. The flat projectile code from US-133 stays for staff bolts (US-141). Keep the M1b spear-throw demo and its tests working.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Lands at the cursor">
+Given a launch speed and a pointer within range on level ground
+When a shot is fired
+Then it follows a ballistic arc and lands within half a metre of the pointer, and two runs with the same inputs land on the same spot
+</scenario>
+<scenario name="Hits in its path">
+Given an enemy between the hero and the pointer, and a second enemy behind a rock
+When a low arc passes through the first enemy's body height
+Then the first enemy is hit; the rock blocks a low shot to the second, and a high arc clears the rock
+</scenario>
+<scenario name="Range and misses">
+Given a pointer farther than the weapon's range
+When the shot is fired
+Then it lands at the range limit, and a miss sticks in the ground briefly and is removed
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-140 ..." cases, the physics tests and the US-029 spear tests; the determinism check still passes.
+Manual checks in docs/plans/US-140.md done, with results recorded there: a screenshot of a shot in the air with its shadow, one of a shot blocked by a rock, and the landing distance measured against the pointer.
+</verification>
+<teach_back>C++ concept for the owner: Fixed-point numbers versus floating point, and why the game uses them for replays.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-141 Bows, crossbows, thrown weapons and staff bolts
+```xml
+<prompt id="S-US-141" codex="1.9" milestone="M2d" story="US-141" priority="Must" size="M">
+<context>
+Story US-141: Bows, crossbows, thrown weapons and staff bolts.
+As the player, I want several ranged weapons I can aim and shoot, so that I can defeat enemies from a distance.
+Epic E13 Content and combat. Traces to: D-25 (owner, 2026-10-01).
+</context>
+<dependencies>
+Stories that must be Done: US-140.
+Owner decisions that must be Decided: D-25.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code. The bow, crossbow and thrown classes use the US-140 arcs (bows and crossbows: light arrows, long range, the fastest arcs; thrown: heavy, slower arcs with spin, short range and high damage); the staff fires its magic bolt flat and fast toward the pointer with its element effects (the US-133 projectile path, now aimed at the pointer). Guns stay on the flat path and are not part of this story. Speed per class and range, damage and rate of fire per weapon come from weapons.json (add the launch speed per class to a `classes` section of that file with validation naming file and field); there is no ammo, only the rate-of-fire cooldown (D-25). Elements (US-135) apply on hit. The starter set's ranged weapons are all shootable from the hotbar. Add `assets/levels/range.json`, a shooting-range level (straw targets, goblins in the open and goblins behind rocks, weapon pickups of the ranged starters at the start) for the owner and for the evidence. The M1b spear-throw demo still works.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Each ranged class shoots">
+Given a bow, a crossbow, a thrown weapon and a staff from the starter set
+When each is fired at a goblin with the pointer on it
+Then each hits with its own speed and path (arcs for the first three, a flat bolt for the staff) and the goblin loses the weapon's damage
+</scenario>
+<scenario name="Elements on shots">
+Given an elemental bow or staff
+When its shot hits a goblin
+Then the element's effect applies as for melee weapons
+</scenario>
+<scenario name="Shooting range">
+Given the range level
+When the owner plays it
+Then goblins in the open and behind rocks can be shot with the ranged weapons, and the numbers can be changed in weapons.json without code
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-141 ..." cases (one per ranged class) and all earlier weapon, element and spear tests.
+Manual checks in docs/plans/US-141.md done, with results recorded there: a screenshot per ranged class shooting on the range level.
+</verification>
+<teach_back>C++ concept for the owner: Data-driven tuning: why speeds and ranges live in JSON and not in code.</teach_back>
 <stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -4108,7 +4264,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -4143,3 +4299,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 1.6 | 2026-09-30 | Kill Gate 1 pivot (source of truth v1.6, Round 9): the owner judged the M2 chronicle "not really a story" (D-GATE-M2: Pivot) and decided the redesign (D-18). New milestone M2b Story engine between M2 and M3 with K-M2b, S-US-110..S-US-115 (reasons for deaths and feuds; quarrels, blame and revenge; sharing, nursing and adoption; courtship, rivals and parting; apprentices and hunting parties; the story told in episodes) and X-M2b, the Kill Gate 1 retry judged by the owner alone; D-GATE-M2, D-18 and D-GATE-M2b in the decision table; D-15 chain includes M2b; new P-005 adopts v1.6. Codex issue resolved: CI-006 (the US-020 first-frame limit is 3 s in Release and 15 s in the Debug build, which AddressSanitizer slows on CI runners). The header and section 0 no longer name AI vendors or models (owner rule of 2026-09-30). |
 | 1.7 | 2026-09-30 | Level editor (source of truth v1.7, Round 10): Kill Gate 1 passed (D-GATE-M2b: Go). Before M3 the owner asked for a level editor (D-19) with his own art (D-05 decided: own art, placeholder quality). New milestone M2c Level editor between M2b and M3 with K-M2c, S-US-120..S-US-126 (real art cut from the owner's sheets into atlases; pointer, font and widgets; levels as data; Game mode and Editor mode; painting ground tiles with undo and redo; placing characters with properties; level and character settings and a guide) and X-M2c (no kill gate); design notes for the milestone (layers, art pipeline, stb_image and ADR-018, data files, tests, UX); D-15 chain includes M2c; new P-006 adopts v1.7. Built from Mraw's brief docs/plans/M2c-editor-brief.md. |
 | 1.8 | 2026-09-30 | Content and combat (source of truth v1.8, Round 11): M2c done. The owner added seven sprite sheets and took every design decision in six chat rounds (D-21). New milestone M2d Content and combat between M2c and M3 with K-M2d, S-US-130..S-US-138 (content catalogs; hero HP, strike-back and death; effect player; eight weapon classes and a 16-weapon starter set; pickups and a 9-slot hotbar with level format version 2; elements; plants; animals in the Editor; placed effects and random weather) and X-M2d (ends by stopping for the owner before K-M3); design notes for the milestone. Charter: human gate 3, design decisions are the owner's (D-22), replacing delegation to Dominus. D-15 chain includes M2d; new P-007 adopts v1.8. Built from Mraw's brief docs/plans/M2d-content-brief.md. |
+| 1.9 | 2026-10-01 | Aiming and ballistics (source of truth v1.9): the owner asked, before plants, to aim weapons with the mouse, to have ballistics and several shootable ranged weapons (D-25, two chat rounds). Three stories S-US-139 (mouse aiming), S-US-140 (arc ballistics with Luna Physics), S-US-141 (bows, crossbows, thrown weapons and staff bolts, with a shooting-range level) are added to M2d between S-US-135 and S-US-136; K-M2d sets the new order; design notes for the milestone; D-25 in the decision table; new P-008 adopts v1.9. Built from Mraw's brief docs/plans/M2d-aiming-brief.md. |
