@@ -140,7 +140,8 @@ add_library(odysseus_game STATIC
     src/game/hero.cpp
     src/game/materials.cpp
     src/game/spear_range.cpp
-    src/game/sword.cpp)
+    src/game/sword.cpp
+    src/game/enemy.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
