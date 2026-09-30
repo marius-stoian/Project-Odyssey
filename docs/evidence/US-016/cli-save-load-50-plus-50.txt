@@ -1,0 +1,31 @@
+--- 50 years, then save:
+Project Odyssey headless runner 0.1.0
+Seed 7, 1400 days (50 years, 3360000 ticks): now Spring, year 51, day 1, 13 C
+Population: 39 alive (20 founders, 45 born, 26 died)
+Deaths by cause: starvation 0, the cold 0, old age 19, a mammoth's tusks 3, childbirth 4
+Average needs of the living: Hunger 93, Energy 86, Warmth 67, Social 70
+Food in store: 177 meals; couples 10, feuds 1, mammoths 26, chronicle entries 8189
+Tick time: 0.049 microseconds per tick (0.16 s in total)
+World hash: 957886377751494564
+Saved C:\Users\Amek\AppData\Local\Temp\odysseus-us016-cli\clan.json (world hash 957886377751494564)
+
+--- load, then 50 more years:
+Loaded C:\Users\Amek\AppData\Local\Temp\odysseus-us016-cli\clan.json: Spring, year 51, world hash 957886377751494564
+Project Odyssey headless runner 0.1.0
+Seed 7, 1400 days (50 years, 3360000 ticks): now Spring, year 101, day 1, 9 C
+Population: 47 alive (20 founders, 93 born, 66 died)
+Deaths by cause: starvation 0, the cold 0, old age 53, a mammoth's tusks 8, childbirth 5
+Average needs of the living: Hunger 54, Energy 86, Warmth 53, Social 49
+Food in store: 0 meals; couples 9, feuds 0, mammoths 71, chronicle entries 14353
+Tick time: 0.092 microseconds per tick (0.31 s in total)
+World hash: 10149270126131427195
+
+--- 100 years in one go:
+Project Odyssey headless runner 0.1.0
+Seed 7, 2800 days (100 years, 6720000 ticks): now Spring, year 101, day 1, 9 C
+Population: 47 alive (20 founders, 93 born, 66 died)
+Deaths by cause: starvation 0, the cold 0, old age 53, a mammoth's tusks 8, childbirth 5
+Average needs of the living: Hunger 54, Energy 86, Warmth 53, Social 49
+Food in store: 0 meals; couples 9, feuds 0, mammoths 71, chronicle entries 14353
+Tick time: 0.071 microseconds per tick (0.48 s in total)
+World hash: 10149270126131427195

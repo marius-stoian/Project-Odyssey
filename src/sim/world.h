@@ -96,6 +96,9 @@ public:
     std::uint64_t hash() const;
 
 private:
+    // Saving and loading (US-016) must see every private member: only the save format may.
+    friend struct WorldArchive;
+
     void startDay();
     void passHour(int hour);
     void doAction(Person& person);

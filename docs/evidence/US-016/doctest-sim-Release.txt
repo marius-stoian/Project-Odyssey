@@ -1,0 +1,12 @@
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(57): MESSAGE: after 50 years: 42 alive, 64 people ever, 5699 chronicle entries, save 1127 KB
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(92): MESSAGE: skipped clan.json: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/crash-safe/clan.json: (syntax): [json.exception.parse_error.101] parse error at line 3097, column 19: syntax error while parsing object - unexpected end of input; expected '}'
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(102): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/crash-safe/clan.json: (file): no save could be loaded:
+  a version 1 save is upgraded and loads
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(152): MESSAGE: clan.json: upgraded from save version 1 to 2
+  a save from a newer version explains why it cannot load
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(172): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/old-version/clan.json: saveVersion: is 99: the save was made by a newer version of the game (this one reads up to 2)
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(189): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/inconsistent/clan.json: (file): no save could be loaded:
+  C:/Users/Amek/AppData/Local/Temp/odysseus-us016/inconsistent/clan.json: (contents): is damaged: people[0] names a person who does not exist
+[doctest] test cases:  5 |  5 passed | 0 failed | 21 skipped
+[doctest] assertions: 30 | 30 passed | 0 failed |
+[doctest] Status: SUCCESS!
