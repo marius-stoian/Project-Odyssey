@@ -21,16 +21,6 @@ int seasonalTemperature(Season season) {
     return 10;
 }
 
-// "Tok", "Tok and Brak", "Tok, Brak and Ura".
-std::string joinNames(const std::vector<std::string>& names) {
-    std::string joined;
-    for (std::size_t i = 0; i < names.size(); ++i) {
-        joined += i == 0 ? "" : (i + 1 == names.size() ? " and " : ", ");
-        joined += names[i];
-    }
-    return joined;
-}
-
 } // namespace
 
 SimConfig loadSimConfig(const std::filesystem::path& dataDirectory) {
@@ -166,12 +156,7 @@ void World::doAction(Person& person) {
         practise(person.huntPractice, person.huntSkill);
         if (lastMammothYear_ != date().year && huntRandom_.below(1000) < static_cast<std::uint32_t>(actions.mammothPerMille)) {
             lastMammothYear_ = date().year; // met or not, the herd moves on
-            // A mammoth: a feast for the clan, if the hunter survives it.
-            if (huntRandom_.chance(static_cast<std::uint32_t>(actions.mammothDeathPercent))) {
-                die(person, CauseOfDeath::Hunting);
-                return;
-            }
-            bringDownMammoth(person.id);
+            huntMammoth(person);            // a party, or a lone hunter, goes after it (US-114)
         } else if (gameLeft_ > 0 &&
                    huntRandom_.chance(static_cast<std::uint32_t>(std::min(100, actions.huntSuccessPercent + person.huntSkill / 5)))) {
             --gameLeft_;
@@ -287,15 +272,17 @@ bool World::closeKin(const Person& a, const Person& b) const {
     return parentChild || siblings || guardian;
 }
 
-void World::bringDownMammoth(int hunter) {
+int World::bringDownMammoth(int hunter, std::vector<int> causes, bool withParty) {
     food_ += config_.actions.mammothYield;
     ++mammoths_;
     const std::string& name = people_[static_cast<std::size_t>(hunter)].name;
+    const std::string party = withParty ? " with the hunting party" : "";
     if (mammoths_ == 1) {
-        chronicle_.add(date(), kImportanceFirstMammoth, std::format("{} brought down the clan's first mammoth.", name));
-    } else {
-        chronicle_.add(date(), kImportanceMammoth, std::format("{} brought down a mammoth.", name));
+        return chronicle_.record(date(), kImportanceFirstMammoth, EventKind::Mammoth, hunter, -1, -1, std::move(causes),
+                                 std::format("{} brought down the clan's first mammoth{}.", name, party));
     }
+    return chronicle_.record(date(), kImportanceMammoth, EventKind::Mammoth, hunter, -1, -1, std::move(causes),
+                             std::format("{} brought down a mammoth{}.", name, party));
 }
 
 std::vector<std::pair<int, int>> World::feuds() const {
@@ -459,6 +446,7 @@ void World::lifeEvents() {
     }
     updateHealth();
     adoptOrphans();
+    teaching();
     encounters();
     courtship();
     updateFeuds();
@@ -649,6 +637,7 @@ int World::die(Person& person, CauseOfDeath cause, int causeEvent) {
     person.causeOfDeath = cause;
     stopCourting(person);         // the dead court nobody, and nobody courts the dead
     dropSuitors(person.id);
+    releaseTeaching(person);      // a master's death ends the lessons, and so does an apprentice's
     releaseCare(person);          // nobody nurses the dead, and a carer who dies frees their patient
     person.health = Health::Well; // nothing more to heal
     const int years = person.ageYears(calendar_.daysPerYear());
@@ -873,6 +862,10 @@ std::uint64_t World::hash() const {
         hasher.add(person.courtDays);
         hasher.add(person.courtEvent);
         hasher.add(person.courtPauseDay);
+        hasher.add(person.master);
+        hasher.add(person.apprentice);
+        hasher.add(person.teachHunt);
+        hasher.add(person.teachEvent);
         hasher.add(person.pregnantDays);
         hasher.add(person.childFather);
         hasher.add(person.lastBirthDay);

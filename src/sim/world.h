@@ -115,8 +115,9 @@ public:
     // Partners go their separate ways. The event says why: the heaviest grudge between them, or
     // that their love faded. Returns the event's id.
     int part(int a, int b);
-    // A hunter kills a mammoth: a feast, and the clan's first is remembered.
-    void bringDownMammoth(int hunter);
+    // A hunter kills a mammoth: a feast, and the clan's first is remembered. `causes` are earlier
+    // events behind it (a hunting party); returns the event's id.
+    int bringDownMammoth(int hunter, std::vector<int> causes = {}, bool withParty = false);
     // Pairs of people who feud now (smaller id first).
     std::vector<std::pair<int, int>> feuds() const;
     int mammothsKilled() const { return mammoths_; }
@@ -160,6 +161,9 @@ private:
     void releaseCare(Person& person); // a death or exile ends any nursing they gave or needed
     void hurtOnHunt(Person& hunter);  // a small-game hunt can end in a wound
     int exile(Person& person, int victim, std::vector<int> causes, const std::string& text);
+    void teaching();        // masters take apprentices; the apprentices learn and graduate (US-114)
+    void releaseTeaching(Person& person);
+    void huntMammoth(Person& sighter); // a party of 3 to 5 hunters, or the sighter alone (US-114)
     void courtship();       // every morning: partings, then suitors court, are turned down or win (US-113)
     void stopCourting(Person& person);
     void dropSuitors(int beloved); // nobody courts someone who has died or been driven out

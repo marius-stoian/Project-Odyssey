@@ -93,6 +93,10 @@ struct Person {
     int courtDays = 0;        // days spent courting them
     int courtEvent = -1;      // the chronicle entry that began the courtship
     std::int64_t courtPauseDay = -1; // no courting before this day: a broken heart mends
+    int master = -1;          // who teaches them now (a youth's teacher), -1 = nobody (M2b)
+    int apprentice = -1;      // whom they teach now, -1 = nobody
+    bool teachHunt = false;   // the lessons are in hunting (else gathering)
+    int teachEvent = -1;      // the chronicle entry that began the apprenticeship
     int pregnantDays = 0;  // 0 = not expecting
     int childFather = -1;  // the father of the child she is expecting
     std::int64_t lastBirthDay = -1;

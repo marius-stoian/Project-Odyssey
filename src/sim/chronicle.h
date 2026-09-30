@@ -26,6 +26,12 @@ inline constexpr int kImportanceCourtship = 35;
 inline constexpr int kImportanceRejection = 40;
 inline constexpr int kImportanceJealousy = 55;
 inline constexpr int kImportanceParting = 65;
+inline constexpr int kImportanceApprentice = 45;
+inline constexpr int kImportanceGraduation = 50;
+inline constexpr int kImportanceHuntParty = 60;
+inline constexpr int kImportanceHero = 65;
+inline constexpr int kImportanceCoward = 55;
+inline constexpr int kImportanceRescue = 65;
 inline constexpr int kImportanceTheft = 35;
 inline constexpr int kImportanceLean = 55;       // a failed harvest: the root of many hard winters
 inline constexpr int kImportanceStoreEmpty = 70; // hunger in the clan is a turn in its story
@@ -55,6 +61,9 @@ enum class EventKind {
 };
 
 const char* eventKindName(EventKind kind);
+
+// "Tok", "Tok and Brak", "Tok, Brak and Ura".
+std::string joinNames(const std::vector<std::string>& names);
 
 // One notable event, as a sentence (NA-02: the clan's tapestry), with the ids of the earlier
 // events that caused it, so the events link into a story (STO-03).

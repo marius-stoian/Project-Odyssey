@@ -102,5 +102,40 @@
   "parting": {
     "partingOpinion": -20,
     "pauseDays": 30
+  },
+  "teaching": {
+    "masterMinSkill": 30,
+    "skillGap": 15,
+    "takePercent": 20,
+    "minOpinion": -10,
+    "kinBonus": 40,
+    "youthMaxYears": 15,
+    "skillPerDay": 1,
+    "opinionPerDay": 2,
+    "graduateGap": 5
+  },
+  "hunt": {
+    "minSize": 3,
+    "maxSize": 5,
+    "joinPercent": 70,
+    "braveJoinBonus": 20,
+    "timidJoinPenalty": 30,
+    "successBase": 20,
+    "leaderBonus": 10,
+    "heroBonus": 15,
+    "cowardPenalty": 15,
+    "heroCourage": 55,
+    "cowardCourage": 30,
+    "dangerPercent": 25,
+    "rescuePercent": 70,
+    "braveRescueBonus": 15,
+    "rescuerHurtPercent": 30,
+    "dangerDeathPercent": 60,
+    "heroFeeling": 60,
+    "heroOpinion": 10,
+    "cowardFeeling": -50,
+    "cowardOpinionLoss": 15,
+    "rescueFeeling": 90,
+    "rescueOpinion": 40
   }
 }

@@ -44,7 +44,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-111 | US-111 | M2b | Done | 2026-09-30 |
 | S-US-112 | US-112 | M2b | Done | 2026-09-30 |
 | S-US-113 | US-113 | M2b | Done | 2026-09-30 |
-| S-US-114 | US-114 | M2b | To do |  |
+| S-US-114 | US-114 | M2b | Done | 2026-09-30 |
 | S-US-115 | US-115 | M2b | To do |  |
 | X-M2b | - | M2b | To do |  |
 | K-M3 | - | M3 | To do |  |

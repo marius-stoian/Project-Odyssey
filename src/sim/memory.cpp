@@ -18,6 +18,8 @@ const char* memoryKindName(MemoryKind kind) {
     case MemoryKind::Sharing: return "sharing";
     case MemoryKind::Rescue: return "rescue";
     case MemoryKind::Rejection: return "rejection";
+    case MemoryKind::Heroism: return "heroism";
+    case MemoryKind::Cowardice: return "cowardice";
     default: return "?";
     }
 }
