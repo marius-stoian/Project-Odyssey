@@ -32,22 +32,13 @@ const luna::physics::Air& air() {
 
 } // namespace
 
-double arcLaunchSpeed(WeaponClass weaponClass) {
-    switch (weaponClass) {
-    case WeaponClass::Bow: return 16.0;
-    case WeaponClass::Thrown: return 10.0;
-    default: return 0.0;
-    }
-}
-
 bool flysInArc(WeaponClass weaponClass) { return weaponClass == WeaponClass::Bow || weaponClass == WeaponClass::Thrown; }
 
-std::optional<ArcShot> launchArcShot(const WeaponDef& weapon, double heroFeetX, double heroFeetY, double dirX, double dirY, double distancePixels,
+std::optional<ArcShot> launchArcShot(const WeaponDef& weapon, double speed, double heroFeetX, double heroFeetY, double dirX, double dirY, double distancePixels,
                                      bool chestHeight) {
     if (!flysInArc(weapon.weaponClass)) {
         return std::nullopt;
     }
-    const double speed = arcLaunchSpeed(weapon.weaponClass);
     const double reach = speed * speed / kGravity * kReachMargin; // the far end of a 45-degree arc, with a margin
     const double distance = std::max(kMinDistance, std::min({distancePixels / kPixelsPerMetre, weapon.range, reach}));
 

@@ -169,6 +169,24 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
     }
 
 
+    // Launch speeds of the classes that shoot (US-141): bow (also crossbows), thrown, staff and gun.
+    {
+        const json data = sim::readJsonFile(weaponsFile);
+        if (!data.contains("classes") || !data.at("classes").is_object()) {
+            throw sim::DataError(weaponsFile, "classes", "must list bow, thrown, staff and gun with their launchSpeed");
+        }
+        for (const char* name : {"bow", "thrown", "staff", "gun"}) {
+            const std::string where = std::string("classes.") + name;
+            if (!data.at("classes").contains(name) || !data.at("classes").at(name).is_object()) {
+                throw sim::DataError(weaponsFile, where, "is missing");
+            }
+            const Fields f{weaponsFile, data.at("classes").at(name), where};
+            for (std::size_t i = 0; i < kClassNames.size(); ++i) {
+                if (std::string(kClassNames[i]) == name) catalogs.classes[i].launchSpeed = f.number("launchSpeed", 1.0, 100.0);
+            }
+        }
+    }
+
     // Element numbers (US-135): weapons.json "elements" has an entry per element; unused fields stay off.
     {
         const json data = sim::readJsonFile(weaponsFile);

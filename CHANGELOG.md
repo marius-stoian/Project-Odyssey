@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-141: Bows, crossbows, thrown weapons and staff bolts (Avengers) — 2026-10-01
+
+**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+
+- `assets/data/weapons.json`: new `classes` section (launch speeds for bow, thrown, staff, gun), validated naming file and field; no speeds are hard-coded any more (`ClassDef`, `Catalogs::weaponClass`, `launchArcShot(weapon, launchSpeed, ...)`).
+- Game: bows and crossbows (class bow) and thrown weapons shoot the US-140 arcs, staffs fire flat bolts aimed at the pointer, all at the speed from the file; elements apply on hit; `OdysseyGame::cameraView()`.
+- `assets/levels/range.json`: the shooting range (seven ranged weapons to pick up, goblins in the open and behind rocks).
+- Tests: US-141 Each ranged class shoots, Every ranged starter is shootable from the hotbar, Elements on shots, Speeds come from weapons.json, Shooting range. Evidence `docs/evidence/US-141/`; plan `docs/plans/US-141.md`.
+
 ## US-140: Arc ballistics for shots (Avengers) — 2026-10-01
 
 **State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.

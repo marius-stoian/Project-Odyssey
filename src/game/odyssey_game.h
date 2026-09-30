@@ -78,6 +78,8 @@ public:
     const std::vector<ArcShot>& arcShots() const { return arcShots_; }
     // Mouse aiming (US-139): while a catalog weapon is held and the pointer is over the picture,
     // the hero faces the pointer and Attack (the left button) goes toward it, at any angle.
+    // The part of the world on screen now, world pixels (the camera stops at the map's edge, so the hero is not always centred).
+    luna::engine::Rect cameraView() const { return camera_.view(); }
     bool aiming() const { return aiming_; }
     double aimDirectionX() const { return aimDx_; } // unit vector from the hero's feet to the pointer
     double aimDirectionY() const { return aimDy_; }

@@ -340,12 +340,13 @@ void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY, 
         const auto hits = behaviour.swingToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, targets);
         core::logInfo(std::format("{} ({}) swung toward {:.0f} degrees, facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing()), hits.size()));
         for (const std::size_t index : hits) strike(enemies_[index], weapon.damage, &weapon);
-    } else if (auto arc = launchArcShot(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, distancePixels, chestHeight)) {
+    } else if (auto arc = launchArcShot(weapon, catalogs_.weaponClass(weapon.weaponClass).launchSpeed, hero_.feetX(), hero_.feetY(), dirX, dirY, distancePixels, chestHeight)) {
         arcShots_.push_back(*arc);
         core::logInfo(std::format("{} ({}) arced toward {:.0f} degrees, {:.1f} m away", weapon.name, weaponClassName(weapon.weaponClass),
                                   std::atan2(dirY, dirX) * 180.0 / std::numbers::pi,
                                   luna::engine::toDouble(luna::physics::length({arc->aimPoint.x - arc->body.position.x, arc->aimPoint.y - arc->body.position.y, luna::physics::kFixedZero}))));
     } else if (auto shot = behaviour.launchToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY)) {
+        shot->pixelsPerTick = catalogs_.weaponClass(weapon.weaponClass).launchSpeed * kTileSize / StatusEffects::kTicksPerSecond; // weapons.json sets the speed
         projectiles_.push_back(*shot);
         core::logInfo(std::format("{} ({}) shot toward {:.0f} degrees, facing {}", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing())));
     }

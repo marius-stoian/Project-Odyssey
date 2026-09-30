@@ -844,3 +844,26 @@ The only floating point is at the edges: the mouse (pixels, a `double`) is round
 **Try it (15 minutes).** Run `odysseus.exe --level docs/evidence/US-140/levels/arc-rock.json`, aim just behind the rock and click, then aim far past it. Watch the shadow. Then change `kSolidHeightMetres` in `arc_shots.h` to `2.0`, build, and see which shots still clear the rock.
 
 **Check yourself.** Why can a bow shot aimed at the ground 4 m away be stopped by a 1 m rock 2 m in front of you, while one aimed 9 m away flies over it?
+
+
+## US-141: Bows, crossbows, thrown weapons and staff bolts (2026-10-01)
+
+**The idea: data-driven tuning.** The speed of an arrow is a number. We could have written `16.0` inside the C++ code; instead it lives in `assets/data/weapons.json`:
+
+```json
+"classes": {
+  "bow":    {"launchSpeed": 16},
+  "thrown": {"launchSpeed": 10},
+  "staff":  {"launchSpeed": 12}
+}
+```
+
+The game reads it once at start (`loadCatalogs`), checks it (a number from 1 to 100, and a missing class is an error that names the file and the field), and hands it to the shot. To make arrows faster you edit a text file, not the program, and you never risk breaking the code. That is why the damage, range and rate of fire of all 150 weapons are in the same file. The rule of thumb: *if a designer might want to change it, it is data; if changing it could crash the game, it is code.*
+
+Notice that crossbows are in the `bow` class: one set of numbers and one behaviour for both, with the individual weapon still free to have its own damage and range. Classes group behaviour; weapons carry numbers.
+
+**Where to look.** The `classes` part of [assets/data/weapons.json](../assets/data/weapons.json); `loadCatalogs` in [src/game/catalogs.cpp](../src/game/catalogs.cpp); the use in `OdysseyGame::attackWith` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (10 minutes).** Open `assets/levels/range.json` in the game (`odysseus.exe --level assets/levels/range.json`), walk east along the weapons, and shoot the goblins with keys 1-7 and the mouse. Then set the bow's `launchSpeed` to `8`, build (the build copies the assets), and notice how far the arrows now fall short of a far pointer.
+
+**Check yourself.** Why is a missing `"bow"` entry reported as an error when the game starts, instead of the bow quietly using speed 0?

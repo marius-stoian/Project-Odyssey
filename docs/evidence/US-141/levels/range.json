@@ -1,0 +1,279 @@
+{
+    "characters":  [
+                       {
+                           "facing":  "W",
+                           "hp":  100,
+                           "id":  1,
+                           "kind":  "goblin",
+                           "name":  "Goblin 1",
+                           "swordDamage":  4,
+                           "x":  304,
+                           "y":  344
+                       },
+                       {
+                           "facing":  "W",
+                           "hp":  100,
+                           "id":  2,
+                           "kind":  "goblin",
+                           "name":  "Goblin 2",
+                           "swordDamage":  4,
+                           "x":  272,
+                           "y":  504
+                       },
+                       {
+                           "facing":  "W",
+                           "hp":  100,
+                           "id":  3,
+                           "kind":  "goblin",
+                           "name":  "Goblin 3",
+                           "swordDamage":  4,
+                           "x":  304,
+                           "y":  408
+                       },
+                       {
+                           "facing":  "W",
+                           "hp":  100,
+                           "id":  4,
+                           "kind":  "goblin",
+                           "name":  "Goblin 4",
+                           "swordDamage":  4,
+                           "x":  368,
+                           "y":  440
+                       }
+                   ],
+    "defaultGround":  "grass",
+    "ground":  [
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           6
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           17
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "path",
+                           7
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "path",
+                           16
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           11
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           12
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           11
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           12
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           24
+                       ]
+                   ]
+               ],
+    "height":  24,
+    "heroStart":  [
+                      92,
+                      408
+                  ],
+    "levelVersion":  2,
+    "name":  "Shooting Range",
+    "nextId":  20,
+    "pickups":  [
+                    {
+                        "id":  10,
+                        "weapon":  "wooden longbow",
+                        "x":  92,
+                        "y":  408
+                    },
+                    {
+                        "id":  11,
+                        "weapon":  "crossbow",
+                        "x":  106,
+                        "y":  408
+                    },
+                    {
+                        "id":  12,
+                        "weapon":  "venom recurve",
+                        "x":  120,
+                        "y":  408
+                    },
+                    {
+                        "id":  13,
+                        "weapon":  "throwing knives",
+                        "x":  134,
+                        "y":  408
+                    },
+                    {
+                        "id":  14,
+                        "weapon":  "void chakram",
+                        "x":  148,
+                        "y":  408
+                    },
+                    {
+                        "id":  15,
+                        "weapon":  "nature staff",
+                        "x":  162,
+                        "y":  408
+                    },
+                    {
+                        "id":  16,
+                        "weapon":  "void staff",
+                        "x":  176,
+                        "y":  408
+                    }
+                ],
+    "targets":  [
+
+                ],
+    "width":  24
+}
