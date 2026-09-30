@@ -39,7 +39,7 @@ git push -u origin story/US-002   # send to GitHub, CI starts
 
 ## US-003: Enforce the layer rules in the build (2026-09-30)
 
-*Built by ChatGPT, verified on Windows by Claude.*
+*Built by ChatGPT, verified on Windows by Mraw.*
 
 **What we built.** Five library targets now represent our five layers, with explicit downward dependencies. Header checks and a validator reject forbidden includes, including shortcuts through relative paths.
 
@@ -188,3 +188,98 @@ accumulated_ %= kNanosecondsPerTick;               // keep the remainder for nex
 **Try it (15 minutes).** Change `daysPerSeason` in `calendar.json` to 10 and run `odysseus_headless.exe --days 40`. Then break the file on purpose (write `"ten"`) and read the error: it names the file and the field.
 
 **Check yourself.** Why would `double seconds += 0.05` twenty times per second eventually give two computers different worlds?
+
+## US-025: Build deterministic 3D math (2026-09-30)
+
+**What we built.** Luna has a sixth layer, Physics, with its own number type `Fixed`, 3D vectors and quaternion rotations. A million mixed calculations give the very same 64-bit hash in Debug, in Release and on the CI machine.
+
+**The idea: fixed-point numbers and operator overloading.** A `Fixed` is a whole number that counts tiny steps of 1/2^32 (about 0.00000000023). 1.5 is stored as 1.5 x 2^32 = 6442450944. Adding two of them is ordinary integer addition, which every CPU does identically; floats round in ways that can differ between compilers. Multiplying needs care: (a x 2^32) x (b x 2^32) has an extra 2^32, so we compute the 128-bit product and shift it back. Operator overloading lets us hide all that behind a normal `*`:
+
+```cpp
+friend Fixed operator+(Fixed a, Fixed b) { return fromRaw(checkedAdd(a.raw_, b.raw_)); }
+```
+
+Now `a + b * c` reads like school maths. A quaternion is four such numbers describing a turn; rotating a vector by it never suffers "gimbal lock".
+
+**Where to look.** [src/luna/physics/fixed.h:55](../src/luna/physics/fixed.h) (the operators), [src/luna/physics/fixed.cpp:108](../src/luna/physics/fixed.cpp) (multiplication with 32-bit "digits", like long multiplication on paper), [src/luna/physics/quat.cpp:25](../src/luna/physics/quat.cpp) (rotating a vector).
+
+**Try it (15 minutes).** In `tests/physics/rotation_test.cpp`, rotate by `physics::degrees(45)` eight times instead of 90 four times, and run `luna_physics_tests.exe --test-case="US-025 Rotations"`. Then print `Fixed::fromRatio(1, 3).raw()` and check by hand that it is 2^32 / 3, rounded.
+
+**Check yourself.** Why is `Fixed::fromRatio(1, 3) * Fixed::fromInt(3)` one step short of 1, and why is that still perfectly deterministic?
+
+## US-026: Detect hits between shapes (2026-09-30)
+
+**What we built.** Luna Physics knows spheres, capsules (pills) and boxes. It can tell whether two of them touch (and where, and which way to push them apart), and it can follow a fast-moving ball along its whole path, so a spear moving 10 m per tick still hits a 20 cm target instead of jumping over it. A grid of 2 m cells makes 1,000 bodies cheap: only 114 pairs need an exact test.
+
+**The idea: plain structs, pure functions and a spatial grid.** Shapes are just data:
+
+```cpp
+struct Sphere {
+    Vec3 center;
+    Fixed radius;
+};
+```
+
+The geometry lives in pure functions such as `overlap(a, b)`: same inputs, same answer, no hidden state, which makes them easy to test and deterministic. The grid is the "phone book" trick: instead of asking every one of 1,000 people whether they stand next to you (499,500 questions), you only ask the people filed under your street.
+
+**Where to look.** [src/luna/physics/shapes.cpp](../src/luna/physics/shapes.cpp) (`sweep()`: a moving ball is a ray against the target grown by the ball's radius), [src/luna/physics/spatial_grid.cpp](../src/luna/physics/spatial_grid.cpp) (`findContacts()`: broad phase, then narrow phase).
+
+**Try it (15 minutes).** In `tests/physics/shapes_test.cpp`, change the grid's cell size in `US-026 Many bodies` from 2 to 64 metres and run the test in Release: watch "pairs tested" and the time grow. Then try 0.5 m.
+
+**Check yourself.** Why does checking only where the spear is at each tick miss the target, and how does sweeping fix it?
+
+## US-027: Fly projectiles with real ballistics (2026-09-30)
+
+**What we built.** Spears and darts fly in true arcs: gravity pulls them down, air drag slows them (more the faster they go), and wind pushes them sideways. An aim solver finds the launch angle that hits a target 25 m away, and the throw really hits it.
+
+**The idea: numerical integration, and units.** Physics formulas describe change: velocity changes by acceleration, position by velocity. A computer cannot do "continuous", so it takes many tiny steps (here 200 per second) and adds up the changes. Semi-implicit Euler first updates the velocity, then moves with the new velocity:
+
+```cpp
+projectile.velocity += projectileAcceleration(projectile, air) * dt;
+projectile.position += projectile.velocity * dt;
+```
+
+Units keep us honest: velocity (m/s) x dt (s) gives metres, so both sides of `position += ...` are metres. If the units of a formula do not match, the formula is wrong. We checked the result against the textbook: 20 m/s at 45 degrees lands 40.7 m away, v^2/g = 40.8 m.
+
+**Where to look.** [src/luna/physics/ballistics.cpp](../src/luna/physics/ballistics.cpp) (`projectileAcceleration`: the drag equation; `aimLaunchAngle`: the secant method).
+
+**Try it (15 minutes).** In `tests/physics/ballistics_test.cpp`, change the crosswind in `US-027 Drag and wind` from 5 to 10 m/s and read the MESSAGE lines: does the drift double? Then set `kProjectileSubsteps` to 1 and watch the range error in `US-027 Arc` grow.
+
+**Check yourself.** Why does air drag make the aim solver choose a slightly higher angle than the vacuum formula?
+
+## US-028: Push and bounce bodies (2026-09-30)
+
+**What we built.** Things in the world have mass now. A shove changes a body's velocity by impulse / mass, a dropped ball bounces to a quarter of its height each time (restitution 0.5) and then lies still, and a crate sliding on grass stops exactly where the friction formula says.
+
+**The idea: classes with invariants, and fixed-timestep integration.** An invariant is a rule that must always be true, such as "the mass is positive". `RigidBody` keeps its data `private` and checks the rules once, in the constructor:
+
+```cpp
+ODYSSEUS_ASSERT(mass > kFixedZero, "a rigid body needs a positive mass");
+```
+
+After that, the only way to change a body is through its member functions (`applyImpulse`, `step`), which keep the rules. Each `step` advances time by a fixed amount (1/20 s). Inside the step we use the exact formula for constant acceleration, x += v t + a t^2 / 2, and we work out the exact moment the ball touches the ground, so the bounce heights come out right to five digits.
+
+**Where to look.** [src/luna/physics/rigid_body.cpp:93](../src/luna/physics/rigid_body.cpp) (`step`: flying, bouncing, sliding, sleeping), [src/luna/physics/rigid_body.cpp:57](../src/luna/physics/rigid_body.cpp) (`flyFor`).
+
+**Try it (15 minutes).** In `tests/physics/rigid_body_test.cpp`, give the ball restitution 0.8 and change the expected ratio to 0.64 (e^2). Run `luna_physics_tests.exe --test-case="US-028 Bounce*"` and read the bounce heights.
+
+**Check yourself.** What would go wrong if `mass_` were a public member that any code could set to 0?
+
+## US-029: Throw a spear in the demo (2026-09-30)
+
+**What we built.** Press Interact (E, Space or the gamepad's South button) and the hero throws a spear at the straw target in front: it flies in an arc, its shadow glides along the ground, and it sticks in the target. Throw at the target behind the boulder and the spear hits the rock instead. Flint tips hurt almost six times more than sharpened wood.
+
+**The idea: putting it together, and content as data.** Every piece from M1 and M1b meets here: intents (Interact), the tile map (rocks become 3D boulders), ballistics (the arc), swept hits (no tunnelling) and the Engine's top-down view, which draws height by lifting the sprite:
+
+```cpp
+// screen y = (y - z) x 32: the higher the spear, the further up the screen
+return {toDouble(metres.x) * kPixelsPerMetre, (toDouble(metres.y) - toDouble(metres.z)) * kPixelsPerMetre};
+```
+
+How hard a flint tip is lives in `assets/data/materials.json`, not in C++. A designer can change it without recompiling, and a typo is caught at start with a message naming the file and the field.
+
+**Where to look.** [src/game/spear_range.cpp](../src/game/spear_range.cpp) (`throwSpear`, `update`), [src/luna/engine/physics_view.cpp](../src/luna/engine/physics_view.cpp), [assets/data/materials.json](../assets/data/materials.json).
+
+**Try it (15 minutes).** In `materials.json`, set the flint `hardness` to 10 and run the game: throw at the west target and read the damage in the log. Then set it to 11 and read the error message.
+
+**Check yourself.** Why is the shadow drawn at (x, y) while the spear is drawn at (x, y - z)?

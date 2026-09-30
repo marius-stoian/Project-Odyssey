@@ -1,0 +1,17 @@
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\ballistics_test.cpp(86): MESSAGE: range 40.704 m (textbook 40.7747 m), flight 2.87821 s
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\ballistics_test.cpp(110): MESSAGE: drag, no wind: 36.0984 m (formula 36.1742 m)
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\ballistics_test.cpp(112): MESSAGE: drag and wind: 35.9228 m, drift 1.19979 m (formula 35.9986 m, drift 1.20167 m)
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\ballistics_test.cpp(138): MESSAGE: launch angle: vacuum 23.1568 deg, with drag 25.8273 deg
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\ballistics_test.cpp(152): MESSAGE: hit after 33 ticks at (14.8424, -19.7899, 1.14496)
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\determinism_test.cpp(68): MESSAGE: mixed-math hash: 17224312723153614174
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\determinism_test.cpp(127): MESSAGE: whole-physics hash: 17309765312882650619
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\rigid_body_test.cpp(79): MESSAGE: bounce 1: 0.249999 m, ratio 0.249999
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\rigid_body_test.cpp(79): MESSAGE: bounce 2: 0.0624997 m, ratio 0.249999
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\rigid_body_test.cpp(79): MESSAGE: bounce 3: 0.0156245 m, ratio 0.249994
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\rigid_body_test.cpp(79): MESSAGE: bounce 4: 0.00390611 m, ratio 0.249999
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\rigid_body_test.cpp(110): MESSAGE: slid 1.22597 m (friction predicts 1.22597 m), asleep after 26 ticks
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\shapes_test.cpp(177): MESSAGE: pairs tested: 114 of 499500; contacts: 9
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\physics\shapes_test.cpp(203): MESSAGE: one step with 1,000 bodies: 3.3649 ms
+[doctest] test cases:     19 |     19 passed | 0 failed | 0 skipped
+[doctest] assertions: 404517 | 404517 passed | 0 failed |
+[doctest] Status: SUCCESS!

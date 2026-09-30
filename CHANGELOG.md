@@ -4,7 +4,82 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
-## US-010 / S-US-010: Advance a seeded world clock (Claude) — 2026-09-30
+## X-M1b: Exit review M1b, Luna Physics (Mraw) — 2026-09-30
+
+**State:** On `qa`; merged into `main` and tagged `m1b-done` once CI on `main` is green.
+
+- `docs/gates/M1b.md`: every exit criterion met, with the textbook comparisons (range, flight time, drag, drift, bounce heights, friction distance) and the in-flight screenshot.
+- New gate test `M1b Whole physics is identical on every build` (`tests/physics/determinism_test.cpp`): 12 throws with drag and wind, a bouncing and sliding ball for 400 ticks and a 1,000-body contact step, hashed and pinned (17309765312882650619) so Debug, Release and CI must agree.
+- Evidence: `docs/evidence/M1b/` (physics test output in both builds, ctest logs, screenshot).
+- Verification: 0 warnings; ctest 17/17 Debug and Release; luna_physics_tests 19 cases, 404,518 assertions.
+
+## US-029 / S-US-029: Throw a spear in the demo (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Completes the M1b stories (Luna Physics).
+
+- Luna Physics: `Material`, `massOf`, `kineticEnergy`; `flyTick` skips obstacles outside the path box.
+- Luna Engine: `physics_view.{h,cpp}` (metres to pixels, top-down position lifted by height, ground shadow, on-screen direction).
+- Data: `assets/data/materials.json` (flint, wood, straw, stone; damage scale; flint and wooden spears).
+- Game: `materials.{h,cpp}` (validated loading, `impactDamage`), `spear_range.{h,cpp}` (boulders from rock tiles, ground, straw targets, auto-aimed throws, swept flight, sticking spears), prop art (spears in 8 directions, target, shadow), `OdysseyGame` (Interact throws alternating flint and wooden spears, two targets, a camera that frames the throw, hit logging), a boulder on the north path; `odysseus.exe` reads data from `ODYSSEUS_DATA_DIR` and logs target totals.
+- Tests: `US-029 Throw`, `US-029 Material`, `US-029 Materials are validated`, `US-029 Blocked` (game tests); `US-029 Throw in the game` (real window, label `window`).
+- Evidence: `docs/evidence/US-029/spear-in-flight.png`, `spear-hit.png`, game log.
+- Verification: 0 warnings; ctest 17/17 Debug and Release.
+
+## US-028 / S-US-028: Push and bounce bodies (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Physics: `rigid_body.{h,cpp}`: `SurfaceMaterial` and combining rules, `Ground`, `RigidBody` (invariants checked in the constructor; impulses, forces, exact constant-acceleration flight, impact times inside a step, restitution and friction impulses, Coulomb sliding, rest and sleep, wake on push).
+- Tests: `US-028 Impulse` (70 kg, 140 N s -> 2 m/s), `US-028 Bounce and rest` (height ratios 0.25 = e^2, then asleep), `US-028 Friction` (stops at v^2/(2 mu g) = 1.226 m).
+- Docs: plan `docs/plans/US-028.md`, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
+## US-027 / S-US-027: Fly projectiles with real ballistics (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Physics: `atan2`; `ballistics.{h,cpp}`: `Air` (density, wind, gravity), `Projectile` (mass, Cd*A), quadratic drag against the air's motion, semi-implicit Euler at 10 sub-steps per tick, `flyTick` (swept collisions per sub-step), `flyUntilLanding`, `launchAngleWithoutDrag` (textbook low arc), `aimLaunchAngle` (secant refinement with drag), `launchVelocity`.
+- Tests: `US-027 Arc` (40.704 m vs v^2/g = 40.775 m), `US-027 Drag and wind` (within 1% of an independent Runge-Kutta solution of the drag equation; 1.20 m drift in a 5 m/s crosswind), `US-027 Aim` (25 m target hit after 33 ticks), atan2 accuracy.
+- Docs: plan `docs/plans/US-027.md`, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
+## US-026 / S-US-026: Detect hits between shapes (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Luna Physics: `Sphere`, `Capsule`, `Box`, `Shape` (variant), `bounds()`, `overlap()` for all six pairings (contact point, normal, depth), `raycast()`, `sweep()` of a moving sphere (Minkowski sum; exact rounded box corners), closest-point helpers; `SpatialGrid` (2 m cells, sorted unique candidate pairs) and `findContacts()`.
+- Tests: `US-026 Overlap`, `US-026 No tunnelling` (10 m per tick, 0.2 m target, time of impact 0.498 of a tick), `US-026 Many bodies` (1,000 bodies, 114 pairs tested, same contacts as all pairs, 0.61 ms in Release), every shape pairing, rays and rounded corners.
+- Docs: plan `docs/plans/US-026.md`, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
+## US-025 / S-US-025: Build deterministic 3D math (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. First story of M1b (Luna Physics).
+
+- New layer Luna Physics (`src/luna/physics/`, target `luna_physics`, ARC-10): `Fixed` 32.32 numbers (own 128-bit multiply and long division, rounded to nearest, overflow asserted in Debug), `sqrt`, `sin`, `cos`, `degrees`; `Vec3` (dot, cross, length, normalise); `Quat` (axis-angle, product, conjugate, rotate, normalise). No floating point inside the layer.
+- Layer enforcement (ADR-016 update): all six `boundary.h` know the Physics identity; the include validator's table; Engine and Simulation link Physics.
+- Tests: `luna_physics_tests` (new, Physics identity): `US-025 Exact arithmetic` (+ 100,000 pairs against the CPU's 128-bit instructions), `US-025 Rotations`, `US-025 Determinism` (1,000,000 operations, pinned hash), sine/cosine accuracy, vectors; `US-025 Physics layer rules` (11 compiler probes); 4 more validator fixtures; `US-025 Physics uses no floating point` (source review).
+- Docs: plan `docs/plans/US-025.md`, ADR-016 update, README, teach-back entry.
+- Verification: 0 warnings; ctest 16/16 Debug and Release.
+
+## Codex v1.5 and K-M1b (Anima, Mraw) — 2026-09-30
+
+**State:** On `qa`.
+
+- Codex v1.5 (Anima): Limit.md and `tools/verify.ps1` are state files; L-01 continues paused story branches, verifies with `verify.ps1`, updates Limit.md; the Charter says how to stop safely at usage limits; section 0: Dominus designs, implements and tests, Anima alone writes the Codex; continuous assembly; P-004.
+- K-M1b: `docs/plans/M1b-physics-design.md` (fixed-point 32.32 with portable 128-bit arithmetic, Vec3 and quaternions, shapes and swept tests, spatial grid, integrator, ballistics and aim solver, rigid bodies, materials, top-down drawing of 3D).
+- Session end: Milestone-10.md (AP-011), Limit.md points the next chat at S-US-025.
+
+## Luna Physics added to the requirements and the Codex (Dominus, Anima) — 2026-09-30
+
+**State:** On `qa`. Owner decisions of 2026-09-30: Luna gets its own physics, core in the MVP, full 3D math, built right after M1.
+
+- Requirements v1.5 (Drive, mirrored to `docs/project/requirements/`): PHY-01..PHY-06 (Luna Physics, hit detection, ballistics, rigid-body dynamics, element physics and chemistry, later-Age physics), ARC-10 (Physics layer), ARC-01 now six layers, ADR-016 and ADR-017 recorded, MVP-12 decided and MVP-13 added, architecture risk and cut-list rows, milestone M1b (9 weeks likely) with epic E10 and stories US-025..US-029; later milestones shifted 9 weeks (MVP likely 72 weeks, 49 stories).
+- Backlog workbook: M1b in the timeline and Gantt, E10, US-025..US-029, decision statuses, MVP-13, kill-gate rows corrected to M2.
+- Codex v1.4 (Anima): Charter rules 1, 3, 9 and new rule 10 (deterministic fixed-point physics, SI units, 1 tile = 1 m); K-M1b, S-US-025..S-US-029, X-M1b; P-003.
+- Repo: `docs/adr/ADR-017-luna-physics.md`, ADR index, README layer tables, status (M1b next; US-011 paused on its branch), decisions (D-15), design-doc note.
+
+## US-010 / S-US-010: Advance a seeded world clock (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2 (console clan simulator).
 
@@ -14,7 +89,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `odysseus_sim_tests` (new, Simulation identity): Calendar, Determinism, Speed control, data validation. `tools/verify.ps1`: the tester's standard build-and-test run with evidence.
 - Verification: 0 warnings; ctest 13/13 Debug and Release.
 
-## US-024 / S-US-024: Walk the character around the map (Claude) — 2026-09-30
+## US-024 / S-US-024: Walk the character around the map (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Completes M1 (Luna walking skeleton).
 
@@ -24,7 +99,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `odysseus_game_tests` (new, Game identity: `US-024 Walk right`, `Stop at a rock`, `Stop and face the last direction`, diagonal speed), Luna collision tests, end to end `US-024 Walk to the rock` (label `window`).
 - Verification: 0 warnings; ctest 12/12 Debug and Release; real window: hero stops at x 1142.0 facing East.
 
-## US-023 / S-US-023: Show a tile map with a following camera (Claude) — 2026-09-30
+## US-023 / S-US-023: Show a tile map with a following camera (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -33,7 +108,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `US-023 Only visible tiles are drawn`, `US-023 Camera follows and stops at the map edges`, TileMap grid test.
 - Verification: 0 warnings; ctest 10/10 Debug and Release; screenshot `docs/evidence/US-023/game-map.png`.
 
-## US-022 / S-US-022: Draw sprites with crisp pixels (Claude) — 2026-09-30
+## US-022 / S-US-022: Draw sprites with crisp pixels (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -44,7 +119,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `US-022 Whole-number scale`, `luna_window_tests` (`US-022 Crisp pixels`, label `window`: real hidden window, pixel readback).
 - Verification: 0 warnings; ctest 10/10 Debug and Release; 1920x1080 x4 with 0 wrong pixels; 1366x768 x2 letterboxed at (203, 114).
 
-## US-021 / S-US-021: Control the game through intents (Claude) — 2026-09-30
+## US-021 / S-US-021: Control the game through intents (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -53,7 +128,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `luna_platform_tests` (new, Platform identity), `US-021 Default bindings`, `US-021 Gamepad`, `US-021 Game reads only intents` (automated review).
 - Verification: 0 warnings; ctest 9/9 Debug and Release. No physical gamepad available: proven with synthetic SDL events.
 
-## US-020 / S-US-020: Open a window with a steady game loop (Claude) — 2026-09-30
+## US-020 / S-US-020: Open a window with a steady game loop (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M1 (Luna engine).
 
@@ -64,7 +139,7 @@ its PR changes rather than leaving an outdated description.
 - Docs: `docs/plans/M1-luna-design.md`, `docs/plans/US-020.md`, evidence, teach-back; delegated decisions D-16 (32x32 tiles), D-17 (8-way movement).
 - Verification: 0 warnings; ctest 7/7 Debug and Release; 60-second run: 60.0 FPS, 1200 ticks, first frame 279 ms.
 
-## US-004 / S-US-004: Log what happens and stop on broken assumptions (Claude) — 2026-09-30
+## US-004 / S-US-004: Log what happens and stop on broken assumptions (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -77,12 +152,12 @@ its PR changes rather than leaving an outdated description.
 - Docs: plan, evidence (`docs/evidence/US-004/`), teach-back, README "Logs".
 - Verification: Debug and Release 0 warnings; ctest 5/5 both; US-004 doctest 3 cases / 24 assertions; end to end: 7 runs leave 5 logs; cdb stops at `assert_probe.cpp @ 13`.
 
-## QA integration of ChatGPT's work (Claude) — 2026-09-30 — branch `qa`
+## QA integration of ChatGPT's work (Mraw) — 2026-09-30 — branch `qa`
 
 **State:** Merged into `qa`; GitHub CI green on `qa` ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). `qa` merges into `main` at the M0 exit review.
 
 ### Integration
-- New branch `qa` from `main` @ `98e45ca`; ChatGPT's work recreated as `story/US-003` @ `f3c3d26` on its base `4488238` (all 90 uploaded files verified identical) and merged with `--no-ff`.
+- New branch `qa` from `main` @ `76ee34e`; ChatGPT's work recreated as `story/US-003` @ `2170dfb` on its base `fb21b48` (all 90 uploaded files verified identical) and merged with `--no-ff`.
 - `README.md`: merge conflict resolved; keeps main's layout table (Luna, `docs/project/`) plus ChatGPT's "Layer boundaries" section; lists `cmake/` and `tests/architecture/`.
 
 ### Fixes
@@ -105,7 +180,7 @@ its PR changes rather than leaving an outdated description.
 ## US-003 / S-US-003: Enforce the layer rules in the build (ChatGPT) — 2026-09-29
 
 **State:** Built by ChatGPT on local `story/US-003` (GitHub push refused, HTTP 403).
-Imported unchanged as `f3c3d26` and merged into `qa` on 2026-09-30; Windows
+Imported unchanged as `2170dfb` and merged into `qa` on 2026-09-30; Windows
 verification and one test-harness fix in the QA entry above. **Done.**
 
 ### Build and source
@@ -167,12 +242,12 @@ Determinism testing starts at US-010. No owner design decision is requested.
 
 | Commit | Change |
 |---|---|
-| `5cda584`, `b9a3794` | P-000: bootstrap the Mraw workspace; toolchain installed, D-12 decided |
-| `ae799e9` | US-001: one CMake preset builds odysseus.exe, odysseus_headless.exe, odysseus_tests.exe with zero warnings |
-| `e34e9c0` | US-002: GitHub Actions builds and tests every push |
-| `1d172b0` | Codex sync from Google Drive at session start (`tools/sync-codex.ps1`) |
-| `bb3e93a` | Dominus and Anima skills in `.claude/skills/` |
-| `e7157d1` | Codex v1.2 from Anima: Luna engine first (requirements v1.4, ARC-09) |
-| `2a31596` | P-001: adopt Codex v1.2 (Luna folders, new prompt order, D-04 and D-13) |
-| `7393ca0`, `4488238` | Milestone.md progress snapshot AP-001; CI-004 |
-| `98e45ca` | Project documents mirrored from Google Drive into `docs/project/` (`tools/sync-workspace.ps1`) |
+| `3d96f58`, `c8c6301` | P-000: bootstrap the Mraw workspace; toolchain installed, D-12 decided |
+| `d231374` | US-001: one CMake preset builds odysseus.exe, odysseus_headless.exe, odysseus_tests.exe with zero warnings |
+| `38290bb` | US-002: GitHub Actions builds and tests every push |
+| `383cbd9` | Codex sync from Google Drive at session start (`tools/sync-codex.ps1`) |
+| `d54ce65` | Dominus and Anima skills in `.claude/skills/` |
+| `5770852` | Codex v1.2 from Anima: Luna engine first (requirements v1.4, ARC-09) |
+| `2d7dc23` | P-001: adopt Codex v1.2 (Luna folders, new prompt order, D-04 and D-13) |
+| `3438f4b`, `fb21b48` | Milestone.md progress snapshot AP-001; CI-004 |
+| `76ee34e` | Project documents mirrored from Google Drive into `docs/project/` (`tools/sync-workspace.ps1`) |

@@ -1,11 +1,11 @@
 # Keeps the repo's copy of Anima's Codex in step with the master copy on Google Drive.
 #
-# Anima publishes new Codex versions to Google Drive. Run this (Claude Code also runs it
-# automatically at session start, see .claude/settings.json) and it will:
+# Anima publishes new Codex versions to Google Drive. Run this (the AI coding session also
+# runs it automatically at session start, see .claude/settings.json) and it will:
 #   - copy a newer Codex into docs/Codex.md,
 #   - regenerate the files P-000 derives from it (CLAUDE.md from the Charter C-01,
 #     .claude/agents/*.md from the roles R-01..R-07),
-#   - tell Claude to commit the sync to main and push.
+#   - tell the session to commit the sync and push.
 # It never overwrites the repo with an older or unversioned change; it reports those instead.
 #
 # Usage:  pwsh tools/sync-codex.ps1            (source defaults to the Drive master copy)
@@ -19,12 +19,12 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $target = Join-Path $repoRoot 'docs\Codex.md'
 
-function Write-HookResult([string]$userMessage, [string]$claudeContext) {
+function Write-HookResult([string]$userMessage, [string]$agentContext) {
     # SessionStart hooks talk back as JSON: systemMessage is shown to the owner,
-    # additionalContext is read by Claude.
+    # additionalContext is read by the AI agent.
     @{
         systemMessage      = $userMessage
-        hookSpecificOutput = @{ hookEventName = 'SessionStart'; additionalContext = $claudeContext }
+        hookSpecificOutput = @{ hookEventName = 'SessionStart'; additionalContext = $agentContext }
     } | ConvertTo-Json -Compress
 }
 

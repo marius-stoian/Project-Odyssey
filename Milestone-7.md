@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Codex / requirements | v1.3 / v1.4 |
-| Repository | `qa` @ `ed2bf33` |
+| Repository | `qa` @ `399b129` |
 | Milestone | **M1 Luna engine: 4 of 5** |
 | Next | S-US-024 walk the character around the map, then X-M1 |
 

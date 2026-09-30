@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "materials": {
+    "flint": { "density": 2600, "hardness": 7.0, "sharpness": 0.9, "restitution": 0.2, "friction": 0.5 },
+    "wood": { "density": 700, "hardness": 3.0, "sharpness": 0.4, "restitution": 0.3, "friction": 0.45 },
+    "straw": { "density": 120, "hardness": 1.0, "sharpness": 0.0, "restitution": 0.05, "friction": 0.6 },
+    "stone": { "density": 2700, "hardness": 6.0, "sharpness": 0.1, "restitution": 0.4, "friction": 0.6 }
+  },
+  "damage": {
+    "comment": "damage = kinetic energy (J) x tip hardness / hardnessScale x tip sharpness",
+    "hardnessScale": 10
+  },
+  "spears": {
+    "flint": { "shaft": "wood", "tip": "flint", "shaftMass": 1.2, "tipVolume": 0.00006, "throwSpeed": 13 },
+    "wooden": { "shaft": "wood", "tip": "wood", "shaftMass": 1.2, "tipVolume": 0.00006, "throwSpeed": 13 }
+  }
+}

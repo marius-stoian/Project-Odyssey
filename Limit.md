@@ -2,17 +2,20 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after US-010 (Milestone-9.md, AP-010).
+**Last updated:** 2026-09-30, after US-029 (Milestone-15.md, AP-016).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
-- Codex v1.3, requirements v1.4. Done: P-000..P-002, all of M0 (`m0-done`) and all of M1, the Luna engine (`m1-done`).
+- Codex v1.5, requirements v1.5. Done: P-000..P-002, all of M0 (`m0-done`) and all of M1, the Luna engine (`m1-done`).
 - K-M2 and US-010 Done (M2 design: `docs/plans/M2-clan-design.md`; D-02 delegated).
-- **Next prompt: S-US-011** (needs), then US-012..US-016 of the console clan simulator (headless, in `src/sim/`, run by `odysseus_headless.exe`), then X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
+- K-M1b Done: the physics design is `docs/plans/M1b-physics-design.md` (read it first).
+- US-025..US-029 Done: Luna Physics complete (Fixed 32.32, Vec3, Quat, shapes, sweeps, spatial grid, ballistics, aim solver, rigid bodies, materials) and the spear throw in the demo.
+- **Next prompt: X-M1b** (exit review: docs/gates/M1b.md, merge qa into main, CI on main green, tag `m1b-done`).
+- Then M2 resumes: **S-US-011** is half-done on branch `story/US-011` (pushed, not merged: needs data, Person, Chronicle written; still to do: CMake, the needs system in World, the starting clan, tests). Rebase or merge that branch onto the latest `qa` before continuing. Then US-012..US-016 and X-M2 = **Kill Gate 1** (a human gate: people read the chronicle).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue
-1. Open Claude Code in `C:\Users\Amek\.amek-ai\Odysseus\odysseus` (this folder, so the Mraw agents, skills and sync hooks load).
+1. Open your AI coding session in `C:\Users\Amek\.amek-ai\Odysseus\odysseus` (this folder, so the Mraw agents, skills and sync hooks load).
 2. `git checkout qa && git pull`.
 3. Paste:
 ```text

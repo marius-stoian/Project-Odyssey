@@ -37,3 +37,6 @@ later. This prevents architectural mistakes; it is not a security boundary again
 someone deliberately editing macros or the validator.
 
 MSVC, Windows x64, existing ASan settings and warnings as errors remain unchanged.
+
+## Update 2026-09-30 (US-025): six layers
+ARC-10 adds Luna Physics (`src/luna/physics/`, identity `ODYSSEUS_LAYER_PHYSICS`). Every `boundary.h` counts the sixth identity; Physics headers refuse Core and Platform code, and Platform, Engine, Simulation and Game headers refuse Physics code. The include validator allows Physics -> Core and Engine/Simulation/Game -> Physics. Compiler probes `us025_*` and four more validator fixtures prove it (`US-025 Physics layer rules`, `US-003 Guard completeness`).

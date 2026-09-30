@@ -1,6 +1,6 @@
 # Project Odyssey: assembly progress (2)
 
-Continues [Milestone.md](Milestone.md) (AP-001 by Claude, AP-002 by ChatGPT). From now on a new Milestone-<n>.md is saved after every story, each with the next AP-### ID.
+Continues [Milestone.md](Milestone.md) (AP-001 by Mraw, AP-002 by ChatGPT). From now on a new Milestone-<n>.md is saved after every story, each with the next AP-### ID.
 
 ## AP-003 · 2026-09-30
 
@@ -9,7 +9,7 @@ Continues [Milestone.md](Milestone.md) (AP-001 by Claude, AP-002 by ChatGPT). Fr
 | Snapshot ID | **AP-003** |
 | Codex | v1.2 (Anima, Luna first); v1.3 in preparation (CI-004, CI-005, owner's standing instructions) |
 | Source of truth | Project Odyssey.docx v1.4 |
-| Repository state | Branch `qa` (M0 work, CI green: [run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)); `main` @ `98e45ca` until the M0 exit review |
+| Repository state | Branch `qa` (M0 work, CI green: [run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)); `main` @ `76ee34e` until the M0 exit review |
 | Current milestone | **M0 Tooling ready**: 3 of 4 stories Done |
 | Next prompt | **S-US-004** Log what happens and stop on broken assumptions |
 | Blocked by owner decisions | Nothing: D-01, D-03, D-04, D-12, D-13 Decided; other decisions are delegated to Dominus (standing instructions in docs/decisions.md) |
@@ -17,7 +17,7 @@ Continues [Milestone.md](Milestone.md) (AP-001 by Claude, AP-002 by ChatGPT). Fr
 ### What happened since AP-002
 
 1. **ChatGPT built US-003** (layer rules) on 2026-09-29 but could not verify it on Windows: GitHub refused its push (HTTP 403). Its full output arrived as an upload in docs/.
-2. **Claude integrated it**: recreated ChatGPT's branch exactly (`f3c3d26`, 90 files verified), merged it with `main` into the new `qa` branch, and resolved one README conflict.
+2. **Mraw integrated it**: recreated ChatGPT's branch exactly (`2170dfb`, 90 files verified), merged it with `main` into the new `qa` branch, and resolved one README conflict.
 3. **Windows verification found a real portability bug** in the tests (not in the layer rules): MSBuild writes `fatal  error C1083` with two spaces, so 2 of 5 tests failed on Windows while passing on Linux. One-line fix; now 5/5 pass in Debug and Release, locally and on GitHub's Windows runner.
 4. **US-003 accepted and Done**: Allowed use, Forbidden use (including `../` and absolute-path bypasses) and Luna stays game-agnostic all pass on MSVC.
 5. **Records**: CHANGELOG covers the whole project; US-003 teach-back in the learning journal; new docs/README.md index; redundant upload copies removed.
@@ -40,9 +40,9 @@ Continues [Milestone.md](Milestone.md) (AP-001 by Claude, AP-002 by ChatGPT). Fr
 
 | Story | By | Evidence |
 |---|---|---|
-| US-001 Build and debug from a clean checkout | Claude | [plan](docs/plans/US-001.md) |
-| US-002 Run the build and tests on every push | Claude | [plan](docs/plans/US-002.md) |
-| US-003 Enforce the layer rules in the build | ChatGPT (build), Claude (Windows verification, fix) | [plan](docs/plans/US-003.md), [report](docs/reports/US-003-2026-09-30.md), [evidence](docs/evidence/US-003/) |
+| US-001 Build and debug from a clean checkout | Mraw | [plan](docs/plans/US-001.md) |
+| US-002 Run the build and tests on every push | Mraw | [plan](docs/plans/US-002.md) |
+| US-003 Enforce the layer rules in the build | ChatGPT (build), Mraw (Windows verification, fix) | [plan](docs/plans/US-003.md), [report](docs/reports/US-003-2026-09-30.md), [evidence](docs/evidence/US-003/) |
 
 ### Owner decisions and Codex issues
 

@@ -30,4 +30,4 @@ The owner wants Mraw to assemble Project Odyssey with minimal intervention:
 | D-16 | Tile size for the tile grid (ENV-11) | M1 | US-023, US-024 | Decided by Dominus (delegated) | 2026-09-30: 32x32 px tiles, matching 32-px-wide characters (D-04). Reasoning in docs/decision-requests/D-16.md. |
 | D-17 | Movement directions: US-024 says four, D-04 gives 8 facing directions | M1 | US-024 | Decided by Dominus (delegated) | 2026-09-30: 8-way movement, diagonals at the same speed; US-024 scenarios unchanged. Reasoning in docs/decision-requests/D-17.md. |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |  |
-| D-15 | Technical chain: M0 > M1 > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |  |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |  |

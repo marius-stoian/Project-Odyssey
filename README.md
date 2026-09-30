@@ -7,13 +7,13 @@ Codename **Odysseus**: a 2D pixel-art life and civilization simulation in C++20 
 Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), written by Anima. Progress: [Milestone.md](Milestone.md) (snapshot per session, AP-###) and [docs/status.md](docs/status.md) (every prompt). Owner decisions: [docs/decisions.md](docs/decisions.md). Learning notes: [docs/learning-journal.md](docs/learning-journal.md).
 
 ## Anima's Codex
-`docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When Claude Code starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and Claude commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
+`docs/Codex.md` is a copy of Anima's master Codex on Google Drive. When an AI coding session starts in this folder, a hook runs [tools/sync-codex.ps1](tools/sync-codex.ps1): if Anima published a newer version, it copies it in and regenerates `CLAUDE.md` (the Charter) and `.claude/agents/` (the Mraw roles), and the session commits the sync. You can also run it by hand: `pwsh tools/sync-codex.ps1`.
 
 ## Project documents
 The requirements (source of truth), backlog, diagrams and archive live in [docs/project/](docs/project/README.md). Their masters are on Google Drive; [tools/sync-workspace.ps1](tools/sync-workspace.ps1) mirrors any changed file into the repo at session start.
 
 ## Team skills
-The Dominus skill (all hats; the full team is Mraw) and the Anima skill (Prompt Architect, writes the Codex) live in [.claude/skills/](.claude/skills/), so every Claude Code session opened in this repo has them, on any machine. They are copies of the owner's personal skills; when those change, copy them in again.
+The Dominus skill (all hats; the full team is Mraw) and the Anima skill (Prompt Architect, writes the Codex) live in [.claude/skills/](.claude/skills/), so every AI coding session opened in this repo has them, on any machine. They are copies of the owner's personal skills; when those change, copy them in again.
 
 ## What you need
 - Visual Studio 2026 (or 2022) with the "Desktop development with C++" workload and "C++ AddressSanitizer"
@@ -39,9 +39,10 @@ The programs land in `build\windows-x64\bin\Debug\` and `build\windows-x64\bin\R
 | `odysseus.exe` | The game. For now it prints its version and exits; the window arrives in US-020. |
 | `odysseus_headless.exe` | The simulation without graphics. Becomes the console clan simulator in M1. |
 | `odysseus_tests.exe` | All automated tests. |
+| `luna_physics_tests.exe` | Luna Physics tests: fixed-point math, rotations, determinism (M1b). |
 
 ## Run
-`odysseus.exe` opens the game window (1280 x 720, resizable). Walk the hero with WASD, the arrow keys or a gamepad's left stick / D-pad. Options: `--quit-after <seconds>` closes it automatically, `--screenshot <file.bmp>` saves the last frame, `--log-dir <folder>` writes the log elsewhere, `--hold MoveRight:0.5:3` holds an intent between two times (scripted play).
+`odysseus.exe` opens the game window (1280 x 720, resizable). Walk the hero with WASD, the arrow keys or a gamepad's left stick / D-pad. Press E, Space or the gamepad's South button to throw a spear: face west for the straw target, north for the one behind the boulder. Options: `--quit-after <seconds>` closes it automatically, `--screenshot <file.bmp>` saves the last frame, `--log-dir <folder>` writes the log elsewhere, `--hold MoveRight:0.5:3` holds an intent between two times (scripted play).
 
 ```powershell
 .\build\windows-x64\bin\Release\odysseus.exe
@@ -67,7 +68,7 @@ Every push to GitHub, on any branch, builds Debug and Release on a Windows machi
 | Folder | What |
 |---|---|
 | `src/core/` | Core: logging, asserts, math, random, ids |
-| `src/luna/platform/`, `src/luna/engine/` | **Luna**, our game-agnostic engine (ARC-09) |
+| `src/luna/platform/`, `src/luna/physics/`, `src/luna/engine/` | **Luna**, our game-agnostic engine (ARC-09, ARC-10): platform, deterministic 3D physics (ADR-017), engine |
 | `src/sim/`, `src/game/` | The Odysseus simulation and game |
 | `apps/` | The programs: odysseus.exe, odysseus_headless.exe |
 | `cmake/` | Layer rules and the include validator (ADR-016) |
@@ -81,14 +82,15 @@ The layer rules are in [CLAUDE.md](CLAUDE.md).
 
 ## Layer boundaries
 
-Each layer has its own CMake library target. A target links only the layers below it; `PUBLIC` dependencies also carry the lower layers' header paths to callers.
+Each layer has its own CMake library target. Luna Physics (`luna_physics`, added in M1b) sits between Core and the Engine and Simulation layers. A target links only the layers below it; `PUBLIC` dependencies also carry the lower layers' header paths to callers.
 
 | Target | Direct layer dependencies |
 |---|---|
 | `odysseus_core` | None |
 | `luna_platform` | `odysseus_core` |
-| `luna_engine` | `luna_platform` |
-| `odysseus_sim` | `odysseus_core` |
+| `luna_physics` | `odysseus_core` (from M1b) |
+| `luna_engine` | `luna_platform`, `luna_physics` (from M1b) |
+| `odysseus_sim` | `odysseus_core`, `luna_physics` (from M1b) |
 | `odysseus_game` | `luna_engine`, `odysseus_sim` |
 
 The game executable links `odysseus_game`; the headless executable links `odysseus_sim`. Luna stays independent of game and simulation code, and Simulation stays independent of graphics.

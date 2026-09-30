@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Codex / requirements | v1.3 / v1.4 |
-| Repository | `qa` @ `d88a924`, CI green on GitHub (the cloud Windows machine opened the real window too); `main` @ `15e512d` tagged **`m0-done`** |
+| Repository | `qa` @ `3f84f51`, CI green on GitHub (the cloud Windows machine opened the real window too); `main` @ `b98e293` tagged **`m0-done`** |
 | Milestone | **M0 complete** (exit review met, tagged). **M1 Luna engine: 1 of 5** |
 | Next | S-US-021 input intents |
 

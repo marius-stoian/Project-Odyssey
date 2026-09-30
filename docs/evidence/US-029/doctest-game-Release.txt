@@ -1,0 +1,12 @@
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(71): MESSAGE: target distance: 7.84961 m
+2026-09-30 00:10:38.523Z [INFO] Threw a flint spear facing West
+2026-09-30 00:10:38.524Z [INFO] Spear (flint) hit the straw target at (24.80, 32.75, 1.09) m, 12.7 m/s, 69.4 damage
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(114): MESSAGE: flight: 11 ticks, hand 1.41076 m, top 1.60638 m, hit at 1.08569 m, 12.7487 m/s
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(137): MESSAGE: flint spear: 69.2693 damage (formula 69.2693); wooden spear: 12.0102 (formula 12.0102)
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(158): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us029-materials/materials.json: materials.flint.hardness: must be between 1 and 10 (is 12)
+2026-09-30 00:10:38.527Z [INFO] Threw a flint spear facing North
+2026-09-30 00:10:38.527Z [INFO] Spear (flint) hit a rock at (32.50, 26.00, 1.36) m, 12.6 m/s, 0.0 damage
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(177): MESSAGE: hit a rock at (32.5, 26, 1.35996)
+[doctest] test cases:  4 |  4 passed | 0 failed | 4 skipped
+[doctest] assertions: 49 | 49 passed | 0 failed |
+[doctest] Status: SUCCESS!
