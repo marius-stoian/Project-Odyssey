@@ -10,6 +10,7 @@ const char* memoryKindName(MemoryKind kind) {
     switch (kind) {
     case MemoryKind::Gift: return "gift";
     case MemoryKind::Theft: return "theft";
+    case MemoryKind::Death: return "death";
     default: return "?";
     }
 }

@@ -7,6 +7,7 @@
 #include "calendar.h"
 #include "chronicle.h"
 #include "clan.h"
+#include "life.h"
 #include "needs.h"
 #include "person.h"
 
@@ -26,16 +27,14 @@ struct SimConfig {
     ClanConfig clan;
     NameList names;
     SocialConfig social;
+    LifeConfig life;
 };
 
 SimConfig loadSimConfig(const std::filesystem::path& dataDirectory);
 
 // Separate random streams per system (Charter rule 6): adding a random call in one system
 // never changes the numbers another system sees.
-enum class Stream : std::uint64_t { Weather = 1, People = 2, Decisions = 3, Hunting = 4, Social = 5 };
-
-// How important chronicle entries are (0..100): deaths and births are always worth telling.
-inline constexpr int kImportanceDeath = 90;
+enum class Stream : std::uint64_t { Weather = 1, People = 2, Decisions = 3, Hunting = 4, Social = 5, Life = 6 };
 
 // The whole simulated world. No graphics, no operating system: it runs the same in the
 // game, in the headless runner and in tests, and the same seed gives the same history.
@@ -84,6 +83,15 @@ public:
     // What `who` thinks of `about`, -100..100.
     int opinion(int who, int about) const;
 
+    // Life events (US-014), called by the daily rules; tests may call them too.
+    // Two adults become partners.
+    void pair(int a, int b);
+    // A hunter kills a mammoth: a feast, and the clan's first is remembered.
+    void bringDownMammoth(int hunter);
+    // Pairs of people who feud now (smaller id first).
+    const std::vector<std::pair<int, int>>& feuds() const { return feuds_; }
+    int mammothsKilled() const { return mammoths_; }
+
     // One number summarising the entire state; equal worlds have equal hashes (ADR-011).
     std::uint64_t hash() const;
 
@@ -95,10 +103,16 @@ private:
     void decideAll(int nextHour);
     void practise(int& practice, int& skill);
     void changeOpinion(Person& who, int about, int change);
-    Person* favouriteAwake(const Person& person);
+    Person* favouriteAwake(const Person& person, bool courting = false);
+    bool courtable(const Person& a, const Person& b) const;
     std::int64_t today() const { return date().day; }
     void checkSurvival(Person& person, bool winter);
-    void die(Person& person, CauseOfDeath cause);
+    void die(Person& person, CauseOfDeath cause, int other = -1);
+    void lifeEvents();
+    void pairUp();
+    void updateFeuds();
+    void giveBirth(Person& mother, std::vector<Person>& newborns);
+    bool closeKin(const Person& a, const Person& b) const;
 
     std::uint64_t seed_;
     SimConfig config_;
@@ -109,6 +123,12 @@ private:
     core::Pcg32 decisionRandom_;
     core::Pcg32 huntRandom_;
     core::Pcg32 socialRandom_;
+    core::Pcg32 lifeRandom_;
+    std::vector<std::pair<int, int>> feuds_;
+    int mammoths_ = 0;
+    bool storeRanOut_ = false; // while true, another empty evening is not news
+    int forageLeft_ = 0;       // what the land still offers today (carrying capacity)
+    int gameLeft_ = 0;
     int hour_ = 1; // the hour of the day now starting (1..24)
     bool dailyLife_ = true;
     int temperature_ = 0;

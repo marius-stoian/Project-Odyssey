@@ -29,9 +29,11 @@ struct ActionConfig {
     int reserveDays = 10;        // the store feels "low" below this many days of meals
     int spoilPercent = 2;        // of the store lost each day
     std::array<int, 4> gatherYield{2, 3, 2, 0}; // meals per hour of gathering, by season
+    std::array<int, 4> forageDaily{50, 80, 60, 0}; // meals the land offers per day, by season
     int gatherSnack = 4;         // Hunger a gatherer gains by nibbling
     int huntSuccessPercent = 30; // chance per hour of hunting to catch small game
     int huntYield = 6;           // meals from small game
+    int gameDaily = 4;           // small game the valley offers per day
     int mammothPerMille = 2;     // chance per hour of hunting to meet a mammoth, in thousandths
     int mammothYield = 120;
     int mammothDeathPercent = 10; // chance a mammoth kills the hunter

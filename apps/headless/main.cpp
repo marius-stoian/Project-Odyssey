@@ -4,6 +4,8 @@
 //   --days <number>   how many in-game days to run (default one year)
 //   --data <folder>   content folder (default: the repository's assets/data)
 //   --inspect <name or id>  print that person's last decision: every action's score (US-012)
+//   --chronicle [year]       print the chronicle (one year, or all years) (US-014)
+//   --threshold <0..100>     the importance an event needs to be printed (default 50)
 #include "core/version.h"
 #include "sim/ai.h"
 #include "sim/world.h"
@@ -19,6 +21,19 @@ int main(int argc, char* argv[]) {
     long long days = -1;
     std::string dataDirectory = ODYSSEUS_DATA_DIR;
     std::string inspect;
+    bool chronicle = false;
+    int chronicleYear = 0;
+    int threshold = odysseus::sim::kDefaultChronicleThreshold;
+    for (int i = 1; i < argc; ++i) {
+        const std::string_view flag = argv[i];
+        if (flag == "--chronicle") {
+            chronicle = true;
+            // An optional year may follow.
+            if (i + 1 < argc && std::string_view(argv[i + 1]).find_first_not_of("0123456789") == std::string_view::npos) {
+                chronicleYear = std::stoi(argv[++i]);
+            }
+        }
+    }
     for (int i = 1; i + 1 < argc; ++i) {
         const std::string_view name = argv[i];
         if (name == "--seed") {
@@ -29,6 +44,8 @@ int main(int argc, char* argv[]) {
             dataDirectory = argv[++i];
         } else if (name == "--inspect") {
             inspect = argv[++i];
+        } else if (name == "--threshold") {
+            threshold = std::stoi(argv[++i]);
         }
     }
 
@@ -43,6 +60,13 @@ int main(int argc, char* argv[]) {
                   << ", day " << world.date().dayOfSeason << ", " << world.temperature() << " C\n"
                   << "Population " << world.population() << ", food in store " << world.food() << " meals\n"
                   << "World hash: " << world.hash() << '\n';
+        if (chronicle) {
+            std::cout << "\nChronicle" << (chronicleYear > 0 ? " of year " + std::to_string(chronicleYear) : std::string())
+                      << " (importance " << threshold << " and above):\n";
+            for (const auto& entry : world.chronicle().select(chronicleYear, threshold)) {
+                std::cout << "  " << odysseus::sim::formatEntry(entry) << '\n';
+            }
+        }
         if (!inspect.empty()) {
             const odysseus::sim::Person* person = world.findPerson(inspect);
             if (person == nullptr) {

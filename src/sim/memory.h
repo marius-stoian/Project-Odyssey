@@ -10,7 +10,7 @@
 namespace odysseus::sim {
 
 // What a memory is about (US-013). More kinds join as the clan's life grows.
-enum class MemoryKind { Gift, Theft, Count };
+enum class MemoryKind { Gift, Theft, Death, Count };
 
 const char* memoryKindName(MemoryKind kind);
 
