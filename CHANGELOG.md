@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-133: Weapon classes and the starter set (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- Game: `WeaponBehaviour` with `MeleeBehaviour` and `RangedBehaviour` for the 8 classes; projectiles for bow, thrown, staff, gun; 16 starters cycled with Shift; held icon in the hero's hand; `atlas --starters` contact sheet.
+- Tests: US-133 Classes, Starters fight, Starter set, In hand; US-029 tests kept. Evidence `docs/evidence/US-133/`; plan `docs/plans/US-133.md`.
+- Verification: `tools/verify.ps1 -Story US-133`: zero warnings, ctest 25/25 in Debug and Release.
+- Known gap: held icons are mirrored for west, not rotated (no renderer rotation).
+
 ## US-132: Effect player (Mraw) — 2026-09-30
 
 **State:** Done; merged into `qa`.
