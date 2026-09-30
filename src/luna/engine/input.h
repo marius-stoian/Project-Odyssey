@@ -25,6 +25,8 @@ enum class Intent {
     Attack,
     // Inspect (US-136): the right mouse button, or scripted; look at the plant next to the hero.
     Inspect,
+    // DevTools (US-083): F12 opens the developer panels in Debug builds; in Release nothing happens.
+    DevTools,
     Count
 };
 

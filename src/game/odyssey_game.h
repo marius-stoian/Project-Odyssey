@@ -29,6 +29,10 @@
 
 #include "core/random.h"
 
+#include "sim/region.h"
+#include "sim/region_save.h"
+#include "sim/rivals.h"
+#include "sim/save.h"
 #include "sim/world.h"
 
 #include <array>
@@ -103,6 +107,27 @@ public:
     void setClanSpeed(int ticksPerTick) { clanSpeed_ = ticksPerTick < 1 ? 1 : ticksPerTick; }
     const sim::World* clan() const { return clan_.get(); }
     const ClanView& clanView() const { return clanView_; }
+    // A generated region (US-040..US-042, D-31): the land is made from the seed and played as a 256-tile level, with the
+    // clan at the start and two rival clans far away. The Editor is off in a region (it is for hand-made levels).
+    void loadRegion(std::uint64_t seed);
+    const sim::Region* region() const { return region_.get(); }
+    const sim::Rivals* rivals() const { return rivals_.get(); }
+    // Saves (US-080): the clan's world (and the region's changes) are written each time an in-game day ends, into this folder
+    // (by default the user's save folder). `loadAutosave` brings them back; a damaged file falls back to the newest backup.
+    void setSaveDirectory(const std::filesystem::path& directory) { saveDirectory_ = directory; }
+    const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
+    bool autosave();              // false when it could not write
+    bool loadAutosave();          // false when there is nothing to load
+    double lastAutosaveMilliseconds() const { return lastAutosaveMs_; }
+    int autosaves() const { return autosaves_; }
+    const std::string& message() const { return message_; }
+    // Developer tools (US-083): F12 in Debug builds only. Click a person to inspect them; set the clan's speed or skip a day.
+    bool devToolsOpen() const { return devToolsOpen_; }
+    int selectedPerson() const { return selectedPerson_; }
+    void setClanSpeedFromTools(int ticksPerTick) { setClanSpeed(ticksPerTick); }
+    int clanSpeed() const { return clanSpeed_; }
+    // Runs the clan to the start of the next day at once.
+    void skipDay();
     // The weather (US-138): a seeded cycle, drawn over the world and under the interface. `--seed` (or this) fixes it.
     void setWeatherSeed(std::uint64_t seed);
     // Starts under the named weather (false when weather.json has none of that name).
@@ -201,6 +226,21 @@ private:
     std::filesystem::path dataDirectory_;
     bool clanEnabled_ = false;
     int clanSpeed_ = 1;
+    std::unique_ptr<sim::Region> region_;
+    std::unique_ptr<sim::Rivals> rivals_;
+    std::filesystem::path saveDirectory_;
+    std::int64_t lastSavedDay_ = -1;
+    double lastAutosaveMs_ = 0.0;
+    int autosaves_ = 0;
+    std::string message_;
+    int messageTicks_ = 0;
+    bool devToolsOpen_ = false;
+    int selectedPerson_ = -1;
+    void say(const std::string& text);
+    void updateDevTools(const luna::engine::Intents& intents);
+    void drawDevTools(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    void drawRivals(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
+    int figureAt(const luna::engine::Rect& view, double alpha) const; // the person under the pointer, -1 for nobody
     std::unique_ptr<sim::World> clan_;
     ClanView clanView_;
     std::optional<LayerSheets> layerSheets_;

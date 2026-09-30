@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M4: Region, tools and saves — US-040, US-041, US-042, US-043, US-080, US-083 (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing); merged into local `qa`.
+
+- `sim::Region` (seeded, integer-only, chunked), resources by biome with berry regrowth, `Rivals` (two clans, levels of detail, moving camps), region delta saves, `ChunkStreamer` (Luna), `levelFromRegion`; `--region`, `--save-dir`, `--load`; autosave at each day's end with backups; F12 developer tools (Debug only); `writeSaveText` shared by the world and region saves.
+- D-31 records the choices. Tests: `tests/sim/region_test.cpp`, `tests/game/m4_test.cpp`. Evidence `docs/evidence/US-040`, `US-083`; plan `docs/plans/M4-region-tools-saves.md`; exit review `docs/gates/M4.md`.
 ## M3: The clan on screen — US-030, US-032, US-031 (Avengers) — 2026-10-01
 
 **State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing until M4); merged into local `qa`. Full verification and CI at the M4 gate.

@@ -964,3 +964,21 @@ A second idea is in the people themselves: a *layer* is just a picture of the sa
 **Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan-speed 40`: twenty people, each different, moving between the fire, the gathering ground and the hunting ground; hover one. Then add a fourth hair style in `drawHair` (style 3) and a colour to `kHairs`.
 
 **Check yourself.** Why does `ClanView` keep a *previous* and a *current* position for every person?
+
+
+## M4: the region, rivals and saves (2026-10-01)
+
+**The idea: a world that is a function.** The whole region is 65,536 tiles, yet a saved game stores only a number (the *seed*) and a few changes. How? Every tile is *computed*, not stored: `biomeAt(x, y)` takes the seed and the place and always gives the same answer. Ask for the same tile a million times, on any machine, and the answer never differs. Such a function is called *pure*. Because it is pure, the game can make a piece of land (a *chunk*) only when somebody walks near it, forget it when they leave, and make it again later, identical. Saving then means: the seed, plus a list of what *changed* (this berry bush was picked on day 100).
+
+```cpp
+Biome Region::biomeAt(int x, int y) const;                    // pure: seed + place -> land
+std::optional<Resource> Region::resourceAt(int x, int y) const;  // pure too
+```
+
+The noise that shapes the land uses only whole numbers (a hashed lattice, blended with a smooth step in integers), for the same reason the physics does: whole-number sums never differ between machines, so seed 7 is the same region for everyone, forever. The rival clans use a second idea, *levels of detail*: what is far from you does not need 20 simulation steps a second; one a second is enough to see them grow, shrink and move, and costs one twentieth.
+
+**Where to look.** `Region::generatedBiome` and `noise` in [src/sim/region.cpp](../src/sim/region.cpp); `Rivals::tick` in [src/sim/rivals.cpp](../src/sim/rivals.cpp); `saveRegion` in [src/sim/region_save.cpp](../src/sim/region_save.cpp); `ChunkStreamer::update` in [src/luna/engine/chunk_streamer.cpp](../src/luna/engine/chunk_streamer.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --region 1` and `--region 2`; press F12 (Debug build) and click a person. Change `lakeLevel` in `assets/data/sim/region.json` from 140 to 300 and see how much more water the region has.
+
+**Check yourself.** Why can the game make a chunk "whenever somebody walks near it" without ever storing it, and what would break if `biomeAt` used the time of day?
