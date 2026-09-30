@@ -17,10 +17,13 @@
 #include "game/enemy.h"
 #include "game/hero.h"
 #include "game/pickups.h"
+#include "game/plants.h"
 #include "game/level.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
 #include "game/weapons.h"
+
+#include "core/random.h"
 
 #include <array>
 #include <cstdint>
@@ -74,6 +77,15 @@ public:
     // "Hotbar full" is shown for a moment when a pickup is touched with no free slot.
     bool hotbarFullShown() const { return fullTicks_ > 0; }
     const std::vector<Projectile>& projectiles() const { return projectiles_; }
+    // Plants (US-136): those of the level as they are now, growing or waiting to grow back.
+    const std::vector<WorldPlant>& plants() const { return plants_; }
+    std::size_t plantsGrowing() const;
+    // What Interact (with empty hands) or Inspect (the right mouse button) showed for the plant
+    // next to the hero, for 3 seconds; empty when nothing is shown.
+    bool inspecting() const { return inspection_.ticks > 0; }
+    const std::string& inspectedName() const { return inspection_.name; }
+    const std::string& inspectedText() const { return inspection_.text; }
+    const PlantArt& plantArt() const { return plantArt_; }
     // Arrows, bolts and thrown weapons in flight or stuck in the ground (US-140): physics arcs with height.
     const std::vector<ArcShot>& arcShots() const { return arcShots_; }
     // Mouse aiming (US-139): while a catalog weapon is held and the pointer is over the picture,
@@ -159,6 +171,27 @@ private:
     // Along a unit vector. distancePixels is how far the hero aims (the pointer); chestHeight: aimed with keys, no pointer.
     void attackWith(const WeaponDef& weapon, double dirX, double dirY, double distancePixels, bool chestHeight);
     std::vector<ArcShot> arcShots_;
+
+    // Plants (US-136).
+    PlantArt plantArt_;
+    std::vector<WorldPlant> plants_;
+    core::Pcg32 plantRng_{1, 5}; // the stream "plants": where destroyed plants grow back (Charter rule 6)
+    struct Inspection {
+        std::string name;
+        std::string text;
+        int plantId = 0;
+        int ticks = 0;
+    } inspection_;
+    void populatePlants();
+    void destroyPlant(std::size_t index);
+    void tickPlants();
+    bool inspectNearestPlant();
+    bool plantSpotFree(int cellX, int cellY) const;
+    // Everything a shot can hit: the enemies, then the big plants still growing (`plantOf` maps a target's
+    // index past the enemies to the plant).
+    std::vector<Target> shotTargets(std::vector<std::size_t>& plantOf) const;
+    void drawPlants(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha, bool behindHero) const;
+    void drawInspection(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
     // acingBefore: how the hero faced before this tick's walking turned it (the pointer rules the facing, steadily).
     void updateAim(const luna::engine::Pointer& pointer, bool fallen, Facing facingBefore);
     void drawAim(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;

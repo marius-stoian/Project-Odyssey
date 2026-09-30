@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-136: Plants (Avengers) — 2026-10-01
+
+**State:** Done on local verification (Debug and Release); merged into local `qa`, pushed with the M2d milestone gate.
+
+- Level format version 2 gains `plants`; the Editor has a **Plant** tool and a palette of all 153 plants (36 to a page); the toolbar button **Weapon** is now **Arms**.
+- Game: plants stand in the world; big ones (bushes, trees) block walking and flat shots through a new obstacle layer in Luna's `TileMap`; Interact with empty hands or the right mouse button (new intent `Inspect`) shows a plant's name and text for 3 s; any weapon hit destroys a plant with a leaf burst, an edible one heals 10 HP; 15 s later the same plant grows back at a random free cell in the camera view (seeded PCG32), with a growth effect.
+- D-27 records the small choices. Tests: US-136 Level format, Editor, Place and block, Inspect, Chop, Eat, Regrow. Evidence `docs/evidence/US-136/`; plan `docs/plans/US-136.md`; guide `docs/guides/editor.md`.
 ## Hero orientation by the pointer, no sprite flicker (Avengers) — 2026-10-01 (follow-up to US-139, D-26)
 
 **State:** Done on local verification (Debug and Release, 25/25); merged into local `qa`, pushed with the M2d milestone gate.

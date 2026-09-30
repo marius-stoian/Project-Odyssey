@@ -69,7 +69,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-139 | US-139 | M2d | Done | 2026-10-01 |
 | S-US-140 | US-140 | M2d | Done | 2026-10-01 |
 | S-US-141 | US-141 | M2d | Done | 2026-10-01 |
-| S-US-136 | US-136 | M2d | To do |  |
+| S-US-136 | US-136 | M2d | Done | 2026-10-01 |
 | S-US-137 | US-137 | M2d | To do |  |
 | S-US-138 | US-138 | M2d | To do |  |
 | X-M2d | - | M2d | To do |  |

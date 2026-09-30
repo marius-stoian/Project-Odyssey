@@ -6,6 +6,7 @@
 #include "game/editor_history.h"
 #include "game/level.h"
 #include "game/pickups.h"
+#include "game/plants.h"
 #include "luna/engine/camera.h"
 #include "luna/engine/input.h"
 #include "luna/engine/renderer.h"
@@ -31,10 +32,11 @@ struct EditorTextures {
     luna::engine::Texture ui;
     const ArtSet* art = nullptr;
     const WeaponArt* weapons = nullptr; // the weapon icons, for pickups and the weapon palette (US-134)
+    const PlantArt* plants = nullptr;   // the plant pictures, for the plant palette and placed plants (US-136)
 };
 
 // What a left click on the map does.
-enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon };
+enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant };
 
 const char* toolName(EditorTool tool);
 
@@ -77,6 +79,14 @@ public:
     void setWeapon(int weapon) { weapon_ = weapon; }
     // The pickup whose icon covers a screen point, if any.
     std::optional<int> pickupAt(int screenX, int screenY) const;
+    // Plants (US-136): the Plant tool places the chosen plant of Definitions::plants at the clicked cell (its feet
+    // in the middle of the cell's bottom edge); the palette shows them by picture, 36 to a page.
+    int plant() const { return plant_; }
+    void setPlant(int plant) { plant_ = plant; }
+    int plantPage() const { return plantPage_; }
+    static constexpr int kPlantsPerPage = 36;
+    // The placed plant whose picture covers a screen point, if any.
+    std::optional<int> plantAt(int screenX, int screenY) const;
     // The placed character selected with the Select tool (its id), if any.
     std::optional<int> selected() const { return selected_; }
     void select(std::optional<int> id);
@@ -133,6 +143,9 @@ private:
     void changeCharacters(const std::string& what, std::vector<PlacedCharacter> after, int nextIdAfter);
     PlacedCharacter* find(int id);
     const PlacedPickup* findPickup(int id) const;
+    const PlacedPlant* findPlant(int id) const;
+    void changePlants(const std::string& what, std::vector<PlacedPlant> after, int nextIdAfter);
+    void buildPlantPalette();
     void changePickups(const std::string& what, std::vector<PlacedPickup> after, int nextIdAfter);
     void removeSelected();
     void buildProperties();
@@ -181,6 +194,10 @@ private:
     std::unique_ptr<luna::engine::Panel> characterPalette_;
     std::unique_ptr<luna::engine::Panel> weaponPalette_;
     std::vector<std::string> weaponNames_;
+    std::unique_ptr<luna::engine::Panel> plantPalette_;
+    int plant_ = 0;
+    int plantPage_ = 0;
+    int plantPageWanted_ = 0; // a page button sets this; the palette is rebuilt at the start of the next tick
     int weapon_ = 0;
     std::unique_ptr<luna::engine::Panel> properties_;
     int propertiesFor_ = -1;       // the character the properties panel shows (-1: none)
@@ -194,6 +211,9 @@ private:
     // A pickup being dragged with the Select tool: the list before.
     bool movingPickup_ = false;
     std::vector<PlacedPickup> movingPickupsBefore_;
+    // A plant being dragged with the Select tool: the list before.
+    bool movingPlant_ = false;
+    std::vector<PlacedPlant> movingPlantsBefore_;
     bool movingStart_ = false; // the hero start marker is being dragged
     PixelPoint startBefore_;
 
