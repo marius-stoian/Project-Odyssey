@@ -451,15 +451,16 @@ std::filesystem::path backupPath(const std::filesystem::path& file, int number) 
     return std::filesystem::path(file.string() + ".bak" + std::to_string(number));
 }
 
-void saveWorld(const World& world, const std::filesystem::path& file) {
+void writeSaveText(const std::filesystem::path& file, const std::string& text) {
     namespace fs = std::filesystem;
+    if (file.has_parent_path()) fs::create_directories(file.parent_path());
     const fs::path temporary = fs::path(file.string() + ".tmp");
     {
         std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
         if (!out) {
             throw DataError(temporary, "(file)", "cannot be written");
         }
-        out << WorldArchive::toJson(world).dump(1);
+        out << text;
         out.flush();
         if (!out) {
             throw DataError(temporary, "(file)", "could not be written completely (is the disk full?)");
@@ -477,6 +478,10 @@ void saveWorld(const World& world, const std::filesystem::path& file) {
         fs::rename(file, backupPath(file, 1));
     }
     fs::rename(temporary, file); // the new save appears in one step
+}
+
+void saveWorld(const World& world, const std::filesystem::path& file) {
+    writeSaveText(file, WorldArchive::toJson(world).dump(1));
 }
 
 LoadedWorld loadWorld(const std::filesystem::path& file, const SimConfig& config) {

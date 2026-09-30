@@ -78,14 +78,14 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-032 | US-032 | M3 | Done | 2026-10-01 |
 | S-US-031 | US-031 | M3 | Done | 2026-10-01 |
 | X-M3 | - | M3 | Done (exit checks owed at M4) | 2026-10-01 |
-| K-M4 | - | M4 | To do |  |
-| S-US-040 | US-040 | M4 | To do |  |
-| S-US-041 | US-041 | M4 | To do |  |
-| S-US-042 | US-042 | M4 | To do |  |
-| S-US-043 | US-043 | M4 | To do |  |
-| S-US-080 | US-080 | M4 | To do |  |
-| S-US-083 | US-083 | M4 | To do |  |
-| X-M4 | - | M4 | To do |  |
+| K-M4 | - | M4 | Done | 2026-10-01 |
+| S-US-040 | US-040 | M4 | Done | 2026-10-01 |
+| S-US-041 | US-041 | M4 | Done | 2026-10-01 |
+| S-US-042 | US-042 | M4 | Done | 2026-10-01 |
+| S-US-043 | US-043 | M4 | Done | 2026-10-01 |
+| S-US-080 | US-080 | M4 | Done | 2026-10-01 |
+| S-US-083 | US-083 | M4 | Done | 2026-10-01 |
+| X-M4 | - | M4 | Built, exit checks owed | 2026-10-01 |
 | K-M5 | - | M5 | To do |  |
 | S-US-050 | US-050 | M5 | To do |  |
 | S-US-053 | US-053 | M5 | To do |  |

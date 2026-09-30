@@ -6,12 +6,15 @@
 #include "core/version.h"
 #include "game/art.h"
 #include "game/placeholder_art.h"
+#include "game/region_level.h"
 #include "luna/engine/physics_view.h"
 #include "luna/engine/ui.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <format>
+#include <cstdlib>
 #include <numbers>
 #include <string>
 
@@ -71,6 +74,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     dataDirectory_ = dataDirectory;
+    saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
@@ -104,6 +108,9 @@ void OdysseyGame::resetPlay() {
     effects_.clear();
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
     if (clanEnabled_) startClan();
+    if (region_) {
+        rivals_ = std::make_unique<sim::Rivals>(*region_, region_->start(), region_->seed() ^ 0x5151ULL, sim::loadSimConfig(dataDirectory_));
+    }
     projectiles_.clear();
     arcShots_.clear();
     attackCooldown_ = 0;
@@ -116,6 +123,10 @@ void OdysseyGame::resetPlay() {
 }
 
 void OdysseyGame::switchMode(Mode mode) {
+    if (mode == Mode::Editor && region_) {
+        say("The Editor is for hand-made levels; a generated region cannot be edited");
+        return;
+    }
     if (mode == mode_) {
         return;
     }
@@ -466,6 +477,248 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
     const luna::engine::Rect box{(kVirtualWidth - width) / 2, 20, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
+    if (!message_.empty()) {
+        const int messageWidth = luna::engine::UiPainter::textWidth(message_) + 8;
+        const luna::engine::Rect messageBox{std::max(2, (kVirtualWidth - messageWidth) / 2), 34, std::min(messageWidth, kVirtualWidth - 4), luna::engine::kGlyphHeight + 6};
+        painter.fill(messageBox, luna::engine::UiColor::Shade);
+        painter.outline(messageBox, luna::engine::UiColor::Gold);
+        painter.text(messageBox.x + 4, messageBox.y + 3, message_.substr(0, static_cast<std::size_t>((messageBox.width - 8) / luna::engine::kTextAdvance)), luna::engine::UiColor::Gold);
+    }
+}
+
+void OdysseyGame::say(const std::string& text) {
+    message_ = text;
+    messageTicks_ = 6 * 20;
+    core::logInfo(text);
+}
+
+// A generated region (US-040): the land, the level made from it, the clan at its start and two rivals far away.
+void OdysseyGame::loadRegion(std::uint64_t seed) {
+    region_ = std::make_unique<sim::Region>(seed, sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json"));
+    level_ = levelFromRegion(*region_, definitions_, catalogs_);
+    clanEnabled_ = true;
+    weatherSeed_ = WeatherCycle::seedFromText(level_.name);
+    editor_.levelChanged();
+    switchMode(Mode::Game);
+    resetPlay();
+    lastSavedDay_ = -1;
+    core::logInfo(std::format("Region {}: start at tile ({}, {}), {} chunks made for the start", seed, region_->start().x, region_->start().y, region_->loadedChunks()));
+}
+
+// Saves the clan's world, and the region's changes when there is a region: safely, with backups, and quickly (US-080 wants
+// under 200 ms; the time is logged and kept).
+bool OdysseyGame::autosave() {
+    if (!clan_) return false;
+    const auto started = std::chrono::steady_clock::now();
+    try {
+        sim::saveWorld(*clan_, saveDirectory_ / "clan.json");
+        if (region_) sim::saveRegion(*region_, saveDirectory_ / "region.json");
+    } catch (const std::exception& error) {
+        say(std::string("Autosave failed: ") + error.what());
+        return false;
+    }
+    lastAutosaveMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
+    ++autosaves_;
+    core::logInfo(std::format("Autosaved day {} in {:.1f} ms", clan_->date().day, lastAutosaveMs_));
+    if (lastAutosaveMs_ > 200.0) core::logWarning(std::format("The autosave took {:.0f} ms (more than the 200 ms it should take)", lastAutosaveMs_));
+    return true;
+}
+
+// Brings the autosave back. A damaged file is skipped for the newest intact backup, and a message says what happened.
+bool OdysseyGame::loadAutosave() {
+    const std::filesystem::path clanFile = saveDirectory_ / "clan.json";
+    const std::filesystem::path regionFile = saveDirectory_ / "region.json";
+    std::string notes;
+    try {
+        if (std::filesystem::exists(regionFile) || std::filesystem::exists(regionFile.string() + ".bak1")) {
+            sim::LoadedRegion loaded = sim::loadRegion(regionFile, sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json"));
+            for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
+            region_ = std::make_unique<sim::Region>(std::move(loaded.region));
+            level_ = levelFromRegion(*region_, definitions_, catalogs_);
+            clanEnabled_ = true;
+            weatherSeed_ = WeatherCycle::seedFromText(level_.name);
+            editor_.levelChanged();
+            switchMode(Mode::Game);
+            resetPlay();
+        }
+        if (!std::filesystem::exists(clanFile) && !std::filesystem::exists(clanFile.string() + ".bak1")) {
+            if (!notes.empty()) say(notes);
+            return region_ != nullptr;
+        }
+        sim::LoadedWorld loaded = sim::loadWorld(clanFile, sim::loadSimConfig(dataDirectory_));
+        for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
+        clan_ = std::make_unique<sim::World>(std::move(loaded.world));
+        if (!layerSheets_) layerSheets_ = makeLayerSheets();
+        PixelPoint camp = level_.heroStart;
+        for (const PlacedEffect& placed : level_.effects) {
+            if (placed.name == "flame") {
+                camp = placed.at;
+                break;
+            }
+        }
+        clanEnabled_ = true;
+        clanView_ = ClanView(camp);
+        clanView_.update(*clan_, map_);
+        lastSavedDay_ = clan_->date().day;
+        say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
+        return true;
+    } catch (const std::exception& error) {
+        say(std::string("Could not load the save: ") + error.what());
+        return false;
+    }
+}
+
+void OdysseyGame::skipDay() {
+    if (!clan_) return;
+    const std::uint64_t perDay = static_cast<std::uint64_t>(clan_->calendar().ticksPerDay());
+    clan_->runTicks(perDay - clan_->ticks() % perDay);
+    clanView_.update(*clan_, map_);
+}
+
+// The person under the pointer (by index into the clan's people), or -1.
+int OdysseyGame::figureAt(const luna::engine::Rect& view, double alpha) const {
+    if (!clan_ || pointerX_ < 0) return -1;
+    int found = -1;
+    double bestY = -1.0;
+    for (std::size_t i = 0; i < clanView_.figures().size(); ++i) {
+        const Figure& figure = clanView_.figures()[i];
+        if (!figure.present) continue;
+        const int feetX = static_cast<int>(std::lround(figure.feetX(alpha))) - view.x;
+        const int feetY = static_cast<int>(std::lround(figure.feetY(alpha))) - view.y;
+        const int height = figure.child ? kCharacterHeight * 3 / 4 : kCharacterHeight;
+        const int halfWidth = (figure.child ? kCharacterWidth * 3 / 4 : kCharacterWidth) / 2;
+        if (pointerX_ >= feetX - halfWidth && pointerX_ < feetX + halfWidth && pointerY_ >= feetY - height && pointerY_ <= feetY && figure.feetY(alpha) > bestY) {
+            found = static_cast<int>(i);
+            bestY = figure.feetY(alpha);
+        }
+    }
+    return found;
+}
+
+namespace {
+struct ToolButton {
+    const char* label;
+    int speed; // 0: skip a day
+};
+constexpr ToolButton kToolButtons[] = {{"1x", 1}, {"2x", 2}, {"4x", 4}, {"16x", 16}, {"Day", 0}};
+luna::engine::Rect toolButtonRect(int index) { return {6 + index * 34, 52, 32, 12}; }
+} // namespace
+
+// F12 (Debug builds only): open or close the panel; click a button for speed, or a person to inspect them.
+void OdysseyGame::updateDevTools(const luna::engine::Intents& intents) {
+#ifndef NDEBUG
+    if (intents.pressed(luna::engine::Intent::DevTools)) devToolsOpen_ = !devToolsOpen_;
+    if (!devToolsOpen_ || !clan_) return;
+    const luna::engine::Pointer& pointer = intents.pointer();
+    if (!pointer.wasPressed(luna::engine::PointerButton::Left) || !pointer.inside()) return;
+    for (int i = 0; i < 5; ++i) {
+        const luna::engine::Rect button = toolButtonRect(i);
+        if (pointer.x >= button.x && pointer.x < button.x + button.width && pointer.y >= button.y && pointer.y < button.y + button.height) {
+            if (kToolButtons[i].speed == 0) {
+                skipDay();
+            } else {
+                setClanSpeed(kToolButtons[i].speed);
+            }
+            return;
+        }
+    }
+    const int person = figureAt(camera_.view(), 1.0);
+    if (person >= 0) selectedPerson_ = person;
+#else
+    (void)intents; // a Release build has no developer tools: the key does nothing
+#endif
+}
+
+void OdysseyGame::drawDevTools(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
+#ifndef NDEBUG
+    if (!devToolsOpen_ || !clan_) return;
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const bool somebody = selectedPerson_ >= 0 && selectedPerson_ < static_cast<int>(clan_->people().size());
+    const luna::engine::Rect panel{2, 40, 236, somebody ? 224 : 96};
+    painter.fill(panel, luna::engine::UiColor::Shade);
+    painter.outline(panel, luna::engine::UiColor::Gold);
+    painter.text(panel.x + 4, panel.y + 3, "DEV TOOLS  F12 closes", luna::engine::UiColor::Gold);
+    for (int i = 0; i < 5; ++i) {
+        const luna::engine::Rect button = toolButtonRect(i);
+        painter.fill(button, kToolButtons[i].speed == clanSpeed_ ? luna::engine::UiColor::Selected : luna::engine::UiColor::Panel);
+        painter.outline(button, luna::engine::UiColor::Border);
+        painter.text(button.x + 4, button.y + 3, kToolButtons[i].label, luna::engine::UiColor::Text);
+    }
+    int y = panel.y + 28;
+    const auto line = [&](const std::string& text, luna::engine::UiColor colour = luna::engine::UiColor::Text) {
+        painter.text(panel.x + 4, y, text, colour);
+        y += luna::engine::kLineHeight;
+    };
+    line(std::format("speed {}x   day {}   people {}", clanSpeed_, clan_->date().day, clan_->population()));
+    if (rivals_) {
+        for (const sim::RivalClan& rival : rivals_->clans()) {
+            const sim::Tile here{static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize};
+            const char* tier[] = {"active", "nearby", "distant"};
+            line(std::format("{}: {} people, {} tiles, {}", rival.name, rival.world->population(), sim::Rivals::distanceTiles(rival.camp, here),
+                             tier[static_cast<int>(rivals_->tierOf(rival, here))]), luna::engine::UiColor::Dim);
+        }
+    }
+    y += 2;
+    if (selectedPerson_ >= 0 && selectedPerson_ < static_cast<int>(clan_->people().size())) {
+        const sim::Person& person = clan_->people()[static_cast<std::size_t>(selectedPerson_)];
+        line(std::format("{}  #{}  age {}  {}", person.name, person.id, person.ageYears(clan_->calendar().daysPerYear()), person.alive ? "alive" : "dead"), luna::engine::UiColor::Gold);
+        line(std::format("needs: hunger {} energy {} warmth {} social {}", person.needs[sim::Need::Hunger], person.needs[sim::Need::Energy], person.needs[sim::Need::Warmth], person.needs[sim::Need::Social]));
+        line(std::format("doing: {}   health {}", sim::actionName(person.action), person.health == sim::Health::Well ? "well" : (person.health == sim::Health::Sick ? "sick" : "injured")));
+        // What the AI scored last hour, best first.
+        std::vector<std::pair<int, int>> scores;
+        for (std::size_t a = 0; a < sim::kActionCount; ++a) scores.push_back({person.lastDecision.scores[a], static_cast<int>(a)});
+        std::sort(scores.begin(), scores.end(), [](const auto& l, const auto& r) { return l.first != r.first ? l.first > r.first : l.second < r.second; });
+        std::string ai = "AI:";
+        for (int i = 0; i < 4; ++i) ai += std::format(" {} {}", sim::actionName(static_cast<sim::Action>(scores[static_cast<std::size_t>(i)].second)), scores[static_cast<std::size_t>(i)].first);
+        line(ai);
+        line(std::format("memories ({}):", person.memories.size()), luna::engine::UiColor::Dim);
+        const std::size_t first = person.memories.size() > 4 ? person.memories.size() - 4 : 0;
+        for (std::size_t m = first; m < person.memories.size(); ++m) {
+            const sim::Memory& memory = person.memories[m];
+            const std::string other = memory.subject == person.id ? "someone" : clan_->people().at(static_cast<std::size_t>(memory.subject)).name;
+            line(std::format(" {} {:+d} by {} (day {})", sim::memoryKindName(memory.kind), memory.feeling, other, memory.day));
+        }
+        // Who they like most and least.
+        std::vector<std::pair<int, int>> opinions;
+        for (std::size_t o = 0; o < person.opinions.size(); ++o) {
+            if (static_cast<int>(o) != person.id && clan_->people()[o].alive) opinions.push_back({person.opinions[o], static_cast<int>(o)});
+        }
+        std::sort(opinions.begin(), opinions.end());
+        line("relationships:", luna::engine::UiColor::Dim);
+        if (!opinions.empty()) {
+            line(std::format(" likes {} ({:+d})", clan_->people()[static_cast<std::size_t>(opinions.back().second)].name, opinions.back().first));
+            line(std::format(" dislikes {} ({:+d})", clan_->people()[static_cast<std::size_t>(opinions.front().second)].name, opinions.front().first));
+        }
+        // The chosen person is framed in the world.
+        const Figure& figure = clanView_.figures()[static_cast<std::size_t>(selectedPerson_)];
+        if (figure.present) {
+            const int feetX = static_cast<int>(std::lround(figure.feetX(alpha))) - view.x;
+            const int feetY = static_cast<int>(std::lround(figure.feetY(alpha))) - view.y;
+            painter.outline({feetX - 17, feetY - kCharacterHeight - 1, kCharacterWidth + 2, kCharacterHeight + 2}, luna::engine::UiColor::Gold);
+        }
+    } else {
+        line("click a person to inspect them", luna::engine::UiColor::Dim);
+    }
+#else
+    (void)renderer;
+    (void)view;
+    (void)alpha;
+#endif
+}
+
+// The rival clans' camps: a small fire and the clan's name and size.
+void OdysseyGame::drawRivals(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const {
+    if (!rivals_) return;
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    for (const sim::RivalClan& rival : rivals_->clans()) {
+        const int x = rival.camp.x * kTileSize + kTileSize / 2 - view.x;
+        const int y = rival.camp.y * kTileSize + kTileSize / 2 - view.y;
+        if (x < -80 || y < -40 || x > kVirtualWidth + 80 || y > kVirtualHeight + 40) continue;
+        drawEffectPicture(renderer, effectArt_, "flame", {x - 12, y - 24, 24, 24});
+        const std::string label = std::format("{} ({})", rival.name, rival.world->population());
+        painter.fill({x - luna::engine::UiPainter::textWidth(label) / 2 - 2, y - 36, luna::engine::UiPainter::textWidth(label) + 4, 10}, luna::engine::UiColor::Shade);
+        painter.text(x - luna::engine::UiPainter::textWidth(label) / 2, y - 35, label, luna::engine::UiColor::Gold);
+    }
 }
 
 void OdysseyGame::setWeatherSeed(std::uint64_t seed) {
@@ -908,7 +1161,16 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
         clanView_.update(*clan_, map_);
+        // An in-game day ended: save (US-080).
+        const std::int64_t day = clan_->date().day;
+        if (day != lastSavedDay_) {
+            if (lastSavedDay_ >= 0) autosave();
+            lastSavedDay_ = day;
+        }
     }
+    if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});
+    if (messageTicks_ > 0 && --messageTicks_ == 0) message_.clear();
+    updateDevTools(intents);
     // After a fall the hero waits out a short fade, then starts again at the hero start.
     const bool fallen = respawnTicks_ > 0;
     if (fallen && --respawnTicks_ == 0) {
@@ -946,7 +1208,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     tickPlants();
 
     // Attack (the left button) goes toward the pointer; Interact goes along the facing, as before.
-    const bool mouseAttack = heldWeapon() != nullptr && aiming_ && intents.held(luna::engine::Intent::Attack);
+    const bool mouseAttack = heldWeapon() != nullptr && aiming_ && intents.held(luna::engine::Intent::Attack) && !devToolsOpen_;
     if (!fallen && heldWeapon() != nullptr && (mouseAttack || intents.pressed(luna::engine::Intent::Interact))) {
         double dirX = aimDx_;
         double dirY = aimDy_;
@@ -1274,9 +1536,11 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     effects_.draw(renderer, view);
     drawWeather(renderer);
     drawInspection(renderer, view);
+    drawRivals(renderer, view);
     drawClanDetails(renderer, view, alpha);
     drawHud(renderer);
     drawClanHud(renderer);
+    drawDevTools(renderer, view, alpha);
     drawModeLabel(renderer);
 }
 
