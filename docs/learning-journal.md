@@ -671,3 +671,22 @@ for (int y = 0; y < std::min(level.height, out.height); ++y)
 **Try it (15 minutes).** Follow [the Editor guide](guides/editor.md): make a new level, paint a lake, place a troll, move the START marker, save, and press F1.
 
 **Check yourself.** What would go wrong if `resized` called `ground.resize(newWidth * newHeight)` and nothing else?
+
+## US-130: Content catalogs from the new sheets (2026-09-30)
+
+**What we built.** Your seven new sheets are cut into a second atlas (653 items: 150 weapons, 153 plants, 50 animals, 200 effects, 100 weather types), with a catalog for each in `assets/data/`. Numbered review sheets are in `docs/evidence/US-130/`.
+
+**The idea: reading data tables with `std::map` and validating them.** A catalog is a list of small structs read from JSON. Every field is checked as it is read, and an error names the file and the exact field, so a typo in `weapons.json` says where it is instead of crashing later:
+
+```cpp
+def.weaponClass = static_cast<WeaponClass>(f.choice("class", kClassNames)); // "sword" -> 0 ... "gun" -> 7
+// a wrong value throws: weapons.json: weapons[0].class: must be one of "sword", "axe", ...
+```
+
+The atlas keeps a `std::map<std::string, ContentFrame>`: from a name ("iron sword", "spark.2") to its page and cell. A map keeps its keys sorted and finds one in a few steps, which is plenty for a few thousand frames.
+
+**Where to look.** `loadCatalogs` in [src/game/catalogs.cpp](../src/game/catalogs.cpp); `cutContent` and `makeFrame` in [src/game/content_art.cpp](../src/game/content_art.cpp).
+
+**Try it (15 minutes).** Open `docs/evidence/US-130/icons.png` and `icons.md`, pick a weapon you like, find it in `assets/data/weapons.json` and set its `"starter"` to true. Run `odysseus_game_tests -tc="US-130*"`: which check now fails, and why?
+
+**Check yourself.** Why does the catalog loader check that every `frame` exists in the atlas, rather than letting the game find out when it draws?

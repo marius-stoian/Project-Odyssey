@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-130: Content catalogs from the new sheets (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- Luna `image_ops`: `keyAlpha`, `keyBrightness`, `removeColour`, `keepMainFigure`.
+- Game: content atlas (`content_art.{h,cpp}`: pages, cut list, cutting, save/load, numbered review sheets) and catalogs (`catalogs.{h,cpp}`: weapons, plants, animals, effects, weather; validated, frames checked against the atlas).
+- `odysseus_atlas` cuts `assets/sprites/content-cuts.json` (653 items, 1,191 frames) into `assets/sprites/atlas/content-*.png` + `content.json`; `--content-preview`.
+- Data: `weapons.json` (150, 16 starters), `plants.json` (153), `animals.json` (50, 20 enemies), `effects.json` (200), `weather.json` (101); `tools/art/` scripts that measured the sheets and wrote the first catalogs; the seven sheets are in `assets/sprites/`.
+- Evidence: `docs/evidence/US-130/` (numbered sheet and name list per page); plan `docs/plans/US-130.md`.
+- Verification: `tools/verify.ps1 -Story US-130`: Debug and Release zero warnings, ctest 25/25 in both (new cases US-130 Cut, Keys, Valid, Review).
+
 ## K-M2d: Kick off M2d (Mraw) — 2026-09-30
 
 **State:** Done; merged into `qa`.

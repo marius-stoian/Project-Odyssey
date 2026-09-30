@@ -152,6 +152,8 @@ add_library(odysseus_game STATIC
     src/game/sword.cpp
     src/game/enemy.cpp
     src/game/art.cpp
+    src/game/content_art.cpp
+    src/game/catalogs.cpp
     src/game/level.cpp
     src/game/editor.cpp
     src/game/editor_history.cpp)
@@ -282,7 +284,8 @@ add_executable(odysseus_game_tests
     tests/game/modes_test.cpp
     tests/game/paint_test.cpp
     tests/game/place_test.cpp
-    tests/game/settings_test.cpp)
+    tests/game/settings_test.cpp
+    tests/game/content_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
