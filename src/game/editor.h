@@ -77,6 +77,25 @@ public:
     // The character whose picture covers a screen point (the one drawn last, on top), if any.
     std::optional<int> characterAt(int screenX, int screenY) const;
 
+    // Level settings (US-126), each one step of Undo.
+    void setLevelName(const std::string& name);
+    void setLevelSize(int width, int height);  // keeps painted cells; drops characters outside
+    void setDefaultGround(int tile);
+    void moveHeroStart(PixelPoint feet);
+    bool settingsShown() const { return settingsShown_; }
+    void showSettings(bool shown);
+
+    // Levels on disk: the file being edited, the other levels next to it, and switching.
+    const std::filesystem::path& levelFile() const { return levelFile_; }
+    std::vector<std::filesystem::path> levelFiles() const;
+    // Opens another level, or starts a new one. With unsaved changes they only ask first
+    // (`asking()`); `answer` then saves, discards or cancels.
+    void requestOpen(const std::filesystem::path& file);
+    void requestNew();
+    enum class Answer { Save, Discard, Cancel };
+    bool asking() const { return pending_.has_value(); }
+    void answer(Answer answer);
+
     // Every edit goes through here: applied, and remembered for Undo.
     void run(std::unique_ptr<Command> command);
     bool undo();
@@ -105,6 +124,12 @@ private:
     PlacedCharacter* find(int id);
     void buildProperties();
     std::pair<int, int> toWorld(int screenX, int screenY) const;
+    void changeLevel(const std::string& what, Level after);
+    void buildSettings();
+    void buildOpenList();
+    void buildQuestion();
+    void replaceLevel(Level level, std::filesystem::path file, const std::string& what);
+    void doPending();
 
     Level& level_;
     const Definitions& definitions_;
@@ -150,6 +175,16 @@ private:
     // A character being dragged with the Select tool: the list before, and where it was grabbed.
     bool moving_ = false;
     std::vector<PlacedCharacter> movingBefore_;
+    bool movingStart_ = false; // the hero start marker is being dragged
+    PixelPoint startBefore_;
+
+    bool settingsShown_ = false;
+    bool settingsStale_ = false;
+    std::unique_ptr<luna::engine::Panel> settings_;
+    std::unique_ptr<luna::engine::Panel> openList_;
+    std::unique_ptr<luna::engine::Panel> question_;
+    // What waits for an answer about unsaved changes: open this file (or, when empty, a new level).
+    std::optional<std::filesystem::path> pending_;
     int grabX_ = 0;
     int grabY_ = 0;
 };

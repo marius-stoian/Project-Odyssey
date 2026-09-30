@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-126 / S-US-126: Level and character settings (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Last story of M2c.
+
+- Game: the Editor's Level panel sets the level's name, width and height (a resize keeps what was painted and drops characters that fall outside) and the default ground; the hero start marker is dragged with Select; New and Open switch levels and ask first about unsaved changes (Save, Discard, Cancel); every setting is one step of Undo. The game plays the level the Editor has open.
+- Engine: hover hints stay on screen (`UiPainter::setScreen`, `keepOnScreen`).
+- Docs: `docs/guides/editor.md`, the owner's guide to every control.
+- Tests: `tests/game/settings_test.cpp` (4 cases) and a UI case; ctest 24/24 in Debug and Release, zero warnings.
+
+
 ## US-125 / S-US-125: Place characters (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Sixth story of M2c.

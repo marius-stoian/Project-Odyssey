@@ -46,7 +46,7 @@ public:
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
     const std::vector<PlacedCharacter>& bystanders() const { return bystanders_; }
-    const std::filesystem::path& levelFile() const { return levelFile_; }
+    const std::filesystem::path& levelFile() const { return editor_.levelFile(); } // the Editor may open another
     Mode mode() const { return mode_; }
     // F1 and F2 do this; `--editor` starts in the Editor. Back in Game, the play state is
     // rebuilt from the level as edited (the hero at the hero start).

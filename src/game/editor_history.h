@@ -59,6 +59,21 @@ private:
     int nextIdAfter_;
 };
 
+// A whole-level change: a resize, a new name, another default ground, a moved hero start. It
+// keeps the level before and after (a resize changes everything, and is rare).
+class LevelCommand final : public Command {
+public:
+    LevelCommand(std::string what, Level before, Level after) : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)) {}
+    void apply(Level& level) const override { level = after_; }
+    void undo(Level& level) const override { level = before_; }
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    Level before_;
+    Level after_;
+};
+
 // The edits done, and the ones undone that can be done again. At most `limit` are kept.
 class History {
 public:

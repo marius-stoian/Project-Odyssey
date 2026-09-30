@@ -55,7 +55,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-123 | US-123 | M2c | Done | 2026-09-30 |
 | S-US-124 | US-124 | M2c | Done | 2026-09-30 |
 | S-US-125 | US-125 | M2c | Done | 2026-09-30 |
-| S-US-126 | US-126 | M2c | To do |  |
+| S-US-126 | US-126 | M2c | Done | 2026-09-30 |
 | X-M2c | - | M2c | To do |  |
 | K-M3 | - | M3 | To do |  |
 | S-US-030 | US-030 | M3 | To do |  |

@@ -82,6 +82,10 @@ struct Level {
 // A new level filled with one ground.
 Level makeLevel(std::string name, int width, int height, int ground);
 
+// The same level at a new size (US-126): painted cells keep their places, new cells get the
+// default ground, characters and targets outside are dropped, the hero start moves inside.
+Level resized(const Level& level, int width, int height);
+
 // The tile map the game draws and walks on.
 luna::engine::TileMap buildTileMap(const Level& level, const Definitions& definitions);
 

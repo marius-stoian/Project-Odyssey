@@ -85,6 +85,7 @@ void Editor::buildPanels() {
     button("Place", "Place a character: choose one, click the map", [this] { tool_ = EditorTool::Place; });
     button("Select", "Select a character: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 4;
+    button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
     button("Grid", "Show or hide the grid (G)", [this] { grid_ = !grid_; });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
     button("Redo", "Redo (Ctrl+Y)", [this] { redo(); });
@@ -126,6 +127,9 @@ void Editor::buildPanels() {
         }
     }
     buildProperties();
+    buildSettings();
+    buildOpenList();
+    buildQuestion();
 }
 
 void Editor::buildProperties() {
@@ -198,6 +202,170 @@ void Editor::setSelectedSwordDamage(int damage) {
 std::pair<int, int> Editor::toWorld(int screenX, int screenY) const {
     const Rect view = camera_.view();
     return {view.x + screenX, view.y + screenY};
+}
+
+// --- Level settings, and other levels (US-126) ---
+
+void Editor::changeLevel(const std::string& what, Level after) {
+    run(std::make_unique<LevelCommand>(what, level_, std::move(after)));
+    settingsStale_ = true;
+    select(selected_); // the selected character may be gone after a resize
+}
+
+void Editor::setLevelName(const std::string& name) {
+    if (name.empty() || name == level_.name) return;
+    Level after = level_;
+    after.name = name;
+    changeLevel("name: " + name, std::move(after));
+}
+
+void Editor::setLevelSize(int width, int height) {
+    width = std::clamp(width, kLevelMinSize, kLevelMaxSize);
+    height = std::clamp(height, kLevelMinSize, kLevelMaxSize);
+    if (width == level_.width && height == level_.height) return;
+    changeLevel(std::format("size {}x{}", width, height), resized(level_, width, height));
+}
+
+void Editor::setDefaultGround(int tile) {
+    if (tile < 0 || tile >= static_cast<int>(definitions_.tiles.size()) || tile == level_.defaultGround) return;
+    Level after = level_;
+    after.defaultGround = tile;
+    changeLevel("default ground: " + definitions_.tiles[static_cast<std::size_t>(tile)].name, std::move(after));
+}
+
+void Editor::moveHeroStart(PixelPoint feet) {
+    feet = {std::clamp(feet.x, 0, level_.width * kTileSize - 1), std::clamp(feet.y, 0, level_.height * kTileSize - 1)};
+    if (feet == level_.heroStart) return;
+    Level after = level_;
+    after.heroStart = feet;
+    changeLevel(std::format("hero start ({}, {})", feet.x, feet.y), std::move(after));
+}
+
+void Editor::showSettings(bool shown) {
+    settingsShown_ = shown;
+    settingsStale_ = true;
+}
+
+void Editor::buildSettings() {
+    settingsStale_ = false;
+    settings_ = std::make_unique<Panel>(Rect{viewWidth_ - 152, kToolbarHeight + 4, 150, 138});
+    settings_->visible = settingsShown_;
+    const Rect box = settings_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    settings_->add<Button>(Rect{left, box.y + 4, width, 11}, "Level settings", [] {});
+    settings_->add<luna::engine::TextField>(Rect{left, box.y + 18, width, 11}, "Name", level_.name, 20,
+                                            [this](const std::string& name) { setLevelName(name); });
+    settings_->add<luna::engine::NumberField>(Rect{left, box.y + 32, width, 11}, "Width", level_.width, kLevelMinSize, kLevelMaxSize,
+                                              [this](int width) { setLevelSize(width, level_.height); });
+    settings_->add<luna::engine::NumberField>(Rect{left, box.y + 46, width, 11}, "Height", level_.height, kLevelMinSize, kLevelMaxSize,
+                                              [this](int height) { setLevelSize(level_.width, height); });
+    std::vector<std::string> grounds;
+    for (const TileKindDef& kind : definitions_.tiles) grounds.push_back(kind.name);
+    auto& ground = settings_->add<luna::engine::ListBox>(Rect{left, box.y + 62, width, 45}, grounds, [this](int tile) { setDefaultGround(tile); });
+    ground.selected = level_.defaultGround;
+    ground.first = std::clamp(level_.defaultGround - 2, 0, std::max(0, static_cast<int>(grounds.size()) - ground.rows()));
+    Button& fresh = settings_->add<Button>(Rect{left, box.y + 112, 44, 14}, "New", [this] { requestNew(); });
+    fresh.hint = "Start a new level (asks first if this one has unsaved changes)";
+    Button& open = settings_->add<Button>(Rect{left + 48, box.y + 112, 44, 14}, "Open", [this] {
+        buildOpenList();
+        openList_->visible = true;
+    });
+    open.hint = "Open another level of this folder";
+    settings_->add<Button>(Rect{left + 96, box.y + 112, 42, 14}, "Close", [this] { showSettings(false); });
+}
+
+std::vector<std::filesystem::path> Editor::levelFiles() const {
+    std::vector<std::filesystem::path> files;
+    std::error_code error;
+    for (const auto& entry : std::filesystem::directory_iterator(levelFile_.parent_path(), error)) {
+        if (entry.is_regular_file() && entry.path().extension() == ".json") files.push_back(entry.path());
+    }
+    std::sort(files.begin(), files.end()); // the same order every time
+    return files;
+}
+
+void Editor::buildOpenList() {
+    const auto files = levelFiles();
+    std::vector<std::string> names;
+    for (const auto& file : files) names.push_back(file.filename().string());
+    openList_ = std::make_unique<Panel>(Rect{viewWidth_ / 2 - 80, 60, 160, 118});
+    openList_->visible = false;
+    openList_->add<Button>(Rect{openList_->bounds.x + 4, 64, 152, 11}, "Open a level", [] {});
+    openList_->add<luna::engine::ListBox>(Rect{openList_->bounds.x + 4, 78, 152, 72}, names, [this, files](int row) {
+        openList_->visible = false;
+        requestOpen(files[static_cast<std::size_t>(row)]);
+    });
+    openList_->add<Button>(Rect{openList_->bounds.x + 4, 158, 152, 14}, "Cancel", [this] { openList_->visible = false; });
+}
+
+void Editor::buildQuestion() {
+    question_ = std::make_unique<Panel>(Rect{viewWidth_ / 2 - 90, viewHeight_ / 2 - 26, 180, 52});
+    question_->visible = pending_.has_value();
+    const Rect box = question_->bounds;
+    question_->add<Button>(Rect{box.x + 4, box.y + 4, box.width - 8, 11}, "Save the changes first?", [] {});
+    question_->add<Button>(Rect{box.x + 4, box.y + 22, 54, 14}, "Save", [this] { answer(Answer::Save); });
+    question_->add<Button>(Rect{box.x + 62, box.y + 22, 54, 14}, "Discard", [this] { answer(Answer::Discard); });
+    question_->add<Button>(Rect{box.x + 120, box.y + 22, 56, 14}, "Cancel", [this] { answer(Answer::Cancel); });
+}
+
+void Editor::requestOpen(const std::filesystem::path& file) {
+    pending_ = file;
+    if (unsaved_) {
+        buildQuestion(); // ask before anything is lost
+        return;
+    }
+    doPending();
+}
+
+void Editor::requestNew() {
+    requestOpen({});
+}
+
+void Editor::answer(Answer answer) {
+    if (!pending_) return;
+    if (answer == Answer::Cancel || (answer == Answer::Save && !save())) {
+        pending_.reset();
+    } else {
+        doPending();
+    }
+    // The question panel hides itself next tick (it must not be rebuilt while its button runs).
+}
+
+void Editor::doPending() {
+    const std::filesystem::path file = *pending_;
+    pending_.reset();
+    if (file.empty()) {
+        // A new level: 32 x 32 of the current ground, in the first free "level-N.json".
+        std::filesystem::path fresh;
+        for (int n = 1; fresh.empty() || std::filesystem::exists(fresh); ++n) {
+            fresh = levelFile_.parent_path() / std::format("level-{}.json", n);
+        }
+        Level level = makeLevel("New level", 32, 32, level_.defaultGround);
+        replaceLevel(std::move(level), fresh, "new level " + fresh.filename().string());
+        save(); // the file exists from the start, so it can be opened again
+        return;
+    }
+    try {
+        LoadedLevel loaded = loadLevel(file, definitions_);
+        replaceLevel(std::move(loaded.level), file, "opened " + file.filename().string());
+    } catch (const sim::DataError& error) {
+        say(std::string("Not opened: ") + error.what());
+    }
+}
+
+void Editor::replaceLevel(Level level, std::filesystem::path file, const std::string& what) {
+    level_ = std::move(level);
+    levelFile_ = std::move(file);
+    history_.clear(); // Undo never crosses into another level
+    unsaved_ = false;
+    selected_.reset();
+    buildProperties();
+    settingsStale_ = true;
+    centreX_ = level_.heroStart.x;
+    centreY_ = level_.heroStart.y;
+    levelChanged();
+    say(what);
 }
 
 std::optional<int> Editor::characterAt(int screenX, int screenY) const {
@@ -331,7 +499,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         if (b == nullptr) continue;
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
-                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) ||
+                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Level" && settingsShown_) ||
                       (b->label == "Grid" && grid_);
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
@@ -346,10 +514,26 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     if (propertiesStale_ && !properties_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
+    // A question about unsaved changes, or the list of levels, takes all input until answered.
+    question_->visible = pending_.has_value();
+    if (question_->visible) {
+        question_->handle(input);
+        return true;
+    }
+    if (openList_->visible) {
+        openList_->handle(input);
+        return true;
+    }
+    if (settingsStale_ && !settings_->typing()) {
+        buildSettings(); // show the level's values again (after an undo, a resize, another level)
+    }
+    settings_->visible = settingsShown_;
+    properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     const bool onToolbar = toolbar_->handle(input);
     const bool onPalette = palette_->handle(input) || characterPalette_->handle(input);
     const bool onProperties = properties_->handle(input);
-    return onToolbar || onPalette || onProperties;
+    const bool onSettings = settings_->handle(input);
+    return onToolbar || onPalette || onProperties || onSettings;
 }
 
 void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
@@ -369,7 +553,31 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         }
         return;
     }
-    // Select: click a character to select it and drag it to move it (one step of Undo).
+    // Select, first the hero start marker: drag it to where the hero should begin.
+    const PixelPoint start = level_.heroStart;
+    const bool onStart = wx >= start.x - kCharacterWidth / 2 && wx < start.x + kCharacterWidth / 2 && wy >= start.y - kCharacterHeight && wy <= start.y;
+    if (pressed && onStart) {
+        select(std::nullopt);
+        movingStart_ = true;
+        startBefore_ = start;
+        grabX_ = start.x - wx;
+        grabY_ = start.y - wy;
+        return;
+    }
+    if (movingStart_) {
+        if (held && pointer.inside()) {
+            const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
+            level_.heroStart = {x, y}; // follows the pointer; one step of Undo when let go
+        }
+        if (released || !held) {
+            movingStart_ = false;
+            const PixelPoint moved = level_.heroStart;
+            level_.heroStart = startBefore_;
+            moveHeroStart(moved);
+        }
+        return;
+    }
+    // Then characters: click one to select it and drag it to move it (one step of Undo).
     if (pressed) {
         const std::optional<int> hit = characterAt(pointer.x, pointer.y);
         select(hit);
@@ -445,7 +653,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || settings_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
@@ -493,6 +701,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     const Rect view = camera_.view(alpha);
     auto screen = [&view](int worldX, int worldY) { return luna::engine::Point{worldX - view.x, worldY - view.y}; };
     UiPainter painter(renderer, textures_.ui);
+    painter.setScreen({0, 0, viewWidth_, viewHeight_});
 
     if (grid_) {
         for (int gx = (view.x / kTileSize) * kTileSize; gx < view.x + view.width; gx += kTileSize) {
@@ -544,6 +753,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     palette_->draw(painter);
     characterPalette_->draw(painter);
     properties_->draw(painter);
+    settings_->draw(painter);
     // The status line: tool, what it uses, cell, and the last thing done.
     std::string what;
     if (tool_ == EditorTool::Eraser) {
@@ -564,10 +774,22 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     painter.fill(bar, UiColor::Shade);
     // The mode label ("EDITOR  F1: PLAY") takes the right end of the line.
     painter.text(4, bar.y + 3, line.substr(0, static_cast<std::size_t>((viewWidth_ - 110) / luna::engine::kTextAdvance)), UiColor::Text);
-    toolbar_->drawOverlay(painter);
-    palette_->drawOverlay(painter);
-    characterPalette_->drawOverlay(painter);
-    properties_->drawOverlay(painter);
+    const bool dialog = openList_->visible || question_->visible;
+    if (!dialog) { // a dialog takes the pointer: hints behind it would be stale
+        toolbar_->drawOverlay(painter);
+        palette_->drawOverlay(painter);
+        characterPalette_->drawOverlay(painter);
+        properties_->drawOverlay(painter);
+        settings_->drawOverlay(painter);
+    }
+    // Dialogs last, over everything, with the world dimmed behind them.
+    if (dialog) {
+        painter.fill({0, 0, viewWidth_, viewHeight_}, UiColor::Shade);
+        openList_->draw(painter);
+        question_->draw(painter);
+        openList_->drawOverlay(painter);
+        question_->drawOverlay(painter);
+    }
 }
 
 } // namespace odysseus::game
