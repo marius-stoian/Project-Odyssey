@@ -4,6 +4,7 @@
 #include <doctest/doctest.h>
 
 #include <regex>
+#include <set>
 #include <string>
 
 using odysseus::sim::World;
@@ -163,4 +164,20 @@ TEST_CASE("US-014 A clan lives for generations") {
             oldAge, " died of old age, ", world.feuds().size(), " feuds now, ", world.mammothsKilled(), " mammoths");
     CHECK(born > 0);
     CHECK(world.population() > 0);
+}
+
+TEST_CASE("US-014 No two living people share a name") {
+    // Readers must never meet two Kals at once (found while preparing Kill Gate 1).
+    for (const std::uint64_t seed : {7ULL, 42ULL}) {
+        World world(seed, realConfig());
+        for (int decade = 0; decade < 6; ++decade) {
+            world.runTicks(world.calendar().ticksPerYear() * 10);
+            std::set<std::string> names;
+            for (const auto& person : world.people()) {
+                if (person.alive) {
+                    CHECK(names.insert(person.name).second);
+                }
+            }
+        }
+    }
 }

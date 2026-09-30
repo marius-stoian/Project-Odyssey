@@ -37,7 +37,7 @@ Codex v1.5. Edited only by mraw-orchestrator.
 | S-US-014 | US-014 | M2 | Done | 2026-09-30 |
 | S-US-015 | US-015 | M2 | Done | 2026-09-30 |
 | S-US-016 | US-016 | M2 | Done | 2026-09-30 |
-| X-M2 | - | M2 | To do |  |
+| X-M2 | - | M2 | Blocked: human gate D-GATE-M2 (evidence in docs/gates/M2.md) | 2026-09-30 |
 | K-M3 | - | M3 | To do |  |
 | S-US-030 | US-030 | M3 | To do |  |
 | S-US-032 | US-032 | M3 | To do |  |
