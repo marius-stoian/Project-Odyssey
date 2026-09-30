@@ -8,6 +8,7 @@
 #include "luna/platform/system.h"
 #include "luna/platform/window.h"
 
+#include <algorithm>
 #include <format>
 #include <vector>
 
@@ -35,8 +36,10 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
                         window.vsyncEnabled() ? "on" : "off"));
 
     WindowRenderer renderer(window);
+    InputMap input;
     const auto logScale = [&](int width, int height) {
         const PixelScale pixels = integerScale(width, height, config.virtualWidth, config.virtualHeight);
+        input.setPointerArea(pixels.area, pixels.scale); // mouse positions become virtual pixels
         logInfo(std::format("Window {}x{}: pixel art scaled x{}, picture {}x{} at ({}, {})", width, height, pixels.scale,
                             pixels.area.width, pixels.area.height, pixels.area.x, pixels.area.y));
     };
@@ -45,13 +48,14 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
 
     FixedStepClock clock(config.ticksPerSecond);
     FrameStats stats;
-    InputMap input;
     std::vector<platform::Event> events;
     const std::uint64_t loopStart = platform::nowNanoseconds();
     std::uint64_t previous = loopStart;
     bool firstFrame = true;
     bool quitRequested = false;
     bool running = true;
+    std::vector<bool> scriptedActive(options.pointer.size(), false);
+    std::vector<bool> typed(options.typing.size(), false);
 
     while (running) {
         const std::uint64_t now = platform::nowNanoseconds();
@@ -76,6 +80,28 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
         const double runSeconds = static_cast<double>(now - loopStart) / 1e9;
         for (const ScriptedHold& hold : options.holds) {
             input.setScripted(hold.intent, runSeconds >= hold.fromSeconds && runSeconds < hold.toSeconds);
+        }
+        for (std::size_t i = 0; i < options.pointer.size(); ++i) {
+            const ScriptedPointer& move = options.pointer[i];
+            const bool active = runSeconds >= move.fromSeconds && runSeconds < move.toSeconds;
+            if (active) {
+                // Straight from start to end over the time given (a drag), whole pixels.
+                const double span = move.toSeconds - move.fromSeconds;
+                const double part = span > 0.0 ? std::min(1.0, (runSeconds - move.fromSeconds) / span) : 1.0;
+                const int x = move.x1 + static_cast<int>((move.x2 - move.x1) * part);
+                const int y = move.y1 + static_cast<int>((move.y2 - move.y1) * part);
+                input.setScriptedPointer(x, y, move.button, move.pressing);
+                scriptedActive[i] = true;
+            } else if (scriptedActive[i]) {
+                input.setScriptedPointer(move.x2, move.y2, move.button, false); // let go at the end
+                scriptedActive[i] = false;
+            }
+        }
+        for (std::size_t i = 0; i < options.typing.size(); ++i) {
+            if (!typed[i] && runSeconds >= options.typing[i].atSeconds) {
+                input.typeScripted(options.typing[i].text);
+                typed[i] = true;
+            }
         }
 
         const int ticks = clock.advance(elapsed);

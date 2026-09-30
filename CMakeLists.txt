@@ -105,7 +105,8 @@ add_library(luna_engine STATIC
     src/luna/engine/collision.cpp
     src/luna/engine/physics_view.cpp
     src/luna/engine/image_ops.cpp
-    src/luna/engine/image_io.cpp)
+    src/luna/engine/image_io.cpp
+    src/luna/engine/ui.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 # PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
 target_include_directories(luna_engine SYSTEM PRIVATE ${Stb_INCLUDE_DIR})
@@ -231,7 +232,8 @@ add_executable(luna_tests
     tests/luna/loop_test.cpp
     tests/luna/pixel_scale_test.cpp
     tests/luna/tile_map_test.cpp
-    tests/luna/collision_test.cpp)
+    tests/luna/collision_test.cpp
+    tests/luna/ui_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)

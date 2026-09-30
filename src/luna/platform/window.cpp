@@ -41,6 +41,7 @@ Window::Window(const WindowSettings& settings) {
     if (!window_) {
         fail("Cannot open the window");
     }
+    SDL_StartTextInput(window_.get()); // typed characters arrive as TextInput (for text fields)
     renderer_.reset(SDL_CreateRenderer(window_.get(), nullptr));
     if (!renderer_) {
         fail("Cannot create the renderer");
@@ -71,7 +72,15 @@ void Window::pollEvents(std::vector<Event>& events) {
         } else if (event->type == EventType::GamepadRemoved) {
             std::erase_if(gamepads_, [&](const auto& entry) { return entry.first == event->gamepad; });
         }
-        events.push_back(*event);
+        Event translated = *event;
+        if (translated.type == EventType::MouseMoved || translated.type == EventType::MouseButtonDown ||
+            translated.type == EventType::MouseButtonUp) {
+            // SDL reports the mouse in window points; Luna works in real pixels (high-DPI screens).
+            const float density = SDL_GetWindowPixelDensity(window_.get());
+            translated.x *= density;
+            translated.y *= density;
+        }
+        events.push_back(translated);
     }
 }
 
