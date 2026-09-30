@@ -11,6 +11,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | P-004 | - | - | Done | 2026-09-30 |
 | P-005 | - | - | Done | 2026-09-30 |
 | P-006 | - | - | Done | 2026-09-30 |
+| P-007 | - | - | Done | 2026-09-30 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -57,6 +58,17 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-125 | US-125 | M2c | Done | 2026-09-30 |
 | S-US-126 | US-126 | M2c | Done | 2026-09-30 |
 | X-M2c | - | M2c | Done | 2026-09-30 |
+| K-M2d | - | M2d | To do |  |
+| S-US-130 | US-130 | M2d | To do |  |
+| S-US-131 | US-131 | M2d | To do |  |
+| S-US-132 | US-132 | M2d | To do |  |
+| S-US-133 | US-133 | M2d | To do |  |
+| S-US-134 | US-134 | M2d | To do |  |
+| S-US-135 | US-135 | M2d | To do |  |
+| S-US-136 | US-136 | M2d | To do |  |
+| S-US-137 | US-137 | M2d | To do |  |
+| S-US-138 | US-138 | M2d | To do |  |
+| X-M2d | - | M2d | To do |  |
 | K-M3 | - | M3 | To do |  |
 | S-US-030 | US-030 | M3 | To do |  |
 | S-US-032 | US-032 | M3 | To do |  |
