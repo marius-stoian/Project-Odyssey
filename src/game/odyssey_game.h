@@ -73,6 +73,13 @@ public:
     // "Hotbar full" is shown for a moment when a pickup is touched with no free slot.
     bool hotbarFullShown() const { return fullTicks_ > 0; }
     const std::vector<Projectile>& projectiles() const { return projectiles_; }
+    // Mouse aiming (US-139): while a catalog weapon is held and the pointer is over the picture,
+    // the hero faces the pointer and Attack (the left button) goes toward it, at any angle.
+    bool aiming() const { return aiming_; }
+    double aimDirectionX() const { return aimDx_; } // unit vector from the hero's feet to the pointer
+    double aimDirectionY() const { return aimDy_; }
+    double aimTargetX() const { return aimTargetX_; } // where the pointer is in the world, pixels
+    double aimTargetY() const { return aimTargetY_; }
     // Starts the named effect (effects.json) centred on a world point, `size` pixels across.
     // Does nothing when the content atlas or the effect is missing.
     void playEffect(const std::string& name, double x, double y, int size = 0);
@@ -144,7 +151,16 @@ private:
     std::vector<Projectile> projectiles_;
     luna::engine::Texture iconsTexture_;
     luna::engine::Texture iconsMirrored_;    // the same icons facing the other way (west)
-    void attackWith(const WeaponDef& weapon);
+    void attackWith(const WeaponDef& weapon, double dirX, double dirY); // along a unit vector
+    void updateAim(const luna::engine::Pointer& pointer, bool fallen);
+    void drawAim(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    bool aiming_ = false;
+    double aimDx_ = 0.0;
+    double aimDy_ = 1.0;
+    double aimTargetX_ = 0.0;
+    double aimTargetY_ = 0.0;
+    int pointerX_ = -1; // the pointer on screen, virtual pixels, for the crosshair
+    int pointerY_ = -1;
     void strike(Enemy& enemy, int damage, const WeaponDef* weapon = nullptr); // a hit: damage, spark, then death smoke or strike back; the weapon's element follows
     void applyElement(Enemy& target, const WeaponDef& weapon, int dealt); // US-135: burn, slow, poison, chain, drain
     void tickStatus(Enemy& enemy);           // burning and poison hurt, effects show while they last

@@ -803,3 +803,24 @@ One detail worth understanding: 2 HP per second is 0.1 HP per tick, and HP is a 
 **Try it (10 minutes).** In weapons.json change fire to `"perSecond": 10` and `"seconds": 1`, build again (the build copies the assets next to the game), then run the game with `--level docs/evidence/US-135/levels/fire.json` and hold Interact. How much HP does the goblin lose? Then set `"slowTo": 0.25` for ice and watch the warning last longer.
 
 **Check yourself.** Why does a second fire hit restart the timer instead of adding a second burn? (Hint: D-24, and what would 5 quick hits do to a stacking burn.)
+
+
+## US-139: Mouse aiming (2026-10-01)
+
+**The idea: coordinate spaces and angles.** The mouse lives on the screen (480x270 picture pixels); the goblins live in the world (2048 x 2048 pixels); the camera is the window between them. To aim, we turn a screen point into a world point by adding the camera's corner, then turn the difference from the hero into a direction:
+
+```cpp
+const Rect view = camera_.view();
+aimTargetX_ = view.x + pointer.x;            // screen -> world
+const double dx = aimTargetX_ - hero_.feetX();
+const double length = std::hypot(dx, dy);
+aimDx_ = dx / length;                        // a unit vector: length 1, only the direction
+```
+
+A *unit vector* is the tidy way to say "which way" without saying "how far". The hero sprite only has 8 directions, so `facingToward` turns the angle (`std::atan2(dy, dx)`, which gives the angle of any direction) into the nearest of 8 sectors of 45 degrees. But the sword arc uses the exact vector, so you can hit a goblin the sprite does not quite face.
+
+**Where to look.** `OdysseyGame::updateAim` and `drawAim` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `facingToward` and `MeleeBehaviour::swingToward` in [src/game/weapons.cpp](../src/game/weapons.cpp).
+
+**Try it (10 minutes).** Run `odysseus.exe --level docs/evidence/US-139/levels/aim.json`, walk with the keys and aim with the mouse: click to swing. Notice the crosshair turns red when the goblin is out of the sword's reach. Then change the `90.0` of the sword in `behaviourOf` to `30.0`, build, and see how much more exactly you must aim.
+
+**Check yourself.** Why does the game keep a unit vector for the aim and a separate `Facing` for drawing the hero?

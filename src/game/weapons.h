@@ -42,11 +42,15 @@ class WeaponBehaviour {
 public:
     virtual ~WeaponBehaviour() = default;
     virtual bool melee() const = 0;
-    // Melee: the targets one swing hits (indexes into `targets`), nearest first.
-    virtual std::vector<std::size_t> swing(const WeaponDef& weapon, double heroX, double heroY, Facing facing,
-                                           const std::vector<Target>& targets) const;
-    // Ranged: the projectile the hero lets go.
-    virtual std::optional<Projectile> launch(const WeaponDef& weapon, double heroX, double heroY, Facing facing) const;
+    // Melee: the targets one swing hits (indexes into `targets`), nearest first. The swing points
+    // along (dirX, dirY), a unit vector: toward the mouse pointer (US-139), or along a facing.
+    virtual std::vector<std::size_t> swingToward(const WeaponDef& weapon, double heroX, double heroY, double dirX, double dirY,
+                                                 const std::vector<Target>& targets) const;
+    // Ranged: the projectile the hero lets go along (dirX, dirY).
+    virtual std::optional<Projectile> launchToward(const WeaponDef& weapon, double heroX, double heroY, double dirX, double dirY) const;
+    // The same along one of the 8 facings.
+    std::vector<std::size_t> swing(const WeaponDef& weapon, double heroX, double heroY, Facing facing, const std::vector<Target>& targets) const;
+    std::optional<Projectile> launch(const WeaponDef& weapon, double heroX, double heroY, Facing facing) const;
 };
 
 class MeleeBehaviour final : public WeaponBehaviour {
@@ -55,8 +59,8 @@ public:
     // arc (axe, whip) or only the nearest (sword, spear).
     MeleeBehaviour(double arcDegrees, bool hitsAll) : arcDegrees_(arcDegrees), hitsAll_(hitsAll) {}
     bool melee() const override { return true; }
-    std::vector<std::size_t> swing(const WeaponDef& weapon, double heroX, double heroY, Facing facing,
-                                   const std::vector<Target>& targets) const override;
+    std::vector<std::size_t> swingToward(const WeaponDef& weapon, double heroX, double heroY, double dirX, double dirY,
+                                         const std::vector<Target>& targets) const override;
 
 private:
     double arcDegrees_;
@@ -67,7 +71,7 @@ class RangedBehaviour final : public WeaponBehaviour {
 public:
     explicit RangedBehaviour(double metresPerSecond) : metresPerSecond_(metresPerSecond) {}
     bool melee() const override { return false; }
-    std::optional<Projectile> launch(const WeaponDef& weapon, double heroX, double heroY, Facing facing) const override;
+    std::optional<Projectile> launchToward(const WeaponDef& weapon, double heroX, double heroY, double dirX, double dirY) const override;
 
 private:
     double metresPerSecond_;
@@ -88,5 +92,7 @@ std::optional<std::size_t> stepProjectile(Projectile& projectile, const luna::en
 
 // The unit vector a facing points along, on the ground (x east, y south).
 void facingVector(Facing facing, double& x, double& y);
+// The nearest of the 8 facings to a direction (the hero faces the mouse pointer that way).
+Facing facingToward(double dirX, double dirY);
 
 } // namespace odysseus::game

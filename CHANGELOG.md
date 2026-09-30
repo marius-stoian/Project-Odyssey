@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-139: Mouse aiming (Avengers) — 2026-10-01
+
+**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+
+- Luna Engine: new intent `Attack` (left mouse button, or scripted with `--hold Attack`); `--aim` flag (same as `--point`).
+- Game: while a catalog weapon is held and the pointer is over the picture, the hero faces the pointer (nearest of 8) and Attack swings or shoots toward it at the exact angle; Interact still attacks along the facing. Dotted aim line (to the weapon's range) and a crosshair (red beyond range).
+- `WeaponBehaviour::swingToward` / `launchToward` (unit direction), `facingToward`, `Hero::face`; the old facing versions still work.
+- D-25 recorded. Tests: US-139 Facing from a direction, Face the cursor, Swing toward the cursor, Keys still work, Interact goes along the facing...; luna_tests: the left button is the Attack intent. Evidence `docs/evidence/US-139/`; plan `docs/plans/US-139.md`.
+
 ## US-135: Elements (Avengers) — 2026-09-30
 
 **State:** Done. Merged into `qa`, pushed; hosted CI run 36776897333 green.

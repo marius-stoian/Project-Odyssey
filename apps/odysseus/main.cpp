@@ -7,10 +7,11 @@
 //   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
 //   --drag <x1>:<y1>:<x2>:<y2>:<from>:<to>  hold the left button and move from one point to the other
 //   --point <x>:<y>:<from>:<to>  rest the pointer there without pressing (hover)
+//   --aim <x>:<y>:<from>:<to>  the same as --point: where the hero aims (Game mode); fire with --hold Attack:<from>:<to>
 //   --type <text>:<time>     type the text at that time
 //   --hold <Intent>:<from>:<to>  hold an intent (MoveUp, MoveDown, MoveLeft, MoveRight, Interact,
 //                            OpenMenu, SwitchWeapon, ModeGame, ModeEditor, Undo, Redo, Save, Delete,
-//                            ToggleGrid, Rotate, Erase, Confirm, Slot1..Slot9) between two times in seconds: scripted play for tests
+//                            ToggleGrid, Rotate, Erase, Confirm, Attack, Slot1..Slot9) between two times in seconds: scripted play for tests
 #include "core/log.h"
 #include "core/version.h"
 #include "game/odyssey_game.h"
@@ -60,6 +61,7 @@ luna::engine::Intent intentNamed(std::string_view name) {
     if (name == "Rotate") return Intent::Rotate;
     if (name == "Erase") return Intent::Erase;
     if (name == "Confirm") return Intent::Confirm;
+    if (name == "Attack") return Intent::Attack;
     if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
         return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
     }
@@ -107,7 +109,7 @@ Arguments parseArguments(int argc, char* argv[]) {
             const auto f = fields(argv[++i]);
             arguments.pointer.push_back({std::stod(f.at(4)), std::stod(f.at(5)), std::stoi(f.at(0)), std::stoi(f.at(1)), std::stoi(f.at(2)),
                                          std::stoi(f.at(3)), true, luna::engine::PointerButton::Left});
-        } else if (name == "--point") {
+        } else if (name == "--point" || name == "--aim") { // --aim is --point, named for what it does in Game mode
             const auto f = fields(argv[++i]);
             arguments.pointer.push_back({std::stod(f.at(2)), std::stod(f.at(3)), std::stoi(f.at(0)), std::stoi(f.at(1)), std::stoi(f.at(0)),
                                          std::stoi(f.at(1)), false, luna::engine::PointerButton::Left});

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
+#include <numbers>
 #include <string>
 
 namespace odysseus::game {
@@ -325,7 +326,7 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
     }
 }
 
-void OdysseyGame::attackWith(const WeaponDef& weapon) {
+void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY) {
     if (attackCooldown_ > 0) {
         return;
     }
@@ -335,13 +336,64 @@ void OdysseyGame::attackWith(const WeaponDef& weapon) {
         std::vector<Target> targets;
         for (const Enemy& enemy : enemies_) targets.push_back({enemy.feetX(), enemy.feetY(), enemy.isAlive()});
         swingTicks_ = 6;
-        const auto hits = behaviour.swing(weapon, hero_.feetX(), hero_.feetY(), hero_.facing(), targets);
-        core::logInfo(std::format("{} ({}) swung facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), facingName(hero_.facing()), hits.size()));
+        const auto hits = behaviour.swingToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY, targets);
+        core::logInfo(std::format("{} ({}) swung toward {:.0f} degrees, facing {}: {} hit", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing()), hits.size()));
         for (const std::size_t index : hits) strike(enemies_[index], weapon.damage, &weapon);
-    } else if (auto shot = behaviour.launch(weapon, hero_.feetX(), hero_.feetY(), hero_.facing())) {
+    } else if (auto shot = behaviour.launchToward(weapon, hero_.feetX(), hero_.feetY(), dirX, dirY)) {
         projectiles_.push_back(*shot);
-        core::logInfo(std::format("{} ({}) shot facing {}", weapon.name, weaponClassName(weapon.weaponClass), facingName(hero_.facing())));
+        core::logInfo(std::format("{} ({}) shot toward {:.0f} degrees, facing {}", weapon.name, weaponClassName(weapon.weaponClass), std::atan2(dirY, dirX) * 180.0 / std::numbers::pi, facingName(hero_.facing())));
     }
+}
+
+// US-139: where the pointer points in the world, and the hero turned to it. Only a held catalog
+// weapon aims; the demo sword and spear keep their own facing rules.
+void OdysseyGame::updateAim(const luna::engine::Pointer& pointer, bool fallen) {
+    aiming_ = false;
+    pointerX_ = pointer.x;
+    pointerY_ = pointer.y;
+    if (fallen || heldWeapon() == nullptr || !pointer.inside()) {
+        return;
+    }
+    const luna::engine::Rect view = camera_.view();
+    aimTargetX_ = view.x + pointer.x;
+    aimTargetY_ = view.y + pointer.y;
+    const double dx = aimTargetX_ - hero_.feetX();
+    const double dy = aimTargetY_ - hero_.feetY();
+    const double length = std::hypot(dx, dy);
+    if (length < 1.0) {
+        return; // right on the hero: keep the last direction
+    }
+    aimDx_ = dx / length;
+    aimDy_ = dy / length;
+    aiming_ = true;
+    hero_.face(facingToward(aimDx_, aimDy_));
+}
+
+// The aim line (dots from the hand toward the pointer, up to the weapon's range) and a crosshair.
+void OdysseyGame::drawAim(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
+    const WeaponDef* weapon = heldWeapon();
+    if (!aiming_ || weapon == nullptr || respawnTicks_ > 0) {
+        return;
+    }
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const double startX = hero_.feetX(alpha) - view.x;
+    const double startY = hero_.feetY(alpha) - 20.0 - view.y;
+    const double endX = pointerX_;
+    const double endY = pointerY_;
+    const double length = std::hypot(endX - startX, endY - startY);
+    const double reach = weapon->range * kTileSize;
+    for (double d = 12.0; d < std::min(length, reach); d += 6.0) {
+        const int x = static_cast<int>(std::lround(startX + (endX - startX) * d / length));
+        const int y = static_cast<int>(std::lround(startY + (endY - startY) * d / length));
+        painter.fill({x, y, 2, 2}, luna::engine::UiColor::Gold);
+    }
+    const luna::engine::UiColor colour = length <= reach ? luna::engine::UiColor::Gold : luna::engine::UiColor::Red; // red: out of range
+    const int px = pointerX_;
+    const int py = pointerY_;
+    painter.fill({px - 5, py, 4, 1}, colour);
+    painter.fill({px + 2, py, 4, 1}, colour);
+    painter.fill({px, py - 5, 1, 4}, colour);
+    painter.fill({px, py + 2, 1, 4}, colour);
 }
 
 void OdysseyGame::drawHeld(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
@@ -461,6 +513,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (!fallen) {
         hero_.update(intents, map_);
     }
+    updateAim(intents.pointer(), fallen);
 
     // Pickups first (US-134), so a weapon picked up this tick can be chosen and used this tick.
     if (fullTicks_ > 0) --fullTicks_;
@@ -477,8 +530,13 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     currentWeapon_ = heldSlotName == kSwordSlashName ? WeaponType::Sword : WeaponType::Bow; // the demos' own two
 
     // Handle attacks based on the held weapon.
-    if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldWeapon() != nullptr) {
-        attackWith(*heldWeapon());
+    // Attack (the left button) goes toward the pointer; Interact goes along the facing, as before.
+    const bool mouseAttack = heldWeapon() != nullptr && aiming_ && intents.held(luna::engine::Intent::Attack);
+    if (!fallen && heldWeapon() != nullptr && (mouseAttack || intents.pressed(luna::engine::Intent::Interact))) {
+        double dirX = aimDx_;
+        double dirY = aimDy_;
+        if (!mouseAttack) facingVector(hero_.facing(), dirX, dirY);
+        attackWith(*heldWeapon(), dirX, dirY);
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && !heldSlotName.empty()) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
@@ -713,6 +771,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
                       screen(p.x - kSpearFrameSize / 2.0, p.y - kSpearFrameSize / 2.0));
     }
     drawHeld(renderer, view, alpha);
+    drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
     drawHud(renderer);
     drawModeLabel(renderer);

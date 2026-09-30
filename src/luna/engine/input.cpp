@@ -232,6 +232,8 @@ Intents InputMap::nextTick() {
         intents.set(static_cast<Intent>(i), held, pressedSinceTick_[i]);
     }
     pressedSinceTick_.fill(false);
+    // The left mouse button is also the Attack intent (US-139); a scripted Attack counts too.
+    intents.set(Intent::Attack, intents.held(Intent::Attack) || pointer_.isHeld(PointerButton::Left), intents.pressed(Intent::Attack) || pointer_.wasPressed(PointerButton::Left));
     intents.setPointer(pointer_);
     intents.setText(std::move(text_));
     text_.clear();
