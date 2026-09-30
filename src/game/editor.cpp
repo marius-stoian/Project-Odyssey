@@ -31,9 +31,30 @@ const char* toolName(EditorTool tool) {
     case EditorTool::Rectangle: return "Rectangle";
     case EditorTool::Fill: return "Fill";
     case EditorTool::Eraser: return "Eraser";
+    case EditorTool::Place: return "Place";
+    case EditorTool::Select: return "Select";
     }
     return "?";
 }
+
+namespace {
+
+bool paints(EditorTool tool) {
+    return tool == EditorTool::Brush || tool == EditorTool::Rectangle || tool == EditorTool::Fill || tool == EditorTool::Eraser;
+}
+
+// "plant monster" -> "Plant monster": the name a newly placed character gets.
+std::string capitalised(std::string name) {
+    if (!name.empty() && name[0] >= 'a' && name[0] <= 'z') name[0] = static_cast<char>(name[0] - 'a' + 'A');
+    return name;
+}
+
+constexpr int kKindColumns = 2;
+constexpr int kKindWidth = 30;   // a character button: the middle of the figure
+constexpr int kKindHeight = 34;
+constexpr int kPropertiesWidth = 136;
+
+} // namespace
 
 Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::path levelFile, int viewWidth, int viewHeight)
     : level_(level), definitions_(definitions), levelFile_(std::move(levelFile)), viewWidth_(viewWidth), viewHeight_(viewHeight),
@@ -61,6 +82,9 @@ void Editor::buildPanels() {
     button("Fill", "Fill the connected area of the same ground", [this] { tool_ = EditorTool::Fill; });
     button("Erase", "Paint the level's default ground", [this] { tool_ = EditorTool::Eraser; });
     x += 4;
+    button("Place", "Place a character: choose one, click the map", [this] { tool_ = EditorTool::Place; });
+    button("Select", "Select a character: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
+    x += 4;
     button("Grid", "Show or hide the grid (G)", [this] { grid_ = !grid_; });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
     button("Redo", "Redo (Ctrl+Y)", [this] { redo(); });
@@ -81,6 +105,111 @@ void Editor::buildPanels() {
         tile.icon = &textures_.tiles;
         tile.iconSource = {i * kTileSize + 7, 7, kPaletteCell - 4, kPaletteCell - 4};
     }
+
+    // Characters: every kind of characters.json, shown by the middle of its figure.
+    const int kinds = static_cast<int>(definitions_.characters.size());
+    const int kindRows = (kinds + kKindColumns - 1) / kKindColumns;
+    characterPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, kKindColumns * kKindWidth + 4, kindRows * kKindHeight + 4});
+    for (int i = 0; i < kinds; ++i) {
+        const CharacterKindDef& def = definitions_.characters[static_cast<std::size_t>(i)];
+        const Rect cell{4 + (i % kKindColumns) * kKindWidth, kToolbarHeight + 6 + (i / kKindColumns) * kKindHeight, kKindWidth - 2, kKindHeight - 2};
+        Button& kind = characterPalette_->add<Button>(cell, textures_.art == nullptr ? capitalised(def.name).substr(0, 1) : "", [this, i] {
+            kind_ = i;
+            tool_ = EditorTool::Place; // choosing a character means placing it
+        });
+        kind.hint = def.name;
+        if (textures_.art != nullptr) {
+            const Rect frame = textures_.art->frame(def.frames, def.directions, Facing::South, 0);
+            kind.icon = &textures_.characters;
+            kind.iconSource = {frame.x + (kCharacterWidth - (kKindWidth - 4)) / 2, frame.y + kCharacterHeight - (kKindHeight - 4) - 2, kKindWidth - 4,
+                               kKindHeight - 4};
+        }
+    }
+    buildProperties();
+}
+
+void Editor::buildProperties() {
+    properties_ = std::make_unique<Panel>(Rect{viewWidth_ - kPropertiesWidth - 2, kToolbarHeight + 4, kPropertiesWidth, 62});
+    properties_->visible = false;
+    propertiesFor_ = -1;
+    propertiesStale_ = false;
+    const PlacedCharacter* shown = selected_ ? find(*selected_) : nullptr;
+    if (shown == nullptr) return;
+    properties_->visible = true;
+    propertiesFor_ = shown->id;
+    const Rect box = properties_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    // A label, not a field: the kind decides the picture, and changing it is a new character.
+    properties_->add<Button>(Rect{left, box.y + 4, width, 11}, std::format("{} #{}", shown->kind, shown->id), [] {});
+    properties_->add<luna::engine::TextField>(Rect{left, box.y + 18, width, 11}, "Name", shown->name, 18,
+                                              [this](const std::string& name) { setSelectedName(name); });
+    properties_->add<luna::engine::NumberField>(Rect{left, box.y + 32, width, 11}, "HP", shown->hp, 1, 9999, [this](int hp) { setSelectedHp(hp); });
+    properties_->add<luna::engine::NumberField>(Rect{left, box.y + 46, width, 11}, "Sword", shown->swordDamage, 0, 999,
+                                                [this](int damage) { setSelectedSwordDamage(damage); });
+}
+
+PlacedCharacter* Editor::find(int id) {
+    for (PlacedCharacter& placed : level_.characters) {
+        if (placed.id == id) return &placed;
+    }
+    return nullptr;
+}
+
+void Editor::select(std::optional<int> id) {
+    if (id && find(*id) == nullptr) id.reset();
+    if (id == selected_ && !propertiesStale_) return;
+    selected_ = id;
+    buildProperties();
+}
+
+void Editor::changeCharacters(const std::string& what, std::vector<PlacedCharacter> after, int nextIdAfter) {
+    run(std::make_unique<CharactersCommand>(what, level_.characters, std::move(after), level_.nextId, nextIdAfter));
+    propertiesStale_ = true;
+}
+
+void Editor::setSelectedName(const std::string& name) {
+    if (!selected_ || find(*selected_) == nullptr || name.empty()) return;
+    auto after = level_.characters;
+    for (PlacedCharacter& placed : after) {
+        if (placed.id == *selected_) placed.name = name;
+    }
+    changeCharacters("rename to " + name, std::move(after), level_.nextId);
+}
+
+void Editor::setSelectedHp(int hp) {
+    if (!selected_ || find(*selected_) == nullptr) return;
+    auto after = level_.characters;
+    for (PlacedCharacter& placed : after) {
+        if (placed.id == *selected_) placed.hp = std::clamp(hp, 1, 9999);
+    }
+    changeCharacters(std::format("HP {}", hp), std::move(after), level_.nextId);
+}
+
+void Editor::setSelectedSwordDamage(int damage) {
+    if (!selected_ || find(*selected_) == nullptr) return;
+    auto after = level_.characters;
+    for (PlacedCharacter& placed : after) {
+        if (placed.id == *selected_) placed.swordDamage = std::clamp(damage, 0, 999);
+    }
+    changeCharacters(std::format("sword damage {}", damage), std::move(after), level_.nextId);
+}
+
+std::pair<int, int> Editor::toWorld(int screenX, int screenY) const {
+    const Rect view = camera_.view();
+    return {view.x + screenX, view.y + screenY};
+}
+
+std::optional<int> Editor::characterAt(int screenX, int screenY) const {
+    if (screenX < 0 || screenY < 0) return std::nullopt;
+    const auto [wx, wy] = toWorld(screenX, screenY);
+    // The last one drawn is on top, so it is the one the owner sees and means.
+    for (auto it = level_.characters.rbegin(); it != level_.characters.rend(); ++it) {
+        if (wx >= it->feet.x - kCharacterWidth / 2 && wx < it->feet.x + kCharacterWidth / 2 && wy >= it->feet.y - kCharacterHeight && wy <= it->feet.y) {
+            return it->id;
+        }
+    }
+    return std::nullopt;
 }
 
 void Editor::levelChanged() {
@@ -129,6 +258,8 @@ bool Editor::undo() {
     }
     unsaved_ = true;
     levelChanged();
+    propertiesStale_ = true; // the selected character may have changed, or be gone
+    select(selected_);
     say("Undone");
     return true;
 }
@@ -140,6 +271,8 @@ bool Editor::redo() {
     }
     unsaved_ = true;
     levelChanged();
+    propertiesStale_ = true;
+    select(selected_);
     say("Redone");
     return true;
 }
@@ -198,14 +331,72 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         if (b == nullptr) continue;
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
+                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) ||
                       (b->label == "Grid" && grid_);
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(palette_->children()[i].get())) b->selected = static_cast<int>(i) == tile_;
     }
+    for (std::size_t i = 0; i < characterPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(characterPalette_->children()[i].get())) b->selected = static_cast<int>(i) == kind_;
+    }
+    // Painting tools show the ground palette; Place and Select show the characters.
+    palette_->visible = paints(tool_);
+    characterPalette_->visible = !paints(tool_);
+    if (propertiesStale_ && !properties_->typing()) {
+        select(selected_); // show the character's values again (after an undo, or a change elsewhere)
+    }
     const bool onToolbar = toolbar_->handle(input);
-    const bool onPalette = palette_->handle(input);
-    return onToolbar || onPalette;
+    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input);
+    const bool onProperties = properties_->handle(input);
+    return onToolbar || onPalette || onProperties;
+}
+
+void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
+    const auto [wx, wy] = toWorld(pointer.x, pointer.y);
+    auto insideLevel = [this](int x, int y) {
+        return std::pair{std::clamp(x, 0, level_.width * kTileSize - 1), std::clamp(y, 0, level_.height * kTileSize - 1)};
+    };
+    if (tool_ == EditorTool::Place) {
+        if (pressed && hover_) {
+            const CharacterKindDef& kind = definitions_.characters[static_cast<std::size_t>(kind_)];
+            auto after = level_.characters;
+            const auto [x, y] = insideLevel(wx, wy);
+            after.push_back({level_.nextId, kind.name, {x, y}, Facing::South, capitalised(kind.name), kind.hp, kind.swordDamage});
+            const int id = level_.nextId;
+            changeCharacters(std::format("place {} #{}", kind.name, id), std::move(after), level_.nextId + 1);
+            select(id);
+        }
+        return;
+    }
+    // Select: click a character to select it and drag it to move it (one step of Undo).
+    if (pressed) {
+        const std::optional<int> hit = characterAt(pointer.x, pointer.y);
+        select(hit);
+        if (hit) {
+            const PlacedCharacter& grabbed = *find(*hit);
+            moving_ = true;
+            movingBefore_ = level_.characters;
+            grabX_ = grabbed.feet.x - wx;
+            grabY_ = grabbed.feet.y - wy;
+        }
+    }
+    if (moving_ && held && pointer.inside() && selected_) {
+        if (PlacedCharacter* dragged = find(*selected_)) {
+            const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
+            dragged->feet = {x, y}; // moved at once, so the owner sees it follow the pointer
+        }
+    }
+    if (moving_ && (released || !held)) {
+        moving_ = false;
+        if (level_.characters != movingBefore_) {
+            const PlacedCharacter* moved = selected_ ? find(*selected_) : nullptr;
+            const std::string what = moved == nullptr ? "move" : std::format("move {} to ({}, {})", moved->name, moved->feet.x, moved->feet.y);
+            history_.record(std::make_unique<CharactersCommand>(what, movingBefore_, level_.characters, level_.nextId, level_.nextId));
+            unsaved_ = true;
+            say(what);
+        }
+    }
 }
 
 void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
@@ -213,6 +404,10 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
     const bool pressed = pointer.wasPressed(PointerButton::Left) && !overPanel;
     const bool held = pointer.isHeld(PointerButton::Left);
     const bool released = pointer.wasReleased(PointerButton::Left);
+    if (!paints(tool_)) {
+        usePlaceOrSelect(pointer, pressed, held, released);
+        return;
+    }
 
     if (tool_ == EditorTool::Brush || tool_ == EditorTool::Eraser) {
         if (pressed && hover_) {
@@ -250,12 +445,27 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
         if (intents.pressed(Intent::Save)) save();
         if (intents.pressed(Intent::ToggleGrid)) grid_ = !grid_;
+        if (selected_ && intents.pressed(Intent::Delete)) {
+            const PlacedCharacter* gone = find(*selected_);
+            const std::string what = gone == nullptr ? "remove" : "remove " + gone->name;
+            auto after = level_.characters;
+            std::erase_if(after, [this](const PlacedCharacter& c) { return c.id == *selected_; });
+            changeCharacters(what, std::move(after), level_.nextId);
+            select(std::nullopt);
+        }
+        if (selected_ && intents.pressed(Intent::Rotate)) {
+            auto after = level_.characters;
+            for (PlacedCharacter& c : after) {
+                if (c.id == *selected_) c.facing = static_cast<Facing>((static_cast<int>(c.facing) + 1) % static_cast<int>(Facing::Count)); // clockwise
+            }
+            changeCharacters("turn", std::move(after), level_.nextId);
+        }
     }
 
     double x = centreX_ + (typing ? 0 : intents.moveX() * kPanPerTick);
@@ -320,20 +530,44 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         painter.outline({corner.x, corner.y, kTileSize, kTileSize}, UiColor::Text);
     }
 
+    // The selected character: framed in gold, with its name above.
+    if (selected_) {
+        for (const PlacedCharacter& placed : level_.characters) {
+            if (placed.id != *selected_) continue;
+            const auto corner = screen(placed.feet.x - kCharacterWidth / 2, placed.feet.y - kCharacterHeight);
+            painter.outline({corner.x - 1, corner.y - 1, kCharacterWidth + 2, kCharacterHeight + 2}, UiColor::Gold);
+            painter.text(corner.x + (kCharacterWidth - UiPainter::textWidth(placed.name)) / 2, corner.y - 9, placed.name, UiColor::Gold);
+        }
+    }
+
     toolbar_->draw(painter);
     palette_->draw(painter);
-    // The status line: tool, ground, cell, and the last thing done.
-    std::string line = std::format("{}  {}", toolName(tool_),
-                                   tool_ == EditorTool::Eraser ? definitions_.tiles[static_cast<std::size_t>(level_.defaultGround)].name
-                                                               : definitions_.tiles[static_cast<std::size_t>(tile_)].name);
+    characterPalette_->draw(painter);
+    properties_->draw(painter);
+    // The status line: tool, what it uses, cell, and the last thing done.
+    std::string what;
+    if (tool_ == EditorTool::Eraser) {
+        what = definitions_.tiles[static_cast<std::size_t>(level_.defaultGround)].name;
+    } else if (paints(tool_)) {
+        what = definitions_.tiles[static_cast<std::size_t>(tile_)].name;
+    } else if (tool_ == EditorTool::Place) {
+        what = definitions_.characters[static_cast<std::size_t>(kind_)].name;
+    } else {
+        const auto shown = std::find_if(level_.characters.begin(), level_.characters.end(), [this](const PlacedCharacter& c) { return selected_ && c.id == *selected_; });
+        what = shown == level_.characters.end() ? "nothing selected" : shown->name;
+    }
+    std::string line = std::format("{}  {}", toolName(tool_), what);
     if (hover_) line += std::format("  ({}, {})", hover_->first, hover_->second);
     if (unsaved_) line += "  *unsaved";
     if (!status_.empty()) line += "  " + status_;
     const Rect bar{0, viewHeight_ - luna::engine::kGlyphHeight - 5, viewWidth_, luna::engine::kGlyphHeight + 5};
     painter.fill(bar, UiColor::Shade);
-    painter.text(4, bar.y + 3, line.substr(0, static_cast<std::size_t>(viewWidth_ / luna::engine::kTextAdvance - 1)), UiColor::Text);
+    // The mode label ("EDITOR  F1: PLAY") takes the right end of the line.
+    painter.text(4, bar.y + 3, line.substr(0, static_cast<std::size_t>((viewWidth_ - 110) / luna::engine::kTextAdvance)), UiColor::Text);
     toolbar_->drawOverlay(painter);
     palette_->drawOverlay(painter);
+    characterPalette_->drawOverlay(painter);
+    properties_->drawOverlay(painter);
 }
 
 } // namespace odysseus::game

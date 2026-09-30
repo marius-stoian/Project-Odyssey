@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-125 / S-US-125: Place characters (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Sixth story of M2c.
+
+- Game: the Editor places characters from a palette of every kind (hero, wanderer, 10 monsters); Select picks one by clicking it, drags it to move it, R turns it, Delete removes it; a properties panel edits its name, HP and sword damage; every change is one step of Undo; saved with the level. In Game mode placed enemies take sword hits, flash red and are defeated; other placed characters stand where they were put.
+- Levels: `assets/levels/demo.json` (the original demo) is what every test plays; the owner's edited `valley.json` stays the game's level (delegated decision D-20); level backups are not committed.
+- Tests: `tests/game/place_test.cpp` (3 cases), end-to-end `US-125 Place in the game`; the end-to-end tests of US-024, US-029, US-123 and US-124 now play demo.json; ctest 24/24 in Debug and Release, zero warnings.
+
+
 ## US-124 / S-US-124: Paint ground tiles (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fifth story of M2c.

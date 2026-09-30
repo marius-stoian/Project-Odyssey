@@ -26,7 +26,7 @@ Intents holding(Intent intent) {
 } // namespace
 
 TEST_CASE("US-123 Switch") {
-    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
+    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     luna::engine::RecordingRenderer renderer;
     odyssey.start(renderer);
     CHECK(odyssey.mode() == game::Mode::Game);
@@ -65,7 +65,7 @@ TEST_CASE("US-123 Switch") {
 }
 
 TEST_CASE("US-123 Back to play") {
-    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
+    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     luna::engine::RecordingRenderer renderer;
     odyssey.start(renderer);
     odyssey.update(pressing(Intent::ModeEditor));
@@ -92,7 +92,7 @@ TEST_CASE("US-123 Back to play") {
 }
 
 TEST_CASE("US-123 Game untouched") {
-    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR);
+    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     luna::engine::RecordingRenderer renderer;
     odyssey.start(renderer);
     // F1 in Game mode changes nothing; the hero walks; the sword and spear still work.

@@ -45,6 +45,7 @@ public:
     const Level& level() const { return level_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
+    const std::vector<PlacedCharacter>& bystanders() const { return bystanders_; }
     const std::filesystem::path& levelFile() const { return levelFile_; }
     Mode mode() const { return mode_; }
     // F1 and F2 do this; `--editor` starts in the Editor. Back in Game, the play state is
@@ -77,6 +78,7 @@ private:
     std::filesystem::path spritesDirectory_;
     Sword sword_;
     std::vector<Enemy> enemies_;
+    std::vector<PlacedCharacter> bystanders_; // placed characters the sword does not fight: they stand and are seen
     Editor editor_;
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;
