@@ -380,3 +380,23 @@ if (error != std::errc() || end != text.data() + text.size() || value < minimum 
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 3 --years 200` and compare with `--years 100`. Then try `--years 10001` and read the message. Finally run `echo $LASTEXITCODE` in PowerShell after a bad command.
 
 **Check yourself.** Why does the program measure time with a clock, when the Charter forbids wall-clock time in the simulation?
+
+## US-016: Save and load the simulation (2026-09-30)
+
+**What we built.** The world can be saved and loaded exactly: after 50 years, save, load, and the world hash is the same; run 50 more years and you get the very world that 100 years in one go would have made. A crash while saving never destroys the last good save, and old save files are upgraded.
+
+**The idea: file I/O, JSON and error handling.** Writing a file is not instant; if the power goes out halfway, the file is garbage. So we write to `clan.json.tmp` first and only then rename it: a rename happens in one step, so there is always one complete save.
+
+```cpp
+out << WorldArchive::toJson(world).dump(1);   // 1. write everything to clan.json.tmp
+fs::rename(file, backupPath(file, 1));        // 2. the old save becomes clan.json.bak1
+fs::rename(temporary, file);                  // 3. the new one takes its name, in one step
+```
+
+Loading can go wrong in many ways (a missing file, broken JSON, a field of the wrong type). Each becomes a `DataError` naming the file and the problem, and `loadWorld` catches it and tries the next backup. `try`/`catch` lets us deal with a problem where we can do something sensible about it.
+
+**Where to look.** [src/sim/save.cpp:310](../src/sim/save.cpp) (`saveWorld`), `loadWorld` just below it, `upgradeFrom1` near the top.
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --years 10 --save clan.json`, open `clan.json` in a text editor and find your clan's names. Change one person's `"partner"` to 999 and try `--load clan.json`: read the message, and see which file was loaded instead.
+
+**Check yourself.** Why do we rename `clan.json.tmp` at the end instead of writing straight into `clan.json`?
