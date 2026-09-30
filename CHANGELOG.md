@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M1b: Exit review M1b, Luna Physics (Mraw) — 2026-09-30
+
+**State:** On `qa`; merged into `main` and tagged `m1b-done` once CI on `main` is green.
+
+- `docs/gates/M1b.md`: every exit criterion met, with the textbook comparisons (range, flight time, drag, drift, bounce heights, friction distance) and the in-flight screenshot.
+- New gate test `M1b Whole physics is identical on every build` (`tests/physics/determinism_test.cpp`): 12 throws with drag and wind, a bouncing and sliding ball for 400 ticks and a 1,000-body contact step, hashed and pinned (17309765312882650619) so Debug, Release and CI must agree.
+- Evidence: `docs/evidence/M1b/` (physics test output in both builds, ctest logs, screenshot).
+- Verification: 0 warnings; ctest 17/17 Debug and Release; luna_physics_tests 19 cases, 404,518 assertions.
+
 ## US-029 / S-US-029: Throw a spear in the demo (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Completes the M1b stories (Luna Physics).
