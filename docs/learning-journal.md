@@ -546,3 +546,27 @@ Everything else (crop, fit, mirror) is a function from one picture and a rectang
 **Try it (15 minutes).** Run `odysseus_atlas.exe --preview preview.png` from the build folder and open the picture. Then run `odysseus_atlas.exe --find "assets/sprites/Retro RPG Heroes, Terrain & Monsters Sheet.png" 12 40 1515 180 12 45` and see the 20 heroes of that sheet measured.
 
 **Check yourself.** Why does `fitInto` weight each colour by its alpha before averaging, and what would the edges of a figure look like if it did not?
+
+## US-121: Point, click and read on screen (2026-09-30)
+
+**What we built.** The mouse reaches the game as a *pointer* in the game's own pixels, keyboard shortcuts arrive as intents (F2 = Editor, Ctrl+Z = Undo...), and Luna has a small UI toolkit: a pixel font and widgets (buttons, lists, number and text fields, panels).
+
+**The idea: classes with virtual functions.** A panel holds many kinds of widget but treats them all alike. Each widget is a class that *derives* from `Widget` and answers the same questions its own way:
+
+```cpp
+class Widget {
+public:
+    virtual ~Widget() = default;
+    virtual bool handle(const UiInput& input) { return false; }
+    virtual void draw(UiPainter& painter) const = 0;   // "= 0": every widget must say how
+};
+class Button final : public Widget { ... bool handle(...) override; void draw(...) const override; };
+```
+
+The panel keeps `std::unique_ptr<Widget>` and calls `child->draw(painter)`; C++ picks `Button::draw` or `ListBox::draw` at run time. The `virtual ~Widget()` matters: deleting a Button through a `Widget` pointer must run the Button's destructor too.
+
+**Where to look.** [src/luna/engine/ui.h](../src/luna/engine/ui.h) and [ui.cpp](../src/luna/engine/ui.cpp).
+
+**Try it (15 minutes).** Open [ui-showcase.png](evidence/US-121/ui-showcase.png), then change the `Gold` colour in `colorOf` in ui.cpp, rebuild, run `luna_tests.exe -tc="US-121 Showcase"` and look at the picture it names.
+
+**Check yourself.** Why does a `Button` run its action when the mouse button is *let go* over it, and not when it is pressed?

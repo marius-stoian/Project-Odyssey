@@ -46,6 +46,12 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::LShift:
     case Key::RShift: return KeyBinding{Intent::SwitchWeapon, kKeyboardA};
     case Key::Tab: return KeyBinding{Intent::SwitchWeapon, kKeyboardB};
+    case Key::F1: return KeyBinding{Intent::ModeGame, kKeyboardA};
+    case Key::F2: return KeyBinding{Intent::ModeEditor, kKeyboardA};
+    case Key::Delete: return KeyBinding{Intent::Delete, kKeyboardA};
+    case Key::Backspace: return KeyBinding{Intent::Erase, kKeyboardA};
+    case Key::G: return KeyBinding{Intent::ToggleGrid, kKeyboardA};
+    case Key::R: return KeyBinding{Intent::Rotate, kKeyboardA};
     default: return std::nullopt;
     }
 }
@@ -97,13 +103,54 @@ void InputMap::setDigital(Intent intent, std::size_t source, bool down) {
 void InputMap::handle(const platform::Event& event) {
     switch (event.type) {
     case EventType::KeyDown:
-    case EventType::KeyUp:
+    case EventType::KeyUp: {
         if (event.repeat) {
             return; // holding a key repeats KeyDown; the intent is already held
         }
-        if (const auto binding = keyBinding(event.key)) {
-            setDigital(binding->intent, binding->source, event.type == EventType::KeyDown);
+        const bool down = event.type == EventType::KeyDown;
+        if (event.key == Key::LCtrl || event.key == Key::RCtrl) {
+            ctrl_[event.key == Key::LCtrl ? 0 : 1] = down;
+            return;
         }
+        // Ctrl chords: Ctrl+Z, Ctrl+Y, Ctrl+S. Ctrl+S saves and does not also walk down. A key
+        // let go always ends its chord, even if Ctrl was let go first.
+        const std::optional<Intent> chord = event.key == Key::Z ? std::optional(Intent::Undo)
+                                            : event.key == Key::Y ? std::optional(Intent::Redo)
+                                            : event.key == Key::S ? std::optional(Intent::Save)
+                                                                  : std::nullopt;
+        if (chord && down && (ctrl_[0] || ctrl_[1])) {
+            setDigital(*chord, kKeyboardA, true);
+            return;
+        }
+        if (chord && !down) {
+            setDigital(*chord, kKeyboardA, false);
+        }
+        if (event.key == Key::Enter) {
+            setDigital(Intent::Confirm, kKeyboardA, down); // Enter also confirms a text field (E does not)
+        }
+        if (const auto binding = keyBinding(event.key)) {
+            setDigital(binding->intent, binding->source, down);
+        }
+        return;
+    }
+    case EventType::MouseMoved:
+        movePointer(event.x, event.y);
+        return;
+    case EventType::MouseButtonDown:
+    case EventType::MouseButtonUp:
+        movePointer(event.x, event.y);
+        if (event.mouseButton != platform::MouseButton::Unknown) {
+            const auto button = event.mouseButton == platform::MouseButton::Left    ? PointerButton::Left
+                                : event.mouseButton == platform::MouseButton::Right ? PointerButton::Right
+                                                                                    : PointerButton::Middle;
+            setButton(static_cast<std::size_t>(button), event.type == EventType::MouseButtonDown);
+        }
+        return;
+    case EventType::MouseWheel:
+        pointer_.wheel += event.wheel > 0.0F ? 1 : (event.wheel < 0.0F ? -1 : 0);
+        return;
+    case EventType::TextInput:
+        text_ += event.text;
         return;
     case EventType::GamepadButtonDown:
     case EventType::GamepadButtonUp:
@@ -136,6 +183,39 @@ void InputMap::setScripted(Intent intent, bool held) {
     setDigital(intent, kScript, held);
 }
 
+void InputMap::setPointerArea(const odysseus::core::Rect& area, int scale) {
+    area_ = area;
+    scale_ = std::max(1, scale);
+}
+
+void InputMap::movePointer(float windowX, float windowY) {
+    const int x = static_cast<int>(windowX);
+    const int y = static_cast<int>(windowY);
+    const bool inside = x >= area_.x && y >= area_.y && x < area_.x + area_.width && y < area_.y + area_.height;
+    pointer_.x = inside ? (x - area_.x) / scale_ : -1;
+    pointer_.y = inside ? (y - area_.y) / scale_ : -1;
+}
+
+void InputMap::setButton(std::size_t button, bool down) {
+    if (down && !pointer_.held[button]) {
+        pointer_.pressed[button] = true;
+    }
+    if (!down && pointer_.held[button]) {
+        pointer_.released[button] = true;
+    }
+    pointer_.held[button] = down;
+}
+
+void InputMap::setScriptedPointer(int x, int y, PointerButton button, bool held) {
+    pointer_.x = x;
+    pointer_.y = y;
+    setButton(static_cast<std::size_t>(button), held);
+}
+
+void InputMap::typeScripted(const std::string& text) {
+    text_ += text;
+}
+
 Intents InputMap::nextTick() {
     Intents intents;
     for (std::size_t i = 0; i < kIntentCount; ++i) {
@@ -143,6 +223,12 @@ Intents InputMap::nextTick() {
         intents.set(static_cast<Intent>(i), held, pressedSinceTick_[i]);
     }
     pressedSinceTick_.fill(false);
+    intents.setPointer(pointer_);
+    intents.setText(std::move(text_));
+    text_.clear();
+    pointer_.pressed.fill(false);
+    pointer_.released.fill(false);
+    pointer_.wheel = 0;
     return intents;
 }
 

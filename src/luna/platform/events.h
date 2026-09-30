@@ -2,6 +2,8 @@
 
 #include "boundary.h"
 
+#include <string>
+
 namespace luna::platform {
 
 // Luna's own description of what happened, so nothing above Platform ever sees SDL.
@@ -15,11 +17,21 @@ enum class EventType {
     GamepadAdded,
     GamepadRemoved,
     WindowResized,     // the drawable size changed (width, height in real pixels)
+    MouseMoved,        // x, y: where the pointer is, in window pixels
+    MouseButtonDown,   // mouseButton, x, y
+    MouseButtonUp,
+    MouseWheel,        // wheel: + away from the user (scroll up), - towards
+    TextInput,         // text: printable ASCII typed (for text fields)
 };
 
 // Physical key positions: W is "the key where W is on a US keyboard", so WASD also works
 // on French (AZERTY) or German (QWERTZ) keyboards.
-enum class Key { Unknown, W, A, S, D, E, Up, Down, Left, Right, Escape, Space, Enter, LShift, RShift, Tab };
+enum class Key {
+    Unknown, W, A, S, D, E, Up, Down, Left, Right, Escape, Space, Enter, LShift, RShift, Tab,
+    F1, F2, Delete, Backspace, LCtrl, RCtrl, Z, Y, G, R
+};
+
+enum class MouseButton { Unknown, Left, Right, Middle };
 
 // Named by position, not label: South is Xbox "A", PlayStation "Cross", Switch "B".
 enum class GamepadButton { Unknown, South, East, West, North, Back, Start, DpadUp, DpadDown, DpadLeft, DpadRight };
@@ -36,6 +48,11 @@ struct Event {
     int gamepad = 0;                         // which gamepad sent it
     int width = 0;                           // WindowResized
     int height = 0;
+    MouseButton mouseButton = MouseButton::Unknown; // MouseButtonDown, MouseButtonUp
+    float x = 0.0F;                          // Mouse events: window pixels
+    float y = 0.0F;
+    float wheel = 0.0F;                      // MouseWheel
+    std::string text;                        // TextInput
 };
 
 } // namespace luna::platform

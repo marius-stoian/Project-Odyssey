@@ -50,7 +50,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | X-M2b | - | M2b | Done (Go, owner 2026-09-30) | 2026-09-30 |
 | K-M2c | - | M2c | Done | 2026-09-30 |
 | S-US-120 | US-120 | M2c | Done | 2026-09-30 |
-| S-US-121 | US-121 | M2c | To do |  |
+| S-US-121 | US-121 | M2c | Done | 2026-09-30 |
 | S-US-122 | US-122 | M2c | To do |  |
 | S-US-123 | US-123 | M2c | To do |  |
 | S-US-124 | US-124 | M2c | To do |  |

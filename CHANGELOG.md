@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-121 / S-US-121: Point, click and read on screen (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Second story of M2c.
+
+- Platform: mouse movement, buttons and wheel, typed text, and the editor's keys (F1, F2, Delete, Backspace, Ctrl, Z, Y, G, R).
+- Engine: new intents (ModeGame, ModeEditor, Undo, Redo, Save, Delete, ToggleGrid, Rotate, Erase, Confirm) and the `Pointer` in virtual pixels; scripted pointer and typing; the UI toolkit (`ui.{h,cpp}`: 5x7 font, 12 colours, button, list, number and text fields, panel) and `ImageRenderer` for pixel tests.
+- Program: `odysseus.exe --click / --drag / --point / --type`; every intent usable with `--hold`.
+- Tests: `tests/luna/ui_test.cpp` (4 cases), SDL mouse and text translation; ctest 21/21 in Debug and Release, zero warnings.
+
+
 ## US-120 / S-US-120: Real art in the game (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2c.
