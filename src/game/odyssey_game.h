@@ -52,7 +52,7 @@ private:
     SpearRange range_;
     Sword sword_;
     Enemy enemy_;
-    WeaponType currentWeapon_ = WeaponType::Sword;
+    WeaponType currentWeapon_ = WeaponType::Bow; // the spear demo (US-029) is the default; Shift switches to the sword
     bool nextSpearIsFlint_ = true; // Interact alternates flint and wooden spears
     // After a throw the camera frames the hero and the target together for a while.
     int framingTicks_ = 0;
