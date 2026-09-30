@@ -97,6 +97,10 @@ json savePerson(const Person& p) {
                 {"courtDays", p.courtDays},
                 {"courtEvent", p.courtEvent},
                 {"courtPauseDay", p.courtPauseDay},
+                {"master", p.master},
+                {"apprentice", p.apprentice},
+                {"teachHunt", p.teachHunt},
+                {"teachEvent", p.teachEvent},
                 {"pregnantDays", p.pregnantDays},
                 {"childFather", p.childFather},
                 {"lastBirthDay", p.lastBirthDay}};
@@ -144,6 +148,10 @@ Person loadPerson(const json& value) {
     p.courtDays = value.at("courtDays").get<int>();
     p.courtEvent = value.at("courtEvent").get<int>();
     p.courtPauseDay = value.at("courtPauseDay").get<std::int64_t>();
+    p.master = value.at("master").get<int>();
+    p.apprentice = value.at("apprentice").get<int>();
+    p.teachHunt = value.at("teachHunt").get<bool>();
+    p.teachEvent = value.at("teachEvent").get<int>();
     p.pregnantDays = value.at("pregnantDays").get<int>();
     p.childFather = value.at("childFather").get<int>();
     p.lastBirthDay = value.at("lastBirthDay").get<std::int64_t>();
@@ -208,6 +216,10 @@ void upgradeFrom2(json& save) {
         person["courtDays"] = 0;
         person["courtEvent"] = -1;
         person["courtPauseDay"] = -1;
+        person["master"] = -1;
+        person["apprentice"] = -1;
+        person["teachHunt"] = false;
+        person["teachEvent"] = -1;
         for (json& memory : person.at("memories")) {
             memory["event"] = -1;
         }
@@ -346,6 +358,9 @@ struct WorldArchive {
             }
             if (p.healthEvent >= events) {
                 return std::format("people[{}].healthEvent names an event that does not exist", i);
+            }
+            if (!validId(p.master) || !validId(p.apprentice) || p.teachEvent >= events) {
+                return std::format("people[{}].master names a person or event that does not exist", i);
             }
             if (!validId(p.courting) || p.courtEvent >= events) {
                 return std::format("people[{}].courting names a person or event that does not exist", i);

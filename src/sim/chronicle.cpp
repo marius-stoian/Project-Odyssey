@@ -20,6 +20,15 @@ const ChronicleEntry* Chronicle::find(int id) const {
     return id >= 0 && id < static_cast<int>(entries_.size()) ? &entries_[static_cast<std::size_t>(id)] : nullptr;
 }
 
+std::string joinNames(const std::vector<std::string>& names) {
+    std::string joined;
+    for (std::size_t i = 0; i < names.size(); ++i) {
+        joined += i == 0 ? "" : (i + 1 == names.size() ? " and " : ", ");
+        joined += names[i];
+    }
+    return joined;
+}
+
 const char* eventKindName(EventKind kind) {
     static constexpr const char* kNames[] = {"note", "birth", "death", "pairing", "parting", "feud", "peace", "theft", "empty store",
                                              "lean season", "mammoth", "gift", "quarrel", "blame", "revenge", "exile", "sickness",

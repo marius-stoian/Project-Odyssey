@@ -180,7 +180,7 @@ TEST_CASE("US-016 Old version") {
         save["random"].erase("story");
         for (auto& person : save["people"]) {
             for (const char* key : {"grudges", "exiled", "health", "healthDays", "healthEvent", "carer", "nursing", "guardian",
-                                    "courting", "courtDays", "courtEvent", "courtPauseDay"}) {
+                                    "courting", "courtDays", "courtEvent", "courtPauseDay", "master", "apprentice", "teachHunt", "teachEvent"}) {
                 person.erase(key);
             }
             for (auto& memory : person["memories"]) {

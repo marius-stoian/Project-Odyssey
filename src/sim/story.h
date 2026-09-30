@@ -139,6 +139,45 @@ struct PartingStory {
     int pauseDays = 30;            // both wait this long before courting again
 };
 
+// Masters teach youths (US-114).
+struct TeachingStory {
+    int masterMinSkill = 30;       // a master knows at least this much
+    int skillGap = 15;             // and is at least this much better than the youth
+    int takePercent = 20;          // chance a day that a master takes an apprentice
+    int minOpinion = -10;          // master and youth think at least this well of each other
+    int kinBonus = 40;             // a relative is likelier to be taught
+    int youthMaxYears = 15;        // youths from the working age (actions.json) up to this age are taught
+    int skillPerDay = 1;           // the apprentice's skill grows this much a day
+    int opinionPerDay = 2;         // and they grow close
+    int graduateGap = 5;           // graduation: within this many points of the master
+};
+
+// Hunting parties, roles, danger and rescue (US-114).
+struct HuntStory {
+    int minSize = 3;               // fewer hunters than this and the sighter hunts alone
+    int maxSize = 5;
+    int joinPercent = 70;          // chance a hunter joins a party...
+    int braveJoinBonus = 20;       // ...more if Brave...
+    int timidJoinPenalty = 30;     // ...less if Timid
+    int successBase = 20;          // percent chance of success before the party's strength is added
+    int leaderBonus = 10;
+    int heroBonus = 15;
+    int cowardPenalty = 15;
+    int heroCourage = 55;          // the most courageous is the hero if at least this
+    int cowardCourage = 30;        // the least courageous is the coward if at most this
+    int dangerPercent = 25;        // chance a member (not the coward) is in danger
+    int rescuePercent = 70;        // chance the best rescuer saves them...
+    int braveRescueBonus = 15;     // ...more if Brave
+    int rescuerHurtPercent = 30;
+    int dangerDeathPercent = 60;   // an unsaved member dies with this chance, else is hurt
+    int heroFeeling = 60;          // what the others feel about the hero
+    int heroOpinion = 10;
+    int cowardFeeling = -50;
+    int cowardOpinionLoss = 15;
+    int rescueFeeling = 90;        // the rescued one's gratitude
+    int rescueOpinion = 40;
+};
+
 struct StoryConfig {
     SeasonStory season;
     CauseStory causes;
@@ -153,6 +192,8 @@ struct StoryConfig {
     CourtshipStory courtship;
     RivalStory rivals;
     PartingStory parting;
+    TeachingStory teaching;
+    HuntStory hunt;
 };
 
 StoryConfig loadStoryConfig(const std::filesystem::path& file);

@@ -487,3 +487,24 @@ The `[](...) {...}` is a lambda, a comparison written on the spot. It must say w
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one "began courting" line to the "became partners" line it caused (`--why <id>` shows the chain). Then set `"opinionPerDay"` under `"courtship"` in `assets/data/sim/story.json` to 0 and watch how many courtships end in a pairing.
 
 **Check yourself.** Why does `pair()` clear every other suitor of both partners, even those who courted only a day and get no Jealousy event?
+
+## US-114: Teach the young and hunt together (2026-09-30)
+
+**What we built.** Skilled adults take youths as apprentices, who learn faster and grow close to them. When a mammoth is sighted, a party of three to five hunters goes out, with a leader, sometimes a hero and sometimes a coward. The party's strength decides the hunt, a member in danger may be saved (and owes a debt of gratitude for life), and everyone remembers what the others did.
+
+**The idea: a class that coordinates others.** A hunting party is not a thing that lives on its own; it is a short-lived *coordinator*. `World::huntMammoth` gathers the members (as pointers to people who already exist), works out the roles, decides the outcome, and hands the consequences back to the people and the chronicle. The people stay plain data; the coordinator holds the rules of how they act together:
+
+```cpp
+std::vector<Person*> party{&sighter};      // borrowed, never owned
+// ... more hunters join ...
+const int event = chronicle_.record(..., "A hunting party of ...");
+remembered(heroAt, MemoryKind::Heroism, ...);   // every member remembers
+```
+
+A pointer here means "look at this person, do not copy them": changing `*party[i]` changes the real person in `people_`. That is safe only because the list of people does not grow while the party is at work.
+
+**Where to look.** `World::huntMammoth` and `World::teaching` in [src/sim/world_hunt.cpp](../src/sim/world_hunt.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --years 30 --chronicle --threshold 30` and follow one "hunting party" line to the "stood firm" and "saved ... from the mammoth" lines it caused (`--why <id>`). Then set `"dangerPercent"` under `"hunt"` in `assets/data/sim/story.json` to 100 and see how the deaths change.
+
+**Check yourself.** Why does the party keep `Person*` pointers instead of copies of the people, and what would go wrong if we copied them?

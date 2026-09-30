@@ -96,6 +96,40 @@ StoryConfig loadStoryConfig(const std::filesystem::path& file) {
 
     config.parting.partingOpinion = requireInt(json, file, "parting", "partingOpinion", -100, 100);
     config.parting.pauseDays = requireInt(json, file, "parting", "pauseDays", 0, 3650);
+
+    config.teaching.masterMinSkill = requireInt(json, file, "teaching", "masterMinSkill", 0, 100);
+    config.teaching.skillGap = requireInt(json, file, "teaching", "skillGap", 0, 100);
+    config.teaching.takePercent = requireInt(json, file, "teaching", "takePercent", 0, 100);
+    config.teaching.minOpinion = requireInt(json, file, "teaching", "minOpinion", -100, 100);
+    config.teaching.kinBonus = requireInt(json, file, "teaching", "kinBonus", 0, 200);
+    config.teaching.youthMaxYears = requireInt(json, file, "teaching", "youthMaxYears", 1, 40);
+    config.teaching.skillPerDay = requireInt(json, file, "teaching", "skillPerDay", 0, 20);
+    config.teaching.opinionPerDay = requireInt(json, file, "teaching", "opinionPerDay", 0, 100);
+    config.teaching.graduateGap = requireInt(json, file, "teaching", "graduateGap", 0, 100);
+
+    HuntStory& hunt = config.hunt;
+    hunt.minSize = requireInt(json, file, "hunt", "minSize", 1, 20);
+    hunt.maxSize = requireInt(json, file, "hunt", "maxSize", hunt.minSize, 20);
+    hunt.joinPercent = requireInt(json, file, "hunt", "joinPercent", 0, 100);
+    hunt.braveJoinBonus = requireInt(json, file, "hunt", "braveJoinBonus", 0, 100);
+    hunt.timidJoinPenalty = requireInt(json, file, "hunt", "timidJoinPenalty", 0, 100);
+    hunt.successBase = requireInt(json, file, "hunt", "successBase", -1000, 1000);
+    hunt.leaderBonus = requireInt(json, file, "hunt", "leaderBonus", 0, 100);
+    hunt.heroBonus = requireInt(json, file, "hunt", "heroBonus", 0, 100);
+    hunt.cowardPenalty = requireInt(json, file, "hunt", "cowardPenalty", 0, 100);
+    hunt.heroCourage = requireInt(json, file, "hunt", "heroCourage", 0, 200);
+    hunt.cowardCourage = requireInt(json, file, "hunt", "cowardCourage", 0, 200);
+    hunt.dangerPercent = requireInt(json, file, "hunt", "dangerPercent", 0, 100);
+    hunt.rescuePercent = requireInt(json, file, "hunt", "rescuePercent", 0, 100);
+    hunt.braveRescueBonus = requireInt(json, file, "hunt", "braveRescueBonus", 0, 100);
+    hunt.rescuerHurtPercent = requireInt(json, file, "hunt", "rescuerHurtPercent", 0, 100);
+    hunt.dangerDeathPercent = requireInt(json, file, "hunt", "dangerDeathPercent", 0, 100);
+    hunt.heroFeeling = requireInt(json, file, "hunt", "heroFeeling", 0, 100);
+    hunt.heroOpinion = requireInt(json, file, "hunt", "heroOpinion", 0, 100);
+    hunt.cowardFeeling = requireInt(json, file, "hunt", "cowardFeeling", -100, 0);
+    hunt.cowardOpinionLoss = requireInt(json, file, "hunt", "cowardOpinionLoss", 0, 100);
+    hunt.rescueFeeling = requireInt(json, file, "hunt", "rescueFeeling", 0, 100);
+    hunt.rescueOpinion = requireInt(json, file, "hunt", "rescueOpinion", 0, 100);
     return config;
 }
 

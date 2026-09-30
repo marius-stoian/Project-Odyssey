@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-114 / S-US-114: Teach the young and hunt together (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`. Fifth story of M2b.
+
+- Simulation: apprenticeship (a skilled well adult takes a youth of 12 to 15 in the master's better skill; the apprentice learns a point a day, master and youth grow close, graduation at 16 or near the master's skill; Apprentice and Graduation events). Hunting parties: a mammoth sighting gathers 3 to 5 well hunters (else the sighter hunts alone as before), with a leader, a hero and a coward; the party's strength decides success; danger and rescue (Rescue event, the rescued keeps a debt of gratitude for life); every member remembers what the others did (new memory kinds Heroism and Cowardice). `bringDownMammoth` now returns its event and can cite the party.
+- Data: `story.json` sections `teaching` and `hunt`.
+- Save: new person fields `master`, `apprentice`, `teachHunt`, `teachEvent` (version 3; upgrade from 2 fills defaults; validated on load). All in the world hash.
+- Code: `src/sim/world_hunt.cpp` (new); `joinNames` moved to `chronicle.cpp`.
+- Tests: `tests/sim/story_hunt_test.cpp` (6 cases); ctest 20/20 in Debug and Release, zero warnings.
+- Balance (10 seeds x 100 years): 29 to 51 alive. Seed 7: 205 apprenticeships, 73 hunting parties, 61 rescues, 2 cowards.
+
+
 ## US-113 / S-US-113: Court and compete for a partner (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fourth story of M2b.

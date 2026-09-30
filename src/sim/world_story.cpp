@@ -63,6 +63,7 @@ int World::exile(Person& person, int victim, std::vector<int> causes, const std:
     person.exiled = true;
     stopCourting(person);
     dropSuitors(person.id);
+    releaseTeaching(person);
     releaseCare(person);
     person.health = Health::Well;
     const int event = chronicle_.record(date(), kImportanceExile, EventKind::Exile, person.id, victim, -1, std::move(causes), text);
