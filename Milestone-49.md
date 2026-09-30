@@ -5,9 +5,9 @@
 | | |
 |---|---|
 | Assembly plan / requirements | **v1.9** / **v1.9** |
-| Repository | US-140 merged into `qa` and pushed; hosted CI to confirm |
-| Milestone | **M2d Content and combat**: 7 of 12 Done; US-140 verified locally |
-| Next | Confirm CI on qa, then **S-US-141** (bows, crossbows, thrown weapons, staff bolts, shooting range) |
+| Repository | `qa` pushed; hosted CI green (run 36782177188) |
+| Milestone | **M2d Content and combat**: 7 of 12 Done; US-140 Done |
+| Next | **S-US-141**, then S-US-136 |
 
 ### What happened
 - US-139 (mouse aiming) is Done: CI on its merge was green.
@@ -23,7 +23,7 @@
 | ID | Milestone | Stories done | State |
 |---|---|---|---|
 | M0-M2c | Tooling to Level editor | 34 / 34 | Done |
-| M2d | Content and combat | 7 / 12 | US-140 awaiting CI |
+| M2d | Content and combat | 7 / 12 | US-140 Done, CI green |
 | M3-M6 | | 0 / 28 | Waits for your word after M2d |
 | | **MVP total** | **41 / 74** | |
 

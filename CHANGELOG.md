@@ -15,7 +15,7 @@ its PR changes rather than leaving an outdated description.
 
 ## US-140: Arc ballistics for shots (Avengers) — 2026-10-01
 
-**State:** Implemented and verified locally (Debug and Release); merge, push and hosted CI follow.
+**State:** Done. Merged into `qa`, pushed; hosted CI green (run 36782177188).
 
 - `src/game/arc_shots.{h,cpp}`: bow and thrown shots are Luna Physics projectiles (fixed-point, gravity, height); the launch angle lands them at the pointer, clamped to the weapon's range and its speed's reach; each tick they stop at the first enemy (feet to 1.5 m), rock (1.0 m tall) or the ground; a miss sticks 2 s, then is gone.
 - Game: sprites lifted by height with a ground shadow; log line per shot and end; staff bolts and bullets keep the flat path. Key aim (Interact) fires a shallow chest-height arrow to the weapon's range.
