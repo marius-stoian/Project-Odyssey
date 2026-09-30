@@ -53,9 +53,6 @@ NeedsConfig loadNeedsConfig(const std::filesystem::path& file) {
     config.dailyDecay[static_cast<std::size_t>(Need::Social)] = requireInt(decay, file, "social", 0, config.maximum);
     config.winterWarmthDecay = requireInt(json, file, "winterWarmthDecay", 0, config.maximum);
     config.mealValue = requireInt(json, file, "mealValue", 1, config.maximum);
-    config.sleepValue = requireInt(json, file, "sleepValue", 1, config.maximum);
-    config.fireWarmth = requireInt(json, file, "fireWarmth", 1, config.maximum);
-    config.talkSocial = requireInt(json, file, "talkSocial", 1, config.maximum);
     if (!json.contains("daysAtZeroBeforeDeath") || !json.at("daysAtZeroBeforeDeath").is_object()) {
         throw DataError(file, "daysAtZeroBeforeDeath", "must be an object with hunger and warmth");
     }

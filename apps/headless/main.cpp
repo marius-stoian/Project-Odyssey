@@ -3,7 +3,9 @@
 //   --seed <number>   world seed (default 42)
 //   --days <number>   how many in-game days to run (default one year)
 //   --data <folder>   content folder (default: the repository's assets/data)
+//   --inspect <name or id>  print that person's last decision: every action's score (US-012)
 #include "core/version.h"
+#include "sim/ai.h"
 #include "sim/world.h"
 
 #include <cstdint>
@@ -16,6 +18,7 @@ int main(int argc, char* argv[]) {
     std::uint64_t seed = 42;
     long long days = -1;
     std::string dataDirectory = ODYSSEUS_DATA_DIR;
+    std::string inspect;
     for (int i = 1; i + 1 < argc; ++i) {
         const std::string_view name = argv[i];
         if (name == "--seed") {
@@ -24,6 +27,8 @@ int main(int argc, char* argv[]) {
             days = std::stoll(argv[++i]);
         } else if (name == "--data") {
             dataDirectory = argv[++i];
+        } else if (name == "--inspect") {
+            inspect = argv[++i];
         }
     }
 
@@ -36,7 +41,16 @@ int main(int argc, char* argv[]) {
         std::cout << "Project Odyssey headless runner " << odysseus::core::versionString() << '\n'
                   << "Seed " << seed << ", " << days << " days: now " << odysseus::sim::describe(world.date())
                   << ", day " << world.date().dayOfSeason << ", " << world.temperature() << " C\n"
+                  << "Population " << world.population() << ", food in store " << world.food() << " meals\n"
                   << "World hash: " << world.hash() << '\n';
+        if (!inspect.empty()) {
+            const odysseus::sim::Person* person = world.findPerson(inspect);
+            if (person == nullptr) {
+                std::cerr << "No person named " << inspect << '\n';
+                return 1;
+            }
+            std::cout << "Last decision: " << odysseus::sim::describeDecision(*person, world.calendar().daysPerYear()) << '\n';
+        }
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Error: " << error.what() << '\n';

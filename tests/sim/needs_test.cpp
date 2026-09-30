@@ -33,6 +33,7 @@ TEST_CASE("US-011 Decay") {
     // In the world: everyone starts with full needs; after one day (spring) without eating,
     // sleeping, warmth or company, each need has dropped by its configured daily rate.
     World world(42, config);
+    world.setDailyLife(false); // nobody eats, sleeps, warms up or talks
     REQUIRE(world.population() == config.clan.startingPeople);
     for (const sim::Person& person : world.people()) {
         for (const int value : person.needs.values) {
@@ -69,9 +70,9 @@ TEST_CASE("US-011 Satisfaction") {
 }
 
 TEST_CASE("US-011 Consequence") {
-    // Nobody eats yet (choosing actions arrives in US-012), so Hunger reaches 0 on the
-    // morning after ceil(maximum / rate) days; after the configured number of days at zero,
-    // the next morning they die, and the chronicle records the cause.
+    // With daily life off nobody eats, so Hunger reaches 0 on the morning after
+    // ceil(maximum / rate) days; after the configured number of days at zero, the next
+    // morning they die, and the chronicle records the cause.
     const sim::SimConfig config = realConfig();
     const int rate = config.needs.dailyDecay[0];
     const int firstEmptyMorning = (config.needs.maximum + rate - 1) / rate;
@@ -79,6 +80,7 @@ TEST_CASE("US-011 Consequence") {
     const auto ticksPerDay = static_cast<std::uint64_t>(config.calendar.ticksPerDay);
 
     World world(42, config);
+    world.setDailyLife(false);
     world.runTicks(ticksPerDay * static_cast<std::uint64_t>(deathMorning) - 1);
     CHECK(world.population() == config.clan.startingPeople); // the last evening: still alive
     CHECK(world.people().front().daysAtZeroHunger == config.needs.hungerDaysBeforeDeath);

@@ -3,6 +3,7 @@
 #include "sim/json_data.h"
 
 #include <algorithm>
+#include <bit>
 
 namespace odysseus::sim {
 
@@ -58,6 +59,17 @@ std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& 
     return name;
 }
 
+void giveRandomTraits(Person& person, core::Pcg32& random) {
+    const int count = random.chance(50) ? 1 : 2;
+    while (std::popcount(person.traits) < count) {
+        const auto trait = static_cast<Trait>(random.below(static_cast<std::uint32_t>(kTraitCount)));
+        const bool clash = (trait == Trait::Brave && person.has(Trait::Timid)) || (trait == Trait::Timid && person.has(Trait::Brave));
+        if (!clash) {
+            person.give(trait);
+        }
+    }
+}
+
 std::vector<Person> makeStartingClan(const ClanConfig& config, const NameList& names, int daysPerYear, core::Pcg32& random) {
     std::vector<Person> people;
     const auto ageSpan = static_cast<std::uint32_t>((config.maximumStartingAgeYears - config.minimumStartingAgeYears + 1) * daysPerYear);
@@ -67,6 +79,11 @@ std::vector<Person> makeStartingClan(const ClanConfig& config, const NameList& n
         person.sex = random.chance(50) ? Sex::Female : Sex::Male;
         person.ageDays = config.minimumStartingAgeYears * daysPerYear + static_cast<int>(random.below(ageSpan));
         person.name = pickName(names, person.sex, people, random);
+        giveRandomTraits(person, random);
+        // Grown-ups have practised for years already.
+        const int adultYears = std::max(0, person.ageDays / daysPerYear - 12);
+        person.gatherSkill = std::min(100, 10 + adultYears * 3);
+        person.huntSkill = std::min(100, 10 + adultYears * 2);
         people.push_back(person);
     }
     return people;

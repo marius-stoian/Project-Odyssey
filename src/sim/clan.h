@@ -33,6 +33,9 @@ NameList loadNameList(const std::filesystem::path& file);
 // Picks a name for a new person, preferring names nobody alive carries.
 std::string pickName(const NameList& names, Sex sex, const std::vector<Person>& living, core::Pcg32& random);
 
+// One or two random traits (never Brave and Timid together).
+void giveRandomTraits(Person& person, core::Pcg32& random);
+
 // The founding clan: startingPeople people of random sex and age with full needs.
 std::vector<Person> makeStartingClan(const ClanConfig& config, const NameList& names, int daysPerYear, core::Pcg32& random);
 
