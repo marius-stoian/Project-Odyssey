@@ -150,7 +150,8 @@ void World::doAction(Person& person) {
     }
     case Action::Hunt: {
         practise(person.huntPractice, person.huntSkill);
-        if (huntRandom_.below(1000) < static_cast<std::uint32_t>(actions.mammothPerMille)) {
+        if (lastMammothYear_ != date().year && huntRandom_.below(1000) < static_cast<std::uint32_t>(actions.mammothPerMille)) {
+            lastMammothYear_ = date().year; // met or not, the herd moves on
             // A mammoth: a feast for the clan, if the hunter survives it.
             if (huntRandom_.chance(static_cast<std::uint32_t>(actions.mammothDeathPercent))) {
                 die(person, CauseOfDeath::Hunting);
@@ -611,6 +612,7 @@ std::uint64_t World::hash() const {
     hasher.add(mammoths_);
     hasher.add(storeRanOut_);
     hasher.add(forageLeft_);
+    hasher.add(lastMammothYear_);
     hasher.add(gameLeft_);
     for (const auto& [a, b] : feuds_) {
         hasher.add(a);

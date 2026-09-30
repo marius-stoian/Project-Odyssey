@@ -37,7 +37,7 @@ The programs land in `build\windows-x64\bin\Debug\` and `build\windows-x64\bin\R
 | Program | What it is |
 |---|---|
 | `odysseus.exe` | The game. For now it prints its version and exits; the window arrives in US-020. |
-| `odysseus_headless.exe` | The simulation without graphics. Becomes the console clan simulator in M1. |
+| `odysseus_headless.exe` | The console clan simulator: `--seed 7 --years 100` runs a century and reports; `--chronicle` prints the clan's story; `--help` lists the options. |
 | `odysseus_tests.exe` | All automated tests. |
 | `luna_physics_tests.exe` | Luna Physics tests: fixed-point math, rotations, determinism (M1b). |
 

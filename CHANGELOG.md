@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-015 / S-US-015: Soak-test the simulation from the command line (Mraw) — 2026-09-30
+
+**State:** Accepted; merged into `qa`.
+
+- Simulation: `report.{h,cpp}` (population, deaths by cause, average needs, food, couples, feuds, mammoths, chronicle size); the mammoth herd passes once a year.
+- `odysseus_headless`: `--years`, `--help`, strict number parsing (`std::from_chars`), usage message and exit code 2 on bad input, report and tick time.
+- Tests: `US-015 Run` and `US-015 Bad input` (ctest, the real program), `US-015 The report adds up`.
+- Evidence: 100-year soak for seed 7 in Release and Debug (same world hash), bad-input output.
+- Docs: plan `docs/plans/US-015.md`, teach-back entry.
+- Verification: 0 warnings; ctest 19/19 Debug and Release.
+
 ## US-014 / S-US-014: Write a readable chronicle (Mraw) — 2026-09-30
 
 **State:** Accepted; merged into `qa`.

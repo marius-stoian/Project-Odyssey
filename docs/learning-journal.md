@@ -359,3 +359,24 @@ std::format("{} was born to {} and {}.", child.name, father.name, mother.name)
 **Try it (15 minutes).** Run `odysseus_headless.exe --seed 7 --days 2800 --chronicle > seed7.txt` and read it like a book: who is the clan's hero? Then try `--threshold 80` for only the biggest events.
 
 **Check yourself.** Why do newborns wait in a separate vector until the loop over `people_` has finished?
+
+## US-015: Soak-test the simulation from the command line (2026-09-30)
+
+**What we built.** `odysseus_headless --seed 7 --years 100` simulates a whole century in half a second and reports how the clan fared: who is alive, what people died of, how hungry and cold the living are, and how long each tick took. Give it nonsense like `--years -5` and it explains how to use it and exits with an error code.
+
+**The idea: main(), command-line arguments, and checking input.** Every C++ program starts in `main(int argc, char* argv[])`: `argc` is how many words were typed, `argv` the words themselves (argv[0] is the program). Words are text, so numbers must be read carefully. `std::from_chars` reads a number and tells us where it stopped, so "12x" is caught:
+
+```cpp
+const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+if (error != std::errc() || end != text.data() + text.size() || value < minimum || value > maximum) {
+    return std::nullopt; // not a whole number in range
+}
+```
+
+`std::optional` says "a value, or nothing"; the caller must check before using it. The program returns 2 on a wrong command line: scripts and CI can see the failure.
+
+**Where to look.** [apps/headless/main.cpp:52](../apps/headless/main.cpp) (`readNumber`, then `parse`), [src/sim/report.cpp](../src/sim/report.cpp).
+
+**Try it (15 minutes).** Run `odysseus_headless.exe --seed 3 --years 200` and compare with `--years 100`. Then try `--years 10001` and read the message. Finally run `echo $LASTEXITCODE` in PowerShell after a bad command.
+
+**Check yourself.** Why does the program measure time with a clock, when the Charter forbids wall-clock time in the simulation?

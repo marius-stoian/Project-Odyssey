@@ -1,76 +1,150 @@
-// odysseus_headless.exe: runs the simulation without graphics, as fast as the computer can.
-// It becomes the console clan simulator in M2 (US-015 adds the full report).
-//   --seed <number>   world seed (default 42)
-//   --days <number>   how many in-game days to run (default one year)
-//   --data <folder>   content folder (default: the repository's assets/data)
-//   --inspect <name or id>  print that person's last decision: every action's score (US-012)
+// odysseus_headless.exe: the console clan simulator (M2). Runs the simulation without
+// graphics, as fast as the computer can, and reports how the clan fared (US-015).
+//   --seed <number>          world seed (default 42)
+//   --years <number>         how many in-game years to run (default 1)
+//   --days <number>          or how many in-game days
+//   --data <folder>          content folder (default: the repository's assets/data)
+//   --inspect <name or id>   print that person's last decision: every action's score (US-012)
 //   --chronicle [year]       print the chronicle (one year, or all years) (US-014)
 //   --threshold <0..100>     the importance an event needs to be printed (default 50)
+//   --help                   print this list
 #include "core/version.h"
 #include "sim/ai.h"
+#include "sim/report.h"
 #include "sim/world.h"
 
+#include <charconv>
+#include <chrono>
 #include <cstdint>
 #include <exception>
+#include <format>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 
-int main(int argc, char* argv[]) {
+namespace {
+
+constexpr int kBadUsage = 2; // exit code for a wrong command line
+
+struct Options {
     std::uint64_t seed = 42;
+    long long years = -1;
     long long days = -1;
     std::string dataDirectory = ODYSSEUS_DATA_DIR;
     std::string inspect;
     bool chronicle = false;
     int chronicleYear = 0;
     int threshold = odysseus::sim::kDefaultChronicleThreshold;
+    bool help = false;
+};
+
+void printUsage(std::ostream& out) {
+    out << "Usage: odysseus_headless [--seed N] [--years N | --days N] [--data FOLDER]\n"
+           "                         [--inspect NAME] [--chronicle [YEAR]] [--threshold 0..100]\n"
+           "  --years and --days take a whole number from 1 to 10000; --seed a whole number 0 or more.\n"
+           "Example: odysseus_headless --seed 7 --years 100\n";
+}
+
+// Reads a whole number in [minimum, maximum]; anything else (letters, "-5", "3.5") is refused.
+// std::from_chars does not accept a leading '+' or spaces and reports where parsing stopped,
+// so "12abc" is caught too.
+std::optional<long long> readNumber(std::string_view text, long long minimum, long long maximum) {
+    long long value = 0;
+    const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+    if (error != std::errc() || end != text.data() + text.size() || value < minimum || value > maximum) {
+        return std::nullopt;
+    }
+    return value;
+}
+
+// Fills `options` from the command line; returns an error message, or nothing when all is well.
+std::optional<std::string> parse(int argc, char* argv[], Options& options) {
     for (int i = 1; i < argc; ++i) {
         const std::string_view flag = argv[i];
-        if (flag == "--chronicle") {
-            chronicle = true;
-            // An optional year may follow.
-            if (i + 1 < argc && std::string_view(argv[i + 1]).find_first_not_of("0123456789") == std::string_view::npos) {
-                chronicleYear = std::stoi(argv[++i]);
+        const bool hasValue = i + 1 < argc;
+        auto value = [&]() { return std::string_view(argv[++i]); };
+        if (flag == "--help") {
+            options.help = true;
+        } else if (flag == "--chronicle") {
+            options.chronicle = true;
+            if (hasValue && readNumber(argv[i + 1], 1, 1'000'000)) {
+                options.chronicleYear = static_cast<int>(*readNumber(value(), 1, 1'000'000)); // the optional year
             }
+        } else if (!hasValue) {
+            return std::format("{} needs a value", flag);
+        } else if (flag == "--seed") {
+            const auto number = readNumber(value(), 0, INT64_MAX);
+            if (!number) return std::format("--seed must be a whole number 0 or more (got {})", argv[i]);
+            options.seed = static_cast<std::uint64_t>(*number);
+        } else if (flag == "--years" || flag == "--days") {
+            const auto number = readNumber(value(), 1, 10'000);
+            if (!number) return std::format("{} must be a whole number from 1 to 10000 (got {})", flag, argv[i]);
+            (flag == "--years" ? options.years : options.days) = *number;
+        } else if (flag == "--data") {
+            options.dataDirectory = value();
+        } else if (flag == "--inspect") {
+            options.inspect = value();
+        } else if (flag == "--threshold") {
+            const auto number = readNumber(value(), 0, 100);
+            if (!number) return std::format("--threshold must be a whole number from 0 to 100 (got {})", argv[i]);
+            options.threshold = static_cast<int>(*number);
+        } else {
+            return std::format("unknown option {}", flag);
         }
     }
-    for (int i = 1; i + 1 < argc; ++i) {
-        const std::string_view name = argv[i];
-        if (name == "--seed") {
-            seed = std::stoull(argv[++i]);
-        } else if (name == "--days") {
-            days = std::stoll(argv[++i]);
-        } else if (name == "--data") {
-            dataDirectory = argv[++i];
-        } else if (name == "--inspect") {
-            inspect = argv[++i];
-        } else if (name == "--threshold") {
-            threshold = std::stoi(argv[++i]);
-        }
+    if (options.years > 0 && options.days > 0) {
+        return std::string("give --years or --days, not both");
+    }
+    return std::nullopt;
+}
+
+} // namespace
+
+int main(int argc, char* argv[]) {
+    Options options;
+    if (const auto problem = parse(argc, argv, options)) {
+        std::cerr << "Error: " << *problem << "\n\n";
+        printUsage(std::cerr);
+        return kBadUsage;
+    }
+    if (options.help) {
+        printUsage(std::cout);
+        return 0;
     }
 
     try {
-        odysseus::sim::World world(seed, odysseus::sim::loadSimConfig(dataDirectory));
-        if (days < 0) {
-            days = world.calendar().daysPerYear();
-        }
-        world.runTicks(static_cast<std::uint64_t>(days) * static_cast<std::uint64_t>(world.calendar().ticksPerDay()));
+        odysseus::sim::World world(options.seed, odysseus::sim::loadSimConfig(options.dataDirectory));
+        const long long days = options.days > 0 ? options.days : (options.years > 0 ? options.years : 1) * world.calendar().daysPerYear();
+        const auto ticks = static_cast<std::uint64_t>(days) * static_cast<std::uint64_t>(world.calendar().ticksPerDay());
+
+        // The only clock in the program: it measures the run, it never feeds the simulation.
+        const auto start = std::chrono::steady_clock::now();
+        world.runTicks(ticks);
+        const std::chrono::duration<double> seconds = std::chrono::steady_clock::now() - start;
+
         std::cout << "Project Odyssey headless runner " << odysseus::core::versionString() << '\n'
-                  << "Seed " << seed << ", " << days << " days: now " << odysseus::sim::describe(world.date())
-                  << ", day " << world.date().dayOfSeason << ", " << world.temperature() << " C\n"
-                  << "Population " << world.population() << ", food in store " << world.food() << " meals\n"
+                  << std::format("Seed {}, {} days ({} years, {} ticks): now {}, day {}, {} C\n", options.seed, days,
+                                 days / world.calendar().daysPerYear(), ticks, odysseus::sim::describe(world.date()),
+                                 world.date().dayOfSeason, world.temperature());
+        for (const std::string& line : odysseus::sim::formatReport(odysseus::sim::makeReport(world))) {
+            std::cout << line << '\n';
+        }
+        std::cout << std::format("Tick time: {:.3f} microseconds per tick ({:.2f} s in total)\n",
+                                 ticks > 0 ? seconds.count() * 1e6 / static_cast<double>(ticks) : 0.0, seconds.count())
                   << "World hash: " << world.hash() << '\n';
-        if (chronicle) {
-            std::cout << "\nChronicle" << (chronicleYear > 0 ? " of year " + std::to_string(chronicleYear) : std::string())
-                      << " (importance " << threshold << " and above):\n";
-            for (const auto& entry : world.chronicle().select(chronicleYear, threshold)) {
+
+        if (options.chronicle) {
+            std::cout << "\nChronicle" << (options.chronicleYear > 0 ? " of year " + std::to_string(options.chronicleYear) : std::string())
+                      << " (importance " << options.threshold << " and above):\n";
+            for (const auto& entry : world.chronicle().select(options.chronicleYear, options.threshold)) {
                 std::cout << "  " << odysseus::sim::formatEntry(entry) << '\n';
             }
         }
-        if (!inspect.empty()) {
-            const odysseus::sim::Person* person = world.findPerson(inspect);
+        if (!options.inspect.empty()) {
+            const odysseus::sim::Person* person = world.findPerson(options.inspect);
             if (person == nullptr) {
-                std::cerr << "No person named " << inspect << '\n';
+                std::cerr << "No person named " << options.inspect << '\n';
                 return 1;
             }
             std::cout << "Last decision: " << odysseus::sim::describeDecision(*person, world.calendar().daysPerYear()) << '\n';
