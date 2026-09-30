@@ -323,3 +323,21 @@ enum class Action { Gather, Hunt, Sleep, WarmByFire, Talk, Rest, Wander, Count }
 **Try it (15 minutes).** Run `odysseus_headless.exe --days 3 --inspect 0` and read the scores. Then raise `traitBonus` in `actions.json` to 100 and run again: do Brave people hunt more? Try `--days 30` too.
 
 **Check yourself.** Why is it important that `decide` only reads the person and never changes them?
+
+## US-013: Remember events and spread gossip (2026-09-30)
+
+**What we built.** People remember. A gift, a theft someone saw: each becomes a memory of who did what, when, and how it felt, and it changes what they think of each other. When two people talk, one may pass on a story the other has not heard, a little weaker, so reputations travel through the clan. Small things are forgotten after 60 days; a theft is remembered for life.
+
+**The idea: containers of structs, and references.** Each person keeps a `std::vector<Memory>`. Forgetting uses a classic pair, erase and remove_if: `remove_if` moves the memories we keep to the front and returns where the rest begins; `erase` cuts them off:
+
+```cpp
+memories.erase(std::remove_if(memories.begin(), memories.end(), isOldAndMinor), memories.end());
+```
+
+In `talk`, `Person& from = people_[speaker];` is a reference: another name for the same person inside the vector, not a copy. Changing `from` changes the real person. (A copy would change nothing that lasts.)
+
+**Where to look.** [src/sim/world.cpp:274](../src/sim/world.cpp) (`talk`: gossip), [src/sim/memory.cpp](../src/sim/memory.cpp) (`forgetOldMemories`, `remember`), [assets/data/sim/social.json](../assets/data/sim/social.json).
+
+**Try it (15 minutes).** Set `gossipPercent` to 100 in `social.json` and run `odysseus_sim_tests.exe --test-case="US-013 Gifts*"`: how many memories are heard second-hand now? Then change `minorMemoryDays` to 7.
+
+**Check yourself.** In `talk`, what would go wrong if we wrote `Person from = people_[speaker];` (without the `&`)?
