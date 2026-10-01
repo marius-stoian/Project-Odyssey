@@ -13,6 +13,13 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## X-M8: exit review of Speak to NPCs (Avengers) - 2026-10-01
+
+**State:** Documents only; all five exit criteria met; `qa` merged into `main`, tag `m8-done`.
+
+- `docs/gates/M8.md`: one section per exit criterion with its evidence, the stories, the questions for the owner (the greeting rule, the 50 small-talk lines) and the delegated technical choices.
+- `docs/gates/M8-smalltalk.md`: 50 generated small-talk lines from one seed for the owner to read, with the count of repeated lines (42 different, none more than twice).
+- `Milestone-74.md` (AP-075), `Limit.md`, `docs/status.md`.
 ## US-165: NPCs talk to each other (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-165`); merged into `qa`.
