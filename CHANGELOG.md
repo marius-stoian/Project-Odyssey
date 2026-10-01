@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## P-010: adopt Codex v2.1 (Avengers) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- `docs/status.md`: P-010 Done; K-M10..X-M14 (47 rows, To do) in Codex order; X-M6 now waits for X-M14.
+- `docs/codex-issues.md`: CI-007 and CI-008 marked resolved in Codex v2.1. D-40, D-41 and the v2.1 Charter were already synced.
+- `Milestone-68.md` (AP-069) and `Limit.md` updated.
+
 ## US-160: The .dlg format (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-160`); merged into `qa`.
