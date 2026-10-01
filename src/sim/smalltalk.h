@@ -53,6 +53,7 @@ public:
     SmallTalk() = default;
     explicit SmallTalk(SmalltalkData data) : data_(std::move(data)) {}
     bool ready() const { return data_.has_value(); }
+    bool hasTopic(const std::string& name) const { return data_ && data_->topic(name) != nullptr; }
 
     // What `npc` says to `hero` now. With no `topic` it is chosen by weights from the person's state: a pressing need, a fresh memory, gossip
     // they have not repeated, the season. A named topic whose facts do not exist (no memory to speak of) falls back to the season. Three numbers are

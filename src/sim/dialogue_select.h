@@ -32,6 +32,12 @@ const DlgScript* selectScript(const DialogueLibrary& library, const WhoFacts& wh
 // The same choice among the short greetings (`@bark`).
 const DlgScript* selectBark(const DialogueLibrary& library, const WhoFacts& who, const RuleContext& context, core::Pcg32& random);
 
+// The script for two people who talk to each other (US-165): `@pair first second` names who speaks first and who answers (a name, a role or a kind,
+// as `@who` does), and `@bark <kind>` names the kind of event it is for (talk, quarrel, courtship, sharing, gift; without `@bark` it is for talk). The
+// best match of the first with `first` and of the second with `second` wins (the two specificities added), then `@priority`, then the stream. nullptr
+// when none fits: the game then makes up a short exchange from the small-talk file.
+const DlgScript* selectPair(const DialogueLibrary& library, const WhoFacts& first, const WhoFacts& second, const std::string& kind, const RuleContext& context, core::Pcg32& random);
+
 // What a greeting says: the first line of its first node whose condition holds, tokens filled. Empty when there is none.
 std::string barkText(const DlgScript& script, const RuleContext& context);
 

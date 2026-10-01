@@ -114,6 +114,8 @@ public:
     // Greetings (US-162): the bubbles over heads, the minute each NPC waits between greetings, and the seeded stream that chooses between
     // equally fitting scripts (the stream "dialogue", Charter rule 6).
     Bubbles& bubbles() { return bubbles_; }
+    Exchanges& exchanges() { return exchanges_; }
+    const Exchanges& exchanges() const { return exchanges_; }
     const Bubbles& bubbles() const { return bubbles_; }
     sim::rules::CooldownTable& greetingCooldowns() { return greetingCooldowns_; }
     core::Pcg32& dialogueRandom() { return dialogueRng_; }
@@ -177,6 +179,7 @@ public:
     // Runs the clan's simulation this many ticks for each game tick (fast forward, for demos and screenshots; 1 is real time).
     void setClanSpeed(int ticksPerTick) { clanSpeed_ = ticksPerTick < 1 ? 1 : ticksPerTick; }
     const sim::World* clan() const { return clan_.get(); }
+    sim::World* clanMutable() { return clan_.get(); } // for the few things that read and empty a queue of the world (US-165)
     const ClanView& clanView() const { return clanView_; }
     // The player's run (M5, D-32): a hero of the clan with a Growing Period, professions, trade and a sacred fire, played through the
     // screens of RunFlow. `--new-game` opens the New Game screen; Esc opens the menu.
@@ -311,6 +314,7 @@ private:
     sim::rules::SmallTalk smalltalk_;
     sim::rules::FlagStore flags_;
     Bubbles bubbles_;
+    Exchanges exchanges_;
     sim::rules::CooldownTable greetingCooldowns_;
     core::Pcg32 dialogueRng_{1, 8};
     void loadInteractions();

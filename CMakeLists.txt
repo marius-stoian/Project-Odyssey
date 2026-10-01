@@ -345,7 +345,8 @@ add_executable(odysseus_game_tests
     tests/game/menu_test.cpp
     tests/game/npc_test.cpp
     tests/game/conversation_test.cpp
-    tests/game/greeting_test.cpp)
+    tests/game/greeting_test.cpp
+    tests/game/exchange_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")

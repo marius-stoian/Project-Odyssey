@@ -376,6 +376,7 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
 // The clan's simulation: the same world for the same level every time (its seed is the hash of the level's name).
 void OdysseyGame::startClan() {
     clan_ = std::make_unique<sim::World>(WeatherCycle::seedFromText(level_.name) ^ 0x9E3779B97F4A7C15ULL, sim::loadSimConfig(dataDirectory_));
+    exchanges_.reset(clan_->chronicle().entries().size());
     // The camp is where the fire burns: the first flame placed in the level, else where the hero starts.
     PixelPoint camp = level_.heroStart;
     for (const PlacedEffect& placed : level_.effects) {
@@ -533,6 +534,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     // A new clan is a new story: what was said, remembered and flagged in the last one does not carry over (US-162..US-164).
     flags_.clear();
     bubbles_.clear();
+    exchanges_.reset(clan_->chronicle().entries().size());
     greetingCooldowns_.clear();
     smalltalk_.clear();
     stats_.record("run-started", ticks_);
@@ -979,6 +981,7 @@ bool OdysseyGame::loadAutosave() {
         for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
         if (loaded.loadedFrom != clanFile) notes = std::format("The latest save was damaged: loaded the newest backup ({}). {}", loaded.loadedFrom.filename().string(), notes);
         clan_ = std::make_unique<sim::World>(std::move(loaded.world));
+        exchanges_.reset(clan_->chronicle().entries().size()); // what happened before the save is not shown again
         if (!layerSheets_) layerSheets_ = makeLayerSheets();
         PixelPoint camp = level_.heroStart;
         for (const PlacedEffect& placed : level_.effects) {
@@ -1629,6 +1632,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         }
         bubbles_.tick();
         updateGreetings(*this);
+        exchanges_.update(*this);
         npcLife_.tick(*this); // clan members and animals look around, walk and do things with the same interactions as the hero (US-154)
     }
     if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});

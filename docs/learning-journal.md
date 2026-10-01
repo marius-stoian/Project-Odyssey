@@ -1150,3 +1150,18 @@ Two small things are worth noticing. The feeling decides the *kind* of memory (a
 **Try it (15 minutes).** The manual checks in [docs/plans/US-164.md](plans/US-164.md); then add `flag trust 1` to the elder's thanks node and a choice that appears only `[if flag(trust)]`.
 
 **Check yourself.** Why does `FlagStore::set` erase a flag when you set it to 0 instead of storing a 0, and what would two saves of the same game look like if it did not?
+
+
+## M8: showing what the simulation did, without changing it (US-165)
+
+When two clan members quarrel, the *simulation* decides it and changes their opinions. The bubbles over their heads only **show** that. The code keeps that line sharp: the game never decides a quarrel, it *listens*. It has two ears. The first is the chronicle, the log the simulation already writes ("Tok quarrelled with Maa over stolen meat"); the game remembers how many entries it has read and looks only at new ones. The second is a tiny queue, `takeTalks()`, because a simple talk leaves no chronicle entry; the simulation drops a note into the queue, and the game empties it each tick.
+
+This pattern, a one-way flow from the simulation to the screen, is why the world stays deterministic (Charter rule 6): the queue is not saved, not hashed and nothing in the simulation reads it, so showing bubbles can never change what happens. It also explains a small piece of C++: `std::exchange(talks_, {})` hands out the whole queue and leaves an empty one behind in a single step, so no note is ever read twice or lost.
+
+The exchange itself is a little timetable: a list of lines, a counter of ticks left, and an index. Each tick the counter goes down; at zero the last speaker's bubble is removed and the next line starts. That is all "in turn, 3 seconds each" means.
+
+**Where to look.** `Exchanges::update` and `makeExchange` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); `World::takeTalks` in [src/sim/world.h](../src/sim/world.h); `selectPair` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-165.md](plans/US-165.md); then write a `.dlg` file with `@pair elder person` and `@bark sharing`, so the elder has their own words when they share food.
+
+**Check yourself.** Why does `Exchanges::update` check `seenEntries_ > entries.size()` before reading the chronicle, and when can the chronicle be shorter than the last time it was looked at?

@@ -203,3 +203,70 @@ TEST_CASE("US-162 The shipped greetings are loaded and fit the elder and anyone 
     }
     CHECK(said == std::set<std::string>{"Good day, Ayla.", "Well met, Ayla."});
 }
+
+namespace {
+
+std::string pairScript(const std::string& first, const std::string& second, const std::string& kind = "", const std::string& more = "") {
+    return (kind.empty() ? "" : "@bark " + kind + "\n") + "@pair " + first + " " + second + "\n" + more + "=== start\n" + first + ": Hello.\n" + second + ": Hi.\n";
+}
+
+std::string pickPair(const rules::DialogueLibrary& library, const rules::WhoFacts& a, const rules::WhoFacts& b, const std::string& kind, const Table& world, odysseus::core::Pcg32& random) {
+    const rules::DlgScript* script = rules::selectPair(library, a, b, kind, world, random);
+    return script == nullptr ? std::string("-") : script->name;
+}
+
+} // namespace
+
+TEST_CASE("US-165 Two people talking: the script that fits both, by kind of event, then how well it names them, then priority") {
+    const auto library = libraryOf("pairs", {{"elder-child", pairScript("elder", "child")},
+                                              {"any-any", pairScript("person", "person")},
+                                              {"ama-child", pairScript("Ama", "child", "talk", "@priority 1\n")},
+                                              {"quarrel-any", pairScript("person", "person", "quarrel")},
+                                              {"courtship-ama", pairScript("person", "Ama", "courtship")}});
+    Table world;
+    odysseus::core::Pcg32 random(1, 8);
+    const rules::WhoFacts elder{"Tok", "person", {"elder"}};
+    const rules::WhoFacts child{"Lia", "person", {"child"}};
+    const rules::WhoFacts ama{"Ama", "person", {}};
+    CHECK(pickPair(library, elder, child, "talk", world, random) == "elder-child");  // 2 + 2 beats 1 + 1
+    CHECK(pickPair(library, ama, child, "talk", world, random) == "ama-child");      // 3 + 2: her own name
+    CHECK(pickPair(library, child, elder, "talk", world, random) == "any-any");      // the order matters: this is not elder then child
+    CHECK(pickPair(library, elder, child, "quarrel", world, random) == "quarrel-any");
+    CHECK(pickPair(library, elder, ama, "courtship", world, random) == "courtship-ama");
+    CHECK(pickPair(library, ama, elder, "courtship", world, random) == "-");         // she is the first, not the one wooed
+    CHECK(pickPair(library, elder, child, "sharing", world, random) == "-");         // no script for that kind
+    // A talk or a greeting never uses a pair script.
+    CHECK(pickTalk(library, ama, world, random) == "-");
+    CHECK(rules::selectBark(library, ama, world, random) == nullptr);
+}
+
+TEST_CASE("US-165 Pair scripts that fit equally well are chosen by the seeded stream, one draw a call") {
+    const auto library = libraryOf("pair-ties", {{"a", pairScript("person", "person")}, {"b", pairScript("person", "person")}});
+    Table world;
+    const rules::WhoFacts someone{"Tok", "person", {}};
+    std::set<std::string> seen;
+    odysseus::core::Pcg32 random(5, 8);
+    for (int i = 0; i < 20; ++i) seen.insert(pickPair(library, someone, someone, "talk", world, random));
+    CHECK(seen == std::set<std::string>{"a", "b"});
+    odysseus::core::Pcg32 none(7, 8);
+    odysseus::core::Pcg32 some(7, 8);
+    const auto empty = libraryOf("pair-none", {{"x", talk("wolf")}});
+    pickPair(empty, someone, someone, "talk", world, none);
+    pickPair(library, someone, someone, "talk", world, some);
+    CHECK(none.state() == some.state());
+}
+
+TEST_CASE("US-165 The world says who has just talked, and does not keep it for ever") {
+    sim::World world(42, story_test::realConfig());
+    CHECK(world.takeTalks().empty());
+    world.talk(3, 4);
+    world.talk(5, 6);
+    const auto talks = world.takeTalks();
+    REQUIRE(talks.size() == 2);
+    CHECK(talks[0].speaker == 3);
+    CHECK(talks[0].listener == 4);
+    CHECK(talks[1].speaker == 5);
+    CHECK(world.takeTalks().empty()); // taken
+    for (int i = 0; i < 100; ++i) world.talk(3, 4); // nobody takes them: only the newest are kept
+    CHECK(world.takeTalks().size() == 32);
+}

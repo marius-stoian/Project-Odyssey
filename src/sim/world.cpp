@@ -615,6 +615,8 @@ bool World::talk(int speaker, int listener) {
     satisfy(to.needs, Need::Social, config_.actions.talkPerHour / 2, config_.needs.maximum);
     changeOpinion(from, listener, config_.social.talkOpinion);
     changeOpinion(to, speaker, config_.social.talkOpinion);
+    talks_.push_back({speaker, listener});
+    if (talks_.size() > 32) talks_.erase(talks_.begin());
     const int chance = from.has(Trait::Talkative) ? config_.social.talkativeGossipPercent : config_.social.gossipPercent;
     if (!socialRandom_.chance(static_cast<std::uint32_t>(chance))) {
         return false;
