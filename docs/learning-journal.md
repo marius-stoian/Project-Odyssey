@@ -1097,3 +1097,15 @@ Two details are worth learning. First, the end of a choice line holds up to thre
 **Try it (15 minutes).** The manual checks in [docs/plans/US-160.md](plans/US-160.md); then add a fourth node of your own to `elder-fire.dlg` and a choice that leads to it, and press F5.
 
 **Check yourself.** Why must the lines a character says come before the choices of a node, and what would the canonical writer have to do if they could be mixed?
+
+## M8: a conversation is a small state machine (US-161)
+
+When you talk to the elder, the game keeps just two things: **which script** and **which node you are at**. That is a *state machine*: a few named places and rules for moving between them. Everything else you see is worked out fresh every frame by asking `view()`: which lines have a true `[if]`, which choices to show, hide or grey out. Nothing about the screen is stored, so a screen can never be out of date (if your berries ran out a moment ago, choice 2 is already grey).
+
+Two choices are worth learning from. First, the `Conversation` holds a **copy** of the script instead of a pointer to the library's one. The scripts live in a list that F5 replaces; a pointer into that list would dangle (point at something that no longer exists) the moment you reload, which is the classic C++ bug. A copy is slightly bigger, but it cannot break. Second, a choice's effects are not carried out by the conversation itself: it hands them to the same *action runner* the interactions use, which is why `take hero berries 1` in a `.dlg` file and in a `.json` interaction mean exactly the same thing.
+
+**Where to look.** `Conversation::view` and `Conversation::choose` in [src/sim/conversation.cpp](../src/sim/conversation.cpp); `moodWord` in the same file; `selectScript` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `RunFlow::buildTalk` in [src/game/run_flow.cpp](../src/game/run_flow.cpp).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-161.md](plans/US-161.md); then in `elder-fire.dlg` give the thanks node a second choice with `[if opinion(npc, hero) >= 10]` and press F5.
+
+**Check yourself.** Why does `choose` ask `view()` for the list of choices instead of numbering the node's choices itself, and what would pressing the key 2 do if it did the latter while choice 1 was hidden?

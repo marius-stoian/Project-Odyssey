@@ -712,6 +712,12 @@ bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {
     return true;
 }
 
+void OdysseyGame::changeOpinion(int who, int about, int delta) {
+    const auto count = clan_ ? static_cast<int>(clan_->people().size()) : 0;
+    if (who < 0 || about < 0 || who >= count || about >= count) return;
+    clan_->adjustOpinion(who, about, delta);
+}
+
 bool OdysseyGame::harmPerson(int personId, sim::Need need, int amount) {
     if (!clan_ || personId < 0 || static_cast<std::size_t>(personId) >= clan_->people().size() || !clan_->people()[static_cast<std::size_t>(personId)].alive) return false;
     clan_->drainPersonNeed(personId, need, amount);

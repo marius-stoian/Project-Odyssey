@@ -129,6 +129,8 @@ add_library(odysseus_sim STATIC
     src/sim/action_runner.cpp
     src/sim/npc_chooser.cpp
     src/sim/dialogue_script.cpp
+    src/sim/dialogue_select.cpp
+    src/sim/conversation.cpp
     src/sim/world.cpp
     src/sim/world_story.cpp
     src/sim/world_care.cpp
@@ -338,7 +340,8 @@ add_executable(odysseus_game_tests
     tests/game/interactions_test.cpp
     tests/game/tags_test.cpp
     tests/game/menu_test.cpp
-    tests/game/npc_test.cpp)
+    tests/game/npc_test.cpp
+    tests/game/conversation_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -383,7 +386,8 @@ add_executable(odysseus_sim_tests
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
     tests/sim/runner_test.cpp
-    tests/sim/dialogue_test.cpp)
+    tests/sim/dialogue_test.cpp
+    tests/sim/conversation_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

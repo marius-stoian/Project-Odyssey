@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-161: Conversations and the dialogue panel (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-161`: zero warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
+
+- Simulation: `conversation` (the runtime: lines and choices by condition, effects in order through the action runner, END, `leave`; the mood word; `{hero}` and `{npc}` tokens), `dialogue_select` (roles `elder` and `child`; the script that speaks for someone: name over role over kind, then priority), `ActionRunner::runEffects`.
+- Game: `Screen::Talk` in `RunFlow` (the world pauses; name and mood, words, up to five numbered choices by mouse or keys 1 to 5, greyed choices with their reason, Esc leaves); Talk opens it when a script fits, else the plain talk; the effect `opinion npc hero n` and the condition `opinion(a, b)` are real.
+- Tests: `tests/sim/conversation_test.cpp` (8 cases), `tests/game/conversation_test.cpp` (5 cases). Docs: `docs/plans/US-161.md`, the new section of `docs/guides/dialogue-format.md`, teach-back, evidence `docs/evidence/US-161/`.
 ## P-010: adopt Codex v2.1 (Avengers) - 2026-10-01
 
 **State:** Documents only; merged into `qa`.

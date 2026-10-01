@@ -4,7 +4,9 @@
 #include "game/odyssey_game.h"
 
 #include "core/log.h"
+#include "sim/dialogue_select.h"
 
+#include <algorithm>
 #include <format>
 
 namespace odysseus::game {
@@ -53,7 +55,8 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     } else if (name == "inspect") {
         game.run().setMessage(plant < game.plants().size() && game.plants()[plant].def != nullptr ? game.plants()[plant].def->inspect : std::string());
     } else if (name == "talk") {
-        game.run().setMessage(hero->talkTo(subject.index).message);
+        // A script that speaks for them opens the conversation panel (US-161); without one it is the plain talk of M5.
+        if (!openConversation(game, subject)) game.run().setMessage(hero->talkTo(subject.index).message);
     } else if (name == "give-berries") {
         game.run().setMessage(hero->giveBerriesTo(subject.index).message);
     } else if (name == "ask-to-teach") {
@@ -133,6 +136,13 @@ public:
         } else if (effect.verb == "fx") {
             // fx flame: a visual effect of effects.json, played once over the thing.
             if (!effect.args.empty()) game_.playEffect(effect.args[0]->text, subject->x, subject->y - 16.0, 48);
+        } else if (effect.verb == "opinion" && effect.args.size() == 3) {
+            // opinion npc hero 5: what the first thinks of the second changes (a conversation's choice, US-161).
+            const GameRuleContext context(game_, *subject);
+            const int who = personNamed(game_, *subject, effect.args[0]->text);
+            const int about = personNamed(game_, *subject, effect.args[1]->text);
+            const long long delta = sim::rules::evaluate(*effect.args[2], context).number;
+            game_.changeOpinion(who, about, static_cast<int>(std::clamp(delta, -200LL, 200LL)));
         } else if (effect.verb == "give" || effect.verb == "take") {
             // give actor berries 2: the hero's bag, the only one with items so far.
             if (effect.args.size() == 3 && game_.life() != nullptr && effect.args[0]->text != "npc" && effect.args[0]->text != "target") {
@@ -195,6 +205,24 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 void tickInteractions(OdysseyGame& game) {
     GameEffectHost host(game);
     game.actions().tick(game.actionClock(), game.interactions(), host);
+}
+
+bool openConversation(OdysseyGame& game, const Subject& subject) {
+    if (subject.kind != Subject::Kind::Person || game.clan() == nullptr) return false;
+    const GameRuleContext context(game, subject);
+    sim::rules::WhoFacts who;
+    who.name = subject.name;
+    who.roles = sim::rules::rolesOf(*game.clan(), subject.index);
+    const sim::rules::DlgScript* script = sim::rules::selectScript(game.dialogues(), who, context);
+    if (script == nullptr) return false;
+    game.run().openTalk(sim::rules::Conversation(*script, kHeroActor, refOf(game, subject)), subject);
+    return true;
+}
+
+bool chooseConversationOption(OdysseyGame& game, sim::rules::Conversation& conversation, const Subject& subject, int index) {
+    GameEffectHost host(game);
+    const GameRuleContext context(game, subject);
+    return conversation.choose(index, context, game.actions(), game.actionClock(), host);
 }
 
 } // namespace odysseus::game

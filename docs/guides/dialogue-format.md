@@ -59,6 +59,18 @@ A `{token}` in a line or a choice is filled in when it is shown: `{hero}` and `{
 - A node nobody can reach loads, with a warning.
 - Every shipped `.dlg` file is read and written back by the tests, and must come back as the same text, `#` notes included.
 
+## Talking: who speaks, and the panel (US-161)
+
+When the player chooses **Talk** on a clan member, the game looks for the script that speaks for them. A script fits when one of its `@who` words is the person's **name** (the most specific), a **role** they have (`elder` is the oldest living member of the clan, `child` is anyone under 12), or their **kind** (`person`), and its `@when` holds. The most specific match wins, then the higher `@priority`, then the file name (US-162 adds barks and a seeded tie-break). A script marked `@bark` or `@pair` never answers Talk. When no script fits, Talk is the plain "You talk with ..." of before.
+
+The game **pauses** while the conversation panel is open. It shows:
+
+- the person's name and one **mood word**: how they feel about the hero (`warm`, `friendly`, `neutral`, `wary`, `hostile`), unless a need is pressing and they are not hostile, then `hungry`, `tired`, `cold` or `lonely`;
+- what they say: every line of the node whose `[if]` holds, in order, as `Speaker: words`;
+- the choices, numbered 1 to 5. Pick one with the mouse or the keys **1** to **5**. A choice with a false `[if]` is hidden, or greyed out with its `[else]` reason and cannot be picked. **Esc** walks away: the talk ends and no effect happens.
+
+Choosing runs the choice's `{effects}` in order, then moves to its node, or ends the talk at `END`. Today the panel carries out `take hero <item> n`, `give hero <item> n`, `opinion npc hero n` (what the first thinks of the second changes by `n`, kept between -100 and 100) and `say`; the other verbs are read and checked but do nothing yet (`remember` and `flag` arrive with US-164). `opinion(npc, hero)` in a condition reads the real opinion.
+
 ## Not in this story yet
 
-Choosing which conversation a person uses, the dialogue panel, small talk, memories and bubbles come in the next stories (US-161 to US-165); until then the files are read, checked and written back.
+Barks and the seeded choice between scripts (US-162), small talk for people without a script and the `{smalltalk.topic}` lines (US-163), memories and flags (US-164) and bubbles between NPCs (US-165) come in the next stories. Until US-163 a `{smalltalk.hunt}` shows as written.
