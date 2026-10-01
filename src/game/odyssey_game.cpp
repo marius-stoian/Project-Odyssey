@@ -1940,11 +1940,22 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     } else {
         core::logWarning("Art: programmer art, because " + art_.problem);
     }
-    characters_ = renderer.createTexture(art_.heroSheet);
-    tiles_ = renderer.createTexture(art_.tileStrip);
+    // A texture and, when its atlas has a normal map, that map (US-241): lights then shade the sprite; without one it is lit flat.
+    // The normal textures are made last, so the numbers of all the other textures stay as they were (tests find props by number).
+    std::vector<std::pair<luna::engine::Texture, const luna::engine::Image*>> pendingNormals;
+    static const luna::engine::Image kNone(0, 0); // "no normal map": the conditionals below must give lvalues, the pointers outlive them
+    std::vector<luna::engine::Image> mirroredNormalPictures;
+    mirroredNormalPictures.reserve(1);
+    const auto withNormals = [&renderer, &pendingNormals](const luna::engine::Image& picture, const luna::engine::Image& normals) {
+        const luna::engine::Texture texture = renderer.createTexture(picture);
+        if (normals.width() > 0) pendingNormals.emplace_back(texture, &normals);
+        return texture;
+    };
+    characters_ = withNormals(art_.heroSheet, art_.heroNormals);
+    tiles_ = withNormals(art_.tileStrip, art_.tileNormals);
     props_ = renderer.createTexture(makePropSheet()); // texture 2: tests find props by this number
-    charactersAtlas_ = renderer.createTexture(art_.characters);
-    charactersHitAtlas_ = renderer.createTexture(art_.charactersHit);
+    charactersAtlas_ = withNormals(art_.characters, art_.charactersNormals);
+    charactersHitAtlas_ = withNormals(art_.charactersHit, art_.charactersNormals);
     uiSheet_ = renderer.createTexture(luna::engine::makeUiSheet());
     editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_});
     // The M2d content atlas (US-130); without it the game plays on, just without effects.
@@ -1969,11 +1980,17 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             if (const auto rect = content_.rect(content_.frameName(def.name, 0))) effectArt_.firstFrame[def.name] = *rect;
         }
         for (const char* page : {"plants-small", "plants-tall", "trees"}) {
-            if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) plantArt_.pages[page] = renderer.createTexture(found->second);
+            if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) {
+                const auto normals = content_.normals.find(page);
+                plantArt_.pages[page] = withNormals(found->second, normals == content_.normals.end() ? kNone : normals->second);
+            }
         }
         if (const auto animals = content_.pictures.find("animals"); animals != content_.pictures.end()) {
-            animalArt_.page = renderer.createTexture(animals->second);
-            animalArt_.mirrored = renderer.createTexture(luna::engine::mirrored(animals->second));
+            const auto animalNormals = content_.normals.find("animals");
+            const bool hasNormals = animalNormals != content_.normals.end();
+            animalArt_.page = withNormals(animals->second, hasNormals ? animalNormals->second : kNone);
+            if (hasNormals) mirroredNormalPictures.push_back(luna::engine::mirroredNormals(animalNormals->second));
+            animalArt_.mirrored = withNormals(luna::engine::mirrored(animals->second), hasNormals ? mirroredNormalPictures.back() : kNone);
             animalArt_.pageWidth = animals->second.width();
             for (const AnimalDef& animal : catalogs_.animals) {
                 if (const auto rect = content_.rect(animal.frame)) animalArt_.sources[animal.name] = *rect;
@@ -2004,6 +2021,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
+    for (const auto& [texture, normals] : pendingNormals) renderer.setNormalMap(texture, renderer.createTexture(*normals));
 }
 
 void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {

@@ -1,6 +1,8 @@
 // odysseus_atlas.exe: turns the owner's sprite sheets into game-ready atlases (US-120).
 //   odysseus_atlas                         cut every frame listed in assets/sprites/cuts.json and
 //                                          write assets/sprites/atlas/ (atlas PNGs and atlas.json)
+//   --normals                              also write a normal-map atlas next to every atlas picture (US-241): <name>_n.png, made from the
+//                                          pictures; a hand-made <frame>_n.png in the sprites folder wins for its frame
 //   --preview <file.png>                   also write a contact sheet of every frame, for review
 //   --find <sheet.png> <x> <y> <w> <h> [tolerance] [minSize]
 //                                          list the figures (blobs) in a region of a sheet, to
@@ -15,6 +17,7 @@
 #include "game/art.h"
 #include "game/catalogs.h"
 #include "game/content_art.h"
+#include "game/normal_art.h"
 
 #include "luna/engine/image_io.h"
 #include "luna/engine/image_ops.h"
@@ -57,12 +60,15 @@ int main(int argc, char** argv) {
         std::filesystem::path preview;
         std::filesystem::path contentPreview;
         std::filesystem::path starters;
+        bool normals = false;
         for (std::size_t i = 0; i < args.size(); ++i) {
             if (args[i] == "--find" && i + 5 < args.size()) { // a sheet and four numbers follow
                 const std::vector<std::string> numbers(args.begin() + static_cast<std::ptrdiff_t>(i) + 2, args.end());
                 return find(args.at(i + 1), numbers);
             }
-            if (args[i] == "--preview" && i + 1 < args.size()) {
+            if (args[i] == "--normals") {
+                normals = true;
+            } else if (args[i] == "--preview" && i + 1 < args.size()) {
                 preview = args[++i];
             } else if (args[i] == "--starters" && i + 1 < args.size()) {
                 starters = args[++i];
@@ -120,6 +126,10 @@ int main(int argc, char** argv) {
                 luna::engine::savePng(odysseus::game::numberedSheet(content, "icons", names), starters);
                 std::cout << "Starters: " << starters.string() << '\n';
             }
+        }
+        if (normals) {
+            const auto report = odysseus::game::writeNormalAtlases(sprites);
+            std::cout << std::format("Wrote {} normal atlases ({} frames from hand-made maps) to {}\n", report.atlases, report.handMade, (sprites / "atlas").string());
         }
         return 0;
     } catch (const std::exception& error) {

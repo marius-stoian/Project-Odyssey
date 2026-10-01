@@ -241,6 +241,7 @@ add_library(odysseus_game STATIC
     src/game/animals.cpp
     src/game/weather.cpp
     src/game/lighting.cpp
+    src/game/normal_art.cpp
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
@@ -336,7 +337,8 @@ add_executable(luna_tests
     tests/luna/collision_test.cpp
     tests/luna/ui_test.cpp
     tests/luna/effects_test.cpp
-    tests/luna/zoom_test.cpp)
+    tests/luna/zoom_test.cpp
+    tests/luna/normals_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
@@ -381,6 +383,7 @@ add_executable(odysseus_game_tests
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
     tests/game/lighting_test.cpp
+    tests/game/normals_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
     tests/game/paint_test.cpp

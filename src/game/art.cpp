@@ -1,5 +1,8 @@
 #include "game/art.h"
 
+#include "game/normal_art.h"
+#include "core/log.h"
+
 #include "game/placeholder_art.h"
 
 #include "luna/engine/image_io.h"
@@ -350,6 +353,24 @@ ArtSet makeArtSet(const std::filesystem::path& spritesFolder, const std::vector<
     for (std::size_t i = 0; i < groundFrames.size(); ++i) {
         paste(art.tileStrip, static_cast<int>(i) * kTileSize, 0, atlas->tiles, atlas->tileFrame(atlas->tileCells.at(groundFrames[i])));
     }
+    // Normal maps (US-241): the same cells cut from the normal atlases, when there are any.
+    std::string note;
+    if (const auto normals = loadNormalAtlas(spritesFolder / "atlas", "characters", atlas->characters, &note)) {
+        art.charactersNormals = *normals;
+        art.heroNormals = Image(art.heroSheet.width(), art.heroSheet.height());
+        for (int facing = 0; facing < static_cast<int>(Facing::Count); ++facing) {
+            for (int walk = 0; walk < kWalkFrames; ++walk) {
+                paste(art.heroNormals, walk * kCharacterWidth, facing * kCharacterHeight, *normals, art.frame("hero", 8, static_cast<Facing>(facing), walk));
+            }
+        }
+    }
+    if (const auto normals = loadNormalAtlas(spritesFolder / "atlas", "tiles", atlas->tiles, &note)) {
+        art.tileNormals = Image(art.tileStrip.width(), art.tileStrip.height());
+        for (std::size_t i = 0; i < groundFrames.size(); ++i) {
+            paste(art.tileNormals, static_cast<int>(i) * kTileSize, 0, *normals, atlas->tileFrame(atlas->tileCells.at(groundFrames[i])));
+        }
+    }
+    if (!note.empty()) core::logWarning("Normal maps: " + note); // a map that does not fit its atlas is left out; the sprites are lit flat
     return art;
 }
 

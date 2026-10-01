@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-241: generated normal maps (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-241/`.
+
+- `odysseus_atlas --normals` (Tools) makes a normal atlas for every atlas picture (nine, committed in `assets/sprites/atlas/*_n.png`); height from the distance to the edge and the brightness, Sobel slopes; a hand-made `<frame>_n.png` next to `cuts.json` wins; a wrong-sized one is refused by name.
+- The game gives the renderer the normal maps of the hero, characters, ground and the plant, tree and animal pages (mirrored animals get mirrored normals); sprites without a map, or with a map that does not fit, are lit flat with no error.
+- `Luna` image ops `normalAtlas` and `mirroredNormals`; guide `docs/guides/lighting.md` extended. Tests: `tests/luna/normals_test.cpp`, `tests/game/normals_test.cpp` (generate, committed maps, missing, own map, the shaded hero on the GPU).
 ## US-240: the lighting pipeline (Mraw) - 2026-10-02
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-240/`.
