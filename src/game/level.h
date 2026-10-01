@@ -28,6 +28,7 @@ struct CharacterKindDef {
     bool enemy = true;      // the hero's sword can hit it
     double reach = 1.5;     // metres: how far its strike back reaches (US-131)
     bool animal = false;    // a creature of animals.json (US-137): one side-view picture from the content atlas; rames is its name there
+    std::vector<std::string> tags; // US-151: "hero", "person" or "hostile"...; "tags" in characters.json replaces them
 };
 
 struct Definitions {

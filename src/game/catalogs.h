@@ -4,6 +4,7 @@
 
 #include <array>
 #include <filesystem>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -27,6 +28,7 @@ struct WeaponDef {
     int damage = 5;
     double speed = 1.0;    // attacks per second
     double range = 1.5;    // metres
+    std::vector<std::string> tags; // US-151: "item", "weapon", its class, its element, "starter"; "tags" in weapons.json replaces them
 };
 
 struct PlantDef {
@@ -36,6 +38,8 @@ struct PlantDef {
     bool blocks = false;   // blocks walking like a rock
     bool edible = false;   // heals the hero when destroyed
     std::string inspect;   // shown on Interact
+    std::vector<std::string> tags;   // US-151: "plant" always, then "edible", "solid", "tree"...; "tags" in plants.json replaces them
+    std::vector<std::string> states; // US-151: the first is where it starts ("ripe", "picked"); none for a plant that never changes
 };
 
 struct AnimalDef {
@@ -45,6 +49,7 @@ struct AnimalDef {
     bool enemy = false;    // can be hit and strikes back (D-21: predators and boars)
     int strikeDamage = 0;
     double reach = 1.5;    // metres
+    std::vector<std::string> tags; // US-151: "animal" and "hostile" or "prey"; "tags" in animals.json replaces them
 };
 
 struct EffectDef {
@@ -94,6 +99,8 @@ struct Catalogs {
     const PlantDef* plant(const std::string& name) const;
     const AnimalDef* animal(const std::string& name) const;
     const EffectDef* effect(const std::string& name) const;
+    // Every tag any catalog entry carries: what an interaction may target (a tag outside this set earns a warning).
+    std::set<std::string> knownTags() const;
     const ClassDef& weaponClass(WeaponClass weaponClass) const { return classes.at(static_cast<std::size_t>(weaponClass)); }
     const ElementDef& element(Element element) const { return elements.at(static_cast<std::size_t>(element)); }
 };

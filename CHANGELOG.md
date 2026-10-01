@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-151: Tags and smart objects (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-151`); merged into `qa`.
+
+- Tags and states: optional `tags` and `states` in plants, animals, weapons and characters (derived from the old fields when not written); `Catalogs::knownTags()`; unknown tag in an interaction file = warning naming file and tag.
+- Game: `GameRuleContext` (the real world for the rule language), `plantOffers` / `plantThing` / `setPlantState`, `WorldPlant::state`; the plant context menu lists the interaction files' offers (Gather, Inspect); `assets/data/interactions/inspect.json`.
+- Docs and tests: guide section "Tags and states", `docs/plans/US-151.md`, teach-back, `tests/game/tags_test.cpp` (5 cases).
+
 ## US-150: Interaction data and the rule language (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-150`: 0 warnings, 27 of 27 tests in Debug and Release); merged into `qa`.

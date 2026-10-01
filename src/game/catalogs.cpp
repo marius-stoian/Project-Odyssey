@@ -1,6 +1,7 @@
 #include "game/catalogs.h"
 
 #include "game/content_art.h"
+#include "game/tags.h"
 #include "sim/data.h"
 #include "sim/json_data.h"
 
@@ -98,6 +99,14 @@ const PlantDef* Catalogs::plant(const std::string& name) const { return byName(p
 const AnimalDef* Catalogs::animal(const std::string& name) const { return byName(animals, name); }
 const EffectDef* Catalogs::effect(const std::string& name) const { return byName(effects, name); }
 
+std::set<std::string> Catalogs::knownTags() const {
+    std::set<std::string> tags;
+    for (const WeaponDef& weapon : weapons) tags.insert(weapon.tags.begin(), weapon.tags.end());
+    for (const PlantDef& plant : plants) tags.insert(plant.tags.begin(), plant.tags.end());
+    for (const AnimalDef& animal : animals) tags.insert(animal.tags.begin(), animal.tags.end());
+    return tags;
+}
+
 Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentAtlas* atlas) {
     Catalogs catalogs;
     // A frame named in a catalog must exist in the atlas (when one is given to check against).
@@ -120,6 +129,10 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.damage = f.whole("damage", 0, 1000);
         def.speed = f.number("speed", 0.1, 20.0);
         def.range = f.number("range", 0.5, 50.0);
+        std::vector<std::string> derived{"item", "weapon", kClassNames.at(static_cast<std::size_t>(def.weaponClass))};
+        if (def.element != Element::None) derived.push_back(kElementNames.at(static_cast<std::size_t>(def.element)));
+        if (def.starter) derived.push_back("starter");
+        def.tags = readTags(entry, weaponsFile, where, std::move(derived));
         return def;
     });
 
@@ -134,6 +147,14 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.blocks = f.flag("blocks");
         def.edible = f.flag("edible");
         def.inspect = f.text("inspect");
+        // Before tags existed: an edible plant that can be walked through is food to gather; a solid one that bears fruit is not
+        // gathered (it is chopped), so it does not get the "edible" tag by default.
+        std::vector<std::string> derived{"plant"};
+        if (def.edible) derived.push_back(def.blocks ? "fruit-bearing" : "edible");
+        if (def.blocks) derived.push_back("solid");
+        if (def.size == "tree") derived.push_back("tree");
+        def.tags = readTags(entry, plantsFile, where, std::move(derived));
+        def.states = readStates(entry, plantsFile, where, (def.edible && !def.blocks) ? std::vector<std::string>{"ripe", "picked"} : std::vector<std::string>{});
         return def;
     });
 
@@ -147,6 +168,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.enemy = f.flag("enemy");
         def.strikeDamage = f.whole("strikeDamage", 0, 1000);
         def.reach = f.number("reach", 0.5, 10.0);
+        def.tags = readTags(entry, animalsFile, where, {"animal", def.enemy ? "hostile" : "prey"});
         return def;
     });
 

@@ -48,6 +48,8 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
+#include <string>
 #include <vector>
 
 namespace odysseus::game {
@@ -81,6 +83,12 @@ public:
     // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
     const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
     const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    // Smart objects (US-151): what a plant is to the rules (its kind and tags), and what the hero may do to it now, in menu order,
+    // with the reason when an item is disabled.
+    sim::rules::ThingInfo plantThing(std::size_t index) const;
+    std::vector<sim::rules::Offer> plantOffers(std::size_t index) const;
+    void setPlantState(std::size_t index, const std::string& state); // "picked", "ripe"...
+    std::set<std::string> knownTags() const; // every tag a catalog or character kind carries
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
     // pickup puts its weapon in the first free slot; keys 1-9 hold a slot, Shift the next filled one.
     static constexpr int kHotbarSlots = 9;

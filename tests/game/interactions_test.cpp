@@ -3,6 +3,7 @@
 
 #include <doctest/doctest.h>
 
+#include <algorithm>
 #include <string>
 
 namespace game = odysseus::game;
@@ -34,18 +35,12 @@ TEST_CASE("US-150 The game registers gather at start and offers it on edible pla
     const RipeSummer world;
     int edible = 0;
     for (const game::PlantDef& plant : odyssey.catalogs().plants) {
-        // US-151 gives every plant its tags; until then a plant is tagged here the way its catalog flags say.
-        rules::ThingInfo thing{plant.name, {"plant"}};
-        if (plant.edible) thing.tags.push_back("edible");
+        const rules::ThingInfo thing{plant.name, plant.tags}; // the catalog's own tags (US-151)
+        const bool gatherable = std::find(plant.tags.begin(), plant.tags.end(), "edible") != plant.tags.end();
         const auto offers = odyssey.interactions().offered(hero, thing, 1000, world);
-        if (plant.edible) {
-            ++edible;
-            REQUIRE_MESSAGE(!offers.empty(), plant.name);
-            CHECK(offers[0].interaction->id == "gather");
-            CHECK(offers[0].enabled);
-        } else {
-            CHECK_MESSAGE(offers.empty(), plant.name);
-        }
+        const bool offersGather = std::any_of(offers.begin(), offers.end(), [](const rules::Offer& o) { return o.interaction->id == "gather" && o.enabled; });
+        CHECK_MESSAGE(offersGather == gatherable, plant.name);
+        if (gatherable) ++edible;
     }
-    CHECK(edible == 31);
+    CHECK(edible == 16); // the edible plants that can be walked through: the 15 solid fruit-bearing ones are chopped, not gathered
 }

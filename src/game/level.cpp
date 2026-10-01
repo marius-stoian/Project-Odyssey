@@ -1,5 +1,6 @@
 #include "game/level.h"
 
+#include "game/tags.h"
 #include "sim/data.h"
 #include "sim/json_data.h"
 
@@ -124,6 +125,11 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
         if (definitions.character(kind.name) != nullptr) {
             throw DataError(charactersFile, where + ".name", "\"" + kind.name + "\" is listed twice");
         }
+        std::vector<std::string> derived;
+        if (kind.name == "hero") derived = {"hero", "person"};
+        else if (kind.enemy) derived = {"hostile"};
+        else derived = {"person"};
+        kind.tags = readTags(entry, charactersFile, where, std::move(derived));
         definitions.characters.push_back(kind);
     }
     // The animals (US-137) are character kinds too: placed, named, hit and struck back by like the others.
@@ -145,6 +151,7 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             kind.enemy = entry.value("enemy", false);
             kind.reach = entry.value("reach", 1.5);
             kind.animal = true;
+            kind.tags = readTags(entry, animalsFile, where, {"animal", kind.enemy ? "hostile" : "prey"});
             if (definitions.character(kind.name) != nullptr) {
                 throw DataError(animalsFile, where + ".name", "\"" + kind.name + "\" is already a character kind");
             }

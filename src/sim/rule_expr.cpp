@@ -324,7 +324,7 @@ bool isWorldValue(std::string_view word) {
 
 const std::vector<FunctionInfo>& knownFunctions() {
     static const std::vector<FunctionInfo> functions = {
-        {"has", 2, 3, "how many of an item someone holds: has(berries, 2) for the actor, has(hero, berries, 2) for anyone"},
+        {"has", 2, 3, "1 when someone holds at least n of an item: has(berries, 2) for the actor, has(hero, berries, 2) for anyone"},
         {"need", 1, 1, "how full a need is, 0 to 100: need(hunger)"},
         {"skill", 1, 1, "the actor's skill in a profession: skill(hunter)"},
         {"trait", 1, 1, "1 when the actor has the trait, else 0: trait(diligent)"},
