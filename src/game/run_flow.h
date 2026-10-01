@@ -22,7 +22,7 @@ class OdysseyGame;
 // the run. Each is a panel of text lines and buttons made fresh every tick from the run's state (immediate mode), so a screen can
 // never show anything stale; a click on a button changes the run through the simulation layer's own functions. While a screen
 // is open the world stands still.
-enum class Screen { None, NewGame, Focus, Event, Mantle, Menu, Craft, Barter, Context, Ended };
+enum class Screen { None, NewGame, Focus, Event, Mantle, Menu, Craft, Barter, Context, Ended, Privacy };
 enum class MenuTab { Bag, Skills, Dominion, Settings };
 
 class RunFlow {
@@ -32,6 +32,9 @@ public:
 
     void openNewGame();
     void openFocus();
+    void openPrivacy() { screen_ = Screen::Privacy; }
+    bool tutorialOn() const { return tutorial_; }
+    void setTutorialOn(bool on) { tutorial_ = on; }
     void openMenu();
     void close() { screen_ = Screen::None; }
     void openMantle() { screen_ = Screen::Mantle; }
@@ -90,6 +93,7 @@ private:
     void buildBarter(OdysseyGame& game);
     void buildContext();
     void buildEnded(OdysseyGame& game);
+    void buildPrivacy();
     void act(OdysseyGame& game, int id);
 
     // Layout helpers while building.
@@ -114,6 +118,7 @@ private:
     std::string seedText_;
     int preset_ = 0;
     int comfort_ = 1;
+    bool tutorial_ = true;
     // Focus
     std::vector<int> picked_;
     // Craft and barter

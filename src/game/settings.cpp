@@ -12,7 +12,7 @@ using nlohmann::json;
 
 void saveSettings(const GameSettings& settings, const std::filesystem::path& file) {
     if (file.has_parent_path()) std::filesystem::create_directories(file.parent_path());
-    const json data{{"fullscreen", settings.fullscreen}, {"width", settings.width}, {"height", settings.height}, {"volume", settings.volume}};
+    const json data{{"fullscreen", settings.fullscreen}, {"width", settings.width}, {"height", settings.height}, {"volume", settings.volume}, {"statistics", settings.statistics}};
     std::ofstream out(file, std::ios::binary | std::ios::trunc);
     out << data.dump(1) << '\n';
 }
@@ -40,6 +40,10 @@ GameSettings loadSettings(const std::filesystem::path& file, std::string* note) 
             if (problem.empty()) {
                 if (!data.contains("volume") || !data.at("volume").is_number_integer() || data.at("volume").get<int>() < 0 || data.at("volume").get<int>() > 100) problem = "volume must be a whole number from 0 to 100";
                 else read.volume = data.at("volume").get<int>();
+            }
+            if (problem.empty() && data.contains("statistics")) {
+                if (!data.at("statistics").is_number_integer() || data.at("statistics").get<int>() < 0 || data.at("statistics").get<int>() > 2) problem = "statistics must be 0, 1 or 2";
+                else read.statistics = data.at("statistics").get<int>();
             }
             if (problem.empty()) return read;
         } catch (const json::exception& error) {

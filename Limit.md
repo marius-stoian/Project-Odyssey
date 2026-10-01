@@ -2,7 +2,7 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-10-01 (later): M5 built (Milestone-54.md, docs/gates/M5.md); next K-M6, US-090..US-092. Earlier note:  2026-10-01, M2d is fully built (US-130..US-141 and the hero-orientation fix); exit review in docs/gates/M2d.md (Milestone-51.md, AP-052). Nothing pushed since 5125364: the owner said "no tests or CI until M4". Next: K-M3 (ask the owner its design questions first).
+**Last updated:** 2026-10-01 (latest): M6 built and stopped at kill gate 2 (D-GATE-M6, Milestone-55.md). Waiting for the owner. Earlier:  2026-10-01 (later): M5 built (Milestone-54.md, docs/gates/M5.md); next K-M6, US-090..US-092. Earlier note:  2026-10-01, M2d is fully built (US-130..US-141 and the hero-orientation fix); exit review in docs/gates/M2d.md (Milestone-51.md, AP-052). Nothing pushed since 5125364: the owner said "no tests or CI until M4". Next: K-M3 (ask the owner its design questions first).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.

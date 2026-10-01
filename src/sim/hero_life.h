@@ -198,6 +198,9 @@ public:
     ActionResult foundFire(const std::string& name, int tileX, int tileY);
     ActionResult holdRitual(const std::vector<int>& attendees);
     ActionResult tendFire();
+    // The first day (US-090): eat a handful of berries (the hero's hunger is fed), and warm yourself and the clan at the camp fire.
+    ActionResult eatBerries();
+    ActionResult tendCampFire();
     const SacredFire& fire() const { return fire_; }
     int faith(int person) const;
 

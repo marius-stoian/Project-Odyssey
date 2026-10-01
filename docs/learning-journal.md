@@ -992,3 +992,13 @@ A run is a short list of numbers (affinities, skills, inventory) that two yearly
 **Try it (15 minutes).** Change `peakPercent` in `assets/data/hero/hero.json` and start a new game; compare the affinities after the first year.
 
 **Check yourself.** Why is it safer to rebuild a screen's buttons every tick than to update them when something changes?
+
+## M6: asking before recording
+
+A playtest needs numbers, but numbers about people need their yes. The statistics file is written only if the player agreed, lives on their own computer and the game contains no network code at all, so nothing is sent by construction, not by promise. The elder script is data like everything else: the hint timer counts game ticks, never the wall clock, so it behaves the same in tests.
+
+**Where to look.** `Tutorial::tick` and `notify` in [src/game/tutorial.cpp](../src/game/tutorial.cpp); `SessionStats::finish` in [src/game/session_stats.cpp](../src/game/session_stats.cpp); `installCrashHandler` in [src/luna/platform/crash.cpp](../src/luna/platform/crash.cpp).
+
+**Try it (15 minutes).** Change `hintAfterSeconds` in `assets/data/hero/tutorial.json` to 5, start a New Game and wait.
+
+**Check yourself.** Why does the crash code live in the Platform layer while the statistics live in the Game layer?

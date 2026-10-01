@@ -79,6 +79,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     {
         std::string note;
         settings_ = loadSettings(saveDirectory_ / "settings.json", &note);
+        stats_.enable(settings_.statistics == 1);
         if (settings_.fullscreen || settings_.width != 1280 || settings_.height != 720) pendingWindow_ = WindowChange{settings_.fullscreen, settings_.width, settings_.height};
         if (!note.empty()) message_ = note;
     }
@@ -494,7 +495,7 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
 }
 
 // Starts a run (US-050): the region of the seed, a clan made for the Comfort level, a hero of it at the preset's age.
-void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion) {
+void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tutorial) {
     if (!heroData_) return;
     if (useRegion) loadRegion(game.seed);
     clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
@@ -504,6 +505,13 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion) {
     clanView_.setHidden(life_->personId());
     clanView_.update(*clan_, map_);
     lastSavedDay_ = -1;
+    stats_.record("run-started", ticks_);
+    if (tutorial) {
+        if (tutorialScript_.steps.empty()) tutorialScript_ = loadTutorial(dataDirectory_ / "hero" / "tutorial.json");
+        tutorial_.start(tutorialScript_);
+    } else {
+        tutorial_.stop();
+    }
     if (life_->phase() == sim::Phase::Growing) {
         runFlow_.openFocus();
     } else {
@@ -513,7 +521,32 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion) {
                               life_->name(), life_->ageYears(), life_->origin()));
 }
 
+void OdysseyGame::setStatistics(bool agreed) {
+    settings_.statistics = agreed ? 1 : 2;
+    stats_.enable(agreed);
+    saveSettings(settings_, saveDirectory_ / "settings.json");
+}
+
+std::filesystem::path OdysseyGame::finishSession() {
+    stats_.record("session-ended", ticks_);
+    return stats_.finish(saveDirectory_ / "sessions", ticks_, sessionStamp());
+}
+
+// The elder speaks in a box at the bottom while the first day is taught (US-090).
+void OdysseyGame::drawTutorial(luna::engine::Renderer& renderer) const {
+    if (!tutorial_.active() || runFlow_.modal()) return;
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    const std::string line = tutorial_.elder() + ": " + tutorial_.text();
+    const int width = std::min(kVirtualWidth - 8, luna::engine::UiPainter::textWidth(line) + 8);
+    const int chars = (width - 8) / luna::engine::kTextAdvance;
+    const luna::engine::Rect box{(kVirtualWidth - width) / 2, kVirtualHeight - 2 * luna::engine::kGlyphHeight - 30, width, luna::engine::kGlyphHeight + 6};
+    painter.fill(box, luna::engine::UiColor::Shade);
+    painter.outline(box, tutorial_.hinting() ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
+    painter.text(box.x + 4, box.y + 3, line.substr(0, static_cast<std::size_t>(chars)), luna::engine::UiColor::Text);
+}
+
 void OdysseyGame::afterYear() {
+    stats_.record("year-lived", ticks_);
     if (!clan_) return;
     clanView_.update(*clan_, map_);
     lastSavedDay_ = clan_->date().day;
@@ -1327,6 +1360,11 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     }
     // The screens of the run (New Game, Focus, menu, crafting...) stop the world while they are open.
     if (intents.pressed(luna::engine::Intent::Overlay)) overlayOn_ = !overlayOn_;
+    // The first time the New Game screen comes up and the player has not chosen yet: ask about statistics first (US-092).
+    if (!privacyAsked_ && runFlow_.screen() == Screen::NewGame) {
+        privacyAsked_ = true;
+        if (settings_.statistics == 0) runFlow_.openPrivacy();
+    }
     if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) runFlow_.openMenu();
     if (runFlow_.modal()) {
         updateAim(intents.pointer(), true, hero_.facing()); // keeps the pointer for drawing
@@ -1334,6 +1372,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         return;
     }
     ++ticks_;
+    tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
     if (clan_) {
@@ -1745,6 +1784,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawClanHud(renderer);
     drawRunHud(renderer);
     drawDevTools(renderer, view, alpha);
+    drawTutorial(renderer);
     runFlow_.draw(renderer, uiSheet_);
     drawOverlay(renderer);
     drawModeLabel(renderer);
