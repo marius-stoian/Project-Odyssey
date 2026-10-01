@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.1
+# Project Odyssey Codex v2.2
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.2 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -12,6 +12,7 @@ Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus A
 - Continuous assembly: the owner wants the MVP as fast as quality allows, engine first. After each prompt, continue with the next one in Codex order without waiting, until a Charter human gate or the end of the session.
 - Autonomous by default (owner instruction, 2026-09-30): the owner wants the game built with minimal intervention. Design decisions are delegated to Dominus, stories integrate through the `qa` branch, and a Milestone-<n>.md progress snapshot is saved after every story, so the owner can review everything later. The owner answers questions up front (before leaving the team to work), not during the run.
 - Design decisions from v2.0 on (owner, 2026-10-01, D-35): the owner takes them (D-22, Charter human gate 3). The delegated period the owner granted on 2026-10-01 for M3-M6 (D-30..D-33) ended with M6. Each kickoff K-Mx asks the owner its open design questions in one chat round before its first story.
+- M8b-M8e (owner, 2026-10-01, D-43) are built right after M8 and before M9, under the M7-M9 rules (D-35): the owner answers each kickoff's design questions in one chat round, and every story runs the full verification with green CI on qa.
 - M10-M14 (owner, 2026-10-01, D-41): Dominus decides the design questions of these milestones with the recommended option and records each as "Decided by Dominus (delegated)" in docs/decisions.md and the next Milestone file; the owner may override any of them. Tests are written with each story but run at each milestone's exit review, which fixes every failure before the milestone is merged into main.
 - Blocked, wrong or ambiguous prompts become codex issues; the owner takes them to Anima with **A-002**; Anima issues a new Codex version.
 
@@ -23,7 +24,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.1)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.2)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -31,7 +32,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.2 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -46,6 +47,7 @@ The owner is learning C++ through this project; every story ends with a teach-ba
 8. Saves: versioned JSON, write to a temp file then rename, keep 3 backups (ADR-010).
 9. Luna (ARC-09) is our game engine: the Platform, Physics and Engine layers in src/luna/ (targets luna_platform, luna_physics and luna_engine, namespaces luna::platform, luna::physics and luna::engine). Luna stays game-agnostic: it never includes Simulation or Game code and holds nothing specific to Odysseus, so another game can reuse it. Game code uses Luna; Luna never knows about the game.
 10. Luna Physics (ARC-10, ADR-017) is written by us and deterministic: all physics state uses fixed-point 32.32 numbers (luna::physics::Fixed), never float or double inside src/luna/physics/; floats appear only where the Engine converts results for drawing. SI units: metres, seconds, kilograms; one 32-pixel tile is 1 metre. Physics uses Core only. Every physics feature is tested against its textbook formula.
+11. Rendering (ARC-11, ADR-021, from M8b): Luna draws through SDL_GPU with shaders behind the Renderer interface; SDL_GPU types and shader files live only in src/luna/platform/ and src/luna/engine/; the SDL_Renderer path stays as fallback and for headless tests. Lighting and shadows are presentation only: the Simulation never reads them, so determinism is unaffected. Screens are laid out from the virtual size (960 x 540) and the UI scale, never from fixed pixel numbers.
 </architecture_rules>
 
 <stack>
@@ -225,7 +227,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-03 | Confirm the Age 1 needs set: Hunger, Energy, Warmth, Social | M2 | US-011 | Decided |
 | D-04 | Sprite size and facing directions (OPEN-11); owner answer 2026-09-29: 32x48 px, 8 directions | M1 | US-022, US-024, US-030 | Decided |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M2c | US-120, US-030 | Decided (owner, 2026-09-30): own art in assets/sprites/, placeholder quality; licence checked before any public release |
-| D-06 | Minimum PC spec (OPEN-19) | M4 | US-082 | Open |
+| D-06 | Minimum PC spec (OPEN-19): a mid-range PC, 6-core CPU, 16 GB RAM, RX 6600 / RTX 3060 class GPU (8 GB) with DirectX 12, Windows 10/11; 60 FPS at 1080p on High lighting, Low for weaker PCs (development PC: RX 7900 XTX, 32 GB RAM, 6-core CPU) | M8b | US-082, US-234, US-247 | Decided (owner, 2026-10-01) |
 | D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Open |
 | D-08 | Interactions interview: verbs, objects, crafting (OPEN-09) | M4 | US-061, US-062 | Decided (answered by D-34) |
 | D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Proposed |
@@ -234,7 +236,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
-| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M8d > M8e > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
 | D-GATE-M2b | Kill Gate 1 retry: the owner reads the M2b story and judges whether it is a story | X-M2b | M3 | Decided: Go (owner, 2026-09-30: "it is a story") |
@@ -246,13 +248,15 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-35 | Assembly of M7-M9 (owner, one chat round with Anima, 2026-10-01): design questions go to the owner at each kickoff (D-22); P-009 pays the test debt (the M2d-M6 tests were never run), then every story runs the full verification and needs green CI on qa; US-155 builds the seven proposed world objects (fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs); the dialogue panel pauses the game | M7 | P-009, US-155, US-161 | Decided (owner, 2026-10-01) |
 | D-40 | Authoring tools and Politics (owner, five chat rounds with Dominus, 2026-10-01): M10 Quests and story authoring (authored quests only, one JSON file per quest + quest graph, flat with prerequisites, journal + tracker + markers, the tutorial becomes a quest, crossroads become story events, play-in-editor debugger), M11 Data editors (schema-driven forms for every data file, Game Rules page with system switches, daily routines), M12 World editing (all generator settings with live preview, hand edits as overrides on the seed, per clan and person social, economic, political and daily setup, actions and properties per kind and per placed thing), M13 Politics (third pillar with victory: alliances and vassal oaths, elders' council, marriage ties, leadership challenges, economic and technological levers) | M10 | US-180..US-216 | Decided (owner, 2026-10-01) |
 | D-41 | Technology and assembly of M10-M14 (owner, two chat rounds with Anima, 2026-10-01): Technology joins as the fourth pillar in M14 (tech tree as data, research by doing, workshops and inventors, espionage and theft; victory = Ember Strand held with a 60% Technology share, or all four pillars averaging 50%); Politics victory 60% vassals confirmed; Game Rules default assets/data/rules/standard.json, New Game and levels may name another; in M10-M14 Dominus decides design questions (delegated) and tests run at exit reviews; kill gate 2 after M14 | M10 | P-010, US-180..US-226 | Decided (owner, 2026-10-01) |
+| D-42 | Resolution, lighting and buildings (owner, three chat rounds with Dominus, 2026-10-01): 960x540 virtual resolution with whole-step scaling or Fill, windowed, borderless and full screen, camera zoom (default 2x) and UI scale; Luna moves to SDL_GPU shaders (ADR-021); sun and moon cycle, fire, torch and effect lights, seasonal day length, weather dimming and lightning; shadows from the sun, the moon and nearby fires for characters, plants and buildings; normal maps generated from the art, placeholder building art; buildings from whole blueprints and from pieces, clan members help, rival clans build, wear and repair, damage and fire; interiors per building (roof fade or interior map, set in the Editor); prefabs composed from pieces in the Editor; all right after M8 | M8b | US-230..US-257 | Decided (owner, 2026-10-01) |
+| D-43 | Assembly of M8b-M8e (owner, one chat round with Anima, 2026-10-01): M8d split into M8d Buildings (US-250, US-251, US-252, US-256) and M8e Building life (US-253, US-254, US-255, US-257); US-256 no longer waits for US-254; the M7-M9 rules (D-35) apply; D-06 answered | M8b | P-011, US-230..US-257 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.1 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.2 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -458,6 +462,23 @@ M7 is done and M8 is under way. The owner planned five more milestones before ki
 4. docs/codex-issues.md: mark CI-007 "Resolved in Codex v2.1 (catalog hot reload joins US-191; dialogue reload in M8 as built)" and CI-008 "Resolved in Codex v2.1 (objects ride on the plant machinery; noted in the M12 design notes)".
 5. Mirror requirements v2.2 and the backlog with tools/sync-workspace.ps1 if the session hook has not already done it.
 6. Update Limit.md (next prompt in Codex order) and commit on qa "P-010: adopt Codex v2.1 (authoring tools, Politics, Technology)", push, and wait for green CI.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+### P-011 Adopt Codex v2.2 (Resolution, lighting and buildings)
+```xml
+<prompt id="P-011" codex="2.2" name="Adopt Codex v2.2">
+<context>
+M8 is under way. The owner added four milestones built right after M8 and before M9 (requirements v2.4, Rounds 16 and 17; D-42, D-43): M8b Resolution and GPU renderer, M8c Lighting and shadows, M8d Buildings, M8e Building life; and answered D-06 (a mid-range target PC). They follow the M7-M9 rules (D-35). Mraw's brief: docs/plans/M8b-M8d-render-light-build-brief.md (section 9 records the split and D-06). Run this prompt as soon as the Codex sync reports v2.2; a story in progress is finished first.
+</context>
+<instructions>
+1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.2 and architecture rule 11 (rendering).
+2. docs/decisions.md: D-06 Decided with the owner's answer; D-42 and D-43 as in section 5. These IDs are taken by the Codex; if a story already used D-42 or D-43, renumber that story's decision to the next free ID and update its references.
+3. docs/status.md: add P-011 after P-010; add K-M8b..X-M8b, K-M8c..X-M8c, K-M8d..X-M8d, K-M8e..X-M8e (To do) in the execution order of section 7, between X-M8 and K-M9.
+4. Mirror requirements v2.4 and the backlog with tools/sync-workspace.ps1 if the session hook has not already done it, and commit docs/plans/M8b-M8d-render-light-build-brief.md if it is not committed yet.
+5. Update Limit.md (next prompt in Codex order) and commit on qa "P-011: adopt Codex v2.2 (resolution, lighting, buildings)", push, and wait for green CI.
 </instructions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -4845,6 +4866,1159 @@ Manual checks in docs/plans/US-165.md done, with results and screenshots (`odyss
 </prompt>
 ```
 
+### M8b Resolution and GPU renderer
+Exit criteria: The game renders at 960x540 through Luna's SDL_GPU renderer (with the old renderer as fallback) and looks the same at 2x camera zoom; windowed sizes, borderless and exclusive full screen work; every screen and editor panel is laid out for the new size; 60 FPS at 1080p on the target mid-range PC (D-06).
+
+Why this milestone exists: the owner wants a higher resolution and window, global lighting with shadows, and buildings (D-42), right after M8 so that every editor from M9 on is built at the final size on the final renderer. M8b changes the renderer and the resolution without changing what the game shows.
+
+Design notes for every M8b-M8e prompt (Anima, from the brief docs/plans/M8b-M8d-render-light-build-brief.md):
+- Decisions (D-35, D-43): the owner answers each kickoff's design questions in one chat round; a design question that appears mid-story stops that story until the owner answers. Technical choices (the shader compiler, data layouts, algorithms) are Dominus's, recorded in ADRs or the milestone design document.
+- Renderer (Charter rule 11, ADR-021): SDL_GPU only in Luna Platform and Engine; the Renderer interface grows the calls lighting needs, with no graphics-API type in it; the SDL_Renderer path stays as fallback and for tests; game code does not change because of the switch.
+- Tests: CI runners have no GPU. Headless tests use the RecordingRenderer as today; GPU pictures are checked with screenshots on the owner's PC, saved in docs/evidence/US-xxx/ and listed in the story's manual checks.
+- Determinism (Charter rule 6): lighting, shadows and flicker are presentation only; buildings, construction, wear and fire are Simulation, seeded, saved and in the world hash.
+- Data (Charter rules 7, 8): the brief's section 4 is the contract (settings, sky.json, lights.json, light fields, height, pieces.json, kinds.json, prefabs); every format change bumps its version with a migration; guides docs/guides/lighting.md and buildings.md.
+- Performance (D-06): 60 FPS at 1080p on High lighting on a mid-range PC (6-core CPU, 16 GB RAM, RX 6600 / RTX 3060 class GPU, DirectX 12); Low lighting for weaker PCs.
+
+```xml
+<prompt id="K-M8b" codex="2.2" name="Kick off M8b Resolution and GPU renderer">
+<instructions>
+1. Confirm that M8e (docs/gates/M8e.md) and its stories are done (since v2.2 M8b-M8e come between M8 and M9), and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8b stories leave open after the brief and D-42/D-43 (for example: the window sizes offered, whether Fill is the default on odd screens, where the UI scale and camera zoom live in the settings screen). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
+3. Architect: write docs/plans/M8b-renderer-design.md (GPU device and swapchain ownership, the Renderer interface changes, batching, shader build, fallback, scaling and window modes, zoom and UI scale, layout rules, performance method) before the first story.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-230, US-231, US-232, US-233, US-234.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-230 Luna's SDL_GPU renderer
+```xml
+<prompt id="S-US-230" codex="2.2" milestone="M8b" story="US-230" priority="Must" size="L">
+<context>
+Story US-230: Luna's SDL_GPU renderer.
+As the developer, I want Luna to draw through SDL_GPU with shaders, keeping the old renderer as a fallback, so that lighting and shadows become possible without changing game code.
+Epic E22 Resolution and GPU renderer: The game renders at 960x540 on Luna's new SDL_GPU renderer, in any window size or full screen, and every screen and editor has room to breathe.
+Traces to: ARC-11, ADR-021, ADR-003.
+</context>
+<dependencies>
+Stories that must be Done: US-020.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna: a GpuRenderer in src/luna/engine/ (with the SDL_GPU device, swapchain and command buffers in src/luna/platform/) implementing the existing Renderer interface: textures, sprite batching, Normal and Add blending, the 480x270 picture first. Shaders in src/luna/engine/shaders/ (HLSL), compiled at build time; choose the compiler (for example SDL_shadercross or DXC from vcpkg) and record it with its trade-offs in docs/adr/ADR-021-sdl-gpu-renderer.md. The window falls back to the SDL_Renderer path when SDL_GPU fails and logs why; a --renderer gpu|sdl switch for tests. Pixel comparison of both renderers on the demo and camp levels (owner's PC; CI runs the RecordingRenderer tests).
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Same picture">
+Given the demo level and the camp
+When they are drawn with the GPU and the old renderer
+Then the screenshots match pixel for pixel at 1x lighting
+</scenario>
+<scenario name="Fallback">
+Given a PC where SDL_GPU cannot start
+When the game starts
+Then it uses the old renderer, says so in the log and plays
+</scenario>
+<scenario name="Game code">
+Given every draw call in src/game/
+When the switch is made
+Then no game file changed its drawing code
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-230/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-230`: Debug and Release builds with zero warnings; every test passes in both, including the "US-230 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-230.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-230/.
+</verification>
+<teach_back>C++ concept for the owner: Graphics pipelines, shaders and sprite batching.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-231 960x540 and window modes
+```xml
+<prompt id="S-US-231" codex="2.2" milestone="M8b" story="US-231" priority="Must" size="M">
+<context>
+Story US-231: 960x540 and window modes.
+As the player, I want the game at 960x540 that fills my screen crisply in a window or full screen, so that it looks sharp on any monitor.
+Epic E22 Resolution and GPU renderer: The game renders at 960x540 on Luna's new SDL_GPU renderer, in any window size or full screen, and every screen and editor has room to breathe.
+Traces to: ENV-18, US-081.
+</context>
+<dependencies>
+Stories that must be Done: US-230, US-081.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna Platform and Engine: virtual size 960x540 in ApplicationSettings; whole-step scaling with a centred border, or Fill (scale to fit, nearest filtering above 2x); window modes (windowed sizes 960x540, 1920x1080, 2880x1620; borderless; exclusive full screen) applied at once and saved in settings.json (US-081 settings screen extended); high-DPI aware.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Scale">
+Given a 1920x1080 and a 3840x2160 screen
+When the game runs full screen
+Then it scales by 2 and by 4 with no blur and no border
+</scenario>
+<scenario name="Modes">
+Given the settings screen
+When the player picks windowed (with sizes), borderless or exclusive full screen
+Then the mode changes at once and is saved
+</scenario>
+<scenario name="Odd sizes">
+Given a 2560x1440 screen
+When the game runs
+Then it scales by 2 with a thin border, or fills the screen smoothly if the player chooses Fill
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-231/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-231`: Debug and Release builds with zero warnings; every test passes in both, including the "US-231 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-231.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-231/.
+</verification>
+<teach_back>C++ concept for the owner: Viewports and scaling maths.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-232 Camera zoom and UI scale
+```xml
+<prompt id="S-US-232" codex="2.2" milestone="M8b" story="US-232" priority="Must" size="M">
+<context>
+Story US-232: Camera zoom and UI scale.
+As the player, I want to zoom the world and size the interface, so that I can see more of the land or read more easily.
+Epic E22 Resolution and GPU renderer: The game renders at 960x540 on Luna's new SDL_GPU renderer, in any window size or full screen, and every screen and editor has room to breathe.
+Traces to: ENV-18.
+</context>
+<dependencies>
+Stories that must be Done: US-231.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Engine: the camera gains a zoom (1x or 2x, default 2x so the world looks as before); the UI draws in its own pass with a UI scale (1x or 2x); the 5x7 font is drawn crisp at both scales; pointer mapping (US-121) goes through zoom and UI scale; scripted input tests updated.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Zoom">
+Given the default camera zoom of 2x
+When the player zooms out
+Then the view shows 1x (30 x 17 tiles) and back, around the hero
+</scenario>
+<scenario name="UI">
+Given UI scale 1x and 2x
+When the player switches
+Then panels, the font and the hotbar resize and stay crisp
+</scenario>
+<scenario name="Pointer">
+Given any zoom
+When the player aims and clicks
+Then the pointer hits the same world spot as before
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-232/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-232`: Debug and Release builds with zero warnings; every test passes in both, including the "US-232 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-232.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-232/.
+</verification>
+<teach_back>C++ concept for the owner: Two coordinate systems: world and screen.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-233 Every screen at the new size
+```xml
+<prompt id="S-US-233" codex="2.2" milestone="M8b" story="US-233" priority="Must" size="L">
+<context>
+Story US-233: Every screen at the new size.
+As the owner, I want every screen, panel and editor laid out for 960x540, so that nothing is cramped or out of place.
+Epic E22 Resolution and GPU renderer: The game renders at 960x540 on Luna's new SDL_GPU renderer, in any window size or full screen, and every screen and editor has room to breathe.
+Traces to: ENV-18, EDT-01.
+</context>
+<dependencies>
+Stories that must be Done: US-232.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: every screen and panel (HUD, hotbar, dialogue panel, run screens, menus, settings, Editor tool bar, palettes, properties, the Interactions and Dialogue work of M8) laid out from the virtual size and UI scale, never fixed 480x270 numbers; screenshot references regenerated and shown to the owner on a contact sheet in docs/evidence/US-233/ for his approval.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Screens">
+Given the HUD, hotbar, menus, the run screens, the dialogue panel and the Editor's tool bar, palettes and properties
+When they are opened at 960x540
+Then they use the space, nothing overlaps and the text is legible
+</scenario>
+<scenario name="Tests">
+Given the screenshot tests
+When they run
+Then they pass with the new reference pictures, reviewed by the owner
+</scenario>
+<scenario name="Old saves">
+Given a save and a level from before
+When they load
+Then they play the same
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-233/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-233`: Debug and Release builds with zero warnings; every test passes in both, including the "US-233 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-233.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-233/.
+</verification>
+<teach_back>C++ concept for the owner: Layout from data instead of fixed numbers.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-234 Frame budget at the new size
+```xml
+<prompt id="S-US-234" codex="2.2" milestone="M8b" story="US-234" priority="Must" size="S">
+<context>
+Story US-234: Frame budget at the new size.
+As the player, I want the game smooth at 960x540, so that the bigger picture costs nothing in feel.
+Epic E22 Resolution and GPU renderer: The game renders at 960x540 on Luna's new SDL_GPU renderer, in any window size or full screen, and every screen and editor has room to breathe.
+Traces to: NFR-03, MVP success criteria.
+</context>
+<dependencies>
+Stories that must be Done: US-233.
+Owner decisions that must be Decided: D-42, D-06.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Performance: a scripted 10-minute run with 500 simulated people at 1080p, recording CPU and GPU frame times (F3 overlay gains GPU time from SDL_GPU timestamps); target 60 FPS on the D-06 mid-range PC; measured on the owner's development PC (RX 7900 XTX) with the numbers scaled by the documented ratio, and the method written in docs/plans/US-234.md.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Budget">
+Given 500 simulated people in the region on the minimum PC (D-06)
+When the game runs for 10 minutes
+Then it holds 60 FPS
+</scenario>
+<scenario name="Overlay">
+Given F3
+When it is pressed
+Then the overlay shows CPU and GPU frame times
+</scenario>
+<scenario name="Record">
+Given the performance run
+When it ends
+Then its numbers are saved in docs/evidence/
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-234/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-234`: Debug and Release builds with zero warnings; every test passes in both, including the "US-234 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-234.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-234/.
+</verification>
+<teach_back>C++ concept for the owner: Measuring GPU and CPU time.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M8b" codex="2.2" name="Exit review M8b">
+<instructions>
+1. Demonstrate the exit criteria: The game renders at 960x540 through Luna's SDL_GPU renderer (with the old renderer as fallback) and looks the same at 2x camera zoom; windowed sizes, borderless and exclusive full screen work; every screen and editor panel is laid out for the new size; 60 FPS at 1080p on the target mid-range PC (D-06).
+2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8b.md, one section per criterion, each marked met or not met. Also: side-by-side screenshots (old 480x270 and new 960x540 at 2x zoom) and the frame-time table from US-234.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8b-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M8c Lighting and shadows
+Exit criteria: The world is lit by the sun and moon through the day and the seasons, by fires, torches and effects at night, and dimmed by weather; sprites are shaded with generated normal maps; characters, plants and buildings cast shadows from the sun, the moon and nearby fires; the Editor previews any time of day; High lighting holds 60 FPS on the target PC.
+
+Why this milestone exists: light that follows the day, the seasons and the weather, fires that glow, and shadows from characters, plants and buildings (D-42, ENV-19..ENV-21). The design notes under M8b apply.
+
+```xml
+<prompt id="K-M8c" codex="2.2" name="Kick off M8c Lighting and shadows">
+<instructions>
+1. Confirm that M8b (docs/gates/M8b.md) and its stories are done, and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8c stories leave open after the brief and D-42/D-43 (for example: how dark nights are, the colour of dawn and dusk, the torch's look, how long shadows may get). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
+3. Architect: write docs/plans/M8c-lighting-design.md (lit pass, light buffer, normal-map generation, sky curves and day length, shadow projection and budgets, weather light, quality presets) before the first story.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-240, US-241, US-242, US-243, US-244, US-245, US-246, US-247.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-240 The lighting pipeline
+```xml
+<prompt id="S-US-240" codex="2.2" milestone="M8c" story="US-240" priority="Must" size="L">
+<context>
+Story US-240: The lighting pipeline.
+As the developer, I want a lit pass with ambient light, point lights and normal maps in the GPU renderer, so that the world can be lit from data.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-19, ADR-021.
+</context>
+<dependencies>
+Stories that must be Done: US-230.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Engine: a lit pass in the GpuRenderer: ambient colour, up to 64 point lights per frame in a buffer, per-sprite normal-map sampling; the Renderer interface gains light and normal-map calls (no SDL types in the interface); assets/data/light/lights.json with a schema-ready layout; the SDL_Renderer fallback draws unlit with the ambient tint only.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Ambient">
+Given an ambient colour in lights.json
+When the scene is drawn
+Then every sprite is tinted by it
+</scenario>
+<scenario name="Point light">
+Given a light with a colour, radius and strength
+When it is placed near a sprite
+Then the sprite's lit side faces the light, using its normal map
+</scenario>
+<scenario name="Budget">
+Given 64 lights on screen
+When the scene is drawn
+Then the frame budget of US-234 still holds
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-240/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-240`: Debug and Release builds with zero warnings; every test passes in both, including the "US-240 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-240.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-240/.
+</verification>
+<teach_back>C++ concept for the owner: Shader inputs, uniform data and lighting maths.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-241 Generated normal maps
+```xml
+<prompt id="S-US-241" codex="2.2" milestone="M8c" story="US-241" priority="Must" size="M">
+<context>
+Story US-241: Generated normal maps.
+As the owner, I want normal maps made from my sprites by a tool, so that lights shade my art without painting a second image.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-19, D-05.
+</context>
+<dependencies>
+Stories that must be Done: US-240, US-120.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Tools: odysseus_atlas --normals generates a normal-map atlas per atlas (height from alpha distance and luminance, Sobel slopes); a hand-made <frame>_n.png next to a cut wins; normal atlases committed; missing maps light flat.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Generate">
+Given the atlases
+When the atlas tool runs with normal maps on
+Then every atlas gets a matching normal-map atlas
+</scenario>
+<scenario name="Missing">
+Given a sprite without a normal map
+When it is lit
+Then it is lit flat, with no error
+</scenario>
+<scenario name="Own map">
+Given a hand-made normal map named like the sprite
+When the tool runs
+Then the hand-made one is kept
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-241/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-241`: Debug and Release builds with zero warnings; every test passes in both, including the "US-241 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-241.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-241/.
+</verification>
+<teach_back>C++ concept for the owner: Image processing: height and slopes from pixels.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-242 Day, night and seasons
+```xml
+<prompt id="S-US-242" codex="2.2" milestone="M8c" story="US-242" priority="Must" size="M">
+<context>
+Story US-242: Day, night and seasons.
+As the player, I want dawn, day, dusk and night to follow the game clock, with longer summer days and short winter days, so that time feels real.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-19, ENV-20.
+</context>
+<dependencies>
+Stories that must be Done: US-240, US-010.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: assets/data/light/sky.json keyframes per hour (sun and moon direction and elevation, ambient colour, shadow strength), blended from the simulation's game clock; day length per season from calendar.json (sunrise and sunset hours); the simulation's night hours stay as they are (no simulation change).
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Cycle">
+Given the game clock running
+When a day passes
+Then the light goes through dawn, day, dusk and night colours from sky.json
+</scenario>
+<scenario name="Seasons">
+Given midsummer and midwinter
+When the days are compared
+Then the summer day is longer, as calendar.json says
+</scenario>
+<scenario name="Moon">
+Given night
+When it is drawn
+Then the moon gives a dim, blue light and a direction for shadows
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-242/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-242`: Debug and Release builds with zero warnings; every test passes in both, including the "US-242 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-242.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-242/.
+</verification>
+<teach_back>C++ concept for the owner: Interpolating curves over time.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-243 Fires, torches and glowing effects
+```xml
+<prompt id="S-US-243" codex="2.2" milestone="M8c" story="US-243" priority="Must" size="M">
+<context>
+Story US-243: Fires, torches and glowing effects.
+As the player, I want fires, torches, the sacred fire and elemental effects to light the night with a flicker, so that camps glow in the dark.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-19.
+</context>
+<dependencies>
+Stories that must be Done: US-240, US-132.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Data: a `light` field on objects, effects, weapons and items (colour, radius, strength, flicker); a torch item for clan members at night (carried light follows its holder); flicker from a seeded noise in the Game, never the simulation stream.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Fire">
+Given a lit fire pit at night
+When the scene is drawn
+Then it lights a circle around it with a flicker
+</scenario>
+<scenario name="Data">
+Given a catalog entry with a light field
+When the thing is placed
+Then it emits that light; without the field, none
+</scenario>
+<scenario name="Torch">
+Given a clan member carrying a torch
+When they walk at night
+Then the light moves with them
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-243/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-243`: Debug and Release builds with zero warnings; every test passes in both, including the "US-243 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-243.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-243/.
+</verification>
+<teach_back>C++ concept for the owner: Noise for natural flicker.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-244 Sun and moon shadows
+```xml
+<prompt id="S-US-244" codex="2.2" milestone="M8c" story="US-244" priority="Must" size="L">
+<context>
+Story US-244: Sun and moon shadows.
+As the player, I want characters, plants and buildings to cast shadows that turn and stretch with the sun and the moon, so that the world has depth.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-21.
+</context>
+<dependencies>
+Stories that must be Done: US-242.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Engine: shadow casters (sprite silhouette, ground point, height from the catalog's `height`) drawn before the lit pass as sheared, darkened silhouettes along the sun or moon direction, length from the elevation, fading with shadow strength; catalogs gain `height` and optional `shadow: false`.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Day">
+Given a tree at 9:00 and at 17:00
+When it is drawn
+Then its shadow points away from the sun and is longer in the morning and evening
+</scenario>
+<scenario name="Casters">
+Given characters, plants and buildings
+When the sun shines
+Then each casts a shadow sized by its height in the catalog
+</scenario>
+<scenario name="Overcast">
+Given fog or heavy cloud
+When it sets in
+Then the shadows fade
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-244/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-244`: Debug and Release builds with zero warnings; every test passes in both, including the "US-244 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-244.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-244/.
+</verification>
+<teach_back>C++ concept for the owner: Projecting silhouettes with a shear transform.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-245 Shadows from fires
+```xml
+<prompt id="S-US-245" codex="2.2" milestone="M8c" story="US-245" priority="Must" size="M">
+<context>
+Story US-245: Shadows from fires.
+As the player, I want a fire to throw shadows of the people and things near it at night, so that night scenes feel alive.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-21.
+</context>
+<dependencies>
+Stories that must be Done: US-244, US-243.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Engine: for each caster, the nearest fires within their radius (max per object from lights.json) add faint shadows away from the fire at night; the Low preset turns them off.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Fire shadow">
+Given a person standing near a fire at night
+When it is drawn
+Then their shadow points away from the fire
+</scenario>
+<scenario name="Two fires">
+Given a person between two fires
+When it is drawn
+Then they cast two faint shadows
+</scenario>
+<scenario name="Budget">
+Given many fires
+When the scene is drawn
+Then only the nearest fires (from lights.json) cast shadows and the frame budget holds
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-245/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-245`: Debug and Release builds with zero warnings; every test passes in both, including the "US-245 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-245.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-245/.
+</verification>
+<teach_back>C++ concept for the owner: Choosing the nearest lights per object within a budget.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-246 Weather and light
+```xml
+<prompt id="S-US-246" codex="2.2" milestone="M8c" story="US-246" priority="Must" size="S">
+<context>
+Story US-246: Weather and light.
+As the player, I want clouds, rain, fog and storms to darken and tint the world, with lightning flashes, so that weather changes the mood.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-19.
+</context>
+<dependencies>
+Stories that must be Done: US-242, US-138.
+Owner decisions that must be Decided: D-42.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Data: weather.json entries gain `light` (dim, tint) and `flash` (lightning frequency); the weather fade (US-138) blends the light the same 3 s; lightning flashes the ambient for a few frames.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Dim">
+Given rain starting at noon
+When it fades in
+Then the light dims and cools over the same 3 s
+</scenario>
+<scenario name="Lightning">
+Given a storm
+When lightning strikes
+Then the whole scene flashes for a moment
+</scenario>
+<scenario name="Data">
+Given weather.json
+When the owner sets a weather's light
+Then the game uses it
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-246/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-246`: Debug and Release builds with zero warnings; every test passes in both, including the "US-246 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-246.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-246/.
+</verification>
+<teach_back>C++ concept for the owner: Blending light settings.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-247 Lighting in the Editor and quality settings
+```xml
+<prompt id="S-US-247" codex="2.2" milestone="M8c" story="US-247" priority="Must" size="M">
+<context>
+Story US-247: Lighting in the Editor and quality settings.
+As the owner, I want to preview any time of day and place lights in the Editor, and players to choose lighting quality, so that levels look right and run everywhere.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-19, EDT-01.
+</context>
+<dependencies>
+Stories that must be Done: US-243, US-244.
+Owner decisions that must be Decided: D-42, D-06.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Editor: a time-of-day slider in the tool bar (preview only, not saved), a Light tool that places light points saved in the level (level version bump with migration); Settings: lighting Low (no normal maps, no fire shadows), Medium, High; the D-06 target holds High at 60 FPS.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Preview">
+Given the Editor
+When the owner drags the time-of-day slider
+Then the level is lit as at that hour
+</scenario>
+<scenario name="Place">
+Given the light tool
+When the owner places a light and sets it
+Then it is saved in the level and shines in the game
+</scenario>
+<scenario name="Quality">
+Given Low, Medium and High lighting
+When the player picks Low
+Then fire shadows and normal maps switch off and the frame time drops
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-247/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-247`: Debug and Release builds with zero warnings; every test passes in both, including the "US-247 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-247.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-247/.
+</verification>
+<teach_back>C++ concept for the owner: Settings that change a pipeline.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M8c" codex="2.2" name="Exit review M8c">
+<instructions>
+1. Demonstrate the exit criteria: The world is lit by the sun and moon through the day and the seasons, by fires, torches and effects at night, and dimmed by weather; sprites are shaded with generated normal maps; characters, plants and buildings cast shadows from the sun, the moon and nearby fires; the Editor previews any time of day; High lighting holds 60 FPS on the target PC.
+2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8c.md, one section per criterion, each marked met or not met. Also: a time-lapse screenshot sheet (dawn, noon, dusk, night with fires, rain) and the frame-time table on High and Low.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8c-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M8d Buildings
+Exit criteria: The hero builds from blueprints and piece by piece on a building grid, and rooms form; the owner composes prefabs from pieces in the Editor and places them in levels; prefabs marked buildable are offered as blueprints.
+
+Why this milestone exists: the hero builds from blueprints and piece by piece, and the owner composes and places pre-made buildings (D-42, INT-07, EDT-07); split from M8e by D-43. The design notes under M8b apply.
+
+```xml
+<prompt id="K-M8d" codex="2.2" name="Kick off M8d Buildings">
+<instructions>
+1. Confirm that M8c (docs/gates/M8c.md) and its stories are done, and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8d stories leave open after the brief and D-42/D-43 (for example: the Build menu's layout, which blueprints are known at the start, how blueprints look before materials arrive). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
+3. Architect: write docs/plans/M8d-buildings-design.md (building data and grid, placement validity, construction as interactions, room detection, prefab format and editor, save migrations) before the first story.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-250, US-251, US-252, US-256.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-250 Building pieces and building kinds as data
+```xml
+<prompt id="S-US-250" codex="2.2" milestone="M8d" story="US-250" priority="Must" size="L">
+<context>
+Story US-250: Building pieces and building kinds as data.
+As the owner, I want building pieces (walls, floors, roofs, doors, posts) and building kinds (layout, materials, build time, interior mode, uses) in data files, so that I can design buildings without code.
+Epic E24 Buildings: The hero builds from whole blueprints and piece by piece; the owner composes pre-made buildings in the Editor and places them.
+Traces to: INT-07, EDT-07, ARC-08.
+</context>
+<dependencies>
+Stories that must be Done: US-150, US-155.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Data: assets/data/buildings/pieces.json and kinds.json (brief section 4), validated with file, line and field; buildings get their own list in levels, world files and saves (versions bumped with migrations), not the plant machinery (CI-008); Simulation: src/sim/buildings/ (kinds, pieces, placed buildings by id, condition, owner, contents); five starter kinds: hut, windbreak, storage pit, drying rack, palisade.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Load">
+Given pieces.json and buildings.json with a hut, a windbreak, a storage pit, a drying rack and a palisade
+When the game starts
+Then every kind and piece is known, with errors naming file, line and field
+</scenario>
+<scenario name="Own list">
+Given buildings in a level
+When it is saved and loaded
+Then they are kept in their own list, not as plants (CI-008)
+</scenario>
+<scenario name="Uses">
+Given a hut with shelter and sleep, a storage pit with storage
+When the data loads
+Then their interactions are offered
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-250/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-250`: Debug and Release builds with zero warnings; every test passes in both, including the "US-250 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-250.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-250/.
+</verification>
+<teach_back>C++ concept for the owner: Composite data: a whole made of parts.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-251 Building from blueprints
+```xml
+<prompt id="S-US-251" codex="2.2" milestone="M8d" story="US-251" priority="Must" size="L">
+<context>
+Story US-251: Building from blueprints.
+As the player, I want to choose a building, place its blueprint, bring materials and build it over time, so that I can shape my camp.
+Epic E24 Buildings: The hero builds from whole blueprints and piece by piece; the owner composes pre-made buildings in the Editor and places them.
+Traces to: INT-07.
+</context>
+<dependencies>
+Stories that must be Done: US-250, US-153.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game and Simulation: a Build menu (B, new intent Build) of known blueprints; a ghost on a 1 m building grid with rotation and red where blocked; construction as an interaction (M7) with material delivery and stages; cancel drops delivered materials.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Place">
+Given known blueprints
+When the player picks a hut and places it
+Then a see-through blueprint shows, red where it cannot stand
+</scenario>
+<scenario name="Build">
+Given a placed blueprint
+When materials are brought and the hero works on it
+Then it rises in stages and is finished after its build time
+</scenario>
+<scenario name="Cancel">
+Given a blueprint under way
+When the player cancels it
+Then the delivered materials are dropped on the site
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-251/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-251`: Debug and Release builds with zero warnings; every test passes in both, including the "US-251 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-251.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-251/.
+</verification>
+<teach_back>C++ concept for the owner: Placement validity on a grid.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-252 Building piece by piece
+```xml
+<prompt id="S-US-252" codex="2.2" milestone="M8d" story="US-252" priority="Must" size="L">
+<context>
+Story US-252: Building piece by piece.
+As the player, I want to place walls, floors, roofs and doors one by one, so that I can build any shape.
+Epic E24 Buildings: The hero builds from whole blueprints and piece by piece; the owner composes pre-made buildings in the Editor and places them.
+Traces to: INT-07.
+</context>
+<dependencies>
+Stories that must be Done: US-251.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Pieces placed one by one as small blueprints; room detection by flood fill over walls, doors and roof cover (enclosed + roofed + door = room, warm and sheltered); walking paths go through doors only.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Pieces">
+Given the build menu's pieces
+When the player places walls in a ring, a door and a roof
+Then each piece is built like a small blueprint
+</scenario>
+<scenario name="Room">
+Given an enclosed, roofed space with a door
+When it is finished
+Then it counts as a room: warm, sheltered, with its own light
+</scenario>
+<scenario name="Paths">
+Given a door
+When people walk to the room
+Then they go through the door, never through walls
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-252/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-252`: Debug and Release builds with zero warnings; every test passes in both, including the "US-252 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-252.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-252/.
+</verification>
+<teach_back>C++ concept for the owner: Flood fill to find enclosed rooms.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-256 Prefab editor and placing buildings
+```xml
+<prompt id="S-US-256" codex="2.2" milestone="M8d" story="US-256" priority="Must" size="L">
+<context>
+Story US-256: Prefab editor and placing buildings.
+As the owner, I want to compose buildings from pieces in the Editor, save them as prefabs with costs and interior mode, and place them whole, so that levels start with real camps.
+Epic E24 Buildings: The hero builds from whole blueprints and piece by piece; the owner composes pre-made buildings in the Editor and places them.
+Traces to: EDT-07.
+</context>
+<dependencies>
+Stories that must be Done: US-252, US-124.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Editor: a Prefab tab: compose pieces on the grid, set materials, build time, interior mode (and interior level name) and uses, save assets/data/buildings/prefabs/<id>.json; prefabs on a palette page placed whole in levels (finished); `buildable` prefabs appear in the Build menu. The interior mode works in the game from US-254 (M8e).
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Compose">
+Given the Prefab tab
+When the owner places pieces, sets materials, build time and interior mode, and saves
+Then a prefab file is written and appears in the palette
+</scenario>
+<scenario name="Place">
+Given a prefab
+When the owner places it in a level
+Then the finished building stands there in the game
+</scenario>
+<scenario name="Blueprint">
+Given a prefab marked buildable
+When a game starts
+Then the player can build it from the build menu
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-256/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-256`: Debug and Release builds with zero warnings; every test passes in both, including the "US-256 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-256.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-256/.
+</verification>
+<teach_back>C++ concept for the owner: Saving a group of parts as one reusable asset.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M8d" codex="2.2" name="Exit review M8d">
+<instructions>
+1. Demonstrate the exit criteria: The hero builds from blueprints and piece by piece on a building grid, and rooms form; the owner composes prefabs from pieces in the Editor and places them in levels; prefabs marked buildable are offered as blueprints.
+2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8d.md, one section per criterion, each marked met or not met. Also: a camp built in the game from blueprints and pieces, and a prefab composed in the Editor and placed, with screenshots.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8d-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M8e Building life
+Exit criteria: Clan members help build and rival clans build; each building fades its roof or opens an interior map as set in the Editor; buildings wear, are repaired, take damage, burn and fall; they shelter, warm and store for the clan and are saved.
+
+Why this milestone exists: buildings become part of clan life: clans build together, interiors open, buildings wear, burn and fall, shelter and store (D-42, D-43, INT-07, INT-08, ENV-20). The design notes under M8b apply.
+
+```xml
+<prompt id="K-M8e" codex="2.2" name="Kick off M8e Building life">
+<instructions>
+1. Confirm that M8d (docs/gates/M8d.md) and its stories are done, and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8e stories leave open after the brief and D-42/D-43 (for example: how fast buildings wear, whether rivals may burn buildings, which buildings open an interior map by default). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
+3. Architect: write docs/plans/M8e-building-life-design.md (construction jobs for NPCs and rivals, roof fade and interior maps, wear, damage and fire spread, rooms in the simulation's needs and stores) before the first story.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-253, US-254, US-255, US-257.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-253 Clans build together
+```xml
+<prompt id="S-US-253" codex="2.2" milestone="M8e" story="US-253" priority="Must" size="M">
+<context>
+Story US-253: Clans build together.
+As the player, I want my clan members to help build and rival clans to grow their own camps, so that building is a shared life.
+Epic E25 Building life: Clans build together; interiors by roof fade or interior map; wear, repair, damage and fire; shelter, warmth and storage for the clan.
+Traces to: INT-07, INT-05.
+</context>
+<dependencies>
+Stories that must be Done: US-251, US-154.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: construction jobs (blueprint, materials missing, work left) that clan members score with the M7 utility AI (bring material, build); rival clans pick blueprints by their needs and build at their camp over seasons, seeded and in the world hash.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Help">
+Given a blueprint and idle clan members
+When time passes
+Then they bring materials and build, through the interaction system
+</scenario>
+<scenario name="Rivals">
+Given a rival camp
+When a season passes
+Then it has built at least one building from its own blueprints
+</scenario>
+<scenario name="Deterministic">
+Given the same seed and inputs
+When two runs
+Then the same buildings stand in the same places
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-253/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-253`: Debug and Release builds with zero warnings; every test passes in both, including the "US-253 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-253.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-253/.
+</verification>
+<teach_back>C++ concept for the owner: Job queues for many workers.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-254 Interiors: roof fade or interior map
+```xml
+<prompt id="S-US-254" codex="2.2" milestone="M8e" story="US-254" priority="Must" size="L">
+<context>
+Story US-254: Interiors: roof fade or interior map.
+As the player, I want to see inside buildings, either by the roof fading or by entering an interior, as the building says, so that houses are places to be.
+Epic E25 Building life: Clans build together; interiors by roof fade or interior map; wear, repair, damage and fire; shelter, warmth and storage for the clan.
+Traces to: ENV-20, EDT-07.
+</context>
+<dependencies>
+Stories that must be Done: US-252, US-122.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: roof fade (roof and front-wall pieces fade when the hero is inside, by the room map from US-252); interior map mode: the door loads the named interior level (made in the Editor) and its exit door returns; per placed building override set in the Editor.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Fade">
+Given a hut set to roof fade
+When the hero walks in
+Then the roof and the front walls fade and the inside shows, lit by its fire and door
+</scenario>
+<scenario name="Interior">
+Given a lodge set to interior map
+When the hero uses its door
+Then the interior level loads and its door leads back outside
+</scenario>
+<scenario name="Setting">
+Given a placed building
+When the owner switches its interior mode in the Editor
+Then the game follows it
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-254/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-254`: Debug and Release builds with zero warnings; every test passes in both, including the "US-254 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-254.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-254/.
+</verification>
+<teach_back>C++ concept for the owner: Linking two maps by doors.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-255 Wear, repair, damage and fire
+```xml
+<prompt id="S-US-255" codex="2.2" milestone="M8e" story="US-255" priority="Must" size="L">
+<context>
+Story US-255: Wear, repair, damage and fire.
+As the player, I want buildings to wear with weather, to be repaired, damaged and to burn, so that they need care.
+Epic E25 Building life: Clans build together; interiors by roof fade or interior map; wear, repair, damage and fire; shelter, warmth and storage for the clan.
+Traces to: INT-08, PHY-04.
+</context>
+<dependencies>
+Stories that must be Done: US-251, US-029.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: condition per piece falling by season and weather (data), Repair interaction; damage from attacks and falling to rubble at zero; fire on wooden pieces spreading to neighbours by Luna material flammability and burning down over time (presentation via M2d fire effects and M8c fire light); general heat and fire simulation stays out of scope.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Wear">
+Given a hut through a winter
+When the season passes
+Then its condition falls as the data says and Repair is offered
+</scenario>
+<scenario name="Fire">
+Given a burning torch dropped by a wooden wall
+When time passes
+Then the wall catches fire, it spreads to wooden neighbours by their materials and ends in rubble
+</scenario>
+<scenario name="Damage">
+Given an attack on a wall
+When it is hit
+Then the wall loses condition and falls at zero
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-255/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-255`: Debug and Release builds with zero warnings; every test passes in both, including the "US-255 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-255.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-255/.
+</verification>
+<teach_back>C++ concept for the owner: Spreading state across neighbours (cellular rules).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-257 Buildings in the clan's life
+```xml
+<prompt id="S-US-257" codex="2.2" milestone="M8e" story="US-257" priority="Must" size="M">
+<context>
+Story US-257: Buildings in the clan's life.
+As the player, I want buildings to matter to the clan: shelter and warmth, sleeping, storage and ownership, saved with the world, so that building changes how people live.
+Epic E25 Building life: Clans build together; interiors by roof fade or interior map; wear, repair, damage and fire; shelter, warmth and storage for the clan.
+Traces to: INT-07, SDC-02.
+</context>
+<dependencies>
+Stories that must be Done: US-253, US-011.
+Owner decisions that must be Decided: D-42, D-43.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: rooms reduce Warmth loss for sleepers, storage buildings hold clan food (counts in the store, slower spoil), owners per building; everything saved and in the determinism hash.
+Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Warmth">
+Given a cold night
+When clan members sleep in a hut
+Then their Warmth need falls slower than outside
+</scenario>
+<scenario name="Storage">
+Given a storage pit
+When food is put in
+Then it counts in the clan store and spoils slower
+</scenario>
+<scenario name="Saved">
+Given buildings with owners, condition and contents
+When the game saves and loads
+Then everything is kept
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-257/.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-257`: Debug and Release builds with zero warnings; every test passes in both, including the "US-257 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-257.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-257/.
+</verification>
+<teach_back>C++ concept for the owner: Linking world objects to simulation needs.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M8e" codex="2.2" name="Exit review M8e">
+<instructions>
+1. Demonstrate the exit criteria: Clan members help build and rival clans build; each building fades its roof or opens an interior map as set in the Editor; buildings wear, are repaired, take damage, burn and fall; they shelter, warm and store for the clan and are saved.
+2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8e.md, one section per criterion, each marked met or not met. Also: a season of play where clan members and a rival clan build, a hut is repaired, a wall burns, and the hero enters a roof-fade hut and an interior-map lodge.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8e-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
 ### M9 Interaction and dialogue editor
 Exit criteria: The owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it and saves it, and the file still reads well in a text editor.
 
@@ -7267,7 +8441,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -7290,6 +8464,8 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | docs/reports/ | Assembly reports and checkpoints, one per session or story. | mraw-orchestrator |
 | docs/guides/interaction-data.md, docs/guides/dialogue-format.md | The owner's reference for every field, condition function and effect verb; updated in the same commit as any format change (from US-150, US-160). | mraw-writer |
 | docs/guides/quests.md, schemas.md, world-editing.md, politics.md, technology.md | The owner's reference for each M10-M14 format; updated in the same commit as any format change. | mraw-writer |
+| docs/guides/lighting.md, docs/guides/buildings.md | The owner's reference for light, sky, shadow and building data (M8b-M8e). | mraw-writer |
+| docs/adr/ADR-021-sdl-gpu-renderer.md | The renderer decision and the shader compiler (US-230). | mraw-architect |
 | assets/worlds/ | World files: a seed, generator settings and the owner's overrides (M12). | Owner (Editor) |
 | docs/gates/test-debt.md | The P-009 run that paid the M2d-M6 test debt. | mraw-tester |
 | AGENTS.md | Owner rules for any AI agent (for example the changelog rule); points to CLAUDE.md. | Owner |
@@ -7309,3 +8485,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 1.9 | 2026-10-01 | Aiming and ballistics (source of truth v1.9): the owner asked, before plants, to aim weapons with the mouse, to have ballistics and several shootable ranged weapons (D-25, two chat rounds). Three stories S-US-139 (mouse aiming), S-US-140 (arc ballistics with Luna Physics), S-US-141 (bows, crossbows, thrown weapons and staff bolts, with a shooting-range level) are added to M2d between S-US-135 and S-US-136; K-M2d sets the new order; design notes for the milestone; D-25 in the decision table; new P-008 adopts v1.9. Built from Mraw's brief docs/plans/M2d-aiming-brief.md. |
 | 2.0 | 2026-10-01 | World interactions, dialogue and their editor (source of truth v2.0, Round 13; Mraw's brief docs/plans/M7-M9-interactions-brief.md). The owner decided D-34 (plain-text .dlg dialogue + JSON interactions; hybrid talk; full visual graph editor plus F5 hot reload; build first, kill gate 2 after) and, with Anima, D-35 (design questions to the owner at each kickoff; P-009 pays the test debt, then per-story verification and CI; the seven proposed world objects; the dialogue panel pauses). New milestones before M6: M7 World interactions (K-M7, S-US-150..S-US-156, X-M7), M8 Speak to NPCs (K-M8, S-US-160..S-US-165, X-M8), M9 Interaction and dialogue editor (K-M9, S-US-170..S-US-175, X-M9), with shared design notes; K-M6 now follows X-M9; D-08 Decided, D-15 chain, D-34 and D-35 in the decision table; new state files (format guides, test-debt record); new P-009 adopts v2.0 and pays the test debt. L-01 step 1 corrected: an undecided D-xx goes to the owner (Charter human gate 3), no longer to Dominus; this contradiction existed since v1.8. Section 0 records that the delegated period of D-30..D-33 ended with M6. |
 | 2.1 | 2026-10-01 | Authoring tools, Politics and Technology (source of truth v2.2, Rounds 14 and 15; Mraw's brief docs/plans/M10-M13-authoring-brief.md). The owner decided D-40 (M10 Quests and story authoring, M11 Data editors, M12 World editing, M13 Politics) and, with Anima, D-41 (Technology as the fourth pillar in M14; Politics victory confirmed; Game Rules files; for M10-M14 Dominus decides design questions as delegated and tests run at exit reviews; kill gate 2 after M14). New: P-010; K-M10..X-M14 with 37 story prompts (S-US-180..S-US-187, S-US-190..S-US-196, S-US-200..S-US-207, S-US-210..S-US-216, S-US-220..S-US-226) and shared design notes; exit reviews run the deferred tests and CI before merging into main. Charter: human gate 3 and Definition of Done gain the M10-M14 exceptions; L-01 steps 1, 7 and 10 follow them. K-M6 now follows X-M14; D-15 chain; D-40 and D-41 in the decision table; new state files (guides, assets/worlds/). Codex issues resolved: CI-007 (catalog hot reload joins US-191, which replaces raw pointers into catalogs with ids; dialogue reload as built in M8), CI-008 (world objects ride on the plant machinery; noted in the M12 design notes). |
+| 2.2 | 2026-10-01 | Resolution, lighting and buildings (source of truth v2.4, Rounds 16 and 17; Mraw's brief docs/plans/M8b-M8d-render-light-build-brief.md). The owner decided D-42 (960x540 with window modes, camera zoom and UI scale; SDL_GPU shaders; sun, moon, fire, torch and effect lights, seasonal day length, weather light; shadows from the sun, the moon and nearby fires; generated normal maps; buildings from blueprints and pieces, built by the clans, with wear, repair, fire, interiors and Editor prefabs; right after M8) and, with Anima, D-43 (M8d split into M8d Buildings and M8e Building life; US-256 no longer waits for US-254; the D-35 assembly rules apply) and D-06 (a mid-range target PC). New: P-011; K-M8b..X-M8e with 21 story prompts (S-US-230..S-US-234, S-US-240..S-US-247, S-US-250..S-US-252, S-US-256, S-US-253..S-US-255, S-US-257) and shared design notes, between X-M8 and K-M9; K-M9 now follows X-M8e. Charter: architecture rule 11 (rendering). D-06 Decided, D-15 chain, D-42 and D-43 in the decision table; new state files (lighting and buildings guides, ADR-021). |

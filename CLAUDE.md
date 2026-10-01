@@ -1,4 +1,4 @@
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.1)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.2)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -6,7 +6,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.2 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -21,6 +21,7 @@ The owner is learning C++ through this project; every story ends with a teach-ba
 8. Saves: versioned JSON, write to a temp file then rename, keep 3 backups (ADR-010).
 9. Luna (ARC-09) is our game engine: the Platform, Physics and Engine layers in src/luna/ (targets luna_platform, luna_physics and luna_engine, namespaces luna::platform, luna::physics and luna::engine). Luna stays game-agnostic: it never includes Simulation or Game code and holds nothing specific to Odysseus, so another game can reuse it. Game code uses Luna; Luna never knows about the game.
 10. Luna Physics (ARC-10, ADR-017) is written by us and deterministic: all physics state uses fixed-point 32.32 numbers (luna::physics::Fixed), never float or double inside src/luna/physics/; floats appear only where the Engine converts results for drawing. SI units: metres, seconds, kilograms; one 32-pixel tile is 1 metre. Physics uses Core only. Every physics feature is tested against its textbook formula.
+11. Rendering (ARC-11, ADR-021, from M8b): Luna draws through SDL_GPU with shaders behind the Renderer interface; SDL_GPU types and shader files live only in src/luna/platform/ and src/luna/engine/; the SDL_Renderer path stays as fallback and for headless tests. Lighting and shadows are presentation only: the Simulation never reads them, so determinism is unaffected. Screens are laid out from the virtual size (960 x 540) and the UI scale, never from fixed pixel numbers.
 </architecture_rules>
 
 <stack>
