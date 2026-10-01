@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## CI: failures were hidden; fixed (Dominus) - 2026-10-01
+
+**State:** Merged into `qa`.
+
+- `.github/workflows/ci.yml`: each test step ran two `ctest` commands and PowerShell reported only the last exit code, so failing headless tests were hidden whenever the window tests passed. Both exit codes are now checked. Runs on `qa` since US-160 reported green while `odysseus_game_tests_c` and `odysseus_sim_tests` failed in Debug and Release on CI.
+- `.gitattributes`: `*.dlg text eol=lf`. Windows runners checked the dialogue scripts out with CRLF, so the US-160 round-trip and reload tests failed on CI (they pass locally, where the files stay LF).
+- `tests/luna/run_game_window.cmake`: on GitHub runners (no GPU) the Release first-frame limit is 10 s (3517 ms was measured); the 3-second player criterion is checked on the owner's PC with `tools/verify.ps1 -Config Release` at milestone exits.
+
 ## CI: faster verification (Dominus, D-46) - 2026-10-01
 
 **State:** Merged into `qa`; this push is the first CI run with the new workflow.

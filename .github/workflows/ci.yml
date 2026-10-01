@@ -68,11 +68,13 @@ jobs:
         run: cmake --build --preset windows-x64-release
 
       # The tests that open no window run side by side (the runner has 4 cores); the window tests
-      # run one at a time afterwards because they depend on frame timing.
+      # run one at a time afterwards because they depend on frame timing. Both exit codes are
+      # checked: PowerShell reports only the last command's, which once hid failing tests.
       - name: Test Release
         run: |
-          ctest --preset windows-x64-release -LE window -j 4
-          ctest --preset windows-x64-release -L window
+          ctest --preset windows-x64-release -LE window -j 4; $headless = $LASTEXITCODE
+          ctest --preset windows-x64-release -L window; $windowed = $LASTEXITCODE
+          if ($headless -ne 0 -or $windowed -ne 0) { exit 1 }
 
       # Milestone exits only: main also builds and tests Debug (AddressSanitizer).
       - name: Build Debug (main only)
@@ -82,5 +84,6 @@ jobs:
       - name: Test Debug (main only)
         if: github.ref == 'refs/heads/main'
         run: |
-          ctest --preset windows-x64-debug -LE window -j 4
-          ctest --preset windows-x64-debug -L window
+          ctest --preset windows-x64-debug -LE window -j 4; $headless = $LASTEXITCODE
+          ctest --preset windows-x64-debug -L window; $windowed = $LASTEXITCODE
+          if ($headless -ne 0 -or $windowed -ne 0) { exit 1 }
