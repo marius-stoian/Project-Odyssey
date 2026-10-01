@@ -744,6 +744,7 @@ bool OdysseyGame::loadAutosave() {
         }
         sim::LoadedWorld loaded = sim::loadWorld(clanFile, sim::loadSimConfig(dataDirectory_));
         for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
+        if (loaded.loadedFrom != clanFile) notes = std::format("The latest save was damaged: loaded the newest backup ({}). {}", loaded.loadedFrom.filename().string(), notes);
         clan_ = std::make_unique<sim::World>(std::move(loaded.world));
         if (!layerSheets_) layerSheets_ = makeLayerSheets();
         PixelPoint camp = level_.heroStart;
@@ -824,6 +825,8 @@ void OdysseyGame::updateDevTools(const luna::engine::Intents& intents) {
             return;
         }
     }
+    pointerX_ = pointer.x; // this tick's pointer, not the one the aiming code has not read yet
+    pointerY_ = pointer.y;
     const int person = figureAt(camera_.view(), 1.0);
     if (person >= 0) selectedPerson_ = person;
 #else

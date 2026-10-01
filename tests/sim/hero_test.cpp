@@ -434,6 +434,7 @@ TEST_CASE("US-072 Sacred fire") {
     REQUIRE(attendees.size() >= 5);
     REQUIRE(run.life.holdRitual(attendees).ok);
     for (const int id : attendees) CHECK(run.life.faith(id) >= data().config.fire.ritualFaith);
+    for (int i = 0; i < 2; ++i) REQUIRE(run.life.holdRitual(attendees).ok); // faith 12 a ritual, 30 makes a follower
     CHECK(run.life.religionPercent() > 0);
     // Rituals draw listeners from the rivals over time.
     const int followersAfterFirst = run.life.followers();

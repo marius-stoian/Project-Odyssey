@@ -123,11 +123,10 @@ TEST_CASE("US-137 Place") {
     for (const game::AnimalDef& animal : catalogs.animals) {
         editor.setTool(game::EditorTool::Place);
         editor.setKind(kindIndex(definitions, animal.name));
-        const auto view = editor.camera().view();
-        const int worldX = (1000 + column * 40);
-        const int worldY = 1000 + (column / 20) * 40;
-        play.odyssey.update(mouse(worldX - view.x, worldY - view.y, true, true, false));
-        play.odyssey.update(mouse(worldX - view.x, worldY - view.y, false, false, true));
+        const int screenX = 120 + (column % 8) * 26; // inside the map area: right of the palette, left of the properties panel
+        const int screenY = 60 + (column / 8) * 25;
+        play.odyssey.update(mouse(screenX, screenY, true, true, false));
+        play.odyssey.update(mouse(screenX, screenY, false, false, true));
         ++column;
     }
     REQUIRE(editor.level().characters.size() == 50);
@@ -150,8 +149,8 @@ TEST_CASE("US-137 Place") {
     editor.setTool(game::EditorTool::Place);
     play.odyssey.update({});
     REQUIRE(editor.kindPage() == 0);
-    play.odyssey.update(mouse(80, 232, true, true, false)); // the ">" arrow under the first page
-    play.odyssey.update(mouse(80, 232, false, false, true));
+    play.odyssey.update(mouse(50, 234, true, true, false)); // the ">" arrow under the first page
+    play.odyssey.update(mouse(50, 234, false, false, true));
     play.odyssey.update({});
     CHECK(editor.kindPage() == 1);
 }

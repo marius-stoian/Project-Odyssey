@@ -105,7 +105,11 @@ TEST_CASE("US-040 Playable") {
         sim::Region region(seed, config());
         region.fingerprint(); // every chunk made
         const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - began).count();
+#ifdef NDEBUG
         CHECK(seconds < 10.0);
+#else
+        CHECK(seconds < 60.0); // Debug builds with their checks are several times slower
+#endif
         CHECK(playableStart(region));
     }
 }
