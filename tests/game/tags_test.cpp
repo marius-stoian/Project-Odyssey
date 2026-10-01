@@ -293,3 +293,30 @@ TEST_CASE("US-156 F5 works in the Editor and the panel shows there too") {
     odyssey.update(reloadPressed());
     CHECK_FALSE(odyssey.interactionPanelOpen());
 }
+
+TEST_CASE("US-160 The game loads the conversations at start, and F5 reloads them with their mistakes named") {
+    const fs::path data = dataCopy("dialogue-reload", "");
+    game::OdysseyGame odyssey(data, levelWith(data, "dialogue-reload", {}));
+    REQUIRE(odyssey.interactionReport().errors.empty());
+    const odysseus::sim::rules::DlgScript* elder = odyssey.dialogues().find("elder-fire");
+    REQUIRE(elder != nullptr);
+    CHECK(elder->nodes.size() == 3);
+
+    const fs::path file = data / "dialogue" / "elder-fire.dlg";
+    std::string text = readText(file);
+    const std::size_t at = text.find("=> hunt\n");
+    REQUIRE(at != std::string::npos);
+    text.replace(at, std::string("=> hunt\n").size(), "=> hunts\n");
+    writeText(file, text);
+    CHECK_FALSE(odyssey.reloadInteractions());
+    REQUIRE(odyssey.interactionReport().errors.size() == 1);
+    CHECK(odyssey.interactionReport().errors[0].text() == "dialogue/elder-fire.dlg:9: unknown node \"hunts\"");
+    CHECK(odyssey.interactionPanelOpen());
+    REQUIRE(odyssey.dialogues().find("elder-fire") != nullptr); // the last good conversation stays
+    CHECK(odyssey.dialogues().find("elder-fire")->nodes.size() == 3);
+
+    text.replace(text.find("=> hunts\n"), std::string("=> hunts\n").size(), "=> hunt\n");
+    writeText(file, text);
+    CHECK(odyssey.reloadInteractions());
+    CHECK_FALSE(odyssey.interactionPanelOpen());
+}

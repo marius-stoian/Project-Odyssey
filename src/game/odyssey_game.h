@@ -37,6 +37,7 @@
 #include "core/random.h"
 
 #include "sim/hero_life.h"
+#include "sim/dialogue_script.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -86,6 +87,9 @@ public:
     // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
     const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
     const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
+    // same report and panel (as "dialogue/<name>.dlg:<line>: message").
+    const sim::rules::DialogueLibrary& dialogues() const { return dialogues_; }
     // Smart objects (US-151): what a plant is to the rules (its kind and tags), and what the hero may do to it now, in menu order,
     // with the reason when an item is disabled.
     sim::rules::ThingInfo plantThing(std::size_t index) const;
@@ -283,6 +287,7 @@ private:
     Catalogs catalogs_;
     sim::rules::InteractionRegistry interactions_;
     sim::rules::LoadReport interactionReport_;
+    sim::rules::DialogueLibrary dialogues_;
     void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
     sim::rules::ActionRunner actions_;

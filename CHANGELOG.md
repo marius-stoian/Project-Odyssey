@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-160: The .dlg format (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-160`); merged into `qa`.
+
+- Simulation: `dialogue_script` (the `.dlg` parser with `file:line: message` errors, the script model, the canonical writer, `DialogueLibrary`).
+- Data and docs: `assets/data/dialogue/elder-fire.dlg`, `docs/guides/dialogue-format.md`, `docs/plans/US-160.md`, teach-back.
+- Game: the conversations load at start and reload with F5 together with the interaction files (same panel).
+- Tests: 10 simulation cases (`tests/sim/dialogue_test.cpp`, incl. the line-9 error, the exact round trip of every shipped file and 300 mutations) and 1 game case.
+
 ## Docs: Codex v2.1, requirements v2.2 and the M10-M14 brief (Anima, Dominus) - 2026-10-01
 
 **State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).

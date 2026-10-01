@@ -141,7 +141,7 @@ Edit a file in any text editor, save it, and press **F5** in the game (Game or E
 - Any mistake: nothing changes. The data you had stays in use, and a red panel at the top of the screen lists each mistake as `file:line: message` (the first eight; the log has all of them). Fix the file and press F5 again; the panel closes by itself.
 - If a file has a mistake when the game *starts*, that file is left out, the others load, and the same panel shows until you fix it and press F5.
 
-F5 reads the interaction files. Plants, animals, weapons and characters (the catalogs) are read only at start for now.
+F5 reads the interaction files and the conversations (`assets/data/dialogue/*.dlg`, see `docs/guides/dialogue-format.md`); a mistake in either keeps both as they were. Plants, animals, weapons and characters (the catalogs) are read only at start for now.
 
 ## A whole file
 

@@ -617,6 +617,12 @@ void OdysseyGame::loadInteractions() {
     options.knownBuiltins.insert(builtInActionNames().begin(), builtInActionNames().end());
     interactionReport_ = {};
     interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_, options);
+    sim::rules::LoadReport dialogueReport;
+    dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
+    interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
+    interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
+    interactionReport_.filesRead += dialogueReport.filesRead;
+    core::logInfo(std::format("Dialogue: {} conversation(s) loaded from {} file(s)", dialogueReport.loaded, dialogueReport.filesRead));
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
     for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
     core::logInfo(std::format("Interactions: {} loaded from {} file(s), {} error(s)", interactionReport_.loaded, interactionReport_.filesRead, interactionReport_.errors.size()));
@@ -631,6 +637,11 @@ bool OdysseyGame::reloadInteractions() {
     options.knownBuiltins.insert(builtInActionNames().begin(), builtInActionNames().end());
     sim::rules::LoadReport report;
     sim::rules::InteractionRegistry fresh = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", report, options);
+    sim::rules::LoadReport dialogueReport;
+    sim::rules::DialogueLibrary freshDialogue = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
+    report.errors.insert(report.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
+    report.warnings.insert(report.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
+    report.filesRead += dialogueReport.filesRead;
     lastInteractionReloadMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     interactionReport_ = report; // the panel always shows the latest result
     for (const sim::rules::Diagnostic& d : report.errors) core::logWarning("Interactions: " + d.text());
@@ -640,6 +651,7 @@ bool OdysseyGame::reloadInteractions() {
         return false;
     }
     interactions_ = std::move(fresh);
+    dialogues_ = std::move(freshDialogue);
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
 }

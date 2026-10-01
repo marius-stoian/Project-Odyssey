@@ -1086,3 +1086,14 @@ Sharing one system with the player means the same timed runner, the same menu ru
 **Try it (15 minutes).** The manual checks in [docs/plans/US-154.md](plans/US-154.md); then change the Flee score in `flee-predator.json` to `(6 - distance) * 10` and see the deer wait longer before running.
 
 **Check yourself.** Why does `pickBest` draw a random number even when there is no tie, and what would go wrong with the world-hash test if it drew only when there was one?
+## M8: reading a small file format line by line (US-160)
+
+A conversation file looks like writing, but the game reads it with a tiny **parser**: it takes the file one line at a time and decides what each line is from its first characters. `#` starts a note, `@` a header, `===` a node, `->` a choice, and anything else must look like `Speaker: words`. Because every line is decided on its own, every mistake can be reported with its line number (`dialogue/elder-fire.dlg:9: unknown node "hunts"`), which is what makes a data file friendly to edit by hand.
+
+Two details are worth learning. First, the end of a choice line holds up to three little groups, `[if ...]`, `[else ...]` and `{effects}`; the parser peels them off from the *right*, matching brackets backwards, so a quote like `"{hero} shared berries"` inside the effects does not confuse it. Second, a **canonical writer** turns the parsed script back into text in one fixed layout. A test reads every shipped file, writes it back and requires exactly the same text, notes included: that is how we know the Editor of M9 can save a script without scrambling what you wrote.
+
+**Where to look.** `Parser::parseLine`, `parseChoice` and `takeSuffix` in [src/sim/dialogue_script.cpp](../src/sim/dialogue_script.cpp); `writeDialogue` in the same file; the example [assets/data/dialogue/elder-fire.dlg](../assets/data/dialogue/elder-fire.dlg).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-160.md](plans/US-160.md); then add a fourth node of your own to `elder-fire.dlg` and a choice that leads to it, and press F5.
+
+**Check yourself.** Why must the lines a character says come before the choices of a node, and what would the canonical writer have to do if they could be mixed?
