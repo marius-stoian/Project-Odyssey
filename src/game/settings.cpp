@@ -4,55 +4,109 @@
 
 #include <filesystem>
 #include <fstream>
-#include <sstream>
+#include <stdexcept>
 
 namespace odysseus::game {
 
 using nlohmann::json;
 
+namespace {
+
+bool allowedSize(int width, int height) {
+    return (width == 1280 && height == 720) || (width == 1600 && height == 900) ||
+           (width == 1920 && height == 1080) || (width == 2560 && height == 1440);
+}
+
+const char* modeName(core::WindowMode mode) {
+    switch (mode) {
+    case core::WindowMode::Windowed: return "Windowed";
+    case core::WindowMode::Borderless: return "Borderless";
+    case core::WindowMode::Exclusive: return "Exclusive";
+    }
+    return "Windowed";
+}
+
+const char* scalingName(core::ScalingMode scaling) {
+    return scaling == core::ScalingMode::Whole ? "Whole" : "Fill";
+}
+
+int boundedInteger(const json& object, const char* key, int minimum, int maximum) {
+    if (!object.contains(key) || !object.at(key).is_number_integer()) throw std::runtime_error(std::string(key) + " must be a whole number");
+    const int value = object.at(key).get<int>();
+    if (value < minimum || value > maximum) throw std::runtime_error(std::string(key) + " is out of range");
+    return value;
+}
+
+} // namespace
+
 void saveSettings(const GameSettings& settings, const std::filesystem::path& file) {
     if (file.has_parent_path()) std::filesystem::create_directories(file.parent_path());
-    const json data{{"fullscreen", settings.fullscreen}, {"width", settings.width}, {"height", settings.height}, {"volume", settings.volume}, {"statistics", settings.statistics}};
+    const json data{{"version", 2}, {"resolution", {{"width", settings.resolution.width}, {"height", settings.resolution.height},
+                    {"mode", modeName(settings.resolution.mode)}, {"scaling", scalingName(settings.resolution.scaling)}}},
+                    {"cameraZoom", settings.cameraZoom}, {"uiScale", settings.uiScale}, {"lighting", settings.lighting},
+                    {"volume", settings.volume}, {"statistics", settings.statistics}};
     std::ofstream out(file, std::ios::binary | std::ios::trunc);
-    out << data.dump(1) << '\n';
+    out << data.dump(2) << '\n';
 }
 
 GameSettings loadSettings(const std::filesystem::path& file, std::string* note) {
-    GameSettings settings;
-    std::string problem;
-    if (std::filesystem::exists(file)) {
-        try {
-            std::ifstream in(file, std::ios::binary);
-            std::stringstream text;
-            text << in.rdbuf();
-            const json data = json::parse(text.str());
-            GameSettings read = settings;
-            if (!data.contains("fullscreen") || !data.at("fullscreen").is_boolean()) problem = "fullscreen must be true or false";
-            else read.fullscreen = data.at("fullscreen").get<bool>();
-            if (problem.empty()) {
-                if (!data.contains("width") || !data.at("width").is_number_integer() || data.at("width").get<int>() < kMinWindowWidth || data.at("width").get<int>() > kMaxWindowWidth) problem = "width must be a whole number from 640 to 7680";
-                else read.width = data.at("width").get<int>();
-            }
-            if (problem.empty()) {
-                if (!data.contains("height") || !data.at("height").is_number_integer() || data.at("height").get<int>() < kMinWindowHeight || data.at("height").get<int>() > kMaxWindowHeight) problem = "height must be a whole number from 360 to 4320";
-                else read.height = data.at("height").get<int>();
-            }
-            if (problem.empty()) {
-                if (!data.contains("volume") || !data.at("volume").is_number_integer() || data.at("volume").get<int>() < 0 || data.at("volume").get<int>() > 100) problem = "volume must be a whole number from 0 to 100";
-                else read.volume = data.at("volume").get<int>();
-            }
-            if (problem.empty() && data.contains("statistics")) {
-                if (!data.at("statistics").is_number_integer() || data.at("statistics").get<int>() < 0 || data.at("statistics").get<int>() > 2) problem = "statistics must be 0, 1 or 2";
-                else read.statistics = data.at("statistics").get<int>();
-            }
-            if (problem.empty()) return read;
-        } catch (const json::exception& error) {
-            problem = std::string("the file is damaged: ") + error.what();
-        }
-        if (note != nullptr) *note = "settings.json had a problem (" + problem + "): the defaults are used and the file was rewritten";
+    GameSettings defaults;
+    if (!std::filesystem::exists(file)) {
+        saveSettings(defaults, file);
+        return defaults;
     }
-    saveSettings(settings, file);
-    return settings;
+    try {
+        std::ifstream in(file, std::ios::binary);
+        const json data = json::parse(in);
+        if (!data.is_object()) throw std::runtime_error("settings must be an object");
+        if (data.contains("version")) {
+            if (!data.at("version").is_number_integer()) throw std::runtime_error("version must be a whole number");
+            const int version = data.at("version").get<int>();
+            if (version > 2) {
+                if (note) *note = "settings.json has an unsupported future version; the file was kept";
+                return defaults;
+            }
+            if (version != 2) throw std::runtime_error("version is not supported");
+        }
+        GameSettings read;
+        if (data.contains("version")) {
+            if (!data.contains("resolution") || !data.at("resolution").is_object()) throw std::runtime_error("resolution must be an object");
+            const json& r = data.at("resolution");
+            read.resolution.width = boundedInteger(r, "width", 1, kMaxWindowWidth);
+            read.resolution.height = boundedInteger(r, "height", 1, kMaxWindowHeight);
+            if (!allowedSize(read.resolution.width, read.resolution.height)) throw std::runtime_error("resolution is not a supported windowed size");
+            if (!r.contains("mode") || !r.at("mode").is_string()) throw std::runtime_error("mode must be a name");
+            const std::string mode = r.at("mode").get<std::string>();
+            if (mode == "Windowed") read.resolution.mode = core::WindowMode::Windowed;
+            else if (mode == "Borderless") read.resolution.mode = core::WindowMode::Borderless;
+            else if (mode == "Exclusive") read.resolution.mode = core::WindowMode::Exclusive;
+            else throw std::runtime_error("mode is not supported");
+            if (!r.contains("scaling") || !r.at("scaling").is_string()) throw std::runtime_error("scaling must be a name");
+            const std::string scaling = r.at("scaling").get<std::string>();
+            if (scaling == "Whole") read.resolution.scaling = core::ScalingMode::Whole;
+            else if (scaling == "Fill") read.resolution.scaling = core::ScalingMode::Fill;
+            else throw std::runtime_error("scaling is not supported");
+            read.cameraZoom = boundedInteger(data, "cameraZoom", 1, 2);
+            read.uiScale = boundedInteger(data, "uiScale", 1, 2);
+            if (!data.contains("lighting") || !data.at("lighting").is_string()) throw std::runtime_error("lighting must be a name");
+            read.lighting = data.at("lighting").get<std::string>();
+            if (read.lighting != "Low" && read.lighting != "Medium" && read.lighting != "High") throw std::runtime_error("lighting is not supported");
+        } else {
+            if (!data.contains("fullscreen") || !data.at("fullscreen").is_boolean()) throw std::runtime_error("fullscreen must be true or false");
+            read.resolution.mode = data.at("fullscreen").get<bool>() ? core::WindowMode::Borderless : core::WindowMode::Windowed;
+            const int width = boundedInteger(data, "width", 1, kMaxWindowWidth);
+            const int height = boundedInteger(data, "height", 1, kMaxWindowHeight);
+            if (allowedSize(width, height)) { read.resolution.width = width; read.resolution.height = height; }
+        }
+        read.volume = boundedInteger(data, "volume", 0, 100);
+        if (data.contains("statistics")) read.statistics = boundedInteger(data, "statistics", 0, 2);
+        if (!data.contains("version")) saveSettings(read, file);
+        return read;
+    } catch (const std::exception& error) {
+        if (note) *note = std::string("settings.json had a problem (") + error.what() + "): the defaults are used and the file was rewritten";
+        saveSettings(defaults, file);
+        return defaults;
+    }
 }
 
 } // namespace odysseus::game

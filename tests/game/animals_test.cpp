@@ -164,13 +164,13 @@ TEST_CASE("US-137 Enemies") {
     CHECK(wolf.animal);
     play.hold("iron sword");
     const int damage = play.odyssey.catalogs().weapon("iron sword")->damage;
-    play.tick(1, attackToward(300, 135));
+    play.tick(1, attackToward(540, 270));
     CHECK(wolf.hp() == wolf.maxHp() - damage);
     CHECK(wolf.isWindingUp());
     play.tick(10);
     CHECK(play.odyssey.heroHp() == 100 - wolf.swordDamage); // it struck back like a goblin
     // Keep hitting: it falls.
-    for (int i = 0; i < 400 && wolf.isAlive(); ++i) play.tick(1, attackToward(300, 135));
+    for (int i = 0; i < 400 && wolf.isAlive(); ++i) play.tick(1, attackToward(540, 270));
     CHECK_FALSE(wolf.isAlive());
     // It is drawn while it lives.
     Play drawn(levelWith("enemy-drawn", {{"grey wolf", 1, 0}}));
@@ -193,9 +193,9 @@ TEST_CASE("US-137 Bystanders") {
     REQUIRE(play.odyssey.bystanders().size() == 3);
     play.hold("iron sword");
     const auto before = play.odyssey.bystanders();
-    play.tick(1, attackToward(300, 135));
-    play.tick(20, attackToward(240, 200));
-    play.tick(20, attackToward(180, 135));
+    play.tick(1, attackToward(540, 270));
+    play.tick(20, attackToward(480, 335));
+    play.tick(20, attackToward(420, 270));
     CHECK(play.odyssey.bystanders() == before); // nothing changed: no HP lost, none removed
     CHECK(play.odyssey.heroHp() == 100);
     // They are drawn all the same.

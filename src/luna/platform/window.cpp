@@ -32,7 +32,7 @@ void Window::GamepadDeleter::operator()(SDL_Gamepad* gamepad) const {
 }
 
 Window::Window(const WindowSettings& settings) {
-    const SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE | (settings.hidden ? SDL_WINDOW_HIDDEN : 0);
+    const SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | (settings.hidden ? SDL_WINDOW_HIDDEN : 0);
     const auto openWindow = [&] {
         window_.reset(SDL_CreateWindow(settings.title.c_str(), settings.width, settings.height, flags));
         if (!window_) {
@@ -49,7 +49,7 @@ Window::Window(const WindowSettings& settings) {
             if (!gpuBackendCompiledIn()) {
                 throw std::runtime_error("this build has no GPU backend (the Windows SDK's dxc.exe was not found when it was made)");
             }
-            backend_ = makeGpuBackend(window_.get(), settings.virtualWidth, settings.virtualHeight);
+            backend_ = makeGpuBackend(window_.get(), settings.virtualWidth, settings.virtualHeight, settings.scaling);
         } catch (const std::exception& error) {
             if (settings.renderer == RendererChoice::Gpu) {
                 throw;
@@ -59,8 +59,9 @@ Window::Window(const WindowSettings& settings) {
         }
     }
     if (!backend_) {
-        backend_ = makeSdlRendererBackend(window_.get(), settings.virtualWidth, settings.virtualHeight);
+        backend_ = makeSdlRendererBackend(window_.get(), settings.virtualWidth, settings.virtualHeight, settings.scaling);
     }
+    if (settings.mode != odysseus::core::WindowMode::Windowed) applyResolution({settings.width, settings.height, settings.mode, settings.scaling});
 }
 
 Window::~Window() = default; // members are destroyed in reverse order: gamepads, the backend (textures and device), the window
@@ -136,6 +137,42 @@ bool Window::fullscreen() const {
 void Window::setSize(int width, int height) {
     SDL_SetWindowSize(window_.get(), width, height);
     SDL_SyncWindow(window_.get()); // wait until the operating system has applied it
+}
+
+void Window::setScalingMode(odysseus::core::ScalingMode mode) {
+    backend_->setScalingMode(mode);
+}
+
+void Window::applyResolution(const odysseus::core::Resolution& resolution) {
+    using odysseus::core::WindowMode;
+    if (fullscreen() && !SDL_SetWindowFullscreen(window_.get(), false)) fail("Cannot leave full screen");
+    if (resolution.mode == WindowMode::Windowed) {
+        if (!SDL_SetWindowBordered(window_.get(), true)) fail("Cannot show the window border");
+        if (!SDL_SetWindowSize(window_.get(), resolution.width, resolution.height)) fail("Cannot change window size");
+    } else if (resolution.mode == WindowMode::Borderless) {
+        if (!SDL_SetWindowFullscreenMode(window_.get(), nullptr)) fail("Cannot select borderless full screen");
+        if (!SDL_SetWindowFullscreen(window_.get(), true)) fail("Cannot enter borderless full screen");
+    } else {
+        const SDL_DisplayID display = SDL_GetDisplayForWindow(window_.get());
+        int count = 0;
+        SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(display, &count);
+        const SDL_DisplayMode* desktop = SDL_GetDesktopDisplayMode(display);
+        const SDL_DisplayMode* chosen = nullptr;
+        for (int i = 0; i < count; ++i) {
+            const bool desktopSize = desktop != nullptr && modes[i]->w == desktop->w && modes[i]->h == desktop->h;
+            const bool chosenDesktopSize = chosen != nullptr && desktop != nullptr && chosen->w == desktop->w && chosen->h == desktop->h;
+            const auto area = static_cast<long long>(modes[i]->w) * modes[i]->h;
+            const auto chosenArea = chosen == nullptr ? 0LL : static_cast<long long>(chosen->w) * chosen->h;
+            if (chosen == nullptr || (desktopSize && !chosenDesktopSize) ||
+                (desktopSize == chosenDesktopSize && (area > chosenArea || (area == chosenArea && modes[i]->refresh_rate > chosen->refresh_rate)))) chosen = modes[i];
+        }
+        if (chosen == nullptr) { SDL_free(modes); throw std::runtime_error("No exclusive display mode is available on this display"); }
+        const bool selected = SDL_SetWindowFullscreenMode(window_.get(), chosen);
+        SDL_free(modes);
+        if (!selected || !SDL_SetWindowFullscreen(window_.get(), true)) fail("Cannot enter exclusive full screen");
+    }
+    if (!SDL_SyncWindow(window_.get())) fail("Cannot synchronize the window mode");
+    backend_->setScalingMode(resolution.scaling);
 }
 
 odysseus::core::Rect Window::outputRect() const {

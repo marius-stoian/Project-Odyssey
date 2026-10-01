@@ -1,4 +1,4 @@
-# Project Odyssey Codex v2.4
+# Project Odyssey Codex v2.5
 
 Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.6 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
@@ -24,7 +24,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.4)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.5)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -257,7 +257,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.4 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.5 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -4944,7 +4944,7 @@ Manual checks in docs/plans/US-230.md done on the owner's PC with the GPU render
 
 #### S-US-231 960x540 and window modes
 ```xml
-<prompt id="S-US-231" codex="2.4" milestone="M8b" story="US-231" priority="Must" size="M">
+<prompt id="S-US-231" codex="2.5" milestone="M8b" story="US-231" priority="Must" size="M">
 <context>
 Story US-231: 960x540 and window modes.
 As the player, I want the game at 960x540 that fills my screen crisply in a window or full screen, so that it looks sharp on any monitor.
@@ -4958,6 +4958,7 @@ Owner decisions that must be Decided: D-42, D-44.
 <instructions>
 Run the Mraw build loop L-01 for this story only.
 Where the work belongs: Luna Platform and Engine: virtual size 960x540 in ApplicationSettings; Whole scaling (largest whole multiple that fits, centred with black bars) by default, or Fill (scale to fit); window modes (windowed sizes 1280x720, 1600x900, 1920x1080, 2560x1440; borderless; exclusive full screen) applied at once and saved in settings.json (US-081 settings screen extended); high-DPI aware. On first start without settings.json, use windowed 1280x720, camera zoom 2x, UI scale 1x and lighting Medium. Follow D-44 and docs/plans/M8b-renderer-design.md for these settings and migration from version 1 settings.
+Story boundary for the First start scenario: implement the fixed default 2x world view now, so the 960x540 virtual picture shows the same 480x270 world area around the hero as before. Map existing world drawing and pointer input through that fixed view so play and existing coordinate tests still work. This story does not add player controls for zoom or UI scale. S-US-232 makes zoom selectable at 1x/2x, adds its Settings and in-play controls, generalizes world-to-screen and pointer mapping for both zooms, and implements adjustable UI scale. Lighting Medium is a settings default here; lighting behavior belongs to M8c.
 Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -4987,6 +4988,7 @@ Then it opens windowed at 1280x720 with Whole scaling, and defaults to camera zo
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-231/.</definition_of_done>
 <verification>
 `pwsh tools/verify.ps1 -Story US-231`: the Debug build with zero warnings and every Debug test passes, including the "US-231 ..." cases and the determinism hash test.
+Check the fixed 2x first-start world view against the previous 480x270 visible area and check that pointer input still reaches the same world positions.
 Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-231.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-231/.
 </verification>
@@ -4998,7 +5000,7 @@ Manual checks in docs/plans/US-231.md done on the owner's PC with the GPU render
 
 #### S-US-232 Camera zoom and UI scale
 ```xml
-<prompt id="S-US-232" codex="2.4" milestone="M8b" story="US-232" priority="Must" size="M">
+<prompt id="S-US-232" codex="2.5" milestone="M8b" story="US-232" priority="Must" size="M">
 <context>
 Story US-232: Camera zoom and UI scale.
 As the player, I want to zoom the world and size the interface, so that I can see more of the land or read more easily.
@@ -5011,7 +5013,7 @@ Owner decisions that must be Decided: D-42, D-44.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Engine: the camera gains a zoom (1x or 2x, default 2x so the world looks as before); the UI draws in its own pass with a UI scale (1x or 2x, default 1x); the 5x7 font is drawn crisp at both scales; pointer mapping (US-121) goes through zoom and UI scale; scripted input tests updated. Put camera zoom and UI scale in the Settings screen; allow camera zoom through the mouse wheel and keys in play, while UI scale stays in Settings (D-44).
+Where the work belongs: Engine: generalize the fixed 2x world view from S-US-231 into selectable camera zoom (1x or 2x, default 2x); the UI draws in its own pass with a UI scale (1x or 2x, default 1x); the 5x7 font is drawn crisp at both scales; world drawing and pointer mapping (US-121) use one zoom-aware transform for both values; scripted input tests updated. Put camera zoom and UI scale in the Settings screen; allow camera zoom through the mouse wheel and keys in play, while UI scale stays in Settings (D-44).
 Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -8494,3 +8496,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.2 | 2026-10-01 | Resolution, lighting and buildings (source of truth v2.4, Rounds 16 and 17; Mraw's brief docs/plans/M8b-M8d-render-light-build-brief.md). The owner decided D-42 (960x540 with window modes, camera zoom and UI scale; SDL_GPU shaders; sun, moon, fire, torch and effect lights, seasonal day length, weather light; shadows from the sun, the moon and nearby fires; generated normal maps; buildings from blueprints and pieces, built by the clans, with wear, repair, fire, interiors and Editor prefabs; right after M8) and, with Anima, D-43 (M8d split into M8d Buildings and M8e Building life; US-256 no longer waits for US-254; the D-35 assembly rules apply) and D-06 (a mid-range target PC). New: P-011; K-M8b..X-M8e with 21 story prompts (S-US-230..S-US-234, S-US-240..S-US-247, S-US-250..S-US-252, S-US-256, S-US-253..S-US-255, S-US-257) and shared design notes, between X-M8 and K-M9; K-M9 now follows X-M8e. Charter: architecture rule 11 (rendering). D-06 Decided, D-15 chain, D-42 and D-43 in the decision table; new state files (lighting and buildings guides, ADR-021). |
 | 2.3 | 2026-10-01 | Faster verification (owner, D-46): the local check (`tools/verify.ps1`, new `-Config Debug|Release|Both`, default Debug) builds and tests Debug with AddressSanitizer; CI builds and tests Release on qa and both on main; CI runs only on pushes to qa and main, skips docs-only pushes, cancels superseded runs and caches built vcpkg libraries (`.github/workflows/ci.yml`). Charter Definition of Done, L-01 step 7, the M10-M14 notes and every prompt still To do (M8b onward) now say which configuration is checked where. No scope change. |
 | 2.4 | 2026-10-01 | D-44 alignment (source of truth v2.6): S-US-231 offers the four owner-decided windowed sizes and first-start defaults, with Whole scaling and Fill in Settings; S-US-232 specifies Settings controls for camera zoom and UI scale, plus mouse wheel and key zoom in play. Both prompts depend on D-44; their acceptance scenarios match requirements v2.6. CI-010 resolved. |
+| 2.5 | 2026-10-01 | Clarified the US-231/US-232 boundary without changing D-44 or requirements v2.6: US-231 implements the fixed default 2x world view and corresponding pointer mapping needed to satisfy its First start scenario; US-232 adds selectable 1x/2x zoom, controls, a shared zoom-aware transform and adjustable UI scale. Acceptance scenarios remain verbatim from the requirements. |

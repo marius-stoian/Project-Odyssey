@@ -28,8 +28,8 @@
 namespace odysseus::game {
 
 namespace {
-constexpr int kVirtualWidth = 480;
-constexpr int kVirtualHeight = 270;
+constexpr int kVirtualWidth = core::kVirtualWidth;
+constexpr int kVirtualHeight = core::kVirtualHeight;
 } // namespace
 
 using luna::physics::Fixed;
@@ -88,7 +88,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         std::string note;
         settings_ = loadSettings(saveDirectory_ / "settings.json", &note);
         stats_.enable(settings_.statistics == 1);
-        if (settings_.fullscreen || settings_.width != 1280 || settings_.height != 720) pendingWindow_ = WindowChange{settings_.fullscreen, settings_.width, settings_.height};
+        if (settings_.resolution != core::Resolution{}) pendingWindow_ = WindowChange{settings_.resolution};
         if (!note.empty()) message_ = note;
     }
     clanEnabled_ = level_.clan;
@@ -836,7 +836,7 @@ std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
 void OdysseyGame::applySettings(const GameSettings& settings) {
     settings_ = settings;
     saveSettings(settings_, saveDirectory_ / "settings.json");
-    pendingWindow_ = WindowChange{settings_.fullscreen, settings_.width, settings_.height};
+    pendingWindow_ = WindowChange{settings_.resolution};
 }
 
 std::optional<luna::engine::Game::WindowChange> OdysseyGame::takeWindowChange() {
@@ -1663,6 +1663,11 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         hero_.update(intents, map_);
     }
     updateAim(intents.pointer(), fallen, facingBefore);
+    // Pressing left or right always turns him that way, whatever the pointer says; the aim of the
+    // attacks still follows the pointer. Up and down alone leave the pointer in charge of his facing.
+    if (!fallen && intents.moveX() != 0) {
+        hero_.face(facingFor(intents.moveX(), intents.moveY(), hero_.facing()));
+    }
 
     // Pickups first (US-134), so a weapon picked up this tick can be chosen and used this tick.
     if (fullTicks_ > 0) --fullTicks_;
@@ -2064,8 +2069,8 @@ luna::engine::AppConfig odysseyAppConfig() {
     config.title = "Project Odyssey " + std::string(core::versionString());
     config.windowWidth = 1280; // US-020: a 1280 x 720 window
     config.windowHeight = 720;
-    config.virtualWidth = 480; // US-022: pixel art drawn at 480 x 270, scaled up
-    config.virtualHeight = 270;
+    config.virtualWidth = core::kVirtualWidth;
+    config.virtualHeight = core::kVirtualHeight;
     config.ticksPerSecond = 20; // ADR-006
     config.clearRed = 34;       // a deep green-blue, like dusk over the valley
     config.clearGreen = 52;

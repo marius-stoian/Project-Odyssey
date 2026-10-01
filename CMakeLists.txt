@@ -62,6 +62,7 @@ add_library(odysseus_core STATIC
     src/core/version.cpp
     src/core/log.cpp
     src/core/assertions.cpp
+    src/core/presentation.cpp
     src/core/random.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
@@ -275,6 +276,7 @@ add_executable(odysseus_tests
     tests/main.cpp
     tests/core/version_test.cpp
     tests/core/log_test.cpp
+    tests/core/presentation_test.cpp
     tests/architecture/layer_rules_test.cpp)
 target_link_libraries(odysseus_tests PRIVATE odysseus_core doctest::doctest)
 target_compile_definitions(odysseus_tests PRIVATE
@@ -379,6 +381,7 @@ add_executable(odysseus_game_tests
     tests/game/paint_test.cpp
     tests/game/place_test.cpp
     tests/game/settings_test.cpp
+    tests/game/presentation_settings_test.cpp
     tests/game/content_test.cpp
     tests/game/combat_test.cpp
     tests/game/weapons_test.cpp

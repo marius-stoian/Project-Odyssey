@@ -226,6 +226,7 @@ public:
         saveDirectory_ = directory;
         settings_ = loadSettings(saveDirectory_ / "settings.json", nullptr);
         stats_.enable(settings_.statistics == 1);
+        pendingWindow_ = WindowChange{settings_.resolution};
     }
     const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
     bool autosave();              // false when it could not write

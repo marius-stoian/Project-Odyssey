@@ -1180,3 +1180,18 @@ One detail is worth remembering: a sprite drawn at three quarters of its size ha
 **Try it (15 minutes).** The manual checks in [docs/plans/US-230.md](plans/US-230.md); then in `sprite.frag.hlsl` change `texel.rgb * color.rgb` to `texel.rgb * color.rgb * 0.5`, rebuild, run with `--renderer gpu` and with `--renderer sdl`, and see the picture darken only on the GPU (then undo it).
 
 **Check yourself.** Why does the GPU renderer collect all the rectangles of a frame into one list and send them together at the end, instead of drawing each one the moment the game asks for it?
+
+
+## M8b: where the virtual picture lands (US-231)
+
+The game draws one 960 by 540 picture. A **viewport** is the rectangle where that picture appears in the actual window. It is calculated from the window's drawable pixel size, which may differ from the window's size in desktop coordinates on a high DPI display. Both renderers use the same rectangle, so the choice of renderer cannot move the picture or change the size of the black bars.
+
+With **Whole** scaling, the scale is the largest whole number that fits both dimensions. On a 2560 by 1440 screen, 2 copies of each virtual pixel fit: the picture is 1920 by 1080, centred at (320, 180). Each virtual pixel becomes a clean 2 by 2 block. With **Fill**, the aspect ratio is kept but the scale may be fractional. The same screen gets a 2560 by 1440 picture. A mouse click must use the very same viewport: subtract its top-left corner, then multiply by the ratio of virtual size to viewport size. A click in the black bars is outside the game.
+
+The settings file records the chosen window mode, last windowed size and scaling method. Loading the older file translates its full-screen flag into a mode and fills the new fields with their defaults, so an update does not discard the player's volume and statistics choices.
+
+**Where to look.** `presentationArea` in [src/core/presentation.cpp](../src/core/presentation.cpp); the two renderer backends in `src/luna/platform/`; the pointer mapping in [src/luna/engine/input.cpp](../src/luna/engine/input.cpp); the saved preferences in [src/game/settings.cpp](../src/game/settings.cpp).
+
+**Try it (15 minutes).** Use the Settings screen to switch between Whole and Fill in a 2560 by 1440 window. Compare the bars and click near the picture edge; then restart and confirm that the choice persists.
+
+**Check yourself.** Why would subtracting the black bar but still dividing mouse coordinates by an integer give the wrong answer in Fill mode?

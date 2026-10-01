@@ -12,7 +12,7 @@
 //   --clan                   run the simulated clan in this level (levels marked "clan": true do it by themselves)
 //   --weather <name>         start under that weather, for example `steady rain` (screenshots and demos)
 //   --seed <number>          fix the weather sequence (the same seed gives the same weathers in the same order)
-//   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
+//   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 960x540) at that time
 //   --drag <x1>:<y1>:<x2>:<y2>:<from>:<to>  hold the left button and move from one point to the other
 //   --point <x>:<y>:<from>:<to>  rest the pointer there without pressing (hover)
 //   --aim <x>:<y>:<from>:<to>  the same as --point: where the hero aims (Game mode); fire with --hold Attack:<from>:<to>
@@ -225,7 +225,13 @@ int main(int argc, char* argv[]) {
         if (arguments.editor) {
             game.switchMode(odysseus::game::Mode::Editor);
         }
-        const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
+        luna::engine::AppConfig app = odysseus::game::odysseyAppConfig();
+        app.windowWidth = game.settings().resolution.width;
+        app.windowHeight = game.settings().resolution.height;
+        app.windowMode = game.settings().resolution.mode;
+        app.scaling = game.settings().resolution.scaling;
+        game.takeWindowChange(); // the first window already uses the saved settings
+        const int exitCode = luna::engine::run(app, game,
                                                {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds, arguments.pointer, arguments.typing, arguments.renderer});
         const odysseus::game::Hero& hero = game.hero();
         odysseus::core::logInfo(std::format("Hero at ({:.1f}, {:.1f}) facing {}, {}", hero.feetX(), hero.feetY(),

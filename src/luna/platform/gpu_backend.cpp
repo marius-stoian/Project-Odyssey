@@ -3,7 +3,7 @@
 // A frame is recorded on the CPU while the game draws (every drawTexture adds a textured quad to a list), then replayed on the GPU in present():
 //   1. the list of quads goes up to the card in one buffer;
 //   2. a first pass draws them, in the order they were made, onto the "virtual screen" (a texture the size of the virtual screen);
-//   3. a second pass draws that texture into the window, enlarged by a whole number with nearest-neighbour sampling, black bars around it.
+//   3. a second pass draws that texture into the shared presentation area with nearest-neighbour sampling.
 #include "luna/platform/backend.h"
 
 #include <SDL3/SDL.h>
@@ -62,7 +62,7 @@ constexpr SDL_GPUTextureFormat kPictureFormat = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_U
 
 class GpuBackend final : public RenderBackend {
 public:
-    GpuBackend(SDL_Window* window, int virtualWidth, int virtualHeight) : window_(window), virtualWidth_(virtualWidth), virtualHeight_(virtualHeight) {
+    GpuBackend(SDL_Window* window, int virtualWidth, int virtualHeight, odysseus::core::ScalingMode scaling) : window_(window), virtualWidth_(virtualWidth), virtualHeight_(virtualHeight), scaling_(scaling) {
         try {
             init();
         } catch (...) {
@@ -78,6 +78,7 @@ public:
 
     std::string name() const override { return std::string("gpu (") + driver_ + ")"; }
     bool vsyncEnabled() const override { return true; } // the swapchain presents with VSync
+    void setScalingMode(odysseus::core::ScalingMode mode) override { scaling_ = mode; }
 
     void clear(int red, int green, int blue) override {
         vertices_.clear();
@@ -165,7 +166,7 @@ public:
 
     odysseus::core::Rect presentationRect() const override {
         const odysseus::core::Rect size = outputRect();
-        return wholeStepArea(size.width, size.height, virtualWidth_, virtualHeight_);
+        return odysseus::core::presentationArea(size.width, size.height, virtualWidth_, virtualHeight_, scaling_);
     }
 
     odysseus::core::Rect outputRect() const override {
@@ -460,7 +461,7 @@ private:
         SDL_EndGPURenderPass(pass);
     }
 
-    // Step 3: the virtual screen into `destination`, enlarged by a whole number, centred, black around it.
+    // Step 3: the virtual screen into the selected area, centred with black outside it.
     void recordBlit(SDL_GPUCommandBuffer* commands, SDL_GPUTexture* destination, int width, int height, SDL_GPUGraphicsPipeline* pipeline) {
         SDL_GPUColorTargetInfo target{};
         target.texture = destination;
@@ -468,7 +469,7 @@ private:
         target.load_op = SDL_GPU_LOADOP_CLEAR;
         target.store_op = SDL_GPU_STOREOP_STORE;
         SDL_GPURenderPass* pass = SDL_BeginGPURenderPass(commands, &target, 1, nullptr);
-        const odysseus::core::Rect area = wholeStepArea(width, height, virtualWidth_, virtualHeight_);
+        const odysseus::core::Rect area = odysseus::core::presentationArea(width, height, virtualWidth_, virtualHeight_, scaling_);
         const SDL_GPUViewport viewport{static_cast<float>(area.x), static_cast<float>(area.y), static_cast<float>(area.width), static_cast<float>(area.height), 0.0F, 1.0F};
         const SDL_Rect scissor{area.x, area.y, area.width, area.height};
         SDL_BindGPUGraphicsPipeline(pass, pipeline);
@@ -504,6 +505,7 @@ private:
     SDL_Window* window_ = nullptr; // owned by the Window, which outlives its backend
     int virtualWidth_ = 0;
     int virtualHeight_ = 0;
+    odysseus::core::ScalingMode scaling_ = odysseus::core::ScalingMode::Whole;
     SDL_GPUDevice* device_ = nullptr;
     const char* driver_ = "";
     bool windowClaimed_ = false;
@@ -533,8 +535,8 @@ bool gpuBackendCompiledIn() {
     return true;
 }
 
-std::unique_ptr<RenderBackend> makeGpuBackend(SDL_Window* window, int virtualWidth, int virtualHeight) {
-    return std::make_unique<GpuBackend>(window, virtualWidth, virtualHeight);
+std::unique_ptr<RenderBackend> makeGpuBackend(SDL_Window* window, int virtualWidth, int virtualHeight, odysseus::core::ScalingMode scaling) {
+    return std::make_unique<GpuBackend>(window, virtualWidth, virtualHeight, scaling);
 }
 
 #else // no dxc.exe when this was built: the GPU backend is left out
@@ -543,7 +545,7 @@ bool gpuBackendCompiledIn() {
     return false;
 }
 
-std::unique_ptr<RenderBackend> makeGpuBackend(SDL_Window*, int, int) {
+std::unique_ptr<RenderBackend> makeGpuBackend(SDL_Window*, int, int, odysseus::core::ScalingMode) {
     throw std::runtime_error("this build has no GPU backend");
 }
 
