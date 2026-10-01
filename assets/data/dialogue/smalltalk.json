@@ -77,7 +77,58 @@
       { "text": "What do you want, {hero}?", "mood": ["wary", "hostile"] },
       { "text": "Leave me be.", "mood": ["wary", "hostile"] }
     ],
-    // Used by the elder's script (`{smalltalk.hunt}`); it is not chosen by itself.
+    // What two clan members say to each other in bubbles when the simulation makes them talk, quarrel, court, share or give (US-165), when no
+    // `@pair` script fits them. Each says one line: the first to the second, then the second back. Here {hero} is the one spoken to.
+    "social.talk": [
+      "How are you keeping, {hero}?",
+      "Sit with me a while.",
+      "The fire is warm tonight.",
+      "Did you see the clouds, {hero}?",
+      "A good {season} so far.",
+      "I was looking for you, {hero}.",
+      "Have you eaten?",
+      "Tell me something good."
+    ],
+    "social.quarrel": [
+      "You took more than your share, {hero}!",
+      "That is not what happened!",
+      "Do not speak to me like that!",
+      "I have had enough of you!",
+      "You never listen!",
+      "Leave me alone, {hero}!",
+      "You are no friend of mine!",
+      "Watch your tongue!"
+    ],
+    "social.courtship": [
+      "You look well tonight, {hero}.",
+      "Walk with me by the fire?",
+      "I made this for you.",
+      "I like it when you laugh.",
+      "Stay a while, {hero}.",
+      "The night is better with you.",
+      "You are kind to me, {hero}.",
+      "I have been thinking of you."
+    ],
+    "social.sharing": [
+      "Take some of mine, {hero}.",
+      "You look hungry. Eat.",
+      "There is enough for both.",
+      "Thank you. I will repay you.",
+      "Share this with me, {hero}.",
+      "You are good to me.",
+      "I will not forget this.",
+      "Eat first, I can wait."
+    ],
+    "social.gift": [
+      "I brought you something, {hero}.",
+      "This is for you.",
+      "Thank you, I did not expect it.",
+      "It is only a small thing.",
+      "You are kind, {hero}.",
+      "I made it myself.",
+      "I hope you like it.",
+      "That is lovely, thank you."
+    ],    // Used by the elder's script (`{smalltalk.hunt}`); it is not chosen by itself.
     "hunt": [
       "The deer are thin this {season}.",
       "Hunters walk far for little meat.",

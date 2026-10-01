@@ -1,0 +1,9 @@
+# The elder calls a child over (US-165). `@pair first second` is for two clan members talking to each other: the first speaks first, the second answers,
+# and the lines are shown as speech bubbles over their heads. The words after @pair name them like @who does (a name, a role or a kind), and each line
+# is said by the speaker with that word. `@bark talk` is the kind of event: talk, quarrel, courtship, sharing or gift.
+@bark talk
+@pair elder child
+
+=== start
+elder: Come here, little one.
+child: Yes, elder!

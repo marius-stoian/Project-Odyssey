@@ -122,7 +122,7 @@ Codex v2.2. Edited only by mraw-orchestrator.
 | S-US-162 | US-162 | M8 | Done | 2026-10-01 |
 | S-US-163 | US-163 | M8 | Done | 2026-10-01 |
 | S-US-164 | US-164 | M8 | Done | 2026-10-01 |
-| S-US-165 | US-165 | M8 | To do |  |
+| S-US-165 | US-165 | M8 | Done | 2026-10-01 |
 | X-M8 | - | M8 | To do |  |
 | K-M8b | - | M8b | To do |  |
 | S-US-230 | US-230 | M8b | To do |  |

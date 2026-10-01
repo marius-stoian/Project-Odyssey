@@ -16,15 +16,19 @@ std::string lowered(std::string text) {
     return text;
 }
 
-// 3 = the NPC's own name, 2 = a role they have, 1 = their kind, 0 = no match.
+// How well one word of `@who` names this NPC: 3 = their own name, 2 = a role they have, 1 = their kind, 0 = not them.
+int wordMatch(const std::string& word, const WhoFacts& who) {
+    const std::string w = lowered(word);
+    if (w == lowered(who.name)) return 3;
+    if (std::find(who.roles.begin(), who.roles.end(), w) != who.roles.end()) return 2;
+    if (w == lowered(who.kind)) return 1;
+    return 0;
+}
+
+// The best match of any word of `@who`.
 int specificity(const DlgScript& script, const WhoFacts& who) {
     int best = 0;
-    for (const std::string& word : script.who) {
-        const std::string w = lowered(word);
-        if (w == lowered(who.name)) best = std::max(best, 3);
-        else if (std::find(who.roles.begin(), who.roles.end(), w) != who.roles.end()) best = std::max(best, 2);
-        else if (w == lowered(who.kind)) best = std::max(best, 1);
-    }
+    for (const std::string& word : script.who) best = std::max(best, wordMatch(word, who));
     return best;
 }
 
@@ -86,6 +90,28 @@ std::vector<std::string> rolesOf(const World& world, int person) {
 
 const DlgScript* selectScript(const DialogueLibrary& library, const WhoFacts& who, const RuleContext& context, core::Pcg32& random) {
     return choose(library, who, context, random, false);
+}
+
+const DlgScript* selectPair(const DialogueLibrary& library, const WhoFacts& first, const WhoFacts& second, const std::string& kind, const RuleContext& context, core::Pcg32& random) {
+    const std::uint32_t draw = random.next(); // one draw every time, like the other choices
+    std::vector<Candidate> candidates;
+    for (const DlgScript& script : library.all()) {
+        if (script.pair.size() != 2) continue;
+        if ((script.bark.empty() ? std::string("talk") : script.bark) != kind) continue;
+        const int a = wordMatch(script.pair[0], first);
+        const int b = wordMatch(script.pair[1], second);
+        if (a == 0 || b == 0) continue;
+        if (script.when != nullptr && !isTrue(*script.when, context)) continue;
+        candidates.push_back({&script, a + b, script.priority});
+    }
+    if (candidates.empty()) return nullptr;
+    const auto better = [](const Candidate& x, const Candidate& y) { return x.specificity != y.specificity ? x.specificity < y.specificity : x.priority < y.priority; };
+    const Candidate& best = *std::ranges::max_element(candidates, better);
+    std::vector<const DlgScript*> tied;
+    for (const Candidate& c : candidates) {
+        if (!better(c, best) && !better(best, c)) tied.push_back(c.script);
+    }
+    return tied[draw % tied.size()];
 }
 
 const DlgScript* selectBark(const DialogueLibrary& library, const WhoFacts& who, const RuleContext& context, core::Pcg32& random) {

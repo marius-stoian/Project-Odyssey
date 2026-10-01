@@ -136,6 +136,23 @@ The lines are templates in `assets/data/dialogue/smalltalk.json`, read at start 
 - **Tokens**, filled when it is said. Everywhere: `{season}` (spring...), `{hero}` (the hero's name), `{npc}` and `{npc.name}` (the speaker). In `memory`: `{memory.what}` ("a wolf at the fire", "Bo blaming Ama", "you giving me a gift"), `{memory.who}` (who did it) and `{memory.when}` (today, yesterday, 3 days ago, a long time ago). In `people`: `{gossip.what}`, `{gossip.who}`, `{gossip.about}` and `{gossip.feeling}` (angry, uneasy, unsure, glad, delighted: how the heard memory sits with them). In `needs`: `{need.name}` (food, rest, warmth, company). A token used in the wrong topic, or one that does not exist, is a mistake with its line.
 - **Variety.** A person does not say a line they said in their last three, and nobody says the same line more than twice in fifty. Add templates to widen it.
 
+## Clan members talking to each other (US-165)
+
+When the social simulation makes two clan members **talk**, **quarrel**, **court**, **share** or **give** a gift, and both are within **12 m** of the hero, the game shows it: a short exchange of speech bubbles, the first person's line, then the other's, each over the speaker's head for **3 seconds** and gone when the next line begins. The outcome is the simulation's own (opinions, memories, the chronicle); the bubbles show it. One exchange plays at a time and a few wait their turn; the hero's own talk has the panel, not bubbles; what happened before a save is not played again.
+
+What they say comes from, in this order:
+1. A **`@pair` script** that fits them. `@pair first second` names the two, as `@who` does (a name, a role or a kind): the one who starts matches `first`, the one who answers matches `second`, and the lines are said by the speaker with that word. `@bark <kind>` says which event it is for: `talk` (also when there is no `@bark`), `quarrel`, `courtship` (also a pairing), `sharing` or `gift`. The two best matches win (a name beats a role beats a kind, added together), then `@priority`, then the seeded stream. `{partner}` is the one spoken to, `{npc}` the speaker. Up to 6 lines, shown in order; a line with an `[if]` is left out while it is false. Shipped: `pair-elder-child.dlg`.
+2. Else two short lines from the topic `social.<kind>` of `smalltalk.json` (`social.talk`, `social.quarrel`, `social.courtship`, `social.sharing`, `social.gift`), one for each, written from the speaker's side: here `{hero}` is the one spoken to.
+
+```text
+@bark talk
+@pair elder child
+
+=== start
+elder: Come here, little one.
+child: Yes, elder!
+```
+
 ## Not in this story yet
 
-Bubbles between NPCs talking to each other (`@pair` scripts) come in the next story (US-165).
+Nothing of the dialogue stories remains: the owner reads the whole of M8 at its exit review (X-M8).

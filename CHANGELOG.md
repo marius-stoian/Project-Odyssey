@@ -13,6 +13,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## US-165: NPCs talk to each other (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-165`); merged into `qa`.
+
+- Simulation: `World::takeTalks()` (who has just talked, for the screen only: not saved, not hashed), `selectPair` (the `@pair` script for two people and a kind of event).
+- Game: `Exchanges` (talk, quarrel, courtship, pairing, sharing and gift events of two clan members within 12 m of the hero become an exchange of speech bubbles: 3 s a line, in turn, one exchange at a time, three may wait) and `Bubbles::remove`.
+- Data and docs: `social.*` topics in `smalltalk.json`, `pair-elder-child.dlg`, the guide section "Clan members talking to each other", `docs/plans/US-165.md`, teach-back, evidence `docs/evidence/US-165/`.
+- Tests: 5 game cases in `tests/game/exchange_test.cpp`, 3 simulation cases in `tests/sim/selection_test.cpp`.
 ## US-164: Conversations are remembered (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-164`); merged into `qa`.
