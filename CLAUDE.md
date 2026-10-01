@@ -1,4 +1,4 @@
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.0)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.2)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -6,7 +6,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.0 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -21,6 +21,7 @@ The owner is learning C++ through this project; every story ends with a teach-ba
 8. Saves: versioned JSON, write to a temp file then rename, keep 3 backups (ADR-010).
 9. Luna (ARC-09) is our game engine: the Platform, Physics and Engine layers in src/luna/ (targets luna_platform, luna_physics and luna_engine, namespaces luna::platform, luna::physics and luna::engine). Luna stays game-agnostic: it never includes Simulation or Game code and holds nothing specific to Odysseus, so another game can reuse it. Game code uses Luna; Luna never knows about the game.
 10. Luna Physics (ARC-10, ADR-017) is written by us and deterministic: all physics state uses fixed-point 32.32 numbers (luna::physics::Fixed), never float or double inside src/luna/physics/; floats appear only where the Engine converts results for drawing. SI units: metres, seconds, kilograms; one 32-pixel tile is 1 metre. Physics uses Core only. Every physics feature is tested against its textbook formula.
+11. Rendering (ARC-11, ADR-021, from M8b): Luna draws through SDL_GPU with shaders behind the Renderer interface; SDL_GPU types and shader files live only in src/luna/platform/ and src/luna/engine/; the SDL_Renderer path stays as fallback and for headless tests. Lighting and shadows are presentation only: the Simulation never reads them, so determinism is unaffected. Screens are laid out from the virtual size (960 x 540) and the UI scale, never from fixed pixel numbers.
 </architecture_rules>
 
 <stack>
@@ -40,7 +41,7 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 <definition_of_done>
 - Code compiles with zero warnings in Debug and Release (x64).
 - All acceptance criteria verified; automated tests written where the story is testable headless.
-- CI is green on the qa branch after the merge (from US-002 on, when CI exists); main is checked at milestone exits.
+- CI is green on the qa branch after the merge (from US-002 on, when CI exists); main is checked at milestone exits. Exception for M10-M14 stories (D-41): the story's tests are written and compile, Debug and Release build with zero warnings, and the story is merged into qa; the tests and CI run at the milestone's exit review, which must end green before the milestone counts as done.
 - No layer rule broken (Simulation does not include Engine, Platform or SDL3; Luna does not include Simulation or Game).
 - Determinism test still passes (from US-010 on, when the simulation exists).
 - Code reviewed with Dominus; anything unclear explained in the learning journal.
@@ -54,7 +55,7 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 The owner wants minimal intervention (standing instructions in docs/decisions.md, 2026-09-30). Only these stop the team:
 1. Kill-gate results that need people (X-M2 readers, X-M6 playtesters): write docs/decision-requests/D-GATE-Mx.md, end the session with the assembly report and a Milestone file, and do not start the next milestone until the owner answers.
 2. Anything that needs accounts, credentials, money, other people, or destructive actions outside this repository. Never create accounts or type credentials. If git push needs authentication that is not already configured, stop and ask.
-3. Design decisions (D-22, owner 2026-09-30): any D-xx that is not Decided, or any question that changes design or scope, is the owner's. Stop that story, ask the owner in chat in question rounds (2-4 options each, the recommended option first), record the answer in docs/decisions.md as "Decided (owner, <date>)" and in the next Milestone file, then continue. Never decide a design question for the owner; work on other ready prompts while waiting only if the owner is away.
+3. Design decisions (D-22, owner 2026-09-30): any D-xx that is not Decided, or any question that changes design or scope, is the owner's. Stop that story, ask the owner in chat in question rounds (2-4 options each, the recommended option first), record the answer in docs/decisions.md as "Decided (owner, <date>)" and in the next Milestone file, then continue. Never decide a design question for the owner; work on other ready prompts while waiting only if the owner is away. Exception for M10-M14 (owner, 2026-10-01, D-41): Dominus decides those milestones' design questions with the recommended option, records each as "Decided by Dominus (delegated)" with its reasoning in docs/decision-requests/<ID>.md, lists it in the next Milestone file, and continues.
 Everything else the team decides and records:
 - Technical choices (how to build what the owner decided): Dominus decides and records them in ADRs or design documents.
 - If the source of truth must change because of an owner decision, update the requirements document on Google Drive (bump its version, add a resolution-log line) and raise a codex issue so Anima can follow.

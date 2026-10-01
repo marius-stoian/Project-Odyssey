@@ -13,6 +13,7 @@ namespace odysseus::sim {
 // only entries at or above a threshold, so everyday gifts and thefts do not drown the births,
 // deaths and feuds.
 inline constexpr int kImportanceGift = 10;
+inline constexpr int kImportanceConversation = 30; // a line a conversation writes with `chronicle` (US-164)
 inline constexpr int kImportanceQuarrel = 30;
 inline constexpr int kImportanceSharing = 30;
 inline constexpr int kImportanceSickness = 35;

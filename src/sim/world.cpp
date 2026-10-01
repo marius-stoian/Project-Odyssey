@@ -594,12 +594,29 @@ std::string World::seasonPhrase() const {
     return "a hard time";
 }
 
+bool World::rememberConversation(int holder, int other, const std::string& text, int feeling) {
+    const auto count = static_cast<int>(people_.size());
+    if (holder < 0 || other < 0 || holder >= count || other >= count || holder == other || !people_[static_cast<std::size_t>(holder)].alive) return false;
+    Person& person = people_[static_cast<std::size_t>(holder)];
+    feeling = std::clamp(feeling, -100, 100);
+    const MemoryKind kind = feeling >= 0 ? MemoryKind::Gift : MemoryKind::Quarrel;
+    remember(person.memories, {other, holder, kind, today(), feeling, std::abs(feeling) >= 60, false, -1}, config_.social.memoryLimit);
+    if (!text.empty()) {
+        person.notes.push_back({text, today(), feeling, false, true});
+        constexpr std::size_t kMostNotes = 20; // a person keeps at most this many free-text memories, the oldest go first
+        if (person.notes.size() > kMostNotes) person.notes.erase(person.notes.begin());
+    }
+    return true;
+}
+
 bool World::talk(int speaker, int listener) {
     Person& from = people_[static_cast<std::size_t>(speaker)];
     Person& to = people_[static_cast<std::size_t>(listener)];
     satisfy(to.needs, Need::Social, config_.actions.talkPerHour / 2, config_.needs.maximum);
     changeOpinion(from, listener, config_.social.talkOpinion);
     changeOpinion(to, speaker, config_.social.talkOpinion);
+    talks_.push_back({speaker, listener});
+    if (talks_.size() > 32) talks_.erase(talks_.begin());
     const int chance = from.has(Trait::Talkative) ? config_.social.talkativeGossipPercent : config_.social.gossipPercent;
     if (!socialRandom_.chance(static_cast<std::uint32_t>(chance))) {
         return false;
@@ -898,6 +915,13 @@ std::uint64_t World::hash() const {
             hasher.add(memory.major);
             hasher.add(memory.secondHand);
             hasher.add(memory.event);
+        }
+        for (const MemoryNote& note : person.notes) { // none unless a conversation or the Game gave one
+            for (const char c : note.text) hasher.add(static_cast<int>(c));
+            hasher.add(note.day);
+            hasher.add(note.feeling);
+            hasher.add(note.secondHand);
+            hasher.add(note.clause);
         }
         for (const int value : person.opinions) {
             hasher.add(value);

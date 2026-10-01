@@ -76,6 +76,10 @@ void ActionRunner::run(const Effect& effect, int actor, const ThingRef& target, 
     host.apply(effect, actor, target);
 }
 
+void ActionRunner::runEffects(const std::vector<Effect>& effects, int actor, const ThingRef& target, std::int64_t now, EffectHost& host) {
+    for (const Effect& effect : effects) run(effect, actor, target, now, host);
+}
+
 void ActionRunner::tick(std::int64_t now, const InteractionRegistry& registry, EffectHost& host) {
     // Effects whose time has come, in the order they were due and made. An effect may make new ones; those wait for their own time.
     while (!pending_.empty() && pending_.front().dueTick <= now) {

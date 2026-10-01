@@ -4,6 +4,95 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Docs: Codex v2.2, requirements v2.4 and the M8b-M8e brief (Anima, Dominus) - 2026-10-01
+
+**State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).
+
+- Codex v2.2 synced from Anima (`docs/Codex.md`, `CLAUDE.md`): P-011; M8b Resolution and GPU renderer, M8c Lighting and shadows, M8d Buildings, M8e Building life (K, 21 story prompts, X each) between X-M8 and K-M9; Charter architecture rule 11 (rendering); D-06, D-42, D-43.
+- Requirements v2.4 and the backlog mirrored from Drive: ENV-18..ENV-21, ARC-11, INT-07, INT-08, EDT-07, MVP-16, ADR-021; epics E22-E25, US-230..US-257; D-06 answered (mid-range target PC); M8d split into M8d and M8e.
+- `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
+- Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
+
+## X-M8: exit review of Speak to NPCs (Avengers) - 2026-10-01
+
+**State:** Documents only; all five exit criteria met; `qa` merged into `main`, tag `m8-done`.
+
+- `docs/gates/M8.md`: one section per exit criterion with its evidence, the stories, the questions for the owner (the greeting rule, the 50 small-talk lines) and the delegated technical choices.
+- `docs/gates/M8-smalltalk.md`: 50 generated small-talk lines from one seed for the owner to read, with the count of repeated lines (42 different, none more than twice).
+- `Milestone-74.md` (AP-075), `Limit.md`, `docs/status.md`.
+## US-165: NPCs talk to each other (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-165`); merged into `qa`.
+
+- Simulation: `World::takeTalks()` (who has just talked, for the screen only: not saved, not hashed), `selectPair` (the `@pair` script for two people and a kind of event).
+- Game: `Exchanges` (talk, quarrel, courtship, pairing, sharing and gift events of two clan members within 12 m of the hero become an exchange of speech bubbles: 3 s a line, in turn, one exchange at a time, three may wait) and `Bubbles::remove`.
+- Data and docs: `social.*` topics in `smalltalk.json`, `pair-elder-child.dlg`, the guide section "Clan members talking to each other", `docs/plans/US-165.md`, teach-back, evidence `docs/evidence/US-165/`.
+- Tests: 5 game cases in `tests/game/exchange_test.cpp`, 3 simulation cases in `tests/sim/selection_test.cpp`.
+## US-164: Conversations are remembered (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-164`); merged into `qa`.
+
+- Simulation: `World::rememberConversation` (an ordinary memory, Gift or Quarrel by the feeling, major from 60, plus a free-text note), `MemoryNote::clause`, `FlagStore` (story notes, ordered, saved, hashed).
+- Game: the effects `remember`, `flag` and `chronicle` are carried out; `flag(name)` reads the store; flags are saved in `things.json` and start empty in a new run; the rude answer of generated small talk leaves a bad memory (-40); the elder remembers the berries (20).
+- Docs: the guide section "Being remembered", `docs/plans/US-164.md`, teach-back.
+- Tests: `tests/sim/memory_talk_test.cpp` (7 cases: memory, gossip at half strength, two days, flags, saved), 4 new game cases in `tests/game/conversation_test.cpp`.
+## US-163: Generated small talk (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-163`); merged into `qa`.
+
+- Data: `assets/data/dialogue/smalltalk.json` (topics memory, people, needs, season, hero, hunt; templates for any mood and for a mood).
+- Simulation: `smalltalk` (the checked file reader and the generator: topic by weights, one of the three newest facts, a template for the mood that is not tired out), `MemoryNote` and `Person::notes` (free-text memories: saved, hashed, never read by the simulation), `{smalltalk.topic}` in scripts, the generated talk with Thank you and Be quiet (opinion -10).
+- Game: Talk with no script opens small talk (and still warms the two); the file loads and reloads with the dialogue files.
+- Tests: `tests/sim/smalltalk_test.cpp` (11 cases), 4 new game cases in `tests/game/conversation_test.cpp`; the older Talk checks of US-152 and US-161 follow the new behaviour. Docs: the small-talk section of the dialogue guide, `docs/plans/US-163.md`, teach-back, evidence `docs/evidence/US-163/` (50 sample lines, a screenshot).
+## P-011: adopt Codex v2.2 and record D-40..D-43 (Avengers) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- `docs/decisions.md`: D-06 Decided (mid-range target PC); D-40 and D-41 (missing since P-010) and D-42 and D-43 added.
+- `docs/status.md`: P-011 Done; K-M8b..X-M8e (29 rows, To do) between X-M8 and K-M9; Codex v2.2 in the header.
+- `Limit.md` updated. CLAUDE.md, the Codex and the requirements were already synced.
+
+## US-162: Who says what (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-162`); merged into `qa`.
+
+- Simulation: `selectScript` breaks exact ties with the seeded stream (one draw per call), `selectBark` and `barkText` for greetings, roles `hunter` and `gatherer`, the condition function `mood(who)`.
+- Game: `Bubbles` and `updateGreetings` (friendly people within 3 m greet in a bubble, at most once a minute each, at most two bubbles at once, nearest first); the greeting cooldowns and the stream "dialogue" belong to the game and reset with a run.
+- Data and docs: `greet-elder.dlg`, `greet-friend.dlg`, `greet-friend-warm.dlg`, the guide sections on ties, roles, mood and greetings, `docs/plans/US-162.md`, teach-back, evidence `docs/evidence/US-162/`.
+- Tests: `tests/sim/selection_test.cpp` (7 cases), `tests/game/greeting_test.cpp` (4 cases).
+## US-161: Conversations and the dialogue panel (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-161`: zero warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
+
+- Simulation: `conversation` (the runtime: lines and choices by condition, effects in order through the action runner, END, `leave`; the mood word; `{hero}` and `{npc}` tokens), `dialogue_select` (roles `elder` and `child`; the script that speaks for someone: name over role over kind, then priority), `ActionRunner::runEffects`.
+- Game: `Screen::Talk` in `RunFlow` (the world pauses; name and mood, words, up to five numbered choices by mouse or keys 1 to 5, greyed choices with their reason, Esc leaves); Talk opens it when a script fits, else the plain talk; the effect `opinion npc hero n` and the condition `opinion(a, b)` are real.
+- Tests: `tests/sim/conversation_test.cpp` (8 cases), `tests/game/conversation_test.cpp` (5 cases). Docs: `docs/plans/US-161.md`, the new section of `docs/guides/dialogue-format.md`, teach-back, evidence `docs/evidence/US-161/`.
+## P-010: adopt Codex v2.1 (Avengers) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- `docs/status.md`: P-010 Done; K-M10..X-M14 (47 rows, To do) in Codex order; X-M6 now waits for X-M14.
+- `docs/codex-issues.md`: CI-007 and CI-008 marked resolved in Codex v2.1. D-40, D-41 and the v2.1 Charter were already synced.
+- `Milestone-68.md` (AP-069) and `Limit.md` updated.
+
+## US-160: The .dlg format (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-160`); merged into `qa`.
+
+- Simulation: `dialogue_script` (the `.dlg` parser with `file:line: message` errors, the script model, the canonical writer, `DialogueLibrary`).
+- Data and docs: `assets/data/dialogue/elder-fire.dlg`, `docs/guides/dialogue-format.md`, `docs/plans/US-160.md`, teach-back.
+- Game: the conversations load at start and reload with F5 together with the interaction files (same panel).
+- Tests: 10 simulation cases (`tests/sim/dialogue_test.cpp`, incl. the line-9 error, the exact round trip of every shipped file and 300 mutations) and 1 game case.
+
+## Docs: Codex v2.1, requirements v2.2 and the M10-M14 brief (Anima, Dominus) - 2026-10-01
+
+**State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).
+
+- Codex v2.1 synced from Anima (`docs/Codex.md`, `CLAUDE.md`): P-010; M10 Quests and story authoring, M11 Data editors, M12 World editing, M13 Politics, M14 Technology (K, 37 story prompts, X each); kill gate 2 after M14; M10-M14 exceptions in the Charter and L-01 (D-41: Dominus decides design questions as delegated, tests run at exit reviews); CI-007 and CI-008 resolved in the Codex.
+- Requirements v2.2 and the backlog mirrored from Drive: STO-04, STO-05, EDT-01..EDT-06, SDC-07, PIL-08 (Politics), PIL-09 (Technology), MVP-08 (four pillars), MVP-09, MVP-15, ADR-020; epics E17-E21, US-180..US-226; D-40, D-41.
+- `docs/plans/M10-M13-authoring-brief.md`: owner answers of Round 15 (section 9) and M14 Technology (section 10).
+- Left for P-010: D-40 and D-41 in `docs/decisions.md`, the new prompts in `docs/status.md`, CI-007 and CI-008 marked resolved in `docs/codex-issues.md`.
+
 ## US-154: NPCs and animals use interactions (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-154`); merged into `qa`.

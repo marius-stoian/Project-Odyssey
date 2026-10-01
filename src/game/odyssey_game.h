@@ -37,6 +37,11 @@
 #include "core/random.h"
 
 #include "sim/hero_life.h"
+#include "game/bubbles.h"
+#include "sim/dialogue_script.h"
+#include "sim/flag_store.h"
+#include "sim/npc_chooser.h"
+#include "sim/smalltalk.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -86,6 +91,9 @@ public:
     // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
     const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
     const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
+    // same report and panel (as "dialogue/<name>.dlg:<line>: message").
+    const sim::rules::DialogueLibrary& dialogues() const { return dialogues_; }
     // Smart objects (US-151): what a plant is to the rules (its kind and tags), and what the hero may do to it now, in menu order,
     // with the reason when an item is disabled.
     sim::rules::ThingInfo plantThing(std::size_t index) const;
@@ -103,6 +111,22 @@ public:
     sim::rules::ActionRunner& actions() { return actions_; }
     const sim::rules::ActionRunner& actions() const { return actions_; }
     std::int64_t actionClock() const { return actionClock_; }
+    // Greetings (US-162): the bubbles over heads, the minute each NPC waits between greetings, and the seeded stream that chooses between
+    // equally fitting scripts (the stream "dialogue", Charter rule 6).
+    Bubbles& bubbles() { return bubbles_; }
+    Exchanges& exchanges() { return exchanges_; }
+    const Exchanges& exchanges() const { return exchanges_; }
+    const Bubbles& bubbles() const { return bubbles_; }
+    sim::rules::CooldownTable& greetingCooldowns() { return greetingCooldowns_; }
+    core::Pcg32& dialogueRandom() { return dialogueRng_; }
+    // Generated small talk (US-163): what people say when no script fits them, and for `{smalltalk.topic}`.
+    sim::rules::SmallTalk& smalltalk() { return smalltalk_; }
+    // Story notes set by conversations and interactions (`flag met-elder`), saved with the things (US-164).
+    sim::rules::FlagStore& flags() { return flags_; }
+    const sim::rules::FlagStore& flags() const { return flags_; }
+    // What a conversation leaves behind (US-164): a memory in someone's mind (see World::rememberConversation) and a line in the clan's chronicle.
+    bool rememberConversation(int holder, int other, const std::string& text, int feeling);
+    void chronicleLine(const std::string& text, int who, int other);
     int plantIndexById(int id) const;
     // What clan members and animals do on their own (US-154), and what they need to do it: the ground, the animals and the people to move.
     NpcLife& npcs() { return npcLife_; }
@@ -114,6 +138,8 @@ public:
     const luna::engine::TileMap& tileMap() const { return map_; }
     // Outside help for a clan member's need (a fire pit's warmth, a bed): false when there is no clan or the person is gone.
     bool helpPerson(int personId, sim::Need need, int amount);
+    // What `who` thinks of `about` changes by `delta` (a conversation's choice, US-161); the world keeps it between -100 and 100.
+    void changeOpinion(int who, int about, int delta);
     // And harm: a clan member's need falls (a hazard, or a test that wants someone hungry).
     bool harmPerson(int personId, sim::Need need, int amount);
     bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }
@@ -153,6 +179,7 @@ public:
     // Runs the clan's simulation this many ticks for each game tick (fast forward, for demos and screenshots; 1 is real time).
     void setClanSpeed(int ticksPerTick) { clanSpeed_ = ticksPerTick < 1 ? 1 : ticksPerTick; }
     const sim::World* clan() const { return clan_.get(); }
+    sim::World* clanMutable() { return clan_.get(); } // for the few things that read and empty a queue of the world (US-165)
     const ClanView& clanView() const { return clanView_; }
     // The player's run (M5, D-32): a hero of the clan with a Growing Period, professions, trade and a sacred fire, played through the
     // screens of RunFlow. `--new-game` opens the New Game screen; Esc opens the menu.
@@ -283,7 +310,15 @@ private:
     Catalogs catalogs_;
     sim::rules::InteractionRegistry interactions_;
     sim::rules::LoadReport interactionReport_;
-    void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
+    sim::rules::DialogueLibrary dialogues_;
+    sim::rules::SmallTalk smalltalk_;
+    sim::rules::FlagStore flags_;
+    Bubbles bubbles_;
+    Exchanges exchanges_;
+    sim::rules::CooldownTable greetingCooldowns_;
+    core::Pcg32 dialogueRng_{1, 8};
+    void loadInteractions();
+    sim::rules::SmallTalk loadSmalltalk(sim::rules::LoadReport& report) const; // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
     sim::rules::ActionRunner actions_;
     std::int64_t actionClock_ = 0;

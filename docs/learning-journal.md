@@ -1086,3 +1086,82 @@ Sharing one system with the player means the same timed runner, the same menu ru
 **Try it (15 minutes).** The manual checks in [docs/plans/US-154.md](plans/US-154.md); then change the Flee score in `flee-predator.json` to `(6 - distance) * 10` and see the deer wait longer before running.
 
 **Check yourself.** Why does `pickBest` draw a random number even when there is no tie, and what would go wrong with the world-hash test if it drew only when there was one?
+## M8: reading a small file format line by line (US-160)
+
+A conversation file looks like writing, but the game reads it with a tiny **parser**: it takes the file one line at a time and decides what each line is from its first characters. `#` starts a note, `@` a header, `===` a node, `->` a choice, and anything else must look like `Speaker: words`. Because every line is decided on its own, every mistake can be reported with its line number (`dialogue/elder-fire.dlg:9: unknown node "hunts"`), which is what makes a data file friendly to edit by hand.
+
+Two details are worth learning. First, the end of a choice line holds up to three little groups, `[if ...]`, `[else ...]` and `{effects}`; the parser peels them off from the *right*, matching brackets backwards, so a quote like `"{hero} shared berries"` inside the effects does not confuse it. Second, a **canonical writer** turns the parsed script back into text in one fixed layout. A test reads every shipped file, writes it back and requires exactly the same text, notes included: that is how we know the Editor of M9 can save a script without scrambling what you wrote.
+
+**Where to look.** `Parser::parseLine`, `parseChoice` and `takeSuffix` in [src/sim/dialogue_script.cpp](../src/sim/dialogue_script.cpp); `writeDialogue` in the same file; the example [assets/data/dialogue/elder-fire.dlg](../assets/data/dialogue/elder-fire.dlg).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-160.md](plans/US-160.md); then add a fourth node of your own to `elder-fire.dlg` and a choice that leads to it, and press F5.
+
+**Check yourself.** Why must the lines a character says come before the choices of a node, and what would the canonical writer have to do if they could be mixed?
+
+## M8: a conversation is a small state machine (US-161)
+
+When you talk to the elder, the game keeps just two things: **which script** and **which node you are at**. That is a *state machine*: a few named places and rules for moving between them. Everything else you see is worked out fresh every frame by asking `view()`: which lines have a true `[if]`, which choices to show, hide or grey out. Nothing about the screen is stored, so a screen can never be out of date (if your berries ran out a moment ago, choice 2 is already grey).
+
+Two choices are worth learning from. First, the `Conversation` holds a **copy** of the script instead of a pointer to the library's one. The scripts live in a list that F5 replaces; a pointer into that list would dangle (point at something that no longer exists) the moment you reload, which is the classic C++ bug. A copy is slightly bigger, but it cannot break. Second, a choice's effects are not carried out by the conversation itself: it hands them to the same *action runner* the interactions use, which is why `take hero berries 1` in a `.dlg` file and in a `.json` interaction mean exactly the same thing.
+
+**Where to look.** `Conversation::view` and `Conversation::choose` in [src/sim/conversation.cpp](../src/sim/conversation.cpp); `moodWord` in the same file; `selectScript` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `RunFlow::buildTalk` in [src/game/run_flow.cpp](../src/game/run_flow.cpp).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-161.md](plans/US-161.md); then in `elder-fire.dlg` give the thanks node a second choice with `[if opinion(npc, hero) >= 10]` and press F5.
+
+**Check yourself.** Why does `choose` ask `view()` for the list of choices instead of numbering the node's choices itself, and what would pressing the key 2 do if it did the latter while choice 1 was hidden?
+
+
+## M8: ranking candidates (US-162)
+
+Several scripts may fit the same person, and the game must pick one the same way every time. The rule is a ranking: most specific `@who` first (the person's name, then a role, then their kind), then the higher `@priority`. C++ has a ready-made tool for "which one is biggest under my rule": `std::ranges::max_element(candidates, better)`. You give it the list and a function that says whether one candidate is *worse* than another, and it returns the best. Because you write that function, the same line of code ranks by anything.
+
+The tie is the interesting part. Two scripts can be equally good, and `max_element` just returns the first of them, which would make one script always win. So after finding the best, the code collects everyone who is not worse *and* not better than it (the tied ones) and picks between them with the game's seeded random stream. The detail to notice: the number is drawn **every call**, even when nobody is tied. If the code drew only when there was a tie, the stream would run ahead by a different amount depending on how many scripts happened to fit, and a new script file would quietly change what happens elsewhere. Drawing exactly once keeps each system's stream predictable (Charter rule 6).
+
+**Where to look.** `choose` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `updateGreetings` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); the shipped greetings in [assets/data/dialogue/](../assets/data/dialogue/).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-162.md](plans/US-162.md); then add a fourth greeting for anyone and see, by restarting a few times, that it joins the rotation.
+
+**Check yourself.** Why does `choose` compare with `better(c, best) == false && better(best, c) == false` to find the tied scripts instead of `c == best`, and what would happen if the `@priority` of two scripts differed by one?
+
+
+## M8: building text from facts (US-163)
+
+Small talk is not written one sentence at a time; it is **assembled**. A template is a sentence with holes, `"I keep thinking about {memory.what}."`, and the generator fills the holes from facts it reads out of the simulation: what the person remembers, what they heard, which need is lowest. The same few templates give many different lines, because the facts differ. This is called *templating*, and most game dialogue that reacts to the world is built this way.
+
+Two ideas are worth taking from the code. First, **the facts are turned into plain phrases once, in one place** (`phraseOf`): a memory of kind `Blame` becomes "Bo blaming Ama", and "you" or "me" replaces a name when the hero or the speaker is meant. Every template can then use the same phrase after "about", so adding a template never means writing new code. Second, **variety is a rule, not luck**: the generator remembers the last lines said (three per person, fifty in all) and avoids a line that is tired out. The test does not hope for variety; it counts, over fifty lines and four seeds, and fails if any line appears three times.
+
+One detail echoes the last story: `say` draws three random numbers *every time*, even when it does not need them, so what the stream gives to the next system never depends on what a person happens to remember.
+
+**Where to look.** `SmallTalk::say` and `phraseOf` in [src/sim/smalltalk.cpp](../src/sim/smalltalk.cpp); the templates in [assets/data/dialogue/smalltalk.json](../assets/data/dialogue/smalltalk.json); the checker in `SmalltalkData::parse`.
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-163.md](plans/US-163.md); then add three templates to the `hunt` topic, press F5, and ask the elder about the hunt a few times.
+
+**Check yourself.** Why is a template that uses `{gossip.who}` a mistake in the topic `memory`, and what would the generator print if the file checker did not catch it?
+
+
+## M8: reuse beats invention (US-164)
+
+When you insult someone, the game has to make them *remember* it, and later have their friends hear about it. The tempting plan is a new "conversation memory" system. The better plan was to look at what the simulation already does: people already have **memories** (who did what to whom, with a feeling), already **gossip** (a talk may pass on the strongest memory the listener lacks, at half strength, marked as heard), and already change their **opinion** when they hear something bad. So a `remember` effect does one thing: it builds an ordinary `Memory` and hands it to the simulation's own `remember()` function. Gossip, forgetting and the chronicle work with no new code, and the acceptance test "two days later the friends have heard it at half strength" passes by using the real rules.
+
+Two small things are worth noticing. The feeling decides the *kind* of memory (a good one is a Gift, a bad one a Quarrel) and whether it is kept for life (strength 60 or more): a rule in one place instead of a choice every script author has to make. And **flags** are a tiny `std::map` from a name to a whole number. It is an *ordered* map on purpose: saving walks it in alphabetical order, so the saved file and the hash never depend on the order things were added, which is how determinism (Charter rule 6) is kept even for a thing as small as a note.
+
+**Where to look.** `World::rememberConversation` in [src/sim/world.cpp](../src/sim/world.cpp); `World::talk` (the gossip) just above it; `FlagStore` in [src/sim/flag_store.cpp](../src/sim/flag_store.cpp); the three effects in `GameEffectHost::apply` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-164.md](plans/US-164.md); then add `flag trust 1` to the elder's thanks node and a choice that appears only `[if flag(trust)]`.
+
+**Check yourself.** Why does `FlagStore::set` erase a flag when you set it to 0 instead of storing a 0, and what would two saves of the same game look like if it did not?
+
+
+## M8: showing what the simulation did, without changing it (US-165)
+
+When two clan members quarrel, the *simulation* decides it and changes their opinions. The bubbles over their heads only **show** that. The code keeps that line sharp: the game never decides a quarrel, it *listens*. It has two ears. The first is the chronicle, the log the simulation already writes ("Tok quarrelled with Maa over stolen meat"); the game remembers how many entries it has read and looks only at new ones. The second is a tiny queue, `takeTalks()`, because a simple talk leaves no chronicle entry; the simulation drops a note into the queue, and the game empties it each tick.
+
+This pattern, a one-way flow from the simulation to the screen, is why the world stays deterministic (Charter rule 6): the queue is not saved, not hashed and nothing in the simulation reads it, so showing bubbles can never change what happens. It also explains a small piece of C++: `std::exchange(talks_, {})` hands out the whole queue and leaves an empty one behind in a single step, so no note is ever read twice or lost.
+
+The exchange itself is a little timetable: a list of lines, a counter of ticks left, and an index. Each tick the counter goes down; at zero the last speaker's bubble is removed and the next line starts. That is all "in turn, 3 seconds each" means.
+
+**Where to look.** `Exchanges::update` and `makeExchange` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); `World::takeTalks` in [src/sim/world.h](../src/sim/world.h); `selectPair` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-165.md](plans/US-165.md); then write a `.dlg` file with `@pair elder person` and `@bark sharing`, so the elder has their own words when they share food.
+
+**Check yourself.** Why does `Exchanges::update` check `seenEntries_ > entries.size()` before reading the chronicle, and when can the chronicle be shorter than the last time it was looked at?

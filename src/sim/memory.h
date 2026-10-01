@@ -32,6 +32,16 @@ struct Memory {
     }
 };
 
+// Something a person remembers that is not about two people: "a wolf at the fire" (US-163). Free text for talk, with a day and a feeling like a
+// memory; the simulation never reads it, so it cannot change what people do (design docs/plans/M8-dialogue-design.md section 7).
+struct MemoryNote {
+    std::string text;        // a noun phrase: "a wolf at the fire"; with `clause`, what happened: "Voll shared berries"
+    std::int64_t day = 0;
+    int feeling = 0;         // -100..100
+    bool secondHand = false; // heard, not seen
+    bool clause = false;     // `text` says what happened (a conversation's `remember`), small talk calls it "the day ..."
+};
+
 // From assets/data/sim/social.json.
 struct SocialConfig {
     int giftFeeling = 40;

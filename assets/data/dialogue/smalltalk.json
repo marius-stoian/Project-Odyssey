@@ -1,0 +1,141 @@
+// What a clan member says when no script was written for them, and what `{smalltalk.<topic>}` fills in (US-163).
+// Each topic is a list of plain, short sentences. A template is either a quoted sentence (any mood) or
+// { "text": "...", "mood": ["warm", "friendly"] }, used only when the person feels one of those ways.
+// Tokens: {season} {hero} {npc} everywhere; {memory.what} {memory.who} {memory.when} in "memory";
+// {gossip.who} {gossip.about} {gossip.what} {gossip.feeling} in "people"; {need.name} in "needs".
+// The game picks a topic from what the person remembers, heard and needs, and avoids repeating a line.
+{
+  "topics": {
+    "memory": [
+      "I keep thinking about {memory.what}.",
+      "{memory.what}, {memory.when}. I have not forgotten.",
+      "Do you remember {memory.what}? That was {memory.when}.",
+      "I remember {memory.what}. It stays with me.",
+      "Some things stick. {memory.what}, {memory.when}.",
+      "I could tell you about {memory.what}.",
+      "{memory.when}, {memory.what}. That is all I will say.",
+      "I was just thinking about {memory.what}.",
+      { "text": "{hero}, you listen well. I keep thinking about {memory.what}.", "mood": ["warm", "friendly"] },
+      { "text": "Why do you ask? {memory.what}, {memory.when}. That is all.", "mood": ["wary", "hostile"] }
+    ],
+    "people": [
+      "They keep talking about {gossip.what}. It leaves me {gossip.feeling}.",
+      "I heard about {gossip.what}. I feel {gossip.feeling} about it.",
+      "Did you hear? {gossip.what}. I am {gossip.feeling}.",
+      "People are talking about {gossip.what}. I am {gossip.feeling}.",
+      "{gossip.what}, so I heard. That makes me {gossip.feeling}.",
+      "Word has spread about {gossip.what}. I feel {gossip.feeling}.",
+      "I should not say it, but I heard about {gossip.what}. I am {gossip.feeling}.",
+      "Everyone has heard about {gossip.what} by now. I am {gossip.feeling}.",
+      { "text": "Why should I tell you? {gossip.what}. I am {gossip.feeling}.", "mood": ["wary", "hostile"] }
+    ],
+    "needs": [
+      "I could do with some {need.name}.",
+      "I need {need.name} before anything else.",
+      "Forgive me, I am thinking of {need.name}.",
+      "A little {need.name} would help.",
+      "All I want is {need.name}.",
+      "Have you any {need.name} to spare, {hero}?",
+      "I am short of {need.name} today.",
+      "Talk later. I need {need.name}.",
+      { "text": "My stomach is empty. I need {need.name}.", "mood": ["hungry"] },
+      { "text": "I can hardly stand. I need {need.name}.", "mood": ["tired"] },
+      { "text": "I am freezing. I need {need.name}.", "mood": ["cold"] },
+      { "text": "It is lonely here at times. I need {need.name}.", "mood": ["lonely"] }
+    ],
+    "season": [
+      "It is {season}. The days go by.",
+      "Another {season}. We keep going.",
+      "{season} again, {hero}.",
+      "I like to watch the {season} come in.",
+      "Good weather for {season}, I think.",
+      "There is plenty to do before {season} is over.",
+      "The clan will manage this {season}.",
+      "What do you make of this {season}, {hero}?",
+      "I have seen worse than this {season}.",
+      "You can feel the {season} in the ground.",
+      "Mind the weather, {hero}. This {season} is not done with us.",
+      "The children are happy this {season}.",
+      "Every {season} the fire feels different.",
+      "We tell stories about the {season}, you know."
+    ],
+    "hero": [
+      "{hero}, what brings you here?",
+      "Everyone watches what you do, {hero}.",
+      "I am {npc}. You know that, {hero}.",
+      "Is there something you want of me?",
+      "Do not let the work wear you out, {hero}.",
+      "I was about to find you, {hero}.",
+      "There is always something to do, {hero}.",
+      "Sit by the fire a while, {hero}.",
+      "You walk a long way every day, {hero}.",
+      "I do not have much to tell, {hero}.",
+      "{hero}, the others are looking at us.",
+      { "text": "You are doing well, {hero}.", "mood": ["warm", "friendly"] },
+      { "text": "You are a strange one, {hero}. I mean it kindly.", "mood": ["warm", "friendly"] },
+      { "text": "We are glad of you, {hero}.", "mood": ["warm"] },
+      { "text": "What do you want, {hero}?", "mood": ["wary", "hostile"] },
+      { "text": "Leave me be.", "mood": ["wary", "hostile"] }
+    ],
+    // What two clan members say to each other in bubbles when the simulation makes them talk, quarrel, court, share or give (US-165), when no
+    // `@pair` script fits them. Each says one line: the first to the second, then the second back. Here {hero} is the one spoken to.
+    "social.talk": [
+      "How are you keeping, {hero}?",
+      "Sit with me a while.",
+      "The fire is warm tonight.",
+      "Did you see the clouds, {hero}?",
+      "A good {season} so far.",
+      "I was looking for you, {hero}.",
+      "Have you eaten?",
+      "Tell me something good."
+    ],
+    "social.quarrel": [
+      "You took more than your share, {hero}!",
+      "That is not what happened!",
+      "Do not speak to me like that!",
+      "I have had enough of you!",
+      "You never listen!",
+      "Leave me alone, {hero}!",
+      "You are no friend of mine!",
+      "Watch your tongue!"
+    ],
+    "social.courtship": [
+      "You look well tonight, {hero}.",
+      "Walk with me by the fire?",
+      "I made this for you.",
+      "I like it when you laugh.",
+      "Stay a while, {hero}.",
+      "The night is better with you.",
+      "You are kind to me, {hero}.",
+      "I have been thinking of you."
+    ],
+    "social.sharing": [
+      "Take some of mine, {hero}.",
+      "You look hungry. Eat.",
+      "There is enough for both.",
+      "Thank you. I will repay you.",
+      "Share this with me, {hero}.",
+      "You are good to me.",
+      "I will not forget this.",
+      "Eat first, I can wait."
+    ],
+    "social.gift": [
+      "I brought you something, {hero}.",
+      "This is for you.",
+      "Thank you, I did not expect it.",
+      "It is only a small thing.",
+      "You are kind, {hero}.",
+      "I made it myself.",
+      "I hope you like it.",
+      "That is lovely, thank you."
+    ],    // Used by the elder's script (`{smalltalk.hunt}`); it is not chosen by itself.
+    "hunt": [
+      "The deer are thin this {season}.",
+      "Hunters walk far for little meat.",
+      "A good spear is worth a good fire.",
+      "Watch the wind, and the game will not smell you.",
+      "Wolves follow the herds, so be careful.",
+      "Hunt together. One hunter feeds only themselves."
+    ]
+  }
+}

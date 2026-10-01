@@ -259,6 +259,12 @@ std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
 
 // ---- the rule context
 
+int personNamed(const OdysseyGame& game, const Subject& subject, const std::string& word) {
+    if (word == "npc" || word == "target") return subject.kind == Subject::Kind::Person ? subject.index : -1;
+    if (word == "hero" || word == "actor") return game.life() != nullptr ? game.life()->personId() : -1;
+    return -1;
+}
+
 GameRuleContext::GameRuleContext(const OdysseyGame& game, const Subject& subject, ActorRef actor) : game_(game), subject_(subject), actor_(actor) {}
 
 Value GameRuleContext::path(const std::string& dotted) const {
@@ -326,8 +332,22 @@ Value GameRuleContext::call(const std::string& name, const std::vector<Value>& a
         if (args[0].text == "target" || args[0].text == "npc") return Value::ofNumber(hasTag(subject_.info.tags, args[1].text) ? 1 : 0);
         if (args[0].text == "actor" || args[0].text == "hero") return Value::ofNumber(hasTag(actorInfo(game_, actor_).tags, args[1].text) ? 1 : 0);
     }
+    if (name == "opinion" && args.size() == 2 && args[0].isText && args[1].isText && game_.clan() != nullptr) {
+        const int who = personNamed(game_, subject_, args[0].text);
+        const int about = personNamed(game_, subject_, args[1].text);
+        const auto count = static_cast<int>(game_.clan()->people().size());
+        if (who < 0 || about < 0 || who >= count || about >= count) return Value::ofNumber(0);
+        return Value::ofNumber(game_.clan()->opinion(who, about));
+    }
+    if (name == "mood" && args.size() == 1 && args[0].isText && game_.clan() != nullptr && game_.life() != nullptr) {
+        // How the person feels about the hero (D-38): the same word the conversation panel shows.
+        const int who = personNamed(game_, subject_, args[0].text);
+        if (who < 0 || static_cast<std::size_t>(who) >= game_.clan()->people().size()) return Value::ofText("neutral");
+        return Value::ofText(sim::rules::moodWord(game_.clan()->opinion(who, game_.life()->personId()), game_.clan()->people()[static_cast<std::size_t>(who)].needs));
+    }
     if (name == "flag" && args.size() == 1 && args[0].isText) {
         if (args[0].text == "sacred-fire") return Value::ofNumber(game_.life() != nullptr && game_.life()->fire().founded ? 1 : 0);
+        return Value::ofNumber(game_.flags().get(args[0].text)); // set by `flag name` in a conversation or an interaction (US-164)
     }
     return Value::ofNumber(0);
 }

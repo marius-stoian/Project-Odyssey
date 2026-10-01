@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <utility>
 #include <vector>
 
 namespace odysseus::sim {
@@ -119,6 +120,19 @@ public:
     // keeps its own rules: a person by id to change (age, traits), a change of opinion, the store, and a line in the chronicle.
     Person* personMutable(int id) { return id >= 0 && static_cast<std::size_t>(id) < people_.size() ? &people_[static_cast<std::size_t>(id)] : nullptr; }
     void adjustOpinion(int who, int about, int delta);
+    // What a conversation leaves in someone's mind (US-164): `holder` remembers that `other` did something, with a feeling (-100..100). It is an ordinary
+    // memory (a Gift when the feeling is good, a Quarrel when it is bad, major from 60 either way), so forgetting, gossip at half strength and the chronicle
+    // treat it like any other, and it also keeps `text` (what happened, a short clause) for small talk. Returns false for people who do not exist.
+    bool rememberConversation(int holder, int other, const std::string& text, int feeling);
+
+    // Who has just talked with whom (US-165): `talk` leaves a note here for a game that wants to show it (speech bubbles). It is a queue for the
+    // screen, not part of the world: it is not saved, not hashed and nothing in the simulation reads it. The game takes it empty each tick; if nobody
+    // does, only the newest 32 are kept.
+    struct TalkEvent {
+        int speaker = -1;
+        int listener = -1;
+    };
+    std::vector<TalkEvent> takeTalks() { return std::exchange(talks_, {}); }
     void adjustFood(int meals) { food_ = food_ + meals < 0 ? 0 : food_ + meals; }
     // Writes an entry in the chronicle now; returns its id.
     int note(const std::string& text, int importance, EventKind kind = EventKind::Note, int who = -1, int other = -1);
@@ -221,6 +235,7 @@ private:
     std::vector<Person> people_;
     int food_ = 0;
     Chronicle chronicle_;
+    std::vector<TalkEvent> talks_; // see takeTalks()
 };
 
 } // namespace odysseus::sim

@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v2.0. Edited only by mraw-orchestrator.
+Codex v2.2. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
@@ -14,6 +14,8 @@ Codex v2.0. Edited only by mraw-orchestrator.
 | P-007 | - | - | Done | 2026-09-30 |
 | P-008 | - | - | Done | 2026-10-01 |
 | P-009 | - | - | Done | 2026-10-01 |
+| P-010 | - | - | Done | 2026-10-01 |
+| P-011 | - | - | Done | 2026-10-01 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -114,14 +116,43 @@ Codex v2.0. Edited only by mraw-orchestrator.
 | S-US-155 | US-155 | M7 | Done | 2026-10-01 |
 | S-US-154 | US-154 | M7 | Done | 2026-10-01 |
 | X-M7 | - | M7 | Done | 2026-10-01 |
-| K-M8 | - | M8 | To do |  |
-| S-US-160 | US-160 | M8 | To do |  |
-| S-US-161 | US-161 | M8 | To do |  |
-| S-US-162 | US-162 | M8 | To do |  |
-| S-US-163 | US-163 | M8 | To do |  |
-| S-US-164 | US-164 | M8 | To do |  |
-| S-US-165 | US-165 | M8 | To do |  |
-| X-M8 | - | M8 | To do |  |
+| K-M8 | - | M8 | Done | 2026-10-01 |
+| S-US-160 | US-160 | M8 | Done | 2026-10-01 |
+| S-US-161 | US-161 | M8 | Done | 2026-10-01 |
+| S-US-162 | US-162 | M8 | Done | 2026-10-01 |
+| S-US-163 | US-163 | M8 | Done | 2026-10-01 |
+| S-US-164 | US-164 | M8 | Done | 2026-10-01 |
+| S-US-165 | US-165 | M8 | Done | 2026-10-01 |
+| X-M8 | - | M8 | Done | 2026-10-01 |
+| K-M8b | - | M8b | To do |  |
+| S-US-230 | US-230 | M8b | To do |  |
+| S-US-231 | US-231 | M8b | To do |  |
+| S-US-232 | US-232 | M8b | To do |  |
+| S-US-233 | US-233 | M8b | To do |  |
+| S-US-234 | US-234 | M8b | To do |  |
+| X-M8b | - | M8b | To do |  |
+| K-M8c | - | M8c | To do |  |
+| S-US-240 | US-240 | M8c | To do |  |
+| S-US-241 | US-241 | M8c | To do |  |
+| S-US-242 | US-242 | M8c | To do |  |
+| S-US-243 | US-243 | M8c | To do |  |
+| S-US-244 | US-244 | M8c | To do |  |
+| S-US-245 | US-245 | M8c | To do |  |
+| S-US-246 | US-246 | M8c | To do |  |
+| S-US-247 | US-247 | M8c | To do |  |
+| X-M8c | - | M8c | To do |  |
+| K-M8d | - | M8d | To do |  |
+| S-US-250 | US-250 | M8d | To do |  |
+| S-US-251 | US-251 | M8d | To do |  |
+| S-US-252 | US-252 | M8d | To do |  |
+| S-US-256 | US-256 | M8d | To do |  |
+| X-M8d | - | M8d | To do |  |
+| K-M8e | - | M8e | To do |  |
+| S-US-253 | US-253 | M8e | To do |  |
+| S-US-254 | US-254 | M8e | To do |  |
+| S-US-255 | US-255 | M8e | To do |  |
+| S-US-257 | US-257 | M8e | To do |  |
+| X-M8e | - | M8e | To do |  |
 | K-M9 | - | M9 | To do |  |
 | S-US-170 | US-170 | M9 | To do |  |
 | S-US-171 | US-171 | M9 | To do |  |
@@ -130,11 +161,58 @@ Codex v2.0. Edited only by mraw-orchestrator.
 | S-US-173 | US-173 | M9 | To do |  |
 | S-US-174 | US-174 | M9 | To do |  |
 | X-M9 | - | M9 | To do |  |
+| K-M10 | - | M10 | To do |  |
+| S-US-180 | US-180 | M10 | To do |  |
+| S-US-181 | US-181 | M10 | To do |  |
+| S-US-182 | US-182 | M10 | To do |  |
+| S-US-183 | US-183 | M10 | To do |  |
+| S-US-186 | US-186 | M10 | To do |  |
+| S-US-184 | US-184 | M10 | To do |  |
+| S-US-187 | US-187 | M10 | To do |  |
+| S-US-185 | US-185 | M10 | To do |  |
+| X-M10 | - | M10 | To do |  |
+| K-M11 | - | M11 | To do |  |
+| S-US-190 | US-190 | M11 | To do |  |
+| S-US-191 | US-191 | M11 | To do |  |
+| S-US-193 | US-193 | M11 | To do |  |
+| S-US-194 | US-194 | M11 | To do |  |
+| S-US-195 | US-195 | M11 | To do |  |
+| S-US-196 | US-196 | M11 | To do |  |
+| S-US-192 | US-192 | M11 | To do |  |
+| X-M11 | - | M11 | To do |  |
+| K-M12 | - | M12 | To do |  |
+| S-US-200 | US-200 | M12 | To do |  |
+| S-US-201 | US-201 | M12 | To do |  |
+| S-US-202 | US-202 | M12 | To do |  |
+| S-US-203 | US-203 | M12 | To do |  |
+| S-US-204 | US-204 | M12 | To do |  |
+| S-US-205 | US-205 | M12 | To do |  |
+| S-US-206 | US-206 | M12 | To do |  |
+| S-US-207 | US-207 | M12 | To do |  |
+| X-M12 | - | M12 | To do |  |
+| K-M13 | - | M13 | To do |  |
+| S-US-210 | US-210 | M13 | To do |  |
+| S-US-211 | US-211 | M13 | To do |  |
+| S-US-212 | US-212 | M13 | To do |  |
+| S-US-213 | US-213 | M13 | To do |  |
+| S-US-214 | US-214 | M13 | To do |  |
+| S-US-215 | US-215 | M13 | To do |  |
+| S-US-216 | US-216 | M13 | To do |  |
+| X-M13 | - | M13 | To do |  |
+| K-M14 | - | M14 | To do |  |
+| S-US-220 | US-220 | M14 | To do |  |
+| S-US-221 | US-221 | M14 | To do |  |
+| S-US-226 | US-226 | M14 | To do |  |
+| S-US-222 | US-222 | M14 | To do |  |
+| S-US-224 | US-224 | M14 | To do |  |
+| S-US-223 | US-223 | M14 | To do |  |
+| S-US-225 | US-225 | M14 | To do |  |
+| X-M14 | - | M14 | To do |  |
 | K-M6 | - | M6 | Done | 2026-10-01 |
 | S-US-090 | US-090 | M6 | Done | 2026-10-01 |
 | S-US-091 | US-091 | M6 | Done | 2026-10-01 |
 | S-US-092 | US-092 | M6 | Done | 2026-10-01 |
-| X-M6 | - | M6 | Blocked | waits for X-M9 and the owner (D-GATE-M6) |
+| X-M6 | - | M6 | Blocked | waits for X-M14 and the owner (D-GATE-M6) |
 
 
 US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Mraw on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).

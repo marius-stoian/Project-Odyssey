@@ -4,7 +4,9 @@
 #include "game/odyssey_game.h"
 
 #include "core/log.h"
+#include "sim/dialogue_select.h"
 
+#include <algorithm>
 #include <format>
 
 namespace odysseus::game {
@@ -53,7 +55,8 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     } else if (name == "inspect") {
         game.run().setMessage(plant < game.plants().size() && game.plants()[plant].def != nullptr ? game.plants()[plant].def->inspect : std::string());
     } else if (name == "talk") {
-        game.run().setMessage(hero->talkTo(subject.index).message);
+        // A script that speaks for them opens the conversation panel (US-161); without one it is the plain talk of M5.
+        if (!openConversation(game, subject)) game.run().setMessage(hero->talkTo(subject.index).message);
     } else if (name == "give-berries") {
         game.run().setMessage(hero->giveBerriesTo(subject.index).message);
     } else if (name == "ask-to-teach") {
@@ -102,6 +105,12 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     return true;
 }
 
+// The word an effect argument names: `flag met-elder` is the word met-elder, however the expression reader took it apart.
+std::string effectWord(const sim::rules::Effect& effect, std::size_t index) {
+    const sim::rules::Expr& e = *effect.args[index];
+    return e.kind == sim::rules::Expr::Kind::Text || e.kind == sim::rules::Expr::Kind::Path ? e.text : effect.argSources[index];
+}
+
 // The game's side of the action runner (US-153): what `set target.state`, `do`, `say` and the rest mean in the world.
 class GameEffectHost final : public sim::rules::EffectHost {
 public:
@@ -133,6 +142,30 @@ public:
         } else if (effect.verb == "fx") {
             // fx flame: a visual effect of effects.json, played once over the thing.
             if (!effect.args.empty()) game_.playEffect(effect.args[0]->text, subject->x, subject->y - 16.0, 48);
+        } else if (effect.verb == "opinion" && effect.args.size() == 3) {
+            // opinion npc hero 5: what the first thinks of the second changes (a conversation's choice, US-161).
+            const GameRuleContext context(game_, *subject);
+            const int who = personNamed(game_, *subject, effect.args[0]->text);
+            const int about = personNamed(game_, *subject, effect.args[1]->text);
+            const long long delta = sim::rules::evaluate(*effect.args[2], context).number;
+            game_.changeOpinion(who, about, static_cast<int>(std::clamp(delta, -200LL, 200LL)));
+        } else if (effect.verb == "flag" && !effect.args.empty()) {
+            // flag met-elder, flag trust 3: a story note (US-164). 1 unless a value is given.
+            const GameRuleContext context(game_, *subject);
+            const std::string name = effectWord(effect, 0);
+            const long long value = effect.args.size() == 2 ? sim::rules::evaluate(*effect.args[1], context).number : 1;
+            game_.flags().set(name, static_cast<int>(std::clamp(value, -1000000LL, 1000000LL)));
+        } else if (effect.verb == "remember" && effect.args.size() >= 2) {
+            // remember npc "{hero} shared berries" 20: what happened, as a short clause, and how it feels (default 10, -100..100) (US-164).
+            const GameRuleContext context(game_, *subject);
+            const int holder = personNamed(game_, *subject, effect.args[0]->text);
+            const int other = personNamed(game_, *subject, holder == personNamed(game_, *subject, "hero") ? "npc" : "hero");
+            const long long feeling = effect.args.size() == 3 ? sim::rules::evaluate(*effect.args[2], context).number : 10;
+            game_.rememberConversation(holder, other, sim::rules::fillDialogueTokens(effect.args[1]->text, context), static_cast<int>(std::clamp(feeling, -100LL, 100LL)));
+        } else if (effect.verb == "chronicle" && !effect.args.empty()) {
+            // chronicle "{hero} promised {npc} a hunt": a line in the clan's chronicle (US-164).
+            const GameRuleContext context(game_, *subject);
+            game_.chronicleLine(sim::rules::fillDialogueTokens(effect.args[0]->text, context), personNamed(game_, *subject, "hero"), personNamed(game_, *subject, "npc"));
         } else if (effect.verb == "give" || effect.verb == "take") {
             // give actor berries 2: the hero's bag, the only one with items so far.
             if (effect.args.size() == 3 && game_.life() != nullptr && effect.args[0]->text != "npc" && effect.args[0]->text != "target") {
@@ -195,6 +228,42 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 void tickInteractions(OdysseyGame& game) {
     GameEffectHost host(game);
     game.actions().tick(game.actionClock(), game.interactions(), host);
+}
+
+bool openConversation(OdysseyGame& game, const Subject& subject) {
+    if (subject.kind != Subject::Kind::Person || game.clan() == nullptr) return false;
+    const GameRuleContext context(game, subject);
+    sim::rules::WhoFacts who;
+    who.name = subject.name;
+    who.roles = sim::rules::rolesOf(*game.clan(), subject.index);
+    const sim::rules::DlgScript* script = sim::rules::selectScript(game.dialogues(), who, context, game.dialogueRandom());
+    const int person = subject.index;
+    const int hero = game.life() != nullptr ? game.life()->personId() : -1;
+    // `{smalltalk.topic}` in a script is a line made up from what this person remembers, heard and needs.
+    const auto smalltalkSource = [&game, person, hero](const std::string& topic) {
+        const auto said = game.smalltalk().say(*game.clan(), person, hero, game.dialogueRandom(), topic);
+        return said ? said->text : std::string();
+    };
+    if (script != nullptr) {
+        sim::rules::Conversation conversation(*script, kHeroActor, refOf(game, subject));
+        conversation.setSmalltalk(smalltalkSource);
+        game.run().openTalk(std::move(conversation), subject);
+        return true;
+    }
+    // No script fits them: small talk, their line and a friendly answer and a rude one. The old talk still warms the two to each other.
+    if (!game.smalltalk().ready() || hero < 0) return false;
+    const auto said = game.smalltalk().say(*game.clan(), person, hero, game.dialogueRandom());
+    if (!said) return false;
+    if (game.life() != nullptr) game.life()->talkTo(person);
+    game.run().openTalk(sim::rules::Conversation(sim::rules::smalltalkScript(subject.name, said->text), kHeroActor, refOf(game, subject)), subject);
+    game.run().setMessage({});
+    return true;
+}
+
+bool chooseConversationOption(OdysseyGame& game, sim::rules::Conversation& conversation, const Subject& subject, int index) {
+    GameEffectHost host(game);
+    const GameRuleContext context(game, subject);
+    return conversation.choose(index, context, game.actions(), game.actionClock(), host);
 }
 
 } // namespace odysseus::game

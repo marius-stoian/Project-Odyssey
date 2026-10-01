@@ -136,6 +136,11 @@ void OdysseyGame::resetPlay() {
     fullTicks_ = 0;
     actions_.clear(); // a restart drops what was under way and what was waiting
     actionClock_ = 0;
+    bubbles_.clear(); // a restart starts the run's talk afresh
+    greetingCooldowns_.clear();
+    smalltalk_.clear();
+    flags_.clear();
+    dialogueRng_ = core::Pcg32(1, 8);
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
@@ -371,6 +376,7 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
 // The clan's simulation: the same world for the same level every time (its seed is the hash of the level's name).
 void OdysseyGame::startClan() {
     clan_ = std::make_unique<sim::World>(WeatherCycle::seedFromText(level_.name) ^ 0x9E3779B97F4A7C15ULL, sim::loadSimConfig(dataDirectory_));
+    exchanges_.reset(clan_->chronicle().entries().size());
     // The camp is where the fire burns: the first flame placed in the level, else where the hero starts.
     PixelPoint camp = level_.heroStart;
     for (const PlacedEffect& placed : level_.effects) {
@@ -416,6 +422,15 @@ void OdysseyGame::drawClan(luna::engine::Renderer& renderer, const luna::engine:
         const luna::engine::Rect source{figure->animationFrame() * kCharacterWidth, static_cast<int>(figure->facing) * kCharacterHeight, kCharacterWidth, kCharacterHeight};
         renderer.drawStyled(found->second, source, {feetX - width / 2, feetY - height, width, height}, {});
         if (figure->emote != Emote::None) drawEmote(renderer, figure->emote, feetX, feetY - height - 14);
+        if (const Bubble* said = bubbles_.of(static_cast<int>(figure - clanView_.figures().data()))) {
+            // Words over the head, above the face of a need if there is one.
+            luna::engine::UiPainter painter(renderer, uiSheet_);
+            const int w = luna::engine::UiPainter::textWidth(said->text) + 8;
+            const luna::engine::Rect box{feetX - w / 2, feetY - height - 14 - (figure->emote != Emote::None ? 14 : 0) - 2, w, 14};
+            painter.fill(box, luna::engine::UiColor::Shade);
+            painter.outline(box, luna::engine::UiColor::Border);
+            painter.text(box.x + 4, box.y + 4, said->text, luna::engine::UiColor::Text);
+        }
     }
 }
 
@@ -516,6 +531,12 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     clanView_.setHidden(life_->personId());
     clanView_.update(*clan_, map_);
     lastSavedDay_ = -1;
+    // A new clan is a new story: what was said, remembered and flagged in the last one does not carry over (US-162..US-164).
+    flags_.clear();
+    bubbles_.clear();
+    exchanges_.reset(clan_->chronicle().entries().size());
+    greetingCooldowns_.clear();
+    smalltalk_.clear();
     stats_.record("run-started", ticks_);
     if (tutorial) {
         if (tutorialScript_.steps.empty()) tutorialScript_ = loadTutorial(dataDirectory_ / "hero" / "tutorial.json");
@@ -610,6 +631,16 @@ std::vector<int> OdysseyGame::attendeesAt(double x, double y, int radiusTiles) c
     return near;
 }
 
+// assets/data/dialogue/smalltalk.json, when there is one (the game plays without small talk when it is not there). Mistakes go in `report`.
+sim::rules::SmallTalk OdysseyGame::loadSmalltalk(sim::rules::LoadReport& report) const {
+    const std::filesystem::path file = dataDirectory_ / "dialogue" / "smalltalk.json";
+    std::error_code ec;
+    if (!std::filesystem::exists(file, ec)) return {};
+    ++report.filesRead;
+    if (auto data = sim::rules::SmalltalkData::load(file, "dialogue/smalltalk.json", report)) return sim::rules::SmallTalk(std::move(*data));
+    return {};
+}
+
 void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
@@ -617,6 +648,13 @@ void OdysseyGame::loadInteractions() {
     options.knownBuiltins.insert(builtInActionNames().begin(), builtInActionNames().end());
     interactionReport_ = {};
     interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_, options);
+    sim::rules::LoadReport dialogueReport;
+    dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
+    smalltalk_ = loadSmalltalk(dialogueReport);
+    interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
+    interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
+    interactionReport_.filesRead += dialogueReport.filesRead;
+    core::logInfo(std::format("Dialogue: {} conversation(s) loaded from {} file(s)", dialogueReport.loaded, dialogueReport.filesRead));
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
     for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
     core::logInfo(std::format("Interactions: {} loaded from {} file(s), {} error(s)", interactionReport_.loaded, interactionReport_.filesRead, interactionReport_.errors.size()));
@@ -631,6 +669,12 @@ bool OdysseyGame::reloadInteractions() {
     options.knownBuiltins.insert(builtInActionNames().begin(), builtInActionNames().end());
     sim::rules::LoadReport report;
     sim::rules::InteractionRegistry fresh = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", report, options);
+    sim::rules::LoadReport dialogueReport;
+    sim::rules::DialogueLibrary freshDialogue = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
+    sim::rules::SmallTalk freshSmalltalk = loadSmalltalk(dialogueReport);
+    report.errors.insert(report.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
+    report.warnings.insert(report.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
+    report.filesRead += dialogueReport.filesRead;
     lastInteractionReloadMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     interactionReport_ = report; // the panel always shows the latest result
     for (const sim::rules::Diagnostic& d : report.errors) core::logWarning("Interactions: " + d.text());
@@ -640,6 +684,8 @@ bool OdysseyGame::reloadInteractions() {
         return false;
     }
     interactions_ = std::move(fresh);
+    dialogues_ = std::move(freshDialogue);
+    smalltalk_ = std::move(freshSmalltalk);
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
 }
@@ -700,6 +746,20 @@ bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {
     return true;
 }
 
+bool OdysseyGame::rememberConversation(int holder, int other, const std::string& text, int feeling) {
+    return clan_ && clan_->rememberConversation(holder, other, text, feeling);
+}
+
+void OdysseyGame::chronicleLine(const std::string& text, int who, int other) {
+    if (clan_) clan_->note(text, sim::kImportanceConversation, sim::EventKind::Note, who, other);
+}
+
+void OdysseyGame::changeOpinion(int who, int about, int delta) {
+    const auto count = clan_ ? static_cast<int>(clan_->people().size()) : 0;
+    if (who < 0 || about < 0 || who >= count || about >= count) return;
+    clan_->adjustOpinion(who, about, delta);
+}
+
 bool OdysseyGame::harmPerson(int personId, sim::Need need, int amount) {
     if (!clan_ || personId < 0 || static_cast<std::size_t>(personId) >= clan_->people().size() || !clan_->people()[static_cast<std::size_t>(personId)].alive) return false;
     clan_->drainPersonNeed(personId, need, amount);
@@ -750,7 +810,7 @@ std::string OdysseyGame::thingsText() const {
     for (const WorldPlant& plant : plants_) {
         if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
     }
-    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}}.dump(1);
+    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}}.dump(1);
 }
 
 std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
@@ -763,6 +823,10 @@ std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
             if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
         }
         notes = actions_.loadPending(data.at("timers").dump(), actionClock_);
+        if (data.contains("flags")) { // saves from before US-164 have none
+            const std::vector<std::string> flagNotes = flags_.load(data.at("flags").dump());
+            notes.insert(notes.end(), flagNotes.begin(), flagNotes.end());
+        }
     } catch (const std::exception& error) {
         notes.push_back(std::string("things.json could not be read: ") + error.what());
     }
@@ -917,6 +981,7 @@ bool OdysseyGame::loadAutosave() {
         for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
         if (loaded.loadedFrom != clanFile) notes = std::format("The latest save was damaged: loaded the newest backup ({}). {}", loaded.loadedFrom.filename().string(), notes);
         clan_ = std::make_unique<sim::World>(std::move(loaded.world));
+        exchanges_.reset(clan_->chronicle().entries().size()); // what happened before the save is not shown again
         if (!layerSheets_) layerSheets_ = makeLayerSheets();
         PixelPoint camp = level_.heroStart;
         for (const PlacedEffect& placed : level_.effects) {
@@ -1565,6 +1630,9 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             if (lastSavedDay_ >= 0) autosave();
             lastSavedDay_ = day;
         }
+        bubbles_.tick();
+        updateGreetings(*this);
+        exchanges_.update(*this);
         npcLife_.tick(*this); // clan members and animals look around, walk and do things with the same interactions as the hero (US-154)
     }
     if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});
