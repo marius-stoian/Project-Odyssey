@@ -128,6 +128,7 @@ add_library(odysseus_sim STATIC
     src/sim/interaction.cpp
     src/sim/action_runner.cpp
     src/sim/npc_chooser.cpp
+    src/sim/dialogue_script.cpp
     src/sim/world.cpp
     src/sim/world_story.cpp
     src/sim/world_care.cpp
@@ -381,7 +382,8 @@ add_executable(odysseus_sim_tests
     tests/sim/region_test.cpp
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
-    tests/sim/runner_test.cpp)
+    tests/sim/runner_test.cpp
+    tests/sim/dialogue_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

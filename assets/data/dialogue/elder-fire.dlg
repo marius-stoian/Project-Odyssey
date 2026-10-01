@@ -1,0 +1,20 @@
+# The elder at the clan fire (US-160). Anything after a # at the start of a line is a note for you; the game and the Editor keep it.
+@who elder
+@when opinion(npc, hero) >= -20
+@priority 10
+
+=== start
+Elder: The fire is low tonight, {hero}.   [if time == night]
+Elder: You walk like a hunter today.
+-> Ask about the hunt => hunt
+# Giving a berry is kind: it costs one and raises the elder's opinion a little.
+-> Offer berries [if has(hero, berries, 1)] [else You have no berries] {take hero berries 1; opinion npc hero 5; remember npc "{hero} shared berries"} => thanks
+-> Leave => END
+
+=== hunt
+Elder: {smalltalk.hunt}
+-> Back => start
+
+=== thanks
+Elder: The clan remembers kindness.
+-> Back => start
