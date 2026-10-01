@@ -45,7 +45,7 @@ game::WeaponDef weaponOf(game::WeaponClass weaponClass, double range) {
 struct Play {
     game::OdysseyGame odyssey;
     luna::engine::RecordingRenderer renderer;
-    explicit Play(const fs::path& data = ODYSSEUS_DATA_DIR) : odyssey(data, ODYSSEUS_DEMO_LEVEL) { odyssey.start(renderer); }
+    explicit Play(const fs::path& data = ODYSSEUS_DATA_DIR) : odyssey(data, ODYSSEUS_DEMO_LEVEL) { odyssey.setViewScales(1, 1); odyssey.start(renderer); }
     void tick(int count = 1, Intents intents = {}) {
         for (int i = 0; i < count; ++i) odyssey.update(intents);
     }

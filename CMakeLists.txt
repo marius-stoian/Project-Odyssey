@@ -155,6 +155,7 @@ add_library(luna_engine STATIC
     src/luna/engine/input.cpp
     src/luna/engine/renderer.cpp
     src/luna/engine/camera.cpp
+    src/luna/engine/scaled_renderer.cpp
     src/luna/engine/tile_map.cpp
     src/luna/engine/collision.cpp
     src/luna/engine/physics_view.cpp
@@ -333,7 +334,8 @@ add_executable(luna_tests
     tests/luna/tile_map_test.cpp
     tests/luna/collision_test.cpp
     tests/luna/ui_test.cpp
-    tests/luna/effects_test.cpp)
+    tests/luna/effects_test.cpp
+    tests/luna/zoom_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)

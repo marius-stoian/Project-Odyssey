@@ -187,6 +187,7 @@ TEST_CASE("US-140 In the game") {
 
     game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, folder / "level.json");
     luna::engine::RecordingRenderer renderer;
+    odyssey.setViewScales(1, 1);
     odyssey.start(renderer);
     REQUIRE(odyssey.pickUp("wooden longbow"));
     odyssey.selectSlot(0);

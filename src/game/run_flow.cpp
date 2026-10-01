@@ -21,7 +21,7 @@ constexpr int kTalkWrap = 56; // characters of a line of speech in the conversat
 enum ScreenIds {
     kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
     kTabBase = 300, kResolutionBase = 320, kWindowed = 330, kVolumeDown = 331, kVolumeUp = 332, kBorderless = 333, kExclusive = 334,
-    kScalingWhole = 335, kScalingFill = 336, kFoundFire = 340, kRitual = 341, kTendFire = 342,
+    kScalingWhole = 335, kScalingFill = 336, kZoomOut = 337, kZoomIn = 338, kUiSmall = 339, kUiLarge = 343, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
     kAcceptCounter = 582, kPayDebtBase = 600, kActionBase = 700
 };
@@ -303,6 +303,16 @@ void RunFlow::buildMenu(OdysseyGame& game) {
         line("Scaling:", UiColor::Dim);
         button("Whole", kScalingWhole, true, s.resolution.scaling == core::ScalingMode::Whole, panel_.x + 8, 62);
         button("Fill", kScalingFill, true, s.resolution.scaling == core::ScalingMode::Fill);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("Camera zoom (also + - and the mouse wheel):", UiColor::Dim);
+        button("1x", kZoomOut, true, s.cameraZoom == 1, panel_.x + 8, 40);
+        button("2x", kZoomIn, true, s.cameraZoom == 2, panel_.x + 52, 40);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("UI scale:", UiColor::Dim);
+        button("1x", kUiSmall, true, s.uiScale == 1, panel_.x + 8, 40);
+        button("2x", kUiLarge, true, s.uiScale == 2, panel_.x + 52, 40);
         newRow();
         cursorY_ += kRowHeight + 4;
         line(std::format("Volume: {}", s.volume), UiColor::Text);
@@ -651,6 +661,11 @@ void RunFlow::act(OdysseyGame& game, int id) {
             GameSettings s = game.settings();
             s.resolution.width = sizes[id - kResolutionBase][0];
             s.resolution.height = sizes[id - kResolutionBase][1];
+            game.applySettings(s);
+        } else if (id == kZoomOut || id == kZoomIn || id == kUiSmall || id == kUiLarge) {
+            GameSettings s = game.settings();
+            if (id == kZoomOut || id == kZoomIn) s.cameraZoom = id == kZoomIn ? 2 : 1;
+            else s.uiScale = id == kUiLarge ? 2 : 1;
             game.applySettings(s);
         } else if (id == kVolumeDown || id == kVolumeUp) {
             GameSettings s = game.settings();

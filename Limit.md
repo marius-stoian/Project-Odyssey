@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-01, US-232):** S-US-232 DONE (Milestone-78.md, AP-079). Next: S-US-233 (every screen at the new size), US-234, X-M8b. The owner said Mraw never asks for permission: commit, merge, pull, push and sync Drive on your own.
+
 **Resume update (2026-10-01, later):** S-US-231 DONE (Milestone-77.md, AP-078), merged into local `qa`, NOT pushed (push needs the owner's go). Next: push qa and check CI, sync the Drive requirements to v2.6, then S-US-232, US-233, US-234, X-M8b.
 
 **Resume update (2026-10-01):** D-44 is reflected in local requirements v2.6 and Anima's revised assembly prompts v2.4; CI-010 is resolved. S-US-231 remains Blocked while the authoritative Drive requirements copy is unsynced after automatic approval review rejected its replacement. Read `Handover.md` for exact resume instructions. No story was completed; leave the owner's two local files untouched.

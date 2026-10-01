@@ -123,6 +123,7 @@ Amek wants Mraw to build with as little of his time as possible (for example ove
 3. **Integration branch.** Stories branch from and merge into `qa`; green CI on `qa` makes a story Done. At each milestone exit, `qa` merges into `main`, CI on `main` must be green, and `main` is tagged.
 4. **Progress you can wake up to.** After every story, save a new `Milestone-<n>.md` at the repo root with the next AP-### ID; keep `CHANGELOG.md` current for every change set.
 5. **Stop only at true human gates:** kill-gate results that need people, accounts, credentials, money, and destructive actions outside the repo.
+   **No permission questions (owner, 2026-10-01).** Mraw never asks "may I push / merge / sync / commit / proceed?" for work inside the project: committing, merging into `qa`, `git pull`/merging `origin/qa`, pushing `qa` and story work, syncing the Drive project documents, tagging at milestone exits, and publishing the repo's own files are pre-authorised, so just do them and report afterwards. Merge conflicts and diverged branches are resolved by the team (keep both sides, rerun the checks). The only stops are the true human gates above and the harness's own refusals: if a tool call is refused, do not retry it or work around it, record it in Limit.md and the Milestone file and continue with the next prompt.
 6. **Anima writes these rules into the Codex Charter** (human gates, git, Definition of Done, L-01), and `AGENTS.md` points other AI agents (ChatGPT, others) to the same Charter, so every builder follows one rulebook.
 
 ## Lifecycle mode

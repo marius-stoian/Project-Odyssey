@@ -62,7 +62,7 @@ fs::path levelWithGoblinAt(const std::string& name, int offsetX, int offsetY) {
 struct Play {
     game::OdysseyGame odyssey;
     luna::engine::RecordingRenderer renderer;
-    explicit Play(const fs::path& level) : odyssey(ODYSSEUS_DATA_DIR, level) { odyssey.start(renderer); }
+    explicit Play(const fs::path& level) : odyssey(ODYSSEUS_DATA_DIR, level) { odyssey.setViewScales(1, 1); odyssey.start(renderer); }
     void tick(int count = 1, Intents intents = {}) {
         for (int i = 0; i < count; ++i) odyssey.update(intents);
     }
@@ -230,4 +230,38 @@ TEST_CASE("US-139 Facing with hysteresis") {
     CHECK(game::facingToward(1.0, 0.75, game::Facing::East, 10.0) == game::Facing::SouthEast); // 37 degrees: turns
     CHECK(game::facingToward(1.0, 0.45, game::Facing::SouthEast, 10.0) == game::Facing::SouthEast);
     CHECK(game::facingToward(1.0, 0.0, game::Facing::SouthEast, 10.0) == game::Facing::East); // 45 degrees off: turns
+}
+
+TEST_CASE("US-232 The pointer hits the same world spot at any zoom") {
+    // A goblin 30 px east and 30 px north of the hero: the pointer is placed on it at each zoom.
+    for (const int zoom : {1, 2}) {
+        Play play(levelWithGoblinAt("zoom-hit", 30, -30));
+        play.odyssey.setViewScales(zoom, 1);
+        play.hold("iron sword");
+        CHECK(play.odyssey.viewWidth() == 960 / zoom);
+        play.tick(1, pointingAt(kHeroScreenX + 30 * zoom, kHeroScreenY - 30 * zoom, true));
+        CHECK(play.goblin().hp() == 100 - play.odyssey.catalogs().weapon("iron sword")->damage);
+    }
+}
+
+TEST_CASE("US-232 Zoom keys and the wheel") {
+    Play play(levelWithGoblinAt("zoom-keys", 200, 0));
+    play.odyssey.setSaveDirectory(fs::temp_directory_path() / "odysseus-us232-zoom");
+    play.odyssey.setViewScales(2, 1);
+    play.tick(1, pressing(Intent::ZoomOut));
+    CHECK(play.odyssey.cameraZoom() == 1); // 30 x 17 tiles
+    CHECK(play.odyssey.viewWidth() == 960);
+    play.tick(1, pressing(Intent::ZoomIn));
+    CHECK(play.odyssey.cameraZoom() == 2); // back
+    CHECK(play.odyssey.viewWidth() == 480);
+    Intents wheel = pointingAt(kHeroScreenX, kHeroScreenY);
+    Pointer pointer = wheel.pointer();
+    pointer.wheel = -1;
+    wheel.setPointer(pointer);
+    play.tick(1, wheel);
+    CHECK(play.odyssey.cameraZoom() == 1);
+    // The interface scale is separate: the panels and the hotbar resize with it.
+    play.odyssey.setViewScales(1, 2);
+    CHECK(play.odyssey.uiWidth() == 480);
+    CHECK(play.odyssey.viewWidth() == 960);
 }
