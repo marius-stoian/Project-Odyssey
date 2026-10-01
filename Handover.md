@@ -27,7 +27,7 @@ Tooling tips (Windows): CMake presets `windows-x64-debug` and `windows-x64-relea
 
 ## 4. Where the work stands
 - Codex v2.3, requirements v2.5 (Drive; mirrored in `docs/project/requirements/`). M0 to M8 are done and tagged (`m8-done` at d058dfc). M8b "Resolution and GPU renderer" is in progress: K-M8b Done, **S-US-230 Done locally** (merged into `qa` at 4d97913 and pushed).
-- **First thing to do:** check the GitHub Actions run for `qa` head 4d97913 (`gh run list --branch qa --limit 3`). The runner is `windows-latest`; if the Windows SDK there has no `dxc.exe`, CMake builds without the GPU backend and the GPU tests skip themselves (this is expected and intended, ADR-021); if CI is red for another reason, fix it before starting US-231. When it is green, US-230 is Done (the row in `docs/status.md` already says Done; correct it if CI says otherwise).
+- **CI result:** green on qa at 9f51a9c (run 36892611637, Release build and tests) with US-230 merged, so S-US-230 is Done. The first CI run of the merge (4d97913) failed on one check only: US-160 Guide ... found CRLF in the guide on the Windows runner; fixed upstream by 9f51a9c (guides keep LF via .gitattributes). The runner built the GPU backend or skipped it as ADR-021 allows; check the log line enderer if you care. Next, start S-US-231.
 - Local verification of US-230: Debug and Release, zero warnings, 27/27 tests (log in `docs/evidence/US-230/`).
 
 ### What US-230 built (read `docs/plans/US-230.md` and `docs/adr/ADR-021-sdl-gpu-renderer.md`)
