@@ -105,6 +105,12 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     return true;
 }
 
+// The word an effect argument names: `flag met-elder` is the word met-elder, however the expression reader took it apart.
+std::string effectWord(const sim::rules::Effect& effect, std::size_t index) {
+    const sim::rules::Expr& e = *effect.args[index];
+    return e.kind == sim::rules::Expr::Kind::Text || e.kind == sim::rules::Expr::Kind::Path ? e.text : effect.argSources[index];
+}
+
 // The game's side of the action runner (US-153): what `set target.state`, `do`, `say` and the rest mean in the world.
 class GameEffectHost final : public sim::rules::EffectHost {
 public:
@@ -143,6 +149,23 @@ public:
             const int about = personNamed(game_, *subject, effect.args[1]->text);
             const long long delta = sim::rules::evaluate(*effect.args[2], context).number;
             game_.changeOpinion(who, about, static_cast<int>(std::clamp(delta, -200LL, 200LL)));
+        } else if (effect.verb == "flag" && !effect.args.empty()) {
+            // flag met-elder, flag trust 3: a story note (US-164). 1 unless a value is given.
+            const GameRuleContext context(game_, *subject);
+            const std::string name = effectWord(effect, 0);
+            const long long value = effect.args.size() == 2 ? sim::rules::evaluate(*effect.args[1], context).number : 1;
+            game_.flags().set(name, static_cast<int>(std::clamp(value, -1000000LL, 1000000LL)));
+        } else if (effect.verb == "remember" && effect.args.size() >= 2) {
+            // remember npc "{hero} shared berries" 20: what happened, as a short clause, and how it feels (default 10, -100..100) (US-164).
+            const GameRuleContext context(game_, *subject);
+            const int holder = personNamed(game_, *subject, effect.args[0]->text);
+            const int other = personNamed(game_, *subject, holder == personNamed(game_, *subject, "hero") ? "npc" : "hero");
+            const long long feeling = effect.args.size() == 3 ? sim::rules::evaluate(*effect.args[2], context).number : 10;
+            game_.rememberConversation(holder, other, sim::rules::fillDialogueTokens(effect.args[1]->text, context), static_cast<int>(std::clamp(feeling, -100LL, 100LL)));
+        } else if (effect.verb == "chronicle" && !effect.args.empty()) {
+            // chronicle "{hero} promised {npc} a hunt": a line in the clan's chronicle (US-164).
+            const GameRuleContext context(game_, *subject);
+            game_.chronicleLine(sim::rules::fillDialogueTokens(effect.args[0]->text, context), personNamed(game_, *subject, "hero"), personNamed(game_, *subject, "npc"));
         } else if (effect.verb == "give" || effect.verb == "take") {
             // give actor berries 2: the hero's bag, the only one with items so far.
             if (effect.args.size() == 3 && game_.life() != nullptr && effect.args[0]->text != "npc" && effect.args[0]->text != "target") {

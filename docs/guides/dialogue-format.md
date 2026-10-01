@@ -17,7 +17,7 @@ Elder: The fire is low tonight, {hero}.   [if time == night]
 Elder: You walk like a hunter today.
 -> Ask about the hunt => hunt
 # Giving a berry is kind: it costs one and raises the elder's opinion a little.
--> Offer berries [if has(hero, berries, 1)] [else You have no berries] {take hero berries 1; opinion npc hero 5; remember npc "{hero} shared berries"} => thanks
+-> Offer berries [if has(hero, berries, 1)] [else You have no berries] {take hero berries 1; opinion npc hero 5; remember npc "{hero} shared berries" 20} => thanks
 -> Leave => END
 
 === hunt
@@ -69,7 +69,7 @@ The game **pauses** while the conversation panel is open. It shows:
 - what they say: every line of the node whose `[if]` holds, in order, as `Speaker: words`;
 - the choices, numbered 1 to 5. Pick one with the mouse or the keys **1** to **5**. A choice with a false `[if]` is hidden, or greyed out with its `[else]` reason and cannot be picked. **Esc** walks away: the talk ends and no effect happens.
 
-Choosing runs the choice's `{effects}` in order, then moves to its node, or ends the talk at `END`. Today the panel carries out `take hero <item> n`, `give hero <item> n`, `opinion npc hero n` (what the first thinks of the second changes by `n`, kept between -100 and 100) and `say`; the other verbs are read and checked but do nothing yet (`remember` and `flag` arrive with US-164). `opinion(npc, hero)` in a condition reads the real opinion.
+Choosing runs the choice's `{effects}` in order, then moves to its node, or ends the talk at `END`. The panel carries out `take hero <item> n`, `give hero <item> n`, `opinion npc hero n` (what the first thinks of the second changes by `n`, kept between -100 and 100), `say`, and the three that make a conversation matter later, described in the next section. `opinion(npc, hero)` in a condition reads the real opinion.
 
 ## Greetings (US-162)
 
@@ -86,6 +86,27 @@ Elder: The fire keeps you well, {hero}.
 ```
 
 Shipped examples: `greet-elder.dlg`, and two plain ones for anyone, `greet-friend.dlg` and `greet-friend-warm.dlg` (equally fitting, so the seeded stream chooses).
+
+## Being remembered: `remember`, `flag` and `chronicle` (US-164)
+
+What is said can matter later. Three effects write into the world, in a choice's `{...}`:
+
+| Effect | What it does | Example |
+|---|---|---|
+| `remember npc "text" [feeling]` | The person remembers that the hero did something, with a feeling from -100 (hateful) to 100 (wonderful), **10** when you leave it out. It is a real memory: a good feeling is a *Gift*, a bad one a *Quarrel*; from 60 either way it is kept for life, otherwise it fades after a while. People pass memories on when they talk, at **half strength** and marked as heard, so a few days later the friends of the person you insulted have heard it too (and think a little less of you). The `text` says what happened, as a short past clause with `{hero}`/`{npc}`, and small talk tells it as "the day Voll shared berries". | `remember npc "{hero} shared berries" 20` |
+| `flag name [value]` | A story note: the whole number `value`, **1** when you leave it out (0 is the same as never set). Read it back in a condition with `flag(name)`, in any script or interaction file: `-> Ask for the key [if flag(promised-hunt)] => key`. Flags are saved with the game and start empty in a new run. Names are words, hyphens allowed. | `flag promised-hunt` or `flag trust 3` |
+| `chronicle "line"` | Writes a line in the clan's chronicle, so the clan's story tells what the talk led to. Say why in the line. `{hero}` and `{npc}` are allowed. | `chronicle "{hero} promised {npc} a hunt"` |
+
+A choice that does all three (a promise worth remembering):
+
+```text
+=== start
+Talker: Will you hunt for me?
+-> Promise a hunt {flag promised-hunt; chronicle "{hero} promised {npc} a hunt"; remember npc "{hero} promised a hunt" 30} => thanks
+-> Not now => END
+```
+
+The generated small talk ("Be quiet") uses the same effects: the person's opinion of the hero falls by 10 and they remember it with a feeling of -40.
 
 ## Small talk: what people say when no script fits (US-163)
 
@@ -117,4 +138,4 @@ The lines are templates in `assets/data/dialogue/smalltalk.json`, read at start 
 
 ## Not in this story yet
 
-Writing a memory from a conversation (`remember`), flags and gossip of free-text memories (US-164) and bubbles between NPCs talking to each other (US-165) come in the next stories.
+Bubbles between NPCs talking to each other (`@pair` scripts) come in the next story (US-165).

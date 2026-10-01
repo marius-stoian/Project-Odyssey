@@ -39,6 +39,7 @@
 #include "sim/hero_life.h"
 #include "game/bubbles.h"
 #include "sim/dialogue_script.h"
+#include "sim/flag_store.h"
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
 #include "sim/interaction.h"
@@ -118,6 +119,12 @@ public:
     core::Pcg32& dialogueRandom() { return dialogueRng_; }
     // Generated small talk (US-163): what people say when no script fits them, and for `{smalltalk.topic}`.
     sim::rules::SmallTalk& smalltalk() { return smalltalk_; }
+    // Story notes set by conversations and interactions (`flag met-elder`), saved with the things (US-164).
+    sim::rules::FlagStore& flags() { return flags_; }
+    const sim::rules::FlagStore& flags() const { return flags_; }
+    // What a conversation leaves behind (US-164): a memory in someone's mind (see World::rememberConversation) and a line in the clan's chronicle.
+    bool rememberConversation(int holder, int other, const std::string& text, int feeling);
+    void chronicleLine(const std::string& text, int who, int other);
     int plantIndexById(int id) const;
     // What clan members and animals do on their own (US-154), and what they need to do it: the ground, the animals and the people to move.
     NpcLife& npcs() { return npcLife_; }
@@ -302,6 +309,7 @@ private:
     sim::rules::LoadReport interactionReport_;
     sim::rules::DialogueLibrary dialogues_;
     sim::rules::SmallTalk smalltalk_;
+    sim::rules::FlagStore flags_;
     Bubbles bubbles_;
     sim::rules::CooldownTable greetingCooldowns_;
     core::Pcg32 dialogueRng_{1, 8};

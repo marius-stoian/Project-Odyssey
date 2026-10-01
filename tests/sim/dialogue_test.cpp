@@ -82,7 +82,7 @@ TEST_CASE("US-160 elder-fire.dlg has three nodes, a conditional line and three c
     CHECK(start.choices[1].elseText == "You have no berries");
     REQUIRE(start.choices[1].effects.size() == 3);
     CHECK(start.choices[1].effects[0].source == "take hero berries 1");
-    CHECK(start.choices[1].effects[2].source == "remember npc \"{hero} shared berries\"");
+    CHECK(start.choices[1].effects[2].source == "remember npc \"{hero} shared berries\" 20");
     CHECK(start.choices[1].target == "thanks");
     CHECK(start.choices[1].notes.size() == 1); // the note above it is attached to it
     CHECK(start.choices[2].target == "END");

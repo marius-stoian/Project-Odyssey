@@ -72,7 +72,7 @@ private:
 };
 
 // The conversation a person has when no script was written for them (US-163): their line, then a friendly answer and a rude one (D-38).
-// The rude one costs 10 opinion.
+// The rude one costs 10 opinion and leaves a bad memory (-40).
 DlgScript smalltalkScript(const std::string& speaker, const std::string& line);
 
 // The one word the panel shows next to the NPC's name (D-38): how they feel about the hero, unless a need is pressing and they are not

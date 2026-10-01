@@ -276,12 +276,12 @@ std::optional<SaidLine> SmallTalk::say(const World& world, int npc, int hero, co
     for (const MemoryNote& note : person.notes) {
         Heard heard;
         heard.day = note.day;
-        heard.tokens["memory.what"] = note.text;
+        heard.tokens["memory.what"] = note.clause ? "the day " + note.text : note.text; // "the day Voll shared berries"
         heard.tokens["memory.who"] = "someone";
         heard.tokens["memory.when"] = whenWord(today, note.day);
         (note.secondHand ? gossip : memories).push_back(heard); // a heard note is a rumour with no names: it tells its text
         if (note.secondHand) {
-            gossip.back().tokens = {{"gossip.who", "someone"}, {"gossip.about", "someone"}, {"gossip.what", note.text}, {"gossip.feeling", feelingWord(note.feeling)}};
+            gossip.back().tokens = {{"gossip.who", "someone"}, {"gossip.about", "someone"}, {"gossip.what", note.clause ? "the day " + note.text : note.text}, {"gossip.feeling", feelingWord(note.feeling)}};
         }
     }
     std::stable_sort(memories.begin(), memories.end(), newerFirst);

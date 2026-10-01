@@ -594,6 +594,21 @@ std::string World::seasonPhrase() const {
     return "a hard time";
 }
 
+bool World::rememberConversation(int holder, int other, const std::string& text, int feeling) {
+    const auto count = static_cast<int>(people_.size());
+    if (holder < 0 || other < 0 || holder >= count || other >= count || holder == other || !people_[static_cast<std::size_t>(holder)].alive) return false;
+    Person& person = people_[static_cast<std::size_t>(holder)];
+    feeling = std::clamp(feeling, -100, 100);
+    const MemoryKind kind = feeling >= 0 ? MemoryKind::Gift : MemoryKind::Quarrel;
+    remember(person.memories, {other, holder, kind, today(), feeling, std::abs(feeling) >= 60, false, -1}, config_.social.memoryLimit);
+    if (!text.empty()) {
+        person.notes.push_back({text, today(), feeling, false, true});
+        constexpr std::size_t kMostNotes = 20; // a person keeps at most this many free-text memories, the oldest go first
+        if (person.notes.size() > kMostNotes) person.notes.erase(person.notes.begin());
+    }
+    return true;
+}
+
 bool World::talk(int speaker, int listener) {
     Person& from = people_[static_cast<std::size_t>(speaker)];
     Person& to = people_[static_cast<std::size_t>(listener)];
@@ -904,6 +919,7 @@ std::uint64_t World::hash() const {
             hasher.add(note.day);
             hasher.add(note.feeling);
             hasher.add(note.secondHand);
+            hasher.add(note.clause);
         }
         for (const int value : person.opinions) {
             hasher.add(value);

@@ -139,6 +139,7 @@ void OdysseyGame::resetPlay() {
     bubbles_.clear(); // a restart starts the run's talk afresh
     greetingCooldowns_.clear();
     smalltalk_.clear();
+    flags_.clear();
     dialogueRng_ = core::Pcg32(1, 8);
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
@@ -529,6 +530,11 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     clanView_.setHidden(life_->personId());
     clanView_.update(*clan_, map_);
     lastSavedDay_ = -1;
+    // A new clan is a new story: what was said, remembered and flagged in the last one does not carry over (US-162..US-164).
+    flags_.clear();
+    bubbles_.clear();
+    greetingCooldowns_.clear();
+    smalltalk_.clear();
     stats_.record("run-started", ticks_);
     if (tutorial) {
         if (tutorialScript_.steps.empty()) tutorialScript_ = loadTutorial(dataDirectory_ / "hero" / "tutorial.json");
@@ -738,6 +744,14 @@ bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {
     return true;
 }
 
+bool OdysseyGame::rememberConversation(int holder, int other, const std::string& text, int feeling) {
+    return clan_ && clan_->rememberConversation(holder, other, text, feeling);
+}
+
+void OdysseyGame::chronicleLine(const std::string& text, int who, int other) {
+    if (clan_) clan_->note(text, sim::kImportanceConversation, sim::EventKind::Note, who, other);
+}
+
 void OdysseyGame::changeOpinion(int who, int about, int delta) {
     const auto count = clan_ ? static_cast<int>(clan_->people().size()) : 0;
     if (who < 0 || about < 0 || who >= count || about >= count) return;
@@ -794,7 +808,7 @@ std::string OdysseyGame::thingsText() const {
     for (const WorldPlant& plant : plants_) {
         if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
     }
-    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}}.dump(1);
+    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}}.dump(1);
 }
 
 std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
@@ -807,6 +821,10 @@ std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
             if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
         }
         notes = actions_.loadPending(data.at("timers").dump(), actionClock_);
+        if (data.contains("flags")) { // saves from before US-164 have none
+            const std::vector<std::string> flagNotes = flags_.load(data.at("flags").dump());
+            notes.insert(notes.end(), flagNotes.begin(), flagNotes.end());
+        }
     } catch (const std::exception& error) {
         notes.push_back(std::string("things.json could not be read: ") + error.what());
     }

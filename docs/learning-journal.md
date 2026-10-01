@@ -1137,3 +1137,16 @@ One detail echoes the last story: `say` draws three random numbers *every time*,
 **Try it (15 minutes).** The manual checks in [docs/plans/US-163.md](plans/US-163.md); then add three templates to the `hunt` topic, press F5, and ask the elder about the hunt a few times.
 
 **Check yourself.** Why is a template that uses `{gossip.who}` a mistake in the topic `memory`, and what would the generator print if the file checker did not catch it?
+
+
+## M8: reuse beats invention (US-164)
+
+When you insult someone, the game has to make them *remember* it, and later have their friends hear about it. The tempting plan is a new "conversation memory" system. The better plan was to look at what the simulation already does: people already have **memories** (who did what to whom, with a feeling), already **gossip** (a talk may pass on the strongest memory the listener lacks, at half strength, marked as heard), and already change their **opinion** when they hear something bad. So a `remember` effect does one thing: it builds an ordinary `Memory` and hands it to the simulation's own `remember()` function. Gossip, forgetting and the chronicle work with no new code, and the acceptance test "two days later the friends have heard it at half strength" passes by using the real rules.
+
+Two small things are worth noticing. The feeling decides the *kind* of memory (a good one is a Gift, a bad one a Quarrel) and whether it is kept for life (strength 60 or more): a rule in one place instead of a choice every script author has to make. And **flags** are a tiny `std::map` from a name to a whole number. It is an *ordered* map on purpose: saving walks it in alphabetical order, so the saved file and the hash never depend on the order things were added, which is how determinism (Charter rule 6) is kept even for a thing as small as a note.
+
+**Where to look.** `World::rememberConversation` in [src/sim/world.cpp](../src/sim/world.cpp); `World::talk` (the gossip) just above it; `FlagStore` in [src/sim/flag_store.cpp](../src/sim/flag_store.cpp); the three effects in `GameEffectHost::apply` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-164.md](plans/US-164.md); then add `flag trust 1` to the elder's thanks node and a choice that appears only `[if flag(trust)]`.
+
+**Check yourself.** Why does `FlagStore::set` erase a flag when you set it to 0 instead of storing a 0, and what would two saves of the same game look like if it did not?
