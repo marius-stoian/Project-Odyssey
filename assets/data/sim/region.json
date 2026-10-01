@@ -1,0 +1,18 @@
+{
+  "size": 256,
+  "chunkSize": 32,
+  "lakeLevel": 140,
+  "mountainLevel": 800,
+  "riverBand": 14,
+  "forestMoisture": 560,
+  "caveNoise": 920,
+  "edgeWall": 8,
+  "flintPerMille": 25,
+  "woodPerMille": 160,
+  "berriesPerMille": 220,
+  "herdPerMille": 3,
+  "herdMinimum": 5,
+  "herdMaximum": 12,
+  "berryRegrowDays": 14,
+  "startNeedWithin": 20
+}

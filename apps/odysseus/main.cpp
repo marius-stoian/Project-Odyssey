@@ -4,18 +4,27 @@
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
+//   --new-game               start at the New Game screen (seed, Growing Period, Comfort)
+//   --region <seed>          play a generated region: land, resources, the clan at its start and two rival clans
+//   --save-dir <folder>      where the autosaves go (default: the user's save folder); --load brings the autosave back
+//   --clan-speed <n>         run the clan's simulation n ticks per game tick (fast forward for demos)
+//   --clan                   run the simulated clan in this level (levels marked "clan": true do it by themselves)
+//   --weather <name>         start under that weather, for example `steady rain` (screenshots and demos)
+//   --seed <number>          fix the weather sequence (the same seed gives the same weathers in the same order)
 //   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
 //   --drag <x1>:<y1>:<x2>:<y2>:<from>:<to>  hold the left button and move from one point to the other
 //   --point <x>:<y>:<from>:<to>  rest the pointer there without pressing (hover)
+//   --aim <x>:<y>:<from>:<to>  the same as --point: where the hero aims (Game mode); fire with --hold Attack:<from>:<to>
 //   --type <text>:<time>     type the text at that time
 //   --hold <Intent>:<from>:<to>  hold an intent (MoveUp, MoveDown, MoveLeft, MoveRight, Interact,
 //                            OpenMenu, SwitchWeapon, ModeGame, ModeEditor, Undo, Redo, Save, Delete,
-//                            ToggleGrid, Rotate, Erase, Confirm) between two times in seconds: scripted play for tests
+//                            ToggleGrid, Rotate, Erase, Confirm, Attack, Inspect, DevTools, Overlay, Slot1..Slot9) between two times in seconds: scripted play for tests
 #include "core/log.h"
 #include "core/version.h"
 #include "game/odyssey_game.h"
 #include "luna/engine/application.h"
 #include "luna/engine/physics_view.h"
+#include "luna/platform/crash.h"
 #include "luna/platform/system.h"
 #include "luna/platform/user_paths.h"
 
@@ -25,6 +34,7 @@
 #include <filesystem>
 #include <format>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -36,6 +46,14 @@ struct Arguments {
     std::filesystem::path screenshot;
     std::filesystem::path level;
     bool editor = false;
+    std::optional<std::uint64_t> seed; // fixes the weather sequence (US-138)
+    std::string weather;               // start under this weather (screenshots)
+    bool clan = false;                 // run the simulated clan in this level
+    int clanSpeed = 1;                 // clan simulation ticks per game tick (fast forward)
+    std::optional<std::uint64_t> region; // play a generated region
+    std::filesystem::path saveDirectory; // where autosaves go
+    bool load = false;                 // load the autosave at start
+    bool newGame = false;              // open the New Game screen
     std::vector<luna::engine::ScriptedHold> holds;
     std::vector<luna::engine::ScriptedPointer> pointer;
     std::vector<luna::engine::ScriptedText> typing;
@@ -60,6 +78,13 @@ luna::engine::Intent intentNamed(std::string_view name) {
     if (name == "Rotate") return Intent::Rotate;
     if (name == "Erase") return Intent::Erase;
     if (name == "Confirm") return Intent::Confirm;
+    if (name == "Attack") return Intent::Attack;
+    if (name == "Inspect") return Intent::Inspect;
+    if (name == "DevTools") return Intent::DevTools;
+    if (name == "Overlay") return Intent::Overlay;
+    if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
+        return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
+    }
     throw std::invalid_argument("unknown intent: " + std::string(name));
 }
 
@@ -79,7 +104,19 @@ Arguments parseArguments(int argc, char* argv[]) {
     Arguments arguments;
     for (int i = 1; i < argc; ++i) {
         const std::string_view name = argv[i];
-        if (name == "--editor") { // the one flag without a value
+        if (name == "--new-game") { // a flag without a value: start at the New Game screen
+            arguments.newGame = true;
+            continue;
+        }
+        if (name == "--load") { // a flag without a value: bring back the autosave
+            arguments.load = true;
+            continue;
+        }
+        if (name == "--clan") { // a flag without a value: run the simulated clan in this level
+            arguments.clan = true;
+            continue;
+        }
+        if (name == "--editor") { // a flag without a value
             arguments.editor = true;
             continue;
         }
@@ -90,6 +127,16 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.quitAfterSeconds = std::stod(argv[++i]);
         } else if (name == "--log-dir") {
             arguments.logDirectory = argv[++i];
+        } else if (name == "--region") {
+            arguments.region = std::stoull(argv[++i]);
+        } else if (name == "--save-dir") {
+            arguments.saveDirectory = argv[++i];
+        } else if (name == "--clan-speed") {
+            arguments.clanSpeed = std::stoi(argv[++i]);
+        } else if (name == "--weather") {
+            arguments.weather = argv[++i];
+        } else if (name == "--seed") {
+            arguments.seed = std::stoull(argv[++i]);
         } else if (name == "--level") {
             arguments.level = argv[++i];
         } else if (name == "--screenshot") {
@@ -104,7 +151,7 @@ Arguments parseArguments(int argc, char* argv[]) {
             const auto f = fields(argv[++i]);
             arguments.pointer.push_back({std::stod(f.at(4)), std::stod(f.at(5)), std::stoi(f.at(0)), std::stoi(f.at(1)), std::stoi(f.at(2)),
                                          std::stoi(f.at(3)), true, luna::engine::PointerButton::Left});
-        } else if (name == "--point") {
+        } else if (name == "--point" || name == "--aim") { // --aim is --point, named for what it does in Game mode
             const auto f = fields(argv[++i]);
             arguments.pointer.push_back({std::stod(f.at(2)), std::stod(f.at(3)), std::stoi(f.at(0)), std::stoi(f.at(1)), std::stoi(f.at(0)),
                                          std::stoi(f.at(1)), false, luna::engine::PointerButton::Left});
@@ -138,7 +185,36 @@ int main(int argc, char* argv[]) {
     std::cout << "Project Odyssey " << version << "\nLog: " << log.file().string() << '\n';
 
     try {
-        odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR, arguments.level);
+        // A packaged build (the zip, US-091) keeps assets/ next to odysseus.exe and its saves in the user's folder; a developer's
+        // build uses the source folder it was built from.
+        const std::filesystem::path packaged = luna::platform::executableDirectory() / "assets" / "data";
+        const bool isPackaged = std::filesystem::exists(packaged / "hero" / "hero.json");
+        odysseus::game::OdysseyGame game(isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR), arguments.level);
+        if (!arguments.saveDirectory.empty()) {
+            game.setSaveDirectory(arguments.saveDirectory);
+        } else if (isPackaged) {
+            game.setSaveDirectory(luna::platform::userDataDirectory() / "saves");
+        }
+        luna::platform::installCrashHandler(luna::platform::userDataDirectory() / "crash", game.saveDirectory());
+        if (arguments.region) {
+            game.loadRegion(*arguments.region);
+        }
+        if (arguments.load && !game.loadAutosave()) {
+            odysseus::core::logWarning("--load found nothing to load");
+        }
+        if (arguments.newGame) {
+            game.run().openNewGame();
+        }
+        if (arguments.clan) {
+            game.setClan(true);
+        }
+        game.setClanSpeed(arguments.clanSpeed);
+        if (arguments.seed) {
+            game.setWeatherSeed(*arguments.seed);
+        }
+        if (!arguments.weather.empty() && !game.setWeatherNamed(arguments.weather)) {
+            throw std::invalid_argument("unknown weather: " + arguments.weather);
+        }
         if (arguments.editor) {
             game.switchMode(odysseus::game::Mode::Editor);
         }
@@ -151,6 +227,9 @@ int main(int argc, char* argv[]) {
             odysseus::core::logInfo(std::format("Straw target at ({:.2f}, {:.2f}) m: {} hits, {:.1f} damage",
                                                 luna::engine::toDouble(target.base.x), luna::engine::toDouble(target.base.y),
                                                 target.hits, luna::engine::toDouble(target.damageTaken)));
+        }
+        if (const std::filesystem::path stats = game.finishSession(); !stats.empty()) {
+            odysseus::core::logInfo("Session statistics written to " + stats.string());
         }
         odysseus::core::logInfo("Shutting down");
         return exitCode;

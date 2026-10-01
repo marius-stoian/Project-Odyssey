@@ -26,15 +26,28 @@ struct CharacterKindDef {
     int hp = 100;
     int swordDamage = 5;
     bool enemy = true;      // the hero's sword can hit it
+    double reach = 1.5;     // metres: how far its strike back reaches (US-131)
+    bool animal = false;    // a creature of animals.json (US-137): one side-view picture from the content atlas; rames is its name there
 };
 
 struct Definitions {
     std::vector<TileKindDef> tiles;
     std::vector<CharacterKindDef> characters;
+    std::vector<std::string> loopingEffects; // names of the effects of effects.json that loop (US-138): what an Editor may place
+    std::vector<std::string> plants;    // names of plants.json (US-136): what a placed plant may be
+    std::vector<std::string> weapons;   // names a pickup may carry (US-134): the weapons of weapons.json, then the built-in demo weapons
 
     int tileNumber(const std::string& name) const;                     // -1 when unknown
     const CharacterKindDef* character(const std::string& name) const;  // nullptr when unknown
+    bool hasWeapon(const std::string& name) const;
+    bool hasPlant(const std::string& name) const;
+    bool hasLoopingEffect(const std::string& name) const;
 };
+
+// The demo weapons of M1b and US-029 (the physics spear throw, the plain sword slash) are not in
+// weapons.json; a pickup may still carry them (D-23).
+inline constexpr const char* kSpearThrowName = "Spear throw";
+inline constexpr const char* kSwordSlashName = "Sword";
 
 Definitions loadDefinitions(const std::filesystem::path& dataDirectory);
 
@@ -56,10 +69,37 @@ struct PlacedCharacter {
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 
-inline constexpr int kLevelVersion = 1;
+// Version 2 (US-134, US-136) adds weapon pickups and plants; version 1 files still load, without any.
+inline constexpr int kLevelVersion = 2;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;
+
+// A weapon lying in the level for the hero to find (US-134). Ids come from the same counter as
+// the characters' and are never reused within a level.
+struct PlacedPickup {
+    int id = 0;
+    std::string weapon;   // a name from weapons.json, or a built-in demo weapon
+    PixelPoint at;        // world pixels: the middle of the icon
+    friend bool operator==(const PlacedPickup&, const PlacedPickup&) = default;
+};
+
+// A plant growing in the level (US-136). Ids come from the same counter as the characters and pickups.
+// The feet are the middle of its bottom edge: the cell they are in is the one a big plant blocks.
+struct PlacedPlant {
+    int id = 0;
+    std::string kind;     // a name from plants.json
+    PixelPoint feet;      // world pixels
+    friend bool operator==(const PlacedPlant&, const PlacedPlant&) = default;
+};
+
+// A looping effect placed in the level (US-138): fireflies, a campfire, a portal. Same ids as the rest.
+struct PlacedEffect {
+    int id = 0;
+    std::string name;     // a looping effect of effects.json
+    PixelPoint at;        // world pixels: the middle of the effect
+    friend bool operator==(const PlacedEffect&, const PlacedEffect&) = default;
+};
 
 // A level: the ground, who stands where, and where the hero begins. Plain data.
 struct Level {
@@ -69,6 +109,10 @@ struct Level {
     int defaultGround = 0;               // tile number
     std::vector<int> ground;             // tile numbers, row after row
     std::vector<PlacedCharacter> characters;
+    std::vector<PlacedPickup> pickups;
+    std::vector<PlacedPlant> plants;
+    std::vector<PlacedEffect> effects;
+    bool clan = false;                   // the simulated clan lives here (US-032); written only when true
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
     int nextId = 1;

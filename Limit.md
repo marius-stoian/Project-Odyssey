@@ -2,7 +2,7 @@
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-09-30, after X-M2c (Milestone-40.md, AP-041). The next session starts here.
+**Last updated:** 2026-10-01 (latest): M6 built and stopped at kill gate 2 (D-GATE-M6, Milestone-55.md). Waiting for the owner. Earlier:  2026-10-01 (later): M5 built (Milestone-54.md, docs/gates/M5.md); next K-M6, US-090..US-092. Earlier note:  2026-10-01, M2d is fully built (US-130..US-141 and the hero-orientation fix); exit review in docs/gates/M2d.md (Milestone-51.md, AP-052). Nothing pushed since 5125364: the owner said "no tests or CI until M4". Next: K-M3 (ask the owner its design questions first).
 
 ## Where we are
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
@@ -14,7 +14,7 @@ This file is kept current after every story, so if a session stops (usage limit,
 - All of M2 is built (US-010..US-016 Done). **Kill Gate 1 failed** (owner, 2026-09-30: "not really a story"; D-GATE-M2 = Pivot). The owner chose the redesign (D-18): story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; he judges the retry alone.
 - Requirements v1.6 (Drive, mirrored in docs/project/requirements/): STO-02, STO-03, SDC-02, milestone M2b, epic E11, US-110..US-115. **Codex v1.6** (Anima) adds P-005, K-M2b, S-US-110..S-US-115, X-M2b; CI-006 resolved.
 - P-005 Done (status, decisions, CI-006 fix: first frame 3 s in Release, 15 s in Debug).
-- **M2 and M2b are DONE** (tags `m2-done`, `m2b-done`). Codex v1.7 adds **M2c Level editor** (US-120..US-126, brief docs/plans/M2c-editor-brief.md). **M2c is DONE** (`m2c-done`). **Next: K-M3, but only when the owner says so**, X-M2c, then K-M3.
+- **M2 and M2b are DONE** (tags `m2-done`, `m2b-done`). Codex v1.7 adds **M2c Level editor** (US-120..US-126, brief docs/plans/M2c-editor-brief.md). **M2c is DONE** (`m2c-done`). Codex v1.8 adds **M2d Content and combat** (US-130..US-138, brief docs/plans/M2d-content-brief.md; D-21). **Design decisions are the owner's (D-22): ask in chat, never delegate.** K-M2d, US-130..US-135, US-139, US-140 and US-141 Done (CI green). M2d is fully built (see docs/gates/M2d.md). **Next: K-M3**, after asking the owner its design questions; nothing pushed since 5125364 (no tests or CI until M4).
 - The M2 work stays on `qa`; `main` is still at `m1b-done` (M2 is not merged to main until the retry passes).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 

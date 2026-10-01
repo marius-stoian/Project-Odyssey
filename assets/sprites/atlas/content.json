@@ -1,0 +1,5490 @@
+{
+ "columns": 16,
+ "contentVersion": 1,
+ "frameCounts": {
+  "acacia tree": 1,
+  "acid rain": 4,
+  "acid splash": 4,
+  "acid trail": 4,
+  "agave": 1,
+  "air slash": 3,
+  "alien sky": 4,
+  "alien tree": 1,
+  "aloe": 1,
+  "alpaca": 1,
+  "angel staff": 1,
+  "apple tree": 1,
+  "arcane burst": 3,
+  "arcane crescent": 1,
+  "arcane orb": 3,
+  "arcane orb staff": 1,
+  "arcane orb still": 1,
+  "ash fall": 4,
+  "ash storm": 4,
+  "ash tree": 1,
+  "assault rifle": 1,
+  "asteroid shower": 4,
+  "aurora shimmer": 4,
+  "autumn leaf storm": 4,
+  "autumn tree": 1,
+  "azalea": 1,
+  "badger": 1,
+  "ball and chain": 1,
+  "bamboo": 1,
+  "banana plant": 1,
+  "baobab tree": 1,
+  "battle axe": 1,
+  "battle rifle": 1,
+  "bear": 1,
+  "beaver": 1,
+  "begonia": 1,
+  "big fire": 3,
+  "bio cannon": 1,
+  "bioluminescent rain": 4,
+  "birch tree": 1,
+  "bird of paradise": 1,
+  "bison": 1,
+  "black hole": 3,
+  "black hole gun": 1,
+  "black hole still": 1,
+  "black ice sheen": 4,
+  "blackberry bush": 1,
+  "blizzard": 3,
+  "blizzard weather": 4,
+  "blood bow": 1,
+  "blood chain sickle": 1,
+  "blood chakram": 1,
+  "blood greatsword": 1,
+  "blood pistol": 1,
+  "blood rain": 4,
+  "blood ring blade": 1,
+  "blood spear": 1,
+  "blood splash": 3,
+  "blood sword": 1,
+  "blood trail": 3,
+  "blue fantasy tree": 1,
+  "blue lotus": 1,
+  "blue mushroom": 1,
+  "blue star": 1,
+  "bluebell": 1,
+  "blueberry bush": 1,
+  "boar": 1,
+  "bone beast gun": 1,
+  "bone scimitar": 1,
+  "bone scythe": 1,
+  "bone tree": 1,
+  "bonsai tree": 1,
+  "bromeliad": 1,
+  "brown mushroom": 1,
+  "bubble": 3,
+  "bubbles": 1,
+  "buffalo": 1,
+  "bull": 1,
+  "bush": 1,
+  "butterfly swarm": 4,
+  "cactus": 1,
+  "calla lily": 1,
+  "camel": 1,
+  "camellia": 1,
+  "carnation": 1,
+  "carrot top": 1,
+  "cat": 1,
+  "cattail": 1,
+  "cedar tree": 1,
+  "chain lightning": 3,
+  "chain lightning weather": 4,
+  "cheetah": 1,
+  "cherry blossom": 1,
+  "cherry tree": 1,
+  "chestnut tree": 1,
+  "chrysanthemum": 1,
+  "claw gauntlet": 1,
+  "clearing clouds": 4,
+  "close lightning": 4,
+  "clover": 1,
+  "coastal storm": 4,
+  "coconut palm": 1,
+  "cold breath haze": 4,
+  "cold front sweep": 4,
+  "comet tails": 4,
+  "comet trail": 3,
+  "coral tree": 1,
+  "corn": 1,
+  "cotton": 1,
+  "cougar": 1,
+  "cow": 1,
+  "cranberry": 1,
+  "crimson axe": 1,
+  "crimson cleaver": 1,
+  "crossbow": 1,
+  "crystal snow": 4,
+  "crystal tree": 1,
+  "crystal wand": 1,
+  "curse": 3,
+  "cyclone spiral": 4,
+  "cypress tree": 1,
+  "daffodil": 1,
+  "dagger": 1,
+  "dahlia": 1,
+  "dark explosion": 3,
+  "dark greatsword": 1,
+  "dark mist": 3,
+  "dark morel": 1,
+  "dark portal": 1,
+  "dark storm clouds": 4,
+  "date palm": 1,
+  "dawn dew sparkle": 4,
+  "dead tree": 1,
+  "death aura": 3,
+  "deer": 1,
+  "dense fog": 4,
+  "desert shrub": 1,
+  "desert whirlwind": 4,
+  "dirt explosion": 3,
+  "distant lightning": 4,
+  "divine burst": 3,
+  "divine light": 1,
+  "doe": 1,
+  "dog": 1,
+  "dogwood tree": 1,
+  "donkey": 1,
+  "drifting mist": 4,
+  "drone blaster": 1,
+  "drone launcher": 1,
+  "druid staff": 1,
+  "dust": 4,
+  "dust breeze": 4,
+  "dust storm": 4,
+  "earth burst": 1,
+  "earth spike": 4,
+  "earth spikes": 1,
+  "earthquake": 1,
+  "eclipse gloom": 4,
+  "electric ball": 3,
+  "electric burst": 3,
+  "electric ring": 3,
+  "electric storm": 4,
+  "electric tree": 1,
+  "elephant": 1,
+  "elk": 1,
+  "elm tree": 1,
+  "ember": 3,
+  "ember burst": 1,
+  "ember drift": 4,
+  "ember sparks": 1,
+  "energy beams": 4,
+  "energy spear": 1,
+  "evening mist": 4,
+  "explosion large": 4,
+  "explosion small": 3,
+  "fast clouds": 4,
+  "feather": 4,
+  "fern": 1,
+  "fig tree": 1,
+  "fire ball": 3,
+  "fire burst": 1,
+  "fire comet": 1,
+  "fire explosion": 1,
+  "fire flail": 1,
+  "fire nova": 3,
+  "fire orb": 1,
+  "fire pillar": 1,
+  "fire slash": 1,
+  "fire spark": 4,
+  "fire staff": 1,
+  "fire storm": 1,
+  "fire trail": 4,
+  "fire tree": 1,
+  "fire trident": 1,
+  "fire whip": 1,
+  "fire wisp": 1,
+  "fireball": 1,
+  "fireflies": 4,
+  "firestorm wind": 4,
+  "flame": 4,
+  "flame projector": 1,
+  "flame sword": 1,
+  "flamethrower": 1,
+  "flat mushroom": 1,
+  "flintlock pistol": 1,
+  "floating lanterns": 4,
+  "floating spores": 4,
+  "fog": 4,
+  "fox": 1,
+  "foxglove": 1,
+  "freezing rain": 4,
+  "frost axe": 1,
+  "frost blaster": 1,
+  "frost blaster rifle": 1,
+  "frost bow": 1,
+  "frost cannon": 1,
+  "frost chakram": 1,
+  "frost gust": 4,
+  "frost halberd": 1,
+  "frost morning star": 1,
+  "frost nova": 3,
+  "frost nunchaku": 1,
+  "frost orb": 1,
+  "frost ray pistol": 1,
+  "frost shuriken": 1,
+  "frost staff": 1,
+  "frost storm": 1,
+  "frost sword": 1,
+  "frost wand": 1,
+  "fuchsia": 1,
+  "galaxy spiral": 4,
+  "garlic": 1,
+  "gatling cannon": 1,
+  "gatling gun": 1,
+  "geothermal steam": 4,
+  "geranium": 1,
+  "ginkgo tree": 1,
+  "giraffe": 1,
+  "glacier": 1,
+  "glow mushroom": 1,
+  "glowing tree": 1,
+  "goat": 1,
+  "gold spark": 1,
+  "golden boomerang": 1,
+  "golden bow": 1,
+  "golden chakram": 1,
+  "golden glaive": 1,
+  "golden halberd": 1,
+  "golden kusarigama": 1,
+  "golden lavender": 1,
+  "golden rapier": 1,
+  "golden rifle": 1,
+  "grape vine": 1,
+  "grass": 1,
+  "gravity hammer": 1,
+  "great tornado": 1,
+  "great wave": 1,
+  "green gas front": 4,
+  "grey wolf": 1,
+  "ground blizzard": 4,
+  "ground crack": 4,
+  "gust front": 4,
+  "hail": 4,
+  "halberd": 1,
+  "healing glow": 3,
+  "healing orb": 1,
+  "heat shimmer": 4,
+  "heat wave": 4,
+  "heavy crossbow": 1,
+  "heavy rain": 4,
+  "heavy snowfall": 4,
+  "heavy war hammer": 1,
+  "heliconia": 1,
+  "hibiscus": 1,
+  "hippopotamus": 1,
+  "holy beam": 1,
+  "holy burst": 1,
+  "holy light": 3,
+  "holy orb": 1,
+  "holy pillar": 1,
+  "holy rays": 1,
+  "holy ring": 1,
+  "holy slash": 1,
+  "horse": 1,
+  "hunting rifle": 1,
+  "hurricane bands": 4,
+  "hydrangea": 1,
+  "hyena": 1,
+  "ice ball": 1,
+  "ice beam": 1,
+  "ice beam gun": 1,
+  "ice burst": 1,
+  "ice comet": 1,
+  "ice crystal": 1,
+  "ice crystal sword": 1,
+  "ice eruption": 1,
+  "ice explosion": 3,
+  "ice fog": 4,
+  "ice pellets": 4,
+  "ice pillar": 1,
+  "ice shard": 4,
+  "ice shards": 1,
+  "ice shatter": 1,
+  "ice slash": 1,
+  "ice spike": 4,
+  "ice spikes": 1,
+  "ice spire": 1,
+  "ice tree": 1,
+  "inferno": 1,
+  "ion cannon": 1,
+  "iris": 1,
+  "iron flail": 1,
+  "iron maul": 1,
+  "iron spear": 1,
+  "iron sword": 1,
+  "ivy": 1,
+  "jacaranda tree": 1,
+  "jackal": 1,
+  "jaguar": 1,
+  "jungle tree": 1,
+  "katana": 1,
+  "knight sword": 1,
+  "laser crossbow": 1,
+  "lavender": 1,
+  "leaf drift": 4,
+  "leaf swirl": 4,
+  "leaf swirl weather": 4,
+  "lemon tree": 1,
+  "leopard": 1,
+  "life steal": 3,
+  "light arrow": 1,
+  "light drizzle": 4,
+  "light snow": 4,
+  "light streaks": 1,
+  "lightning arc": 1,
+  "lightning bolt": 4,
+  "lightning bolt still": 1,
+  "lightning chain": 1,
+  "lightning spark": 3,
+  "lightning spear": 1,
+  "lightning strike": 1,
+  "lily": 1,
+  "linden tree": 1,
+  "lion": 1,
+  "llama": 1,
+  "locust swarm": 4,
+  "long rifle": 1,
+  "long spear": 1,
+  "lotus": 1,
+  "low cloud bank": 4,
+  "lynx": 1,
+  "magic circle": 3,
+  "magic missile": 4,
+  "magic rainbows": 4,
+  "magic trail": 4,
+  "magnolia": 1,
+  "magnolia tree": 1,
+  "magnum": 1,
+  "mana explosion": 3,
+  "mangrove": 1,
+  "maple tree": 1,
+  "marigold": 1,
+  "meteor explosion": 3,
+  "meteor shower": 4,
+  "meteoric snow": 4,
+  "meteors": 4,
+  "microburst": 4,
+  "mirage shimmer": 4,
+  "monsoon burst": 4,
+  "moonflower": 1,
+  "moonlit mist": 4,
+  "moose": 1,
+  "morel": 1,
+  "morning fog lift": 4,
+  "morning star": 1,
+  "moss": 1,
+  "mud splash": 4,
+  "mushroom tree": 1,
+  "nature burst": 1,
+  "nature circle": 1,
+  "nature explosion": 3,
+  "nature healing": 3,
+  "nature leaf": 4,
+  "nature pillar": 1,
+  "nature ring": 1,
+  "nature staff": 1,
+  "nightshade": 1,
+  "oak tree": 1,
+  "ocean mist": 4,
+  "olive tree": 1,
+  "onion grass": 1,
+  "orange tree": 1,
+  "orchid": 1,
+  "otter": 1,
+  "overcast bands": 4,
+  "palm leaf": 1,
+  "pansy": 1,
+  "papyrus": 1,
+  "peach tree": 1,
+  "pear tree": 1,
+  "peony": 1,
+  "pepper plant": 1,
+  "petal burst": 4,
+  "petunia": 1,
+  "pig": 1,
+  "pine tree": 1,
+  "pink lotus": 1,
+  "plasma axe": 1,
+  "plasma blaster": 1,
+  "plasma cannon": 1,
+  "plasma explosion": 3,
+  "plasma pistol": 1,
+  "plasma storm": 4,
+  "plum tree": 1,
+  "plumeria": 1,
+  "poison burst": 4,
+  "poison cloud": 3,
+  "poison cloud large": 1,
+  "poison cloud still": 1,
+  "poison comet": 1,
+  "poison drip": 1,
+  "poison fog": 1,
+  "poison slash": 1,
+  "poison splash": 1,
+  "pollen drift": 4,
+  "poplar tree": 1,
+  "poppy": 1,
+  "porcupine": 1,
+  "portal close": 3,
+  "portal idle": 2,
+  "portal open": 3,
+  "potato plant": 1,
+  "power fist": 1,
+  "puddle ripple": 4,
+  "purple fantasy tree": 1,
+  "purple lotus": 1,
+  "purple mushroom": 1,
+  "purple storm": 4,
+  "rabbit": 1,
+  "raccoon": 1,
+  "radioactive rain": 4,
+  "rainbow after rain": 4,
+  "rainforest tree": 1,
+  "rapier": 1,
+  "raspberry bush": 1,
+  "reality distortion": 2,
+  "recurve bow": 1,
+  "red blaster": 1,
+  "red carbine": 1,
+  "red energy blade": 1,
+  "red fantasy tree": 1,
+  "red hibiscus": 1,
+  "red minigun": 1,
+  "red morel": 1,
+  "red mushroom": 1,
+  "red star": 1,
+  "red war axe": 1,
+  "redwood": 1,
+  "reed": 1,
+  "reindeer": 1,
+  "revolver": 1,
+  "rhino": 1,
+  "rhododendron": 1,
+  "rice": 1,
+  "rime frost": 4,
+  "ring blade": 1,
+  "rock burst": 3,
+  "rock debris": 4,
+  "rock debris still": 1,
+  "rock spires": 1,
+  "rocket launcher": 1,
+  "rolling clouds": 4,
+  "rose": 1,
+  "sand burst": 4,
+  "sand gust": 4,
+  "sand tornado": 4,
+  "sandstorm": 4,
+  "scimitar": 1,
+  "sea storm spray": 4,
+  "sequoia": 1,
+  "shadow pillar": 1,
+  "shadow portal": 2,
+  "shadow slash": 3,
+  "shadow slash still": 1,
+  "shadow staff": 1,
+  "shadow twin blades": 1,
+  "sheep": 1,
+  "shelf fungus": 1,
+  "shock rifle": 1,
+  "shockwave": 4,
+  "shotgun": 1,
+  "skunk": 1,
+  "slanted rain": 4,
+  "sleet": 4,
+  "small sunflower": 1,
+  "small tornado": 1,
+  "smoke cloud": 1,
+  "smoke puff": 4,
+  "smoke puff still": 1,
+  "smoke trail": 4,
+  "snapdragon": 1,
+  "sniper rifle": 1,
+  "snow": 4,
+  "snow burst": 3,
+  "snow dust devil": 4,
+  "snow flurry": 4,
+  "snow leopard": 1,
+  "snowy tree": 1,
+  "solar flare sky": 4,
+  "sonic blaster": 1,
+  "soul release": 4,
+  "space rift": 3,
+  "spark": 4,
+  "spell cast": 3,
+  "spiked flail": 1,
+  "spiked mace": 1,
+  "spirit tree": 1,
+  "spore tree": 1,
+  "spruce tree": 1,
+  "squirrel": 1,
+  "stag": 1,
+  "star burst": 3,
+  "starry frost": 4,
+  "steady rain": 4,
+  "steam vent": 4,
+  "steel battle axe": 1,
+  "steel revolver": 1,
+  "steel star": 1,
+  "stone spires": 1,
+  "storm bow": 1,
+  "storm rain": 4,
+  "storm staff": 1,
+  "strawberry": 1,
+  "succulent": 1,
+  "sugarcane": 1,
+  "sun mace": 1,
+  "sun shower": 4,
+  "sun staff": 1,
+  "sun sword": 1,
+  "sunbeams": 4,
+  "sunflower": 1,
+  "sunrise haze": 4,
+  "swamp haze": 4,
+  "swamp tree": 1,
+  "tall grass": 1,
+  "tall mushroom": 1,
+  "tech tree": 1,
+  "teleport": 2,
+  "teleport trail": 4,
+  "thorn ring": 1,
+  "thorn spike": 4,
+  "thorn whip": 1,
+  "throwing knives": 1,
+  "thunder hammer": 1,
+  "thunder strike": 3,
+  "thunderstorm": 1,
+  "thunderstorm weather": 4,
+  "tidal wave": 1,
+  "tiger": 1,
+  "time warp": 2,
+  "tomato plant": 1,
+  "tornado": 2,
+  "tornado funnel": 4,
+  "toxic bubble": 3,
+  "toxic skull": 1,
+  "toxic smog": 4,
+  "tree growth": 4,
+  "trident": 1,
+  "tropical squall": 4,
+  "truffle": 1,
+  "tsunami": 1,
+  "tulip": 1,
+  "twilight haze": 4,
+  "twin daggers": 1,
+  "twin stars": 1,
+  "venom blaster": 1,
+  "venom chain": 1,
+  "venom flail": 1,
+  "venom launcher": 1,
+  "venom pistol": 1,
+  "venom recurve": 1,
+  "venom rifle": 1,
+  "venom scythe": 1,
+  "venom shuriken": 1,
+  "venom staff": 1,
+  "venom sword": 1,
+  "vine": 1,
+  "vines": 4,
+  "violet energy blade": 1,
+  "void blaster": 1,
+  "void bow": 1,
+  "void burst": 1,
+  "void cannon": 1,
+  "void chain": 1,
+  "void chakram": 1,
+  "void circle": 1,
+  "void comet": 1,
+  "void crossbow": 1,
+  "void disc": 1,
+  "void dome": 1,
+  "void eye": 1,
+  "void galaxy": 1,
+  "void katana": 1,
+  "void lance": 1,
+  "void orb": 1,
+  "void pillar": 1,
+  "void pulse gun": 1,
+  "void rifle": 1,
+  "void ring": 1,
+  "void scythe": 1,
+  "void slash": 1,
+  "void sniper": 1,
+  "void spiral": 1,
+  "void staff": 1,
+  "void tree": 1,
+  "void vortex": 1,
+  "volcanic smoke": 4,
+  "war hammer": 1,
+  "water buffalo": 1,
+  "water burst": 1,
+  "water circle": 1,
+  "water drop": 4,
+  "water explosion": 3,
+  "water geyser": 1,
+  "water hyacinth": 1,
+  "water jet": 4,
+  "water lily": 1,
+  "water ring": 3,
+  "water slash": 1,
+  "water splash": 4,
+  "water wave": 4,
+  "waterfall": 1,
+  "waterspout": 4,
+  "wave spray gale": 4,
+  "wheat": 1,
+  "whirlpool": 3,
+  "white peony": 1,
+  "whiteout": 4,
+  "wild pig": 1,
+  "willow tree": 1,
+  "wind comet": 1,
+  "wind gust": 4,
+  "wind slash": 1,
+  "wind swirl": 1,
+  "wind tornado": 1,
+  "wind trail": 4,
+  "wisteria": 1,
+  "wooden crossbow": 1,
+  "wooden longbow": 1,
+  "yak": 1,
+  "yellow hibiscus": 1,
+  "yucca": 1,
+  "zebra": 1
+ },
+ "frames": {
+  "acacia tree": [
+   "trees",
+   18
+  ],
+  "acid rain.0": [
+   "weather",
+   192
+  ],
+  "acid rain.1": [
+   "weather",
+   193
+  ],
+  "acid rain.2": [
+   "weather",
+   194
+  ],
+  "acid rain.3": [
+   "weather",
+   195
+  ],
+  "acid splash.0": [
+   "effects",
+   282
+  ],
+  "acid splash.1": [
+   "effects",
+   283
+  ],
+  "acid splash.2": [
+   "effects",
+   284
+  ],
+  "acid splash.3": [
+   "effects",
+   285
+  ],
+  "acid trail.0": [
+   "effects",
+   286
+  ],
+  "acid trail.1": [
+   "effects",
+   287
+  ],
+  "acid trail.2": [
+   "effects",
+   288
+  ],
+  "acid trail.3": [
+   "effects",
+   289
+  ],
+  "agave": [
+   "plants-tall",
+   5
+  ],
+  "air slash.0": [
+   "effects",
+   231
+  ],
+  "air slash.1": [
+   "effects",
+   232
+  ],
+  "air slash.2": [
+   "effects",
+   233
+  ],
+  "alien sky.0": [
+   "weather",
+   396
+  ],
+  "alien sky.1": [
+   "weather",
+   397
+  ],
+  "alien sky.2": [
+   "weather",
+   398
+  ],
+  "alien sky.3": [
+   "weather",
+   399
+  ],
+  "alien tree": [
+   "trees",
+   46
+  ],
+  "aloe": [
+   "plants-small",
+   7
+  ],
+  "alpaca": [
+   "animals",
+   29
+  ],
+  "angel staff": [
+   "icons",
+   69
+  ],
+  "apple tree": [
+   "trees",
+   3
+  ],
+  "arcane burst.0": [
+   "effects",
+   310
+  ],
+  "arcane burst.1": [
+   "effects",
+   311
+  ],
+  "arcane burst.2": [
+   "effects",
+   312
+  ],
+  "arcane crescent": [
+   "effects",
+   16
+  ],
+  "arcane orb staff": [
+   "icons",
+   66
+  ],
+  "arcane orb still": [
+   "effects",
+   52
+  ],
+  "arcane orb.0": [
+   "effects",
+   307
+  ],
+  "arcane orb.1": [
+   "effects",
+   308
+  ],
+  "arcane orb.2": [
+   "effects",
+   309
+  ],
+  "ash fall.0": [
+   "weather",
+   176
+  ],
+  "ash fall.1": [
+   "weather",
+   177
+  ],
+  "ash fall.2": [
+   "weather",
+   178
+  ],
+  "ash fall.3": [
+   "weather",
+   179
+  ],
+  "ash storm.0": [
+   "weather",
+   180
+  ],
+  "ash storm.1": [
+   "weather",
+   181
+  ],
+  "ash storm.2": [
+   "weather",
+   182
+  ],
+  "ash storm.3": [
+   "weather",
+   183
+  ],
+  "ash tree": [
+   "trees",
+   22
+  ],
+  "assault rifle": [
+   "icons",
+   81
+  ],
+  "asteroid shower.0": [
+   "effects",
+   414
+  ],
+  "asteroid shower.1": [
+   "effects",
+   415
+  ],
+  "asteroid shower.2": [
+   "effects",
+   416
+  ],
+  "asteroid shower.3": [
+   "effects",
+   417
+  ],
+  "aurora shimmer.0": [
+   "weather",
+   252
+  ],
+  "aurora shimmer.1": [
+   "weather",
+   253
+  ],
+  "aurora shimmer.2": [
+   "weather",
+   254
+  ],
+  "aurora shimmer.3": [
+   "weather",
+   255
+  ],
+  "autumn leaf storm.0": [
+   "weather",
+   164
+  ],
+  "autumn leaf storm.1": [
+   "weather",
+   165
+  ],
+  "autumn leaf storm.2": [
+   "weather",
+   166
+  ],
+  "autumn leaf storm.3": [
+   "weather",
+   167
+  ],
+  "autumn tree": [
+   "trees",
+   34
+  ],
+  "azalea": [
+   "plants-tall",
+   13
+  ],
+  "badger": [
+   "animals",
+   45
+  ],
+  "ball and chain": [
+   "icons",
+   121
+  ],
+  "bamboo": [
+   "plants-tall",
+   3
+  ],
+  "banana plant": [
+   "plants-tall",
+   2
+  ],
+  "baobab tree": [
+   "trees",
+   19
+  ],
+  "battle axe": [
+   "icons",
+   107
+  ],
+  "battle rifle": [
+   "icons",
+   135
+  ],
+  "bear": [
+   "animals",
+   2
+  ],
+  "beaver": [
+   "animals",
+   46
+  ],
+  "begonia": [
+   "plants-small",
+   33
+  ],
+  "big fire.0": [
+   "effects",
+   115
+  ],
+  "big fire.1": [
+   "effects",
+   116
+  ],
+  "big fire.2": [
+   "effects",
+   117
+  ],
+  "bio cannon": [
+   "icons",
+   145
+  ],
+  "bioluminescent rain.0": [
+   "weather",
+   384
+  ],
+  "bioluminescent rain.1": [
+   "weather",
+   385
+  ],
+  "bioluminescent rain.2": [
+   "weather",
+   386
+  ],
+  "bioluminescent rain.3": [
+   "weather",
+   387
+  ],
+  "birch tree": [
+   "trees",
+   15
+  ],
+  "bird of paradise": [
+   "plants-tall",
+   15
+  ],
+  "bison": [
+   "animals",
+   26
+  ],
+  "black hole gun": [
+   "icons",
+   97
+  ],
+  "black hole still": [
+   "effects",
+   76
+  ],
+  "black hole.0": [
+   "effects",
+   430
+  ],
+  "black hole.1": [
+   "effects",
+   431
+  ],
+  "black hole.2": [
+   "effects",
+   432
+  ],
+  "black ice sheen.0": [
+   "weather",
+   284
+  ],
+  "black ice sheen.1": [
+   "weather",
+   285
+  ],
+  "black ice sheen.2": [
+   "weather",
+   286
+  ],
+  "black ice sheen.3": [
+   "weather",
+   287
+  ],
+  "blackberry bush": [
+   "plants-tall",
+   33
+  ],
+  "blizzard weather.0": [
+   "weather",
+   52
+  ],
+  "blizzard weather.1": [
+   "weather",
+   53
+  ],
+  "blizzard weather.2": [
+   "weather",
+   54
+  ],
+  "blizzard weather.3": [
+   "weather",
+   55
+  ],
+  "blizzard.0": [
+   "effects",
+   222
+  ],
+  "blizzard.1": [
+   "effects",
+   223
+  ],
+  "blizzard.2": [
+   "effects",
+   224
+  ],
+  "blood bow": [
+   "icons",
+   39
+  ],
+  "blood chain sickle": [
+   "icons",
+   56
+  ],
+  "blood chakram": [
+   "icons",
+   47
+  ],
+  "blood greatsword": [
+   "icons",
+   3
+  ],
+  "blood pistol": [
+   "icons",
+   77
+  ],
+  "blood rain.0": [
+   "weather",
+   336
+  ],
+  "blood rain.1": [
+   "weather",
+   337
+  ],
+  "blood rain.2": [
+   "weather",
+   338
+  ],
+  "blood rain.3": [
+   "weather",
+   339
+  ],
+  "blood ring blade": [
+   "icons",
+   43
+  ],
+  "blood spear": [
+   "icons",
+   23
+  ],
+  "blood splash.0": [
+   "effects",
+   361
+  ],
+  "blood splash.1": [
+   "effects",
+   362
+  ],
+  "blood splash.2": [
+   "effects",
+   363
+  ],
+  "blood sword": [
+   "icons",
+   123
+  ],
+  "blood trail.0": [
+   "effects",
+   364
+  ],
+  "blood trail.1": [
+   "effects",
+   365
+  ],
+  "blood trail.2": [
+   "effects",
+   366
+  ],
+  "blue fantasy tree": [
+   "trees",
+   41
+  ],
+  "blue lotus": [
+   "plants-small",
+   40
+  ],
+  "blue mushroom": [
+   "plants-small",
+   51
+  ],
+  "blue star": [
+   "effects",
+   1
+  ],
+  "bluebell": [
+   "plants-small",
+   25
+  ],
+  "blueberry bush": [
+   "plants-tall",
+   31
+  ],
+  "boar": [
+   "animals",
+   8
+  ],
+  "bone beast gun": [
+   "icons",
+   99
+  ],
+  "bone scimitar": [
+   "icons",
+   5
+  ],
+  "bone scythe": [
+   "icons",
+   26
+  ],
+  "bone tree": [
+   "trees",
+   49
+  ],
+  "bonsai tree": [
+   "trees",
+   32
+  ],
+  "bromeliad": [
+   "plants-small",
+   28
+  ],
+  "brown mushroom": [
+   "plants-small",
+   49
+  ],
+  "bubble.0": [
+   "effects",
+   192
+  ],
+  "bubble.1": [
+   "effects",
+   193
+  ],
+  "bubble.2": [
+   "effects",
+   194
+  ],
+  "bubbles": [
+   "effects",
+   9
+  ],
+  "buffalo": [
+   "animals",
+   25
+  ],
+  "bull": [
+   "animals",
+   31
+  ],
+  "bush": [
+   "plants-tall",
+   0
+  ],
+  "butterfly swarm.0": [
+   "effects",
+   403
+  ],
+  "butterfly swarm.1": [
+   "effects",
+   404
+  ],
+  "butterfly swarm.2": [
+   "effects",
+   405
+  ],
+  "butterfly swarm.3": [
+   "effects",
+   406
+  ],
+  "cactus": [
+   "plants-tall",
+   4
+  ],
+  "calla lily": [
+   "plants-tall",
+   17
+  ],
+  "camel": [
+   "animals",
+   27
+  ],
+  "camellia": [
+   "plants-tall",
+   12
+  ],
+  "carnation": [
+   "plants-small",
+   23
+  ],
+  "carrot top": [
+   "plants-small",
+   44
+  ],
+  "cat": [
+   "animals",
+   41
+  ],
+  "cattail": [
+   "plants-tall",
+   20
+  ],
+  "cedar tree": [
+   "trees",
+   17
+  ],
+  "chain lightning weather.0": [
+   "weather",
+   32
+  ],
+  "chain lightning weather.1": [
+   "weather",
+   33
+  ],
+  "chain lightning weather.2": [
+   "weather",
+   34
+  ],
+  "chain lightning weather.3": [
+   "weather",
+   35
+  ],
+  "chain lightning.0": [
+   "effects",
+   249
+  ],
+  "chain lightning.1": [
+   "effects",
+   250
+  ],
+  "chain lightning.2": [
+   "effects",
+   251
+  ],
+  "cheetah": [
+   "animals",
+   14
+  ],
+  "cherry blossom": [
+   "plants-small",
+   18
+  ],
+  "cherry tree": [
+   "trees",
+   7
+  ],
+  "chestnut tree": [
+   "trees",
+   25
+  ],
+  "chrysanthemum": [
+   "plants-small",
+   31
+  ],
+  "claw gauntlet": [
+   "icons",
+   120
+  ],
+  "clearing clouds.0": [
+   "weather",
+   116
+  ],
+  "clearing clouds.1": [
+   "weather",
+   117
+  ],
+  "clearing clouds.2": [
+   "weather",
+   118
+  ],
+  "clearing clouds.3": [
+   "weather",
+   119
+  ],
+  "close lightning.0": [
+   "weather",
+   28
+  ],
+  "close lightning.1": [
+   "weather",
+   29
+  ],
+  "close lightning.2": [
+   "weather",
+   30
+  ],
+  "close lightning.3": [
+   "weather",
+   31
+  ],
+  "clover": [
+   "plants-small",
+   2
+  ],
+  "coastal storm.0": [
+   "weather",
+   308
+  ],
+  "coastal storm.1": [
+   "weather",
+   309
+  ],
+  "coastal storm.2": [
+   "weather",
+   310
+  ],
+  "coastal storm.3": [
+   "weather",
+   311
+  ],
+  "coconut palm": [
+   "trees",
+   10
+  ],
+  "cold breath haze.0": [
+   "weather",
+   96
+  ],
+  "cold breath haze.1": [
+   "weather",
+   97
+  ],
+  "cold breath haze.2": [
+   "weather",
+   98
+  ],
+  "cold breath haze.3": [
+   "weather",
+   99
+  ],
+  "cold front sweep.0": [
+   "weather",
+   248
+  ],
+  "cold front sweep.1": [
+   "weather",
+   249
+  ],
+  "cold front sweep.2": [
+   "weather",
+   250
+  ],
+  "cold front sweep.3": [
+   "weather",
+   251
+  ],
+  "comet tails.0": [
+   "weather",
+   344
+  ],
+  "comet tails.1": [
+   "weather",
+   345
+  ],
+  "comet tails.2": [
+   "weather",
+   346
+  ],
+  "comet tails.3": [
+   "weather",
+   347
+  ],
+  "comet trail.0": [
+   "effects",
+   411
+  ],
+  "comet trail.1": [
+   "effects",
+   412
+  ],
+  "comet trail.2": [
+   "effects",
+   413
+  ],
+  "coral tree": [
+   "trees",
+   48
+  ],
+  "corn": [
+   "plants-tall",
+   25
+  ],
+  "cotton": [
+   "plants-tall",
+   27
+  ],
+  "cougar": [
+   "animals",
+   10
+  ],
+  "cow": [
+   "animals",
+   30
+  ],
+  "cranberry": [
+   "plants-tall",
+   34
+  ],
+  "crimson axe": [
+   "icons",
+   11
+  ],
+  "crimson cleaver": [
+   "icons",
+   8
+  ],
+  "crossbow": [
+   "icons",
+   33
+  ],
+  "crystal snow.0": [
+   "weather",
+   316
+  ],
+  "crystal snow.1": [
+   "weather",
+   317
+  ],
+  "crystal snow.2": [
+   "weather",
+   318
+  ],
+  "crystal snow.3": [
+   "weather",
+   319
+  ],
+  "crystal tree": [
+   "trees",
+   43
+  ],
+  "crystal wand": [
+   "icons",
+   115
+  ],
+  "curse.0": [
+   "effects",
+   355
+  ],
+  "curse.1": [
+   "effects",
+   356
+  ],
+  "curse.2": [
+   "effects",
+   357
+  ],
+  "cyclone spiral.0": [
+   "weather",
+   228
+  ],
+  "cyclone spiral.1": [
+   "weather",
+   229
+  ],
+  "cyclone spiral.2": [
+   "weather",
+   230
+  ],
+  "cyclone spiral.3": [
+   "weather",
+   231
+  ],
+  "cypress tree": [
+   "trees",
+   31
+  ],
+  "daffodil": [
+   "plants-small",
+   13
+  ],
+  "dagger": [
+   "icons",
+   105
+  ],
+  "dahlia": [
+   "plants-small",
+   21
+  ],
+  "dark explosion.0": [
+   "effects",
+   349
+  ],
+  "dark explosion.1": [
+   "effects",
+   350
+  ],
+  "dark explosion.2": [
+   "effects",
+   351
+  ],
+  "dark greatsword": [
+   "icons",
+   103
+  ],
+  "dark mist.0": [
+   "effects",
+   352
+  ],
+  "dark mist.1": [
+   "effects",
+   353
+  ],
+  "dark mist.2": [
+   "effects",
+   354
+  ],
+  "dark morel": [
+   "plants-small",
+   59
+  ],
+  "dark portal": [
+   "effects",
+   96
+  ],
+  "dark storm clouds.0": [
+   "weather",
+   104
+  ],
+  "dark storm clouds.1": [
+   "weather",
+   105
+  ],
+  "dark storm clouds.2": [
+   "weather",
+   106
+  ],
+  "dark storm clouds.3": [
+   "weather",
+   107
+  ],
+  "date palm": [
+   "trees",
+   9
+  ],
+  "dawn dew sparkle.0": [
+   "weather",
+   356
+  ],
+  "dawn dew sparkle.1": [
+   "weather",
+   357
+  ],
+  "dawn dew sparkle.2": [
+   "weather",
+   358
+  ],
+  "dawn dew sparkle.3": [
+   "weather",
+   359
+  ],
+  "dead tree": [
+   "trees",
+   33
+  ],
+  "death aura.0": [
+   "effects",
+   339
+  ],
+  "death aura.1": [
+   "effects",
+   340
+  ],
+  "death aura.2": [
+   "effects",
+   341
+  ],
+  "deer": [
+   "animals",
+   3
+  ],
+  "dense fog.0": [
+   "weather",
+   88
+  ],
+  "dense fog.1": [
+   "weather",
+   89
+  ],
+  "dense fog.2": [
+   "weather",
+   90
+  ],
+  "dense fog.3": [
+   "weather",
+   91
+  ],
+  "desert shrub": [
+   "plants-tall",
+   7
+  ],
+  "desert whirlwind.0": [
+   "weather",
+   152
+  ],
+  "desert whirlwind.1": [
+   "weather",
+   153
+  ],
+  "desert whirlwind.2": [
+   "weather",
+   154
+  ],
+  "desert whirlwind.3": [
+   "weather",
+   155
+  ],
+  "dirt explosion.0": [
+   "effects",
+   151
+  ],
+  "dirt explosion.1": [
+   "effects",
+   152
+  ],
+  "dirt explosion.2": [
+   "effects",
+   153
+  ],
+  "distant lightning.0": [
+   "weather",
+   24
+  ],
+  "distant lightning.1": [
+   "weather",
+   25
+  ],
+  "distant lightning.2": [
+   "weather",
+   26
+  ],
+  "distant lightning.3": [
+   "weather",
+   27
+  ],
+  "divine burst.0": [
+   "effects",
+   299
+  ],
+  "divine burst.1": [
+   "effects",
+   300
+  ],
+  "divine burst.2": [
+   "effects",
+   301
+  ],
+  "divine light": [
+   "effects",
+   94
+  ],
+  "doe": [
+   "animals",
+   5
+  ],
+  "dog": [
+   "animals",
+   40
+  ],
+  "dogwood tree": [
+   "trees",
+   28
+  ],
+  "donkey": [
+   "animals",
+   33
+  ],
+  "drifting mist.0": [
+   "weather",
+   92
+  ],
+  "drifting mist.1": [
+   "weather",
+   93
+  ],
+  "drifting mist.2": [
+   "weather",
+   94
+  ],
+  "drifting mist.3": [
+   "weather",
+   95
+  ],
+  "drone blaster": [
+   "icons",
+   141
+  ],
+  "drone launcher": [
+   "icons",
+   96
+  ],
+  "druid staff": [
+   "icons",
+   114
+  ],
+  "dust breeze.0": [
+   "weather",
+   136
+  ],
+  "dust breeze.1": [
+   "weather",
+   137
+  ],
+  "dust breeze.2": [
+   "weather",
+   138
+  ],
+  "dust breeze.3": [
+   "weather",
+   139
+  ],
+  "dust storm.0": [
+   "weather",
+   140
+  ],
+  "dust storm.1": [
+   "weather",
+   141
+  ],
+  "dust storm.2": [
+   "weather",
+   142
+  ],
+  "dust storm.3": [
+   "weather",
+   143
+  ],
+  "dust.0": [
+   "effects",
+   143
+  ],
+  "dust.1": [
+   "effects",
+   144
+  ],
+  "dust.2": [
+   "effects",
+   145
+  ],
+  "dust.3": [
+   "effects",
+   146
+  ],
+  "earth burst": [
+   "effects",
+   34
+  ],
+  "earth spike.0": [
+   "effects",
+   162
+  ],
+  "earth spike.1": [
+   "effects",
+   163
+  ],
+  "earth spike.2": [
+   "effects",
+   164
+  ],
+  "earth spike.3": [
+   "effects",
+   165
+  ],
+  "earth spikes": [
+   "effects",
+   67
+  ],
+  "earthquake": [
+   "effects",
+   97
+  ],
+  "eclipse gloom.0": [
+   "weather",
+   348
+  ],
+  "eclipse gloom.1": [
+   "weather",
+   349
+  ],
+  "eclipse gloom.2": [
+   "weather",
+   350
+  ],
+  "eclipse gloom.3": [
+   "weather",
+   351
+  ],
+  "electric ball.0": [
+   "effects",
+   262
+  ],
+  "electric ball.1": [
+   "effects",
+   263
+  ],
+  "electric ball.2": [
+   "effects",
+   264
+  ],
+  "electric burst.0": [
+   "effects",
+   252
+  ],
+  "electric burst.1": [
+   "effects",
+   253
+  ],
+  "electric burst.2": [
+   "effects",
+   254
+  ],
+  "electric ring.0": [
+   "effects",
+   255
+  ],
+  "electric ring.1": [
+   "effects",
+   256
+  ],
+  "electric ring.2": [
+   "effects",
+   257
+  ],
+  "electric storm.0": [
+   "weather",
+   320
+  ],
+  "electric storm.1": [
+   "weather",
+   321
+  ],
+  "electric storm.2": [
+   "weather",
+   322
+  ],
+  "electric storm.3": [
+   "weather",
+   323
+  ],
+  "electric tree": [
+   "trees",
+   51
+  ],
+  "elephant": [
+   "animals",
+   20
+  ],
+  "elk": [
+   "animals",
+   6
+  ],
+  "elm tree": [
+   "trees",
+   23
+  ],
+  "ember burst": [
+   "effects",
+   14
+  ],
+  "ember drift.0": [
+   "weather",
+   188
+  ],
+  "ember drift.1": [
+   "weather",
+   189
+  ],
+  "ember drift.2": [
+   "weather",
+   190
+  ],
+  "ember drift.3": [
+   "weather",
+   191
+  ],
+  "ember sparks": [
+   "effects",
+   2
+  ],
+  "ember.0": [
+   "effects",
+   108
+  ],
+  "ember.1": [
+   "effects",
+   109
+  ],
+  "ember.2": [
+   "effects",
+   110
+  ],
+  "energy beams.0": [
+   "effects",
+   258
+  ],
+  "energy beams.1": [
+   "effects",
+   259
+  ],
+  "energy beams.2": [
+   "effects",
+   260
+  ],
+  "energy beams.3": [
+   "effects",
+   261
+  ],
+  "energy spear": [
+   "icons",
+   128
+  ],
+  "evening mist.0": [
+   "weather",
+   364
+  ],
+  "evening mist.1": [
+   "weather",
+   365
+  ],
+  "evening mist.2": [
+   "weather",
+   366
+  ],
+  "evening mist.3": [
+   "weather",
+   367
+  ],
+  "explosion large.0": [
+   "effects",
+   131
+  ],
+  "explosion large.1": [
+   "effects",
+   132
+  ],
+  "explosion large.2": [
+   "effects",
+   133
+  ],
+  "explosion large.3": [
+   "effects",
+   134
+  ],
+  "explosion small.0": [
+   "effects",
+   128
+  ],
+  "explosion small.1": [
+   "effects",
+   129
+  ],
+  "explosion small.2": [
+   "effects",
+   130
+  ],
+  "fast clouds.0": [
+   "weather",
+   108
+  ],
+  "fast clouds.1": [
+   "weather",
+   109
+  ],
+  "fast clouds.2": [
+   "weather",
+   110
+  ],
+  "fast clouds.3": [
+   "weather",
+   111
+  ],
+  "feather.0": [
+   "effects",
+   238
+  ],
+  "feather.1": [
+   "effects",
+   239
+  ],
+  "feather.2": [
+   "effects",
+   240
+  ],
+  "feather.3": [
+   "effects",
+   241
+  ],
+  "fern": [
+   "plants-small",
+   3
+  ],
+  "fig tree": [
+   "trees",
+   8
+  ],
+  "fire ball.0": [
+   "effects",
+   121
+  ],
+  "fire ball.1": [
+   "effects",
+   122
+  ],
+  "fire ball.2": [
+   "effects",
+   123
+  ],
+  "fire burst": [
+   "effects",
+   30
+  ],
+  "fire comet": [
+   "effects",
+   20
+  ],
+  "fire explosion": [
+   "effects",
+   70
+  ],
+  "fire flail": [
+   "icons",
+   59
+  ],
+  "fire nova.0": [
+   "effects",
+   118
+  ],
+  "fire nova.1": [
+   "effects",
+   119
+  ],
+  "fire nova.2": [
+   "effects",
+   120
+  ],
+  "fire orb": [
+   "effects",
+   50
+  ],
+  "fire pillar": [
+   "effects",
+   60
+  ],
+  "fire slash": [
+   "effects",
+   40
+  ],
+  "fire spark.0": [
+   "effects",
+   104
+  ],
+  "fire spark.1": [
+   "effects",
+   105
+  ],
+  "fire spark.2": [
+   "effects",
+   106
+  ],
+  "fire spark.3": [
+   "effects",
+   107
+  ],
+  "fire staff": [
+   "icons",
+   64
+  ],
+  "fire storm": [
+   "effects",
+   80
+  ],
+  "fire trail.0": [
+   "effects",
+   124
+  ],
+  "fire trail.1": [
+   "effects",
+   125
+  ],
+  "fire trail.2": [
+   "effects",
+   126
+  ],
+  "fire trail.3": [
+   "effects",
+   127
+  ],
+  "fire tree": [
+   "trees",
+   53
+  ],
+  "fire trident": [
+   "icons",
+   29
+  ],
+  "fire whip": [
+   "icons",
+   50
+  ],
+  "fire wisp": [
+   "effects",
+   4
+  ],
+  "fireball": [
+   "effects",
+   25
+  ],
+  "fireflies.0": [
+   "effects",
+   399
+  ],
+  "fireflies.1": [
+   "effects",
+   400
+  ],
+  "fireflies.2": [
+   "effects",
+   401
+  ],
+  "fireflies.3": [
+   "effects",
+   402
+  ],
+  "firestorm wind.0": [
+   "weather",
+   372
+  ],
+  "firestorm wind.1": [
+   "weather",
+   373
+  ],
+  "firestorm wind.2": [
+   "weather",
+   374
+  ],
+  "firestorm wind.3": [
+   "weather",
+   375
+  ],
+  "flame projector": [
+   "icons",
+   140
+  ],
+  "flame sword": [
+   "icons",
+   1
+  ],
+  "flame.0": [
+   "effects",
+   111
+  ],
+  "flame.1": [
+   "effects",
+   112
+  ],
+  "flame.2": [
+   "effects",
+   113
+  ],
+  "flame.3": [
+   "effects",
+   114
+  ],
+  "flamethrower": [
+   "icons",
+   95
+  ],
+  "flat mushroom": [
+   "plants-small",
+   55
+  ],
+  "flintlock pistol": [
+   "icons",
+   70
+  ],
+  "floating lanterns.0": [
+   "weather",
+   388
+  ],
+  "floating lanterns.1": [
+   "weather",
+   389
+  ],
+  "floating lanterns.2": [
+   "weather",
+   390
+  ],
+  "floating lanterns.3": [
+   "weather",
+   391
+  ],
+  "floating spores.0": [
+   "weather",
+   172
+  ],
+  "floating spores.1": [
+   "weather",
+   173
+  ],
+  "floating spores.2": [
+   "weather",
+   174
+  ],
+  "floating spores.3": [
+   "weather",
+   175
+  ],
+  "fog.0": [
+   "weather",
+   84
+  ],
+  "fog.1": [
+   "weather",
+   85
+  ],
+  "fog.2": [
+   "weather",
+   86
+  ],
+  "fog.3": [
+   "weather",
+   87
+  ],
+  "fox": [
+   "animals",
+   1
+  ],
+  "foxglove": [
+   "plants-tall",
+   18
+  ],
+  "freezing rain.0": [
+   "weather",
+   68
+  ],
+  "freezing rain.1": [
+   "weather",
+   69
+  ],
+  "freezing rain.2": [
+   "weather",
+   70
+  ],
+  "freezing rain.3": [
+   "weather",
+   71
+  ],
+  "frost axe": [
+   "icons",
+   12
+  ],
+  "frost blaster": [
+   "icons",
+   72
+  ],
+  "frost blaster rifle": [
+   "icons",
+   143
+  ],
+  "frost bow": [
+   "icons",
+   34
+  ],
+  "frost cannon": [
+   "icons",
+   91
+  ],
+  "frost chakram": [
+   "icons",
+   45
+  ],
+  "frost gust.0": [
+   "weather",
+   72
+  ],
+  "frost gust.1": [
+   "weather",
+   73
+  ],
+  "frost gust.2": [
+   "weather",
+   74
+  ],
+  "frost gust.3": [
+   "weather",
+   75
+  ],
+  "frost halberd": [
+   "icons",
+   28
+  ],
+  "frost morning star": [
+   "icons",
+   17
+  ],
+  "frost nova.0": [
+   "effects",
+   219
+  ],
+  "frost nova.1": [
+   "effects",
+   220
+  ],
+  "frost nova.2": [
+   "effects",
+   221
+  ],
+  "frost nunchaku": [
+   "icons",
+   57
+  ],
+  "frost orb": [
+   "effects",
+   51
+  ],
+  "frost ray pistol": [
+   "icons",
+   78
+  ],
+  "frost shuriken": [
+   "icons",
+   41
+  ],
+  "frost staff": [
+   "icons",
+   61
+  ],
+  "frost storm": [
+   "effects",
+   79
+  ],
+  "frost sword": [
+   "icons",
+   4
+  ],
+  "frost wand": [
+   "icons",
+   67
+  ],
+  "fuchsia": [
+   "plants-small",
+   34
+  ],
+  "galaxy spiral.0": [
+   "effects",
+   421
+  ],
+  "galaxy spiral.1": [
+   "effects",
+   422
+  ],
+  "galaxy spiral.2": [
+   "effects",
+   423
+  ],
+  "galaxy spiral.3": [
+   "effects",
+   424
+  ],
+  "garlic": [
+   "plants-small",
+   46
+  ],
+  "gatling cannon": [
+   "icons",
+   87
+  ],
+  "gatling gun": [
+   "icons",
+   139
+  ],
+  "geothermal steam.0": [
+   "weather",
+   212
+  ],
+  "geothermal steam.1": [
+   "weather",
+   213
+  ],
+  "geothermal steam.2": [
+   "weather",
+   214
+  ],
+  "geothermal steam.3": [
+   "weather",
+   215
+  ],
+  "geranium": [
+   "plants-small",
+   32
+  ],
+  "ginkgo tree": [
+   "trees",
+   30
+  ],
+  "giraffe": [
+   "animals",
+   23
+  ],
+  "glacier": [
+   "effects",
+   91
+  ],
+  "glow mushroom": [
+   "plants-small",
+   53
+  ],
+  "glowing tree": [
+   "trees",
+   44
+  ],
+  "goat": [
+   "animals",
+   34
+  ],
+  "gold spark": [
+   "effects",
+   0
+  ],
+  "golden boomerang": [
+   "icons",
+   44
+  ],
+  "golden bow": [
+   "icons",
+   32
+  ],
+  "golden chakram": [
+   "icons",
+   42
+  ],
+  "golden glaive": [
+   "icons",
+   24
+  ],
+  "golden halberd": [
+   "icons",
+   22
+  ],
+  "golden kusarigama": [
+   "icons",
+   54
+  ],
+  "golden lavender": [
+   "plants-small",
+   9
+  ],
+  "golden rapier": [
+   "icons",
+   6
+  ],
+  "golden rifle": [
+   "icons",
+   83
+  ],
+  "grape vine": [
+   "plants-tall",
+   35
+  ],
+  "grass": [
+   "plants-small",
+   0
+  ],
+  "gravity hammer": [
+   "icons",
+   149
+  ],
+  "great tornado": [
+   "effects",
+   88
+  ],
+  "great wave": [
+   "effects",
+   85
+  ],
+  "green gas front.0": [
+   "weather",
+   200
+  ],
+  "green gas front.1": [
+   "weather",
+   201
+  ],
+  "green gas front.2": [
+   "weather",
+   202
+  ],
+  "green gas front.3": [
+   "weather",
+   203
+  ],
+  "grey wolf": [
+   "animals",
+   0
+  ],
+  "ground blizzard.0": [
+   "weather",
+   76
+  ],
+  "ground blizzard.1": [
+   "weather",
+   77
+  ],
+  "ground blizzard.2": [
+   "weather",
+   78
+  ],
+  "ground blizzard.3": [
+   "weather",
+   79
+  ],
+  "ground crack.0": [
+   "effects",
+   158
+  ],
+  "ground crack.1": [
+   "effects",
+   159
+  ],
+  "ground crack.2": [
+   "effects",
+   160
+  ],
+  "ground crack.3": [
+   "effects",
+   161
+  ],
+  "gust front.0": [
+   "weather",
+   244
+  ],
+  "gust front.1": [
+   "weather",
+   245
+  ],
+  "gust front.2": [
+   "weather",
+   246
+  ],
+  "gust front.3": [
+   "weather",
+   247
+  ],
+  "hail.0": [
+   "weather",
+   60
+  ],
+  "hail.1": [
+   "weather",
+   61
+  ],
+  "hail.2": [
+   "weather",
+   62
+  ],
+  "hail.3": [
+   "weather",
+   63
+  ],
+  "halberd": [
+   "icons",
+   112
+  ],
+  "healing glow.0": [
+   "effects",
+   293
+  ],
+  "healing glow.1": [
+   "effects",
+   294
+  ],
+  "healing glow.2": [
+   "effects",
+   295
+  ],
+  "healing orb": [
+   "effects",
+   53
+  ],
+  "heat shimmer.0": [
+   "weather",
+   124
+  ],
+  "heat shimmer.1": [
+   "weather",
+   125
+  ],
+  "heat shimmer.2": [
+   "weather",
+   126
+  ],
+  "heat shimmer.3": [
+   "weather",
+   127
+  ],
+  "heat wave.0": [
+   "weather",
+   128
+  ],
+  "heat wave.1": [
+   "weather",
+   129
+  ],
+  "heat wave.2": [
+   "weather",
+   130
+  ],
+  "heat wave.3": [
+   "weather",
+   131
+  ],
+  "heavy crossbow": [
+   "icons",
+   117
+  ],
+  "heavy rain.0": [
+   "weather",
+   8
+  ],
+  "heavy rain.1": [
+   "weather",
+   9
+  ],
+  "heavy rain.2": [
+   "weather",
+   10
+  ],
+  "heavy rain.3": [
+   "weather",
+   11
+  ],
+  "heavy snowfall.0": [
+   "weather",
+   48
+  ],
+  "heavy snowfall.1": [
+   "weather",
+   49
+  ],
+  "heavy snowfall.2": [
+   "weather",
+   50
+  ],
+  "heavy snowfall.3": [
+   "weather",
+   51
+  ],
+  "heavy war hammer": [
+   "icons",
+   109
+  ],
+  "heliconia": [
+   "plants-tall",
+   16
+  ],
+  "hibiscus": [
+   "plants-small",
+   17
+  ],
+  "hippopotamus": [
+   "animals",
+   22
+  ],
+  "holy beam": [
+   "effects",
+   84
+  ],
+  "holy burst": [
+   "effects",
+   35
+  ],
+  "holy light.0": [
+   "effects",
+   296
+  ],
+  "holy light.1": [
+   "effects",
+   297
+  ],
+  "holy light.2": [
+   "effects",
+   298
+  ],
+  "holy orb": [
+   "effects",
+   54
+  ],
+  "holy pillar": [
+   "effects",
+   64
+  ],
+  "holy rays": [
+   "effects",
+   74
+  ],
+  "holy ring": [
+   "effects",
+   12
+  ],
+  "holy slash": [
+   "effects",
+   45
+  ],
+  "horse": [
+   "animals",
+   32
+  ],
+  "hunting rifle": [
+   "icons",
+   80
+  ],
+  "hurricane bands.0": [
+   "weather",
+   224
+  ],
+  "hurricane bands.1": [
+   "weather",
+   225
+  ],
+  "hurricane bands.2": [
+   "weather",
+   226
+  ],
+  "hurricane bands.3": [
+   "weather",
+   227
+  ],
+  "hydrangea": [
+   "plants-tall",
+   10
+  ],
+  "hyena": [
+   "animals",
+   18
+  ],
+  "ice ball": [
+   "effects",
+   26
+  ],
+  "ice beam": [
+   "effects",
+   99
+  ],
+  "ice beam gun": [
+   "icons",
+   93
+  ],
+  "ice burst": [
+   "effects",
+   31
+  ],
+  "ice comet": [
+   "effects",
+   21
+  ],
+  "ice crystal": [
+   "effects",
+   39
+  ],
+  "ice crystal sword": [
+   "icons",
+   124
+  ],
+  "ice eruption": [
+   "effects",
+   71
+  ],
+  "ice explosion.0": [
+   "effects",
+   205
+  ],
+  "ice explosion.1": [
+   "effects",
+   206
+  ],
+  "ice explosion.2": [
+   "effects",
+   207
+  ],
+  "ice fog.0": [
+   "weather",
+   276
+  ],
+  "ice fog.1": [
+   "weather",
+   277
+  ],
+  "ice fog.2": [
+   "weather",
+   278
+  ],
+  "ice fog.3": [
+   "weather",
+   279
+  ],
+  "ice pellets.0": [
+   "weather",
+   64
+  ],
+  "ice pellets.1": [
+   "weather",
+   65
+  ],
+  "ice pellets.2": [
+   "weather",
+   66
+  ],
+  "ice pellets.3": [
+   "weather",
+   67
+  ],
+  "ice pillar": [
+   "effects",
+   61
+  ],
+  "ice shard.0": [
+   "effects",
+   215
+  ],
+  "ice shard.1": [
+   "effects",
+   216
+  ],
+  "ice shard.2": [
+   "effects",
+   217
+  ],
+  "ice shard.3": [
+   "effects",
+   218
+  ],
+  "ice shards": [
+   "effects",
+   5
+  ],
+  "ice shatter": [
+   "effects",
+   15
+  ],
+  "ice slash": [
+   "effects",
+   41
+  ],
+  "ice spike.0": [
+   "effects",
+   201
+  ],
+  "ice spike.1": [
+   "effects",
+   202
+  ],
+  "ice spike.2": [
+   "effects",
+   203
+  ],
+  "ice spike.3": [
+   "effects",
+   204
+  ],
+  "ice spikes": [
+   "effects",
+   59
+  ],
+  "ice spire": [
+   "effects",
+   81
+  ],
+  "ice tree": [
+   "trees",
+   52
+  ],
+  "inferno": [
+   "effects",
+   90
+  ],
+  "ion cannon": [
+   "icons",
+   137
+  ],
+  "iris": [
+   "plants-tall",
+   11
+  ],
+  "iron flail": [
+   "icons",
+   58
+  ],
+  "iron maul": [
+   "icons",
+   14
+  ],
+  "iron spear": [
+   "icons",
+   20
+  ],
+  "iron sword": [
+   "icons",
+   0
+  ],
+  "ivy": [
+   "plants-small",
+   5
+  ],
+  "jacaranda tree": [
+   "trees",
+   27
+  ],
+  "jackal": [
+   "animals",
+   19
+  ],
+  "jaguar": [
+   "animals",
+   13
+  ],
+  "jungle tree": [
+   "trees",
+   38
+  ],
+  "katana": [
+   "icons",
+   101
+  ],
+  "knight sword": [
+   "icons",
+   100
+  ],
+  "laser crossbow": [
+   "icons",
+   146
+  ],
+  "lavender": [
+   "plants-small",
+   10
+  ],
+  "leaf drift.0": [
+   "weather",
+   156
+  ],
+  "leaf drift.1": [
+   "weather",
+   157
+  ],
+  "leaf drift.2": [
+   "weather",
+   158
+  ],
+  "leaf drift.3": [
+   "weather",
+   159
+  ],
+  "leaf swirl weather.0": [
+   "weather",
+   160
+  ],
+  "leaf swirl weather.1": [
+   "weather",
+   161
+  ],
+  "leaf swirl weather.2": [
+   "weather",
+   162
+  ],
+  "leaf swirl weather.3": [
+   "weather",
+   163
+  ],
+  "leaf swirl.0": [
+   "effects",
+   373
+  ],
+  "leaf swirl.1": [
+   "effects",
+   374
+  ],
+  "leaf swirl.2": [
+   "effects",
+   375
+  ],
+  "leaf swirl.3": [
+   "effects",
+   376
+  ],
+  "lemon tree": [
+   "trees",
+   1
+  ],
+  "leopard": [
+   "animals",
+   12
+  ],
+  "life steal.0": [
+   "effects",
+   358
+  ],
+  "life steal.1": [
+   "effects",
+   359
+  ],
+  "life steal.2": [
+   "effects",
+   360
+  ],
+  "light arrow": [
+   "effects",
+   28
+  ],
+  "light drizzle.0": [
+   "weather",
+   0
+  ],
+  "light drizzle.1": [
+   "weather",
+   1
+  ],
+  "light drizzle.2": [
+   "weather",
+   2
+  ],
+  "light drizzle.3": [
+   "weather",
+   3
+  ],
+  "light snow.0": [
+   "weather",
+   40
+  ],
+  "light snow.1": [
+   "weather",
+   41
+  ],
+  "light snow.2": [
+   "weather",
+   42
+  ],
+  "light snow.3": [
+   "weather",
+   43
+  ],
+  "light streaks": [
+   "effects",
+   8
+  ],
+  "lightning arc": [
+   "effects",
+   49
+  ],
+  "lightning bolt still": [
+   "effects",
+   19
+  ],
+  "lightning bolt.0": [
+   "effects",
+   245
+  ],
+  "lightning bolt.1": [
+   "effects",
+   246
+  ],
+  "lightning bolt.2": [
+   "effects",
+   247
+  ],
+  "lightning bolt.3": [
+   "effects",
+   248
+  ],
+  "lightning chain": [
+   "icons",
+   52
+  ],
+  "lightning spark.0": [
+   "effects",
+   242
+  ],
+  "lightning spark.1": [
+   "effects",
+   243
+  ],
+  "lightning spark.2": [
+   "effects",
+   244
+  ],
+  "lightning spear": [
+   "icons",
+   21
+  ],
+  "lightning strike": [
+   "effects",
+   78
+  ],
+  "lily": [
+   "plants-tall",
+   9
+  ],
+  "linden tree": [
+   "trees",
+   26
+  ],
+  "lion": [
+   "animals",
+   15
+  ],
+  "llama": [
+   "animals",
+   28
+  ],
+  "locust swarm.0": [
+   "weather",
+   368
+  ],
+  "locust swarm.1": [
+   "weather",
+   369
+  ],
+  "locust swarm.2": [
+   "weather",
+   370
+  ],
+  "locust swarm.3": [
+   "weather",
+   371
+  ],
+  "long rifle": [
+   "icons",
+   136
+  ],
+  "long spear": [
+   "icons",
+   111
+  ],
+  "lotus": [
+   "plants-small",
+   15
+  ],
+  "low cloud bank.0": [
+   "weather",
+   100
+  ],
+  "low cloud bank.1": [
+   "weather",
+   101
+  ],
+  "low cloud bank.2": [
+   "weather",
+   102
+  ],
+  "low cloud bank.3": [
+   "weather",
+   103
+  ],
+  "lynx": [
+   "animals",
+   11
+  ],
+  "magic circle.0": [
+   "effects",
+   302
+  ],
+  "magic circle.1": [
+   "effects",
+   303
+  ],
+  "magic circle.2": [
+   "effects",
+   304
+  ],
+  "magic missile.0": [
+   "effects",
+   313
+  ],
+  "magic missile.1": [
+   "effects",
+   314
+  ],
+  "magic missile.2": [
+   "effects",
+   315
+  ],
+  "magic missile.3": [
+   "effects",
+   316
+  ],
+  "magic rainbows.0": [
+   "weather",
+   328
+  ],
+  "magic rainbows.1": [
+   "weather",
+   329
+  ],
+  "magic rainbows.2": [
+   "weather",
+   330
+  ],
+  "magic rainbows.3": [
+   "weather",
+   331
+  ],
+  "magic trail.0": [
+   "effects",
+   317
+  ],
+  "magic trail.1": [
+   "effects",
+   318
+  ],
+  "magic trail.2": [
+   "effects",
+   319
+  ],
+  "magic trail.3": [
+   "effects",
+   320
+  ],
+  "magnolia": [
+   "plants-small",
+   19
+  ],
+  "magnolia tree": [
+   "trees",
+   29
+  ],
+  "magnum": [
+   "icons",
+   132
+  ],
+  "mana explosion.0": [
+   "effects",
+   324
+  ],
+  "mana explosion.1": [
+   "effects",
+   325
+  ],
+  "mana explosion.2": [
+   "effects",
+   326
+  ],
+  "mangrove": [
+   "trees",
+   37
+  ],
+  "maple tree": [
+   "trees",
+   11
+  ],
+  "marigold": [
+   "plants-small",
+   22
+  ],
+  "meteor explosion.0": [
+   "effects",
+   433
+  ],
+  "meteor explosion.1": [
+   "effects",
+   434
+  ],
+  "meteor explosion.2": [
+   "effects",
+   435
+  ],
+  "meteor shower.0": [
+   "weather",
+   340
+  ],
+  "meteor shower.1": [
+   "weather",
+   341
+  ],
+  "meteor shower.2": [
+   "weather",
+   342
+  ],
+  "meteor shower.3": [
+   "weather",
+   343
+  ],
+  "meteoric snow.0": [
+   "weather",
+   392
+  ],
+  "meteoric snow.1": [
+   "weather",
+   393
+  ],
+  "meteoric snow.2": [
+   "weather",
+   394
+  ],
+  "meteoric snow.3": [
+   "weather",
+   395
+  ],
+  "meteors.0": [
+   "effects",
+   407
+  ],
+  "meteors.1": [
+   "effects",
+   408
+  ],
+  "meteors.2": [
+   "effects",
+   409
+  ],
+  "meteors.3": [
+   "effects",
+   410
+  ],
+  "microburst.0": [
+   "weather",
+   240
+  ],
+  "microburst.1": [
+   "weather",
+   241
+  ],
+  "microburst.2": [
+   "weather",
+   242
+  ],
+  "microburst.3": [
+   "weather",
+   243
+  ],
+  "mirage shimmer.0": [
+   "weather",
+   132
+  ],
+  "mirage shimmer.1": [
+   "weather",
+   133
+  ],
+  "mirage shimmer.2": [
+   "weather",
+   134
+  ],
+  "mirage shimmer.3": [
+   "weather",
+   135
+  ],
+  "monsoon burst.0": [
+   "weather",
+   216
+  ],
+  "monsoon burst.1": [
+   "weather",
+   217
+  ],
+  "monsoon burst.2": [
+   "weather",
+   218
+  ],
+  "monsoon burst.3": [
+   "weather",
+   219
+  ],
+  "moonflower": [
+   "plants-small",
+   27
+  ],
+  "moonlit mist.0": [
+   "weather",
+   260
+  ],
+  "moonlit mist.1": [
+   "weather",
+   261
+  ],
+  "moonlit mist.2": [
+   "weather",
+   262
+  ],
+  "moonlit mist.3": [
+   "weather",
+   263
+  ],
+  "moose": [
+   "animals",
+   7
+  ],
+  "morel": [
+   "plants-small",
+   58
+  ],
+  "morning fog lift.0": [
+   "weather",
+   360
+  ],
+  "morning fog lift.1": [
+   "weather",
+   361
+  ],
+  "morning fog lift.2": [
+   "weather",
+   362
+  ],
+  "morning fog lift.3": [
+   "weather",
+   363
+  ],
+  "morning star": [
+   "icons",
+   110
+  ],
+  "moss": [
+   "plants-small",
+   4
+  ],
+  "mud splash.0": [
+   "weather",
+   288
+  ],
+  "mud splash.1": [
+   "weather",
+   289
+  ],
+  "mud splash.2": [
+   "weather",
+   290
+  ],
+  "mud splash.3": [
+   "weather",
+   291
+  ],
+  "mushroom tree": [
+   "trees",
+   45
+  ],
+  "nature burst": [
+   "effects",
+   33
+  ],
+  "nature circle": [
+   "effects",
+   57
+  ],
+  "nature explosion.0": [
+   "effects",
+   396
+  ],
+  "nature explosion.1": [
+   "effects",
+   397
+  ],
+  "nature explosion.2": [
+   "effects",
+   398
+  ],
+  "nature healing.0": [
+   "effects",
+   389
+  ],
+  "nature healing.1": [
+   "effects",
+   390
+  ],
+  "nature healing.2": [
+   "effects",
+   391
+  ],
+  "nature leaf.0": [
+   "effects",
+   369
+  ],
+  "nature leaf.1": [
+   "effects",
+   370
+  ],
+  "nature leaf.2": [
+   "effects",
+   371
+  ],
+  "nature leaf.3": [
+   "effects",
+   372
+  ],
+  "nature pillar": [
+   "effects",
+   63
+  ],
+  "nature ring": [
+   "effects",
+   73
+  ],
+  "nature staff": [
+   "icons",
+   60
+  ],
+  "nightshade": [
+   "plants-small",
+   26
+  ],
+  "oak tree": [
+   "trees",
+   12
+  ],
+  "ocean mist.0": [
+   "weather",
+   304
+  ],
+  "ocean mist.1": [
+   "weather",
+   305
+  ],
+  "ocean mist.2": [
+   "weather",
+   306
+  ],
+  "ocean mist.3": [
+   "weather",
+   307
+  ],
+  "olive tree": [
+   "trees",
+   0
+  ],
+  "onion grass": [
+   "plants-small",
+   45
+  ],
+  "orange tree": [
+   "trees",
+   2
+  ],
+  "orchid": [
+   "plants-small",
+   14
+  ],
+  "otter": [
+   "animals",
+   47
+  ],
+  "overcast bands.0": [
+   "weather",
+   112
+  ],
+  "overcast bands.1": [
+   "weather",
+   113
+  ],
+  "overcast bands.2": [
+   "weather",
+   114
+  ],
+  "overcast bands.3": [
+   "weather",
+   115
+  ],
+  "palm leaf": [
+   "plants-tall",
+   1
+  ],
+  "pansy": [
+   "plants-small",
+   36
+  ],
+  "papyrus": [
+   "plants-tall",
+   22
+  ],
+  "peach tree": [
+   "trees",
+   5
+  ],
+  "pear tree": [
+   "trees",
+   4
+  ],
+  "peony": [
+   "plants-small",
+   20
+  ],
+  "pepper plant": [
+   "plants-tall",
+   30
+  ],
+  "petal burst.0": [
+   "effects",
+   377
+  ],
+  "petal burst.1": [
+   "effects",
+   378
+  ],
+  "petal burst.2": [
+   "effects",
+   379
+  ],
+  "petal burst.3": [
+   "effects",
+   380
+  ],
+  "petunia": [
+   "plants-small",
+   35
+  ],
+  "pig": [
+   "animals",
+   36
+  ],
+  "pine tree": [
+   "trees",
+   13
+  ],
+  "pink lotus": [
+   "plants-small",
+   42
+  ],
+  "plasma axe": [
+   "icons",
+   127
+  ],
+  "plasma blaster": [
+   "icons",
+   131
+  ],
+  "plasma cannon": [
+   "icons",
+   89
+  ],
+  "plasma explosion.0": [
+   "effects",
+   272
+  ],
+  "plasma explosion.1": [
+   "effects",
+   273
+  ],
+  "plasma explosion.2": [
+   "effects",
+   274
+  ],
+  "plasma pistol": [
+   "icons",
+   79
+  ],
+  "plasma storm.0": [
+   "weather",
+   324
+  ],
+  "plasma storm.1": [
+   "weather",
+   325
+  ],
+  "plasma storm.2": [
+   "weather",
+   326
+  ],
+  "plasma storm.3": [
+   "weather",
+   327
+  ],
+  "plum tree": [
+   "trees",
+   6
+  ],
+  "plumeria": [
+   "plants-small",
+   39
+  ],
+  "poison burst.0": [
+   "effects",
+   278
+  ],
+  "poison burst.1": [
+   "effects",
+   279
+  ],
+  "poison burst.2": [
+   "effects",
+   280
+  ],
+  "poison burst.3": [
+   "effects",
+   281
+  ],
+  "poison cloud large": [
+   "effects",
+   83
+  ],
+  "poison cloud still": [
+   "effects",
+   29
+  ],
+  "poison cloud.0": [
+   "effects",
+   275
+  ],
+  "poison cloud.1": [
+   "effects",
+   276
+  ],
+  "poison cloud.2": [
+   "effects",
+   277
+  ],
+  "poison comet": [
+   "effects",
+   23
+  ],
+  "poison drip": [
+   "effects",
+   7
+  ],
+  "poison fog": [
+   "effects",
+   69
+  ],
+  "poison slash": [
+   "effects",
+   43
+  ],
+  "poison splash": [
+   "effects",
+   17
+  ],
+  "pollen drift.0": [
+   "weather",
+   168
+  ],
+  "pollen drift.1": [
+   "weather",
+   169
+  ],
+  "pollen drift.2": [
+   "weather",
+   170
+  ],
+  "pollen drift.3": [
+   "weather",
+   171
+  ],
+  "poplar tree": [
+   "trees",
+   24
+  ],
+  "poppy": [
+   "plants-small",
+   24
+  ],
+  "porcupine": [
+   "animals",
+   49
+  ],
+  "portal close.0": [
+   "effects",
+   332
+  ],
+  "portal close.1": [
+   "effects",
+   333
+  ],
+  "portal close.2": [
+   "effects",
+   334
+  ],
+  "portal idle.0": [
+   "effects",
+   330
+  ],
+  "portal idle.1": [
+   "effects",
+   331
+  ],
+  "portal open.0": [
+   "effects",
+   327
+  ],
+  "portal open.1": [
+   "effects",
+   328
+  ],
+  "portal open.2": [
+   "effects",
+   329
+  ],
+  "potato plant": [
+   "plants-small",
+   47
+  ],
+  "power fist": [
+   "icons",
+   148
+  ],
+  "puddle ripple.0": [
+   "weather",
+   292
+  ],
+  "puddle ripple.1": [
+   "weather",
+   293
+  ],
+  "puddle ripple.2": [
+   "weather",
+   294
+  ],
+  "puddle ripple.3": [
+   "weather",
+   295
+  ],
+  "purple fantasy tree": [
+   "trees",
+   42
+  ],
+  "purple lotus": [
+   "plants-small",
+   41
+  ],
+  "purple mushroom": [
+   "plants-small",
+   52
+  ],
+  "purple storm.0": [
+   "weather",
+   332
+  ],
+  "purple storm.1": [
+   "weather",
+   333
+  ],
+  "purple storm.2": [
+   "weather",
+   334
+  ],
+  "purple storm.3": [
+   "weather",
+   335
+  ],
+  "rabbit": [
+   "animals",
+   42
+  ],
+  "raccoon": [
+   "animals",
+   44
+  ],
+  "radioactive rain.0": [
+   "weather",
+   380
+  ],
+  "radioactive rain.1": [
+   "weather",
+   381
+  ],
+  "radioactive rain.2": [
+   "weather",
+   382
+  ],
+  "radioactive rain.3": [
+   "weather",
+   383
+  ],
+  "rainbow after rain.0": [
+   "weather",
+   264
+  ],
+  "rainbow after rain.1": [
+   "weather",
+   265
+  ],
+  "rainbow after rain.2": [
+   "weather",
+   266
+  ],
+  "rainbow after rain.3": [
+   "weather",
+   267
+  ],
+  "rainforest tree": [
+   "trees",
+   39
+  ],
+  "rapier": [
+   "icons",
+   102
+  ],
+  "raspberry bush": [
+   "plants-tall",
+   32
+  ],
+  "reality distortion.0": [
+   "effects",
+   436
+  ],
+  "reality distortion.1": [
+   "effects",
+   437
+  ],
+  "recurve bow": [
+   "icons",
+   116
+  ],
+  "red blaster": [
+   "icons",
+   73
+  ],
+  "red carbine": [
+   "icons",
+   85
+  ],
+  "red energy blade": [
+   "icons",
+   126
+  ],
+  "red fantasy tree": [
+   "trees",
+   40
+  ],
+  "red hibiscus": [
+   "plants-small",
+   38
+  ],
+  "red minigun": [
+   "icons",
+   92
+  ],
+  "red morel": [
+   "plants-small",
+   54
+  ],
+  "red mushroom": [
+   "plants-small",
+   50
+  ],
+  "red star": [
+   "effects",
+   10
+  ],
+  "red war axe": [
+   "icons",
+   108
+  ],
+  "redwood": [
+   "trees",
+   20
+  ],
+  "reed": [
+   "plants-tall",
+   21
+  ],
+  "reindeer": [
+   "animals",
+   37
+  ],
+  "revolver": [
+   "icons",
+   71
+  ],
+  "rhino": [
+   "animals",
+   21
+  ],
+  "rhododendron": [
+   "plants-tall",
+   14
+  ],
+  "rice": [
+   "plants-tall",
+   24
+  ],
+  "rime frost.0": [
+   "weather",
+   280
+  ],
+  "rime frost.1": [
+   "weather",
+   281
+  ],
+  "rime frost.2": [
+   "weather",
+   282
+  ],
+  "rime frost.3": [
+   "weather",
+   283
+  ],
+  "ring blade": [
+   "icons",
+   118
+  ],
+  "rock burst.0": [
+   "effects",
+   166
+  ],
+  "rock burst.1": [
+   "effects",
+   167
+  ],
+  "rock burst.2": [
+   "effects",
+   168
+  ],
+  "rock debris still": [
+   "effects",
+   18
+  ],
+  "rock debris.0": [
+   "effects",
+   154
+  ],
+  "rock debris.1": [
+   "effects",
+   155
+  ],
+  "rock debris.2": [
+   "effects",
+   156
+  ],
+  "rock debris.3": [
+   "effects",
+   157
+  ],
+  "rock spires": [
+   "effects",
+   77
+  ],
+  "rocket launcher": [
+   "icons",
+   90
+  ],
+  "rolling clouds.0": [
+   "weather",
+   36
+  ],
+  "rolling clouds.1": [
+   "weather",
+   37
+  ],
+  "rolling clouds.2": [
+   "weather",
+   38
+  ],
+  "rolling clouds.3": [
+   "weather",
+   39
+  ],
+  "rose": [
+   "plants-small",
+   11
+  ],
+  "sand burst.0": [
+   "effects",
+   147
+  ],
+  "sand burst.1": [
+   "effects",
+   148
+  ],
+  "sand burst.2": [
+   "effects",
+   149
+  ],
+  "sand burst.3": [
+   "effects",
+   150
+  ],
+  "sand gust.0": [
+   "weather",
+   144
+  ],
+  "sand gust.1": [
+   "weather",
+   145
+  ],
+  "sand gust.2": [
+   "weather",
+   146
+  ],
+  "sand gust.3": [
+   "weather",
+   147
+  ],
+  "sand tornado.0": [
+   "effects",
+   169
+  ],
+  "sand tornado.1": [
+   "effects",
+   170
+  ],
+  "sand tornado.2": [
+   "effects",
+   171
+  ],
+  "sand tornado.3": [
+   "effects",
+   172
+  ],
+  "sandstorm.0": [
+   "weather",
+   148
+  ],
+  "sandstorm.1": [
+   "weather",
+   149
+  ],
+  "sandstorm.2": [
+   "weather",
+   150
+  ],
+  "sandstorm.3": [
+   "weather",
+   151
+  ],
+  "scimitar": [
+   "icons",
+   104
+  ],
+  "sea storm spray.0": [
+   "weather",
+   300
+  ],
+  "sea storm spray.1": [
+   "weather",
+   301
+  ],
+  "sea storm spray.2": [
+   "weather",
+   302
+  ],
+  "sea storm spray.3": [
+   "weather",
+   303
+  ],
+  "sequoia": [
+   "trees",
+   21
+  ],
+  "shadow pillar": [
+   "effects",
+   66
+  ],
+  "shadow portal.0": [
+   "effects",
+   367
+  ],
+  "shadow portal.1": [
+   "effects",
+   368
+  ],
+  "shadow slash still": [
+   "effects",
+   47
+  ],
+  "shadow slash.0": [
+   "effects",
+   346
+  ],
+  "shadow slash.1": [
+   "effects",
+   347
+  ],
+  "shadow slash.2": [
+   "effects",
+   348
+  ],
+  "shadow staff": [
+   "icons",
+   65
+  ],
+  "shadow twin blades": [
+   "icons",
+   9
+  ],
+  "sheep": [
+   "animals",
+   35
+  ],
+  "shelf fungus": [
+   "plants-small",
+   60
+  ],
+  "shock rifle": [
+   "icons",
+   144
+  ],
+  "shockwave.0": [
+   "effects",
+   268
+  ],
+  "shockwave.1": [
+   "effects",
+   269
+  ],
+  "shockwave.2": [
+   "effects",
+   270
+  ],
+  "shockwave.3": [
+   "effects",
+   271
+  ],
+  "shotgun": [
+   "icons",
+   134
+  ],
+  "skunk": [
+   "animals",
+   48
+  ],
+  "slanted rain.0": [
+   "weather",
+   12
+  ],
+  "slanted rain.1": [
+   "weather",
+   13
+  ],
+  "slanted rain.2": [
+   "weather",
+   14
+  ],
+  "slanted rain.3": [
+   "weather",
+   15
+  ],
+  "sleet.0": [
+   "weather",
+   56
+  ],
+  "sleet.1": [
+   "weather",
+   57
+  ],
+  "sleet.2": [
+   "weather",
+   58
+  ],
+  "sleet.3": [
+   "weather",
+   59
+  ],
+  "small sunflower": [
+   "plants-tall",
+   26
+  ],
+  "small tornado": [
+   "effects",
+   58
+  ],
+  "smoke cloud": [
+   "effects",
+   13
+  ],
+  "smoke puff still": [
+   "effects",
+   3
+  ],
+  "smoke puff.0": [
+   "effects",
+   135
+  ],
+  "smoke puff.1": [
+   "effects",
+   136
+  ],
+  "smoke puff.2": [
+   "effects",
+   137
+  ],
+  "smoke puff.3": [
+   "effects",
+   138
+  ],
+  "smoke trail.0": [
+   "effects",
+   139
+  ],
+  "smoke trail.1": [
+   "effects",
+   140
+  ],
+  "smoke trail.2": [
+   "effects",
+   141
+  ],
+  "smoke trail.3": [
+   "effects",
+   142
+  ],
+  "snapdragon": [
+   "plants-small",
+   29
+  ],
+  "sniper rifle": [
+   "icons",
+   86
+  ],
+  "snow burst.0": [
+   "effects",
+   212
+  ],
+  "snow burst.1": [
+   "effects",
+   213
+  ],
+  "snow burst.2": [
+   "effects",
+   214
+  ],
+  "snow dust devil.0": [
+   "weather",
+   312
+  ],
+  "snow dust devil.1": [
+   "weather",
+   313
+  ],
+  "snow dust devil.2": [
+   "weather",
+   314
+  ],
+  "snow dust devil.3": [
+   "weather",
+   315
+  ],
+  "snow flurry.0": [
+   "weather",
+   44
+  ],
+  "snow flurry.1": [
+   "weather",
+   45
+  ],
+  "snow flurry.2": [
+   "weather",
+   46
+  ],
+  "snow flurry.3": [
+   "weather",
+   47
+  ],
+  "snow leopard": [
+   "animals",
+   17
+  ],
+  "snow.0": [
+   "effects",
+   208
+  ],
+  "snow.1": [
+   "effects",
+   209
+  ],
+  "snow.2": [
+   "effects",
+   210
+  ],
+  "snow.3": [
+   "effects",
+   211
+  ],
+  "snowy tree": [
+   "trees",
+   35
+  ],
+  "solar flare sky.0": [
+   "weather",
+   376
+  ],
+  "solar flare sky.1": [
+   "weather",
+   377
+  ],
+  "solar flare sky.2": [
+   "weather",
+   378
+  ],
+  "solar flare sky.3": [
+   "weather",
+   379
+  ],
+  "sonic blaster": [
+   "icons",
+   142
+  ],
+  "soul release.0": [
+   "effects",
+   342
+  ],
+  "soul release.1": [
+   "effects",
+   343
+  ],
+  "soul release.2": [
+   "effects",
+   344
+  ],
+  "soul release.3": [
+   "effects",
+   345
+  ],
+  "space rift.0": [
+   "effects",
+   427
+  ],
+  "space rift.1": [
+   "effects",
+   428
+  ],
+  "space rift.2": [
+   "effects",
+   429
+  ],
+  "spark.0": [
+   "effects",
+   100
+  ],
+  "spark.1": [
+   "effects",
+   101
+  ],
+  "spark.2": [
+   "effects",
+   102
+  ],
+  "spark.3": [
+   "effects",
+   103
+  ],
+  "spell cast.0": [
+   "effects",
+   321
+  ],
+  "spell cast.1": [
+   "effects",
+   322
+  ],
+  "spell cast.2": [
+   "effects",
+   323
+  ],
+  "spiked flail": [
+   "icons",
+   51
+  ],
+  "spiked mace": [
+   "icons",
+   18
+  ],
+  "spirit tree": [
+   "trees",
+   54
+  ],
+  "spore tree": [
+   "trees",
+   47
+  ],
+  "spruce tree": [
+   "trees",
+   14
+  ],
+  "squirrel": [
+   "animals",
+   43
+  ],
+  "stag": [
+   "animals",
+   4
+  ],
+  "star burst.0": [
+   "effects",
+   418
+  ],
+  "star burst.1": [
+   "effects",
+   419
+  ],
+  "star burst.2": [
+   "effects",
+   420
+  ],
+  "starry frost.0": [
+   "weather",
+   256
+  ],
+  "starry frost.1": [
+   "weather",
+   257
+  ],
+  "starry frost.2": [
+   "weather",
+   258
+  ],
+  "starry frost.3": [
+   "weather",
+   259
+  ],
+  "steady rain.0": [
+   "weather",
+   4
+  ],
+  "steady rain.1": [
+   "weather",
+   5
+  ],
+  "steady rain.2": [
+   "weather",
+   6
+  ],
+  "steady rain.3": [
+   "weather",
+   7
+  ],
+  "steam vent.0": [
+   "weather",
+   208
+  ],
+  "steam vent.1": [
+   "weather",
+   209
+  ],
+  "steam vent.2": [
+   "weather",
+   210
+  ],
+  "steam vent.3": [
+   "weather",
+   211
+  ],
+  "steel battle axe": [
+   "icons",
+   10
+  ],
+  "steel revolver": [
+   "icons",
+   75
+  ],
+  "steel star": [
+   "icons",
+   49
+  ],
+  "stone spires": [
+   "effects",
+   87
+  ],
+  "storm bow": [
+   "icons",
+   36
+  ],
+  "storm rain.0": [
+   "weather",
+   16
+  ],
+  "storm rain.1": [
+   "weather",
+   17
+  ],
+  "storm rain.2": [
+   "weather",
+   18
+  ],
+  "storm rain.3": [
+   "weather",
+   19
+  ],
+  "storm staff": [
+   "icons",
+   130
+  ],
+  "strawberry": [
+   "plants-small",
+   48
+  ],
+  "succulent": [
+   "plants-small",
+   8
+  ],
+  "sugarcane": [
+   "plants-tall",
+   28
+  ],
+  "sun mace": [
+   "icons",
+   15
+  ],
+  "sun shower.0": [
+   "weather",
+   268
+  ],
+  "sun shower.1": [
+   "weather",
+   269
+  ],
+  "sun shower.2": [
+   "weather",
+   270
+  ],
+  "sun shower.3": [
+   "weather",
+   271
+  ],
+  "sun staff": [
+   "icons",
+   63
+  ],
+  "sun sword": [
+   "icons",
+   122
+  ],
+  "sunbeams.0": [
+   "weather",
+   272
+  ],
+  "sunbeams.1": [
+   "weather",
+   273
+  ],
+  "sunbeams.2": [
+   "weather",
+   274
+  ],
+  "sunbeams.3": [
+   "weather",
+   275
+  ],
+  "sunflower": [
+   "plants-tall",
+   8
+  ],
+  "sunrise haze.0": [
+   "weather",
+   120
+  ],
+  "sunrise haze.1": [
+   "weather",
+   121
+  ],
+  "sunrise haze.2": [
+   "weather",
+   122
+  ],
+  "sunrise haze.3": [
+   "weather",
+   123
+  ],
+  "swamp haze.0": [
+   "weather",
+   204
+  ],
+  "swamp haze.1": [
+   "weather",
+   205
+  ],
+  "swamp haze.2": [
+   "weather",
+   206
+  ],
+  "swamp haze.3": [
+   "weather",
+   207
+  ],
+  "swamp tree": [
+   "trees",
+   36
+  ],
+  "tall grass": [
+   "plants-small",
+   1
+  ],
+  "tall mushroom": [
+   "plants-small",
+   56
+  ],
+  "tech tree": [
+   "trees",
+   55
+  ],
+  "teleport trail.0": [
+   "effects",
+   335
+  ],
+  "teleport trail.1": [
+   "effects",
+   336
+  ],
+  "teleport trail.2": [
+   "effects",
+   337
+  ],
+  "teleport trail.3": [
+   "effects",
+   338
+  ],
+  "teleport.0": [
+   "effects",
+   305
+  ],
+  "teleport.1": [
+   "effects",
+   306
+  ],
+  "thorn ring": [
+   "effects",
+   48
+  ],
+  "thorn spike.0": [
+   "effects",
+   385
+  ],
+  "thorn spike.1": [
+   "effects",
+   386
+  ],
+  "thorn spike.2": [
+   "effects",
+   387
+  ],
+  "thorn spike.3": [
+   "effects",
+   388
+  ],
+  "thorn whip": [
+   "icons",
+   119
+  ],
+  "throwing knives": [
+   "icons",
+   40
+  ],
+  "thunder hammer": [
+   "icons",
+   19
+  ],
+  "thunder strike.0": [
+   "effects",
+   265
+  ],
+  "thunder strike.1": [
+   "effects",
+   266
+  ],
+  "thunder strike.2": [
+   "effects",
+   267
+  ],
+  "thunderstorm": [
+   "effects",
+   98
+  ],
+  "thunderstorm weather.0": [
+   "weather",
+   20
+  ],
+  "thunderstorm weather.1": [
+   "weather",
+   21
+  ],
+  "thunderstorm weather.2": [
+   "weather",
+   22
+  ],
+  "thunderstorm weather.3": [
+   "weather",
+   23
+  ],
+  "tidal wave": [
+   "effects",
+   75
+  ],
+  "tiger": [
+   "animals",
+   16
+  ],
+  "time warp.0": [
+   "effects",
+   425
+  ],
+  "time warp.1": [
+   "effects",
+   426
+  ],
+  "tomato plant": [
+   "plants-tall",
+   29
+  ],
+  "tornado funnel.0": [
+   "weather",
+   232
+  ],
+  "tornado funnel.1": [
+   "weather",
+   233
+  ],
+  "tornado funnel.2": [
+   "weather",
+   234
+  ],
+  "tornado funnel.3": [
+   "weather",
+   235
+  ],
+  "tornado.0": [
+   "effects",
+   229
+  ],
+  "tornado.1": [
+   "effects",
+   230
+  ],
+  "toxic bubble.0": [
+   "effects",
+   290
+  ],
+  "toxic bubble.1": [
+   "effects",
+   291
+  ],
+  "toxic bubble.2": [
+   "effects",
+   292
+  ],
+  "toxic skull": [
+   "effects",
+   93
+  ],
+  "toxic smog.0": [
+   "weather",
+   196
+  ],
+  "toxic smog.1": [
+   "weather",
+   197
+  ],
+  "toxic smog.2": [
+   "weather",
+   198
+  ],
+  "toxic smog.3": [
+   "weather",
+   199
+  ],
+  "tree growth.0": [
+   "effects",
+   392
+  ],
+  "tree growth.1": [
+   "effects",
+   393
+  ],
+  "tree growth.2": [
+   "effects",
+   394
+  ],
+  "tree growth.3": [
+   "effects",
+   395
+  ],
+  "trident": [
+   "icons",
+   113
+  ],
+  "tropical squall.0": [
+   "weather",
+   220
+  ],
+  "tropical squall.1": [
+   "weather",
+   221
+  ],
+  "tropical squall.2": [
+   "weather",
+   222
+  ],
+  "tropical squall.3": [
+   "weather",
+   223
+  ],
+  "truffle": [
+   "plants-small",
+   57
+  ],
+  "tsunami": [
+   "effects",
+   95
+  ],
+  "tulip": [
+   "plants-small",
+   12
+  ],
+  "twilight haze.0": [
+   "weather",
+   352
+  ],
+  "twilight haze.1": [
+   "weather",
+   353
+  ],
+  "twilight haze.2": [
+   "weather",
+   354
+  ],
+  "twilight haze.3": [
+   "weather",
+   355
+  ],
+  "twin daggers": [
+   "icons",
+   106
+  ],
+  "twin stars": [
+   "effects",
+   11
+  ],
+  "venom blaster": [
+   "icons",
+   133
+  ],
+  "venom chain": [
+   "icons",
+   53
+  ],
+  "venom flail": [
+   "icons",
+   16
+  ],
+  "venom launcher": [
+   "icons",
+   98
+  ],
+  "venom pistol": [
+   "icons",
+   76
+  ],
+  "venom recurve": [
+   "icons",
+   35
+  ],
+  "venom rifle": [
+   "icons",
+   84
+  ],
+  "venom scythe": [
+   "icons",
+   27
+  ],
+  "venom shuriken": [
+   "icons",
+   48
+  ],
+  "venom staff": [
+   "icons",
+   68
+  ],
+  "venom sword": [
+   "icons",
+   2
+  ],
+  "vine": [
+   "plants-small",
+   6
+  ],
+  "vines.0": [
+   "effects",
+   381
+  ],
+  "vines.1": [
+   "effects",
+   382
+  ],
+  "vines.2": [
+   "effects",
+   383
+  ],
+  "vines.3": [
+   "effects",
+   384
+  ],
+  "violet energy blade": [
+   "icons",
+   125
+  ],
+  "void blaster": [
+   "icons",
+   74
+  ],
+  "void bow": [
+   "icons",
+   31
+  ],
+  "void burst": [
+   "effects",
+   32
+  ],
+  "void cannon": [
+   "icons",
+   138
+  ],
+  "void chain": [
+   "icons",
+   55
+  ],
+  "void chakram": [
+   "icons",
+   46
+  ],
+  "void circle": [
+   "effects",
+   56
+  ],
+  "void comet": [
+   "effects",
+   22
+  ],
+  "void crossbow": [
+   "icons",
+   38
+  ],
+  "void disc": [
+   "icons",
+   147
+  ],
+  "void dome": [
+   "effects",
+   72
+  ],
+  "void eye": [
+   "effects",
+   86
+  ],
+  "void galaxy": [
+   "effects",
+   92
+  ],
+  "void katana": [
+   "icons",
+   7
+  ],
+  "void lance": [
+   "icons",
+   129
+  ],
+  "void orb": [
+   "effects",
+   6
+  ],
+  "void pillar": [
+   "effects",
+   62
+  ],
+  "void pulse gun": [
+   "icons",
+   94
+  ],
+  "void rifle": [
+   "icons",
+   82
+  ],
+  "void ring": [
+   "effects",
+   38
+  ],
+  "void scythe": [
+   "icons",
+   25
+  ],
+  "void slash": [
+   "effects",
+   42
+  ],
+  "void sniper": [
+   "icons",
+   88
+  ],
+  "void spiral": [
+   "effects",
+   82
+  ],
+  "void staff": [
+   "icons",
+   62
+  ],
+  "void tree": [
+   "trees",
+   50
+  ],
+  "void vortex": [
+   "effects",
+   27
+  ],
+  "volcanic smoke.0": [
+   "weather",
+   184
+  ],
+  "volcanic smoke.1": [
+   "weather",
+   185
+  ],
+  "volcanic smoke.2": [
+   "weather",
+   186
+  ],
+  "volcanic smoke.3": [
+   "weather",
+   187
+  ],
+  "war hammer": [
+   "icons",
+   13
+  ],
+  "water buffalo": [
+   "animals",
+   39
+  ],
+  "water burst": [
+   "effects",
+   36
+  ],
+  "water circle": [
+   "effects",
+   55
+  ],
+  "water drop.0": [
+   "effects",
+   173
+  ],
+  "water drop.1": [
+   "effects",
+   174
+  ],
+  "water drop.2": [
+   "effects",
+   175
+  ],
+  "water drop.3": [
+   "effects",
+   176
+  ],
+  "water explosion.0": [
+   "effects",
+   198
+  ],
+  "water explosion.1": [
+   "effects",
+   199
+  ],
+  "water explosion.2": [
+   "effects",
+   200
+  ],
+  "water geyser": [
+   "effects",
+   65
+  ],
+  "water hyacinth": [
+   "plants-small",
+   43
+  ],
+  "water jet.0": [
+   "effects",
+   188
+  ],
+  "water jet.1": [
+   "effects",
+   189
+  ],
+  "water jet.2": [
+   "effects",
+   190
+  ],
+  "water jet.3": [
+   "effects",
+   191
+  ],
+  "water lily": [
+   "plants-small",
+   16
+  ],
+  "water ring.0": [
+   "effects",
+   185
+  ],
+  "water ring.1": [
+   "effects",
+   186
+  ],
+  "water ring.2": [
+   "effects",
+   187
+  ],
+  "water slash": [
+   "effects",
+   46
+  ],
+  "water splash.0": [
+   "effects",
+   177
+  ],
+  "water splash.1": [
+   "effects",
+   178
+  ],
+  "water splash.2": [
+   "effects",
+   179
+  ],
+  "water splash.3": [
+   "effects",
+   180
+  ],
+  "water wave.0": [
+   "effects",
+   181
+  ],
+  "water wave.1": [
+   "effects",
+   182
+  ],
+  "water wave.2": [
+   "effects",
+   183
+  ],
+  "water wave.3": [
+   "effects",
+   184
+  ],
+  "waterfall": [
+   "effects",
+   89
+  ],
+  "waterspout.0": [
+   "weather",
+   236
+  ],
+  "waterspout.1": [
+   "weather",
+   237
+  ],
+  "waterspout.2": [
+   "weather",
+   238
+  ],
+  "waterspout.3": [
+   "weather",
+   239
+  ],
+  "wave spray gale.0": [
+   "weather",
+   296
+  ],
+  "wave spray gale.1": [
+   "weather",
+   297
+  ],
+  "wave spray gale.2": [
+   "weather",
+   298
+  ],
+  "wave spray gale.3": [
+   "weather",
+   299
+  ],
+  "wheat": [
+   "plants-tall",
+   23
+  ],
+  "whirlpool.0": [
+   "effects",
+   195
+  ],
+  "whirlpool.1": [
+   "effects",
+   196
+  ],
+  "whirlpool.2": [
+   "effects",
+   197
+  ],
+  "white peony": [
+   "plants-small",
+   30
+  ],
+  "whiteout.0": [
+   "weather",
+   80
+  ],
+  "whiteout.1": [
+   "weather",
+   81
+  ],
+  "whiteout.2": [
+   "weather",
+   82
+  ],
+  "whiteout.3": [
+   "weather",
+   83
+  ],
+  "wild pig": [
+   "animals",
+   9
+  ],
+  "willow tree": [
+   "trees",
+   16
+  ],
+  "wind comet": [
+   "effects",
+   24
+  ],
+  "wind gust.0": [
+   "effects",
+   225
+  ],
+  "wind gust.1": [
+   "effects",
+   226
+  ],
+  "wind gust.2": [
+   "effects",
+   227
+  ],
+  "wind gust.3": [
+   "effects",
+   228
+  ],
+  "wind slash": [
+   "effects",
+   44
+  ],
+  "wind swirl": [
+   "effects",
+   37
+  ],
+  "wind tornado": [
+   "effects",
+   68
+  ],
+  "wind trail.0": [
+   "effects",
+   234
+  ],
+  "wind trail.1": [
+   "effects",
+   235
+  ],
+  "wind trail.2": [
+   "effects",
+   236
+  ],
+  "wind trail.3": [
+   "effects",
+   237
+  ],
+  "wisteria": [
+   "plants-tall",
+   19
+  ],
+  "wooden crossbow": [
+   "icons",
+   37
+  ],
+  "wooden longbow": [
+   "icons",
+   30
+  ],
+  "yak": [
+   "animals",
+   38
+  ],
+  "yellow hibiscus": [
+   "plants-small",
+   37
+  ],
+  "yucca": [
+   "plants-tall",
+   6
+  ],
+  "zebra": [
+   "animals",
+   24
+  ]
+ },
+ "pages": {
+  "animals": {
+   "cell": [
+    64,
+    48
+   ],
+   "file": "content-animals.png",
+   "fit": "bottom",
+   "trim": true
+  },
+  "effects": {
+   "cell": [
+    48,
+    48
+   ],
+   "file": "content-effects.png",
+   "fit": "centre",
+   "trim": true
+  },
+  "icons": {
+   "cell": [
+    32,
+    32
+   ],
+   "file": "content-icons.png",
+   "fit": "centre",
+   "trim": true
+  },
+  "plants-small": {
+   "cell": [
+    32,
+    32
+   ],
+   "file": "content-plants-small.png",
+   "fit": "bottom",
+   "trim": true
+  },
+  "plants-tall": {
+   "cell": [
+    32,
+    64
+   ],
+   "file": "content-plants-tall.png",
+   "fit": "bottom",
+   "trim": true
+  },
+  "trees": {
+   "cell": [
+    64,
+    96
+   ],
+   "file": "content-trees.png",
+   "fit": "bottom",
+   "trim": true
+  },
+  "weather": {
+   "cell": [
+    32,
+    64
+   ],
+   "file": "content-weather.png",
+   "fit": "centre",
+   "trim": false
+  }
+ }
+}

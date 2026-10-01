@@ -41,9 +41,32 @@ void TileMap::setSolid(int tile, bool solid) {
     solidTiles_[static_cast<std::size_t>(tile)] = solid;
 }
 
+void TileMap::setObstacle(int x, int y, double heightMetres) {
+    if (!inside(x, y)) {
+        return;
+    }
+    if (obstacles_.empty()) {
+        if (heightMetres <= 0.0) {
+            return;
+        }
+        obstacles_.assign(tiles_.size(), 0.0F);
+    }
+    obstacles_[static_cast<std::size_t>(y * width_ + x)] = static_cast<float>(heightMetres);
+}
+
+double TileMap::obstacleHeight(int x, int y) const {
+    if (!inside(x, y) || obstacles_.empty()) {
+        return 0.0;
+    }
+    return obstacles_[static_cast<std::size_t>(y * width_ + x)];
+}
+
 bool TileMap::isSolid(int x, int y) const {
     if (!inside(x, y)) {
         return true; // the edge of the world is a wall
+    }
+    if (!obstacles_.empty() && obstacles_[static_cast<std::size_t>(y * width_ + x)] > 0.0F) {
+        return true;
     }
     const int tile = at(x, y);
     return tile < static_cast<int>(solidTiles_.size()) && solidTiles_[static_cast<std::size_t>(tile)];

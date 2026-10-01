@@ -70,6 +70,7 @@ odysseus_apply_settings(odysseus_core)
 add_library(luna_platform STATIC
     src/luna/platform/layer.cpp
     src/luna/platform/sdl_events.cpp
+    src/luna/platform/crash.cpp
     src/luna/platform/system.cpp
     src/luna/platform/user_paths.cpp
     src/luna/platform/window.cpp)
@@ -105,8 +106,11 @@ add_library(luna_engine STATIC
     src/luna/engine/collision.cpp
     src/luna/engine/physics_view.cpp
     src/luna/engine/image_ops.cpp
+    src/luna/engine/sprite_layers.cpp
+    src/luna/engine/chunk_streamer.cpp
     src/luna/engine/image_io.cpp
-    src/luna/engine/ui.cpp)
+    src/luna/engine/ui.cpp
+    src/luna/engine/effects.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 # PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
 target_include_directories(luna_engine SYSTEM PRIVATE ${Stb_INCLUDE_DIR})
@@ -134,7 +138,12 @@ add_library(odysseus_sim STATIC
     src/sim/life.cpp
     src/sim/story.cpp
     src/sim/report.cpp
-    src/sim/save.cpp)
+    src/sim/save.cpp
+    src/sim/region.cpp
+    src/sim/rivals.cpp
+    src/sim/region_save.cpp
+    src/sim/hero_data.cpp
+    src/sim/hero_life.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -151,7 +160,23 @@ add_library(odysseus_game STATIC
     src/game/spear_range.cpp
     src/game/sword.cpp
     src/game/enemy.cpp
+    src/game/status.cpp
     src/game/art.cpp
+    src/game/content_art.cpp
+    src/game/catalogs.cpp
+    src/game/weapons.cpp
+    src/game/arc_shots.cpp
+    src/game/pickups.cpp
+    src/game/plants.cpp
+    src/game/animals.cpp
+    src/game/weather.cpp
+    src/game/clan_art.cpp
+    src/game/clan_view.cpp
+    src/game/region_level.cpp
+    src/game/run_flow.cpp
+    src/game/settings.cpp
+    src/game/tutorial.cpp
+    src/game/session_stats.cpp
     src/game/level.cpp
     src/game/editor.cpp
     src/game/editor_history.cpp)
@@ -236,7 +261,8 @@ add_executable(luna_tests
     tests/luna/pixel_scale_test.cpp
     tests/luna/tile_map_test.cpp
     tests/luna/collision_test.cpp
-    tests/luna/ui_test.cpp)
+    tests/luna/ui_test.cpp
+    tests/luna/effects_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
@@ -276,13 +302,27 @@ set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
 add_executable(odysseus_game_tests
     tests/main.cpp
     tests/game/hero_test.cpp
+    tests/game/m6_test.cpp
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
     tests/game/paint_test.cpp
     tests/game/place_test.cpp
-    tests/game/settings_test.cpp)
+    tests/game/settings_test.cpp
+    tests/game/content_test.cpp
+    tests/game/combat_test.cpp
+    tests/game/weapons_test.cpp
+    tests/game/elements_test.cpp
+    tests/game/aiming_test.cpp
+    tests/game/arc_test.cpp
+    tests/game/ranged_test.cpp
+    tests/game/plants_test.cpp
+    tests/game/animals_test.cpp
+    tests/game/weather_test.cpp
+    tests/game/clan_test.cpp
+    tests/game/m4_test.cpp
+    tests/game/pickups_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -316,7 +356,9 @@ add_executable(odysseus_sim_tests
     tests/sim/story_care_test.cpp
     tests/sim/story_love_test.cpp
     tests/sim/story_hunt_test.cpp
-    tests/sim/story_episode_test.cpp)
+    tests/sim/story_episode_test.cpp
+    tests/sim/region_test.cpp
+    tests/sim/hero_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
@@ -367,3 +409,14 @@ add_test(NAME "X-M2c Two scripted presses"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/twopresses
             -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_two_presses.cmake")
 set_tests_properties("X-M2c Two scripted presses" PROPERTIES LABELS window TIMEOUT 120)
+
+# Playtest package (US-091): `cmake --build --preset windows-x64-release --target package` makes a zip that unpacks and runs on a
+# Windows 10/11 x64 PC without developer tools: odysseus.exe, the SDL3 library it needs, and the assets folder it reads at start.
+install(TARGETS odysseus RUNTIME DESTINATION .)
+install(FILES $<TARGET_RUNTIME_DLLS:odysseus> DESTINATION . OPTIONAL)
+install(DIRECTORY assets/ DESTINATION assets PATTERN "saves" EXCLUDE PATTERN "*.bak" EXCLUDE)
+install(FILES README.md DESTINATION . OPTIONAL)
+set(CPACK_GENERATOR ZIP)
+set(CPACK_PACKAGE_NAME "ProjectOdyssey-playtest")
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+include(CPack)

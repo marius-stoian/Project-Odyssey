@@ -48,10 +48,21 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::Tab: return KeyBinding{Intent::SwitchWeapon, kKeyboardB};
     case Key::F1: return KeyBinding{Intent::ModeGame, kKeyboardA};
     case Key::F2: return KeyBinding{Intent::ModeEditor, kKeyboardA};
+    case Key::F12: return KeyBinding{Intent::DevTools, kKeyboardA};
+    case Key::F3: return KeyBinding{Intent::Overlay, kKeyboardA};
     case Key::Delete: return KeyBinding{Intent::Delete, kKeyboardA};
     case Key::Backspace: return KeyBinding{Intent::Erase, kKeyboardA};
     case Key::G: return KeyBinding{Intent::ToggleGrid, kKeyboardA};
     case Key::R: return KeyBinding{Intent::Rotate, kKeyboardA};
+    case Key::Num1: return KeyBinding{Intent::Slot1, kKeyboardA};
+    case Key::Num2: return KeyBinding{Intent::Slot2, kKeyboardA};
+    case Key::Num3: return KeyBinding{Intent::Slot3, kKeyboardA};
+    case Key::Num4: return KeyBinding{Intent::Slot4, kKeyboardA};
+    case Key::Num5: return KeyBinding{Intent::Slot5, kKeyboardA};
+    case Key::Num6: return KeyBinding{Intent::Slot6, kKeyboardA};
+    case Key::Num7: return KeyBinding{Intent::Slot7, kKeyboardA};
+    case Key::Num8: return KeyBinding{Intent::Slot8, kKeyboardA};
+    case Key::Num9: return KeyBinding{Intent::Slot9, kKeyboardA};
     default: return std::nullopt;
     }
 }
@@ -223,6 +234,9 @@ Intents InputMap::nextTick() {
         intents.set(static_cast<Intent>(i), held, pressedSinceTick_[i]);
     }
     pressedSinceTick_.fill(false);
+    // The left mouse button is also the Attack intent (US-139); a scripted Attack counts too.
+    intents.set(Intent::Attack, intents.held(Intent::Attack) || pointer_.isHeld(PointerButton::Left), intents.pressed(Intent::Attack) || pointer_.wasPressed(PointerButton::Left));
+    intents.set(Intent::Inspect, intents.held(Intent::Inspect) || pointer_.isHeld(PointerButton::Right), intents.pressed(Intent::Inspect) || pointer_.wasPressed(PointerButton::Right));
     intents.setPointer(pointer_);
     intents.setText(std::move(text_));
     text_.clear();

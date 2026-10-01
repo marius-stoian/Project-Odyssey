@@ -11,4 +11,7 @@ namespace luna::platform {
 // app-private folder from SDL3, which is why this lives in Platform (Charter rule 2).
 std::filesystem::path userDataDirectory();
 
+// The folder the program was started from (where odysseus.exe lies): a packaged build keeps its assets next to it (US-091).
+std::filesystem::path executableDirectory();
+
 } // namespace luna::platform

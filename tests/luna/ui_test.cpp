@@ -108,6 +108,15 @@ TEST_CASE("US-121 Pointer") {
             CHECK(input.nextTick().pressed(intent));
             input.handle(key(k, false));
         }
+        // US-134: the number keys 1-9 are Slot1-Slot9.
+        for (int i = 0; i < 9; ++i) {
+            const Key number = static_cast<Key>(static_cast<int>(Key::Num1) + i);
+            input.handle(key(number, true));
+            const auto numberTick = input.nextTick();
+            CHECK(numberTick.pressed(static_cast<Intent>(static_cast<int>(Intent::Slot1) + i)));
+            input.handle(key(number, false));
+            input.nextTick();
+        }
     }
     SUBCASE("typed text and scripted input") {
         Event text;
@@ -121,6 +130,20 @@ TEST_CASE("US-121 Pointer") {
         const auto tick = input.nextTick();
         CHECK(tick.pointer().x == 12);
         CHECK(tick.pointer().wasPressed(PointerButton::Left));
+    }
+    SUBCASE("the left button is the Attack intent (US-139)") {
+        CHECK_FALSE(input.nextTick().held(Intent::Attack));
+        input.setScriptedPointer(50, 60, PointerButton::Left, true);
+        const auto down = input.nextTick();
+        CHECK(down.held(Intent::Attack));
+        CHECK(down.pressed(Intent::Attack));
+        const auto still = input.nextTick();
+        CHECK(still.held(Intent::Attack));
+        CHECK_FALSE(still.pressed(Intent::Attack));
+        input.setScriptedPointer(50, 60, PointerButton::Left, false);
+        CHECK_FALSE(input.nextTick().held(Intent::Attack));
+        input.setScripted(Intent::Attack, true); // a script can attack without the mouse
+        CHECK(input.nextTick().held(Intent::Attack));
     }
 }
 

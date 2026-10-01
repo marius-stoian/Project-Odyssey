@@ -4,6 +4,175 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M6: Playtest readiness - US-090, US-091, US-092 (Avengers) - 2026-10-01
+
+**State:** Built and compiled; tests written, not run; merged into local `qa`. X-M6 waits for the owner (D-GATE-M6).
+
+- Tutorial (`tutorial.*`, `tutorial.json`), crash report (`luna::platform::installCrashHandler`), packaging (install rules and CPack zip), opt-in session statistics (`session_stats.*`), the first-launch Privacy screen, `HeroLife::eatBerries` and `tendCampFire`.
+- D-33 records the choices. Tests: `tests/game/m6_test.cpp`. Exit review `docs/gates/M6.md`.
+
+## M5: The vertical slice - US-050..US-055, US-060..US-063, US-070..US-073, US-081, US-082 (Avengers) - 2026-10-01
+
+**State:** Built and compiled (Debug); simulation tests written, not run (owner: no testing); merged into local `qa`.
+
+- Simulation: `HeroData` (assets/data/hero/*.json, validated with file and field), `HeroLife` (imprint, presets, comforts, focus and crossroads, mantle, professions, crafting quality, apprenticeship, dominion, barter and debts, sacred fire, aging, win and lose, save and load).
+- Game and Luna: `RunFlow` screens and context menu, `GameSettings`, F3 overlay, fullscreen switching, `--new-game`.
+- D-32 records the choices. Tests: `tests/sim/hero_test.cpp`. Evidence `docs/evidence/US-050`; exit review `docs/gates/M5.md`.
+## M4: Region, tools and saves — US-040, US-041, US-042, US-043, US-080, US-083 (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing); merged into local `qa`.
+
+- `sim::Region` (seeded, integer-only, chunked), resources by biome with berry regrowth, `Rivals` (two clans, levels of detail, moving camps), region delta saves, `ChunkStreamer` (Luna), `levelFromRegion`; `--region`, `--save-dir`, `--load`; autosave at each day's end with backups; F12 developer tools (Debug only); `writeSaveText` shared by the world and region saves.
+- D-31 records the choices. Tests: `tests/sim/region_test.cpp`, `tests/game/m4_test.cpp`. Evidence `docs/evidence/US-040`, `US-083`; plan `docs/plans/M4-region-tools-saves.md`; exit review `docs/gates/M4.md`.
+## M3: The clan on screen — US-030, US-032, US-031 (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing until M4); merged into local `qa`. Full verification and CI at the M4 gate.
+
+- Luna: `recoloured` and `composed` (`sprite_layers`). Game: layered code-drawn people (`clan_art`), `ClanView` (the simulation's actions given places, people walking at 60 px/s with interpolation), `Level::clan` and `assets/levels/camp.json`, the clan's simulation running inside the game (`--clan`, `--clan-speed`), emote bubbles and shiver, the hover panel, the date line.
+- D-30 records the choices. Tests in `tests/game/clan_test.cpp`. Evidence `docs/evidence/US-030..US-032`; plans `docs/plans/US-030.md`, `US-031.md`, `US-032.md`.
+## US-138: Placed effects and random weather (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
+
+- Level format version 2 gains `effects`; the Editor has an **Fx** tool and palette of the 17 looping effects with place, select, move, delete, Undo and Redo; the toolbar button **Grid** is now **#**.
+- `WeatherCycle` (seeded PCG32 stream `weather`): a random weather from weather.json every 60-120 s, 3 s cross-fade, clear about a third of the time; drawn over the world and under the interface; `--seed` and `--weather` flags.
+- D-29 records the small choices. Tests: US-138 Weather cycle, Weather in the game, Placed effects. Evidence `docs/evidence/US-138/`; plan `docs/plans/US-138.md`; guide `docs/guides/editor.md`.
+## US-137: Animals in the Editor (Avengers) — 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
+
+- The 50 animals are character kinds (`CharacterKindDef::animal`); the Editor's character palette has pages (12 to a page) with arrows; animals are drawn from the content atlas side views (`animals.{h,cpp}`), mirrored for west; the 20 predators and boars are enemies that are hit, strike back and die; the others are harmless bystanders.
+- D-28 records the small choices. Tests: US-137 The fifty animals are character kinds, Place, Enemies, Bystanders. Evidence `docs/evidence/US-137/`; plan `docs/plans/US-137.md`; guide `docs/guides/editor.md`.
+## US-136: Plants (Avengers) — 2026-10-01
+
+**State:** Done on local verification (Debug and Release); merged into local `qa`, pushed with the M2d milestone gate.
+
+- Level format version 2 gains `plants`; the Editor has a **Plant** tool and a palette of all 153 plants (36 to a page); the toolbar button **Weapon** is now **Arms**.
+- Game: plants stand in the world; big ones (bushes, trees) block walking and flat shots through a new obstacle layer in Luna's `TileMap`; Interact with empty hands or the right mouse button (new intent `Inspect`) shows a plant's name and text for 3 s; any weapon hit destroys a plant with a leaf burst, an edible one heals 10 HP; 15 s later the same plant grows back at a random free cell in the camera view (seeded PCG32), with a growth effect.
+- D-27 records the small choices. Tests: US-136 Level format, Editor, Place and block, Inspect, Chop, Eat, Regrow. Evidence `docs/evidence/US-136/`; plan `docs/plans/US-136.md`; guide `docs/guides/editor.md`.
+## Hero orientation by the pointer, no sprite flicker (Avengers) — 2026-10-01 (follow-up to US-139, D-26)
+
+**State:** Done on local verification (Debug and Release, 25/25); merged into local `qa`, pushed with the M2d milestone gate.
+
+- The hero always faces the mouse pointer while it is over the picture (also with empty hands and the demo weapons); off the picture he faces the way he walks. Only a held catalog weapon still aims attacks and shows the aim line.
+- Flicker fix: the facing is measured from the chest, ignores a pointer within 16 px, and changes only when the pointer is 10 degrees past the edge of the current facing's sector (`facingToward` with hysteresis); the facing before the tick's walking is what counts.
+- Tests: US-139 The hero always faces the pointer, No flicker walking past the pointer (fails without the fix), Facing with hysteresis. Evidence `docs/evidence/US-139/walk-east-facing-pointer.png`; plan `docs/plans/US-139.md` (follow-up section).
+
+## US-141: Bows, crossbows, thrown weapons and staff bolts (Avengers) — 2026-10-01
+
+**State:** Done. Merged into `qa`, pushed; hosted CI green (run 36783802996).
+
+- `assets/data/weapons.json`: new `classes` section (launch speeds for bow, thrown, staff, gun), validated naming file and field; no speeds are hard-coded any more (`ClassDef`, `Catalogs::weaponClass`, `launchArcShot(weapon, launchSpeed, ...)`).
+- Game: bows and crossbows (class bow) and thrown weapons shoot the US-140 arcs, staffs fire flat bolts aimed at the pointer, all at the speed from the file; elements apply on hit; `OdysseyGame::cameraView()`.
+- `assets/levels/range.json`: the shooting range (seven ranged weapons to pick up, goblins in the open and behind rocks).
+- Tests: US-141 Each ranged class shoots, Every ranged starter is shootable from the hotbar, Elements on shots, Speeds come from weapons.json, Shooting range. Evidence `docs/evidence/US-141/`; plan `docs/plans/US-141.md`.
+
+## US-140: Arc ballistics for shots (Avengers) — 2026-10-01
+
+**State:** Done. Merged into `qa`, pushed; hosted CI green (run 36782177188).
+
+- `src/game/arc_shots.{h,cpp}`: bow and thrown shots are Luna Physics projectiles (fixed-point, gravity, height); the launch angle lands them at the pointer, clamped to the weapon's range and its speed's reach; each tick they stop at the first enemy (feet to 1.5 m), rock (1.0 m tall) or the ground; a miss sticks 2 s, then is gone.
+- Game: sprites lifted by height with a ground shadow; log line per shot and end; staff bolts and bullets keep the flat path. Key aim (Interact) fires a shallow chest-height arrow to the weapon's range.
+- Earlier test "US-133 Starters fight" aims thrown weapons with the pointer. D-25 covers the design.
+- Tests: US-140 Lands at the cursor, Range and misses, Hits in its path, In the game. Evidence `docs/evidence/US-140/`; plan `docs/plans/US-140.md`.
+
+## US-139: Mouse aiming (Avengers) — 2026-10-01
+
+**State:** Done. Merged into `qa`, pushed; hosted CI green (merge 00c0095).
+
+- Luna Engine: new intent `Attack` (left mouse button, or scripted with `--hold Attack`); `--aim` flag (same as `--point`).
+- Game: while a catalog weapon is held and the pointer is over the picture, the hero faces the pointer (nearest of 8) and Attack swings or shoots toward it at the exact angle; Interact still attacks along the facing. Dotted aim line (to the weapon's range) and a crosshair (red beyond range).
+- `WeaponBehaviour::swingToward` / `launchToward` (unit direction), `facingToward`, `Hero::face`; the old facing versions still work.
+- D-25 recorded. Tests: US-139 Facing from a direction, Face the cursor, Swing toward the cursor, Keys still work, Interact goes along the facing...; luna_tests: the left button is the Attack intent. Evidence `docs/evidence/US-139/`; plan `docs/plans/US-139.md`.
+
+## US-135: Elements (Avengers) — 2026-09-30
+
+**State:** Done. Merged into `qa`, pushed; hosted CI run 36776897333 green.
+
+- `assets/data/weapons.json`: new `elements` section with the numbers and effect names per element; `loadCatalogs` range-checks them and requires every effect name to exist in effects.json (`ElementDef`, `Catalogs::element`).
+- `src/game/status.{h,cpp}`: `StatusEffects` (burn, poison, slow) held by every `Enemy`; a new hit restarts the timer, it never stacks.
+- Combat: fire burns 2 HP/s for 3 s, poison 1 HP/s for 5 s, ice slows to 50% for 2 s (a slowed enemy winds up at half speed), lightning jumps once to the nearest other enemy within 3 m for half damage, void heals the hero 25% of the damage. Hit and status effects come from effects.json. `Enemy::takeDamage(damage, flash)`.
+- D-24 (owner answers of this story) recorded in docs/decisions.md.
+- Tests: US-135 Numbers, Status effects, Fire, Fire shows, Poison, Ice, Lightning, Void, Bad numbers (odysseus_game_tests). Evidence `docs/evidence/US-135/` (a screenshot per element, the levels used); plan `docs/plans/US-135.md`.
+
+## US-134: Pickups and the hotbar (Avengers) — 2026-09-30
+
+**State:** Done. Merged into `qa`, pushed; hosted CI run 36766225054 green.
+
+- Level format version 2 (`pickups`: weapon name and position); version 1 files load unchanged; unknown weapon names are refused with the field named. `Definitions::weapons`.
+- Editor: Weapon tool and palette (16 starters + the two demo weapons), Select moves, Delete removes, Undo and Redo through `PickupsCommand`.
+- Platform and Engine: keys 1-9, intents `Slot1..Slot9` (scriptable with `--hold Slot3`).
+- Game: 9-slot hotbar at the bottom centre, pickups lying in the world, first free slot, "Hotbar full", 1-9 and Shift; the starters no longer cycle with Shift. `pickups.{h,cpp}`.
+- `assets/levels/demo.json` is version 2 with the spear throw and sword as pickups. D-23 recorded in docs/decisions.md. docs/guides/editor.md explains pickups.
+- Tests: US-134 Place, Move and delete, Level versions, Pick up, Full hotbar, Select, Hotbar drawn (odysseus_game_tests); number keys (luna_tests). Evidence `docs/evidence/US-134/`; plan `docs/plans/US-134.md`.
+- Verification: zero warnings; 25/25 checks passed in Debug and Release, including simulation determinism and the earlier end-to-end tests. The first run exposed stale ID/effect assumptions and one missed scripted paint click; the full rerun passed.
+
+## US-133: Weapon classes and the starter set (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- Game: `WeaponBehaviour` with `MeleeBehaviour` and `RangedBehaviour` for the 8 classes; projectiles for bow, thrown, staff, gun; 16 starters cycled with Shift; held icon in the hero's hand; `atlas --starters` contact sheet.
+- Tests: US-133 Classes, Starters fight, Starter set, In hand; US-029 tests kept. Evidence `docs/evidence/US-133/`; plan `docs/plans/US-133.md`.
+- Verification: `tools/verify.ps1 -Story US-133`: zero warnings, ctest 25/25 in Debug and Release.
+- Known gap: held icons are mirrored for west, not rotated (no renderer rotation).
+
+## US-132: Effect player (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- Luna: `Renderer::drawStyled` (stretch, alpha, additive) in the window, the recorder and `ImageRenderer`; `EffectPlayer` (`effects.{h,cpp}`).
+- Game: catalogs and content atlas loaded; `playEffect`; hit spark, death smoke, spear dust trail.
+- Tests: US-132 One-shot, Looping, Placement and style, Additive light (luna_tests); Combat effects, Death smoke (odysseus_game_tests). Evidence `docs/evidence/US-132/`; plan `docs/plans/US-132.md`.
+- Verification: `tools/verify.ps1 -Story US-132`: zero warnings, ctest 25/25 in Debug and Release.
+
+## US-131: Hero HP, fighting back and death (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `Enemy`: strike-back state machine (0.5 s wind-up, one strike per wind-up, no strikes from the dead), `reachMetres`; character kinds may set `reach`.
+- `OdysseyGame`: hero 100 HP; hit enemies strike back with their sword damage within reach; fall, 1 s fade, respawn at the hero start; HUD (hero HP, red "!" over a wind-up).
+- `characters.json`: strike numbers per D-21.
+- Tests: US-131 Strike back, One strike per wind-up, Out of reach, Death and respawn; evidence `docs/evidence/US-131/`; plan `docs/plans/US-131.md`.
+- Verification: `tools/verify.ps1 -Story US-131`: zero warnings, ctest 25/25 in Debug and Release.
+
+## US-130: Content catalogs from the new sheets (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- Luna `image_ops`: `keyAlpha`, `keyBrightness`, `removeColour`, `keepMainFigure`.
+- Game: content atlas (`content_art.{h,cpp}`: pages, cut list, cutting, save/load, numbered review sheets) and catalogs (`catalogs.{h,cpp}`: weapons, plants, animals, effects, weather; validated, frames checked against the atlas).
+- `odysseus_atlas` cuts `assets/sprites/content-cuts.json` (653 items, 1,191 frames) into `assets/sprites/atlas/content-*.png` + `content.json`; `--content-preview`.
+- Data: `weapons.json` (150, 16 starters), `plants.json` (153), `animals.json` (50, 20 enemies), `effects.json` (200), `weather.json` (101); `tools/art/` scripts that measured the sheets and wrote the first catalogs; the seven sheets are in `assets/sprites/`.
+- Evidence: `docs/evidence/US-130/` (numbered sheet and name list per page); plan `docs/plans/US-130.md`.
+- Verification: `tools/verify.ps1 -Story US-130`: Debug and Release zero warnings, ctest 25/25 in both (new cases US-130 Cut, Keys, Valid, Review).
+
+## K-M2d: Kick off M2d (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `docs/plans/M2d-content-design.md`: atlas pages, cut-list grids and smooth background removal, catalogs, Luna renderer additions and effect player, combat state machine, level format version 2, plants, weather.
+- Verification: docs only.
+
+## P-007: Adopt Codex v1.8 (Mraw) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `docs/status.md`: P-007 Done; K-M2d, S-US-130..S-US-138, X-M2d added (To do).
+- `docs/decisions.md`: D-21 (M2d content and combat) and D-22 (design decisions are the owner's).
+- `assets/sprites/`: the seven new sheets committed unchanged.
+- `Limit.md`, `Milestone-41.md` (AP-042): next prompt K-M2d.
+- Verification: docs and assets only; CI on `qa`.
+
+## M2d planning: brief, requirements v1.8, Codex v1.8 (Mraw, Anima) — 2026-09-30
+
+**State:** Done; merged into `qa`.
+
+- `docs/plans/M2d-content-brief.md`: the owner's seven new sprite sheets and every design decision from six chat rounds (D-21), and the new rule that design decisions are the owner's (D-22).
+- Requirements v1.8 synced from Drive (`docs/project/requirements/`): epic E13, milestone M2d before M3, stories US-130..US-138, D-21, D-22, resolution-log round 11.
+- Codex v1.8 by Anima (`docs/Codex.md`, `CLAUDE.md` regenerated): P-007, the M2d section (K-M2d, S-US-130..S-US-138, X-M2d), Charter human gate 3, D-15 chain, execution order, amendment log.
+- Verification: docs only; no code changed.
+
+
 ## X-M2c: Exit review M2c (Mraw) — 2026-09-30
 
 **State:** Done; `qa` merged into `main`, tag `m2c-done`.

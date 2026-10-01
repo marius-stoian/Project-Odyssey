@@ -40,4 +40,22 @@ std::vector<odysseus::core::Rect> findBlobs(const Image& image, const odysseus::
 // How far apart two colours are: the largest difference of red, green and blue.
 int colourDistance(Color a, Color b);
 
+// Sheets that already carry transparency (M2d): pixels less opaque than `threshold` become
+// fully transparent. With `hard` the rest become fully opaque (crisp pixel art); otherwise they
+// keep their alpha (soft glows).
+void keyAlpha(Image& image, int threshold, bool hard);
+
+// Light effects painted on a dark background: each pixel's opacity becomes how much brighter it
+// is than `background` (its brightest channel), times `gain`, so glows fade out softly.
+void keyBrightness(Image& image, Color background, int gain);
+
+// Keeps one figure: the largest connected group of visible pixels (8 neighbours) whose middle
+// lies inside `focus`, and the groups centred in `focus` that touch its box (loose parts like an
+// antler). Everything else (a neighbour reaching into the picture) becomes transparent.
+void keepMainFigure(Image& image, const odysseus::core::Rect& focus);
+
+// Every pixel within `tolerance` of `colour` becomes transparent, wherever it is: a background
+// that also shows through holes (inside a bow, between chain links).
+void removeColour(Image& image, Color colour, int tolerance);
+
 } // namespace luna::engine

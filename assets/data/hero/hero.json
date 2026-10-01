@@ -1,0 +1,51 @@
+{
+  "imprint": { "startAge": 12, "peakPercent": 300, "midAge": 19, "midPercent": 175, "endAge": 26, "endPercent": 50, "settledPercent": 25 },
+  "presets": [
+    { "name": "Full", "startAge": 12, "mantleAge": 26 },
+    { "name": "Short", "startAge": 20, "mantleAge": 26 },
+    { "name": "Off", "startAge": 26, "mantleAge": 26 }
+  ],
+  "comforts": [
+    { "name": "Gentle", "needsPercent": 70, "foodPercent": 140 },
+    { "name": "Balanced", "needsPercent": 100, "foodPercent": 100 },
+    { "name": "Harsh", "needsPercent": 135, "foodPercent": 70 }
+  ],
+  "aging": { "fromYears": 40, "startPercent": 10, "perYearPercent": 2 },
+  "skillLevelPoints": 10,
+  "masterBonusPercent": 100,
+  "trustOpinion": 25,
+  "origins": [
+    { "name": "a hunter's child", "affinity": { "hunter": 40, "gatherer": 15, "knapper": 15, "fireKeeper": 10, "shaman": 10, "trade": 10, "religion": 10 } },
+    { "name": "a gatherer's child", "affinity": { "hunter": 12, "gatherer": 40, "knapper": 15, "fireKeeper": 12, "shaman": 12, "trade": 12, "religion": 10 } },
+    { "name": "a flint-knapper's child", "affinity": { "hunter": 15, "gatherer": 12, "knapper": 40, "fireKeeper": 10, "shaman": 10, "trade": 18, "religion": 10 } },
+    { "name": "a fire-keeper's child", "affinity": { "hunter": 10, "gatherer": 12, "knapper": 10, "fireKeeper": 40, "shaman": 18, "trade": 10, "religion": 25 } },
+    { "name": "a healer's child", "affinity": { "hunter": 10, "gatherer": 18, "knapper": 10, "fireKeeper": 18, "shaman": 40, "trade": 10, "religion": 22 } }
+  ],
+  "dominion": {
+    "tradePerPerson": 3,
+    "rivalTradePerPerson": 10,
+    "rivalTradeGrowthPerDay": 1,
+    "winPercent": 60,
+    "combinedWinPercent": 50,
+    "loseBelowPeople": 3,
+    "rivalFollowerPercent": 60
+  },
+  "trade": {
+    "dueDays": 14,
+    "maxDebts": 3,
+    "defaultRelationshipPenalty": 30,
+    "defaultTradePenaltyPercent": 50,
+    "relationshipPerDeal": 3,
+    "needPercent": 130
+  },
+  "fire": {
+    "skillLevelToFound": 3,
+    "untendedDaysBeforeOut": 5,
+    "ritualMinimumAttendees": 5,
+    "ritualFaith": 12,
+    "followerFaith": 30,
+    "neglectFaithLoss": 10,
+    "conversionPerMille": 120,
+    "ritualRadiusTiles": 4
+  }
+}

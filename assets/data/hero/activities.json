@@ -1,0 +1,11 @@
+{
+  "activities": [
+    { "id": "hunt", "name": "Hunt with the elders", "text": "You follow the hunters into the cold grass before dawn.", "affinity": { "hunter": 6, "trade": 1 }, "skill": { "hunter": 5 } },
+    { "id": "gather", "name": "Gather with the clan", "text": "You learn which roots and berries the land gives in each season.", "affinity": { "gatherer": 6, "trade": 1 }, "skill": { "gatherer": 5 } },
+    { "id": "knap", "name": "Knap flint", "text": "You sit at the stone and learn how flint breaks.", "affinity": { "knapper": 6, "trade": 2 }, "skill": { "knapper": 5 } },
+    { "id": "fire", "name": "Tend the fire", "text": "You keep the clan's fire alive through the long nights.", "affinity": { "fireKeeper": 6, "religion": 4 }, "skill": { "fireKeeper": 5 } },
+    { "id": "heal", "name": "Sit with the healer", "text": "You learn the herbs, the songs and the quiet of the sick.", "affinity": { "shaman": 6, "religion": 3 }, "skill": { "shaman": 5 } },
+    { "id": "haggle", "name": "Listen to the traders", "text": "You listen as the elders weigh what one thing is worth against another.", "affinity": { "trade": 6, "knapper": 1 }, "skill": {} },
+    { "id": "wander", "name": "Wander", "text": "You go where your feet take you, and see what the land is like.", "affinity": { "hunter": 2, "gatherer": 2, "knapper": 1, "fireKeeper": 1, "shaman": 1, "trade": 1, "religion": 1 }, "skill": {} }
+  ]
+}

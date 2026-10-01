@@ -5,14 +5,23 @@
 //   --find <sheet.png> <x> <y> <w> <h> [tolerance] [minSize]
 //                                          list the figures (blobs) in a region of a sheet, to
 //                                          measure the rectangles for cuts.json
+//   --content-preview <folder>             also write, per content page, a numbered sheet
+//                                          (<page>.png) and its names (<page>.md), for review
+//   --starters <file.png>                  also write the starter weapons (weapons.json) as a
+//                                          numbered sheet, and their names in <file>.md
 //   --sprites <folder>                     where the sheets are (default: assets/sprites)
+//   It also cuts the M2d content (US-130) listed in assets/sprites/content-cuts.json into
+//   assets/sprites/atlas/content-*.png and content.json.
 #include "game/art.h"
+#include "game/catalogs.h"
+#include "game/content_art.h"
 
 #include "luna/engine/image_io.h"
 #include "luna/engine/image_ops.h"
 
 #include <exception>
 #include <filesystem>
+#include <fstream>
 #include <format>
 #include <iostream>
 #include <string>
@@ -46,6 +55,8 @@ int main(int argc, char** argv) {
         std::vector<std::string> args(argv + 1, argv + argc);
         std::filesystem::path sprites = std::filesystem::path(ODYSSEUS_ASSETS_DIR) / "sprites";
         std::filesystem::path preview;
+        std::filesystem::path contentPreview;
+        std::filesystem::path starters;
         for (std::size_t i = 0; i < args.size(); ++i) {
             if (args[i] == "--find" && i + 5 < args.size()) { // a sheet and four numbers follow
                 const std::vector<std::string> numbers(args.begin() + static_cast<std::ptrdiff_t>(i) + 2, args.end());
@@ -53,6 +64,10 @@ int main(int argc, char** argv) {
             }
             if (args[i] == "--preview" && i + 1 < args.size()) {
                 preview = args[++i];
+            } else if (args[i] == "--starters" && i + 1 < args.size()) {
+                starters = args[++i];
+            } else if (args[i] == "--content-preview" && i + 1 < args.size()) {
+                contentPreview = args[++i];
             } else if (args[i] == "--sprites" && i + 1 < args.size()) {
                 sprites = args[++i];
             } else {
@@ -69,6 +84,42 @@ int main(int argc, char** argv) {
         if (!preview.empty()) {
             luna::engine::savePng(odysseus::game::contactSheet(atlas), preview);
             std::cout << "Preview: " << preview.string() << '\n';
+        }
+        if (std::filesystem::exists(sprites / "content-cuts.json")) {
+            const auto contentCuts = odysseus::game::loadContentCuts(sprites / "content-cuts.json");
+            const auto content = odysseus::game::cutContent(contentCuts, sprites);
+            odysseus::game::saveContent(content, sprites / "atlas");
+            std::cout << std::format("Wrote {} content items ({} frames) to {}\n", content.frameCounts.size(), content.frames.size(),
+                                     (sprites / "atlas").string());
+            if (!contentPreview.empty()) {
+                std::filesystem::create_directories(contentPreview);
+                for (const auto& page : content.pages) {
+                    std::vector<std::string> names;
+                    for (const auto& cut : contentCuts.cuts) {
+                        if (cut.page == page.name) names.push_back(cut.name);
+                    }
+                    luna::engine::savePng(odysseus::game::numberedSheet(content, page.name, names), contentPreview / (page.name + ".png"));
+                    std::ofstream list(contentPreview / (page.name + ".md"), std::ios::binary | std::ios::trunc);
+                    list << "# " << page.name << " (" << names.size() << ")\n\nNumbers match " << page.name << ".png.\n\n";
+                    for (std::size_t n = 0; n < names.size(); ++n) list << n + 1 << ". " << names[n] << "\n";
+                }
+                std::cout << "Content preview: " << contentPreview.string() << '\n';
+            }
+            if (!starters.empty()) {
+                const auto catalogs = odysseus::game::loadCatalogs(sprites.parent_path() / "data", &content);
+                std::vector<std::string> names;
+                std::ofstream list(std::filesystem::path(starters).replace_extension(".md"), std::ios::binary | std::ios::trunc);
+                list << "# Starter weapons\n\nNumbers match " << starters.filename().string()
+                     << ". Swap one by setting \"starter\" in assets/data/weapons.json.\n\n";
+                for (const auto& weapon : catalogs.weapons) {
+                    if (!weapon.starter) continue;
+                    names.push_back(weapon.frame);
+                    list << names.size() << ". " << weapon.name << " (" << odysseus::game::weaponClassName(weapon.weaponClass) << ", "
+                         << odysseus::game::elementName(weapon.element) << ", damage " << weapon.damage << ")\n";
+                }
+                luna::engine::savePng(odysseus::game::numberedSheet(content, "icons", names), starters);
+                std::cout << "Starters: " << starters.string() << '\n';
+            }
         }
         return 0;
     } catch (const std::exception& error) {

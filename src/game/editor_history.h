@@ -59,6 +59,57 @@ private:
     int nextIdAfter_;
 };
 
+// Weapon pickups placed, moved or removed (US-134): like characters, the whole list before and after.
+class PickupsCommand final : public Command {
+public:
+    PickupsCommand(std::string what, std::vector<PlacedPickup> before, std::vector<PlacedPickup> after, int nextIdBefore, int nextIdAfter)
+        : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)), nextIdBefore_(nextIdBefore), nextIdAfter_(nextIdAfter) {}
+    void apply(Level& level) const override;
+    void undo(Level& level) const override;
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    std::vector<PlacedPickup> before_;
+    std::vector<PlacedPickup> after_;
+    int nextIdBefore_;
+    int nextIdAfter_;
+};
+
+// Plants placed, moved or removed (US-136): like pickups, the whole list before and after.
+class PlantsCommand final : public Command {
+public:
+    PlantsCommand(std::string what, std::vector<PlacedPlant> before, std::vector<PlacedPlant> after, int nextIdBefore, int nextIdAfter)
+        : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)), nextIdBefore_(nextIdBefore), nextIdAfter_(nextIdAfter) {}
+    void apply(Level& level) const override;
+    void undo(Level& level) const override;
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    std::vector<PlacedPlant> before_;
+    std::vector<PlacedPlant> after_;
+    int nextIdBefore_;
+    int nextIdAfter_;
+};
+
+// Placed effects placed, moved or removed (US-138): the whole list before and after.
+class EffectsCommand final : public Command {
+public:
+    EffectsCommand(std::string what, std::vector<PlacedEffect> before, std::vector<PlacedEffect> after, int nextIdBefore, int nextIdAfter)
+        : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)), nextIdBefore_(nextIdBefore), nextIdAfter_(nextIdAfter) {}
+    void apply(Level& level) const override;
+    void undo(Level& level) const override;
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    std::vector<PlacedEffect> before_;
+    std::vector<PlacedEffect> after_;
+    int nextIdBefore_;
+    int nextIdAfter_;
+};
+
 // A whole-level change: a resize, a new name, another default ground, a moved hero start. It
 // keeps the level before and after (a resize changes everything, and is rare).
 class LevelCommand final : public Command {

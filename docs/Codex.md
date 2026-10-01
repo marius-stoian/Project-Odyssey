@@ -1,6 +1,6 @@
-# Project Odyssey Codex v1.7
+# Project Odyssey Codex v1.9
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-30 | Source of truth: Project Odyssey.docx v1.7 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are delegated to Dominus
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-30 | Source of truth: Project Odyssey.docx v1.9 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -21,7 +21,7 @@ Hybrid: **stage gates** at milestones M0-M6 (with kill gates at M2 and M6) and *
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.7)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.9)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -29,7 +29,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v1.7 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v1.9 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -77,9 +77,10 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 The owner wants minimal intervention (standing instructions in docs/decisions.md, 2026-09-30). Only these stop the team:
 1. Kill-gate results that need people (X-M2 readers, X-M6 playtesters): write docs/decision-requests/D-GATE-Mx.md, end the session with the assembly report and a Milestone file, and do not start the next milestone until the owner answers.
 2. Anything that needs accounts, credentials, money, other people, or destructive actions outside this repository. Never create accounts or type credentials. If git push needs authentication that is not already configured, stop and ask.
+3. Design decisions (D-22, owner 2026-09-30): any D-xx that is not Decided, or any question that changes design or scope, is the owner's. Stop that story, ask the owner in chat in question rounds (2-4 options each, the recommended option first), record the answer in docs/decisions.md as "Decided (owner, <date>)" and in the next Milestone file, then continue. Never decide a design question for the owner; work on other ready prompts while waiting only if the owner is away.
 Everything else the team decides and records:
-- Design decisions (a D-xx that is not Decided, or any question that changes design or scope): Dominus decides using the recommended option in the source of truth or this Codex. Write docs/decision-requests/<ID>.md with the question, 2-4 options, the choice and why; set the decision in docs/decisions.md to "Decided by Dominus (delegated)" with a one-line answer; list it in the next Milestone file; continue. The owner may override later; an override is a new decision.
-- If the source of truth must change because of a delegated decision, update the requirements document on Google Drive (bump its version, add a resolution-log line) and raise a codex issue so Anima can follow.
+- Technical choices (how to build what the owner decided): Dominus decides and records them in ADRs or design documents.
+- If the source of truth must change because of an owner decision, update the requirements document on Google Drive (bump its version, add a resolution-log line) and raise a codex issue so Anima can follow.
 - Kill-gate evidence agents can measure, git push, new libraries: handle and report.
 Sessions end without warning (usage limits, crashes), so work must always be resumable: Limit.md at the repository root is kept current after every story. When a session is told it is near its limit, or the owner asks for a break: finish the current step, commit work in progress to its story branch with a "work in progress" message, push the branch, and update Limit.md with exactly what is done and what is left. Never leave uncommitted work.
 </human_gates>
@@ -188,7 +189,7 @@ You are the Mraw designer. You write content only as data files in assets/data/ 
 
 ## 4. Build loop (L-01)
 ```xml
-<prompt id="L-01" codex="1.7" name="Mraw build loop">
+<prompt id="L-01" codex="1.8" name="Mraw build loop">
 <context>
 Used by mraw-orchestrator for every story prompt S-US-xxx. The Charter (CLAUDE.md) is already loaded.
 </context>
@@ -231,18 +232,21 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
-| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
 | D-GATE-M2b | Kill Gate 1 retry: the owner reads the M2b story and judges whether it is a story | X-M2b | M3 | Decided: Go (owner, 2026-09-30: "it is a story") |
 | D-19 | Level editor scope v1: settings are level and character properties (level name, map size, default ground, hero start; per character name, HP, facing, sword damage); placed characters stand still with properties; new milestone M2c before M3 | M2c | US-120..US-126 | Decided (owner, 2026-09-30) |
+| D-21 | M2d content and combat (owner, six rounds in chat): full gameplay; all 150 weapons catalogued, 16 starters (one plain and one elemental per class) placed as pickups, 9-slot hotbar (1-9, Shift cycles); 8 weapon classes; elements with status effects; hero 100 HP, respawn at the start; enemies (goblins, predators, boars) strike back after a 0.5 s wind-up within 1.5 m; deaths drop nothing; plants block (big ones), are inspected, chopped, heal 10 when edible and regrow after 15 s at a random free spot in camera view; effects on hits, plant actions and placed in the Editor; random weather every 60-120 s with a 3 s fade | M2d | US-130..US-138 | Decided (owner, 2026-09-30) |
+| D-22 | Design decisions are taken by the owner in interactive question rounds in chat; Dominus no longer delegates design or scope questions (Charter human gate 3) | All | All | Decided (owner, 2026-09-30) |
+| D-25 | Aiming and ballistics (owner, two rounds in chat, 2026-10-01): free aim at the mouse cursor (the hero faces it, melee swings toward it, aim line and crosshair); full arcs from Luna Physics that land at the cursor (clamped to range), hit anything in their path at body height, are blocked by rocks and trees when low and clear them when high; bows, crossbows, thrown weapons and staffs (staff bolts flat and fast) are shootable, guns are out of scope; no ammo, only rate-of-fire cooldown; three stories US-139..US-141 before plants | M2d | US-139..US-141 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.7 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.9 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -262,7 +266,7 @@ Read docs/Codex.md and docs/codex-issues.md. For each open issue: decide the fix
 ## 7. Prompts by milestone
 ### P-000 Bootstrap
 ```xml
-<prompt id="P-000" codex="1.7" name="Bootstrap the Mraw workspace">
+<prompt id="P-000" codex="1.8" name="Bootstrap the Mraw workspace">
 <context>
 Runs once, in an empty folder named odysseus/ that contains only Codex.md. Creates the files every later prompt relies on.
 </context>
@@ -284,7 +288,7 @@ Runs once, in an empty folder named odysseus/ that contains only Codex.md. Creat
 
 ### P-001 Adopt Codex v1.2 (Luna first)
 ```xml
-<prompt id="P-001" codex="1.7" name="Adopt Codex v1.2 in an existing workspace">
+<prompt id="P-001" codex="1.8" name="Adopt Codex v1.2 in an existing workspace">
 <context>
 Codex v1.2 builds the Luna engine first (source of truth v1.4, ARC-09): M1 is now the Luna engine walking skeleton and M2 the console clan simulator with Kill Gate 1. Workspaces bootstrapped with Codex v1.1 still have the old folders and prompt order. A workspace bootstrapped with v1.2 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -303,7 +307,7 @@ Codex v1.2 builds the Luna engine first (source of truth v1.4, ARC-09): M1 is no
 
 ### P-002 Adopt Codex v1.3 (autonomous assembly)
 ```xml
-<prompt id="P-002" codex="1.7" name="Adopt Codex v1.3 in an existing workspace">
+<prompt id="P-002" codex="1.8" name="Adopt Codex v1.3 in an existing workspace">
 <context>
 Codex v1.3 writes the owner's standing instructions of 2026-09-30 into the Charter: delegated design decisions, the qa integration branch, CHANGELOG.md per change set, and a Milestone-<n>.md snapshot after every story. A workspace bootstrapped with v1.3 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -320,7 +324,7 @@ Codex v1.3 writes the owner's standing instructions of 2026-09-30 into the Chart
 
 ### P-003 Adopt Codex v1.4 (Luna Physics)
 ```xml
-<prompt id="P-003" codex="1.7" name="Adopt Codex v1.4 in an existing workspace">
+<prompt id="P-003" codex="1.8" name="Adopt Codex v1.4 in an existing workspace">
 <context>
 Codex v1.4 adds milestone M1b Luna Physics (requirements v1.5: PHY-01..PHY-06, ARC-10, ADR-017) right after M1, before the rest of M2. A workspace bootstrapped with v1.4 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -336,7 +340,7 @@ Codex v1.4 adds milestone M1b Luna Physics (requirements v1.5: PHY-01..PHY-06, A
 
 ### P-004 Adopt Codex v1.5 (assembly instructions)
 ```xml
-<prompt id="P-004" codex="1.7" name="Adopt Codex v1.5 in an existing workspace">
+<prompt id="P-004" codex="1.8" name="Adopt Codex v1.5 in an existing workspace">
 <context>
 Codex v1.5 writes down how the team already works: Limit.md as the resume point, tools/verify.ps1 as the standard verification, continuing paused story branches, continuous assembly, and who does what. A workspace bootstrapped with v1.5 needs nothing: mark this prompt Done with the note "not needed".
 </context>
@@ -351,7 +355,7 @@ Codex v1.5 writes down how the team already works: Limit.md as the resume point,
 
 ### P-005 Adopt Codex v1.6 (Kill Gate 1 pivot)
 ```xml
-<prompt id="P-005" codex="1.7" name="Adopt Codex v1.6 in an existing workspace">
+<prompt id="P-005" codex="1.8" name="Adopt Codex v1.6 in an existing workspace">
 <context>
 Kill Gate 1 failed on 2026-09-30: the owner read the M2 chronicle and found "not really a story" (D-GATE-M2: Pivot). The Codex kill rule applies: no new content until the simulation is redesigned. The owner decided the redesign (D-18): new milestone M2b Story engine (requirements v1.6: STO-02, STO-03, SDC-02; epic E11; US-110..US-115), and the gate is repeated at the end of M2b, judged by the owner alone. Codex issue CI-006 (the US-020 first-frame check fails now and then on the CI Debug runner) is resolved here too.
 </context>
@@ -367,7 +371,7 @@ Kill Gate 1 failed on 2026-09-30: the owner read the M2 chronicle and found "not
 
 ### P-006 Adopt Codex v1.7 (Level editor)
 ```xml
-<prompt id="P-006" codex="1.7" name="Adopt Codex v1.7 in an existing workspace">
+<prompt id="P-006" codex="1.8" name="Adopt Codex v1.7 in an existing workspace">
 <context>
 Kill Gate 1 passed on 2026-09-30 (D-GATE-M2b: Go, "it is a story"); M2 and M2b are done (`main` tagged m2-done and m2b-done). Before M3 the owner asked for a level editor (requirements v1.7: epic E12, US-120..US-126; decisions D-05 and D-19; Mraw's brief docs/plans/M2c-editor-brief.md). The owner added his own art to assets/sprites/: labelled sprite sheets (heroes, monsters, ground tiles) and landscape pictures, all generated images of placeholder quality.
 </context>
@@ -382,11 +386,43 @@ Kill Gate 1 passed on 2026-09-30 (D-GATE-M2b: Go, "it is a story"); M2 and M2b a
 </prompt>
 ```
 
+### P-007 Adopt Codex v1.8 (Content and combat)
+```xml
+<prompt id="P-007" codex="1.8" name="Adopt Codex v1.8 in an existing workspace">
+<context>
+M2c is done (`main` tagged m2c-done). The owner added seven sprite sheets (150 weapons, 150 plants, 50 animals, 100 animated effects, 100 elemental effects, 100 weather types) and, in six question rounds in chat, decided M2d Content and combat (requirements v1.8: epic E13, US-130..US-138; D-21) and that design decisions are the owner's from now on (D-22). Mraw's brief: docs/plans/M2d-content-brief.md.
+</context>
+<instructions>
+1. CLAUDE.md: regenerate from the Charter C-01 (tools/sync-codex.ps1 does it): version references v1.8 and human gate 3 (design decisions are the owner's).
+2. docs/status.md: add P-007 after P-006; set X-M2c to Done; add K-M2d, S-US-130..S-US-138 and X-M2d (To do) between X-M2c and K-M3.
+3. docs/decisions.md: D-21 and D-22 as in section 5; add a note that delegated decisions made before D-22 stay valid unless the owner overrides them.
+4. Commit the seven new sheets in assets/sprites/ unchanged.
+5. Update Limit.md (next prompt K-M2d) and commit on qa "P-007: adopt Codex v1.8 (content and combat)", push, and wait for green CI.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+### P-008 Adopt Codex v1.9 (Aiming and ballistics)
+```xml
+<prompt id="P-008" codex="1.9" name="Adopt Codex v1.9 in an existing workspace">
+<context>
+US-130..US-135 are done. Before plants the owner asked to aim weapons with the mouse, to have ballistics and several shootable ranged weapons (requirements v1.9: US-139..US-141 in epic E13; D-25, two question rounds in chat). Mraw's brief: docs/plans/M2d-aiming-brief.md.
+</context>
+<instructions>
+1. CLAUDE.md: regenerate from the Charter C-01 (tools/sync-codex.ps1 does it): version references v1.9.
+2. docs/status.md: add P-008 after P-007 (Done); add S-US-139, S-US-140 and S-US-141 (To do) between S-US-135 and S-US-136.
+3. docs/decisions.md: D-25 as in section 5.
+4. Update Limit.md (next prompt S-US-139) and commit on qa "P-008: adopt Codex v1.9 (aiming and ballistics)", push, and wait for green CI.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
 ### M0 Tooling ready
 Exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 
 ```xml
-<prompt id="K-M0" codex="1.7" name="Kick off M0 Tooling ready">
+<prompt id="K-M0" codex="1.8" name="Kick off M0 Tooling ready">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-12) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -399,7 +435,7 @@ Exit criteria: A clean checkout builds in Visual Studio; you pause the program o
 
 #### S-US-001 Build and debug from a clean checkout
 ```xml
-<prompt id="S-US-001" codex="1.7" milestone="M0" story="US-001" priority="Must" size="S">
+<prompt id="S-US-001" codex="1.8" milestone="M0" story="US-001" priority="Must" size="S">
 <context>
 Story US-001: Build and debug from a clean checkout.
 As a developer, I want to clone the repository and build every target with one CMake preset, so that I can start working in minutes and never fight the build.
@@ -448,7 +484,7 @@ Manual checks in docs/plans/US-001.md done, with results recorded there.
 
 #### S-US-002 Run the build and tests on every push
 ```xml
-<prompt id="S-US-002" codex="1.7" milestone="M0" story="US-002" priority="Must" size="S">
+<prompt id="S-US-002" codex="1.8" milestone="M0" story="US-002" priority="Must" size="S">
 <context>
 Story US-002: Run the build and tests on every push.
 As a developer, I want GitHub Actions to build and test every push on a Windows runner, so that mistakes are caught automatically, even when I forget to run tests.
@@ -492,7 +528,7 @@ Manual checks in docs/plans/US-002.md done, with results recorded there.
 
 #### S-US-003 Enforce the layer rules in the build
 ```xml
-<prompt id="S-US-003" codex="1.7" milestone="M0" story="US-003" priority="Must" size="S">
+<prompt id="S-US-003" codex="1.8" milestone="M0" story="US-003" priority="Must" size="S">
 <context>
 Story US-003: Enforce the layer rules in the build.
 As a developer, I want the build to reject code that breaks the five-layer rule or pulls game code into Luna, so that the architecture cannot rot by accident.
@@ -541,7 +577,7 @@ Manual checks in docs/plans/US-003.md done, with results recorded there.
 
 #### S-US-004 Log what happens and stop on broken assumptions
 ```xml
-<prompt id="S-US-004" codex="1.7" milestone="M0" story="US-004" priority="Must" size="S">
+<prompt id="S-US-004" codex="1.8" milestone="M0" story="US-004" priority="Must" size="S">
 <context>
 Story US-004: Log what happens and stop on broken assumptions.
 As a developer, I want a logging system and asserts in Core, so that I can see what the game did before a problem.
@@ -589,7 +625,7 @@ Manual checks in docs/plans/US-004.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M0" codex="1.7" name="Exit review M0">
+<prompt id="X-M0" codex="1.8" name="Exit review M0">
 <instructions>
 1. Demonstrate the exit criteria: A clean checkout builds in Visual Studio; you pause the program on a breakpoint; CI runs on push.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M0.md, one section per criterion, each marked met or not met.
@@ -603,7 +639,7 @@ Manual checks in docs/plans/US-004.md done, with results recorded there.
 Exit criteria: Luna opens a window; a demo character walks around a tile map at 60 FPS with crisp pixels at any window size; the build proves Luna contains no Odysseus code.
 
 ```xml
-<prompt id="K-M1" codex="1.7" name="Kick off M1 Luna engine: walking skeleton">
+<prompt id="K-M1" codex="1.8" name="Kick off M1 Luna engine: walking skeleton">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -616,7 +652,7 @@ Exit criteria: Luna opens a window; a demo character walks around a tile map at 
 
 #### S-US-020 Open a window with a steady game loop
 ```xml
-<prompt id="S-US-020" codex="1.7" milestone="M1" story="US-020" priority="Must" size="M">
+<prompt id="S-US-020" codex="1.8" milestone="M1" story="US-020" priority="Must" size="M">
 <context>
 Story US-020: Open a window with a steady game loop.
 As a player, I want the game to open a window that runs smoothly and closes cleanly, so that the game feels solid from the first second.
@@ -666,7 +702,7 @@ Manual checks in docs/plans/US-020.md done, with results recorded there.
 
 #### S-US-021 Control the game through intents
 ```xml
-<prompt id="S-US-021" codex="1.7" milestone="M1" story="US-021" priority="Must" size="S">
+<prompt id="S-US-021" codex="1.8" milestone="M1" story="US-021" priority="Must" size="S">
 <context>
 Story US-021: Control the game through intents.
 As a player, I want keyboard, mouse and gamepad to control the same actions, so that I can play the way I like, and touch can be added later.
@@ -715,7 +751,7 @@ Manual checks in docs/plans/US-021.md done, with results recorded there.
 
 #### S-US-022 Draw sprites with crisp pixels
 ```xml
-<prompt id="S-US-022" codex="1.7" milestone="M1" story="US-022" priority="Must" size="M">
+<prompt id="S-US-022" codex="1.8" milestone="M1" story="US-022" priority="Must" size="M">
 <context>
 Story US-022: Draw sprites with crisp pixels.
 As a player, I want pixel art to stay sharp at every window size, so that the game looks right on any screen.
@@ -759,7 +795,7 @@ Manual checks in docs/plans/US-022.md done, with results recorded there.
 
 #### S-US-023 Show a tile map with a following camera
 ```xml
-<prompt id="S-US-023" codex="1.7" milestone="M1" story="US-023" priority="Must" size="M">
+<prompt id="S-US-023" codex="1.8" milestone="M1" story="US-023" priority="Must" size="M">
 <context>
 Story US-023: Show a tile map with a following camera.
 As a player, I want to see the world around my character, with the camera following me, so that I always know where I am.
@@ -803,7 +839,7 @@ Manual checks in docs/plans/US-023.md done, with results recorded there.
 
 #### S-US-024 Walk the character around the map
 ```xml
-<prompt id="S-US-024" codex="1.7" milestone="M1" story="US-024" priority="Must" size="M">
+<prompt id="S-US-024" codex="1.8" milestone="M1" story="US-024" priority="Must" size="M">
 <context>
 Story US-024: Walk the character around the map.
 As a player, I want to move my character in four directions with animation, so that I feel in control of a person in the world.
@@ -851,7 +887,7 @@ Manual checks in docs/plans/US-024.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M1" codex="1.7" name="Exit review M1">
+<prompt id="X-M1" codex="1.8" name="Exit review M1">
 <instructions>
 1. Demonstrate the exit criteria: Luna opens a window; a demo character walks around a tile map at 60 FPS with crisp pixels at any window size; the build proves Luna contains no Odysseus code. For the last criterion, show the US-003 "Luna stays game-agnostic" check passing on the current code.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M1.md, one section per criterion, each marked met or not met.
@@ -865,7 +901,7 @@ Manual checks in docs/plans/US-024.md done, with results recorded there.
 Exit criteria: Luna Physics passes its math, hit-detection, ballistics and rigid-body tests identically on every build; in the demo the hero throws a spear that flies in an arc with a shadow and hits a target.
 
 ```xml
-<prompt id="K-M1b" codex="1.7" name="Kick off M1b Luna Physics">
+<prompt id="K-M1b" codex="1.8" name="Kick off M1b Luna Physics">
 <instructions>
 1. Confirm the previous milestone's exit review (docs/gates/M1.md) exists and passed.
 2. Read docs/decisions.md. This milestone needs no open owner decision; design questions that come up are delegated to Dominus (Charter human_gates).
@@ -879,7 +915,7 @@ Exit criteria: Luna Physics passes its math, hit-detection, ballistics and rigid
 
 #### S-US-025 Build deterministic 3D math
 ```xml
-<prompt id="S-US-025" codex="1.7" milestone="M1b" story="US-025" priority="Must" size="M">
+<prompt id="S-US-025" codex="1.8" milestone="M1b" story="US-025" priority="Must" size="M">
 <context>
 Story US-025: Build deterministic 3D math.
 As a developer, I want fixed-point numbers, 3D vectors and rotations in Luna Physics, so that physics gives identical results on every computer and every run.
@@ -928,7 +964,7 @@ Manual checks in docs/plans/US-025.md done, with results recorded there.
 
 #### S-US-026 Detect hits between shapes
 ```xml
-<prompt id="S-US-026" codex="1.7" milestone="M1b" story="US-026" priority="Must" size="L">
+<prompt id="S-US-026" codex="1.8" milestone="M1b" story="US-026" priority="Must" size="L">
 <context>
 Story US-026: Detect hits between shapes.
 As a developer, I want spheres, capsules and boxes to report overlaps, ray hits and swept hits, so that every hit is found and a fast spear never passes through its target.
@@ -977,7 +1013,7 @@ Manual checks in docs/plans/US-026.md done, with results recorded there.
 
 #### S-US-027 Fly projectiles with real ballistics
 ```xml
-<prompt id="S-US-027" codex="1.7" milestone="M1b" story="US-027" priority="Must" size="M">
+<prompt id="S-US-027" codex="1.8" milestone="M1b" story="US-027" priority="Must" size="M">
 <context>
 Story US-027: Fly projectiles with real ballistics.
 As a hunter, I want thrown spears and darts to fly in true arcs under gravity, drag and wind, so that aim, strength and distance matter.
@@ -1026,7 +1062,7 @@ Manual checks in docs/plans/US-027.md done, with results recorded there.
 
 #### S-US-028 Push and bounce bodies
 ```xml
-<prompt id="S-US-028" codex="1.7" milestone="M1b" story="US-028" priority="Must" size="M">
+<prompt id="S-US-028" codex="1.8" milestone="M1b" story="US-028" priority="Must" size="M">
 <context>
 Story US-028: Push and bounce bodies.
 As a player, I want bodies to have mass, be pushed, slide, bounce and come to rest, so that knockback and thrown or falling objects feel physical.
@@ -1075,7 +1111,7 @@ Manual checks in docs/plans/US-028.md done, with results recorded there.
 
 #### S-US-029 Throw a spear in the demo
 ```xml
-<prompt id="S-US-029" codex="1.7" milestone="M1b" story="US-029" priority="Must" size="M">
+<prompt id="S-US-029" codex="1.8" milestone="M1b" story="US-029" priority="Must" size="M">
 <context>
 Story US-029: Throw a spear in the demo.
 As a player, I want to throw a spear at a target in the walking skeleton, so that Luna Physics is proven end to end in the real game.
@@ -1123,7 +1159,7 @@ Manual checks in docs/plans/US-029.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M1b" codex="1.7" name="Exit review M1b">
+<prompt id="X-M1b" codex="1.8" name="Exit review M1b">
 <instructions>
 1. Demonstrate the exit criteria: Luna Physics passes its math, hit-detection, ballistics and rigid-body tests identically on every build; in the demo the hero throws a spear that flies in an arc with a shadow and hits a target. Include the textbook comparisons (range, bounce heights, friction distance) and a screenshot of the spear in flight.
 2. Collect evidence into docs/gates/M1b.md, one section per criterion, each marked met or not met.
@@ -1137,7 +1173,7 @@ Manual checks in docs/plans/US-029.md done, with results recorded there.
 Exit criteria: The headless runner simulates a 20-person clan for 100 years without crashing; the printed chronicle is shown to 3 people and at least 2 find a story in it; the determinism test passes.
 
 ```xml
-<prompt id="K-M2" codex="1.7" name="Kick off M2 Console clan simulator (KILL GATE 1)">
+<prompt id="K-M2" codex="1.8" name="Kick off M2 Console clan simulator (KILL GATE 1)">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-01, D-02, D-03, D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -1150,7 +1186,7 @@ Exit criteria: The headless runner simulates a 20-person clan for 100 years with
 
 #### S-US-010 Advance a seeded world clock
 ```xml
-<prompt id="S-US-010" codex="1.7" milestone="M2" story="US-010" priority="Must" size="M">
+<prompt id="S-US-010" codex="1.8" milestone="M2" story="US-010" priority="Must" size="M">
 <context>
 Story US-010: Advance a seeded world clock.
 As a developer, I want the simulation to tick 20 times per second of game time with a calendar of days and seasons, so that everything in the world happens on one reliable clock.
@@ -1199,7 +1235,7 @@ Manual checks in docs/plans/US-010.md done, with results recorded there.
 
 #### S-US-011 Give every person needs that change over time
 ```xml
-<prompt id="S-US-011" codex="1.7" milestone="M2" story="US-011" priority="Must" size="M">
+<prompt id="S-US-011" codex="1.8" milestone="M2" story="US-011" priority="Must" size="M">
 <context>
 Story US-011: Give every person needs that change over time.
 As a player, I want clan members to get hungry, tired, cold and lonely, so that the world feels alive and people have reasons to act.
@@ -1248,7 +1284,7 @@ Manual checks in docs/plans/US-011.md done, with results recorded there.
 
 #### S-US-012 Let people choose what to do (utility AI)
 ```xml
-<prompt id="S-US-012" codex="1.7" milestone="M2" story="US-012" priority="Must" size="L">
+<prompt id="S-US-012" codex="1.8" milestone="M2" story="US-012" priority="Must" size="L">
 <context>
 Story US-012: Let people choose what to do (utility AI).
 As a player, I want each clan member to pick sensible actions based on their needs and skills, so that the clan survives without me micromanaging it.
@@ -1297,7 +1333,7 @@ Manual checks in docs/plans/US-012.md done, with results recorded there.
 
 #### S-US-013 Remember events and spread gossip
 ```xml
-<prompt id="S-US-013" codex="1.7" milestone="M2" story="US-013" priority="Must" size="M">
+<prompt id="S-US-013" codex="1.8" milestone="M2" story="US-013" priority="Must" size="M">
 <context>
 Story US-013: Remember events and spread gossip.
 As a player, I want people to remember important events and tell others, so that reputations form and stories travel through the clan.
@@ -1346,7 +1382,7 @@ Manual checks in docs/plans/US-013.md done, with results recorded there.
 
 #### S-US-014 Write a readable chronicle
 ```xml
-<prompt id="S-US-014" codex="1.7" milestone="M2" story="US-014" priority="Must" size="M">
+<prompt id="S-US-014" codex="1.8" milestone="M2" story="US-014" priority="Must" size="M">
 <context>
 Story US-014: Write a readable chronicle.
 As a player, I want notable events recorded as short sentences, so that I can read the clan's story and share it.
@@ -1390,7 +1426,7 @@ Manual checks in docs/plans/US-014.md done, with results recorded there.
 
 #### S-US-015 Soak-test the simulation from the command line
 ```xml
-<prompt id="S-US-015" codex="1.7" milestone="M2" story="US-015" priority="Must" size="S">
+<prompt id="S-US-015" codex="1.8" milestone="M2" story="US-015" priority="Must" size="S">
 <context>
 Story US-015: Soak-test the simulation from the command line.
 As a developer, I want to run the headless simulation for N years with a seed and get a report, so that I can check stability and balance in seconds.
@@ -1434,7 +1470,7 @@ Manual checks in docs/plans/US-015.md done, with results recorded there.
 
 #### S-US-016 Save and load the simulation
 ```xml
-<prompt id="S-US-016" codex="1.7" milestone="M2" story="US-016" priority="Must" size="M">
+<prompt id="S-US-016" codex="1.8" milestone="M2" story="US-016" priority="Must" size="M">
 <context>
 Story US-016: Save and load the simulation.
 As a player, I want to save the world and load it later exactly as it was, so that I never lose my progress.
@@ -1482,7 +1518,7 @@ Manual checks in docs/plans/US-016.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M2" codex="1.7" name="Exit review M2">
+<prompt id="X-M2" codex="1.8" name="Exit review M2">
 <instructions>
 1. Demonstrate the exit criteria: The headless runner simulates a 20-person clan for 100 years without crashing; the printed chronicle is shown to 3 people and at least 2 find a story in it; the determinism test passes.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M2.md, one section per criterion, each marked met or not met.
@@ -1502,7 +1538,7 @@ Exit criteria: The chronicle tells the clan's story in fewer, bigger episodes wi
 Why this milestone exists: Kill Gate 1 failed on 2026-09-30. The owner found the M2 chronicle "not really a story" and asked for reasons behind deaths and feuds, more kinds of interaction between people, and fewer, more complex events (D-GATE-M2, D-18). By the Codex kill rule, no content is added before the simulation is redesigned; M2b is that redesign, and the gate is repeated at its end.
 
 ```xml
-<prompt id="K-M2b" codex="1.7" name="Kick off M2b Story engine">
+<prompt id="K-M2b" codex="1.8" name="Kick off M2b Story engine">
 <instructions>
 1. Confirm docs/gates/M2.md exists and records the failed gate, and that D-GATE-M2 (Pivot) and D-18 are recorded in docs/decisions.md.
 2. Architect: write docs/plans/M2b-story-design.md before US-110. It covers: an event log in which every notable event has an id, its people and the ids of the events that caused it; how causes are chosen (a starvation death points at the empty store and any theft that emptied it; a feud points at the thefts, quarrels or blame that soured it); health (sick, injured) and its causes; the new interactions of D-18 and the data files that tune them; how episodes are recognised from linked events (a beginning, a turn, an end) and named; how the story is printed (`--story`, episodes first, then lines with reasons); the save-version upgrade path; and how the chronicle stays readable (at most about 40 episodes a century).
@@ -1515,7 +1551,7 @@ Why this milestone exists: Kill Gate 1 failed on 2026-09-30. The owner found the
 
 #### S-US-110 Give every death and feud a reason
 ```xml
-<prompt id="S-US-110" codex="1.7" milestone="M2b" story="US-110" priority="Must" size="M">
+<prompt id="S-US-110" codex="1.8" milestone="M2b" story="US-110" priority="Must" size="M">
 <context>
 Story US-110: Give every death and feud a reason.
 As a reader, I want every death and feud in the chronicle to say why it happened, so that events connect into a story.
@@ -1565,7 +1601,7 @@ Manual checks in docs/plans/US-110.md done, with results recorded there.
 
 #### S-US-111 Quarrel, blame and take revenge
 ```xml
-<prompt id="S-US-111" codex="1.7" milestone="M2b" story="US-111" priority="Must" size="L">
+<prompt id="S-US-111" codex="1.8" milestone="M2b" story="US-111" priority="Must" size="L">
 <context>
 Story US-111: Quarrel, blame and take revenge.
 As a player, I want people to quarrel, blame each other for losses and seek revenge, so that conflicts have causes and consequences.
@@ -1615,7 +1651,7 @@ Manual checks in docs/plans/US-111.md done, with results recorded there.
 
 #### S-US-112 Share food and nurse the sick
 ```xml
-<prompt id="S-US-112" codex="1.7" milestone="M2b" story="US-112" priority="Must" size="L">
+<prompt id="S-US-112" codex="1.8" milestone="M2b" story="US-112" priority="Must" size="L">
 <context>
 Story US-112: Share food and nurse the sick.
 As a player, I want people to share food in hard times and care for the sick and injured, so that kindness has weight and debts of gratitude form.
@@ -1665,7 +1701,7 @@ Manual checks in docs/plans/US-112.md done, with results recorded there.
 
 #### S-US-113 Court and compete for a partner
 ```xml
-<prompt id="S-US-113" codex="1.7" milestone="M2b" story="US-113" priority="Must" size="M">
+<prompt id="S-US-113" codex="1.8" milestone="M2b" story="US-113" priority="Must" size="M">
 <context>
 Story US-113: Court and compete for a partner.
 As a player, I want courtship with rivals and broken pairings, so that love brings drama as well as children.
@@ -1715,7 +1751,7 @@ Manual checks in docs/plans/US-113.md done, with results recorded there.
 
 #### S-US-114 Teach the young and hunt together
 ```xml
-<prompt id="S-US-114" codex="1.7" milestone="M2b" story="US-114" priority="Must" size="L">
+<prompt id="S-US-114" codex="1.8" milestone="M2b" story="US-114" priority="Must" size="L">
 <context>
 Story US-114: Teach the young and hunt together.
 As a player, I want masters to teach apprentices and hunters to go out in parties, so that skills pass down and hunts create heroes and cowards.
@@ -1765,7 +1801,7 @@ Manual checks in docs/plans/US-114.md done, with results recorded there.
 
 #### S-US-115 Tell the clan's story in episodes
 ```xml
-<prompt id="S-US-115" codex="1.7" milestone="M2b" story="US-115" priority="Must" size="L">
+<prompt id="S-US-115" codex="1.8" milestone="M2b" story="US-115" priority="Must" size="L">
 <context>
 Story US-115: Tell the clan's story in episodes.
 As a reader, I want the chronicle to tell fewer, bigger episodes with a beginning, a turn and an end, so that I can follow the clan's story.
@@ -1814,7 +1850,7 @@ Manual checks in docs/plans/US-115.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M2b" codex="1.7" name="Exit review M2b = Kill Gate 1 retry">
+<prompt id="X-M2b" codex="1.8" name="Exit review M2b = Kill Gate 1 retry">
 <instructions>
 1. Demonstrate the exit criteria: The chronicle tells the clan's story in fewer, bigger episodes with reasons; every death and feud says why; the 100-year soak still runs without crashing and the determinism test passes; the owner reads the printed story and judges whether it is a story (Kill Gate 1 retry).
 2. Collect evidence into docs/gates/M2b.md, one section per criterion, each marked met or not met: the 100-year soak on several seeds, the determinism tests, and the printed story of the soak seed (`odysseus_headless --seed 7 --years 100 --story`), also saved as a reader packet in docs/gates/M2b-reader-packet.md.
@@ -1842,7 +1878,7 @@ Design notes for every M2c prompt (Anima, from the brief docs/plans/M2c-editor-b
 - UX at 480x270: icon buttons with the name shown on hover, palettes at the screen edges, never covering the map's centre; the mode is always shown in a corner ("GAME" / "EDITOR").
 
 ```xml
-<prompt id="K-M2c" codex="1.7" name="Kick off M2c Level editor">
+<prompt id="K-M2c" codex="1.8" name="Kick off M2c Level editor">
 <instructions>
 1. Confirm docs/gates/M2b.md records the passed gate (D-GATE-M2b: Go) and that D-05 and D-19 are Decided in docs/decisions.md.
 2. Architect: write docs/plans/M2c-editor-design.md before US-120, following the design notes above: the cutter and the atlas format (review the owner's sheets and choose, per character, the frames that exist: the best 8-direction hero sheet, mirroring where a direction is missing, front-view monsters with one frame); the pointer and the widget toolkit (how widgets receive the pointer and draw text); the Level format and its version; the editor's tools and its command history (undo and redo); how Game mode starts from a level; and which of today's demo objects (test map, straw targets, enemy, sword) become level data.
@@ -1855,7 +1891,7 @@ Design notes for every M2c prompt (Anima, from the brief docs/plans/M2c-editor-b
 
 #### S-US-120 Real art in the game
 ```xml
-<prompt id="S-US-120" codex="1.7" milestone="M2c" story="US-120" priority="Must" size="L">
+<prompt id="S-US-120" codex="1.8" milestone="M2c" story="US-120" priority="Must" size="L">
 <context>
 Story US-120: Real art in the game.
 As a player, I want the heroes, monsters and ground drawn from the new art, so that the world looks like the game I imagine.
@@ -1905,7 +1941,7 @@ Manual checks in docs/plans/US-120.md done, with results recorded there: the con
 
 #### S-US-121 Point, click and read on screen
 ```xml
-<prompt id="S-US-121" codex="1.7" milestone="M2c" story="US-121" priority="Must" size="M">
+<prompt id="S-US-121" codex="1.8" milestone="M2c" story="US-121" priority="Must" size="M">
 <context>
 Story US-121: Point, click and read on screen.
 As a level designer, I want to point, click and read labels on screen, so that I can use editor tools.
@@ -1954,7 +1990,7 @@ Manual checks in docs/plans/US-121.md done, with results recorded there: a scree
 
 #### S-US-122 Levels as data
 ```xml
-<prompt id="S-US-122" codex="1.7" milestone="M2c" story="US-122" priority="Must" size="M">
+<prompt id="S-US-122" codex="1.8" milestone="M2c" story="US-122" priority="Must" size="M">
 <context>
 Story US-122: Levels as data.
 As a level designer, I want levels saved as files, so that what I build stays and can be shared.
@@ -2003,7 +2039,7 @@ Manual checks in docs/plans/US-122.md done, with results recorded there.
 
 #### S-US-123 Game mode and Editor mode
 ```xml
-<prompt id="S-US-123" codex="1.7" milestone="M2c" story="US-123" priority="Must" size="S">
+<prompt id="S-US-123" codex="1.8" milestone="M2c" story="US-123" priority="Must" size="S">
 <context>
 Story US-123: Game mode and Editor mode.
 As a level designer, I want to switch between playing and editing, so that I can try what I build at once.
@@ -2052,7 +2088,7 @@ Manual checks in docs/plans/US-123.md done, with results recorded there.
 
 #### S-US-124 Paint ground tiles
 ```xml
-<prompt id="S-US-124" codex="1.7" milestone="M2c" story="US-124" priority="Must" size="M">
+<prompt id="S-US-124" codex="1.8" milestone="M2c" story="US-124" priority="Must" size="M">
 <context>
 Story US-124: Paint ground tiles.
 As a level designer, I want to paint ground tiles by hand, so that I shape the world.
@@ -2101,7 +2137,7 @@ Manual checks in docs/plans/US-124.md done, with results recorded there.
 
 #### S-US-125 Place characters
 ```xml
-<prompt id="S-US-125" codex="1.7" milestone="M2c" story="US-125" priority="Must" size="M">
+<prompt id="S-US-125" codex="1.8" milestone="M2c" story="US-125" priority="Must" size="M">
 <context>
 Story US-125: Place characters.
 As a level designer, I want to place heroes and monsters in the world, so that the game has someone to meet.
@@ -2150,7 +2186,7 @@ Manual checks in docs/plans/US-125.md done, with results recorded there.
 
 #### S-US-126 Level and character settings
 ```xml
-<prompt id="S-US-126" codex="1.7" milestone="M2c" story="US-126" priority="Must" size="S">
+<prompt id="S-US-126" codex="1.8" milestone="M2c" story="US-126" priority="Must" size="S">
 <context>
 Story US-126: Level and character settings.
 As a level designer, I want to set the level's name, size, default ground and the hero's start, so that each level is my own.
@@ -2198,7 +2234,7 @@ Manual checks in docs/plans/US-126.md done, with results recorded there: the gui
 ```
 
 ```xml
-<prompt id="X-M2c" codex="1.7" name="Exit review M2c">
+<prompt id="X-M2c" codex="1.8" name="Exit review M2c">
 <instructions>
 1. Demonstrate the exit criteria: The owner switches between Game mode and Editor mode; in the Editor he paints ground tiles, places characters with properties and sets the level's name, size, default ground and hero start; he saves, reloads and plays the level; the game draws his own art; the spear and sword demos still work.
 2. Collect evidence into docs/gates/M2c.md, one section per criterion, each marked met or not met: a scripted end-to-end session (paint, place, set, save, restart, load, play, strike) with screenshots in docs/evidence/X-M2c/; the full test run; the guide.
@@ -2209,11 +2245,608 @@ Manual checks in docs/plans/US-126.md done, with results recorded there: the gui
 </prompt>
 ```
 
+### M2d Content and combat (weapons, nature, effects, weather)
+Exit criteria: The owner places weapon pickups, plants, animals and looping effects with the Editor, saves and plays the level; the hero picks weapons into a 9-slot hotbar and fights with the 16 starter weapons of 8 classes, elements included, aiming them with the mouse and shooting arcs with bows, crossbows, thrown weapons and staffs; enemies (goblins, predators and boars) strike back when hit and in reach, and die; the hero respawns at 0 HP; plants block, are inspected, chopped and eaten and regrow; effects play on hits, deaths and plant actions; the weather changes by itself; every M2c feature and the spear and sword demos still work.
+
+Why this milestone exists: after M2c the owner added seven sprite sheets and asked for them to be processed and added to the game with full gameplay, before M3 (D-21). Every design choice below was taken by the owner in chat (D-22); none is open.
+
+Design notes for every M2d prompt (Anima, from the brief docs/plans/M2d-content-brief.md):
+- Decisions (D-22): the owner takes every design decision. When a prompt meets a design or scope question that this Codex does not answer, Mraw stops that story, asks the owner in chat (AskUserQuestion rounds, recommended option first), records the answer in docs/decisions.md as "Decided (owner, date)", and continues. Technical choices stay with Dominus and are recorded in ADRs or the design document.
+- Art (D-05): the seven new sheets in assets/sprites/ are never edited. They are cut by the existing cutter (odysseus_atlas, cuts.json) into new atlases in assets/sprites/atlas/: weapons 32x32 icons; plants by size class (small 32x32, tall 32x64, tree 64x96, feet at the bottom centre); animals scaled to fit 64x48 (feet at the bottom centre; side view, the other side mirrored); effects as 4-frame strips (the elemental grid as single frames); weather as 4-frame screen overlays (at least 160x90 per frame, tiled or scaled to the 480x270 virtual screen). Labelled sheets: the label strip is excluded from each rectangle, and the painted background is removed with a per-cut background sample and opaque-bounds trimming; a cut may carry its own background colour and tolerance in cuts.json. Printed numbers on the sheets are unreliable; catalogs use names.
+- Data (Charter rules 7 and 8): `assets/data/weapons.json` (all 150: name, atlas frame, class, element or none, era fantasy or future, starter yes or no, damage, speed, range; the class gives the attack), `assets/data/plants.json` (all 150: name, frame, size class, blocks, edible, inspect text), `assets/data/characters.json` extended with the 50 animals (enemy flag, strike damage, reach; defaults HP), `assets/data/effects.json` (name, frames, frame time, loop or one-shot, anchor), `assets/data/weather.json` (name, frames, frame time, weight; "clear" carries about a third of the total weight). Every file is validated with errors naming file and field.
+- Levels: format version 2 adds weapon pickups, plants and placed effects; version 1 files still load and are saved as version 2. demo.json stays the fixture every test uses (D-20).
+- Combat (owner numbers, all in JSON): hero 100 HP; enemies strike back once per hit after a 0.5 s telegraphed wind-up if the hero is within their reach (1.5 m by default); goblins and small predators 5-10 damage, big predators 15-20; the hero at 0 HP fades and respawns at the hero start with 100 HP, enemies keep their HP; enemies at 0 HP die (smoke effect) and are gone until the level restarts; nothing drops. Enemies = goblins plus wolf, fox, bear, cougar, lynx, leopard, jaguar, cheetah, lion, tiger, snow leopard, hyena, jackal, boar, wild pig, rhino, hippopotamus, bull, buffalo, water buffalo; every other animal is a bystander that cannot be hit.
+- Weapons: 8 classes, each with its own attack: sword (arc in front), axe (heavy, slow arc), spear (long thrust), bow and crossbow (arrow projectile), thrown (spinning projectile), whip and flail (long reach arc), staff (magic bolt), gun (fast projectile). The starter set is one plain and one elemental weapon per class (16), chosen by Dominus in US-133 and shown to the owner on a numbered contact sheet; swapping is editing `starter` in weapons.json. Elements: fire burns over time, ice slows, lightning chains to one more enemy nearby, poison damages over time, void and dark heal the hero by part of the damage.
+- Plants: big plants (trees, big bushes) block walking like solid tiles; small ones are walk-over. Interact next to a plant shows its name and inspect text. Any weapon hit destroys a plant (leaf burst); an edible one heals the hero a flat 10 HP (healing glow). 15 s after a plant is destroyed, the same kind regrows at a random free spot inside the current camera view (growth effect).
+- Effects: a Luna Engine effect player (game-agnostic: frames, frame time, loop or once, world or screen space) draws effects; the Game decides which plays when: hit sparks, element effects, death smoke, projectile trails, leaf burst, healing glow, growth, and Editor-placed looping effects saved in the level.
+- Weather: visual only. A random weather every 60-120 s of play, cross-fading over 3 s, from weather.json weights; drawn as a screen overlay above the world and below the UI; its random stream is a seeded PCG32 stream (Charter rule 6), so a test with a seed sees the same weathers in the same order.
+- Hotbar and intents (Charter rule 4): new intents Slot1..Slot9 (keys 1-9); Shift keeps cycling weapons; walking over a pickup puts it in the first free slot (a full hotbar leaves the pickup lying). The hotbar and the hero's HP are drawn with the Luna UI toolkit.
+- Aiming and ballistics (D-25, stories US-139..US-141, before plants): free aim at the mouse cursor; the hero faces the pointer (8 facings) and melee arcs are centred on the exact angle to it; shots are Luna Physics arcs (fixed-point, height, gravity) whose launch angle is solved to land at the pointer, clamped to the weapon's range; a shot hits the first enemy whose body (feet to about 1.5 m) it passes through, is blocked by rocks and trees when low and clears them when high, and a miss sticks in the ground and vanishes; a ground shadow and a lifted sprite show the height. Bows, crossbows and thrown weapons arc, staff bolts fly flat and fast, guns are not part of this scope; no ammo, only the rate-of-fire cooldown.
+- Tests: logic headless in odysseus_game_tests (catalog validation, level v1 to v2, strike-back timing, death and respawn, each weapon class, each element, plant block, chop, heal and regrow placement, weather sequence per seed); the window end to end with scripted input and screenshots, as in M2c.
+
+```xml
+<prompt id="K-M2d" codex="1.8" name="Kick off M2d Content and combat">
+<instructions>
+1. Confirm docs/gates/M2c.md records M2c done and that D-21 and D-22 are Decided in docs/decisions.md.
+2. Architect: write docs/plans/M2d-content-design.md before US-130, following the design notes above: the cut plan per sheet (grid or labelled, frame sizes, background handling), the catalog formats, level format version 2, the combat model (HP, strike-back state machine, death and respawn), the weapon class interface and projectiles, status effects, plants in the world (blocking, interaction, regrow), the effect player, and the weather cycle.
+3. Set this milestone's stories to To do in docs/status.md in this order: US-130, US-131, US-132, US-133, US-134, US-135, US-139, US-140, US-141, US-136, US-137, US-138.
+4. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, decisions requested.</output_format>
+</prompt>
+```
+
+#### S-US-130 Content catalogs from the new sheets
+```xml
+<prompt id="S-US-130" codex="1.8" milestone="M2d" story="US-130" priority="Must" size="L">
+<context>
+Story US-130: Content catalogs from the new sheets.
+As the owner, I want my seven new sprite sheets cut into game atlases and catalogs, so that weapons, plants, animals, effects and weather can be used in the game.
+Epic E13 Content and combat: The owner's weapons, plants, animals, effects and weather are in the game and playable.
+Traces to: D-05, D-21, ARC-08.
+</context>
+<dependencies>
+Stories that must be Done: US-120.
+Owner decisions that must be Decided: D-05, D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: new cuts in assets/sprites/cuts.json; any new cutting logic (label exclusion, per-cut background, grids) in the existing Game art code and odysseus_atlas; atlases in assets/sprites/atlas/; catalogs in assets/data/ (weapons.json, plants.json, effects.json, weather.json; the animals added to characters.json with bystanders and enemies as in the design notes). Loading and validating the catalogs is Game code with tests. Commit the seven sheets unchanged.
+`odysseus_atlas --preview` writes one numbered contact sheet per catalog to docs/evidence/US-130/ with each item's catalog name, for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Cut">
+Given the seven sheets and cuts.json
+When the atlas tool runs
+Then atlases and JSON catalogs exist for weapons (150), plants (150), animals (50), effects (200) and weather (100), with backgrounds removed
+</scenario>
+<scenario name="Review">
+Given the contact sheets in docs/evidence/US-130/
+When the owner opens them
+Then every item is shown with its catalog name and number
+</scenario>
+<scenario name="Valid">
+Given a catalog with a wrong field
+When the game loads it
+Then the error names the file and the field
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-130 ..." cases.
+Manual checks in docs/plans/US-130.md done, with results recorded there: every contact sheet reviewed; no label text, halo or cut-off part in any frame (fix the cut, not the sheet).
+</verification>
+<teach_back>C++ concept for the owner: Reading data tables with std::map and validating them.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-131 Hero HP, fighting back and death
+```xml
+<prompt id="S-US-131" codex="1.8" milestone="M2d" story="US-131" priority="Must" size="M">
+<context>
+Story US-131: Hero HP, fighting back and death.
+As the player, I want enemies to strike back when I hit them, so that fighting has risk.
+Epic E13 Content and combat. Traces to: D-21.
+</context>
+<dependencies>
+Stories that must be Done: US-125.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code (hero, enemy and a small combat model with an enum-class state machine: idle, wind-up, strike); numbers from characters.json (strike damage, reach) with defaults 10 damage and 1.5 m; the hero's HP drawn on screen with the Luna UI toolkit. The wind-up shows a telegraph (the enemy flashes) for 0.5 s; the strike lands only if the hero is still within reach when it ends. Hero at 0 HP: a short fade, respawn at the level's hero start with 100 HP; enemies keep their HP. Enemies at 0 HP die and are removed until the level restarts (the death effect arrives with US-132; until then they simply vanish).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Strike back">
+Given an enemy the hero hits while standing within its reach
+When 0.5 s pass with a warning flash
+Then the hero loses the enemy kind's strike damage
+</scenario>
+<scenario name="Out of reach">
+Given the hero hits an enemy from afar with the spear throw, or steps away during the wind-up
+When the wind-up ends
+Then the hero loses nothing
+</scenario>
+<scenario name="Death and respawn">
+Given the hero or an enemy reaching 0 HP
+When it happens
+Then the hero respawns at the hero start with 100 HP; the enemy is removed until the level restarts
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-131 ..." cases and the M2c tests.
+Manual checks in docs/plans/US-131.md done, with results recorded there: a scripted fight screenshot showing the hero's HP and a telegraph flash.
+</verification>
+<teach_back>C++ concept for the owner: A small state machine with enum class.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-132 Effect player
+```xml
+<prompt id="S-US-132" codex="1.8" milestone="M2d" story="US-132" priority="Must" size="M">
+<context>
+Story US-132: Effect player.
+As the player, I want hits, deaths and projectiles to show effects, so that combat reads clearly.
+Epic E13 Content and combat. Traces to: D-21, ARC-09.
+</context>
+<dependencies>
+Stories that must be Done: US-130.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: the effect player in Luna Engine (game-agnostic: frames from an atlas, frame time in ticks, one-shot or looping, world or screen position, drawn in depth order with the world); which effect plays when is Game code, named in effects.json. Wire in: a hit spark on every weapon hit, a smoke puff when a character dies, a trail behind the thrown spear and arrows.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="One-shot">
+Given an effect started in the world
+When its frames have played
+Then it disappears
+</scenario>
+<scenario name="Looping">
+Given a looping effect
+When time passes
+Then it keeps playing until it is removed
+</scenario>
+<scenario name="Combat">
+Given a sword hit, a death or a spear in flight
+When it happens
+Then a hit spark, a smoke puff or a trail plays
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-132 ..." cases.
+Manual checks in docs/plans/US-132.md done, with results recorded there: screenshots of each wired effect.
+</verification>
+<teach_back>C++ concept for the owner: Timers and animation frames in a fixed timestep.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-133 Weapon classes and the starter set
+```xml
+<prompt id="S-US-133" codex="1.8" milestone="M2d" story="US-133" priority="Must" size="L">
+<context>
+Story US-133: Weapon classes and the starter set.
+As the player, I want each kind of weapon to fight differently, so that choosing a weapon matters.
+Epic E13 Content and combat. Traces to: D-21.
+</context>
+<dependencies>
+Stories that must be Done: US-130, US-132.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code. One weapon-class interface with the 8 classes of the design notes (sword, axe, spear, bow and crossbow, thrown, whip and flail, staff, gun); projectiles for bow, thrown, staff and gun; damage, speed (attacks per second) and range from weapons.json. Today's sword and spear become the sword and spear classes, with their tests kept. Pick the 16 starters (one plain and one elemental per class), set `starter` in weapons.json, and write their numbered contact sheet to docs/evidence/US-133/ for the owner to review; until US-134, the starters are cycled with Shift for testing. The held weapon is drawn in the hero's hand from its icon, rotated and mirrored with the facing (reuse the US-029 sword hand point).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Classes">
+Given each of the 8 classes
+When the hero attacks
+Then its own attack shape, speed and range are used, from weapons.json
+</scenario>
+<scenario name="Starter set">
+Given the 16 starter weapons
+When the owner reviews their contact sheet
+Then any starter can be swapped by editing weapons.json, with no code change
+</scenario>
+<scenario name="In hand">
+Given a weapon selected
+When the hero walks in any of the 8 directions
+Then the weapon's icon is drawn in the hero's hand
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-133 ..." cases and the US-029 sword and spear tests.
+Manual checks in docs/plans/US-133.md done, with results recorded there: a screenshot per class attacking a goblin; the starter contact sheet.
+</verification>
+<teach_back>C++ concept for the owner: Virtual functions or std::variant for weapon classes.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-134 Pickups and the hotbar
+```xml
+<prompt id="S-US-134" codex="1.8" milestone="M2d" story="US-134" priority="Must" size="M">
+<context>
+Story US-134: Pickups and the hotbar.
+As a level designer, I want to place weapons in my levels for the hero to find, so that levels have rewards.
+Epic E13 Content and combat. Traces to: D-21, ADR-010.
+</context>
+<dependencies>
+Stories that must be Done: US-133.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: level format version 2 (pickups: weapon name and position), reading version 1 unchanged; a weapon palette in the Editor listing the starter weapons (placing, moving and deleting pickups works like characters, with undo and redo); new intents Slot1..Slot9 in Platform and Engine; the 9-slot hotbar in Game code, drawn at the bottom centre with the Luna UI toolkit. Walking over a pickup puts the weapon in the first free slot and removes the pickup until the level restarts; a full hotbar leaves it lying. 1-9 select a slot, Shift cycles through the filled slots. The hero starts with an empty hotbar unless demo levels place pickups (demo.json gets the sword and the spear as pickups next to the hero start so the M1b and M2c tests keep working).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Place">
+Given the Editor
+When I place a weapon pickup and save
+Then the level file (version 2) keeps it, and a version 1 file still loads
+</scenario>
+<scenario name="Pick up">
+Given the hero walks over a pickup
+When it happens
+Then the weapon goes into the first free of 9 hotbar slots
+</scenario>
+<scenario name="Select">
+Given weapons in the hotbar
+When I press 1-9 or Shift
+Then that weapon, or the next one, is held
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-134 ..." cases and every earlier end-to-end test.
+Manual checks in docs/plans/US-134.md done, with results recorded there: a screenshot of the hotbar with three weapons; docs/guides/editor.md explains pickups and the hotbar.
+</verification>
+<teach_back>C++ concept for the owner: Upgrading a saved file format (version 1 to 2).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-135 Elements
+```xml
+<prompt id="S-US-135" codex="1.8" milestone="M2d" story="US-135" priority="Should" size="S">
+<context>
+Story US-135: Elements.
+As the player, I want elemental weapons to do something special, so that they feel different.
+Epic E13 Content and combat. Traces to: D-21.
+</context>
+<dependencies>
+Stories that must be Done: US-133.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code: status effects as small structs on characters (burn, slow, poison; a chain jump and a drain happen at the hit). Numbers in weapons.json per element (for example burn 2 HP per second for 3 s, slow to 50% for 2 s, chain to the nearest enemy within 3 m for half damage, poison 1 HP per second for 5 s, drain 25% of the damage to the hero); each shows its effect from effects.json while it lasts.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Over time">
+Given a hit with a fire or poison weapon
+When seconds pass
+Then the target loses HP over time with its effect showing
+</scenario>
+<scenario name="Ice and void">
+Given a hit with an ice or a void weapon
+When it happens
+Then the target is slowed, or part of the damage heals the hero
+</scenario>
+<scenario name="Lightning">
+Given a hit with a lightning weapon and a second enemy nearby
+When it happens
+Then the lightning jumps to that enemy
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-135 ..." cases (one per element).
+Manual checks in docs/plans/US-135.md done, with results recorded there: a screenshot per element.
+</verification>
+<teach_back>C++ concept for the owner: Components: small structs attached to characters.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-139 Mouse aiming
+```xml
+<prompt id="S-US-139" codex="1.9" milestone="M2d" story="US-139" priority="Must" size="M">
+<context>
+Story US-139: Mouse aiming.
+As the player, I want to aim my weapon with the mouse, so that I can attack exactly where I point.
+Epic E13 Content and combat. Traces to: D-25 (owner, 2026-10-01). Brief: docs/plans/M2d-aiming-brief.md.
+</context>
+<dependencies>
+Stories that must be Done: US-133, US-134.
+Owner decisions that must be Decided: D-25.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna Engine gives the Game the pointer's world position (pointer plus camera; Luna stays game-agnostic) and an Intent for the attack button (left mouse button; Charter rule 4: Game code reads intents, never raw buttons). Game code: in Game mode, the hero faces the pointer (the nearest of the 8 facings) and keeps walking with the keys; the attack intent uses the held catalog weapon toward the pointer (the Interact key keeps attacking toward the facing, so today's tests and scripts still work); melee arcs (MeleeBehaviour) are centred on the exact angle to the pointer, not on the facing; a small aim line from the hero and a crosshair at the pointer are drawn while a catalog weapon is held; the Editor keeps using the pointer for its tools, unchanged. Add a scripted `--aim <x>:<y>:<from>:<to>` flag to apps/odysseus/main.cpp (like --point) so tests and screenshots can aim. Do not change projectile flight yet (US-140).
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Face the cursor">
+Given a weapon is held in Game mode
+When the mouse pointer moves around the hero
+Then the hero faces the pointer's nearest of the 8 directions and an aim line and crosshair follow the pointer
+</scenario>
+<scenario name="Swing toward the cursor">
+Given a melee weapon is held and an enemy stands to the north-east
+When the pointer is north-east of the hero and the attack button is pressed
+Then the swing hits the enemy; with the pointer to the south-west the same swing misses it
+</scenario>
+<scenario name="Keys still work">
+Given the Interact key
+When it is pressed with no pointer movement
+Then the attack goes toward the hero's facing as before, and every earlier test still passes
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-139 ..." cases and all earlier weapon, combat and spear tests.
+Manual checks in docs/plans/US-139.md done, with results recorded there: screenshots of the hero facing two different pointer positions with the aim line, and a melee swing toward the pointer hitting a goblin.
+</verification>
+<teach_back>C++ concept for the owner: Converting between coordinate spaces (screen, world) and angles with atan2.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-140 Arc ballistics for shots
+```xml
+<prompt id="S-US-140" codex="1.9" milestone="M2d" story="US-140" priority="Must" size="L">
+<context>
+Story US-140: Arc ballistics for shots.
+As the player, I want shots to fly as real arcs that land where I aim, so that aiming and distance matter.
+Epic E13 Content and combat. Traces to: D-25 (owner, 2026-10-01), ARC-10, ADR-017.
+</context>
+<dependencies>
+Stories that must be Done: US-139.
+Owner decisions that must be Decided: D-25.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code using Luna Physics (fixed-point 32.32, SI units, 1 tile = 1 m; Charter rule 10). Reuse the functions of the US-027 and US-029 work (ballistics flight per tick, aimLaunchAngle, launchVelocity, the world collision and material hits) instead of copying them; add a Game-side `ArcShot` that holds a Luna Physics projectile with height. At launch the angle is solved so the shot lands at the pointer, with the distance clamped to the weapon's range (an unreachable pointer lands at the range limit). Each tick the shot advances one physics tick; it hits the first enemy whose body it passes through (feet to about 1.5 m high; the enemy's position is its feet, as today), hits solids (rock, tree, wall tiles) when it is below their height and flies over them when above, and otherwise ends at the ground: a miss sticks in the ground briefly (an effect) and is removed. Drawing: the sprite is lifted by its height and a small shadow is drawn on the ground; the conversion from physics position to screen stays in one place (luna/engine/physics_view). Damage, elements and the provoke rule reuse the existing strike path. The flat projectile code from US-133 stays for staff bolts (US-141). Keep the M1b spear-throw demo and its tests working.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Lands at the cursor">
+Given a launch speed and a pointer within range on level ground
+When a shot is fired
+Then it follows a ballistic arc and lands within half a metre of the pointer, and two runs with the same inputs land on the same spot
+</scenario>
+<scenario name="Hits in its path">
+Given an enemy between the hero and the pointer, and a second enemy behind a rock
+When a low arc passes through the first enemy's body height
+Then the first enemy is hit; the rock blocks a low shot to the second, and a high arc clears the rock
+</scenario>
+<scenario name="Range and misses">
+Given a pointer farther than the weapon's range
+When the shot is fired
+Then it lands at the range limit, and a miss sticks in the ground briefly and is removed
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-140 ..." cases, the physics tests and the US-029 spear tests; the determinism check still passes.
+Manual checks in docs/plans/US-140.md done, with results recorded there: a screenshot of a shot in the air with its shadow, one of a shot blocked by a rock, and the landing distance measured against the pointer.
+</verification>
+<teach_back>C++ concept for the owner: Fixed-point numbers versus floating point, and why the game uses them for replays.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-141 Bows, crossbows, thrown weapons and staff bolts
+```xml
+<prompt id="S-US-141" codex="1.9" milestone="M2d" story="US-141" priority="Must" size="M">
+<context>
+Story US-141: Bows, crossbows, thrown weapons and staff bolts.
+As the player, I want several ranged weapons I can aim and shoot, so that I can defeat enemies from a distance.
+Epic E13 Content and combat. Traces to: D-25 (owner, 2026-10-01).
+</context>
+<dependencies>
+Stories that must be Done: US-140.
+Owner decisions that must be Decided: D-25.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game code. The bow, crossbow and thrown classes use the US-140 arcs (bows and crossbows: light arrows, long range, the fastest arcs; thrown: heavy, slower arcs with spin, short range and high damage); the staff fires its magic bolt flat and fast toward the pointer with its element effects (the US-133 projectile path, now aimed at the pointer). Guns stay on the flat path and are not part of this story. Speed per class and range, damage and rate of fire per weapon come from weapons.json (add the launch speed per class to a `classes` section of that file with validation naming file and field); there is no ammo, only the rate-of-fire cooldown (D-25). Elements (US-135) apply on hit. The starter set's ranged weapons are all shootable from the hotbar. Add `assets/levels/range.json`, a shooting-range level (straw targets, goblins in the open and goblins behind rocks, weapon pickups of the ranged starters at the start) for the owner and for the evidence. The M1b spear-throw demo still works.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Each ranged class shoots">
+Given a bow, a crossbow, a thrown weapon and a staff from the starter set
+When each is fired at a goblin with the pointer on it
+Then each hits with its own speed and path (arcs for the first three, a flat bolt for the staff) and the goblin loses the weapon's damage
+</scenario>
+<scenario name="Elements on shots">
+Given an elemental bow or staff
+When its shot hits a goblin
+Then the element's effect applies as for melee weapons
+</scenario>
+<scenario name="Shooting range">
+Given the range level
+When the owner plays it
+Then goblins in the open and behind rocks can be shot with the ranged weapons, and the numbers can be changed in weapons.json without code
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-141 ..." cases (one per ranged class) and all earlier weapon, element and spear tests.
+Manual checks in docs/plans/US-141.md done, with results recorded there: a screenshot per ranged class shooting on the range level.
+</verification>
+<teach_back>C++ concept for the owner: Data-driven tuning: why speeds and ranges live in JSON and not in code.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-136 Plants
+```xml
+<prompt id="S-US-136" codex="1.8" milestone="M2d" story="US-136" priority="Must" size="L">
+<context>
+Story US-136: Plants.
+As a level designer and player, I want plants in the world that block, can be looked at, chopped and eaten, so that the world feels alive.
+Epic E13 Content and combat. Traces to: D-21.
+</context>
+<dependencies>
+Stories that must be Done: US-130, US-132, US-134.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: plants in level format version 2 (kind, position); a plant palette in the Editor (all 150, with place, move, delete, undo and redo like characters); Game code for plants in the world: big plants block walking, spears and arrows; Interact next to a plant shows its name and inspect text for a few seconds; any weapon hit destroys it with a leaf burst; an edible plant heals the hero 10 HP with a healing glow; 15 s later the same kind regrows at a random free spot (not blocked, not on the hero, not on another plant) inside the current camera view, with the growth effect. The random spot comes from a seeded PCG32 stream.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Place and block">
+Given the Editor's plant palette
+When I place a tree and a flower and play
+Then the tree blocks walking and the flower does not
+</scenario>
+<scenario name="Inspect, chop and eat">
+Given the hero next to a plant
+When the player presses Interact, or hits the plant with a weapon
+Then its name and inspect text show, or it is destroyed with a leaf burst; an edible plant heals the hero 10 HP
+</scenario>
+<scenario name="Regrow">
+Given a destroyed plant
+When 15 s pass
+Then the same plant grows back at a random free spot inside the camera view
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-136 ..." cases.
+Manual checks in docs/plans/US-136.md done, with results recorded there: screenshots of a planted level, an inspect text, a chop and a regrow; docs/guides/editor.md explains plants.
+</verification>
+<teach_back>C++ concept for the owner: Random numbers from a seeded stream; spatial queries.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-137 Animals in the Editor
+```xml
+<prompt id="S-US-137" codex="1.8" milestone="M2d" story="US-137" priority="Must" size="S">
+<context>
+Story US-137: Animals in the Editor.
+As a level designer, I want to place animals, so that my levels have wildlife and dangers.
+Epic E13 Content and combat. Traces to: D-21.
+</context>
+<dependencies>
+Stories that must be Done: US-130, US-131.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: the 50 animals appear in the Editor's character palette (a tab or a scrolling list, readable at 480x270); placed animals use the properties panel like characters (name, HP, facing: east or west for side views, strike damage for enemies); enemies from the design notes take damage, strike back and die like goblins; bystanders cannot be hit and weapons pass them.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Place">
+Given the character palette
+When I place any of the 50 animals
+Then it stands in the level with its name and HP
+</scenario>
+<scenario name="Enemies">
+Given a predator or a boar
+When the hero hits it
+Then it takes damage and strikes back like a goblin
+</scenario>
+<scenario name="Bystanders">
+Given a deer, a cow or a rabbit
+When the hero attacks next to it
+Then it takes no damage
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-137 ..." cases.
+Manual checks in docs/plans/US-137.md done, with results recorded there: a screenshot of a level with animals; docs/guides/editor.md lists which animals are enemies.
+</verification>
+<teach_back>C++ concept for the owner: Data-driven behaviour flags.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-138 Placed effects and random weather
+```xml
+<prompt id="S-US-138" codex="1.8" milestone="M2d" story="US-138" priority="Should" size="M">
+<context>
+Story US-138: Placed effects and random weather.
+As the owner, I want ambient effects and changing weather, so that the world has atmosphere.
+Epic E13 Content and combat. Traces to: D-21, ADR-011.
+</context>
+<dependencies>
+Stories that must be Done: US-132.
+Owner decisions that must be Decided: D-21.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: placed effects in level format version 2 and an effect palette in the Editor (the looping effects from effects.json: fireflies, campfire, portal, magic circle and others), with undo and redo; Game code for the weather cycle (a seeded PCG32 stream picks by weight every 60-120 s of play; 3 s cross-fade) drawn as a screen overlay above the world and below the UI; the Editor shows no weather. `--seed` fixes the weather sequence for tests and screenshots.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Placed effects">
+Given the Editor
+When I place a campfire, fireflies or a portal and save
+Then it loops in Game mode after a reload
+</scenario>
+<scenario name="Weather">
+Given Game mode
+When 60-120 s pass
+Then a random weather fades in over 3 s; clear sky comes about 1 in 3
+</scenario>
+<scenario name="Repeatable">
+Given the same seed
+When the game runs twice
+Then the same weathers come in the same order
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done.</definition_of_done>
+<verification>
+Debug and Release builds with zero warnings; ctest in both presets passes, including the "US-138 ..." cases.
+Manual checks in docs/plans/US-138.md done, with results recorded there: screenshots of three weathers and of placed effects; docs/guides/editor.md explains effects and weather.
+</verification>
+<teach_back>C++ concept for the owner: Blending two overlays with alpha.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions.</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M2d" codex="1.8" name="Exit review M2d">
+<instructions>
+1. Demonstrate the exit criteria: The owner places weapon pickups, plants, animals and looping effects with the Editor, saves and plays the level; the hero picks weapons into a 9-slot hotbar and fights with the 16 starter weapons of 8 classes, elements included; enemies strike back when hit and in reach, and die; the hero respawns at 0 HP; plants block, are inspected, chopped and eaten and regrow; effects play; the weather changes by itself; every M2c feature and the spear and sword demos still work.
+2. Collect evidence into docs/gates/M2d.md, one section per criterion, each marked met or not met: a scripted end-to-end session with screenshots in docs/evidence/X-M2d/; the full test run; the updated guide.
+3. No kill gate: invite the owner to play with docs/guides/editor.md and record the notes when given; they become new stories through Anima, never silent changes.
+4. Merge qa into main, push, confirm CI on main is green, tag the repository m2d-done and push the tag, and save a Milestone-<n>.md snapshot. Then stop: K-M3 starts only when the owner says so.
+</instructions>
+<output_format>Assembly report with the review result.</output_format>
+</prompt>
+```
+
 ### M3 Living clan on screen
 Exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
 
 ```xml
-<prompt id="K-M3" codex="1.7" name="Kick off M3 Living clan on screen">
+<prompt id="K-M3" codex="1.8" name="Kick off M3 Living clan on screen">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-04, D-05) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -2226,7 +2859,7 @@ Exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed 
 
 #### S-US-030 Compose characters from layers
 ```xml
-<prompt id="S-US-030" codex="1.7" milestone="M3" story="US-030" priority="Must" size="M">
+<prompt id="S-US-030" codex="1.8" milestone="M3" story="US-030" priority="Must" size="M">
 <context>
 Story US-030: Compose characters from layers.
 As a player, I want characters built from body, hair, outfit and held-item layers with colour variants, so that every person looks different and outfits can grow with progression.
@@ -2275,7 +2908,7 @@ Manual checks in docs/plans/US-030.md done, with results recorded there.
 
 #### S-US-032 See the simulated clan on screen
 ```xml
-<prompt id="S-US-032" codex="1.7" milestone="M3" story="US-032" priority="Must" size="L">
+<prompt id="S-US-032" codex="1.8" milestone="M3" story="US-032" priority="Must" size="L">
 <context>
 Story US-032: See the simulated clan on screen.
 As a player, I want clan members from the simulation to appear and act in the world, so that I watch the clan live its life.
@@ -2324,7 +2957,7 @@ Manual checks in docs/plans/US-032.md done, with results recorded there.
 
 #### S-US-031 Read people's state at a glance
 ```xml
-<prompt id="S-US-031" codex="1.7" milestone="M3" story="US-031" priority="Should" size="S">
+<prompt id="S-US-031" codex="1.8" milestone="M3" story="US-031" priority="Should" size="S">
 <context>
 Story US-031: Read people's state at a glance.
 As a player, I want to see how people feel from their posture and small emote icons, so that I understand the clan without opening menus.
@@ -2367,7 +3000,7 @@ Manual checks in docs/plans/US-031.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M3" codex="1.7" name="Exit review M3">
+<prompt id="X-M3" codex="1.8" name="Exit review M3">
 <instructions>
 1. Demonstrate the exit criteria: The clan from M2 runs inside the game; NPCs are visible, dressed in layered outfits, and act on their needs.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M3.md, one section per criterion, each marked met or not met.
@@ -2381,7 +3014,7 @@ Manual checks in docs/plans/US-031.md done, with results recorded there.
 Exit criteria: A region is generated from a seed with biomes, resources and two rival clans; any NPC can be inspected; the game saves and loads.
 
 ```xml
-<prompt id="K-M4" codex="1.7" name="Kick off M4 Region, tools and saves">
+<prompt id="K-M4" codex="1.8" name="Kick off M4 Region, tools and saves">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-13) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -2394,7 +3027,7 @@ Exit criteria: A region is generated from a seed with biomes, resources and two 
 
 #### S-US-040 Generate a region from a seed
 ```xml
-<prompt id="S-US-040" codex="1.7" milestone="M4" story="US-040" priority="Must" size="L">
+<prompt id="S-US-040" codex="1.8" milestone="M4" story="US-040" priority="Must" size="L">
 <context>
 Story US-040: Generate a region from a seed.
 As a player, I want each new game to create a different region with steppe, forest, river and caves, so that every playthrough feels new.
@@ -2443,7 +3076,7 @@ Manual checks in docs/plans/US-040.md done, with results recorded there.
 
 #### S-US-041 Place resources by biome
 ```xml
-<prompt id="S-US-041" codex="1.7" milestone="M4" story="US-041" priority="Must" size="M">
+<prompt id="S-US-041" codex="1.8" milestone="M4" story="US-041" priority="Must" size="M">
 <context>
 Story US-041: Place resources by biome.
 As a player, I want flint, wood, berries and animals placed where they make sense, so that exploring the land matters.
@@ -2487,7 +3120,7 @@ Manual checks in docs/plans/US-041.md done, with results recorded there.
 
 #### S-US-042 Spawn rival clans
 ```xml
-<prompt id="S-US-042" codex="1.7" milestone="M4" story="US-042" priority="Must" size="M">
+<prompt id="S-US-042" codex="1.8" milestone="M4" story="US-042" priority="Must" size="M">
 <context>
 Story US-042: Spawn rival clans.
 As a player, I want two AI clans living elsewhere in the region, so that there are others to trade with, convert, or compete against.
@@ -2536,7 +3169,7 @@ Manual checks in docs/plans/US-042.md done, with results recorded there.
 
 #### S-US-043 Stream chunks and save only changes
 ```xml
-<prompt id="S-US-043" codex="1.7" milestone="M4" story="US-043" priority="Should" size="M">
+<prompt id="S-US-043" codex="1.8" milestone="M4" story="US-043" priority="Should" size="M">
 <context>
 Story US-043: Stream chunks and save only changes.
 As a developer, I want the region stored as a seed plus changed chunks, so that saves stay small and loading is fast.
@@ -2580,7 +3213,7 @@ Manual checks in docs/plans/US-043.md done, with results recorded there.
 
 #### S-US-080 Autosave and keep backups
 ```xml
-<prompt id="S-US-080" codex="1.7" milestone="M4" story="US-080" priority="Must" size="M">
+<prompt id="S-US-080" codex="1.8" milestone="M4" story="US-080" priority="Must" size="M">
 <context>
 Story US-080: Autosave and keep backups.
 As a player, I want the game to autosave and keep backups, so that I never lose more than a few minutes.
@@ -2629,7 +3262,7 @@ Manual checks in docs/plans/US-080.md done, with results recorded there.
 
 #### S-US-083 Inspect and control the world with dev tools
 ```xml
-<prompt id="S-US-083" codex="1.7" milestone="M4" story="US-083" priority="Should" size="M">
+<prompt id="S-US-083" codex="1.8" milestone="M4" story="US-083" priority="Should" size="M">
 <context>
 Story US-083: Inspect and control the world with dev tools.
 As a developer, I want Dear ImGui panels to inspect any person and control time, so that I can understand and tune the simulation live.
@@ -2677,7 +3310,7 @@ Manual checks in docs/plans/US-083.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M4" codex="1.7" name="Exit review M4">
+<prompt id="X-M4" codex="1.8" name="Exit review M4">
 <instructions>
 1. Demonstrate the exit criteria: A region is generated from a seed with biomes, resources and two rival clans; any NPC can be inspected; the game saves and loads.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M4.md, one section per criterion, each marked met or not met.
@@ -2691,7 +3324,7 @@ Manual checks in docs/plans/US-083.md done, with results recorded there.
 Exit criteria: A player can start a new game, live the Growing Period, take a profession, pursue Trade or Religion, and win or lose.
 
 ```xml
-<prompt id="K-M5" codex="1.7" name="Kick off M5 Vertical slice feature-complete">
+<prompt id="K-M5" codex="1.8" name="Kick off M5 Vertical slice feature-complete">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-06, D-07, D-08, D-09, D-10, D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -2704,7 +3337,7 @@ Exit criteria: A player can start a new game, live the Growing Period, take a pr
 
 #### S-US-050 Start a new game
 ```xml
-<prompt id="S-US-050" codex="1.7" milestone="M5" story="US-050" priority="Must" size="M">
+<prompt id="S-US-050" codex="1.8" milestone="M5" story="US-050" priority="Must" size="M">
 <context>
 Story US-050: Start a new game.
 As a player, I want to choose a seed, a Growing Period preset and a Comfort level before starting, so that I can shape the kind of game I want.
@@ -2753,7 +3386,7 @@ Manual checks in docs/plans/US-050.md done, with results recorded there.
 
 #### S-US-053 Weight choices by age (imprint curve)
 ```xml
-<prompt id="S-US-053" codex="1.7" milestone="M5" story="US-053" priority="Must" size="S">
+<prompt id="S-US-053" codex="1.8" milestone="M5" story="US-053" priority="Must" size="S">
 <context>
 Story US-053: Weight choices by age (imprint curve).
 As a developer, I want Path Affinity gains multiplied by the imprint curve, so that early choices shape the hero most, as designed.
@@ -2802,7 +3435,7 @@ Manual checks in docs/plans/US-053.md done, with results recorded there.
 
 #### S-US-051 Choose how to spend each year of youth
 ```xml
-<prompt id="S-US-051" codex="1.7" milestone="M5" story="US-051" priority="Must" size="M">
+<prompt id="S-US-051" codex="1.8" milestone="M5" story="US-051" priority="Must" size="M">
 <context>
 Story US-051: Choose how to spend each year of youth.
 As a player, I want to pick Focus activities each in-game year, so that I decide what kind of person my hero becomes.
@@ -2846,7 +3479,7 @@ Manual checks in docs/plans/US-051.md done, with results recorded there.
 
 #### S-US-052 Face Crossroads events
 ```xml
-<prompt id="S-US-052" codex="1.7" milestone="M5" story="US-052" priority="Must" size="L">
+<prompt id="S-US-052" codex="1.8" milestone="M5" story="US-052" priority="Must" size="L">
 <context>
 Story US-052: Face Crossroads events.
 As a player, I want story decisions with lasting consequences during youth, so that my choices feel meaningful.
@@ -2895,7 +3528,7 @@ Manual checks in docs/plans/US-052.md done, with results recorded there.
 
 #### S-US-054 Reveal the specialty at the Mantle moment
 ```xml
-<prompt id="S-US-054" codex="1.7" milestone="M5" story="US-054" priority="Must" size="S">
+<prompt id="S-US-054" codex="1.8" milestone="M5" story="US-054" priority="Must" size="S">
 <context>
 Story US-054: Reveal the specialty at the Mantle moment.
 As a player, I want my hero's specialty revealed at 26, so that I see the result of my youth.
@@ -2939,7 +3572,7 @@ Manual checks in docs/plans/US-054.md done, with results recorded there.
 
 #### S-US-060 Define the five Age 1 professions as data
 ```xml
-<prompt id="S-US-060" codex="1.7" milestone="M5" story="US-060" priority="Must" size="S">
+<prompt id="S-US-060" codex="1.8" milestone="M5" story="US-060" priority="Must" size="S">
 <context>
 Story US-060: Define the five Age 1 professions as data.
 As a designer (data editor), I want professions defined in JSON: skills, tools, actions, related pillar, so that content can grow without code changes.
@@ -2983,7 +3616,7 @@ Manual checks in docs/plans/US-060.md done, with results recorded there.
 
 #### S-US-061 Interact with things through a context menu
 ```xml
-<prompt id="S-US-061" codex="1.7" milestone="M5" story="US-061" priority="Must" size="L">
+<prompt id="S-US-061" codex="1.8" milestone="M5" story="US-061" priority="Must" size="L">
 <context>
 Story US-061: Interact with things through a context menu.
 As a player, I want to click a thing and pick from the actions it offers, so that I can do many things with everything in the world.
@@ -3032,7 +3665,7 @@ Manual checks in docs/plans/US-061.md done, with results recorded there.
 
 #### S-US-062 Craft at a workstation
 ```xml
-<prompt id="S-US-062" codex="1.7" milestone="M5" story="US-062" priority="Must" size="M">
+<prompt id="S-US-062" codex="1.8" milestone="M5" story="US-062" priority="Must" size="M">
 <context>
 Story US-062: Craft at a workstation.
 As a player, I want to turn materials into tools at a knapping stone or fire, so that my work produces useful things.
@@ -3081,7 +3714,7 @@ Manual checks in docs/plans/US-062.md done, with results recorded there.
 
 #### S-US-063 Learn a trade from a master
 ```xml
-<prompt id="S-US-063" codex="1.7" milestone="M5" story="US-063" priority="Should" size="M">
+<prompt id="S-US-063" codex="1.8" milestone="M5" story="US-063" priority="Should" size="M">
 <context>
 Story US-063: Learn a trade from a master.
 As a player, I want to apprentice with an NPC master once they trust me, so that skills and relationships grow together.
@@ -3130,7 +3763,7 @@ Manual checks in docs/plans/US-063.md done, with results recorded there.
 
 #### S-US-070 Track regional dominion
 ```xml
-<prompt id="S-US-070" codex="1.7" milestone="M5" story="US-070" priority="Must" size="M">
+<prompt id="S-US-070" codex="1.8" milestone="M5" story="US-070" priority="Must" size="M">
 <context>
 Story US-070: Track regional dominion.
 As a player, I want a Dominion Meter showing my clan's share of the region in Trade and Religion, so that I know how close I am to leading the region.
@@ -3174,7 +3807,7 @@ Manual checks in docs/plans/US-070.md done, with results recorded there.
 
 #### S-US-055 Age, die, and end the run
 ```xml
-<prompt id="S-US-055" codex="1.7" milestone="M5" story="US-055" priority="Must" size="M">
+<prompt id="S-US-055" codex="1.8" milestone="M5" story="US-055" priority="Must" size="M">
 <context>
 Story US-055: Age, die, and end the run.
 As a player, I want my hero to age and eventually die, ending the run with a summary, so that every life has an arc and an ending.
@@ -3223,7 +3856,7 @@ Manual checks in docs/plans/US-055.md done, with results recorded there.
 
 #### S-US-071 Barter with rival clans
 ```xml
-<prompt id="S-US-071" codex="1.7" milestone="M5" story="US-071" priority="Must" size="L">
+<prompt id="S-US-071" codex="1.8" milestone="M5" story="US-071" priority="Must" size="L">
 <context>
 Story US-071: Barter with rival clans.
 As a player, I want to exchange goods with other clans and track debts, so that Trade becomes a path to leadership.
@@ -3272,7 +3905,7 @@ Manual checks in docs/plans/US-071.md done, with results recorded there.
 
 #### S-US-072 Found a sacred fire and gather followers
 ```xml
-<prompt id="S-US-072" codex="1.7" milestone="M5" story="US-072" priority="Must" size="L">
+<prompt id="S-US-072" codex="1.8" milestone="M5" story="US-072" priority="Must" size="L">
 <context>
 Story US-072: Found a sacred fire and gather followers.
 As a player, I want to found a named sacred fire and hold rituals that attract followers, so that Religion becomes a path to leadership.
@@ -3321,7 +3954,7 @@ Manual checks in docs/plans/US-072.md done, with results recorded there.
 
 #### S-US-073 Win by leading the region
 ```xml
-<prompt id="S-US-073" codex="1.7" milestone="M5" story="US-073" priority="Must" size="S">
+<prompt id="S-US-073" codex="1.8" milestone="M5" story="US-073" priority="Must" size="S">
 <context>
 Story US-073: Win by leading the region.
 As a player, I want to win when my clan dominates the region, so that the run has a satisfying goal.
@@ -3365,7 +3998,7 @@ Manual checks in docs/plans/US-073.md done, with results recorded there.
 
 #### S-US-081 Change basic settings
 ```xml
-<prompt id="S-US-081" codex="1.7" milestone="M5" story="US-081" priority="Should" size="S">
+<prompt id="S-US-081" codex="1.8" milestone="M5" story="US-081" priority="Should" size="S">
 <context>
 Story US-081: Change basic settings.
 As a player, I want to set window mode, resolution and volume, so that the game fits my screen and ears.
@@ -3409,7 +4042,7 @@ Manual checks in docs/plans/US-081.md done, with results recorded there.
 
 #### S-US-082 Keep within the performance budget
 ```xml
-<prompt id="S-US-082" codex="1.7" milestone="M5" story="US-082" priority="Must" size="S">
+<prompt id="S-US-082" codex="1.8" milestone="M5" story="US-082" priority="Must" size="S">
 <context>
 Story US-082: Keep within the performance budget.
 As a developer, I want an FPS and tick-time overlay and a performance test, so that I notice slowdowns the day I cause them.
@@ -3452,7 +4085,7 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M5" codex="1.7" name="Exit review M5">
+<prompt id="X-M5" codex="1.8" name="Exit review M5">
 <instructions>
 1. Demonstrate the exit criteria: A player can start a new game, live the Growing Period, take a profession, pursue Trade or Religion, and win or lose.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M5.md, one section per criterion, each marked met or not met.
@@ -3466,7 +4099,7 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 
 ```xml
-<prompt id="K-M6" codex="1.7" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
+<prompt id="K-M6" codex="1.8" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
 <instructions>
 1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
 2. Read docs/decisions.md. For every decision this milestone needs (D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
@@ -3479,7 +4112,7 @@ Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go d
 
 #### S-US-090 Learn the game in the first ten minutes
 ```xml
-<prompt id="S-US-090" codex="1.7" milestone="M6" story="US-090" priority="Should" size="M">
+<prompt id="S-US-090" codex="1.8" milestone="M6" story="US-090" priority="Should" size="M">
 <context>
 Story US-090: Learn the game in the first ten minutes.
 As a playtester, I want a clan elder to guide me through my first day, so that I can play without reading a manual.
@@ -3528,7 +4161,7 @@ Manual checks in docs/plans/US-090.md done, with results recorded there.
 
 #### S-US-091 Install and run the playtest build
 ```xml
-<prompt id="S-US-091" codex="1.7" milestone="M6" story="US-091" priority="Must" size="S">
+<prompt id="S-US-091" codex="1.8" milestone="M6" story="US-091" priority="Must" size="S">
 <context>
 Story US-091: Install and run the playtest build.
 As a playtester, I want a zip I can unpack and run, so that I can try the game without technical help.
@@ -3572,7 +4205,7 @@ Manual checks in docs/plans/US-091.md done, with results recorded there.
 
 #### S-US-092 Record local session statistics
 ```xml
-<prompt id="S-US-092" codex="1.7" milestone="M6" story="US-092" priority="Should" size="S">
+<prompt id="S-US-092" codex="1.8" milestone="M6" story="US-092" priority="Should" size="S">
 <context>
 Story US-092: Record local session statistics.
 As a developer, I want an opt-in local log of session length and key events, so that I can measure the MVP success criteria honestly.
@@ -3615,7 +4248,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ```xml
-<prompt id="X-M6" codex="1.7" name="Exit review M6">
+<prompt id="X-M6" codex="1.8" name="Exit review M6">
 <instructions>
 1. Demonstrate the exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M6.md, one section per criterion, each marked met or not met.
@@ -3631,7 +4264,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -3665,3 +4298,5 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 1.5 | 2026-09-30 | Assembly instructions (owner requests of 2026-09-30): Limit.md is a state file and the resume point, updated after every story and before any stop, read by A-001; L-01 step 2 continues paused story branches; step 7 uses tools/verify.ps1; step 11 updates Limit.md; the Charter says how to stop safely at usage limits; section 0 states that Dominus designs, implements and tests while Anima alone writes the Codex, and that assembly is continuous; new P-004. |
 | 1.6 | 2026-09-30 | Kill Gate 1 pivot (source of truth v1.6, Round 9): the owner judged the M2 chronicle "not really a story" (D-GATE-M2: Pivot) and decided the redesign (D-18). New milestone M2b Story engine between M2 and M3 with K-M2b, S-US-110..S-US-115 (reasons for deaths and feuds; quarrels, blame and revenge; sharing, nursing and adoption; courtship, rivals and parting; apprentices and hunting parties; the story told in episodes) and X-M2b, the Kill Gate 1 retry judged by the owner alone; D-GATE-M2, D-18 and D-GATE-M2b in the decision table; D-15 chain includes M2b; new P-005 adopts v1.6. Codex issue resolved: CI-006 (the US-020 first-frame limit is 3 s in Release and 15 s in the Debug build, which AddressSanitizer slows on CI runners). The header and section 0 no longer name AI vendors or models (owner rule of 2026-09-30). |
 | 1.7 | 2026-09-30 | Level editor (source of truth v1.7, Round 10): Kill Gate 1 passed (D-GATE-M2b: Go). Before M3 the owner asked for a level editor (D-19) with his own art (D-05 decided: own art, placeholder quality). New milestone M2c Level editor between M2b and M3 with K-M2c, S-US-120..S-US-126 (real art cut from the owner's sheets into atlases; pointer, font and widgets; levels as data; Game mode and Editor mode; painting ground tiles with undo and redo; placing characters with properties; level and character settings and a guide) and X-M2c (no kill gate); design notes for the milestone (layers, art pipeline, stb_image and ADR-018, data files, tests, UX); D-15 chain includes M2c; new P-006 adopts v1.7. Built from Mraw's brief docs/plans/M2c-editor-brief.md. |
+| 1.8 | 2026-09-30 | Content and combat (source of truth v1.8, Round 11): M2c done. The owner added seven sprite sheets and took every design decision in six chat rounds (D-21). New milestone M2d Content and combat between M2c and M3 with K-M2d, S-US-130..S-US-138 (content catalogs; hero HP, strike-back and death; effect player; eight weapon classes and a 16-weapon starter set; pickups and a 9-slot hotbar with level format version 2; elements; plants; animals in the Editor; placed effects and random weather) and X-M2d (ends by stopping for the owner before K-M3); design notes for the milestone. Charter: human gate 3, design decisions are the owner's (D-22), replacing delegation to Dominus. D-15 chain includes M2d; new P-007 adopts v1.8. Built from Mraw's brief docs/plans/M2d-content-brief.md. |
+| 1.9 | 2026-10-01 | Aiming and ballistics (source of truth v1.9): the owner asked, before plants, to aim weapons with the mouse, to have ballistics and several shootable ranged weapons (D-25, two chat rounds). Three stories S-US-139 (mouse aiming), S-US-140 (arc ballistics with Luna Physics), S-US-141 (bows, crossbows, thrown weapons and staff bolts, with a shooting-range level) are added to M2d between S-US-135 and S-US-136; K-M2d sets the new order; design notes for the milestone; D-25 in the decision table; new P-008 adopts v1.9. Built from Mraw's brief docs/plans/M2d-aiming-brief.md. |

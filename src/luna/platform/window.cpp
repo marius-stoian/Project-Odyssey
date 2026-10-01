@@ -121,10 +121,29 @@ void Window::drawTexture(int texture, const odysseus::core::Rect& source, const 
     SDL_RenderTexture(renderer_.get(), textures_.at(static_cast<std::size_t>(texture)).get(), &from, &to);
 }
 
+void Window::drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive) {
+    SDL_Texture* picture = textures_.at(static_cast<std::size_t>(texture)).get();
+    SDL_SetTextureAlphaMod(picture, alpha);
+    SDL_SetTextureBlendMode(picture, additive ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
+    drawTexture(texture, source, destination);
+    // Back to plain drawing: other draws of this texture must not inherit the style.
+    SDL_SetTextureAlphaMod(picture, 255);
+    SDL_SetTextureBlendMode(picture, SDL_BLENDMODE_BLEND);
+}
+
 odysseus::core::Rect Window::presentationRect() const {
     SDL_FRect rect{};
     SDL_GetRenderLogicalPresentationRect(renderer_.get(), &rect);
     return {static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.w), static_cast<int>(rect.h)};
+}
+
+void Window::setFullscreen(bool fullscreen) {
+    SDL_SetWindowFullscreen(window_.get(), fullscreen);
+    SDL_SyncWindow(window_.get());
+}
+
+bool Window::fullscreen() const {
+    return (SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0;
 }
 
 void Window::setSize(int width, int height) {

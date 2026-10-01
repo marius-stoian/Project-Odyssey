@@ -42,6 +42,11 @@ public:
     void setSolid(int tile, bool solid);
     bool isSolid(int x, int y) const;
 
+    // Things standing on a cell that block it like a solid tile (a tree, US-136), and how tall they are in
+    // metres (0: nothing). The Game sets and clears them as things appear and go; they are not tiles.
+    void setObstacle(int x, int y, double heightMetres);
+    double obstacleHeight(int x, int y) const;
+
     // The tiles a view (in world pixels) overlaps, clamped to the map.
     TileRange visibleTiles(const Rect& view) const;
 
@@ -54,6 +59,7 @@ private:
     int tileSize_;
     std::vector<int> tiles_;       // width_ * height_ cells
     std::vector<bool> solidTiles_; // index = tile number
+    std::vector<float> obstacles_; // height of the thing standing on each cell; empty until one is set
 };
 
 } // namespace luna::engine

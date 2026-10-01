@@ -21,6 +21,10 @@ inline constexpr int kSaveBackups = 3;
 // at any moment leaves the previous complete save in place.
 void saveWorld(const World& world, const std::filesystem::path& file);
 
+// The safe write behind every save (US-016, US-043, US-080): `text` goes to `<file>.tmp`, the last saves move up one backup, and
+// only then does the new file take its name.
+void writeSaveText(const std::filesystem::path& file, const std::string& text);
+
 struct LoadedWorld {
     World world;
     std::filesystem::path loadedFrom;  // the save, or the backup that had to be used

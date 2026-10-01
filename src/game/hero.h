@@ -34,6 +34,8 @@ public:
     double feetY(double alpha = 1.0) const;
 
     Facing facing() const { return facing_; }
+    // Turns the hero without walking: toward the mouse pointer while a weapon is held (US-139).
+    void face(Facing facing) { facing_ = facing; }
     bool walking() const { return walking_; }
     int animationFrame() const; // 0..3 while walking, 0 when idle
 

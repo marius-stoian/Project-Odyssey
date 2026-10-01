@@ -348,4 +348,27 @@ void ImageRenderer::draw(const Texture& texture, const Rect& source, Point at) {
     }
 }
 
+
+void ImageRenderer::drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) {
+    const Image& from = textures_.at(static_cast<std::size_t>(texture.id));
+    if (destination.width <= 0 || destination.height <= 0) return;
+    for (int y = 0; y < destination.height; ++y) {
+        for (int x = 0; x < destination.width; ++x) {
+            const int tx = destination.x + x;
+            const int ty = destination.y + y;
+            if (tx < 0 || ty < 0 || tx >= target_.width() || ty >= target_.height()) continue;
+            // Nearest source pixel: square pixels, as the window draws them.
+            const Color c = from.get(source.x + x * source.width / destination.width, source.y + y * source.height / destination.height);
+            const int a = c.alpha * style.alpha / 255;
+            if (a == 0) continue;
+            const Color under = target_.get(tx, ty);
+            auto mix = [&](int top, int bottom) {
+                const int value = style.blend == Blend::Add ? bottom + top * a / 255 : (top * a + bottom * (255 - a)) / 255;
+                return static_cast<std::uint8_t>(std::min(255, value));
+            };
+            target_.set(tx, ty, {mix(c.red, under.red), mix(c.green, under.green), mix(c.blue, under.blue), 255});
+        }
+    }
+}
+
 } // namespace luna::engine

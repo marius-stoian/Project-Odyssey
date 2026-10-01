@@ -671,3 +671,334 @@ for (int y = 0; y < std::min(level.height, out.height); ++y)
 **Try it (15 minutes).** Follow [the Editor guide](guides/editor.md): make a new level, paint a lake, place a troll, move the START marker, save, and press F1.
 
 **Check yourself.** What would go wrong if `resized` called `ground.resize(newWidth * newHeight)` and nothing else?
+
+## US-130: Content catalogs from the new sheets (2026-09-30)
+
+**What we built.** Your seven new sheets are cut into a second atlas (653 items: 150 weapons, 153 plants, 50 animals, 200 effects, 100 weather types), with a catalog for each in `assets/data/`. Numbered review sheets are in `docs/evidence/US-130/`.
+
+**The idea: reading data tables with `std::map` and validating them.** A catalog is a list of small structs read from JSON. Every field is checked as it is read, and an error names the file and the exact field, so a typo in `weapons.json` says where it is instead of crashing later:
+
+```cpp
+def.weaponClass = static_cast<WeaponClass>(f.choice("class", kClassNames)); // "sword" -> 0 ... "gun" -> 7
+// a wrong value throws: weapons.json: weapons[0].class: must be one of "sword", "axe", ...
+```
+
+The atlas keeps a `std::map<std::string, ContentFrame>`: from a name ("iron sword", "spark.2") to its page and cell. A map keeps its keys sorted and finds one in a few steps, which is plenty for a few thousand frames.
+
+**Where to look.** `loadCatalogs` in [src/game/catalogs.cpp](../src/game/catalogs.cpp); `cutContent` and `makeFrame` in [src/game/content_art.cpp](../src/game/content_art.cpp).
+
+**Try it (15 minutes).** Open `docs/evidence/US-130/icons.png` and `icons.md`, pick a weapon you like, find it in `assets/data/weapons.json` and set its `"starter"` to true. Run `odysseus_game_tests -tc="US-130*"`: which check now fails, and why?
+
+**Check yourself.** Why does the catalog loader check that every `frame` exists in the atlas, rather than letting the game find out when it draws?
+
+## US-131: Hero HP, fighting back and death (2026-09-30)
+
+**What we built.** Enemies hit back now. Hit a goblin and a red "!" appears over it: half a second later it strikes, if you are still within 1.5 m. Your HP is shown top left; at 0 the screen fades and you start again at the hero start.
+
+**The idea: a small state machine with `enum class`.** An enemy is always in exactly one state, and each tick decides whether to move to another:
+
+```cpp
+enum class Strike { Idle, WindUp };
+void Enemy::provoke() { if (isAlive() && state_ == Strike::Idle) { state_ = Strike::WindUp; windUpTicks_ = 10; } }
+bool Enemy::update() {           // true on the tick the strike lands
+    if (state_ != Strike::WindUp) return false;
+    if (--windUpTicks_ > 0) return false;
+    state_ = Strike::Idle;
+    return true;
+}
+```
+
+Because `provoke` does nothing while winding up, hitting twice cannot make two strikes. The game, not the enemy, checks the distance when the strike lands: the enemy does not need to know where the hero is.
+
+**Where to look.** [src/game/enemy.cpp](../src/game/enemy.cpp); `OdysseyGame::update` and `hurtHero` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** Play the valley, walk to a goblin, hit it once with the sword (Shift, then E), and step away as soon as the "!" appears. Then change the goblin's `swordDamage` in `assets/data/characters.json` to 60 and see how fast you fall.
+
+**Check yourself.** What would happen if `update()` checked `isAlive()` only at the end, after the countdown?
+
+## US-132: Effect player (2026-09-30)
+
+**What we built.** Effects from your VFX sheets now play in the game: a spark where the sword lands, a smoke puff when a monster falls, puffs of dust behind a flying spear. Luna has a small effect player; the game says which effect plays where.
+
+**The idea: timers and animation frames in a fixed timestep.** The game ticks 20 times a second. An effect only counts its age in ticks; which frame to show is worked out from the age when drawing:
+
+```cpp
+const int step = effect.age / ticksPerFrame;                 // 3 ticks per frame: 0,0,0,1,1,1,...
+const Rect& frame = frames[loop ? step % count : std::min(step, count - 1)];
+```
+
+Nothing depends on how fast the computer draws: at 30 or 144 frames per second, the same tick shows the same frame. A one-shot effect removes itself once `age >= frames * ticksPerFrame`.
+
+**Where to look.** [src/luna/engine/effects.cpp](../src/luna/engine/effects.cpp); `playEffect` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** In `odyssey_game.cpp` change the hit effect `"spark"` to `"fire nova"` (a name from `assets/data/effects.json`), build, and hit a goblin. Then set its `ticksPerFrame` to 10 in effects.json and watch it slow down.
+
+**Check yourself.** Why does the effect player remove finished effects in `update()` and not in `draw()`?
+
+## US-133: Weapon classes and the starter set (2026-09-30)
+
+**What we built.** Eight kinds of weapon now fight differently: swords, axes, spears and whips hit what is in front of you; bows, thrown weapons, staffs and guns launch projectiles. Damage, speed and range come from `weapons.json`, and the 16 starters are a numbered contact sheet you can review and swap by editing the file.
+
+**The idea: virtual functions.** One base class says what every weapon can do; each kind fills it in its own way, and the game only talks to the base:
+
+```cpp
+class WeaponBehaviour {
+public:
+    virtual ~WeaponBehaviour() = default;
+    virtual bool melee() const = 0;
+    virtual std::optional<Projectile> launch(const WeaponDef&, double x, double y, Facing) const;
+};
+```
+
+The game calls `swing` or `launch` on the base, and C++ picks the right version at run time. A new class is a new subclass, not a new `if` in the game loop. `std::variant` would also work; virtual functions read more simply here.
+
+**Where to look.** [src/game/weapons.h](../src/game/weapons.h), [src/game/weapons.cpp](../src/game/weapons.cpp).
+
+**Try it (15 minutes).** Press Shift to cycle the starters and attack a goblin with each. Then set `"starter"` on another weapon in `assets/data/weapons.json` and rerun.
+
+**Check yourself.** Why does `WeaponBehaviour` need a virtual destructor?
+
+## US-134: Pickups and the hotbar (2026-09-30)
+
+**What we built.** You can now place weapons in a level with the editor's new Weapon tool. In the game the hero starts empty-handed, walks over a weapon to put it in the first free box of a nine-box hotbar, presses 1-9 to hold one, and Shift to go to the next filled box.
+
+**The idea: upgrading a saved file format.** Your levels live in files, and a file written today must still open after the game grows. So every level file says which version it is (`"levelVersion": 2`). Version 2 only *adds* a list, `pickups`. The reader follows two rules:
+
+```cpp
+if (version > kLevelVersion) throw ...;        // made by a newer game: refuse, never guess
+if (data.contains("pickups")) { ... }           // a version 1 file simply has none
+```
+
+Old files load as they are, with no pickups. The next time you save, the game writes version 2. Nobody has to convert anything. The one thing we never do is open a file from a *newer* game: we stop and say so, so its extra data is never silently thrown away. Adding fields is easy; renaming or removing them would need a real conversion step.
+
+**Where to look.** `readLevelFile` and `saveLevel` in [src/game/level.cpp](../src/game/level.cpp); `OdysseyGame::collectPickups` and `cycleSlot` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** Open the editor (F2), choose Weapon, place three weapons by the START marker and save. Open `valley.json` in a text editor and find the new `pickups` list. Then change `"levelVersion": 2` to `9` and start the game: read the error.
+
+**Check yourself.** Why does a pickup list that is missing entirely count as "no pickups" and not as an error?
+
+
+## US-135: Elements (2026-09-30)
+
+**The idea: components, small structs attached to a character.** A goblin used to be "a position and some HP". Now a goblin can also be burning, poisoned or slowed. We did not add three loose variables to `Enemy`; we made one small struct, `StatusEffects`, and gave every enemy one:
+
+```cpp
+struct StatusEffects {
+    Drip burn;              // HP per second, ticks left
+    Drip poison;
+    double slowFactor = 1.0;
+    int slowTicksLeft = 0;
+    void apply(Element, const ElementDef&);
+    int tick();             // counts down, returns the whole HP lost this tick
+};
+class Enemy { ... StatusEffects status; ... };
+```
+
+The struct knows nothing about goblins, swords or drawing; it only counts down. The game asks it "how much HP did this cost now?" once per tick and does the rest. That split (data that belongs to a thing, small logic next to the data, the game doing the big decisions) is how big games keep hundreds of effects manageable, and it is the idea behind the "components" of the EnTT library we will meet in M3.
+
+One detail worth understanding: 2 HP per second is 0.1 HP per tick, and HP is a whole number. `Drip::carry` keeps the part of an HP not yet lost (0.1, 0.2, ...), and when it reaches 1 the goblin loses a whole HP. Over 3 seconds that is exactly 6.
+
+**Where to look.** [src/game/status.cpp](../src/game/status.cpp) (`dripTick`), `OdysseyGame::applyElement` and `tickStatus` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); the numbers in the `elements` part of [assets/data/weapons.json](../assets/data/weapons.json).
+
+**Try it (10 minutes).** In weapons.json change fire to `"perSecond": 10` and `"seconds": 1`, build again (the build copies the assets next to the game), then run the game with `--level docs/evidence/US-135/levels/fire.json` and hold Interact. How much HP does the goblin lose? Then set `"slowTo": 0.25` for ice and watch the warning last longer.
+
+**Check yourself.** Why does a second fire hit restart the timer instead of adding a second burn? (Hint: D-24, and what would 5 quick hits do to a stacking burn.)
+
+
+## US-139: Mouse aiming (2026-10-01)
+
+**The idea: coordinate spaces and angles.** The mouse lives on the screen (480x270 picture pixels); the goblins live in the world (2048 x 2048 pixels); the camera is the window between them. To aim, we turn a screen point into a world point by adding the camera's corner, then turn the difference from the hero into a direction:
+
+```cpp
+const Rect view = camera_.view();
+aimTargetX_ = view.x + pointer.x;            // screen -> world
+const double dx = aimTargetX_ - hero_.feetX();
+const double length = std::hypot(dx, dy);
+aimDx_ = dx / length;                        // a unit vector: length 1, only the direction
+```
+
+A *unit vector* is the tidy way to say "which way" without saying "how far". The hero sprite only has 8 directions, so `facingToward` turns the angle (`std::atan2(dy, dx)`, which gives the angle of any direction) into the nearest of 8 sectors of 45 degrees. But the sword arc uses the exact vector, so you can hit a goblin the sprite does not quite face.
+
+**Where to look.** `OdysseyGame::updateAim` and `drawAim` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `facingToward` and `MeleeBehaviour::swingToward` in [src/game/weapons.cpp](../src/game/weapons.cpp).
+
+**Try it (10 minutes).** Run `odysseus.exe --level docs/evidence/US-139/levels/aim.json`, walk with the keys and aim with the mouse: click to swing. Notice the crosshair turns red when the goblin is out of the sword's reach. Then change the `90.0` of the sword in `behaviourOf` to `30.0`, build, and see how much more exactly you must aim.
+
+**Check yourself.** Why does the game keep a unit vector for the aim and a separate `Facing` for drawing the hero?
+
+
+## US-140: Arc ballistics for shots (2026-10-01)
+
+**The idea: fixed-point numbers versus floating point.** A computer stores most fractions as *floating point* (`double`): fast, but the result of the same sum can differ in the last digits between different machines or compilers. Luna Physics avoids that: its numbers are `Fixed`, a whole number counting 1/4,294,967,296 of a metre, so `Fixed` arithmetic gives the identical answer everywhere, every run. That matters for a game that may replay a recorded game or check a simulation hash, and it is why the tests can say "two runs land on the exact same point" with `==`.
+
+```cpp
+luna::physics::Projectile body{hand, {}, mass, dragArea};          // metres, m/s, kg: all Fixed
+const auto angle = luna::physics::aimLaunchAngle(body, air, aimPoint, speed);
+body.velocity = luna::physics::launchVelocity(hand, aimPoint, speed, *angle);
+// each tick: flyTick(body, air, tipRadius, obstacles) moves it in 10 small sub-steps
+```
+
+The only floating point is at the edges: the mouse (pixels, a `double`) is rounded to 1/1024 m when it enters the physics, and the position is turned back into pixels only to draw. The arrow's *height* is physics (z); the screen shows it by lifting the sprite, with a shadow left on the ground so your eye can judge the distance.
+
+**Where to look.** `launchArcShot` and `stepArcShots` in [src/game/arc_shots.cpp](../src/game/arc_shots.cpp); the drawing at the end of `OdysseyGame::drawHeld` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --level docs/evidence/US-140/levels/arc-rock.json`, aim just behind the rock and click, then aim far past it. Watch the shadow. Then change `kSolidHeightMetres` in `arc_shots.h` to `2.0`, build, and see which shots still clear the rock.
+
+**Check yourself.** Why can a bow shot aimed at the ground 4 m away be stopped by a 1 m rock 2 m in front of you, while one aimed 9 m away flies over it?
+
+
+## US-141: Bows, crossbows, thrown weapons and staff bolts (2026-10-01)
+
+**The idea: data-driven tuning.** The speed of an arrow is a number. We could have written `16.0` inside the C++ code; instead it lives in `assets/data/weapons.json`:
+
+```json
+"classes": {
+  "bow":    {"launchSpeed": 16},
+  "thrown": {"launchSpeed": 10},
+  "staff":  {"launchSpeed": 12}
+}
+```
+
+The game reads it once at start (`loadCatalogs`), checks it (a number from 1 to 100, and a missing class is an error that names the file and the field), and hands it to the shot. To make arrows faster you edit a text file, not the program, and you never risk breaking the code. That is why the damage, range and rate of fire of all 150 weapons are in the same file. The rule of thumb: *if a designer might want to change it, it is data; if changing it could crash the game, it is code.*
+
+Notice that crossbows are in the `bow` class: one set of numbers and one behaviour for both, with the individual weapon still free to have its own damage and range. Classes group behaviour; weapons carry numbers.
+
+**Where to look.** The `classes` part of [assets/data/weapons.json](../assets/data/weapons.json); `loadCatalogs` in [src/game/catalogs.cpp](../src/game/catalogs.cpp); the use in `OdysseyGame::attackWith` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (10 minutes).** Open `assets/levels/range.json` in the game (`odysseus.exe --level assets/levels/range.json`), walk east along the weapons, and shoot the goblins with keys 1-7 and the mouse. Then set the bow's `launchSpeed` to `8`, build (the build copies the assets), and notice how far the arrows now fall short of a far pointer.
+
+**Check yourself.** Why is a missing `"bow"` entry reported as an error when the game starts, instead of the bow quietly using speed 0?
+
+
+## Follow-up to US-139: steady orientation, hysteresis (2026-10-01)
+
+**The idea: hysteresis.** A thermostat that switches the heating on at 20.0 degrees and off at 20.0 degrees would click on and off all day as the temperature wobbles around 20. Real ones switch on at 19.5 and off at 20.5: the gap is *hysteresis*. The hero's facing had the same problem: the pointer decides between "east" and "north-east" at exactly 22.5 degrees, so a pointer near that edge (or a hero walking past it, the camera lagging behind him) flipped the sprite back and forth. The fix is the same gap:
+
+```cpp
+if (offDegrees <= 22.5 + hysteresisDegrees) return current;   // close enough: keep facing this way
+return facingToward(dirX, dirY);                              // clearly somewhere else: turn
+```
+
+Two smaller ingredients: a *dead zone* (a pointer within 16 pixels of his chest means nothing, because its direction changes wildly for tiny moves), and measuring from the chest instead of the feet, because the pointer is usually level with the sprite's body. And the order of the tick matters: walking used to set the facing first and the pointer overwrote it, so the "current" facing was never the last one shown; now the facing from before the tick is what we compare with.
+
+**Where to look.** `facingToward` (the second version) in [src/game/weapons.cpp](../src/game/weapons.cpp); `OdysseyGame::updateAim` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp).
+
+**Try it (10 minutes).** In `odyssey_game.cpp` change `kFacingHysteresisDegrees` to `0.0` and `kFacingDeadZonePixels` to `0.0`, build, and walk sideways with the mouse near the hero: watch him flicker. Then run the test `US-139 No flicker walking past the pointer`: it fails. Put the numbers back.
+
+**Check yourself.** Why is the facing compared with the facing *before* this tick's walking, and not the facing after it?
+
+
+
+## US-136: Plants (2026-10-01)
+
+**The idea: random numbers from a seeded stream, and spatial queries.** When you cut a plant down, it must grow back at a random place, but the game must still be replayable: the same play must give the same result. The trick is that a computer's "random" numbers are a recipe, not chance. `Pcg32(1, 5)` is a recipe started from the *seed* 1 on *stream* 5; every call to `below(n)` gives the next number of the recipe. Start the game again and the recipe restarts, so the plant grows back in the same places. (In Charter rule 6 every system has its own stream, so adding a new random thing in another system never changes where plants grow.)
+
+```cpp
+const int cellX = firstX + plantRng_.below(cellsX);     // a random column inside the camera view
+const int cellY = firstY + plantRng_.below(cellsY);
+if (!plantSpotFree(cellX, cellY)) continue;              // try another; give up after 64 tries
+```
+
+`plantSpotFree` is a *spatial query*: "is anything near this place?" It asks the map (solid?), the other plants (same cell?), the characters, and the hero (distance). Whenever the game needs to know "what is here", it asks such a question instead of keeping a big table of everything.
+
+A second idea hides in the trees: a tree is not a tile, but it must block like one. So the map got a small extra layer, `setObstacle(x, y, height)`: "something this tall stands on this cell". Walking and flat shots ask `isSolid`, which now also answers yes for an obstacle cell. The same question, one more reason to say yes.
+
+**Where to look.** `OdysseyGame::tickPlants`, `plantSpotFree` and `destroyPlant` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `setObstacle` in [src/luna/engine/tile_map.cpp](../src/luna/engine/tile_map.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --level docs/evidence/US-136/levels/garden.json`, cut down a flower with the sword (click toward it), and watch where it comes back 15 seconds later. Restart the level and cut it again: it comes back in the very same place. Then change the seed `core::Pcg32(1, 5)` in `populatePlants` to `Pcg32(2, 5)`, build, and see it move.
+
+**Check yourself.** Why does the regrow test run the same scenario twice and expect the same position, and what would make it fail?
+
+
+## US-137: Animals in the Editor (2026-10-01)
+
+**The idea: data-driven behaviour flags.** A wolf and a deer are both in `animals.json`; the only difference the game needs is one word:
+
+```json
+{"name":"grey wolf","frame":"grey wolf","hp":80,"enemy":true,"strikeDamage":10,"reach":1.5},
+{"name":"deer","frame":"deer","hp":80,"enemy":false,"strikeDamage":0,"reach":1.5}
+```
+
+At the start the game reads every line into a `CharacterKindDef` and, for each placed animal, asks `if (kind->enemy)`: an enemy becomes an `Enemy` (it can be hit, strikes back, dies); anything else is a bystander that is simply drawn. No `if (name == "wolf")` anywhere. To make the deer dangerous you change `false` to `true` in a text file. A *flag* in the data turns a whole behaviour on or off, so the code stays short and the designer stays in control. The same trick made the 50 animals cost almost no new game logic: they are just more character kinds.
+
+**Where to look.** The animals part of `loadDefinitions` in [src/game/level.cpp](../src/game/level.cpp); `OdysseyGame::populate` (where `kind->enemy` decides) in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `drawAnimal` in [src/game/animals.cpp](../src/game/animals.cpp).
+
+**Try it (10 minutes).** Open `docs/evidence/US-137/levels/animals.json` with `odysseus.exe --level`, hit the deer: nothing. Edit `assets/data/animals.json`, set the deer's `enemy` to `true` and `strikeDamage` to `12`, build, and hit it again.
+
+**Check yourself.** Why is it better that the wolf's danger is a `true` in a file than an `if` about wolves in the code?
+
+
+## US-138: Placed effects and random weather (2026-10-01)
+
+**The idea: blending two layers with alpha.** When rain fades into sunshine, the screen shows *both* for three seconds, the rain a little less each moment and the new weather a little more. The renderer blends each layer with an *alpha*, a number from 0 (invisible) to 255 (solid). Every tick of the fade we work out how far along it is, from 0.0 to 1.0, and draw the old weather with `1 - fade` and the new one with `fade`:
+
+```cpp
+layer(weather_.previous(), 1.0 - weather_.fade());   // the old one fades out
+layer(weather_.current(),  weather_.fade());          // the new one fades in
+```
+
+Two blend *modes* are used: *add* for light things (rain and sparks are added to the picture below, so they glow) and *normal* for fog (laid over the picture, hiding a little of it). The weather itself is another seeded stream like the plants: the same seed brings the same weathers in the same order, which is how the test can check a whole day of weather in a moment.
+
+**Where to look.** `OdysseyGame::drawWeather` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `WeatherCycle::update` in [src/game/weather.cpp](../src/game/weather.cpp).
+
+**Try it (10 minutes).** Run `odysseus.exe --level docs/evidence/US-138/levels/ambient.json --weather "steady rain"`, then `--weather "dense fog"`. Change `kStrength` in `drawWeather` from `0.8` to `0.3` and see the rain thin out.
+
+**Check yourself.** Why must the two alphas of the old and the new weather add up to about 1 during the fade?
+
+
+## M3: US-030, US-032 and US-031, the clan on screen (2026-10-01)
+
+**The idea: mapping data to presentation.** The simulation knows a person only as numbers (needs, an action, an age). The player needs a face. The game keeps these two worlds apart and translates between them in one direction only: *data in, pictures out*. `emoteOf(person)` turns needs into an emote; `lookOf(person)` turns an id into a look; `ClanView::targetOf(...)` turns "hunting" into "a spot east of the camp". None of them changes the person; if the drawing is thrown away the simulation is unharmed, and the same simulation can be drawn in another way (another art style, or a text report, as the headless runner does).
+
+```cpp
+Emote emoteOf(const sim::Person& p) {
+    if (p.needs[sim::Need::Warmth] <= 20) return Emote::Cold;   // the most urgent first
+    if (p.needs[sim::Need::Hunger] <= 20) return Emote::Hungry;
+    ...
+}
+```
+
+A second idea is in the people themselves: a *layer* is just a picture of the same size as all the others, with some pixels see-through. Stack body, outfit, hair and spear, and you have a person; change one layer and you change only that part. A *palette swap* turns one picture into many: the hair drawn once in a marker colour (brown) is recoloured to black, blond, red... by replacing that exact colour. Four skins x 3 hairs x 6 hair colours x 3 outfits x 6 outfit colours x spear or not is over 2,000 different people from about 8 small pictures.
+
+**Where to look.** `recoloured` and `composed` in [src/luna/engine/sprite_layers.cpp](../src/luna/engine/sprite_layers.cpp); `composeLook` and `lookOf` in [src/game/clan_art.cpp](../src/game/clan_art.cpp); `ClanView::update` in [src/game/clan_view.cpp](../src/game/clan_view.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan-speed 40`: twenty people, each different, moving between the fire, the gathering ground and the hunting ground; hover one. Then add a fourth hair style in `drawHair` (style 3) and a colour to `kHairs`.
+
+**Check yourself.** Why does `ClanView` keep a *previous* and a *current* position for every person?
+
+
+## M4: the region, rivals and saves (2026-10-01)
+
+**The idea: a world that is a function.** The whole region is 65,536 tiles, yet a saved game stores only a number (the *seed*) and a few changes. How? Every tile is *computed*, not stored: `biomeAt(x, y)` takes the seed and the place and always gives the same answer. Ask for the same tile a million times, on any machine, and the answer never differs. Such a function is called *pure*. Because it is pure, the game can make a piece of land (a *chunk*) only when somebody walks near it, forget it when they leave, and make it again later, identical. Saving then means: the seed, plus a list of what *changed* (this berry bush was picked on day 100).
+
+```cpp
+Biome Region::biomeAt(int x, int y) const;                    // pure: seed + place -> land
+std::optional<Resource> Region::resourceAt(int x, int y) const;  // pure too
+```
+
+The noise that shapes the land uses only whole numbers (a hashed lattice, blended with a smooth step in integers), for the same reason the physics does: whole-number sums never differ between machines, so seed 7 is the same region for everyone, forever. The rival clans use a second idea, *levels of detail*: what is far from you does not need 20 simulation steps a second; one a second is enough to see them grow, shrink and move, and costs one twentieth.
+
+**Where to look.** `Region::generatedBiome` and `noise` in [src/sim/region.cpp](../src/sim/region.cpp); `Rivals::tick` in [src/sim/rivals.cpp](../src/sim/rivals.cpp); `saveRegion` in [src/sim/region_save.cpp](../src/sim/region_save.cpp); `ChunkStreamer::update` in [src/luna/engine/chunk_streamer.cpp](../src/luna/engine/chunk_streamer.cpp).
+
+**Try it (15 minutes).** Run `odysseus.exe --region 1` and `--region 2`; press F12 (Debug build) and click a person. Change `lakeLevel` in `assets/data/sim/region.json` from 140 to 300 and see how much more water the region has.
+
+**Check yourself.** Why can the game make a chunk "whenever somebody walks near it" without ever storing it, and what would break if `biomeAt` used the time of day?
+
+## M5: a whole life in data
+
+A run is a short list of numbers (affinities, skills, inventory) that two yearly choices nudge, multiplied by an *imprint*: the same choice teaches three times as much at 12 as at 26. Keeping the curve in `hero.json` means you tune the feel of youth without recompiling. The screens are rebuilt from the state every tick, so they can never show stale numbers.
+
+**Where to look.** `HeroLife::imprintPercent` and `liveYear` in [src/sim/hero_life.cpp](../src/sim/hero_life.cpp); `RunFlow::build` in [src/game/run_flow.cpp](../src/game/run_flow.cpp).
+
+**Try it (15 minutes).** Change `peakPercent` in `assets/data/hero/hero.json` and start a new game; compare the affinities after the first year.
+
+**Check yourself.** Why is it safer to rebuild a screen's buttons every tick than to update them when something changes?
+
+## M6: asking before recording
+
+A playtest needs numbers, but numbers about people need their yes. The statistics file is written only if the player agreed, lives on their own computer and the game contains no network code at all, so nothing is sent by construction, not by promise. The elder script is data like everything else: the hint timer counts game ticks, never the wall clock, so it behaves the same in tests.
+
+**Where to look.** `Tutorial::tick` and `notify` in [src/game/tutorial.cpp](../src/game/tutorial.cpp); `SessionStats::finish` in [src/game/session_stats.cpp](../src/game/session_stats.cpp); `installCrashHandler` in [src/luna/platform/crash.cpp](../src/luna/platform/crash.cpp).
+
+**Try it (15 minutes).** Change `hintAfterSeconds` in `assets/data/hero/tutorial.json` to 5, start a New Game and wait.
+
+**Check yourself.** Why does the crash code live in the Platform layer while the statistics live in the Game layer?

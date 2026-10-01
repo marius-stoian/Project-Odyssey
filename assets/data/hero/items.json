@@ -1,0 +1,16 @@
+{
+  "items": [
+    { "id": "flint", "name": "Flint", "kind": "material", "value": 3 },
+    { "id": "wood", "name": "Wood", "kind": "material", "value": 2 },
+    { "id": "herbs", "name": "Herbs", "kind": "material", "value": 2 },
+    { "id": "hammerstone", "name": "Hammerstone", "kind": "tool", "value": 4 },
+    { "id": "spearhead", "name": "Spearhead", "kind": "material", "value": 6 },
+    { "id": "spear", "name": "Spear", "kind": "tool", "value": 10 },
+    { "id": "basket", "name": "Basket", "kind": "tool", "value": 4 },
+    { "id": "fire-drill", "name": "Fire drill", "kind": "tool", "value": 4 },
+    { "id": "medicine-bag", "name": "Medicine bag", "kind": "tool", "value": 6 },
+    { "id": "flint-tool", "name": "Flint tool", "kind": "good", "value": 7 },
+    { "id": "berries", "name": "Berries", "kind": "food", "value": 1 },
+    { "id": "fur", "name": "Fur", "kind": "good", "value": 5 }
+  ]
+}

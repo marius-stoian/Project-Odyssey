@@ -31,4 +31,9 @@ std::filesystem::path userDataDirectory() {
     return std::filesystem::path(reinterpret_cast<const char8_t*>(path.get()));
 }
 
+std::filesystem::path executableDirectory() {
+    const char* base = SDL_GetBasePath();
+    return base != nullptr ? std::filesystem::path(reinterpret_cast<const char8_t*>(base)) : std::filesystem::path();
+}
+
 } // namespace luna::platform

@@ -1,0 +1,10 @@
+{
+  "hintAfterSeconds": 120,
+  "elder": "Elder",
+  "steps": [
+    { "goal": "gather", "say": "Welcome, young one. First, food: right-click a berry bush and choose Gather.", "hint": "Berry bushes are the small green plants near the camp. Walk close, then right-click one." },
+    { "goal": "eat", "say": "Well done. Now eat: right-click the clan's fire and choose Eat berries.", "hint": "The clan's fire is in the middle of the camp. Stand near it before you right-click." },
+    { "goal": "tend", "say": "Good. Last, keep us warm: right-click the fire again and choose Tend the fire.", "hint": "Same fire, other choice: Tend the fire. It keeps the whole clan warm." }
+  ],
+  "done": "You know the first day. The rest is your life: press Esc for your bag, skills and the dominion."
+}

@@ -28,9 +28,12 @@ Rest the pointer on any button to see what it does.
 | **Fill** | Click a cell: every touching cell of the same ground becomes the chosen ground (a whole pond, a whole meadow). |
 | **Erase** | Paint the level's default ground (see Level). |
 | **Place** | Put a character on the map (see Characters). |
-| **Select** | Pick a character, or the hero's start, to move or change it. |
+| **Arms** | Put a weapon pickup on the map (see Weapon pickups). |
+| **Plant** | Put a plant on the map (see Plants). |
+| **Select** | Pick a character, pickup, plant or the hero's start, to move or change it. |
 | **Level** | Open the level settings (see Level settings). |
-| **Grid** | Show or hide the cell lines (also **G**). |
+| **#** | The Grid button: show or hide the cell lines (also **G**). |
+| **Fx** | Put a looping effect on the map (see Effects and weather). |
 | **Undo** | Take back the last change (also **Ctrl+Z**). Up to 100 steps. |
 | **Redo** | Do it again (also **Ctrl+Y**). |
 | **Save** | Save the level (also **Ctrl+S**). The last three saves are kept as backups (`.bak1` to `.bak3`), so a mistake is never final. |
@@ -49,8 +52,28 @@ With **Brush**, **Rect**, **Fill** or **Erase** chosen, the palette on the left 
    - press **Delete** to remove it;
    - change its **Name**, **HP** and **Sword** damage in the panel on the right: click a field, type, press **Enter** (or click somewhere else).
 
-In the game, take the sword (**Shift**) and strike (**E**, **Space** or **Enter**): monsters lose HP, flash red and fall at 0. The heroes you place just stand there for now.
+In the game, pick up the sword (see Weapon pickups below), hold it (**Shift** or **1-9**) and strike (**E**, **Space** or **Enter**): monsters lose HP, flash red and fall at 0. A monster you hit strikes back: a red **!** appears over it, and half a second later its **Sword** damage hits you if you are still within 1.5 m, so step away in time. Your HP is shown top left; at 0 you start again at the START marker. The heroes you place just stand there for now.
 
+## Weapon pickups and the hotbar
+1. Click **Arms**. The palette shows the 16 starter weapons by their icons, then **Sp** (the old spear throw) and **Sw** (the old plain sword slash).
+2. Click one, then click the map. The weapon lies there on the ground, with a shadow, and is selected at once.
+3. With **Select** you can click a pickup, drag it to move it, and press **Delete** to remove it. **Ctrl+Z** and **Ctrl+Y** undo and redo every one of these, like characters.
+4. Save with **Ctrl+S**. The level file is now version 2 and lists the pickups; older (version 1) files still open, with no pickups.
+
+In the game the hero starts with empty hands. Walk over a pickup and its weapon goes into the first free slot of the **hotbar** (nine boxes, bottom centre) and the pickup is gone until the level restarts (F2, then F1). Keys **1** to **9** hold that slot; **Shift** holds the next filled one. With all nine slots full a pickup stays where it is and "Hotbar full" flashes. **E**, **Space** or **Enter** attack with the held weapon. Your valley has no pickups until you place some; `demo.json` has the old spear and sword by the hero.
+
+## Plants
+1. Click **Plant**. The palette shows the 153 plants by picture, 36 to a page; the arrows **<** and **>** at its top turn the pages (the page number is between them). Flowers, grasses and mushrooms are small and you can walk over them; bushes and trees are big and **block walking** like a rock (and stop shots).
+2. Click a plant in the palette, then click a cell of the map: the plant grows there, with its feet in the middle of the bottom edge of the cell. Only one plant grows in a cell.
+3. With **Select** you can click a plant, drag it to another cell and press **Delete** to remove it. **Ctrl+Z** and **Ctrl+Y** undo and redo all of it.
+4. In the game: walk next to a plant and press **E**, **Space** or **Enter** with empty hands (or the **right mouse button** at any time) and its name and a line about it show for three seconds. Hit it with any weapon and it is destroyed with a burst of leaves; an **edible** plant heals you 10 HP. Fifteen seconds later the same plant grows back at a random free spot inside the picture.
+## Animals
+The character palette has six pages (the arrows **<** and **>** under it): the first is the twelve characters, the others the 50 animals. Place, select, move, turn (**R**), rename and delete them like any character; their **Facing** picks the side they look toward (west shows the picture turned around). Hovering a button tells the animal's name and whether it is an enemy.
+
+In the game these 20 animals are **enemies**: grey wolf, fox, bear, boar, wild pig, cougar, lynx, leopard, jaguar, cheetah, lion, tiger, snow leopard, hyena, jackal, rhino, hippopotamus, buffalo, bull, water buffalo. They can be hit, strike back after a half-second warning when you are within 1.5 m, and fall at 0 HP. All the others (deer, cows, rabbits, ...) are harmless: they stand where you put them, cannot be hit, and every weapon passes them. The **Sword** number in the properties panel is an animal's strike damage.
+## Effects and weather
+1. Click **Fx**. The palette shows the 17 looping effects (fireflies, a flame, a portal, a magic circle, a whirlpool, dark mist, ...) by their first picture. Click one, then click the map: it is placed where you click. **Select** moves it (drag) or removes it (**Delete**); **Ctrl+Z** and **Ctrl+Y** undo and redo. In the game it plays in a loop.
+2. The weather is not edited: in the game a random weather fades in over 3 seconds every 60 to 120 seconds, and the sky is clear about one time in three. The weather is only for the eyes. The same level plays under the same weathers every time. To try a weather: `odysseus.exe --weather "steady rain"`; to choose another sequence: `--seed 7`. The Editor shows no weather.
 ## The hero's start
 The hero begins where the gold **START** marker stands. With **Select**, drag the marker to move it. Press **F1** and the hero starts there.
 

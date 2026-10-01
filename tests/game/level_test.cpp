@@ -50,7 +50,8 @@ game::Level oldDemo() {
     level.heroStart = {1040, 1048};
     level.targets = {{784, 1048}, {1040, 784}}; // (24.5, 32.75) m and (32.5, 24.5) m
     level.characters.push_back({1, "goblin", {1104, 1048}, game::Facing::South, "Goblin", 100, 4});
-    level.nextId = 2;
+    level.pickups = {{2, "Spear throw", {1034, 1044}}, {3, "Sword", {1046, 1044}}}; // US-134: the two demo weapons by the hero
+    level.nextId = 4;
     return level;
 }
 
@@ -128,7 +129,8 @@ TEST_CASE("US-122 Damaged") {
     const fs::path file = folder / "level.json";
     game::Level level = game::makeLevel("Good", 10, 10, 0);
     level.characters.push_back({1, "goblin", {40, 60}, game::Facing::South, "Goblin", 60, 4});
-    level.nextId = 2;
+    level.pickups.push_back({2, "Sword", {80, 60}});
+    level.nextId = 3;
     game::saveLevel(level, definitions, file);
     level.name = "Better";
     game::saveLevel(level, definitions, file); // "Good" is now level.json.bak1
@@ -162,7 +164,8 @@ TEST_CASE("US-122 Damaged") {
         CHECK(problem("\"kind\": \"goblin\"", "\"kind\": \"dragon\"").find("characters[0].kind") != std::string::npos);
         CHECK(problem("\"facing\": \"S\"", "\"facing\": \"Up\"").find("characters[0].facing") != std::string::npos);
         CHECK(problem("\"defaultGround\": \"grass\"", "\"defaultGround\": \"cheese\"").find("defaultGround") != std::string::npos);
-        CHECK(problem("\"levelVersion\": 1", "\"levelVersion\": 9").find("newer version") != std::string::npos);
+        CHECK(problem("\"weapon\": \"Sword\"", "\"weapon\": \"Laser\"").find("pickups[0].weapon") != std::string::npos);
+        CHECK(problem("\"levelVersion\": 2", "\"levelVersion\": 9").find("newer version") != std::string::npos);
         CHECK(problem("[\n    \"grass\",\n    10\n   ]", "[\n    \"grass\",\n    9\n   ]").find("ground[0]") != std::string::npos);
     }
 }

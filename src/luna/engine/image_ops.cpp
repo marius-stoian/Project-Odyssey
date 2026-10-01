@@ -185,4 +185,103 @@ std::vector<Rect> findBlobs(const Image& image, const Rect& area, Color backgrou
     return ordered;
 }
 
+
+void keyAlpha(Image& image, int threshold, bool hard) {
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
+            Color c = image.get(x, y);
+            if (c.alpha < threshold) {
+                c = Color{0, 0, 0, 0};
+            } else if (hard) {
+                c.alpha = 255;
+            }
+            image.set(x, y, c);
+        }
+    }
+}
+
+void keyBrightness(Image& image, Color background, int gain) {
+    const int floor = std::max({background.red, background.green, background.blue});
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
+            Color c = image.get(x, y);
+            const int lift = std::max({c.red, c.green, c.blue}) - floor;
+            c.alpha = static_cast<std::uint8_t>(std::clamp(lift * gain, 0, 255));
+            image.set(x, y, c.alpha == 0 ? Color{0, 0, 0, 0} : c);
+        }
+    }
+}
+
+void keepMainFigure(Image& image, const odysseus::core::Rect& focus) {
+    const int w = image.width();
+    const int h = image.height();
+    struct Group {
+        odysseus::core::Rect box;
+        std::vector<std::pair<int, int>> members;
+        bool centred = false; // its middle lies inside the focus
+    };
+    std::vector<Group> groups;
+    std::vector<bool> seen(static_cast<std::size_t>(w) * static_cast<std::size_t>(h), false);
+    auto index = [w](int x, int y) { return static_cast<std::size_t>(y) * static_cast<std::size_t>(w) + static_cast<std::size_t>(x); };
+    std::vector<std::pair<int, int>> stack;
+    for (int y0 = 0; y0 < h; ++y0) {
+        for (int x0 = 0; x0 < w; ++x0) {
+            if (seen[index(x0, y0)] || image.get(x0, y0).alpha == 0) continue;
+            // One group: flood it (an explicit stack, never recursion), remembering its box.
+            Group group;
+            int left = x0, right = x0, top = y0, bottom = y0;
+            seen[index(x0, y0)] = true;
+            stack.push_back({x0, y0});
+            while (!stack.empty()) {
+                const auto [x, y] = stack.back();
+                stack.pop_back();
+                group.members.push_back({x, y});
+                left = std::min(left, x);
+                right = std::max(right, x);
+                top = std::min(top, y);
+                bottom = std::max(bottom, y);
+                for (int dy = -1; dy <= 1; ++dy) {
+                    for (int dx = -1; dx <= 1; ++dx) {
+                        const int nx = x + dx;
+                        const int ny = y + dy;
+                        if (nx < 0 || ny < 0 || nx >= w || ny >= h || seen[index(nx, ny)] || image.get(nx, ny).alpha == 0) continue;
+                        seen[index(nx, ny)] = true;
+                        stack.push_back({nx, ny});
+                    }
+                }
+            }
+            group.box = {left, top, right - left + 1, bottom - top + 1};
+            const int middleX = (left + right) / 2;
+            const int middleY = (top + bottom) / 2;
+            group.centred = middleX >= focus.x && middleY >= focus.y && middleX < focus.x + focus.width && middleY < focus.y + focus.height;
+            groups.push_back(std::move(group));
+        }
+    }
+    // The main figure: the largest group centred in the focus.
+    const Group* main = nullptr;
+    for (const Group& group : groups) {
+        if (group.centred && (main == nullptr || group.members.size() > main->members.size())) main = &group;
+    }
+    // Its loose parts (an antler, a spark) lie mostly within its width; a neighbour's head
+    // reaching in from the side does not.
+    auto touchesMain = [&](const Group& group) {
+        if (main == nullptr) return false;
+        const int overlap = std::min(group.box.x + group.box.width, main->box.x + main->box.width) - std::max(group.box.x, main->box.x);
+        return overlap * 2 >= group.box.width;
+    };
+    for (const Group& group : groups) {
+        if (&group == main || (group.centred && touchesMain(group))) continue;
+        for (const auto& [x, y] : group.members) image.set(x, y, Color{0, 0, 0, 0});
+    }
+}
+
+
+void removeColour(Image& image, Color colour, int tolerance) {
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = 0; x < image.width(); ++x) {
+            if (colourDistance(image.get(x, y), colour) <= tolerance) image.set(x, y, Color{0, 0, 0, 0});
+        }
+    }
+}
+
 } // namespace luna::engine

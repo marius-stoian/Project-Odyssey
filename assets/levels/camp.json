@@ -1,0 +1,509 @@
+{
+    "characters":  [
+
+                   ],
+    "clan":  true,
+    "defaultGround":  "grass",
+    "ground":  [
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           10
+                       ],
+                       [
+                           "water",
+                           3
+                       ],
+                       [
+                           "grass",
+                           8
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           10
+                       ],
+                       [
+                           "water",
+                           3
+                       ],
+                       [
+                           "grass",
+                           8
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           11
+                       ],
+                       [
+                           "water",
+                           1
+                       ],
+                       [
+                           "grass",
+                           9
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           22
+                       ],
+                       [
+                           "path",
+                           1
+                       ],
+                       [
+                           "grass",
+                           21
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           21
+                       ],
+                       [
+                           "stone",
+                           3
+                       ],
+                       [
+                           "grass",
+                           20
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           21
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           1
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           20
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           21
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           1
+                       ],
+                       [
+                           "stone",
+                           1
+                       ],
+                       [
+                           "grass",
+                           20
+                       ]
+                   ],
+                   [
+                       [
+                           "path",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ],
+                   [
+                       [
+                           "grass",
+                           44
+                       ]
+                   ]
+               ],
+    "height":  30,
+    "heroStart":  [
+                      720,
+                      592
+                  ],
+    "levelVersion":  2,
+    "name":  "The Camp",
+    "nextId":  100,
+    "pickups":  [
+                    {
+                        "id":  90,
+                        "weapon":  "wooden longbow",
+                        "x":  752,
+                        "y":  592
+                    }
+                ],
+    "plants":  [
+                   {
+                       "id":  10,
+                       "kind":  "olive tree",
+                       "x":  112,
+                       "y":  124
+                   },
+                   {
+                       "id":  11,
+                       "kind":  "lemon tree",
+                       "x":  304,
+                       "y":  92
+                   },
+                   {
+                       "id":  12,
+                       "kind":  "orange tree",
+                       "x":  496,
+                       "y":  156
+                   },
+                   {
+                       "id":  13,
+                       "kind":  "bush",
+                       "x":  912,
+                       "y":  124
+                   },
+                   {
+                       "id":  14,
+                       "kind":  "pear tree",
+                       "x":  1296,
+                       "y":  156
+                   },
+                   {
+                       "id":  15,
+                       "kind":  "peach tree",
+                       "x":  80,
+                       "y":  348
+                   },
+                   {
+                       "id":  16,
+                       "kind":  "olive tree",
+                       "x":  1360,
+                       "y":  412
+                   },
+                   {
+                       "id":  17,
+                       "kind":  "bamboo",
+                       "x":  144,
+                       "y":  732
+                   },
+                   {
+                       "id":  18,
+                       "kind":  "orange tree",
+                       "x":  400,
+                       "y":  860
+                   },
+                   {
+                       "id":  19,
+                       "kind":  "apple tree",
+                       "x":  1232,
+                       "y":  796
+                   },
+                   {
+                       "id":  20,
+                       "kind":  "pear tree",
+                       "x":  976,
+                       "y":  892
+                   },
+                   {
+                       "id":  21,
+                       "kind":  "cactus",
+                       "x":  656,
+                       "y":  892
+                   },
+                   {
+                       "id":  22,
+                       "kind":  "olive tree",
+                       "x":  784,
+                       "y":  60
+                   },
+                   {
+                       "id":  23,
+                       "kind":  "lemon tree",
+                       "x":  592,
+                       "y":  60
+                   },
+                   {
+                       "id":  24,
+                       "kind":  "carrot top",
+                       "x":  304,
+                       "y":  476
+                   },
+                   {
+                       "id":  25,
+                       "kind":  "onion grass",
+                       "x":  336,
+                       "y":  508
+                   },
+                   {
+                       "id":  26,
+                       "kind":  "garlic",
+                       "x":  368,
+                       "y":  604
+                   },
+                   {
+                       "id":  27,
+                       "kind":  "carrot top",
+                       "x":  432,
+                       "y":  636
+                   },
+                   {
+                       "id":  28,
+                       "kind":  "onion grass",
+                       "x":  272,
+                       "y":  540
+                   }
+               ],
+    "effects":  [
+                    {
+                        "id":  29,
+                        "name":  "flame",
+                        "x":  720,
+                        "y":  496
+                    }
+                ],
+    "targets":  [
+
+                ],
+    "width":  44
+}
