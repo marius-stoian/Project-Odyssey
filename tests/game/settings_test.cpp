@@ -69,7 +69,7 @@ TEST_CASE("US-126 Settings") {
     // The width, typed into the settings panel; the height from the program.
     editor.showSettings(true);
     odyssey.update(mouse(-1, -1, false, false, false)); // the panel appears
-    const int fieldX = 480 - 152 + 100;
+    const int fieldX = 960 - 152 + 100;
     const int widthY = 22 + 32 + 5;
     odyssey.update(mouse(fieldX, widthY, true, true, false));
     odyssey.update(mouse(fieldX, widthY, false, false, true, "40"));

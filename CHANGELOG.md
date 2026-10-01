@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-231: 960x540 virtual screen, window modes, hero facing and eight directions (Mraw) - 2026-10-01
+
+**State:** Merged into `qa` locally; verified in Debug (27 of 27, zero warnings).
+
+- Virtual screen 960x540 (`src/core/presentation.*`), windowed sizes, borderless and exclusive modes, Whole and Fill scaling, settings and pointer mapping (D-44, requirements v2.6).
+- Tests and scripted window runs moved from the 480x270 coordinates to 960x540.
+- Fix: a held left or right key always turns the hero that way (`odyssey_game.cpp`); the pointer keeps the aim.
+- Hero art: eight facings use real frames from the owner's turn-around sheet (`ArtSet::frame`); West no longer shows a right-facing hero. New tests: "US-139 Left and right keys turn him", "US-231 Eight hero directions".
 ## CI: guides keep LF too (Dominus) - 2026-10-01
 
 **State:** Merged into `qa`.

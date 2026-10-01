@@ -97,6 +97,7 @@ public:
     // Where the game's picture is in the window: `area` in window pixels, drawn `scale` times
     // larger than the virtual screen. Mouse positions are turned into virtual pixels with it.
     void setPointerArea(const odysseus::core::Rect& area, int scale);
+    void setPointerArea(const odysseus::core::Rect& area, int virtualWidth, int virtualHeight);
 
     // Holds or releases an intent as if a device did it. For automated tests and demos.
     void setScripted(Intent intent, bool held);
@@ -122,6 +123,8 @@ private:
     bool ctrl_[2] = {false, false};
     odysseus::core::Rect area_{0, 0, 0, 0};
     int scale_ = 1;
+    int virtualWidth_ = 0;
+    int virtualHeight_ = 0;
     Pointer pointer_;           // held and position now; pressed/released since the last tick
     std::string text_;
 };

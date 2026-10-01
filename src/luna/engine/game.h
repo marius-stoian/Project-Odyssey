@@ -4,6 +4,7 @@
 
 #include "input.h"
 #include "renderer.h"
+#include "core/presentation.h"
 
 #include <optional>
 
@@ -29,9 +30,7 @@ public:
     // A change of the window the game asks for (US-081): full screen or windowed, and the size of the window. Luna polls this
     // after every tick and applies what it finds once.
     struct WindowChange {
-        bool fullscreen = false;
-        int width = 0;   // 0: keep the size
-        int height = 0;
+        odysseus::core::Resolution resolution;
     };
     virtual std::optional<WindowChange> takeWindowChange() { return std::nullopt; }
 };

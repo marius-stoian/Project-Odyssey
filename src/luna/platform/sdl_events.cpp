@@ -145,6 +145,8 @@ std::optional<Event> translateEvent(const SDL_Event& event) {
         return out;
     }
     case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+    case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+    case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
         out.type = EventType::WindowResized;
         out.width = event.window.data1;
         out.height = event.window.data2;

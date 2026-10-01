@@ -21,14 +21,13 @@ namespace {
 
 class SdlRendererBackend final : public RenderBackend {
 public:
-    SdlRendererBackend(SDL_Window* window, int virtualWidth, int virtualHeight) : window_(window) {
+    SdlRendererBackend(SDL_Window* window, int virtualWidth, int virtualHeight, odysseus::core::ScalingMode scaling) : window_(window), virtualWidth_(virtualWidth), virtualHeight_(virtualHeight), scaling_(scaling) {
         renderer_.reset(SDL_CreateRenderer(window, nullptr));
         if (!renderer_) {
             fail("Cannot create the renderer");
         }
-        // Draw at a small virtual size, scaled by the largest whole number that fits the
-        // window, with black bars for the rest: pixel art stays crisp (US-022).
-        if (!SDL_SetRenderLogicalPresentation(renderer_.get(), virtualWidth, virtualHeight, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
+        // Draw into the virtual texture first; the shared presentation area places it in the window.
+        if (!SDL_SetRenderLogicalPresentation(renderer_.get(), 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED)) {
             fail("Cannot set the virtual screen size");
         }
         virtualScreen_.reset(SDL_CreateTexture(renderer_.get(), SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, virtualWidth, virtualHeight));
@@ -41,6 +40,7 @@ public:
 
     std::string name() const override { return std::string("sdl (") + SDL_GetRendererName(renderer_.get()) + ")"; }
     bool vsyncEnabled() const override { return vsync_; }
+    void setScalingMode(odysseus::core::ScalingMode mode) override { scaling_ = mode; }
 
     void clear(int red, int green, int blue) override {
         // A new frame starts on the virtual screen: the requested colour all over it.
@@ -85,9 +85,8 @@ public:
     }
 
     odysseus::core::Rect presentationRect() const override {
-        SDL_FRect rect{};
-        SDL_GetRenderLogicalPresentationRect(renderer_.get(), &rect);
-        return {static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.w), static_cast<int>(rect.h)};
+        const auto out = outputRect();
+        return odysseus::core::presentationArea(out.width, out.height, virtualWidth_, virtualHeight_, scaling_);
     }
 
     odysseus::core::Rect outputRect() const override {
@@ -129,12 +128,14 @@ public:
     }
 
 private:
-    // The virtual screen into the window: black bars, then the picture enlarged by a whole number (the logical presentation does the enlarging).
+    // The virtual screen into the window, with black bars outside the selected presentation area.
     void compose() {
         SDL_SetRenderTarget(renderer_.get(), nullptr);
         SDL_SetRenderDrawColor(renderer_.get(), 0, 0, 0, 255);
         SDL_RenderClear(renderer_.get());
-        SDL_RenderTexture(renderer_.get(), virtualScreen_.get(), nullptr, nullptr);
+        const auto area = presentationRect();
+        const SDL_FRect destination{static_cast<float>(area.x), static_cast<float>(area.y), static_cast<float>(area.width), static_cast<float>(area.height)};
+        SDL_RenderTexture(renderer_.get(), virtualScreen_.get(), nullptr, &destination);
     }
 
     struct RendererDeleter {
@@ -150,19 +151,15 @@ private:
     std::vector<std::unique_ptr<SDL_Texture, TextureDeleter>> textures_; // index = texture number
     std::unique_ptr<SDL_Texture, TextureDeleter> virtualScreen_;         // destroyed before the renderer too (declared after the renderer)
     bool vsync_ = false;
+    int virtualWidth_ = 0;
+    int virtualHeight_ = 0;
+    odysseus::core::ScalingMode scaling_ = odysseus::core::ScalingMode::Whole;
 };
 
 } // namespace
 
-odysseus::core::Rect wholeStepArea(int windowWidth, int windowHeight, int virtualWidth, int virtualHeight) {
-    const int scale = std::max(1, std::min(windowWidth / virtualWidth, windowHeight / virtualHeight));
-    const int width = virtualWidth * scale;
-    const int height = virtualHeight * scale;
-    return {(windowWidth - width) / 2, (windowHeight - height) / 2, width, height};
-}
-
-std::unique_ptr<RenderBackend> makeSdlRendererBackend(SDL_Window* window, int virtualWidth, int virtualHeight) {
-    return std::make_unique<SdlRendererBackend>(window, virtualWidth, virtualHeight);
+std::unique_ptr<RenderBackend> makeSdlRendererBackend(SDL_Window* window, int virtualWidth, int virtualHeight, odysseus::core::ScalingMode scaling) {
+    return std::make_unique<SdlRendererBackend>(window, virtualWidth, virtualHeight, scaling);
 }
 
 } // namespace luna::platform

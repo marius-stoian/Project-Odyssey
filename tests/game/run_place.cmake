@@ -12,7 +12,7 @@ file(READ "${copy}" original)
 string(JSON placed_id GET "${original}" nextId)
 
 execute_process(COMMAND "${GAME}" --level "${copy}" --editor --quit-after 2.8
-                        --click 170:11:0.4 --click 18:74:0.7 --click 272:135:1.0 --hold Save:1.3:1.4
+                        --click 170:11:0.4 --click 18:74:0.7 --click 512:270:1.0 --hold Save:1.3:1.4
                         --hold ModeGame:1.6:1.7 --hold SwitchWeapon:1.9:2.0 --hold Interact:2.2:2.3
                         --log-dir "${WORK_DIR}/logs" --screenshot "${WORK_DIR}/struck.bmp"
     RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)

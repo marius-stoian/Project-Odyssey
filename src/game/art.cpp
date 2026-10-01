@@ -296,14 +296,27 @@ ArtSet programmerArt(std::string problem, const std::vector<std::string>& ground
 } // namespace
 
 core::Rect ArtSet::frame(const std::string& frames, int directions, Facing facing, int walkFrame) const {
-    // The owner's sheets show a figure from the front (S), the side (E) and the back (N); the
-    // other side (W) is mirrored. Diagonals use the side view they move towards.
-    constexpr const char* kView[] = {"S", "W", "W", "W", "N", "E", "E", "E"}; // by Facing
-    constexpr int kSheetFrame[] = {0, 2, 4, 6};                               // walk frames used
-    const std::string name = directions == 8 ? std::format("{}.{}.{}", frames, kView[static_cast<std::size_t>(facing)],
-                                                           kSheetFrame[std::clamp(walkFrame, 0, 3)])
-                                             : frames;
-    const auto it = cells.find(name);
+    // The owner's hero sheet is one turn-around: row S turns from the front (S0, S4) to three-quarter
+    // views, row E holds the side views (E0-E3 look left, E5-E7 look right), row N the back and its
+    // three-quarter views. Looking left on screen is West, so each of the eight facings is given the
+    // frames that really show that direction (picked by eye from the sheet), four per walk cycle.
+    struct View {
+        char row;
+        int frame[4];
+    };
+    constexpr View kView[] = {
+        {'S', {0, 4, 0, 4}}, // South: facing the player
+        {'S', {1, 2, 3, 2}}, // SouthWest: front, turned to the left
+        {'E', {0, 1, 2, 3}}, // West: side view looking left
+        {'N', {1, 2, 1, 2}}, // NorthWest: back, turned to the left
+        {'N', {4, 3, 4, 5}}, // North: back
+        {'N', {7, 6, 7, 6}}, // NorthEast: back, turned to the right
+        {'E', {7, 6, 5, 6}}, // East: side view looking right
+        {'S', {7, 6, 5, 6}}, // SouthEast: front, turned to the right
+    };
+    const std::string name = directions == 8 ? std::format("{}.{}.{}", frames, kView[static_cast<std::size_t>(facing)].row,
+                                                           kView[static_cast<std::size_t>(facing)].frame[std::clamp(walkFrame, 0, 3)])
+                                             : frames;    const auto it = cells.find(name);
     const int cell = it == cells.end() ? 0 : it->second;
     return {cell % kAtlasColumns * kAtlasCharacterWidth, cell / kAtlasColumns * kAtlasCharacterHeight, kAtlasCharacterWidth, kAtlasCharacterHeight};
 }

@@ -5,6 +5,7 @@
 #include "events.h"
 
 #include "core/geometry.h"
+#include "core/presentation.h"
 
 #include <cstdint>
 #include <filesystem>
@@ -26,10 +27,12 @@ struct WindowSettings {
     std::string title;
     int width = 1280;
     int height = 720;
-    int virtualWidth = 480;  // everything is drawn at this size, then scaled up
-    int virtualHeight = 270;
+    int virtualWidth = odysseus::core::kVirtualWidth;
+    int virtualHeight = odysseus::core::kVirtualHeight;
     bool hidden = false;     // tests draw into a window nobody sees
     RendererChoice renderer = RendererChoice::Auto;
+    odysseus::core::WindowMode mode = odysseus::core::WindowMode::Windowed;
+    odysseus::core::ScalingMode scaling = odysseus::core::ScalingMode::Whole;
 };
 
 // A screenshot: width x height pixels, 4 bytes each (red, green, blue, alpha).
@@ -82,6 +85,8 @@ public:
     // Full screen or a window (US-081): takes effect at once; the window keeps its size for going back.
     void setFullscreen(bool fullscreen);
     bool fullscreen() const;
+    void applyResolution(const odysseus::core::Resolution& resolution);
+    void setScalingMode(odysseus::core::ScalingMode mode);
 
     // The size of the drawing surface in real pixels (can differ from the requested
     // window size on high-DPI screens).

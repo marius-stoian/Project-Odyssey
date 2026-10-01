@@ -19,9 +19,9 @@ using luna::engine::PointerButton;
 
 namespace {
 
-// The camera centres on the hero at the start, so the hero stands at the middle of the 480x270 picture.
-constexpr int kHeroScreenX = 240;
-constexpr int kHeroScreenY = 135;
+// The camera centres on the hero at the start, so the hero stands at the middle of the 960x540 picture.
+constexpr int kHeroScreenX = 480;
+constexpr int kHeroScreenY = 270;
 
 Intents pointingAt(int x, int y, bool attack = false) {
     Intents intents;
@@ -112,6 +112,19 @@ TEST_CASE("US-139 Face the cursor") {
     CHECK(aimed > play.renderer.draws().size());
 }
 
+TEST_CASE("US-139 Left and right keys turn him") {
+    Play play(levelWithGoblinAt("keys", 200, 0));
+    // The pointer is far to the west, yet pressing right turns him east (and left turns him west).
+    Intents right = pointingAt(kHeroScreenX - 200, kHeroScreenY);
+    right.set(Intent::MoveRight, true, true);
+    play.tick(1, right);
+    CHECK(play.odyssey.hero().facing() == game::Facing::East);
+    Intents left = pointingAt(kHeroScreenX + 200, kHeroScreenY);
+    left.set(Intent::MoveLeft, true, true);
+    play.tick(1, left);
+    CHECK(play.odyssey.hero().facing() == game::Facing::West);
+}
+
 TEST_CASE("US-139 Swing toward the cursor") {
     // A goblin 30 px east and 30 px north of the hero (42 px away, inside the sword's 48 px reach).
     SUBCASE("pointer north-east: hit") {
@@ -155,14 +168,14 @@ TEST_CASE("US-139 Interact goes along the facing even with the pointer elsewhere
     CHECK(play.goblin().hp() == 100 - play.odyssey.catalogs().weapon("iron sword")->damage);
 }
 
-TEST_CASE("US-139 The hero always faces the pointer") {
-    // Even with empty hands: walking does not turn him away from the pointer.
+TEST_CASE("US-139 The hero faces the pointer, except while a left or right key is held") {
+    // Even with empty hands the pointer turns him; a held left or right key wins over it (owner, 2026-10-01).
     Play play(levelWithGoblinAt("empty-hands", 200, 0));
     Intents walkEastPointingWest = pointingAt(kHeroScreenX - 80, kHeroScreenY - 20);
     walkEastPointingWest.set(Intent::MoveRight, true, false);
     play.tick(10, walkEastPointingWest);
     CHECK_FALSE(play.odyssey.aiming()); // nothing is held, so no aim line...
-    CHECK(play.odyssey.hero().facing() == game::Facing::West); // ...but he faces the pointer while walking east
+    CHECK(play.odyssey.hero().facing() == game::Facing::East); // ...and the right key turns him east, whatever the pointer says
     // With the pointer off the picture he faces the way he walks again.
     Intents walkEast;
     walkEast.set(Intent::MoveRight, true, false);

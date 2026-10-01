@@ -326,7 +326,7 @@ TEST_CASE("US-136 Chop") {
         play.tick(30);
         play.hold("iron sword");
         REQUIRE(play.odyssey.effects().count() == 0);
-        play.tick(1, attackToward(300, 135)); // east
+        play.tick(1, attackToward(540, 270)); // east
         CHECK_FALSE(play.plant().alive);
         CHECK(play.odyssey.plantsGrowing() == 0);
         CHECK(play.odyssey.effects().count() > 0); // the leaves
@@ -337,7 +337,7 @@ TEST_CASE("US-136 Chop") {
         play.tick(80, holding(Intent::MoveRight));
         REQUIRE(play.odyssey.hero().feetX() < 34 * 32.0);
         play.tick(30); // the camera catches up, so the pointer is where we think
-        play.tick(1, attackToward(360, 135));
+        play.tick(1, attackToward(600, 270));
         CHECK_FALSE(play.plant().alive);
         play.tick(40, holding(Intent::MoveRight));
         CHECK(play.odyssey.hero().feetX() > 34 * 32.0 + 20.0);
@@ -346,7 +346,7 @@ TEST_CASE("US-136 Chop") {
         Play play(levelWith("arrow-tree", {{{tree, feetIn(32, 36)}}, false}));
         play.tick(30);
         play.hold("wooden longbow");
-        play.tick(1, attackToward(240, 135 + (feetIn(32, 36).y - 1048)));
+        play.tick(1, attackToward(480, 270 + (feetIn(32, 36).y - 1048)));
         for (int i = 0; i < 30 && play.plant().alive; ++i) play.tick();
         CHECK_FALSE(play.plant().alive);
     }
@@ -359,13 +359,13 @@ TEST_CASE("US-136 Eat") {
     Play play(levelWith("eat", {{{apple, game::PixelPoint{1070, 1048}}, {apple, game::PixelPoint{1086, 1048}}}, true}));
     play.tick(30);
     play.hold("iron sword");
-    play.tick(1, attackToward(300, 135)); // the nearest plant, and the goblin
+    play.tick(1, attackToward(540, 270)); // the nearest plant, and the goblin
     CHECK(play.odyssey.plantsGrowing() == 1);
     CHECK(play.odyssey.heroHp() == 100); // eaten at full health: nothing to heal
     play.tick(12);                       // the goblin strikes back
     REQUIRE(play.odyssey.heroHp() == 80);
     play.tick(20);                       // the sword rests
-    play.tick(1, attackToward(300, 135));
+    play.tick(1, attackToward(540, 270));
     CHECK(play.odyssey.plantsGrowing() == 0);
     CHECK(play.odyssey.heroHp() == 90); // +10 from the second plant
 }
@@ -377,7 +377,7 @@ TEST_CASE("US-136 Regrow") {
         Play play(levelWith("regrow", {{{kind, feetIn(32, 31)}}, false}));
         play.tick(30);
         play.hold("iron sword");
-        play.tick(1, attackToward(240, 60)); // north: the plant is a metre up
+        play.tick(1, attackToward(480, 195)); // north: the plant is a metre up
         REQUIRE_FALSE(play.plant().alive);
         ticksToGrow = 0;
         while (!play.plant().alive && ticksToGrow < 1000) {
@@ -407,7 +407,7 @@ TEST_CASE("US-136 Regrow") {
         Play play(levelWith("regrow-tree", {{{tree, feetIn(32, 31)}}, false}));
         play.tick(30);
         play.hold("iron sword");
-        play.tick(1, attackToward(240, 60));
+        play.tick(1, attackToward(480, 195));
         REQUIRE_FALSE(play.plant().alive);
         play.tick(305);
         REQUIRE(play.plant().alive);

@@ -20,7 +20,8 @@ constexpr int kTalkWrap = 56; // characters of a line of speech in the conversat
 
 enum ScreenIds {
     kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
-    kTabBase = 300, kResolutionBase = 320, kFullscreen = 330, kVolumeDown = 331, kVolumeUp = 332, kFoundFire = 340, kRitual = 341, kTendFire = 342,
+    kTabBase = 300, kResolutionBase = 320, kWindowed = 330, kVolumeDown = 331, kVolumeUp = 332, kBorderless = 333, kExclusive = 334,
+    kScalingWhole = 335, kScalingFill = 336, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
     kAcceptCounter = 582, kPayDebtBase = 600, kActionBase = 700
 };
@@ -289,12 +290,19 @@ void RunFlow::buildMenu(OdysseyGame& game) {
     case MenuTab::Settings: {
         const GameSettings& s = game.settings();
         title("Settings");
-        button(std::format("Full screen: {}", s.fullscreen ? "on" : "off"), kFullscreen, true, false, panel_.x + 8, 130);
+        button("Windowed", kWindowed, true, s.resolution.mode == core::WindowMode::Windowed, panel_.x + 8, 78);
+        button("Borderless", kBorderless, true, s.resolution.mode == core::WindowMode::Borderless);
+        button("Exclusive", kExclusive, true, s.resolution.mode == core::WindowMode::Exclusive);
         newRow();
         cursorY_ += kRowHeight + 4;
         line("Window size:", UiColor::Dim);
-        const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}};
-        for (int i = 0; i < 3; ++i) button(std::format("{}x{}", sizes[i][0], sizes[i][1]), kResolutionBase + i, true, s.width == sizes[i][0]);
+        const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}, {2560, 1440}};
+        for (int i = 0; i < 4; ++i) button(std::format("{}x{}", sizes[i][0], sizes[i][1]), kResolutionBase + i, true, s.resolution.width == sizes[i][0]);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("Scaling:", UiColor::Dim);
+        button("Whole", kScalingWhole, true, s.resolution.scaling == core::ScalingMode::Whole, panel_.x + 8, 62);
+        button("Fill", kScalingFill, true, s.resolution.scaling == core::ScalingMode::Fill);
         newRow();
         cursorY_ += kRowHeight + 4;
         line(std::format("Volume: {}", s.volume), UiColor::Text);
@@ -630,12 +638,19 @@ void RunFlow::act(OdysseyGame& game, int id) {
             const double fy = hero->fire().tileY * kTileSize + 16;
             message_ = hero->holdRitual(game.attendeesAt(fx, fy, data->config.fire.ritualRadiusTiles)).message;
         } else if (id == kTendFire && hero != nullptr) message_ = hero->tendFire().message;
-        else if (id == kFullscreen) { GameSettings s = game.settings(); s.fullscreen = !s.fullscreen; game.applySettings(s); }
-        else if (id >= kResolutionBase && id < kResolutionBase + 3) {
-            const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}};
+        else if (id == kWindowed || id == kBorderless || id == kExclusive) {
             GameSettings s = game.settings();
-            s.width = sizes[id - kResolutionBase][0];
-            s.height = sizes[id - kResolutionBase][1];
+            s.resolution.mode = id == kWindowed ? core::WindowMode::Windowed : id == kBorderless ? core::WindowMode::Borderless : core::WindowMode::Exclusive;
+            game.applySettings(s);
+        } else if (id == kScalingWhole || id == kScalingFill) {
+            GameSettings s = game.settings();
+            s.resolution.scaling = id == kScalingWhole ? core::ScalingMode::Whole : core::ScalingMode::Fill;
+            game.applySettings(s);
+        } else if (id >= kResolutionBase && id < kResolutionBase + 4) {
+            const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}, {2560, 1440}};
+            GameSettings s = game.settings();
+            s.resolution.width = sizes[id - kResolutionBase][0];
+            s.resolution.height = sizes[id - kResolutionBase][1];
             game.applySettings(s);
         } else if (id == kVolumeDown || id == kVolumeUp) {
             GameSettings s = game.settings();

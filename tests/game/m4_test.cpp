@@ -63,14 +63,14 @@ TEST_CASE("US-043 Streaming") {
         ++loads;
     };
     const auto unload = [](int, int) {};
-    // The player walks from one side of the region to the other, east, at walking speed (4.8 pixels a tick), the view 480 x 270.
+    // The player walks from one side of the region to the other, east, at walking speed (4.8 pixels a tick), the view 960 x 540.
     double x = 40.0 * game::kTileSize;
     const double y = region.start().y * game::kTileSize;
     double worst = 0.0;
     bool popped = false;
     for (int tick = 0; tick < 2500; ++tick) {
         x += 4.8;
-        const odysseus::core::Rect view{static_cast<int>(x) - 240, static_cast<int>(y) - 135, 480, 270};
+        const odysseus::core::Rect view{static_cast<int>(x) - 480, static_cast<int>(y) - 270, 960, 540};
         const auto began = std::chrono::steady_clock::now();
         streamer.update(view, load, unload, 2);
         worst = std::max(worst, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - began).count());
@@ -122,7 +122,7 @@ TEST_CASE("US-083 Developer tools") {
         const game::Figure& figure = play.odyssey.clanView().figures()[i];
         const int x = static_cast<int>(figure.x) - view.x;
         const int y = static_cast<int>(figure.y) - view.y;
-        if (figure.present && x > 250 && x < 460 && y > 80 && y < 250) {
+        if (figure.present && x > 500 && x < 920 && y > 160 && y < 500) {
             target = &figure;
             index = static_cast<int>(i);
         }

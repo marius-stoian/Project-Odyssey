@@ -138,8 +138,8 @@ TEST_CASE("US-133 Starters fight") {
             // Thrown weapons fly in arcs (US-140): they land where the pointer is, so aim at the goblin's feet.
             play.tick(30); // the camera settles on the hero, who then stands at the middle of the picture
             luna::engine::Pointer pointer;
-            pointer.x = 240 + static_cast<int>(std::lround(goblin.feetX() - play.odyssey.hero().feetX()));
-            pointer.y = 135 + static_cast<int>(std::lround(goblin.feetY() - play.odyssey.hero().feetY()));
+            pointer.x = 480 + static_cast<int>(std::lround(goblin.feetX() - play.odyssey.hero().feetX()));
+            pointer.y = 270 + static_cast<int>(std::lround(goblin.feetY() - play.odyssey.hero().feetY()));
             Intents aim;
             aim.set(Intent::Attack, true, true);
             aim.setPointer(pointer);

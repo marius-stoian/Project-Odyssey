@@ -5,6 +5,7 @@
 #include "window.h"
 
 #include "core/geometry.h"
+#include "core/presentation.h"
 
 #include <cstdint>
 #include <memory>
@@ -34,6 +35,7 @@ public:
     virtual odysseus::core::Rect presentationRect() const = 0; // where the virtual screen lands in the window, in real pixels
     virtual odysseus::core::Rect outputRect() const = 0;       // the size of the drawing surface in real pixels
     virtual Pixels readPixels() = 0;                           // the frame as drawn so far, black bars included
+    virtual void setScalingMode(odysseus::core::ScalingMode mode) = 0;
 };
 
 // When a sprite is drawn at another size than its own (three quarters, for the children), some pixels of it look at exactly the line between two
@@ -41,14 +43,11 @@ public:
 // five-hundredth of a texel further right and down, which settles every such case the same way (and moves no other pixel).
 inline constexpr float kTexelNudge = 1.0F / 512.0F;
 
-// The largest whole-number scale at which the virtual screen fits the window, centred; never below 1 (the same rule as luna::engine::integerScale).
-odysseus::core::Rect wholeStepArea(int windowWidth, int windowHeight, int virtualWidth, int virtualHeight);
-
-std::unique_ptr<RenderBackend> makeSdlRendererBackend(SDL_Window* window, int virtualWidth, int virtualHeight);
+std::unique_ptr<RenderBackend> makeSdlRendererBackend(SDL_Window* window, int virtualWidth, int virtualHeight, odysseus::core::ScalingMode scaling = odysseus::core::ScalingMode::Whole);
 
 // True when this build has the GPU backend (the shaders could be compiled with the Windows SDK's dxc.exe).
 bool gpuBackendCompiledIn();
 // Throws std::runtime_error with the reason when the GPU cannot be used (no device, no swapchain, a shader that does not load). Never returns null.
-std::unique_ptr<RenderBackend> makeGpuBackend(SDL_Window* window, int virtualWidth, int virtualHeight);
+std::unique_ptr<RenderBackend> makeGpuBackend(SDL_Window* window, int virtualWidth, int virtualHeight, odysseus::core::ScalingMode scaling = odysseus::core::ScalingMode::Whole);
 
 } // namespace luna::platform
