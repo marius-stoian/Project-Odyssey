@@ -1,6 +1,6 @@
 # Limit.md: how to continue the assembly
 
-**Resume update (2026-10-01):** S-US-231 is Blocked by CI-010. The story prompt's windowed size list contradicts owner decision D-44 and `docs/plans/M8b-renderer-design.md`. Anima must revise S-US-231 before implementation. Read `Handover.md` for the exact conflict and resume instructions. No story was completed; leave the owner's two local files untouched.
+**Resume update (2026-10-01):** D-44 is reflected in local requirements v2.6 and Anima's revised assembly prompts v2.4; CI-010 is resolved. S-US-231 remains Blocked while the authoritative Drive requirements copy is unsynced after automatic approval review rejected its replacement. Read `Handover.md` for exact resume instructions. No story was completed; leave the owner's two local files untouched.
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 

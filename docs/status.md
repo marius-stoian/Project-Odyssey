@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v2.2. Edited only by mraw-orchestrator.
+Codex v2.4. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|

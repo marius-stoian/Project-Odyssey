@@ -4,16 +4,18 @@ Everything written about Project Odyssey outside the code: the requirements, Ani
 
 **Masters live on Google Drive** (`My Drive/~gamerrr/Project Odysseus/`), where Dominus and Anima write them. The files here are mirrored copies: when an AI coding session starts in this repo, [tools/sync-workspace.ps1](../../tools/sync-workspace.ps1) copies any Drive file that changed into this folder, and the session commits it. Edit the Drive file, not the copy here, or the next sync will overwrite your change.
 
+D-44 update (2026-10-01): local requirements and backlog are revised, but the Drive replacements await explicit authorization after automatic approval review rejected the upload. Do not run the sync until both copies agree; see [Handover.md](../../Handover.md).
+
 ## requirements/
 
 | File | What it is | Status |
 |---|---|---|
-| [Project Odyssey.docx](requirements/Project%20Odyssey.docx) | The requirements, architecture, MVP plan and all 44 user stories | **Source of truth for WHAT**, v1.5 (Luna first, Luna Physics) |
+| [Project Odyssey.docx](requirements/Project%20Odyssey.docx) | Requirements, architecture and MVP plan | Local v2.6 (D-44); Drive master remains v2.5 pending sync |
 | [Project Odyssey - MVP Backlog.xlsx](requirements/Project%20Odyssey%20-%20MVP%20Backlog.xlsx) | Working tracker: timeline with Gantt chart, dependencies, epics, stories with status | Generated from chapter 12 of the docx; the docx wins if they differ |
 
 ## codex/
 
-The Codex itself is [docs/Codex.md](../Codex.md) (source of truth for HOW and ORDER, v1.4). Supporting material:
+The assembly prompts are in [docs/Codex.md](../Codex.md) (source of truth for HOW and ORDER, v2.4). Supporting material:
 
 | File | What it is | Status |
 |---|---|---|
