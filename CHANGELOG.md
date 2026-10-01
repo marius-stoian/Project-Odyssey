@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-162: Who says what (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-162`); merged into `qa`.
+
+- Simulation: `selectScript` breaks exact ties with the seeded stream (one draw per call), `selectBark` and `barkText` for greetings, roles `hunter` and `gatherer`, the condition function `mood(who)`.
+- Game: `Bubbles` and `updateGreetings` (friendly people within 3 m greet in a bubble, at most once a minute each, at most two bubbles at once, nearest first); the greeting cooldowns and the stream "dialogue" belong to the game and reset with a run.
+- Data and docs: `greet-elder.dlg`, `greet-friend.dlg`, `greet-friend-warm.dlg`, the guide sections on ties, roles, mood and greetings, `docs/plans/US-162.md`, teach-back, evidence `docs/evidence/US-162/`.
+- Tests: `tests/sim/selection_test.cpp` (7 cases), `tests/game/greeting_test.cpp` (4 cases).
 ## US-161: Conversations and the dialogue panel (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-161`: zero warnings, 27 of 27 tests in Debug and Release); merged into `qa`.

@@ -1,0 +1,6 @@
+# A second plain greeting: when two scripts fit equally well, the seeded stream picks one, so people do not all say the same thing (US-162).
+@who person
+@bark greet
+
+=== start
+Friend: Well met, {hero}.

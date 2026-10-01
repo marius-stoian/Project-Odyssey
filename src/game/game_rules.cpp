@@ -339,6 +339,12 @@ Value GameRuleContext::call(const std::string& name, const std::vector<Value>& a
         if (who < 0 || about < 0 || who >= count || about >= count) return Value::ofNumber(0);
         return Value::ofNumber(game_.clan()->opinion(who, about));
     }
+    if (name == "mood" && args.size() == 1 && args[0].isText && game_.clan() != nullptr && game_.life() != nullptr) {
+        // How the person feels about the hero (D-38): the same word the conversation panel shows.
+        const int who = personNamed(game_, subject_, args[0].text);
+        if (who < 0 || static_cast<std::size_t>(who) >= game_.clan()->people().size()) return Value::ofText("neutral");
+        return Value::ofText(sim::rules::moodWord(game_.clan()->opinion(who, game_.life()->personId()), game_.clan()->people()[static_cast<std::size_t>(who)].needs));
+    }
     if (name == "flag" && args.size() == 1 && args[0].isText) {
         if (args[0].text == "sacred-fire") return Value::ofNumber(game_.life() != nullptr && game_.life()->fire().founded ? 1 : 0);
     }

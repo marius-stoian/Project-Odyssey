@@ -205,8 +205,9 @@ TEST_CASE("US-161 The script that speaks for someone: their name, then a role, t
     const rules::DialogueLibrary library = rules::DialogueLibrary::load(folder, report);
     REQUIRE(report.errors.empty());
     Table world;
+    odysseus::core::Pcg32 random(1, 8);
     const auto pick = [&](rules::WhoFacts who) {
-        const rules::DlgScript* chosen = rules::selectScript(library, who, world);
+        const rules::DlgScript* chosen = rules::selectScript(library, who, world, random);
         return chosen == nullptr ? std::string("-") : chosen->name;
     };
 

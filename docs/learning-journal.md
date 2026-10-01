@@ -1109,3 +1109,16 @@ Two choices are worth learning from. First, the `Conversation` holds a **copy** 
 **Try it (15 minutes).** The manual checks in [docs/plans/US-161.md](plans/US-161.md); then in `elder-fire.dlg` give the thanks node a second choice with `[if opinion(npc, hero) >= 10]` and press F5.
 
 **Check yourself.** Why does `choose` ask `view()` for the list of choices instead of numbering the node's choices itself, and what would pressing the key 2 do if it did the latter while choice 1 was hidden?
+
+
+## M8: ranking candidates (US-162)
+
+Several scripts may fit the same person, and the game must pick one the same way every time. The rule is a ranking: most specific `@who` first (the person's name, then a role, then their kind), then the higher `@priority`. C++ has a ready-made tool for "which one is biggest under my rule": `std::ranges::max_element(candidates, better)`. You give it the list and a function that says whether one candidate is *worse* than another, and it returns the best. Because you write that function, the same line of code ranks by anything.
+
+The tie is the interesting part. Two scripts can be equally good, and `max_element` just returns the first of them, which would make one script always win. So after finding the best, the code collects everyone who is not worse *and* not better than it (the tied ones) and picks between them with the game's seeded random stream. The detail to notice: the number is drawn **every call**, even when nobody is tied. If the code drew only when there was a tie, the stream would run ahead by a different amount depending on how many scripts happened to fit, and a new script file would quietly change what happens elsewhere. Drawing exactly once keeps each system's stream predictable (Charter rule 6).
+
+**Where to look.** `choose` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `updateGreetings` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); the shipped greetings in [assets/data/dialogue/](../assets/data/dialogue/).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-162.md](plans/US-162.md); then add a fourth greeting for anyone and see, by restarting a few times, that it joins the rotation.
+
+**Check yourself.** Why does `choose` compare with `better(c, best) == false && better(best, c) == false` to find the tied scripts instead of `c == best`, and what would happen if the `@priority` of two scripts differed by one?

@@ -213,7 +213,7 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
     sim::rules::WhoFacts who;
     who.name = subject.name;
     who.roles = sim::rules::rolesOf(*game.clan(), subject.index);
-    const sim::rules::DlgScript* script = sim::rules::selectScript(game.dialogues(), who, context);
+    const sim::rules::DlgScript* script = sim::rules::selectScript(game.dialogues(), who, context, game.dialogueRandom());
     if (script == nullptr) return false;
     game.run().openTalk(sim::rules::Conversation(*script, kHeroActor, refOf(game, subject)), subject);
     return true;

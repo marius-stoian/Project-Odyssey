@@ -157,6 +157,8 @@ TEST_CASE("US-152 Every action the old menu had is now a file") {
 
 TEST_CASE("US-153 Gather takes three seconds under a ring, then gives berries and hides the plant until it is ripe again") {
     Camp camp("timed-gather", {}, true);
+    // Nobody greets in this test (US-162): a bubble over a head would add drawings and blur the count of the ring.
+    for (const odysseus::sim::Person& person : camp.odyssey.clan()->people()) camp.odyssey.changeOpinion(person.id, camp.odyssey.life()->personId(), -100);
     REQUIRE(camp.odyssey.plants().size() == 1);
     const game::WorldPlant& plant = camp.odyssey.plants()[0];
     REQUIRE(plant.state == "ripe");

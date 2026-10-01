@@ -61,7 +61,7 @@ A `{token}` in a line or a choice is filled in when it is shown: `{hero}` and `{
 
 ## Talking: who speaks, and the panel (US-161)
 
-When the player chooses **Talk** on a clan member, the game looks for the script that speaks for them. A script fits when one of its `@who` words is the person's **name** (the most specific), a **role** they have (`elder` is the oldest living member of the clan, `child` is anyone under 12), or their **kind** (`person`), and its `@when` holds. The most specific match wins, then the higher `@priority`, then the file name (US-162 adds barks and a seeded tie-break). A script marked `@bark` or `@pair` never answers Talk. When no script fits, Talk is the plain "You talk with ..." of before.
+When the player chooses **Talk** on a clan member, the game looks for the script that speaks for them. A script fits when one of its `@who` words is the person's **name** (the most specific), a **role** they have (`elder` is the oldest living member of the clan, `hunter` and `gatherer` are the grown members with the best hunting and gathering skill, `child` is anyone under 12), or their **kind** (`person`), and its `@when` holds. The most specific match wins (a script for `Ama` beats one for all `elder`s), then the higher `@priority`; scripts still tied are chosen between by the game's seeded stream, so the same game always picks the same one. A script marked `@bark` or `@pair` never answers Talk. Use `@when mood(npc) == wary` or `@when opinion(npc, hero) < -30` to write what someone says to a hero they dislike. When no script fits, Talk is the plain "You talk with ..." of before.
 
 The game **pauses** while the conversation panel is open. It shows:
 
@@ -71,6 +71,22 @@ The game **pauses** while the conversation panel is open. It shows:
 
 Choosing runs the choice's `{effects}` in order, then moves to its node, or ends the talk at `END`. Today the panel carries out `take hero <item> n`, `give hero <item> n`, `opinion npc hero n` (what the first thinks of the second changes by `n`, kept between -100 and 100) and `say`; the other verbs are read and checked but do nothing yet (`remember` and `flag` arrive with US-164). `opinion(npc, hero)` in a condition reads the real opinion.
 
+## Greetings (US-162)
+
+A script with `@bark greet` is a **greeting**: one short line said in a bubble over someone's head, not a conversation. When the hero passes within **3 m** of a clan member who thinks well of them (opinion 0 or more), the game chooses a greeting for that person the same way it chooses a conversation (name, then role, then kind, then `@priority`, then the seeded stream), and shows the first line of its first node whose `[if]` holds for 3 seconds. Each person greets at most **once a minute**, even if the hero stays beside them. A greeting needs no choices and no `-> ...` line:
+
+```text
+@who elder
+@when opinion(npc, hero) >= 0
+@priority 10
+@bark greet
+
+=== start
+Elder: The fire keeps you well, {hero}.
+```
+
+Shipped examples: `greet-elder.dlg`, and two plain ones for anyone, `greet-friend.dlg` and `greet-friend-warm.dlg` (equally fitting, so the seeded stream chooses).
+
 ## Not in this story yet
 
-Barks and the seeded choice between scripts (US-162), small talk for people without a script and the `{smalltalk.topic}` lines (US-163), memories and flags (US-164) and bubbles between NPCs (US-165) come in the next stories. Until US-163 a `{smalltalk.hunt}` shows as written.
+Small talk for people without a script and the `{smalltalk.topic}` lines (US-163), memories and flags (US-164) and bubbles between NPCs talking to each other (US-165) come in the next stories. Until US-163 a `{smalltalk.hunt}` shows as written.

@@ -64,7 +64,7 @@ std::vector<std::string> builtInThingTags(const OdysseyGame& game);
 // The real world as the rule language sees it (US-150, US-151): what `target.state`, `season`, `has(berries, 2)` mean in the game.
 // It is made for one moment and one target, reads the game and changes nothing.
 // Answered so far: actor.name, target.name, target.kind, target.state, target.inspect, season, time, distance, has(...), tag(...) and
-// flag(sacred-fire), and opinion(a, b) between the hero and a clan member (US-161). skill, kin and other flags answer 0 until the stories that
+// flag(sacred-fire), and opinion(a, b) and mood(who) between the hero and a clan member (US-161). skill, kin and other flags answer 0 until the stories that
 // give them a meaning (US-164).
 class GameRuleContext : public sim::rules::RuleContext {
 public:
