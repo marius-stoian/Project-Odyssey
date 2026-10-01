@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-02, US-242):** S-US-242 DONE (Milestone-84.md, AP-085). Next: S-US-243 (fires, torches and glowing effects: lights placed from lights.json), then US-244 (sun and moon shadows), US-245, US-246, US-247, X-M8c. CI note: the 64-light budget test is judged only off GitHub.
+
 **Resume update (2026-10-02, US-241):** S-US-241 DONE (Milestone-83.md, AP-084). Next: S-US-242 (day, night and seasons: sky.json, calendar day length, D-49 numbers), then US-243..US-247, X-M8c.
 
 **Resume update (2026-10-02, US-240):** S-US-240 DONE (Milestone-82.md, AP-083); K-M8c Done (D-49, docs/plans/M8c-lighting-design.md). Next: S-US-241 (generated normal maps), then US-242 (day, night, seasons), US-243, US-244, US-245, US-246, US-247, X-M8c.

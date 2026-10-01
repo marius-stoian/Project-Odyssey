@@ -81,6 +81,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+    sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     dataDirectory_ = dataDirectory;
@@ -844,6 +845,14 @@ void OdysseyGame::applySettings(const GameSettings& settings) {
     saveSettings(settings_, saveDirectory_ / "settings.json");
     pendingWindow_ = WindowChange{settings_.resolution};
     setViewScales(settings_.cameraZoom, settings_.uiScale);
+}
+
+SkyState OdysseyGame::sky() const {
+    if (!clan_) return skyAt(sky_, 12.0, 0); // no clock: noon of a spring day
+    const std::uint64_t ticks = clan_->ticks();
+    const auto perDay = static_cast<std::uint64_t>(clan_->calendar().ticksPerDay());
+    const double hour = static_cast<double>(ticks % perDay) * 24.0 / static_cast<double>(perDay);
+    return skyAt(sky_, hour, static_cast<int>(clan_->calendar().dateAt(ticks).season));
 }
 
 void OdysseyGame::setViewScales(int cameraZoom, int uiScale) {
@@ -2053,7 +2062,11 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     luna::engine::ScaledRenderer world(output, settings_.cameraZoom);
     luna::engine::Renderer& renderer = world;
     // The world is lit (US-240): the ambient colour tints everything drawn until the lighting is cleared below; the interface is never dimmed.
-    const luna::engine::LightFrame lightFrame = lighting_.ambientFrame();
+    luna::engine::LightFrame lightFrame = lighting_.ambientFrame();
+    const SkyState skyNow = sky(); // the time of day tints the ambient light (US-242)
+    lightFrame.ambientR *= skyNow.ambientR;
+    lightFrame.ambientG *= skyNow.ambientG;
+    lightFrame.ambientB *= skyNow.ambientB;
     renderer.setLighting(&lightFrame);
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);

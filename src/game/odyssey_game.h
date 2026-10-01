@@ -28,6 +28,7 @@
 #include "game/session_stats.h"
 #include "game/lighting.h"
 #include "game/settings.h"
+#include "game/sky.h"
 #include "game/tutorial.h"
 #include "game/weather.h"
 #include "game/level.h"
@@ -224,6 +225,8 @@ public:
     // Camera zoom and UI scale (US-232). Zoom 2x is the world as it always looked (15 x 8.4 tiles); 1x shows 30 x 17.
     // `setViewScales` only changes what is drawn (tests use it); `applySettings` also saves them.
     void setViewScales(int cameraZoom, int uiScale);
+    // The sky now (US-242): the light follows the clan's game clock (a level without a clan has no clock and stays at noon).
+    SkyState sky() const;
     void updateZoom(const luna::engine::Intents& intents);
     int cameraZoom() const { return settings_.cameraZoom; }
     int uiScale() const { return settings_.uiScale; }
@@ -408,6 +411,7 @@ private:
     std::chrono::steady_clock::time_point lastRender_{};
     void drawOverlay(luna::engine::Renderer& renderer) const;
     GameSettings settings_;
+    SkyData sky_;           // assets/data/light/sky.json and the daylight of calendar.json (US-242)
     LightingData lighting_; // assets/data/light/lights.json (US-240): the ambient colour and the kinds of light
     std::optional<WindowChange> pendingWindow_;
     void drawRunHud(luna::engine::Renderer& renderer) const;

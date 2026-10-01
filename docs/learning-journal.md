@@ -1295,3 +1295,21 @@ The direction (nx, ny, 1) is shortened to length 1 and stored in the colour chan
 **Try it (15 minutes).** Open `assets/sprites/atlas/characters_n.png` in an image viewer: the purple-blue picture is the hero's surface directions. Then change `kBodyStrength` in `normal_art.cpp` to 4.0, run `odysseus_atlas --normals` and look again.
 
 **Check yourself.** Why is the colour of a flat surface (128, 128, 255), a light purple-blue, and not black?
+## US-242 Day, night and seasons: interpolating curves over time
+
+**What we built.** The light now follows the game clock: night, orange dawn, bright day, orange dusk. Summer days are long, winter days short.
+
+**The C++ idea: interpolation (lerp).** Between two known moments, the value in between is a straight blend. With `t` from 0 to 1:
+
+```cpp
+const auto mix = [t](double x, double y) { return x + (y - x) * t; };
+ambientR = mix(a.red / 255.0 * a.strength, b.red / 255.0 * b.strength);
+```
+
+`t` is how far the clock has gone from one keyframe to the next: `(now - from) / (to - from)`. The sun uses a sine: `elevation = peak * sin(pi * f)`, where `f` is how far through the day it is; the sine rises, peaks at noon and falls back, which is exactly the shape of a sun's path.
+
+**Where to look.** `skyAt` in `src/game/sky.cpp`; `OdysseyGame::sky()` in `src/game/odyssey_game.cpp`.
+
+**Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan --clan-speed 20` and watch a day pass. Then edit the `Winter` sunset in `calendar.json` to 12.0 and see how early the evening comes.
+
+**Check yourself.** Why is the first keyframe of the day not at hour 0, and how does the code make the last keyframe join it over midnight?

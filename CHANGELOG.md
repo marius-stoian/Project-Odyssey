@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-242: day, night and seasons (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-242/`.
+
+- `assets/data/light/sky.json` (keyframes relative to sunrise and sunset, D-49 values, sun and moon peaks) and `daylight` in `assets/data/sim/calendar.json` (summer 15 h, winter 8 h); the simulation ignores the new part. `skyAt` blends the light from the clan's clock; the world's ambient follows it; the moon is the dim blue light of the night and gives the shadow direction.
+- Guide `docs/guides/lighting.md` extended. Tests: `tests/game/sky_test.cpp`. The GPU-against-SDL picture test runs with the sky off.
 ## US-241: generated normal maps (Mraw) - 2026-10-02
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-241/`.

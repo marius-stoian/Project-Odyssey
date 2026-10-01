@@ -2,6 +2,7 @@
 // GPU half, a graphics card with Direct3D 12: where there is none (a CI runner) the test says so and passes (the fallback test covers that case).
 #include "camp.h"
 
+#include "game/sky.h"
 #include "luna/engine/renderer.h"
 #include "luna/platform/system.h"
 #include "luna/platform/window.h"
@@ -28,6 +29,14 @@ std::optional<platform::Pixels> drawn(const Scene& scene, platform::RendererChoi
         platform::Window window({"US-230 test", 1280, 720, 480, 270, true, choice});
         if (backend != nullptr) *backend = window.backendName();
         luna::engine::WindowRenderer renderer(window);
+        // The pictures of the two renderers are compared pixel for pixel, so the light of the time of day is switched off here: the fallback
+        // renderer tints by the ambient colour with whole numbers and the GPU with fractions (the lighting tests compare that to two levels).
+        {
+            const fs::path skyFile = scene.data / "light" / "sky.json";
+            game::SkyData sky = game::loadSky(skyFile, scene.data / "sim" / "calendar.json");
+            sky.enabled = false;
+            writeText(skyFile, game::skyToText(sky));
+        }
         game::OdysseyGame odyssey(scene.data, scene.level);
         odyssey.start(renderer);
         if (scene.run) {

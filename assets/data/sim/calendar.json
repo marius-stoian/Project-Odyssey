@@ -1,4 +1,10 @@
 {
   "ticksPerDay": 2400,
-  "daysPerSeason": 7
+  "daysPerSeason": 7,
+  "daylight": {
+    "Spring": { "sunrise": 6.0, "sunset": 18.0 },
+    "Summer": { "sunrise": 5.0, "sunset": 20.0 },
+    "Autumn": { "sunrise": 6.5, "sunset": 17.5 },
+    "Winter": { "sunrise": 8.0, "sunset": 16.0 }
+  }
 }
