@@ -18,6 +18,9 @@ public:
     void draw(const Texture& texture, const Rect& source, Point at) override;
     void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) override;
 
+    void measureGpu(bool on) override { inner_.measureGpu(on); }
+    double gpuMilliseconds() const override { return inner_.gpuMilliseconds(); }
+
     int scale() const { return scale_; }
 
 private:

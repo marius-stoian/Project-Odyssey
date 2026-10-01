@@ -24,6 +24,10 @@ public:
 
     virtual std::string name() const = 0; // "sdl (direct3d11)", "gpu (direct3d12)"
     virtual bool vsyncEnabled() const = 0;
+    // GPU time (US-234): SDL_GPU has no timestamp queries, so with timing on, present() waits for the card to finish the frame and
+    // measures submit-to-done. It costs a little speed, so it is off unless the overlay (F3) or a performance run asks. -1: not measured.
+    virtual void setGpuTiming(bool) {}
+    virtual double gpuMilliseconds() const { return -1.0; }
 
     // A new frame: black bars outside the virtual screen, `red green blue` inside it.
     virtual void clear(int red, int green, int blue) = 0;

@@ -378,7 +378,9 @@ void OdysseyGame::tickStatus(Enemy& enemy) {
 
 // The clan's simulation: the same world for the same level every time (its seed is the hash of the level's name).
 void OdysseyGame::startClan() {
-    clan_ = std::make_unique<sim::World>(WeatherCycle::seedFromText(level_.name) ^ 0x9E3779B97F4A7C15ULL, sim::loadSimConfig(dataDirectory_));
+    sim::SimConfig simConfig = sim::loadSimConfig(dataDirectory_);
+    if (startingPeople_ > 0) simConfig.clan.startingPeople = startingPeople_; // a performance run (US-234), past the file's 200 limit
+    clan_ = std::make_unique<sim::World>(WeatherCycle::seedFromText(level_.name) ^ 0x9E3779B97F4A7C15ULL, simConfig);
     exchanges_.reset(clan_->chronicle().entries().size());
     // The camp is where the fire burns: the first flame placed in the level, else where the hero starts.
     PixelPoint camp = level_.heroStart;
@@ -916,6 +918,46 @@ double OdysseyGame::framesPerSecond() const {
     return ms > 0.0 ? 1000.0 / ms : 0.0;
 }
 
+double OdysseyGame::drawMilliseconds() const {
+    if (drawTimesFilled_ == 0) return 0.0;
+    double total = 0.0;
+    for (std::size_t i = 0; i < drawTimesFilled_; ++i) total += drawTimes_[i];
+    return total / static_cast<double>(drawTimesFilled_);
+}
+
+// One drawn frame: the draw time, the card's time (when measured) and, in a performance run, the totals and a line a minute.
+void OdysseyGame::recordFrame(double drawMs, double gpuMs) {
+    drawTimes_[drawTimeAt_] = drawMs;
+    drawTimeAt_ = (drawTimeAt_ + 1) % drawTimes_.size();
+    drawTimesFilled_ = std::min(drawTimesFilled_ + 1, drawTimes_.size());
+    gpuMs_ = gpuMs;
+    if (!perfLog_ || frameTimesFilled_ == 0) return;
+    const double frameMs = frameTimes_[(frameTimeAt_ + frameTimes_.size() - 1) % frameTimes_.size()];
+    ++perf_.frames;
+    if (frameMs > 20.0) ++perf_.over20;
+    perf_.frameSum += frameMs;
+    perf_.frameMax = std::max(perf_.frameMax, frameMs);
+    perf_.drawSum += drawMs;
+    perf_.drawMax = std::max(perf_.drawMax, drawMs);
+    if (gpuMs >= 0.0) {
+        perf_.gpuSum += gpuMs;
+        perf_.gpuMax = std::max(perf_.gpuMax, gpuMs);
+        ++perf_.gpuFrames;
+    }
+    perf_.tickWorst = std::max(perf_.tickWorst, worstTickMilliseconds());
+    const auto now = std::chrono::steady_clock::now();
+    if (perfLastLog_.time_since_epoch().count() == 0) perfLastLog_ = now;
+    if (now - perfLastLog_ >= std::chrono::seconds(60)) {
+        perfLastLog_ = now;
+        const double frames = static_cast<double>(perf_.frames);
+        core::logInfo(std::format("Perf: {} frames, {:.1f} FPS average, frame {:.2f} ms (max {:.1f}), {} frames over 20 ms, draw {:.2f} ms (max {:.1f}), "
+                                  "gpu {:.2f} ms (max {:.1f}), tick {:.2f} ms (worst {:.1f}), people {}",
+                                  perf_.frames, 1000.0 * frames / perf_.frameSum, perf_.frameSum / frames, perf_.frameMax, perf_.over20,
+                                  perf_.drawSum / frames, perf_.drawMax, perf_.gpuFrames > 0 ? perf_.gpuSum / static_cast<double>(perf_.gpuFrames) : -1.0,
+                                  perf_.gpuMax, tickMilliseconds(), perf_.tickWorst, clan_ ? clan_->population() : 0));
+    }
+}
+
 double OdysseyGame::tickMilliseconds() const {
     if (tickTimesFilled_ == 0) return 0.0;
     double total = 0.0;
@@ -933,11 +975,16 @@ double OdysseyGame::worstTickMilliseconds() const {
 void OdysseyGame::drawOverlay(luna::engine::Renderer& renderer) const {
     if (!overlayOn_) return;
     luna::engine::UiPainter painter(renderer, uiSheet_);
-    const std::string line = std::format("FPS {:.0f}  frame {:.1f} ms  tick {:.2f} ms (worst {:.2f})  people {}", framesPerSecond(), frameMilliseconds(), tickMilliseconds(), worstTickMilliseconds(),
-                                         clan_ ? clan_->population() : 0);
-    const luna::engine::Rect box{2, uiHeight() - luna::engine::kGlyphHeight - 8, luna::engine::UiPainter::textWidth(line) + 8, luna::engine::kGlyphHeight + 6};
+    // CPU: the simulation tick and the drawing. GPU: the card's time for the frame (the fallback renderer cannot measure it).
+    const std::string cpu = std::format("FPS {:.0f}  frame {:.1f} ms  CPU: tick {:.2f} ms (worst {:.2f}), draw {:.2f} ms", framesPerSecond(), frameMilliseconds(), tickMilliseconds(),
+                                        worstTickMilliseconds(), drawMilliseconds());
+    const std::string gpu = std::format("GPU {}  people {}", gpuMs_ >= 0.0 ? std::format("{:.2f} ms", gpuMs_) : std::string("n/a"), clan_ ? clan_->population() : 0);
+    const int width = std::max(luna::engine::UiPainter::textWidth(cpu), luna::engine::UiPainter::textWidth(gpu)) + 8;
+    const int height = 2 * luna::engine::kLineHeight + 4;
+    const luna::engine::Rect box{2, uiHeight() - height - 4, width, height};
     painter.fill(box, luna::engine::UiColor::Shade);
-    painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
+    painter.text(box.x + 4, box.y + 3, cpu, luna::engine::UiColor::Text);
+    painter.text(box.x + 4, box.y + 3 + luna::engine::kLineHeight, gpu, luna::engine::UiColor::Text);
 }
 
 void OdysseyGame::say(const std::string& text) {
@@ -1959,6 +2006,16 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
 }
 
 void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
+    // Draw time and GPU time (US-234): the card is only asked to measure while the overlay or a performance run needs it.
+    struct DrawTimer {
+        OdysseyGame& game;
+        luna::engine::Renderer& output;
+        std::chrono::steady_clock::time_point started = std::chrono::steady_clock::now();
+        ~DrawTimer() {
+            game.recordFrame(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count(), output.gpuMilliseconds());
+        }
+    } drawTimer{*this, output};
+    output.measureGpu(overlayOn_ || perfLog_);
     const auto renderStarted = std::chrono::steady_clock::now();
     if (lastRender_.time_since_epoch().count() != 0) {
         frameTimes_[frameTimeAt_] = std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count();

@@ -8,6 +8,14 @@ namespace luna::engine {
 
 WindowRenderer::WindowRenderer(platform::Window& window) : window_(window) {}
 
+void WindowRenderer::measureGpu(bool on) {
+    window_.setGpuTiming(on);
+}
+
+double WindowRenderer::gpuMilliseconds() const {
+    return window_.gpuMilliseconds();
+}
+
 Texture WindowRenderer::createTexture(const Image& image) {
     return {window_.createTexture(image.width(), image.height(), image.data()), image.width(), image.height()};
 }

@@ -78,6 +78,8 @@ public:
 
     std::string name() const override { return std::string("gpu (") + driver_ + ")"; }
     bool vsyncEnabled() const override { return true; } // the swapchain presents with VSync
+    void setGpuTiming(bool on) override { timing_ = on; }
+    double gpuMilliseconds() const override { return timing_ ? gpuMilliseconds_ : -1.0; }
     void setScalingMode(odysseus::core::ScalingMode mode) override { scaling_ = mode; }
 
     void clear(int red, int green, int blue) override {
@@ -164,6 +166,9 @@ public:
         }
     }
 
+    bool timing_ = false;
+    double gpuMilliseconds_ = 0.0;
+
     odysseus::core::Rect presentationRect() const override {
         const odysseus::core::Rect size = outputRect();
         return odysseus::core::presentationArea(size.width, size.height, virtualWidth_, virtualHeight_, scaling_);
@@ -182,6 +187,23 @@ public:
             fail("Cannot start a frame");
         }
         recordScene(commands);
+        if (timing_) {
+            // The scene (every sprite of the frame, drawn into the virtual screen) is sent on its own and waited for, so the time is
+            // the card's work and not the wait for the monitor's refresh that the window's picture brings (US-234).
+            // The card first finishes the last frame (its picture waits for the monitor), so that only this frame's work is timed.
+            SDL_WaitForGPUIdle(device_);
+            const std::uint64_t started = SDL_GetPerformanceCounter();
+            SDL_GPUFence* fence = SDL_SubmitGPUCommandBufferAndAcquireFence(commands);
+            if (fence != nullptr) {
+                SDL_WaitForGPUFences(device_, true, &fence, 1);
+                SDL_ReleaseGPUFence(device_, fence);
+            }
+            gpuMilliseconds_ = 1000.0 * static_cast<double>(SDL_GetPerformanceCounter() - started) / static_cast<double>(SDL_GetPerformanceFrequency());
+            commands = SDL_AcquireGPUCommandBuffer(device_);
+            if (commands == nullptr) {
+                fail("Cannot start a frame");
+            }
+        }
         SDL_GPUTexture* swapchain = nullptr;
         Uint32 width = 0;
         Uint32 height = 0;
@@ -196,7 +218,6 @@ public:
         vertices_.clear();
         batches_.clear();
     }
-
     Pixels readPixels() override {
         // The frame so far is drawn once more into a picture the size of the window, then copied back. Slow; for tests and screenshots.
         const odysseus::core::Rect size = outputRect();
