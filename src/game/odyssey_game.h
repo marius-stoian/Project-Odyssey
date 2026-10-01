@@ -22,7 +22,9 @@
 #include "game/effect_art.h"
 #include "game/plants.h"
 #include "game/run_flow.h"
+#include "game/session_stats.h"
 #include "game/settings.h"
+#include "game/tutorial.h"
 #include "game/weather.h"
 #include "game/level.h"
 #include "game/spear_range.h"
@@ -119,7 +121,14 @@ public:
     RunFlow& run() { return runFlow_; }
     const RunFlow& run() const { return runFlow_; }
     // useRegion false starts the run in the level already loaded (a hand-made camp) instead of a generated region.
-    void startNewRun(const sim::NewGame& game, bool useRegion = true);
+    void startNewRun(const sim::NewGame& game, bool useRegion = true, bool tutorial = false);
+    // The elder's first-day guidance (US-090) and the opt-in session statistics (US-092).
+    Tutorial& tutorial() { return tutorial_; }
+    const Tutorial& tutorial() const { return tutorial_; }
+    SessionStats& stats() { return stats_; }
+    void setStatistics(bool agreed);
+    // Writes the session's statistics file (only when the player agreed); called when the game ends. Returns the file or empty.
+    std::filesystem::path finishSession();
     void afterYear();                                    // the clan has lived a year while the hero grew up
     bool harvestPlant(std::size_t index);                // gathering takes a plant (it regrows): no healing, no leaf burst
     int plantAtWorld(double x, double y) const;          // the growing plant whose picture covers a world point, or -1
@@ -148,6 +157,7 @@ public:
     void setSaveDirectory(const std::filesystem::path& directory) {
         saveDirectory_ = directory;
         settings_ = loadSettings(saveDirectory_ / "settings.json", nullptr);
+        stats_.enable(settings_.statistics == 1);
     }
     const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
     bool autosave();              // false when it could not write
@@ -261,6 +271,11 @@ private:
     std::optional<sim::HeroData> heroData_;
     std::unique_ptr<sim::HeroLife> life_;
     RunFlow runFlow_;
+    Tutorial tutorial_;
+    TutorialScript tutorialScript_;
+    SessionStats stats_;
+    bool privacyAsked_ = false;
+    void drawTutorial(luna::engine::Renderer& renderer) const;
     bool overlayOn_ = false;
     std::array<double, 100> tickTimes_{};
     std::array<double, 60> frameTimes_{};

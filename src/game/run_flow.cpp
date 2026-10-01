@@ -19,7 +19,7 @@ constexpr int kReachPixels = 64;       // how close the hero must be to work wit
 constexpr int kBarterReachPixels = 96; // and to trade with a rival camp: 3 m
 
 enum ScreenIds {
-    kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
+    kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
     kTabBase = 300, kResolutionBase = 320, kFullscreen = 330, kVolumeDown = 331, kVolumeUp = 332, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
     kAcceptCounter = 582, kPayDebtBase = 600, kActionBase = 700
@@ -124,6 +124,7 @@ void RunFlow::build(OdysseyGame& game) {
     case Screen::Barter: buildBarter(game); break;
     case Screen::Context: buildContext(); break;
     case Screen::Ended: buildEnded(game); break;
+    case Screen::Privacy: buildPrivacy(); break;
     default: break;
     }
     if (!message_.empty() && screen_ != Screen::None) {
@@ -151,8 +152,19 @@ void RunFlow::buildNewGame(OdysseyGame& game) {
     line("Comfort:", UiColor::Dim);
     for (std::size_t i = 0; i < data.config.comforts.size(); ++i) button(data.config.comforts[i].name, kComfortBase + static_cast<int>(i), true, static_cast<int>(i) == comfort_);
     newRow();
-    cursorY_ += kRowHeight + 10;
+    cursorY_ += kRowHeight + 6;
+    button(tutorial_ ? "Tutorial: on" : "Tutorial: off", kTutorialToggle, true, tutorial_, panel_.x + 8, 100);
+    cursorY_ += kRowHeight + 6;
     button("Start", kStart, true, false, panel_.x + 8, 60);
+}
+
+void RunFlow::buildPrivacy() {
+    title("SESSION STATISTICS");
+    paragraph("May the game keep a small file on this computer with how long you played and the key moments of the session? It helps the makers see how the game plays. The file stays on your computer; the game never sends anything anywhere. You can say no and play exactly the same.");
+    gap();
+    button("Yes, keep it on my computer", kStatsYes, true, false, panel_.x + 8, 180);
+    cursorY_ += kRowHeight + 6;
+    button("No, record nothing", kStatsNo, true, false, panel_.x + 8, 180);
 }
 
 void RunFlow::buildFocus(OdysseyGame& game) {
@@ -441,6 +453,14 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
         const bool close = near(camp.x, camp.y, kReachPixels);
         contextTitle_ = "The clan's fire";
         actions_.push_back({"Craft at the fire", tooFar(close, ""), [](OdysseyGame& g) { g.run().openCraft("fire"); }});
+        actions_.push_back({"Eat berries", !close ? "Too far away" : (hero->count("berries") == 0 ? "You have no berries" : ""), [](OdysseyGame& g) {
+                                g.run().setMessage(g.life()->eatBerries().message);
+                                g.tutorial().notify("eat");
+                            }});
+        actions_.push_back({"Tend the fire", tooFar(close, ""), [](OdysseyGame& g) {
+                                g.run().setMessage(g.life()->tendCampFire().message);
+                                g.tutorial().notify("tend");
+                            }});
         actions_.push_back({"Tend the sacred fire", hero->fire().founded ? "" : "No sacred fire yet", [](OdysseyGame& g) { g.run().setMessage(g.life()->tendFire().message); }});
         screen_ = Screen::Context;
         return true;
@@ -481,6 +501,7 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
         if (plant.def != nullptr && plant.def->edible && !plant.def->blocks) {
             actions_.push_back({"Gather", tooFar(close, ""), [index](OdysseyGame& g) {
                                     g.run().setMessage(g.life()->gatherBerries().message);
+                                    g.tutorial().notify("gather");
                                     g.harvestPlant(index);
                                 }});
         } else if (plant.kind == "moss") { // the flint nodule
@@ -587,15 +608,23 @@ void RunFlow::act(OdysseyGame& game, int id) {
     }
     message_.clear();
     switch (screen_) {
+    case Screen::Privacy: {
+        if (id == kStatsYes || id == kStatsNo) {
+            game.setStatistics(id == kStatsYes);
+            screen_ = Screen::NewGame;
+        }
+        break;
+    }
     case Screen::NewGame: {
-        if (id >= kPresetBase && id < kPresetBase + 10) preset_ = id - kPresetBase;
+        if (id == kTutorialToggle) tutorial_ = !tutorial_;
+        else if (id >= kPresetBase && id < kPresetBase + 10) preset_ = id - kPresetBase;
         else if (id >= kComfortBase && id < kComfortBase + 10) comfort_ = id - kComfortBase;
         else if (id == kStart) {
             sim::NewGame newGame;
             newGame.seed = seedText_.empty() ? randomSeed() : std::stoull(seedText_);
             newGame.preset = preset_;
             newGame.comfort = comfort_;
-            game.startNewRun(newGame);
+            game.startNewRun(newGame, true, tutorial_);
         }
         break;
     }

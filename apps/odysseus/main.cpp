@@ -24,6 +24,7 @@
 #include "game/odyssey_game.h"
 #include "luna/engine/application.h"
 #include "luna/engine/physics_view.h"
+#include "luna/platform/crash.h"
 #include "luna/platform/system.h"
 #include "luna/platform/user_paths.h"
 
@@ -184,10 +185,17 @@ int main(int argc, char* argv[]) {
     std::cout << "Project Odyssey " << version << "\nLog: " << log.file().string() << '\n';
 
     try {
-        odysseus::game::OdysseyGame game(ODYSSEUS_DATA_DIR, arguments.level);
+        // A packaged build (the zip, US-091) keeps assets/ next to odysseus.exe and its saves in the user's folder; a developer's
+        // build uses the source folder it was built from.
+        const std::filesystem::path packaged = luna::platform::executableDirectory() / "assets" / "data";
+        const bool isPackaged = std::filesystem::exists(packaged / "hero" / "hero.json");
+        odysseus::game::OdysseyGame game(isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR), arguments.level);
         if (!arguments.saveDirectory.empty()) {
             game.setSaveDirectory(arguments.saveDirectory);
+        } else if (isPackaged) {
+            game.setSaveDirectory(luna::platform::userDataDirectory() / "saves");
         }
+        luna::platform::installCrashHandler(luna::platform::userDataDirectory() / "crash", game.saveDirectory());
         if (arguments.region) {
             game.loadRegion(*arguments.region);
         }
@@ -219,6 +227,9 @@ int main(int argc, char* argv[]) {
             odysseus::core::logInfo(std::format("Straw target at ({:.2f}, {:.2f}) m: {} hits, {:.1f} damage",
                                                 luna::engine::toDouble(target.base.x), luna::engine::toDouble(target.base.y),
                                                 target.hits, luna::engine::toDouble(target.damageTaken)));
+        }
+        if (const std::filesystem::path stats = game.finishSession(); !stats.empty()) {
+            odysseus::core::logInfo("Session statistics written to " + stats.string());
         }
         odysseus::core::logInfo("Shutting down");
         return exitCode;

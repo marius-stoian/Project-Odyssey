@@ -574,6 +574,23 @@ ActionResult HeroLife::tendFire() {
     return {true, std::format("You tend {}.", fire_.name)};
 }
 
+ActionResult HeroLife::eatBerries() {
+    if (!take("berries", 1)) return {false, "You have no berries."};
+    if (Person* hero = world_->personMutable(personId_)) {
+        int& hunger = hero->needs[Need::Hunger];
+        hunger = std::min(100, hunger + world_->config().needs.mealValue);
+    }
+    return {true, "You eat the berries."};
+}
+
+ActionResult HeroLife::tendCampFire() {
+    if (Person* hero = world_->personMutable(personId_)) {
+        int& warmth = hero->needs[Need::Warmth];
+        warmth = std::min(100, warmth + 20);
+    }
+    return {true, "You feed the clan's fire."};
+}
+
 int HeroLife::agingPercent(int years) const {
     const AgingConfig& a = data_->config.aging;
     return years < a.fromYears ? 0 : a.startPercent + a.perYearPercent * (years - a.fromYears);

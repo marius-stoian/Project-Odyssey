@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M6: Playtest readiness - US-090, US-091, US-092 (Avengers) - 2026-10-01
+
+**State:** Built and compiled; tests written, not run; merged into local `qa`. X-M6 waits for the owner (D-GATE-M6).
+
+- Tutorial (`tutorial.*`, `tutorial.json`), crash report (`luna::platform::installCrashHandler`), packaging (install rules and CPack zip), opt-in session statistics (`session_stats.*`), the first-launch Privacy screen, `HeroLife::eatBerries` and `tendCampFire`.
+- D-33 records the choices. Tests: `tests/game/m6_test.cpp`. Exit review `docs/gates/M6.md`.
+
 ## M5: The vertical slice - US-050..US-055, US-060..US-063, US-070..US-073, US-081, US-082 (Avengers) - 2026-10-01
 
 **State:** Built and compiled (Debug); simulation tests written, not run (owner: no testing); merged into local `qa`.

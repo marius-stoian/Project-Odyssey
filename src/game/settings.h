@@ -14,6 +14,7 @@ struct GameSettings {
     int width = 1280;
     int height = 720;
     int volume = 80; // 0..100 (there is no sound yet: it is kept for when there is)
+    int statistics = 0; // local session statistics (US-092): 0 not asked yet, 1 agreed, 2 declined
     friend bool operator==(const GameSettings&, const GameSettings&) = default;
 };
 

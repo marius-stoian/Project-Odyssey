@@ -70,6 +70,7 @@ odysseus_apply_settings(odysseus_core)
 add_library(luna_platform STATIC
     src/luna/platform/layer.cpp
     src/luna/platform/sdl_events.cpp
+    src/luna/platform/crash.cpp
     src/luna/platform/system.cpp
     src/luna/platform/user_paths.cpp
     src/luna/platform/window.cpp)
@@ -174,6 +175,8 @@ add_library(odysseus_game STATIC
     src/game/region_level.cpp
     src/game/run_flow.cpp
     src/game/settings.cpp
+    src/game/tutorial.cpp
+    src/game/session_stats.cpp
     src/game/level.cpp
     src/game/editor.cpp
     src/game/editor_history.cpp)
@@ -299,6 +302,7 @@ set_tests_properties(luna_window_tests PROPERTIES LABELS window TIMEOUT 120)
 add_executable(odysseus_game_tests
     tests/main.cpp
     tests/game/hero_test.cpp
+    tests/game/m6_test.cpp
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
     tests/game/level_test.cpp
@@ -405,3 +409,14 @@ add_test(NAME "X-M2c Two scripted presses"
     COMMAND "${CMAKE_COMMAND}" -DGAME=$<TARGET_FILE:odysseus> -DWORK_DIR=${CMAKE_BINARY_DIR}/e2e/twopresses
             -DLEVEL=${PROJECT_SOURCE_DIR}/assets/levels/demo.json -P "${PROJECT_SOURCE_DIR}/tests/game/run_two_presses.cmake")
 set_tests_properties("X-M2c Two scripted presses" PROPERTIES LABELS window TIMEOUT 120)
+
+# Playtest package (US-091): `cmake --build --preset windows-x64-release --target package` makes a zip that unpacks and runs on a
+# Windows 10/11 x64 PC without developer tools: odysseus.exe, the SDL3 library it needs, and the assets folder it reads at start.
+install(TARGETS odysseus RUNTIME DESTINATION .)
+install(FILES $<TARGET_RUNTIME_DLLS:odysseus> DESTINATION . OPTIONAL)
+install(DIRECTORY assets/ DESTINATION assets PATTERN "saves" EXCLUDE PATTERN "*.bak" EXCLUDE)
+install(FILES README.md DESTINATION . OPTIONAL)
+set(CPACK_GENERATOR ZIP)
+set(CPACK_PACKAGE_NAME "ProjectOdyssey-playtest")
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+include(CPack)

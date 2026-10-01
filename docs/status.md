@@ -104,11 +104,11 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-081 | US-081 | M5 | Done | 2026-10-01 |
 | S-US-082 | US-082 | M5 | Done | 2026-10-01 |
 | X-M5 | - | M5 | To do |  |
-| K-M6 | - | M6 | To do |  |
-| S-US-090 | US-090 | M6 | To do |  |
-| S-US-091 | US-091 | M6 | To do |  |
-| S-US-092 | US-092 | M6 | To do |  |
-| X-M6 | - | M6 | To do |  |
+| K-M6 | - | M6 | Done | 2026-10-01 |
+| S-US-090 | US-090 | M6 | Done | 2026-10-01 |
+| S-US-091 | US-091 | M6 | Done | 2026-10-01 |
+| S-US-092 | US-092 | M6 | Done | 2026-10-01 |
+| X-M6 | - | M6 | Blocked | waits for the owner (D-GATE-M6) |
 
 
 US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Mraw on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).
