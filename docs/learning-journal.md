@@ -1122,3 +1122,18 @@ The tie is the interesting part. Two scripts can be equally good, and `max_eleme
 **Try it (15 minutes).** The manual checks in [docs/plans/US-162.md](plans/US-162.md); then add a fourth greeting for anyone and see, by restarting a few times, that it joins the rotation.
 
 **Check yourself.** Why does `choose` compare with `better(c, best) == false && better(best, c) == false` to find the tied scripts instead of `c == best`, and what would happen if the `@priority` of two scripts differed by one?
+
+
+## M8: building text from facts (US-163)
+
+Small talk is not written one sentence at a time; it is **assembled**. A template is a sentence with holes, `"I keep thinking about {memory.what}."`, and the generator fills the holes from facts it reads out of the simulation: what the person remembers, what they heard, which need is lowest. The same few templates give many different lines, because the facts differ. This is called *templating*, and most game dialogue that reacts to the world is built this way.
+
+Two ideas are worth taking from the code. First, **the facts are turned into plain phrases once, in one place** (`phraseOf`): a memory of kind `Blame` becomes "Bo blaming Ama", and "you" or "me" replaces a name when the hero or the speaker is meant. Every template can then use the same phrase after "about", so adding a template never means writing new code. Second, **variety is a rule, not luck**: the generator remembers the last lines said (three per person, fifty in all) and avoids a line that is tired out. The test does not hope for variety; it counts, over fifty lines and four seeds, and fails if any line appears three times.
+
+One detail echoes the last story: `say` draws three random numbers *every time*, even when it does not need them, so what the stream gives to the next system never depends on what a person happens to remember.
+
+**Where to look.** `SmallTalk::say` and `phraseOf` in [src/sim/smalltalk.cpp](../src/sim/smalltalk.cpp); the templates in [assets/data/dialogue/smalltalk.json](../assets/data/dialogue/smalltalk.json); the checker in `SmalltalkData::parse`.
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-163.md](plans/US-163.md); then add three templates to the `hunt` topic, press F5, and ask the elder about the hunt a few times.
+
+**Check yourself.** Why is a template that uses `{gossip.who}` a mistake in the topic `memory`, and what would the generator print if the file checker did not catch it?

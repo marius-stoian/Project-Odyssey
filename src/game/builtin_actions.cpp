@@ -214,8 +214,26 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
     who.name = subject.name;
     who.roles = sim::rules::rolesOf(*game.clan(), subject.index);
     const sim::rules::DlgScript* script = sim::rules::selectScript(game.dialogues(), who, context, game.dialogueRandom());
-    if (script == nullptr) return false;
-    game.run().openTalk(sim::rules::Conversation(*script, kHeroActor, refOf(game, subject)), subject);
+    const int person = subject.index;
+    const int hero = game.life() != nullptr ? game.life()->personId() : -1;
+    // `{smalltalk.topic}` in a script is a line made up from what this person remembers, heard and needs.
+    const auto smalltalkSource = [&game, person, hero](const std::string& topic) {
+        const auto said = game.smalltalk().say(*game.clan(), person, hero, game.dialogueRandom(), topic);
+        return said ? said->text : std::string();
+    };
+    if (script != nullptr) {
+        sim::rules::Conversation conversation(*script, kHeroActor, refOf(game, subject));
+        conversation.setSmalltalk(smalltalkSource);
+        game.run().openTalk(std::move(conversation), subject);
+        return true;
+    }
+    // No script fits them: small talk, their line and a friendly answer and a rude one. The old talk still warms the two to each other.
+    if (!game.smalltalk().ready() || hero < 0) return false;
+    const auto said = game.smalltalk().say(*game.clan(), person, hero, game.dialogueRandom());
+    if (!said) return false;
+    if (game.life() != nullptr) game.life()->talkTo(person);
+    game.run().openTalk(sim::rules::Conversation(sim::rules::smalltalkScript(subject.name, said->text), kHeroActor, refOf(game, subject)), subject);
+    game.run().setMessage({});
     return true;
 }
 

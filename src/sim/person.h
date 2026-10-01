@@ -82,6 +82,7 @@ struct Person {
     Action action = Action::Rest; // what they are doing this hour
     Decision lastDecision;
     std::vector<Memory> memories;   // oldest first (US-013)
+    std::vector<MemoryNote> notes;  // what they remember that is not about two people, oldest first (US-163); saved, never read by the simulation
     std::vector<int> opinions;      // opinion of every person, by id: -100..100
     std::vector<Grudge> grudges;    // why they think badly of others (M2b), oldest first
     std::int64_t lastGiftDay = -1;  // one gift a day at most

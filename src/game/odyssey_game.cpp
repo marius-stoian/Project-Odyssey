@@ -138,6 +138,7 @@ void OdysseyGame::resetPlay() {
     actionClock_ = 0;
     bubbles_.clear(); // a restart starts the run's talk afresh
     greetingCooldowns_.clear();
+    smalltalk_.clear();
     dialogueRng_ = core::Pcg32(1, 8);
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
@@ -622,6 +623,16 @@ std::vector<int> OdysseyGame::attendeesAt(double x, double y, int radiusTiles) c
     return near;
 }
 
+// assets/data/dialogue/smalltalk.json, when there is one (the game plays without small talk when it is not there). Mistakes go in `report`.
+sim::rules::SmallTalk OdysseyGame::loadSmalltalk(sim::rules::LoadReport& report) const {
+    const std::filesystem::path file = dataDirectory_ / "dialogue" / "smalltalk.json";
+    std::error_code ec;
+    if (!std::filesystem::exists(file, ec)) return {};
+    ++report.filesRead;
+    if (auto data = sim::rules::SmalltalkData::load(file, "dialogue/smalltalk.json", report)) return sim::rules::SmallTalk(std::move(*data));
+    return {};
+}
+
 void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
@@ -631,6 +642,7 @@ void OdysseyGame::loadInteractions() {
     interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_, options);
     sim::rules::LoadReport dialogueReport;
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
+    smalltalk_ = loadSmalltalk(dialogueReport);
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
@@ -651,6 +663,7 @@ bool OdysseyGame::reloadInteractions() {
     sim::rules::InteractionRegistry fresh = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", report, options);
     sim::rules::LoadReport dialogueReport;
     sim::rules::DialogueLibrary freshDialogue = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
+    sim::rules::SmallTalk freshSmalltalk = loadSmalltalk(dialogueReport);
     report.errors.insert(report.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     report.warnings.insert(report.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     report.filesRead += dialogueReport.filesRead;
@@ -664,6 +677,7 @@ bool OdysseyGame::reloadInteractions() {
     }
     interactions_ = std::move(fresh);
     dialogues_ = std::move(freshDialogue);
+    smalltalk_ = std::move(freshSmalltalk);
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
 }
