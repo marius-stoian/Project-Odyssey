@@ -1,0 +1,9 @@
+{
+  "id": "ask-to-teach-flint-knapper",
+  "label": "Ask to teach you Flint-knapper",
+  "actors": ["hero"],
+  "target": { "tags": ["person", "teaches-flint-knapper"] },
+  "range": 2,
+  "order": 33,
+  "effects": [ "do ask-to-teach flint-knapper" ]
+}

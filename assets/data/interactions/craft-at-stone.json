@@ -1,0 +1,10 @@
+// The knapping stone.
+{
+  "id": "craft-at-stone",
+  "label": "Craft",
+  "actors": ["hero"],
+  "target": { "tags": ["knapping-stone"] },
+  "range": 2,
+  "order": 10,
+  "effects": [ "do open-craft knapping-stone" ]
+}

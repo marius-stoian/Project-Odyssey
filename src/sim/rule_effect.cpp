@@ -151,6 +151,7 @@ const std::vector<VerbInfo>& knownVerbs() {
         {"say", 1, 1, "show a speech bubble: say \"Hello, {hero.name}\""},
         {"fx", 1, 1, "play a visual effect from effects.json: fx leaves"},
         {"sound", 1, 1, "play a sound: sound pop"},
+        {"do", 1, 4, "run an action built into the game: do give-berries"},
         {"after", 3, 1000, "do an effect later (s, m or d): after 15s set target.state ripe"},
         {"chronicle", 1, 1, "write a line in the clan's chronicle: chronicle \"{actor.name} shared berries\""},
     };

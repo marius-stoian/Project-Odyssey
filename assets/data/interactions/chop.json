@@ -1,0 +1,10 @@
+// Plants that block walking: trees, tall bushes.
+{
+  "id": "chop",
+  "label": "Chop wood",
+  "actors": ["hero"],
+  "target": { "tags": ["plant", "solid"] },
+  "range": 2,
+  "order": 10,
+  "effects": [ "do chop" ]
+}

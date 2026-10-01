@@ -1,21 +1,16 @@
-// Gather from a plant that is ripe (US-150). The owner may edit this file in any text editor;
-// the game reads it when it starts, and F5 reloads it while the game runs.
+// Gather from a plant that is ripe. Today it does what the game always did: the hero gathers at once and the plant regrows
+// elsewhere (the built-in action "gather"). US-153 turns this into a timed action with the effects written out here.
 {
   "id": "gather",
-  "label": "Gather {target.name}",
-  "note": "The first interaction written as data. Today's Gather still runs from code until US-152 moves it here.",
+  "label": "Gather",
+  "note": "Reach 2 m, instant: the same as before the interactions moved into data.",
   "actors": ["hero", "person"],
   "target": { "tags": ["edible", "plant"] },
-  "range": 1.5,        // metres
-  "duration": 3.0,     // seconds
+  "range": 2,
+  "order": 10,
   "requires": [
-    { "if": "season != winter",     "else": "Nothing grows in winter" },
     { "if": "target.state == ripe", "else": "Nothing to pick yet" }
   ],
-  "effects": [
-    "give actor berries 2",
-    "set target.state picked",
-    "after 15s set target.state ripe"
-  ],
+  "effects": [ "do gather" ],
   "npc": { "score": "need(hunger) * 2 + trait(diligent) * 10", "cooldown": 60 }
 }

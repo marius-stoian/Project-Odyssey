@@ -76,9 +76,9 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     dataDirectory_ = dataDirectory;
-    loadInteractions();
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
+    loadInteractions(); // after the hero data: the professions give people their `teaches-...` tags
     {
         std::string note;
         settings_ = loadSettings(saveDirectory_ / "settings.json", &note);
@@ -606,6 +606,7 @@ void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
     options.knownTags = knownTags(); // an interaction aimed at a tag nothing carries gets a warning naming file and tag
+    options.knownBuiltins.insert(builtInActionNames().begin(), builtInActionNames().end());
     interactionReport_ = {};
     interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_, options);
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
@@ -619,6 +620,7 @@ bool OdysseyGame::reloadInteractions() {
     const auto started = std::chrono::steady_clock::now();
     sim::rules::LoadOptions options;
     options.knownTags = knownTags();
+    options.knownBuiltins.insert(builtInActionNames().begin(), builtInActionNames().end());
     sim::rules::LoadReport report;
     sim::rules::InteractionRegistry fresh = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", report, options);
     lastInteractionReloadMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
@@ -660,6 +662,7 @@ void OdysseyGame::drawInteractionPanel(luna::engine::Renderer& renderer) const {
 std::set<std::string> OdysseyGame::knownTags() const {
     std::set<std::string> tags = catalogs_.knownTags();
     for (const CharacterKindDef& kind : definitions_.characters) tags.insert(kind.tags.begin(), kind.tags.end());
+    for (const std::string& tag : builtInThingTags(*this)) tags.insert(tag); // the game's own things: people, fires, the stone, camps
     return tags;
 }
 
@@ -669,11 +672,14 @@ sim::rules::ThingInfo OdysseyGame::plantThing(std::size_t index) const {
 }
 
 std::vector<sim::rules::Offer> OdysseyGame::plantOffers(std::size_t index) const {
-    const WorldPlant& plant = plants_.at(index);
-    const double pixels = std::hypot(plant.feet.x - hero_.feetX(), plant.feet.y - hero_.feetY());
+    return offersFor(plantSubject(*this, index));
+}
+
+std::vector<sim::rules::Offer> OdysseyGame::offersFor(const Subject& subject) const {
+    const double pixels = std::hypot(subject.x - hero_.feetX(), subject.y - hero_.feetY());
     const sim::rules::ThingInfo hero{"hero", {"hero", "person"}};
-    const GameRuleContext context(*this, static_cast<int>(index));
-    return interactions_.offered(hero, plantThing(index), static_cast<long long>(pixels * 1000.0 / kTileSize), context);
+    const GameRuleContext context(*this, subject);
+    return interactions_.offered(hero, subject.info, static_cast<long long>(pixels * 1000.0 / kTileSize), context);
 }
 
 void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {

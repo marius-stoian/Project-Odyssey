@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-152: The context menu from data (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-152`); merged into `qa`.
+
+- Simulation: the effect verb `do` (a built-in action of the game); `LoadOptions::knownBuiltins` makes an unknown built-in a load error.
+- Game: `Subject` and `subjectAt` (what the hero can act on), `GameRuleContext` for any subject, 14 built-in actions moved unchanged out of the old menu code (`builtin_actions.cpp`), `RunFlow::openContext` now builds the menu from the registry.
+- Data: 20 interaction files (every action the old menu had); `gather.json` now does what the game did (instant, 2 m, "Gather").
+- Docs and tests: guide sections "Built-in actions" and the tags of the game's things, `docs/plans/US-152.md`, teach-back, `tests/game/menu_test.cpp` (6 cases); US-150 and US-156 tests adapted (see the plan).
+
 ## US-156: Hot reload (F5) and the validation panel (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-156`); merged into `qa`.

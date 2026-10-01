@@ -51,6 +51,20 @@ public:
     bool update(OdysseyGame& game, const luna::engine::Intents& intents);
     void draw(luna::engine::Renderer& renderer, const luna::engine::Texture& uiSheet) const;
 
+    // The open context menu: its heading and its items with the reason each is greyed out (empty = possible). For tests and scripted play;
+    // press(game, kActionBase + i) chooses item i.
+    struct ContextEntry {
+        std::string label;
+        std::string reason;
+    };
+    std::vector<ContextEntry> contextEntries() const {
+        std::vector<ContextEntry> entries;
+        for (const ContextAction& action : actions_) entries.push_back({action.label, action.reason});
+        return entries;
+    }
+    const std::string& contextTitle() const { return contextTitle_; }
+    static constexpr int kContextBase = 700;
+
     // What the last action said (shown on the screen and kept for tests).
     const std::string& message() const { return message_; }
 

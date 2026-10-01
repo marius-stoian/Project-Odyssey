@@ -1038,3 +1038,15 @@ The reason the catalogs are *not* reloaded yet is the other half of the lesson: 
 **Try it (15 minutes).** The three manual checks in [docs/plans/US-156.md](plans/US-156.md).
 
 **Check yourself.** Why is "keep the old data when the new data has any mistake" safer than "load every good file and skip the bad one" during a reload, even though the game does the second at start?
+
+## M7: swapping the engine of a menu without changing how it drives (US-152)
+
+The right-click menu was 150 lines of "if it is a person, offer these; if it is the fire, offer those", each item with its own little function. The goal was to move all of that into data files while the game feels *exactly* the same, which is the textbook definition of **refactoring**: change the inside, keep the outside. Two habits made it safe. First, a **stable interface**: the menu still ends in "a list of labelled items with a reason when greyed out, and something to run when clicked", so the screen code that draws it did not change at all. Second, **tests first**: before the data was wired, the old behaviour was written down as tests (the same labels, order, reasons and results for a person, the fire and the stone), and the new menu had to pass the same sentences.
+
+The old code did not disappear; it moved. Each item's body became a **built-in action** with a name (`give-berries`, `tend-camp-fire`), and a data file points at it with `do give-berries`. That is a small version of a pattern you will see everywhere: a table from a name to a function (here `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp)). Later stories replace `do ...` lines with plain effects one at a time, and each replacement is again checked against the same tests.
+
+**Where to look.** `RunFlow::openContext` in [src/game/run_flow.cpp](../src/game/run_flow.cpp) (now short); `subjectAt` in [src/game/game_rules.cpp](../src/game/game_rules.cpp); `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp); any file in [assets/data/interactions/](../assets/data/interactions/).
+
+**Try it (15 minutes).** Do the three manual checks in [docs/plans/US-152.md](plans/US-152.md); then add `"order": 5` to `eat-berries.json`, press F5 and see it jump to the top of the fire's menu.
+
+**Check yourself.** Why was it important to write the tests for the old menu *before* connecting the new one, and what would you not know if you had written them afterwards from the new code?

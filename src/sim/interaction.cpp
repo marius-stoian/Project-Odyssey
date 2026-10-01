@@ -251,6 +251,16 @@ private:
         }
     }
 
+    void checkBuiltins(const Effect& effect, int line) {
+        if (effect.verb == "do" && options_ != nullptr && !options_->knownBuiltins.empty() && !effect.args.empty() && effect.args[0]->kind == Expr::Kind::Text &&
+            options_->knownBuiltins.count(effect.args[0]->text) == 0) {
+            std::string known;
+            for (const std::string& name : options_->knownBuiltins) known += (known.empty() ? "" : ", ") + name;
+            error(line, std::format("do names \"{}\", which the game does not know (it knows: {})", effect.args[0]->text, known));
+        }
+        if (effect.inner) checkBuiltins(*effect.inner, line);
+    }
+
     void collectStarts(const Effect& effect, int line) {
         if (effect.verb == "start" && pending_ != nullptr && !effect.args.empty() && effect.args[0]->kind == Expr::Kind::Text) {
             pending_->push_back({id_, effect.args[0]->text, line});
@@ -276,6 +286,7 @@ private:
                 error(item.line, parsed.problem->message);
                 continue;
             }
+            checkBuiltins(parsed.effect, item.line);
             collectStarts(parsed.effect, item.line);
             out.effects.push_back(std::move(parsed.effect));
         }
