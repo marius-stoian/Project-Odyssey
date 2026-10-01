@@ -105,7 +105,7 @@ Codex v2.0. Edited only by mraw-orchestrator.
 | S-US-081 | US-081 | M5 | Done | 2026-10-01 |
 | S-US-082 | US-082 | M5 | Done | 2026-10-01 |
 | X-M5 | - | M5 | To do |  |
-| K-M7 | - | M7 | To do |  |
+| K-M7 | - | M7 | Done | 2026-10-01 |
 | S-US-150 | US-150 | M7 | To do |  |
 | S-US-151 | US-151 | M7 | To do |  |
 | S-US-156 | US-156 | M7 | To do |  |

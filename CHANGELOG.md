@@ -4,6 +4,10 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## K-M7: M7 World interactions kickoff (Avengers) - 2026-10-01
+
+**State:** Docs only. D-36 records the owner's four design answers; the design is `docs/plans/M7-interactions-design.md`; Milestone-57.md (AP-058).
+
 ## P-009: Adopt Codex v2.0 and pay the test debt (Avengers) - 2026-10-01
 
 **State:** Docs only; no code changed. Verified: Debug and Release build with 0 warnings, 25 of 25 tests pass in each (`docs/evidence/P-009/`).
