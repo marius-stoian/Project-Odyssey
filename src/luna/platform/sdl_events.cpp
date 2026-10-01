@@ -26,6 +26,10 @@ Key toKey(SDL_Scancode scancode) {
     case SDL_SCANCODE_F12: return Key::F12;
     case SDL_SCANCODE_F3: return Key::F3;
     case SDL_SCANCODE_F5: return Key::F5;
+    case SDL_SCANCODE_EQUALS: return Key::Equals;
+    case SDL_SCANCODE_MINUS: return Key::Minus;
+    case SDL_SCANCODE_KP_PLUS: return Key::KpPlus;
+    case SDL_SCANCODE_KP_MINUS: return Key::KpMinus;
     case SDL_SCANCODE_DELETE: return Key::Delete;
     case SDL_SCANCODE_BACKSPACE: return Key::Backspace;
     case SDL_SCANCODE_LCTRL: return Key::LCtrl;

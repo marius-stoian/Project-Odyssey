@@ -173,6 +173,7 @@ TEST_CASE("US-032 The clan in the game") {
     REQUIRE(fs::exists(campLevel()));
     game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, campLevel());
     luna::engine::RecordingRenderer renderer;
+    odyssey.setViewScales(1, 1);
     odyssey.start(renderer);
     REQUIRE(odyssey.clanOn()); // the level says "clan": true
     for (int i = 0; i < 40; ++i) odyssey.update({});
@@ -217,6 +218,7 @@ TEST_CASE("US-031 Emotes") {
 TEST_CASE("US-031 Details on demand") {
     game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, campLevel());
     luna::engine::RecordingRenderer renderer;
+    odyssey.setViewScales(1, 1);
     odyssey.start(renderer);
     for (int i = 0; i < 40; ++i) odyssey.update({});
     // Find a person on screen and hover over their middle.

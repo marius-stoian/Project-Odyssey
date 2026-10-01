@@ -31,6 +31,8 @@ enum class Intent {
     Overlay,
     // Reload (US-156): F5 reads the data files again while the game runs.
     Reload,
+    // Zoom (US-232): the keys + and - (also on the number pad); the mouse wheel zooms too.
+    ZoomIn, ZoomOut,
     Count
 };
 

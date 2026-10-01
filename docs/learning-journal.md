@@ -1195,3 +1195,24 @@ The settings file records the chosen window mode, last windowed size and scaling
 **Try it (15 minutes).** Use the Settings screen to switch between Whole and Fill in a 2560 by 1440 window. Compare the bars and click near the picture edge; then restart and confirm that the choice persists.
 
 **Check yourself.** Why would subtracting the black bar but still dividing mouse coordinates by an integer give the wrong answer in Fill mode?
+
+## US-232 Camera zoom and UI scale: two coordinate systems
+
+**What we built.** You can zoom the world (1x or 2x) and size the interface (1x or 2x) independently. The game still thinks in small pixels; a `ScaledRenderer` multiplies every drawing by a whole number on its way to the screen.
+
+**The C++ idea: wrapping an interface (the decorator).** `ScaledRenderer` *is a* `Renderer` and *holds* another `Renderer`. The game code does not know the difference:
+
+```cpp
+luna::engine::ScaledRenderer world(output, settings_.cameraZoom); // draws 2x larger
+luna::engine::Renderer& renderer = world;                          // the old code keeps calling renderer.draw(...)
+```
+
+Each `draw` call is turned into a `drawStyled` call with a destination `scale` times bigger, and passed on. Because the number is whole, every pixel becomes a clean block and the 5x7 font stays crisp.
+
+**Two coordinate systems.** World pixels move with the camera; screen pixels do not. The mouse arrives in screen pixels, so it is divided by the zoom before the game asks "which world spot is this?": `world = view.x + pointer.x / zoom` (`scaledPointer` in `src/luna/engine/scaled_renderer.cpp`).
+
+**Where to look.** `src/luna/engine/scaled_renderer.*`, `OdysseyGame::render` and the top of `OdysseyGame::update` in `src/game/odyssey_game.cpp`, `Camera::setViewSize`.
+
+**Try it (15 minutes).** Press `-` and `+` in the game and scroll the wheel; then open Settings and set UI scale 2x. Add a `std::printf` of `view.x + pointer.x` in `updateAim` and check that it is the same number at both zooms when you point at the same tree.
+
+**Check yourself.** Why must the UI pointer be divided by the UI scale but the world pointer by the camera zoom, instead of one pointer for both?

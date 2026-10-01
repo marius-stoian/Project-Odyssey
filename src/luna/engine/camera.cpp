@@ -26,6 +26,14 @@ void Camera::centreOn(double x, double y) {
     previousY_ = y_;
 }
 
+void Camera::setViewSize(int viewWidth, int viewHeight) {
+    const double centreX = x_ + viewWidth_ / 2.0;
+    const double centreY = y_ + viewHeight_ / 2.0;
+    viewWidth_ = viewWidth;
+    viewHeight_ = viewHeight;
+    centreOn(centreX, centreY);
+}
+
 void Camera::follow(double x, double y, double smoothing) {
     previousX_ = x_;
     previousY_ = y_;

@@ -51,6 +51,10 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::F12: return KeyBinding{Intent::DevTools, kKeyboardA};
     case Key::F3: return KeyBinding{Intent::Overlay, kKeyboardA};
     case Key::F5: return KeyBinding{Intent::Reload, kKeyboardA};
+    case Key::Equals: return KeyBinding{Intent::ZoomIn, kKeyboardA};
+    case Key::KpPlus: return KeyBinding{Intent::ZoomIn, kKeyboardB};
+    case Key::Minus: return KeyBinding{Intent::ZoomOut, kKeyboardA};
+    case Key::KpMinus: return KeyBinding{Intent::ZoomOut, kKeyboardB};
     case Key::Delete: return KeyBinding{Intent::Delete, kKeyboardA};
     case Key::Backspace: return KeyBinding{Intent::Erase, kKeyboardA};
     case Key::G: return KeyBinding{Intent::ToggleGrid, kKeyboardA};

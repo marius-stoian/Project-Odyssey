@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "luna/engine/scaled_renderer.h"
+
 #include "game/game_rules.h"
 
 #include "luna/engine/image_ops.h"
@@ -75,7 +77,7 @@ Level loadAndReport(const std::filesystem::path& file, const Definitions& defini
 OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::filesystem::path& levelFile)
     : definitions_(loadDefinitions(dataDirectory)), levelFile_(chosenLevel(dataDirectory, levelFile)),
       level_(loadAndReport(levelFile_, definitions_)), map_(buildTileMap(level_, definitions_)),
-      camera_(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight()),
+      camera_(kVirtualWidth / GameSettings{}.cameraZoom, kVirtualHeight / GameSettings{}.cameraZoom, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
@@ -91,6 +93,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         if (settings_.resolution != core::Resolution{}) pendingWindow_ = WindowChange{settings_.resolution};
         if (!note.empty()) message_ = note;
     }
+    setViewScales(settings_.cameraZoom, settings_.uiScale);
     clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
@@ -112,7 +115,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
 
 void OdysseyGame::resetPlay() {
     map_ = buildTileMap(level_, definitions_);
-    camera_ = luna::engine::Camera(kVirtualWidth, kVirtualHeight, map_.pixelWidth(), map_.pixelHeight());
+    camera_ = luna::engine::Camera(viewWidth(), viewHeight(), map_.pixelWidth(), map_.pixelHeight());
     hero_ = Hero(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y));
     const MaterialsConfig materials = range_.materials();
     range_ = SpearRange(map_, materials);
@@ -170,8 +173,8 @@ void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
     const char* label = mode_ == Mode::Game ? "GAME  F2: EDIT" : "EDITOR  F1: PLAY";
     const int width = luna::engine::UiPainter::textWidth(label) + 6;
     // Top right in the game; bottom right in the Editor, where the toolbar needs the top.
-    const int top = mode_ == Mode::Game ? 2 : kVirtualHeight - luna::engine::kGlyphHeight - 6;
-    const luna::engine::Rect box{kVirtualWidth - width - 2, top, width, luna::engine::kGlyphHeight + 6};
+    const int top = mode_ == Mode::Game ? 2 : uiHeight() - luna::engine::kGlyphHeight - 6;
+    const luna::engine::Rect box{uiWidth() - width - 2, top, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 3, box.y + 3, label, mode_ == Mode::Game ? luna::engine::UiColor::Text : luna::engine::UiColor::Gold);
 }
@@ -489,8 +492,8 @@ void OdysseyGame::drawClanDetails(luna::engine::Renderer& renderer, const luna::
     width += 8;
     const int height = static_cast<int>(lines.size()) * luna::engine::kLineHeight + 4;
     luna::engine::Rect box{pointerX_ + 10, pointerY_ + 10, width, height};
-    box.x = std::min(box.x, kVirtualWidth - width - 2);
-    box.y = std::min(box.y, kVirtualHeight - height - 2);
+    box.x = std::min(box.x, viewWidth() - width - 2);
+    box.y = std::min(box.y, viewHeight() - height - 2);
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.outline(box, luna::engine::UiColor::Gold);
     int y = box.y + 3;
@@ -508,12 +511,12 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
                                          clan_->population(), clan_->food());
     luna::engine::UiPainter painter(renderer, uiSheet_);
     const int width = luna::engine::UiPainter::textWidth(line) + 8;
-    const luna::engine::Rect box{(kVirtualWidth - width) / 2, 20, width, luna::engine::kGlyphHeight + 6};
+    const luna::engine::Rect box{(uiWidth() - width) / 2, 20, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
     if (!message_.empty()) {
         const int messageWidth = luna::engine::UiPainter::textWidth(message_) + 8;
-        const luna::engine::Rect messageBox{std::max(2, (kVirtualWidth - messageWidth) / 2), 48, std::min(messageWidth, kVirtualWidth - 4), luna::engine::kGlyphHeight + 6};
+        const luna::engine::Rect messageBox{std::max(2, (uiWidth() - messageWidth) / 2), 48, std::min(messageWidth, uiWidth() - 4), luna::engine::kGlyphHeight + 6};
         painter.fill(messageBox, luna::engine::UiColor::Shade);
         painter.outline(messageBox, luna::engine::UiColor::Gold);
         painter.text(messageBox.x + 4, messageBox.y + 3, message_.substr(0, static_cast<std::size_t>((messageBox.width - 8) / luna::engine::kTextAdvance)), luna::engine::UiColor::Gold);
@@ -569,9 +572,9 @@ void OdysseyGame::drawTutorial(luna::engine::Renderer& renderer) const {
     if (!tutorial_.active() || runFlow_.modal()) return;
     luna::engine::UiPainter painter(renderer, uiSheet_);
     const std::string line = tutorial_.elder() + ": " + tutorial_.text();
-    const int width = std::min(kVirtualWidth - 8, luna::engine::UiPainter::textWidth(line) + 8);
+    const int width = std::min(uiWidth() - 8, luna::engine::UiPainter::textWidth(line) + 8);
     const int chars = (width - 8) / luna::engine::kTextAdvance;
-    const luna::engine::Rect box{(kVirtualWidth - width) / 2, kVirtualHeight - 2 * luna::engine::kGlyphHeight - 30, width, luna::engine::kGlyphHeight + 6};
+    const luna::engine::Rect box{(uiWidth() - width) / 2, uiHeight() - 2 * luna::engine::kGlyphHeight - 30, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.outline(box, tutorial_.hinting() ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
     painter.text(box.x + 4, box.y + 3, line.substr(0, static_cast<std::size_t>(chars)), luna::engine::UiColor::Text);
@@ -694,7 +697,7 @@ bool OdysseyGame::reloadInteractions() {
 void OdysseyGame::drawInteractionPanel(luna::engine::Renderer& renderer) const {
     if (interactionReport_.errors.empty()) return;
     constexpr std::size_t kMaxLines = 8;
-    const int width = kVirtualWidth - 20;
+    const int width = uiWidth() - 20;
     const int maxChars = (width - 8) / luna::engine::kTextAdvance;
     const std::size_t shown = std::min(kMaxLines, interactionReport_.errors.size());
     const luna::engine::Rect box{10, 34, width, static_cast<int>(shown + 2) * luna::engine::kLineHeight + 6};
@@ -837,6 +840,27 @@ void OdysseyGame::applySettings(const GameSettings& settings) {
     settings_ = settings;
     saveSettings(settings_, saveDirectory_ / "settings.json");
     pendingWindow_ = WindowChange{settings_.resolution};
+    setViewScales(settings_.cameraZoom, settings_.uiScale);
+}
+
+void OdysseyGame::setViewScales(int cameraZoom, int uiScale) {
+    settings_.cameraZoom = std::clamp(cameraZoom, 1, 2);
+    settings_.uiScale = std::clamp(uiScale, 1, 2);
+    camera_.setViewSize(viewWidth(), viewHeight()); // zooming keeps the hero where he is on the picture
+}
+
+// The zoom keys and the mouse wheel in play (US-232): one step in or out, kept in the settings file.
+void OdysseyGame::updateZoom(const luna::engine::Intents& intents) {
+    int step = 0;
+    if (intents.pressed(luna::engine::Intent::ZoomIn)) ++step;
+    if (intents.pressed(luna::engine::Intent::ZoomOut)) --step;
+    if (intents.pointer().inside()) step += intents.pointer().wheel > 0 ? 1 : (intents.pointer().wheel < 0 ? -1 : 0);
+    if (step == 0) return;
+    const int zoom = std::clamp(settings_.cameraZoom + step, 1, 2); // zoom in = bigger pixels = the higher number
+    if (zoom == settings_.cameraZoom) return;
+    GameSettings changed = settings_;
+    changed.cameraZoom = zoom;
+    applySettings(changed);
 }
 
 std::optional<luna::engine::Game::WindowChange> OdysseyGame::takeWindowChange() {
@@ -853,7 +877,7 @@ void OdysseyGame::drawRunHud(luna::engine::Renderer& renderer) const {
     const std::string line = std::format("{}, {}{}  Trade {}%  Religion {}%", life_->name(), life_->ageYears(), specialty.empty() ? "" : " " + specialty, life_->tradePercent(), life_->religionPercent());
     luna::engine::UiPainter painter(renderer, uiSheet_);
     const int width = luna::engine::UiPainter::textWidth(line) + 8;
-    const luna::engine::Rect box{(kVirtualWidth - width) / 2, 34, width, luna::engine::kGlyphHeight + 6};
+    const luna::engine::Rect box{(uiWidth() - width) / 2, 34, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Gold);
 }
@@ -865,7 +889,7 @@ void OdysseyGame::drawRunWorld(luna::engine::Renderer& renderer, const luna::eng
     const PixelPoint stone = knappingStone();
     const int sx = stone.x - view.x;
     const int sy = stone.y - view.y;
-    if (sx > -40 && sy > -40 && sx < kVirtualWidth + 40 && sy < kVirtualHeight + 40) {
+    if (sx > -40 && sy > -40 && sx < viewWidth() + 40 && sy < viewHeight() + 40) {
         renderer.draw(tiles_, {static_cast<int>(TileKind::Rock) * kTileSize, 0, kTileSize, kTileSize}, {sx - 16, sy - 28});
         painter.text(sx - luna::engine::UiPainter::textWidth("knapping stone") / 2, sy - 38, "knapping stone", luna::engine::UiColor::Dim);
     }
@@ -873,7 +897,7 @@ void OdysseyGame::drawRunWorld(luna::engine::Renderer& renderer, const luna::eng
     if (fire.founded) {
         const int fx = fire.tileX * kTileSize + 16 - view.x;
         const int fy = fire.tileY * kTileSize + 16 - view.y;
-        if (fx > -60 && fy > -40 && fx < kVirtualWidth + 60 && fy < kVirtualHeight + 40) {
+        if (fx > -60 && fy > -40 && fx < viewWidth() + 60 && fy < viewHeight() + 40) {
             if (fire.lit) drawEffectPicture(renderer, effectArt_, "flame", {fx - 14, fy - 28, 28, 28});
             painter.text(fx - luna::engine::UiPainter::textWidth(fire.name) / 2, fy - 38, fire.name, fire.lit ? luna::engine::UiColor::Gold : luna::engine::UiColor::Dim);
         }
@@ -911,7 +935,7 @@ void OdysseyGame::drawOverlay(luna::engine::Renderer& renderer) const {
     luna::engine::UiPainter painter(renderer, uiSheet_);
     const std::string line = std::format("FPS {:.0f}  frame {:.1f} ms  tick {:.2f} ms (worst {:.2f})  people {}", framesPerSecond(), frameMilliseconds(), tickMilliseconds(), worstTickMilliseconds(),
                                          clan_ ? clan_->population() : 0);
-    const luna::engine::Rect box{2, kVirtualHeight - luna::engine::kGlyphHeight - 8, luna::engine::UiPainter::textWidth(line) + 8, luna::engine::kGlyphHeight + 6};
+    const luna::engine::Rect box{2, uiHeight() - luna::engine::kGlyphHeight - 8, luna::engine::UiPainter::textWidth(line) + 8, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
     painter.text(box.x + 4, box.y + 3, line, luna::engine::UiColor::Text);
 }
@@ -1052,7 +1076,7 @@ void OdysseyGame::updateDevTools(const luna::engine::Intents& intents) {
 #ifndef NDEBUG
     if (intents.pressed(luna::engine::Intent::DevTools)) devToolsOpen_ = !devToolsOpen_;
     if (!devToolsOpen_ || !clan_) return;
-    const luna::engine::Pointer& pointer = intents.pointer();
+    const luna::engine::Pointer pointer = luna::engine::scaledPointer(intents.pointer(), settings_.uiScale); // the panel is interface
     if (!pointer.wasPressed(luna::engine::PointerButton::Left) || !pointer.inside()) return;
     for (int i = 0; i < 5; ++i) {
         const luna::engine::Rect button = toolButtonRect(i);
@@ -1065,8 +1089,9 @@ void OdysseyGame::updateDevTools(const luna::engine::Intents& intents) {
             return;
         }
     }
-    pointerX_ = pointer.x; // this tick's pointer, not the one the aiming code has not read yet
-    pointerY_ = pointer.y;
+    const luna::engine::Pointer inWorld = luna::engine::scaledPointer(intents.pointer(), settings_.cameraZoom);
+    pointerX_ = inWorld.x; // this tick's pointer, not the one the aiming code has not read yet
+    pointerY_ = inWorld.y;
     const int person = figureAt(camera_.view(), 1.0);
     if (person >= 0) selectedPerson_ = person;
 #else
@@ -1158,7 +1183,7 @@ void OdysseyGame::drawRivals(luna::engine::Renderer& renderer, const luna::engin
     for (const sim::RivalClan& rival : rivals_->clans()) {
         const int x = rival.camp.x * kTileSize + kTileSize / 2 - view.x;
         const int y = rival.camp.y * kTileSize + kTileSize / 2 - view.y;
-        if (x < -80 || y < -40 || x > kVirtualWidth + 80 || y > kVirtualHeight + 40) continue;
+        if (x < -80 || y < -40 || x > viewWidth() + 80 || y > viewHeight() + 40) continue;
         drawEffectPicture(renderer, effectArt_, "flame", {x - 12, y - 24, 24, 24});
         const std::string label = std::format("{} ({})", rival.name, rival.world->population());
         painter.fill({x - luna::engine::UiPainter::textWidth(label) / 2 - 2, y - 36, luna::engine::UiPainter::textWidth(label) + 4, 10}, luna::engine::UiColor::Shade);
@@ -1201,11 +1226,11 @@ void OdysseyGame::drawWeather(luna::engine::Renderer& renderer) const {
         const luna::engine::DrawStyle style{static_cast<std::uint8_t>(std::clamp(amount * kStrength, 0.0, 1.0) * 255.0), def.additive ? luna::engine::Blend::Add : luna::engine::Blend::Normal};
         if (!def.additive) {
             // Fog and clouds: the one picture stretched over the whole screen, soft (tiled it would show its edges).
-            renderer.drawStyled(weatherTexture_, source, {0, 0, kVirtualWidth, kVirtualHeight}, style);
+            renderer.drawStyled(weatherTexture_, source, {0, 0, uiWidth(), uiHeight()}, style);
             return;
         }
-        for (int y = 0; y < kVirtualHeight; y += source.height) {
-            for (int x = 0; x < kVirtualWidth; x += source.width) renderer.drawStyled(weatherTexture_, source, {x, y, source.width, source.height}, style);
+        for (int y = 0; y < uiHeight(); y += source.height) {
+            for (int x = 0; x < uiWidth(); x += source.width) renderer.drawStyled(weatherTexture_, source, {x, y, source.width, source.height}, style);
         }
     };
     if (weather_.fading()) {
@@ -1358,7 +1383,7 @@ void OdysseyGame::drawInspection(luna::engine::Renderer& renderer, const luna::e
         const int height = 2 * luna::engine::kLineHeight + 4;
         const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
         luna::engine::Rect box{plant.feet.x - view.x - width / 2, plant.feet.y - view.y - extent.height - height - 2, width, height};
-        box.x = std::clamp(box.x, 2, kVirtualWidth - width - 2);
+        box.x = std::clamp(box.x, 2, viewWidth() - width - 2);
         box.y = std::max(box.y, 2);
         painter.fill(box, luna::engine::UiColor::Shade);
         painter.outline(box, luna::engine::UiColor::Gold);
@@ -1569,8 +1594,8 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
     // The hotbar (US-134), bottom centre: nine slots, the number in the corner, the held slot framed in gold.
     constexpr int kSlot = 22;
     constexpr int kGap = 2;
-    const int left = (kVirtualWidth - (kHotbarSlots * kSlot + (kHotbarSlots - 1) * kGap)) / 2;
-    const int top = kVirtualHeight - kSlot - 4;
+    const int left = (uiWidth() - (kHotbarSlots * kSlot + (kHotbarSlots - 1) * kGap)) / 2;
+    const int top = uiHeight() - kSlot - 4;
     for (int slot = 0; slot < kHotbarSlots; ++slot) {
         const luna::engine::Rect cell{left + slot * (kSlot + kGap), top, kSlot, kSlot};
         painter.fill(cell, luna::engine::UiColor::Shade);
@@ -1584,11 +1609,11 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
     }
     if (fullTicks_ > 0) {
         const char* message = "Hotbar full";
-        painter.text((kVirtualWidth - luna::engine::UiPainter::textWidth(message)) / 2, top - luna::engine::kGlyphHeight - 3, message, luna::engine::UiColor::Red);
+        painter.text((uiWidth() - luna::engine::UiPainter::textWidth(message)) / 2, top - luna::engine::kGlyphHeight - 3, message, luna::engine::UiColor::Red);
     }
     // After a fall the screen darkens, more with every step of the fade.
     for (int layer = 0; layer < (kRespawnTicks - respawnTicks_) / 4 + 1 && respawnTicks_ > 0; ++layer) {
-        painter.fill({0, 0, kVirtualWidth, kVirtualHeight}, luna::engine::UiColor::Shade);
+        painter.fill({0, 0, uiWidth(), uiHeight()}, luna::engine::UiColor::Shade);
     }
 }
 
@@ -1611,11 +1636,18 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         if (settings_.statistics == 0) runFlow_.openPrivacy();
     }
     if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) runFlow_.openMenu();
+    // Two pictures, two pointers (US-232): the world is drawn zoomed and the interface scaled, so the pointer is
+    // turned into the pixels of each one before anything reads it.
+    luna::engine::Intents worldIntents = intents;
+    worldIntents.setPointer(luna::engine::scaledPointer(intents.pointer(), settings_.cameraZoom));
+    luna::engine::Intents uiIntents = intents;
+    uiIntents.setPointer(luna::engine::scaledPointer(intents.pointer(), settings_.uiScale));
     if (runFlow_.modal()) {
-        updateAim(intents.pointer(), true, hero_.facing()); // keeps the pointer for drawing
-        runFlow_.update(*this, intents);
+        updateAim(worldIntents.pointer(), true, hero_.facing()); // keeps the pointer for drawing
+        runFlow_.update(*this, uiIntents);
         return;
     }
+    if (!devToolsOpen_) updateZoom(intents);
     ++ticks_;
     tickActions(intents);
     tutorial_.tick();
@@ -1662,7 +1694,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (!fallen) {
         hero_.update(intents, map_);
     }
-    updateAim(intents.pointer(), fallen, facingBefore);
+    updateAim(worldIntents.pointer(), fallen, facingBefore);
     // Pressing left or right always turns him that way, whatever the pointer says; the aim of the
     // attacks still follows the pointer. Up and down alone leave the pointer in charge of his facing.
     if (!fallen && intents.moveX() != 0) {
@@ -1687,7 +1719,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     // Plants (US-136): Interact with empty hands, or the right mouse button, looks at the plant next to the hero.
     if (!fallen && intents.pressed(luna::engine::Intent::Inspect)) {
         // A right click on something in the world offers its actions (US-061); on nothing it looks at the nearest plant.
-        const luna::engine::Pointer& p = intents.pointer();
+        const luna::engine::Pointer& p = worldIntents.pointer();
         const luna::engine::Rect view = camera_.view();
         if (!(life_ && p.inside() && runFlow_.openContext(*this, view.x + p.x, view.y + p.y))) inspectNearestPlant();
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldSlotName.empty()) {
@@ -1926,7 +1958,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     }
 }
 
-void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
+void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     const auto renderStarted = std::chrono::steady_clock::now();
     if (lastRender_.time_since_epoch().count() != 0) {
         frameTimes_[frameTimeAt_] = std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count();
@@ -1934,12 +1966,16 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
         frameTimesFilled_ = std::min(frameTimesFilled_ + 1, frameTimes_.size());
     }
     lastRender_ = renderStarted;
+    // The world is drawn zoomed and the interface scaled (US-232): each is laid out in its own small pixels.
+    luna::engine::ScaledRenderer ui(output, settings_.uiScale);
     if (mode_ == Mode::Editor) {
-        editor_.render(renderer, alpha);
-        drawInteractionPanel(renderer); // F5 works in the Editor too, so its mistakes show there
-        drawModeLabel(renderer);
+        editor_.render(output, alpha);
+        drawInteractionPanel(ui); // F5 works in the Editor too, so its mistakes show there
+        drawModeLabel(ui);
         return;
     }
+    luna::engine::ScaledRenderer world(output, settings_.cameraZoom);
+    luna::engine::Renderer& renderer = world;
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);
     auto screen = [&view](double worldX, double worldY) {
@@ -2043,21 +2079,21 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawHeld(renderer, view, alpha);
     drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
-    drawWeather(renderer);
+    drawWeather(ui);
     drawInspection(renderer, view);
     drawRivals(renderer, view);
     drawRunWorld(renderer, view);
     drawClanDetails(renderer, view, alpha);
-    drawHud(renderer);
-    drawClanHud(renderer);
-    drawRunHud(renderer);
-    drawDevTools(renderer, view, alpha);
-    drawTutorial(renderer);
-    runFlow_.draw(renderer, uiSheet_);
+    drawHud(ui);
+    drawClanHud(ui);
+    drawRunHud(ui);
+    drawDevTools(ui, view, alpha);
+    drawTutorial(ui);
+    runFlow_.draw(ui, uiSheet_);
     drawActionRing(renderer, view);
-    drawOverlay(renderer);
-    drawInteractionPanel(renderer);
-    drawModeLabel(renderer);
+    drawOverlay(ui);
+    drawInteractionPanel(ui);
+    drawModeLabel(ui);
 }
 
 std::uint64_t OdysseyGame::ticks() const {

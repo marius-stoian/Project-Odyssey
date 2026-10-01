@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-232: camera zoom and UI scale (Mraw) - 2026-10-01
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings), GPU screenshots in `docs/evidence/US-232/`.
+
+- `ScaledRenderer` (Engine) draws a whole-number larger; the world is drawn at camera zoom 1x or 2x (default 2x) and the interface at UI scale 1x or 2x (default 1x), each laid out in its own pixels. `Camera::setViewSize`; pointer mapping goes through zoom and UI scale.
+- Settings screen buttons; keys + and - and the mouse wheel zoom in play; `cameraZoom` and `uiScale` in `settings.json` (guide updated).
+- Tests: `tests/luna/zoom_test.cpp`, two US-232 cases in `aiming_test.cpp`; older game tests run at zoom 1x.
 ## US-231: 960x540 virtual screen, window modes, hero facing and eight directions (Mraw) - 2026-10-01
 
 **State:** Merged into `qa` locally; verified in Debug (27 of 27, zero warnings).

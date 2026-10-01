@@ -30,7 +30,7 @@ enum class Key {
     Unknown, W, A, S, D, E, Up, Down, Left, Right, Escape, Space, Enter, LShift, RShift, Tab,
     F1, F2, Delete, Backspace, LCtrl, RCtrl, Z, Y, G, R,
     Num1, Num2, Num3, Num4, Num5, Num6, Num7, Num8, Num9,
-    F12, F3, F5
+    F12, F3, F5, Equals, Minus, KpPlus, KpMinus
 };
 
 enum class MouseButton { Unknown, Left, Right, Middle };

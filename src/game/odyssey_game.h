@@ -214,6 +214,17 @@ public:
     double tickMilliseconds() const;
     double worstTickMilliseconds() const;
     void applySettings(const GameSettings& settings);    // saved, and asked of the window at once
+    // Camera zoom and UI scale (US-232). Zoom 2x is the world as it always looked (15 x 8.4 tiles); 1x shows 30 x 17.
+    // `setViewScales` only changes what is drawn (tests use it); `applySettings` also saves them.
+    void setViewScales(int cameraZoom, int uiScale);
+    void updateZoom(const luna::engine::Intents& intents);
+    int cameraZoom() const { return settings_.cameraZoom; }
+    int uiScale() const { return settings_.uiScale; }
+    // The world picture and the interface picture, in their own pixels: the 960 x 540 screen divided by the zoom or scale.
+    int viewWidth() const { return core::kVirtualWidth / settings_.cameraZoom; }
+    int viewHeight() const { return core::kVirtualHeight / settings_.cameraZoom; }
+    int uiWidth() const { return core::kVirtualWidth / settings_.uiScale; }
+    int uiHeight() const { return core::kVirtualHeight / settings_.uiScale; }
     std::optional<WindowChange> takeWindowChange() override;
     // A generated region (US-040..US-042, D-31): the land is made from the seed and played as a 256-tile level, with the
     // clan at the start and two rival clans far away. The Editor is off in a region (it is for hand-made levels).
@@ -227,6 +238,7 @@ public:
         settings_ = loadSettings(saveDirectory_ / "settings.json", nullptr);
         stats_.enable(settings_.statistics == 1);
         pendingWindow_ = WindowChange{settings_.resolution};
+        setViewScales(settings_.cameraZoom, settings_.uiScale);
     }
     const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
     bool autosave();              // false when it could not write

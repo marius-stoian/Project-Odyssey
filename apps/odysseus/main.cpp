@@ -84,6 +84,8 @@ luna::engine::Intent intentNamed(std::string_view name) {
     if (name == "Inspect") return Intent::Inspect;
     if (name == "DevTools") return Intent::DevTools;
     if (name == "Overlay") return Intent::Overlay;
+    if (name == "ZoomIn") return Intent::ZoomIn;
+    if (name == "ZoomOut") return Intent::ZoomOut;
     if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
         return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
     }
