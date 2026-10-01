@@ -71,6 +71,8 @@ struct LoadOptions {
     std::set<std::string> knownTags;
     // Interaction ids that exist outside this folder (never needed yet; kept for tests).
     std::set<std::string> extraIds;
+    // The built-in actions the game can carry out (`do give-berries`). When not empty, a `do` naming anything else is an error.
+    std::set<std::string> knownBuiltins;
 };
 
 class InteractionRegistry {

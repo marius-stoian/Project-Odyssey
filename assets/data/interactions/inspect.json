@@ -1,4 +1,4 @@
-// Look at a plant (US-151). Works from anywhere in view; the text is the plant's own line in plants.json.
+// Look at a plant. Works from anywhere in view; the text is the plant's own line in plants.json.
 {
   "id": "inspect",
   "label": "Inspect",
@@ -6,5 +6,5 @@
   "target": { "tags": ["plant"] },
   "range": 30,
   "order": 900,
-  "effects": [ "say \"{target.inspect}\"" ]
+  "effects": [ "do inspect" ]
 }

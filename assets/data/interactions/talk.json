@@ -1,0 +1,10 @@
+// Talk to a clan member (US-152). Until the conversations of M8, the line comes from the simulation.
+{
+  "id": "talk",
+  "label": "Talk",
+  "actors": ["hero"],
+  "target": { "tags": ["person"] },
+  "range": 2,
+  "order": 10,
+  "effects": [ "do talk" ]
+}

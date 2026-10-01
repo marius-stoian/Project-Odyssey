@@ -4,7 +4,46 @@ How to change what things in the world offer and do, without touching code (US-1
 
 Every action in the game is one **interaction**: a small text file in `assets/data/interactions/`, one file per interaction, named after its id (`gather.json` holds the interaction `gather`). Edit the files in any text editor. The game reads them when it starts, and a mistake is reported as `file:line: message` so you can fix it in seconds. A file with a mistake is skipped, the rest still load.
 
-> Today `gather.json` and `inspect.json` ship, and the game still runs most of its actions from code. US-152 moves every built-in action into these files.
+> Every action in the game's right-click menu is one of these files (US-152). They carry out their work with `do`, which names an action built into the game (see "Built-in actions" below); US-153 lets files spell out their own effects, with durations.
+
+## Built-in actions: `do`
+
+Some things a menu item does need the game itself: open the crafting screen, change what a clan member thinks of the hero, harvest a plant. Those are **built-in actions**. An interaction names one with `do`:
+
+```jsonc
+"effects": [ "do open-craft knapping-stone" ]
+```
+
+A `do` that names anything the game does not have is an error at load (`do names "talks", which the game does not know (it knows: ...)`). The built-ins, and what each does exactly as the game always did it:
+
+| Name | What it does |
+|---|---|
+| `gather` | the hero gathers berries from the plant (and the plant regrows elsewhere) |
+| `knap` | knaps flint from a flint nodule (needs a hammerstone) |
+| `pick-flint` | picks flint up from a nodule by hand |
+| `chop` | chops wood from a solid plant |
+| `inspect` | shows the plant's own line from plants.json |
+| `talk` | talks with the clan member |
+| `give-berries` | gives the clan member a berry |
+| `ask-to-teach <profession>` | asks the clan member to teach a profession: `do ask-to-teach hunter` |
+| `open-craft <station>` | opens the crafting screen for `fire` or `knapping-stone` |
+| `eat-berries` | the hero eats berries at the fire |
+| `tend-camp-fire` | tends the clan's fire |
+| `tend-sacred-fire` | tends the hero's sacred fire |
+| `hold-ritual` | holds a ritual at the sacred fire |
+| `open-barter` | opens the barter screen with a rival camp |
+
+### What the game's own things are tagged
+
+| Thing | Tags | Name in `{target.name}` |
+|---|---|---|
+| a clan member | `person`, `clan`, and `teaches-<profession>` while they are the hero's master of that profession with no apprentice yet | their name |
+| the knapping stone | `workstation`, `knapping-stone` | Knapping stone |
+| the clan's fire | `fire`, `workstation`, `camp-fire` | The clan's fire |
+| the sacred fire | `fire`, `sacred-fire` | Sacred fire (its name) |
+| a rival camp | `camp`, `rival` | the clan's name |
+
+`flag(sacred-fire)` is 1 once the hero has founded a sacred fire. Menu items appear in `order`, lowest first; an item that fails `range` or a `requires` is greyed out with its reason.
 
 ## Editing while the game runs: F5
 
@@ -148,6 +187,7 @@ One line per effect. A line is a verb followed by arguments separated by spaces.
 | `say` | show a speech bubble: say "Hello, {hero.name}" |
 | `fx` | play a visual effect from effects.json: fx leaves |
 | `sound` | play a sound: sound pop |
+| `do` | run an action built into the game: do give-berries |
 | `after` | do an effect later (s, m or d): after 15s set target.state ripe |
 | `chronicle` | write a line in the clan's chronicle: chronicle "{actor.name} shared berries" |
 

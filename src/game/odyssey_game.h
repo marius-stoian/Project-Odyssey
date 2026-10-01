@@ -17,6 +17,7 @@
 #include "luna/engine/effects.h"
 #include "game/editor.h"
 #include "game/enemy.h"
+#include "game/game_rules.h"
 #include "game/hero.h"
 #include "game/pickups.h"
 #include "game/effect_art.h"
@@ -87,6 +88,9 @@ public:
     // with the reason when an item is disabled.
     sim::rules::ThingInfo plantThing(std::size_t index) const;
     std::vector<sim::rules::Offer> plantOffers(std::size_t index) const;
+    // The same for any Subject (a clan member, a fire, the stone, a rival camp, a plant): what the hero may do to it now, in menu order,
+    // with the reason for a disabled item (US-152).
+    std::vector<sim::rules::Offer> offersFor(const Subject& subject) const;
     void setPlantState(std::size_t index, const std::string& state); // "picked", "ripe"...
     std::set<std::string> knownTags() const; // every tag a catalog or character kind carries
     // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the

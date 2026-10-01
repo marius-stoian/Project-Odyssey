@@ -1,0 +1,10 @@
+// Offered only while this person is the hero's master of the profession and has no apprentice yet: the game tags them teaches-<profession>.
+{
+  "id": "ask-to-teach-hunter",
+  "label": "Ask to teach you Hunter",
+  "actors": ["hero"],
+  "target": { "tags": ["person", "teaches-hunter"] },
+  "range": 2,
+  "order": 31,
+  "effects": [ "do ask-to-teach hunter" ]
+}

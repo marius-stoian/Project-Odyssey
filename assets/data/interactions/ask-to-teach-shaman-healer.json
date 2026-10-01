@@ -1,0 +1,9 @@
+{
+  "id": "ask-to-teach-shaman-healer",
+  "label": "Ask to teach you Shaman-healer",
+  "actors": ["hero"],
+  "target": { "tags": ["person", "teaches-shaman-healer"] },
+  "range": 2,
+  "order": 35,
+  "effects": [ "do ask-to-teach shaman-healer" ]
+}

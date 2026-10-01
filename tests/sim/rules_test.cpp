@@ -67,6 +67,29 @@ std::string problemOf(const std::string& source) {
     return parsed.problem ? parsed.problem->message : std::string();
 }
 
+// The example interaction of the design brief (US-150's "Load" scenario): a range, a duration, two conditions, three effects.
+// The shipped gather.json has since been made to do exactly what the game did before (US-152), so this keeps the original here.
+const char* const kBriefGather = R"(// Gather from a plant that is ripe.
+{
+  "id": "gather",
+  "label": "Gather {target.name}",
+  "note": "The first interaction written as data.",
+  "actors": ["hero", "person"],
+  "target": { "tags": ["edible", "plant"] },
+  "range": 1.5,        // metres
+  "duration": 3.0,     // seconds
+  "requires": [
+    { "if": "season != winter",     "else": "Nothing grows in winter" },
+    { "if": "target.state == ripe", "else": "Nothing to pick yet" }
+  ],
+  "effects": [
+    "give actor berries 2",
+    "set target.state picked",
+    "after 15s set target.state ripe"
+  ],
+  "npc": { "score": "need(hunger) * 2 + trait(diligent) * 10", "cooldown": 60 }
+})";
+
 const char* const kLine12Fixture =
     "{\n"                                              // 1
     "  \"id\": \"gather\",\n"                          // 2
@@ -200,6 +223,7 @@ TEST_CASE("US-150 Every effect verb has a working example") {
         {"say", "say \"Hello, {hero.name}\""},
         {"fx", "fx leaves"},
         {"sound", "sound pop"},
+        {"do", "do give-berries"},
         {"after", "after 15s set target.state ripe"},
         {"chronicle", "chronicle \"{actor.name} shared berries\""},
     };
@@ -296,8 +320,11 @@ TEST_CASE("US-150 Decimals are whole thousandths") {
 }
 
 TEST_CASE("US-150 Load: gather.json is registered and offered on edible plants") {
+    const fs::path folder = freshFolder("brief-gather") / "interactions";
+    fs::create_directories(folder);
+    { std::ofstream(folder / "gather.json", std::ios::binary) << kBriefGather; }
     rules::LoadReport report;
-    const rules::InteractionRegistry registry = rules::InteractionRegistry::load(interactionsDir(), report);
+    const rules::InteractionRegistry registry = rules::InteractionRegistry::load(folder, report);
     for (const rules::Diagnostic& d : report.errors) MESSAGE(d.text());
     REQUIRE(report.errors.empty());
     REQUIRE(registry.all().size() >= 1);

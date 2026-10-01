@@ -1,0 +1,9 @@
+{
+  "id": "ask-to-teach-fire-keeper",
+  "label": "Ask to teach you Fire-keeper",
+  "actors": ["hero"],
+  "target": { "tags": ["person", "teaches-fire-keeper"] },
+  "range": 2,
+  "order": 34,
+  "effects": [ "do ask-to-teach fire-keeper" ]
+}

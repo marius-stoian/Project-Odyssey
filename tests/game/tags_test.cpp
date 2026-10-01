@@ -204,12 +204,12 @@ TEST_CASE("US-156 F5 takes an edited file within a second") {
     luna::engine::RecordingRenderer renderer;
     game::OdysseyGame odyssey(data, levelWith(data, "reload", {}));
     odyssey.start(renderer);
-    REQUIRE(odyssey.interactions().find("gather")->rangeMilli == 1500);
+    REQUIRE(odyssey.interactions().find("gather")->rangeMilli == 2000);
 
-    editGather(data, "\"range\": 1.5,", "\"range\": 2.5,");
+    editGather(data, "\"range\": 2,", "\"range\": 3,");
     odyssey.update(reloadPressed()); // the F5 key, as the game receives it
     REQUIRE(odyssey.interactions().find("gather") != nullptr);
-    CHECK(odyssey.interactions().find("gather")->rangeMilli == 2500);
+    CHECK(odyssey.interactions().find("gather")->rangeMilli == 3000);
     CHECK_FALSE(odyssey.interactionPanelOpen());
     CHECK(odyssey.lastInteractionReloadMilliseconds() < 1000.0);
 
@@ -228,24 +228,24 @@ TEST_CASE("US-156 A bad file lists file:line: message and the last good data sta
     odyssey.render(renderer, 0.0);
     const std::size_t quietDraws = renderer.draws().size();
 
-    editGather(data, "\"give actor berries 2\"", "\"giv actor berries 2\"");
-    editGather(data, "\"range\": 1.5,", "\"range\": 2.5,"); // a good change in the same file must not sneak in
+    editGather(data, "\"do gather\"", "\"giv gather\"");
+    editGather(data, "\"range\": 2,", "\"range\": 3,"); // a good change in the same file must not sneak in
     odyssey.update(reloadPressed());
     REQUIRE(odyssey.interactionPanelOpen());
     REQUIRE(odyssey.interactionReport().errors.size() == 1);
     CHECK(odyssey.interactionReport().errors[0].text().find("interactions/gather.json:") == 0);
     CHECK(odyssey.interactionReport().errors[0].message == "unknown effect verb \"giv\"");
     REQUIRE(odyssey.interactions().find("gather") != nullptr);
-    CHECK(odyssey.interactions().find("gather")->rangeMilli == 1500); // the old data, whole
+    CHECK(odyssey.interactions().find("gather")->rangeMilli == 2000); // the old data, whole
 
     renderer.clear();
     odyssey.render(renderer, 0.0);
     CHECK(renderer.draws().size() > quietDraws); // the panel is on screen
 
-    editGather(data, "\"giv actor berries 2\"", "\"give actor berries 2\"");
+    editGather(data, "\"giv gather\"", "\"do gather\"");
     odyssey.update(reloadPressed());
     CHECK_FALSE(odyssey.interactionPanelOpen());
-    CHECK(odyssey.interactions().find("gather")->rangeMilli == 2500); // now the new data
+    CHECK(odyssey.interactions().find("gather")->rangeMilli == 3000); // now the new data
     renderer.clear();
     odyssey.render(renderer, 0.0);
     CHECK(renderer.draws().size() == quietDraws);
@@ -254,7 +254,7 @@ TEST_CASE("US-156 A bad file lists file:line: message and the last good data sta
 TEST_CASE("US-156 A syntax error is reported with its line and a missing folder never crashes") {
     const fs::path data = dataCopy("syntax", "");
     game::OdysseyGame odyssey(data, levelWith(data, "syntax", {}));
-    editGather(data, "\"range\": 1.5,", "\"range\": 1.5\n  \"duration\": 3.0,"); // a comma is missing
+    editGather(data, "\"range\": 2,", "\"range\": 2\n  \"order\": 10,"); // a comma is missing
     CHECK_FALSE(odyssey.reloadInteractions());
     REQUIRE(odyssey.interactionReport().errors.size() == 1);
     CHECK(odyssey.interactionReport().errors[0].line > 0);
@@ -278,14 +278,14 @@ TEST_CASE("US-156 F5 works in the Editor and the panel shows there too") {
     odyssey.render(renderer, 0.0);
     const std::size_t quietDraws = renderer.draws().size();
 
-    editGather(data, "\"give actor berries 2\"", "\"giv actor berries 2\"");
+    editGather(data, "\"do gather\"", "\"giv gather\"");
     odyssey.update(reloadPressed());
     REQUIRE(odyssey.interactionPanelOpen());
     renderer.clear();
     odyssey.render(renderer, 0.0);
     CHECK(renderer.draws().size() > quietDraws);
 
-    editGather(data, "\"giv actor berries 2\"", "\"give actor berries 2\"");
+    editGather(data, "\"giv gather\"", "\"do gather\"");
     odyssey.update(reloadPressed());
     CHECK_FALSE(odyssey.interactionPanelOpen());
 }
