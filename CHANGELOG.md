@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-153: Timed actions and world state (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-153`); merged into `qa`.
+
+- Simulation: `ActionRunner` (durations, progress, interruption, waiting effects in a deterministic order, saved timers), `EffectHost`, `ThingRef`.
+- Game: the hero's timed actions with a ring of dots over the target; moving or attacking stops the action and gives nothing; plants have states and a plant out of its starting state is hidden (D-37); `things.json` saved with the autosave (plant states and waiting effects); `gather.json` is a 3 s job that picks the plant and ripens it again after 15 s; built-in `gather` became `gather-berries`.
+- Docs and tests: guide section "Timed actions and things that change", `docs/plans/US-153.md`, teach-back, `tests/sim/runner_test.cpp` (9 cases), 5 new cases in `tests/game/menu_test.cpp`; D-37 recorded.
+
 ## US-152: The context menu from data (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-152`); merged into `qa`.

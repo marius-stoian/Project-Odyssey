@@ -46,6 +46,11 @@ struct WorldPlant {
     bool alive = true;
     int regrowTicks = 0; // destroyed: ticks left before the same kind grows back somewhere else
     std::string state;   // US-151: "ripe", "picked"...; the first of the plant's states, empty for a plant that never changes
+
+    // A plant that is in any state but its first is hidden until it is back to it (D-37: a picked plant vanishes, and reappears
+    // in the same spot when ripe again). A hidden plant cannot be seen, clicked, inspected or hit.
+    bool hidden() const { return def != nullptr && !def->states.empty() && state != def->states.front(); }
+    bool present() const { return alive && !hidden(); }
 };
 
 inline constexpr int kInspectReachPixels = 48;  // 1.5 m: Interact looks at a plant this close

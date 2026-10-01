@@ -12,10 +12,14 @@
 #include "luna/engine/physics_view.h"
 #include "luna/engine/ui.h"
 
+#include <nlohmann/json.hpp>
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <format>
+#include <fstream>
+#include <iterator>
 #include <cstdlib>
 #include <numbers>
 #include <string>
@@ -129,6 +133,8 @@ void OdysseyGame::resetPlay() {
     hotbar_ = {};     // a restart: empty hands, and every pickup lies in the level again
     heldSlot_ = 0;
     fullTicks_ = 0;
+    actions_.clear(); // a restart drops what was under way and what was waiting
+    actionClock_ = 0;
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -567,7 +573,7 @@ int OdysseyGame::plantAtWorld(double x, double y) const {
     int bestY = -1;
     for (std::size_t i = 0; i < plants_.size(); ++i) {
         const WorldPlant& plant = plants_[i];
-        if (!plant.alive) continue;
+        if (!plant.present()) continue;
         const luna::engine::Rect extent = plantExtent(plantArt_, plant.kind);
         if (x >= plant.feet.x - extent.width / 2.0 && x < plant.feet.x + extent.width / 2.0 && y >= plant.feet.y - extent.height && y <= plant.feet.y && plant.feet.y > bestY) {
             found = static_cast<int>(i);
@@ -686,6 +692,69 @@ void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {
     if (index < plants_.size()) plants_[index].state = state;
 }
 
+int OdysseyGame::plantIndexById(int id) const {
+    for (std::size_t i = 0; i < plants_.size(); ++i) {
+        if (plants_[i].id == id) return static_cast<int>(i);
+    }
+    return -1;
+}
+
+// One play tick of the timed actions (US-153). The hero's action stops, with nothing given, when the player moves or attacks.
+void OdysseyGame::tickActions(const luna::engine::Intents& intents) {
+    ++actionClock_;
+    if (actions_.running(0) != nullptr) {
+        using luna::engine::Intent;
+        const bool moving = intents.held(Intent::MoveUp) || intents.held(Intent::MoveDown) || intents.held(Intent::MoveLeft) || intents.held(Intent::MoveRight);
+        if (moving || intents.held(Intent::Attack)) {
+            actions_.cancel(0);
+            core::logInfo("The hero stopped what they were doing");
+        }
+    }
+    tickInteractions(*this);
+}
+
+// A ring of twelve dots over the target, filling as the action's time runs out (D-36).
+void OdysseyGame::drawActionRing(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const {
+    const sim::rules::RunningAction* action = actions_.running(0);
+    if (action == nullptr) return;
+    const std::optional<Subject> subject = subjectFor(*this, action->target);
+    if (!subject) return;
+    static constexpr int kDots[12][2] = {{0, -8}, {4, -7}, {7, -4}, {8, 0}, {7, 4}, {4, 7}, {0, 8}, {-4, 7}, {-7, 4}, {-8, 0}, {-7, -4}, {-4, -7}};
+    const int filled = actions_.progress(0, actionClock_) * 12 / 100;
+    const int centreX = static_cast<int>(std::lround(subject->x)) - view.x;
+    const int centreY = static_cast<int>(std::lround(subject->y)) - view.y - 36; // above the target's head
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    for (int i = 0; i < 12; ++i) {
+        painter.fill({centreX + kDots[i][0] - 1, centreY + kDots[i][1] - 1, 3, 3}, i < filled ? luna::engine::UiColor::Gold : luna::engine::UiColor::Dark);
+    }
+}
+
+// What is saved besides the clan and the hero (US-153): the plants that are not in their starting state, and the effects waiting for
+// their time (the berries ripening again). Running actions are not saved; their effects had not happened yet.
+std::string OdysseyGame::thingsText() const {
+    nlohmann::json plants = nlohmann::json::object();
+    for (const WorldPlant& plant : plants_) {
+        if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
+    }
+    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}}.dump(1);
+}
+
+std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
+    std::vector<std::string> notes;
+    try {
+        const nlohmann::json data = nlohmann::json::parse(text);
+        if (data.at("version").get<int>() != 1) return {"things.json was saved by another version and was not loaded"};
+        for (const auto& [id, state] : data.at("plants").items()) {
+            const int index = plantIndexById(std::stoi(id));
+            if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
+        }
+        notes = actions_.loadPending(data.at("timers").dump(), actionClock_);
+    } catch (const std::exception& error) {
+        notes.push_back(std::string("things.json could not be read: ") + error.what());
+    }
+    return notes;
+}
+
 void OdysseyGame::applySettings(const GameSettings& settings) {
     settings_ = settings;
     saveSettings(settings_, saveDirectory_ / "settings.json");
@@ -797,6 +866,7 @@ bool OdysseyGame::autosave() {
         sim::saveWorld(*clan_, saveDirectory_ / "clan.json");
         if (region_) sim::saveRegion(*region_, saveDirectory_ / "region.json");
         if (life_) life_->save(saveDirectory_ / "hero.json");
+        sim::writeSaveText(saveDirectory_ / "things.json", thingsText());
     } catch (const std::exception& error) {
         say(std::string("Autosave failed: ") + error.what());
         return false;
@@ -849,6 +919,10 @@ bool OdysseyGame::loadAutosave() {
             life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
             clanView_.setHidden(life_->personId());
             clanView_.update(*clan_, map_);
+        }
+        if (std::ifstream things(saveDirectory_ / "things.json", std::ios::binary); things) {
+            const std::string text((std::istreambuf_iterator<char>(things)), std::istreambuf_iterator<char>());
+            for (const std::string& note : restoreThings(text)) notes += (notes.empty() ? "" : "; ") + note;
         }
         say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
         return true;
@@ -1158,7 +1232,7 @@ bool OdysseyGame::inspectNearestPlant() {
     const WorldPlant* nearest = nullptr;
     double best = kInspectReachPixels;
     for (const WorldPlant& plant : plants_) {
-        if (!plant.alive) continue;
+        if (!plant.present()) continue;
         const double distance = std::hypot(plant.feet.x - hero_.feetX(), plant.feet.y - hero_.feetY());
         if (distance <= best) {
             best = distance;
@@ -1187,7 +1261,7 @@ void OdysseyGame::drawPlants(luna::engine::Renderer& renderer, const luna::engin
     std::vector<const WorldPlant*> order;
     const double heroY = hero_.feetY(alpha);
     for (const WorldPlant& plant : plants_) {
-        if (plant.alive && (plant.feet.y <= heroY) == behindHero) order.push_back(&plant);
+        if (plant.present() && (plant.feet.y <= heroY) == behindHero) order.push_back(&plant);
     }
     std::sort(order.begin(), order.end(), [](const WorldPlant* a, const WorldPlant* b) { return a->feet.y != b->feet.y ? a->feet.y < b->feet.y : a->id < b->id; });
     for (const WorldPlant* plant : order) {
@@ -1232,7 +1306,7 @@ void OdysseyGame::attackWith(const WeaponDef& weapon, double dirX, double dirY, 
         std::vector<Target> plantTargets;
         std::vector<std::size_t> plantOf;
         for (std::size_t i = 0; i < plants_.size(); ++i) {
-            if (!plants_[i].alive) continue;
+            if (!plants_[i].present()) continue;
             plantTargets.push_back({static_cast<double>(plants_[i].feet.x), static_cast<double>(plants_[i].feet.y), true});
             plantOf.push_back(i);
         }
@@ -1464,6 +1538,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         return;
     }
     ++ticks_;
+    tickActions(intents);
     tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
@@ -1879,6 +1954,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawDevTools(renderer, view, alpha);
     drawTutorial(renderer);
     runFlow_.draw(renderer, uiSheet_);
+    drawActionRing(renderer, view);
     drawOverlay(renderer);
     drawInteractionPanel(renderer);
     drawModeLabel(renderer);

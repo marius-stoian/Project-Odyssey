@@ -426,7 +426,7 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
         const std::string id = offer.interaction->id; // by id: the data may be reloaded (F5) while the menu is open
         actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), offer.enabled ? std::string() : offer.reason,
                             [id, subject = *subject](OdysseyGame& g) {
-                                if (!runInteraction(g, id, subject)) g.run().setMessage("That action is no longer in the data.");
+                                if (!startInteraction(g, id, subject)) g.run().setMessage("That action is no longer in the data.");
                             }});
     }
     backTo_ = Screen::None;

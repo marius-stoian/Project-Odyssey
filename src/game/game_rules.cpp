@@ -44,56 +44,73 @@ Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex) {
     return subject;
 }
 
-std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) {
+namespace {
+
+Subject personSubject(const OdysseyGame& game, int person) {
     const sim::HeroLife* hero = game.life();
     const sim::HeroData* data = game.heroData();
-    // A clan member. The tags say what they can do for the hero now: `teaches-hunter` while they are the hero's master of that
-    // profession and have no apprentice yet.
-    if (const int person = game.personAtWorld(wx, wy); person >= 0 && game.clan() != nullptr) {
-        const Figure& figure = game.clanView().figures()[static_cast<std::size_t>(person)];
-        Subject subject;
-        subject.kind = Subject::Kind::Person;
-        subject.index = person;
-        subject.name = game.clan()->people()[static_cast<std::size_t>(person)].name;
-        subject.title = subject.name;
-        subject.x = figure.x;
-        subject.y = figure.y;
-        subject.info = {"person", {"person", "clan"}};
-        if (hero != nullptr && data != nullptr) {
-            for (int p = 0; p < static_cast<int>(sim::kProfessionCount); ++p) {
-                if (hero->masterOf(p) == person && hero->apprenticeOf(p) < 0) subject.info.tags.push_back("teaches-" + data->professions[static_cast<std::size_t>(p)].id);
-            }
+    const Figure& figure = game.clanView().figures()[static_cast<std::size_t>(person)];
+    Subject subject;
+    subject.kind = Subject::Kind::Person;
+    subject.index = person;
+    subject.name = game.clan()->people()[static_cast<std::size_t>(person)].name;
+    subject.title = subject.name;
+    subject.x = figure.x;
+    subject.y = figure.y;
+    subject.info = {"person", {"person", "clan"}};
+    // The tags say what they can do for the hero now: `teaches-hunter` while they are the hero's master of that profession and have no
+    // apprentice yet.
+    if (hero != nullptr && data != nullptr) {
+        for (int p = 0; p < static_cast<int>(sim::kProfessionCount); ++p) {
+            if (hero->masterOf(p) == person && hero->apprenticeOf(p) < 0) subject.info.tags.push_back("teaches-" + data->professions[static_cast<std::size_t>(p)].id);
         }
-        return subject;
     }
+    return subject;
+}
+
+Subject stoneSubject(const OdysseyGame& game) {
+    const PixelPoint stone = game.knappingStone();
+    return Subject{Subject::Kind::KnappingStone, -1, "Knapping stone", "Knapping stone", static_cast<double>(stone.x), static_cast<double>(stone.y), {"knapping-stone", {"workstation", "knapping-stone"}}};
+}
+
+Subject campSubject(const OdysseyGame& game) {
+    const PixelPoint camp = game.campPixels();
+    return Subject{Subject::Kind::CampFire, -1, "The clan's fire", "The clan's fire", static_cast<double>(camp.x), static_cast<double>(camp.y), {"camp-fire", {"fire", "workstation", "camp-fire"}}};
+}
+
+std::optional<Subject> sacredSubject(const OdysseyGame& game) {
+    const sim::HeroLife* hero = game.life();
+    if (hero == nullptr || !hero->fire().founded) return std::nullopt;
+    const double fx = hero->fire().tileX * kTileSize + 16;
+    const double fy = hero->fire().tileY * kTileSize + 16;
+    const std::string title = std::format("Sacred fire {}", hero->fire().name);
+    return Subject{Subject::Kind::SacredFire, -1, title, title, fx, fy, {"sacred-fire", {"fire", "sacred-fire"}}};
+}
+
+std::optional<Subject> rivalSubject(const OdysseyGame& game, std::size_t i) {
+    if (game.rivals() == nullptr || i >= game.rivals()->clans().size()) return std::nullopt;
+    const sim::Tile tile = game.rivals()->clans()[i].camp;
+    const std::string& name = game.rivals()->clans()[i].name;
+    return Subject{Subject::Kind::RivalCamp, static_cast<int>(i), name, name, tile.x * kTileSize + 16.0, tile.y * kTileSize + 16.0, {"rival-camp", {"camp", "rival"}}};
+}
+
+} // namespace
+
+std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) {
+    // A clan member.
+    if (const int person = game.personAtWorld(wx, wy); person >= 0 && game.clan() != nullptr) return personSubject(game, person);
     // A workstation: the knapping stone, or the camp's fire.
     const PixelPoint stone = game.knappingStone();
-    if (std::abs(wx - stone.x) < 20 && wy > stone.y - 26 && wy < stone.y + 6) {
-        return Subject{Subject::Kind::KnappingStone, -1, "Knapping stone", "Knapping stone", static_cast<double>(stone.x), static_cast<double>(stone.y), {"knapping-stone", {"workstation", "knapping-stone"}}};
-    }
+    if (std::abs(wx - stone.x) < 20 && wy > stone.y - 26 && wy < stone.y + 6) return stoneSubject(game);
     const PixelPoint camp = game.campPixels();
-    if (std::hypot(wx - camp.x, wy - (camp.y - 12)) < 22) {
-        return Subject{Subject::Kind::CampFire, -1, "The clan's fire", "The clan's fire", static_cast<double>(camp.x), static_cast<double>(camp.y), {"camp-fire", {"fire", "workstation", "camp-fire"}}};
-    }
+    if (std::hypot(wx - camp.x, wy - (camp.y - 12)) < 22) return campSubject(game);
     // The sacred fire.
-    if (hero != nullptr && hero->fire().founded) {
-        const double fx = hero->fire().tileX * kTileSize + 16;
-        const double fy = hero->fire().tileY * kTileSize + 16;
-        if (std::hypot(wx - fx, wy - fy) < 24) {
-            const std::string title = std::format("Sacred fire {}", hero->fire().name);
-            return Subject{Subject::Kind::SacredFire, -1, title, title, fx, fy, {"sacred-fire", {"fire", "sacred-fire"}}};
-        }
-    }
+    if (const auto sacred = sacredSubject(game); sacred && std::hypot(wx - sacred->x, wy - sacred->y) < 24) return sacred;
     // A rival camp.
     if (game.rivals() != nullptr) {
         for (std::size_t i = 0; i < game.rivals()->clans().size(); ++i) {
-            const sim::Tile tile = game.rivals()->clans()[i].camp;
-            const double cx = tile.x * kTileSize + 16;
-            const double cy = tile.y * kTileSize + 16;
-            if (std::hypot(wx - cx, wy - (cy - 12)) < 26) {
-                const std::string& name = game.rivals()->clans()[i].name;
-                return Subject{Subject::Kind::RivalCamp, static_cast<int>(i), name, name, cx, cy, {"rival-camp", {"camp", "rival"}}};
-            }
+            const auto rival = rivalSubject(game, i);
+            if (rival && std::hypot(wx - rival->x, wy - (rival->y - 12)) < 26) return rival;
         }
     }
     // A plant: berries, flint, a tree.
@@ -101,6 +118,31 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) 
     return std::nullopt;
 }
 
+sim::rules::ThingRef refOf(const OdysseyGame& game, const Subject& subject) {
+    const int kind = static_cast<int>(subject.kind);
+    if (subject.kind == Subject::Kind::Plant && subject.index >= 0 && static_cast<std::size_t>(subject.index) < game.plants().size()) {
+        return {kind, game.plants()[static_cast<std::size_t>(subject.index)].id};
+    }
+    return {kind, subject.index};
+}
+
+std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::ThingRef& ref) {
+    switch (static_cast<Subject::Kind>(ref.kind)) {
+    case Subject::Kind::Plant: {
+        const int index = game.plantIndexById(ref.id);
+        if (index < 0) return std::nullopt;
+        return plantSubject(game, static_cast<std::size_t>(index));
+    }
+    case Subject::Kind::Person:
+        if (game.clan() == nullptr || ref.id < 0 || static_cast<std::size_t>(ref.id) >= game.clanView().figures().size()) return std::nullopt;
+        return personSubject(game, ref.id);
+    case Subject::Kind::KnappingStone: return stoneSubject(game);
+    case Subject::Kind::CampFire: return campSubject(game);
+    case Subject::Kind::SacredFire: return sacredSubject(game);
+    case Subject::Kind::RivalCamp: return rivalSubject(game, static_cast<std::size_t>(std::max(0, ref.id)));
+    }
+    return std::nullopt;
+}
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
     std::vector<std::string> tags = {"person", "clan", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero"};
     if (const sim::HeroData* data = game.heroData()) {
