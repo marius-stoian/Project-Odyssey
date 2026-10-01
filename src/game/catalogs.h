@@ -40,6 +40,7 @@ struct PlantDef {
     std::string inspect;   // shown on Interact
     std::vector<std::string> tags;   // US-151: "plant" always, then "edible", "solid", "tree"...; "tags" in plants.json replaces them
     std::vector<std::string> states; // US-151: the first is where it starts ("ripe", "picked"); none for a plant that never changes
+    bool object = false;   // US-155: a world object from objects.json (fire pit, shelter...), placed like a plant but drawn by the game
 };
 
 struct AnimalDef {

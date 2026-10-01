@@ -114,3 +114,29 @@ TEST_CASE("US-011 The starting clan comes from data") {
     CHECK(again.people().front().name == world.people().front().name);
     CHECK(again.hash() == world.hash());
 }
+
+TEST_CASE("US-155 Outside help raises a need, capped, and ignores the dead and the unknown") {
+    const sim::SimConfig config = realConfig();
+    World world(42, config);
+    world.setDailyLife(false);
+    world.runTicks(static_cast<std::uint64_t>(world.calendar().ticksPerDay())); // everyone is a little cold
+    const int cold = config.needs.maximum - config.needs.dailyDecay[2];
+    REQUIRE(world.people()[0].needs[Need::Warmth] == cold);
+    world.satisfyPersonNeed(0, Need::Warmth, 10);
+    CHECK(world.people()[0].needs[Need::Warmth] == cold + 10);
+    CHECK(world.people()[1].needs[Need::Warmth] == cold); // only the one asked for
+    world.satisfyPersonNeed(0, Need::Warmth, 1000);
+    CHECK(world.people()[0].needs[Need::Warmth] == config.needs.maximum); // never above the maximum
+    world.satisfyPersonNeed(0, Need::Energy, 0);                            // nothing to give
+    world.satisfyPersonNeed(-1, Need::Warmth, 10);                          // nobody
+    world.satisfyPersonNeed(100000, Need::Warmth, 10);
+    CHECK(world.people()[0].needs[Need::Energy] == config.needs.maximum - config.needs.dailyDecay[1]);
+    // The same help to two worlds of the same seed leaves them the same (determinism).
+    World other(42, config);
+    other.setDailyLife(false);
+    other.runTicks(static_cast<std::uint64_t>(other.calendar().ticksPerDay()));
+    other.satisfyPersonNeed(0, Need::Warmth, 10);
+    other.satisfyPersonNeed(0, Need::Warmth, 1000);
+    other.satisfyPersonNeed(0, Need::Energy, 0);
+    CHECK(other.hash() == world.hash());
+}

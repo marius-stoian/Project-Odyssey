@@ -49,7 +49,7 @@ struct WorldPlant {
 
     // A plant that is in any state but its first is hidden until it is back to it (D-37: a picked plant vanishes, and reappears
     // in the same spot when ripe again). A hidden plant cannot be seen, clicked, inspected or hit.
-    bool hidden() const { return def != nullptr && !def->states.empty() && state != def->states.front(); }
+    bool hidden() const { return def != nullptr && !def->object && !def->states.empty() && state != def->states.front(); }
     bool present() const { return alive && !hidden(); }
 };
 

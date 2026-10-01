@@ -1062,3 +1062,15 @@ Saving a clock is a trap: tick 5000 means nothing to a game that starts again fr
 **Try it (15 minutes).** The four manual checks in [docs/plans/US-153.md](plans/US-153.md); then set `"after 15s"` in `gather.json` to `"after 3s"` and see plants come back quickly.
 
 **Check yourself.** Why does the saved file store "in 200 ticks" rather than "at tick 5200", and what would go wrong after loading if it stored the second?
+
+## M7: data-driven object kinds (US-155)
+
+A "fire pit" is not a new kind of C++ class. It is a row of data: a name, a picture name, some **tags** and a few **states**. Everything the game does with plants (place in the Editor, select, move, delete, undo, save in a level, look at, act on) works on that row, so a fire pit gets it all for free as soon as it is in `objects.json`. This is the idea behind "data-driven" design: write the machinery once for *any* thing with tags and states, then add new things by adding rows. The only C++ written for the seven objects is what is truly new: a tiny drawing routine for their programmer art, and two built-in actions, `warm-nearby` and `restore`.
+
+Look at how little the fire pit's behaviour needs: its interaction file says "needs a fire drill, three seconds, set the state to burning, warm everyone within six metres now and twice more later, then go out." The runner you met in US-153 does the timing; the new `World::satisfyPersonNeed` is the one small door through which the game may help a person's need, and it is capped and deterministic like everything in the simulation.
+
+**Where to look.** `loadCatalogs` (the objects part) in [src/game/catalogs.cpp](../src/game/catalogs.cpp); `makeObjectPage` in [src/game/object_art.cpp](../src/game/object_art.cpp); `Editor::plantKinds` and `plantPageSize` in [src/game/editor.cpp](../src/game/editor.cpp); [assets/data/objects.json](../assets/data/objects.json) and [assets/data/interactions/light-fire.json](../assets/data/interactions/light-fire.json).
+
+**Try it (15 minutes).** The three manual checks in [docs/plans/US-155.md](plans/US-155.md); then change `warm-nearby 6 25` to `warm-nearby 12 50` in `light-fire.json`, press F5 and light a fire again.
+
+**Check yourself.** Why does an object without `tags` in the file still get Inspect, and which one line in the code makes that so?

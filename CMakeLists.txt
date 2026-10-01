@@ -171,6 +171,7 @@ add_library(odysseus_game STATIC
     src/game/catalogs.cpp
     src/game/tags.cpp
     src/game/game_rules.cpp
+    src/game/object_art.cpp
     src/game/builtin_actions.cpp
     src/game/weapons.cpp
     src/game/arc_shots.cpp

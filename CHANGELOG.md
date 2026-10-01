@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-155: Age 1 world objects (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-155`); merged into `qa`.
+
+- Data: `assets/data/objects.json` (fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs) and 9 interaction files.
+- Game: objects are loaded into the plant catalog (flagged `object`) and placed, saved and edited like plants (codex issue CI-008: no level format bump); programmer art by code (`object_art`); the Editor's plant tool gets the objects as a last page; built-in actions `restore` and `warm-nearby`, effect verb `fx`.
+- Simulation: `World::satisfyPersonNeed`.
+- Docs and tests: guide section "World objects", `docs/plans/US-155.md`, teach-back, 6 new game cases and 1 sim case; `US-130 Cut`, `US-136 Editor` and `US-151 Catalog` adapted (reasons in the plan).
+
 ## US-153: Timed actions and world state (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-153`); merged into `qa`.

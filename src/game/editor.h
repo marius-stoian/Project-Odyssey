@@ -158,6 +158,13 @@ private:
     const PlacedPlant* findPlant(int id) const;
     void changePlants(const std::string& what, std::vector<PlacedPlant> after, int nextIdAfter);
     void buildPlantPalette();
+    // The plant palette lists the plants of plants.json, then the world objects of objects.json on their own last page (US-155). Objects are
+    // placed, selected, moved and deleted exactly like plants (they are kept in the level's plant list). `plant_` indexes this list.
+    std::vector<std::string> plantKinds() const;
+    int plantPageCount() const;
+    int plantPageFirst(int page) const; // index in plantKinds() of the first kind on a page
+    int plantPageSize(int page) const;
+    bool onObjectPage(int page) const { return !definitions_.objects.empty() && page == plantPageCount() - 1; }
     const PlacedEffect* findEffect(int id) const;
     void changeEffects(const std::string& what, std::vector<PlacedEffect> after, int nextIdAfter);
     void buildCharacterPalette();

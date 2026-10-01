@@ -56,6 +56,10 @@ public:
     // Today's temperature in whole degrees Celsius, rolled each morning (weather stream).
     int temperature() const { return temperature_; }
 
+    // Outside help for a need (US-155: a fire pit warms people, a bed rests them): it rises by `amount`, capped at the maximum. The
+    // dead and unknown ids are ignored. Whole numbers, so the world stays deterministic.
+    void satisfyPersonNeed(int personId, Need need, int amount);
+
     // Everyone who ever lived, in id order (the dead keep their place).
     const std::vector<Person>& people() const { return people_; }
     int population() const;
