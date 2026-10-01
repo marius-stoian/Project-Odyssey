@@ -81,6 +81,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+    lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
@@ -2033,6 +2034,9 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     }
     luna::engine::ScaledRenderer world(output, settings_.cameraZoom);
     luna::engine::Renderer& renderer = world;
+    // The world is lit (US-240): the ambient colour tints everything drawn until the lighting is cleared below; the interface is never dimmed.
+    const luna::engine::LightFrame lightFrame = lighting_.ambientFrame();
+    renderer.setLighting(&lightFrame);
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);
     auto screen = [&view](double worldX, double worldY) {
@@ -2136,6 +2140,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawHeld(renderer, view, alpha);
     drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
+    renderer.setLighting(nullptr);
     drawWeather(ui);
     drawInspection(renderer, view);
     drawRivals(renderer, view);

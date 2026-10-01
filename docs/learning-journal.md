@@ -1257,3 +1257,23 @@ No matter which `return` is taken, the time is recorded. The GPU is harder: the 
 **Try it (15 minutes).** Run the game with `--perf --people 500`, watch the F3 overlay, then try `--people 20`: which number changes, CPU or GPU?
 
 **Check yourself.** Why did our first GPU numbers read about 16 ms for a frame that really takes 0.2 ms?
+
+## US-240 The lighting pipeline: shader inputs and lighting maths
+
+**What we built.** The graphics card can now light the world: an ambient colour tints every sprite, and point lights brighten the side of a sprite that faces them.
+
+**The C++ idea: data crossing from the CPU to the GPU.** A shader is a tiny program that runs once per pixel on the card. It cannot see our C++ variables; we pack the numbers it needs into a flat array of floats (a *uniform buffer*) and push it before drawing:
+
+```cpp
+std::vector<float> data(4 + 8 * 64);       // ambient + count, then 8 floats per light
+data[3] = static_cast<float>(count);
+SDL_PushGPUFragmentUniformData(commands, 0, data.data(), bytes);
+```
+
+The shader declares the same layout (`float4 lights[128]`) and reads it back. The maths per pixel: how close is the light (`reach`) times how squarely the surface faces it (`dot(normal, directionToLight)`).
+
+**Where to look.** `src/luna/platform/shaders/sprite_lit.frag.hlsl`; `pack()` in `src/luna/platform/gpu_backend.cpp`; `src/game/lighting.cpp`.
+
+**Try it (15 minutes).** In `assets/data/light/lights.json` set `ambient.strength` to 0.5 and start the game: the world dims, the HUD does not. Set it back to 1.0.
+
+**Check yourself.** Why does a sprite with no normal map still brighten near a light, and why only a little at the edge of the light's radius?

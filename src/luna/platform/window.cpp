@@ -101,6 +101,14 @@ void Window::present() {
     backend_->present();
 }
 
+void Window::setLighting(const LightingState* state) {
+    backend_->setLighting(state);
+}
+
+void Window::setNormalMap(int texture, int normals) {
+    backend_->setNormalMap(texture, normals);
+}
+
 void Window::setGpuTiming(bool on) {
     backend_->setGpuTiming(on);
 }

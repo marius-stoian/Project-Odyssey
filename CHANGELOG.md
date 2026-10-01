@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-240: the lighting pipeline (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-240/`.
+
+- Lit sprite shader (ambient plus up to 64 point lights, normal-map facing), `setLighting` and `setNormalMap` through Window, backends and Renderer; the SDL fallback tints by the ambient colour only; additive draws are not lit.
+- `assets/data/light/lights.json` (ambient, light kinds; D-49 values), `LightingData`, guide `docs/guides/lighting.md`; the world is drawn lit, the interface not; default is neutral, so the picture is unchanged.
+- Tests: window tests for ambient, point light and a 64-light budget (0.28 ms on the card); game tests for the data, the round trip, errors and lit-world drawing.
 ## US-234: frame budget at the new size (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); 10-minute run in `docs/evidence/US-234/`.

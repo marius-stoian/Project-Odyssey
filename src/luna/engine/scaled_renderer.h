@@ -21,6 +21,10 @@ public:
     void measureGpu(bool on) override { inner_.measureGpu(on); }
     double gpuMilliseconds() const override { return inner_.gpuMilliseconds(); }
 
+    // Lights are placed in the scaled picture's own pixels: they grow with it.
+    void setLighting(const LightFrame* frame) override;
+    void setNormalMap(const Texture& texture, const Texture& normals) override { inner_.setNormalMap(texture, normals); }
+
     int scale() const { return scale_; }
 
 private:
