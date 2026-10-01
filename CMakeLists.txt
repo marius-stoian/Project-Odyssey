@@ -241,6 +241,7 @@ add_library(odysseus_game STATIC
     src/game/animals.cpp
     src/game/weather.cpp
     src/game/lighting.cpp
+    src/game/sky.cpp
     src/game/normal_art.cpp
     src/game/clan_art.cpp
     src/game/clan_view.cpp
@@ -384,6 +385,7 @@ add_executable(odysseus_game_tests
     tests/game/art_test.cpp
     tests/game/lighting_test.cpp
     tests/game/normals_test.cpp
+    tests/game/sky_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
     tests/game/paint_test.cpp
