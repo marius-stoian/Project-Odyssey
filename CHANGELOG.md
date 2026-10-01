@@ -12,6 +12,34 @@ its PR changes rather than leaving an outdated description.
 - Tests and scripted window runs moved from the 480x270 coordinates to 960x540.
 - Fix: a held left or right key always turns the hero that way (`odyssey_game.cpp`); the pointer keeps the aim.
 - Hero art: eight facings use real frames from the owner's turn-around sheet (`ArtSet::frame`); West no longer shows a right-facing hero. New tests: "US-139 Left and right keys turn him", "US-231 Eight hero directions".
+
+## Docs: merged parallel versions: Codex v2.6, requirements v2.8 (Dominus, Anima) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- While Anima published Codex v2.4 and v2.5 and requirements v2.6 and v2.7, Mraw aligned US-231 and US-232 with the owner's M8b answers (D-44, CI-010) on `story/US-231` and published its own "v2.4" Codex and "v2.6" requirements to Drive. Both lines are merged: Codex v2.6 and requirements v2.8 contain every change from both sides (Mraw's S-US-231 and S-US-232 prompts are kept word for word).
+- `docs/project/requirements/`: requirements v2.8 and the backlog; `docs/Codex.md`, `CLAUDE.md`: Codex v2.6; `docs/codex-issues.md`: CI-010 resolved.
+- For `story/US-231` when it merges `qa`: take `qa`'s version of `docs/Codex.md`, `CLAUDE.md`, `docs/codex-issues.md` and the two files in `docs/project/requirements/` (they already contain the branch's changes); keep the branch's own versions of `Handover.md`, `Limit.md`, `docs/status.md` and `docs/project/README.md`.
+- From now on Codex changes go through Anima (A-002) so versions stay in one line.
+
+## Docs: Codex v2.5, requirements v2.7, playtest plan (Dominus, Anima, D-48) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- Codex v2.5 synced from Anima: K-M13 reminds the owner to recruit the eight playtesters; X-M6 runs the playtest by the plan; D-14, D-48.
+- Requirements v2.7 and the backlog mirrored from Drive: ARC-01..ARC-08 Decided (ARC-01 renamed Six-layer architecture), D-14 plan ready, D-48.
+- `docs/plans/M6-playtest-plan.md`: who, recruiting, session script, interview, evidence and privacy for kill gate 2.
+- `docs/decisions.md`: D-14 updated, D-48.
+
+## Docs: completeness review, Codex v2.4 and requirements v2.6 (Dominus, Anima, D-47) - 2026-10-01
+
+**State:** Documents and the workspace sync only; merged into `qa`.
+
+- Codex v2.4 synced from Anima: CI-009 resolved (K-M8b checks that M8 is done, K-M9 that M8e is done); every remaining exit review (X-M8b..X-M14) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check; D-07, D-09, D-10, D-11 closed or superseded; D-47.
+- Requirements v2.6 and the backlog mirrored from Drive: stale decisions closed, STO-01 and SDC-01 absorbed, OPEN-08/10/15 answered, every MVP scope item Decided, ADR-018 in the ADR table, glossary extended, Figure 2 redrawn (`docs/project/diagrams/Odysseus - MVP Timeline.png`).
+- `tools/sync-workspace.ps1`: the reading PDFs on Drive (Matt Ganzak guides) are no longer reported as unmirrored files.
+- `docs/decisions.md`: D-07, D-09, D-10, D-11 closed, D-47; `docs/codex-issues.md`: CI-009 resolved.
+
 ## CI: guides keep LF too (Dominus) - 2026-10-01
 
 **State:** Merged into `qa`.
