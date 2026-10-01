@@ -1,6 +1,6 @@
-# Project Odyssey Codex v1.9
+# Project Odyssey Codex v2.0
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-09-30 | Source of truth: Project Odyssey.docx v1.9 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.0 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -11,17 +11,18 @@ Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus A
 - Who does what (owner instruction, 2026-09-30): Dominus, wearing every Mraw hat, designs, implements and tests the game; Anima alone writes and amends this Codex. Mraw never edits docs/Codex.md; problems go to Anima as codex issues.
 - Continuous assembly: the owner wants the MVP as fast as quality allows, engine first. After each prompt, continue with the next one in Codex order without waiting, until a Charter human gate or the end of the session.
 - Autonomous by default (owner instruction, 2026-09-30): the owner wants the game built with minimal intervention. Design decisions are delegated to Dominus, stories integrate through the `qa` branch, and a Milestone-<n>.md progress snapshot is saved after every story, so the owner can review everything later. The owner answers questions up front (before leaving the team to work), not during the run.
+- Design decisions from v2.0 on (owner, 2026-10-01, D-35): the owner takes them (D-22, Charter human gate 3). The delegated period the owner granted on 2026-10-01 for M3-M6 (D-30..D-33) ended with M6. Each kickoff K-Mx asks the owner its open design questions in one chat round before its first story.
 - Blocked, wrong or ambiguous prompts become codex issues; the owner takes them to Anima with **A-002**; Anima issues a new Codex version.
 
 ## 1. Delivery format
 
-Hybrid: **stage gates** at milestones M0-M6 (with kill gates at M2 and M6) and **Kanban flow** inside each milestone, WIP 1. Milestone kickoff (K) batches owner decisions; exit review (X) demonstrates exit criteria and tags the repo.
+Hybrid: **stage gates** at milestones M0-M9 (with kill gates at M2 and M6; kill gate 2 is held after M9, D-34) and **Kanban flow** inside each milestone, WIP 1. Milestone kickoff (K) batches owner decisions; exit review (X) demonstrates exit criteria and tags the repo.
 
 ## 2. Charter (C-01)
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v1.9)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.0)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -29,7 +30,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v1.9 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.0 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -189,12 +190,12 @@ You are the Mraw designer. You write content only as data files in assets/data/ 
 
 ## 4. Build loop (L-01)
 ```xml
-<prompt id="L-01" codex="1.8" name="Mraw build loop">
+<prompt id="L-01" codex="2.0" name="Mraw build loop">
 <context>
 Used by mraw-orchestrator for every story prompt S-US-xxx. The Charter (CLAUDE.md) is already loaded.
 </context>
 <instructions>
-1. Readiness: for each D-xx in the story's <dependencies>, read docs/decisions.md. If any is not Decided, follow the Charter's human_gates: Dominus decides it (delegated), records it, and the story continues. For each US-xxx dependency, confirm it is Done in docs/status.md.
+1. Readiness: for each D-xx in the story's <dependencies>, read docs/decisions.md. If any is not Decided, follow the Charter's human gate 3: ask the owner in chat (2-4 options, recommended first), record the answer in docs/decisions.md as "Decided (owner, <date>)", then continue; while waiting, work on another ready prompt only if the owner is away. For each US-xxx dependency, confirm it is Done in docs/status.md.
 2. Branch: create story/US-xxx from qa. If that branch already exists with paused work (Limit.md says so), continue on it instead: merge the latest qa into it first, then finish what Limit.md lists as left.
 3. Plan: delegate to mraw-architect -> docs/plans/US-xxx.md.
 4. Tests first: delegate to mraw-tester -> failing tests for every headless-testable scenario; manual checks for the rest.
@@ -225,14 +226,14 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M2c | US-120, US-030 | Decided (owner, 2026-09-30): own art in assets/sprites/, placeholder quality; licence checked before any public release |
 | D-06 | Minimum PC spec (OPEN-19) | M4 | US-082 | Open |
 | D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Open |
-| D-08 | Interactions interview: verbs, objects, crafting (OPEN-09) | M4 | US-061, US-062 | Open |
+| D-08 | Interactions interview: verbs, objects, crafting (OPEN-09) | M4 | US-061, US-062 | Decided (answered by D-34) |
 | D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Proposed |
 | D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Proposed |
 | D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Open |
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
-| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M6 (each milestone needs the previous one) | All | All | Planned |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M9 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
 | D-GATE-M2b | Kill Gate 1 retry: the owner reads the M2b story and judges whether it is a story | X-M2b | M3 | Decided: Go (owner, 2026-09-30: "it is a story") |
@@ -240,13 +241,15 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-21 | M2d content and combat (owner, six rounds in chat): full gameplay; all 150 weapons catalogued, 16 starters (one plain and one elemental per class) placed as pickups, 9-slot hotbar (1-9, Shift cycles); 8 weapon classes; elements with status effects; hero 100 HP, respawn at the start; enemies (goblins, predators, boars) strike back after a 0.5 s wind-up within 1.5 m; deaths drop nothing; plants block (big ones), are inspected, chopped, heal 10 when edible and regrow after 15 s at a random free spot in camera view; effects on hits, plant actions and placed in the Editor; random weather every 60-120 s with a 3 s fade | M2d | US-130..US-138 | Decided (owner, 2026-09-30) |
 | D-22 | Design decisions are taken by the owner in interactive question rounds in chat; Dominus no longer delegates design or scope questions (Charter human gate 3) | All | All | Decided (owner, 2026-09-30) |
 | D-25 | Aiming and ballistics (owner, two rounds in chat, 2026-10-01): free aim at the mouse cursor (the hero faces it, melee swings toward it, aim line and crosshair); full arcs from Luna Physics that land at the cursor (clamped to range), hit anything in their path at body height, are blocked by rocks and trees when low and clear them when high; bows, crossbows, thrown weapons and staffs (staff bolts flat and fast) are shootable, guns are out of scope; no ammo, only rate-of-fire cooldown; three stories US-139..US-141 before plants | M2d | US-139..US-141 | Decided (owner, 2026-10-01) |
+| D-34 | World interactions and dialogue (owner, one chat round, 2026-10-01): plain-text `.dlg` dialogue scripts + JSON interaction files (comments allowed, one file per thing); hybrid talk (written dialogue trees that read the simulation, plus generated small talk from memories, gossip and needs); a full visual graph editor in the Editor plus F5 hot reload; build M7, M8, M9 first and hold kill gate 2 (X-M6) afterwards | M7 | US-150..US-175 | Decided (owner, 2026-10-01) |
+| D-35 | Assembly of M7-M9 (owner, one chat round with Anima, 2026-10-01): design questions go to the owner at each kickoff (D-22); P-009 pays the test debt (the M2d-M6 tests were never run), then every story runs the full verification and needs green CI on qa; US-155 builds the seven proposed world objects (fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs); the dialogue panel pauses the game | M7 | P-009, US-155, US-161 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v1.9 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.0 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -415,6 +418,27 @@ US-130..US-135 are done. Before plants the owner asked to aim weapons with the m
 4. Update Limit.md (next prompt S-US-139) and commit on qa "P-008: adopt Codex v1.9 (aiming and ballistics)", push, and wait for green CI.
 </instructions>
 <output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+### P-009 Adopt Codex v2.0 (World interactions, dialogue and their editor)
+```xml
+<prompt id="P-009" codex="2.0" name="Adopt Codex v2.0 and pay the test debt">
+<context>
+M2d, M3, M4, M5 and M6 are built; M6 waits at kill gate 2 (D-GATE-M6). Since M2d the owner asked for no tests or CI, so the M2d-M6 tests were compiled but never run and nothing has been pushed since 5125364. The owner has now decided three new milestones built before kill gate 2 (requirements v2.0, Round 13; D-34): M7 World interactions, M8 Speak to NPCs, M9 Interaction and dialogue editor; and how they are assembled (D-35). Mraw's brief: docs/plans/M7-M9-interactions-brief.md. M7 starts with a large refactor (US-152 moves every hard-coded action into data), which is only safe on a test suite that is known to pass.
+</context>
+<instructions>
+1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.0.
+2. docs/status.md: add P-009 after P-008; add K-M7, S-US-150..S-US-156, X-M7, K-M8, S-US-160..S-US-165, X-M8, K-M9, S-US-170..S-US-175, X-M9 (To do) between X-M5 and K-M6; X-M6 stays Blocked until X-M9 is done.
+3. docs/decisions.md: D-08 Decided (answered by D-34); D-34 and D-35 as in section 5.
+4. Pay the test debt on qa: run `pwsh tools/verify.ps1 -Story P-009` (Debug and Release, every test). Fix every failure in the code the failing test covers, one commit per fix ("P-009: fix <test>"). Then push qa and wait for green CI. Keep each test's intent: change a test only when it is provably wrong about the requirements, and list every such change in the report with the reason.
+5. Record the result in docs/gates/test-debt.md: tests run, failures found, each fix, CI run link. Complete the exit checks that M2d-M5 left owed (docs/gates/M2d.md..M5.md) from this run, and mark them done there.
+6. Update Limit.md (next prompt K-M7), save a Milestone-<n>.md, and commit on qa "P-009: adopt Codex v2.0 (interactions, dialogue, editor)", push, and wait for green CI.
+</instructions>
+<stop_conditions>
+A failure whose fix would change behaviour the requirements describe (write a decision request for the owner); more than 3 attempts on one failure (codex issue); push needs authentication that is not configured.
+</stop_conditions>
+<output_format>Assembly report (Charter report_format), with the test-debt table.</output_format>
 </prompt>
 ```
 
@@ -4095,13 +4119,1041 @@ Manual checks in docs/plans/US-082.md done, with results recorded there.
 </prompt>
 ```
 
+### M7 World interactions
+Exit criteria: Every action in today's game comes from data files; the player, NPCs and animals act on things with timed, visible, saved results; files edited offline reload with F5 and errors name file and line.
+
+Why this milestone exists: the owner wants game entities to interact with each other and with the world, configured offline in readable files and in the Editor (D-34). Today every world action is C++ in RunFlow::openContext and the clan's actions are only rates; M7 makes one data-driven system that the player, NPCs and animals share. Order: the language and loader first (US-150, US-151), hot reload early so the owner can iterate (US-156), then the refactor (US-152), time and state (US-153), objects (US-155), and NPCs last (US-154).
+
+Design notes for every M7, M8 and M9 prompt (Anima, from the brief docs/plans/M7-M9-interactions-brief.md):
+- Decisions (D-22, D-35): the owner takes every design decision. K-M7, K-M8 and K-M9 each ask the owner, in one chat round, every design question their stories leave open; a question that appears mid-story stops that story until the owner answers. Technical choices stay with Dominus and go into ADRs or the milestone design document.
+- Formats (D-34, ADR-019): interactions are JSON in assets/data/interactions/, one file per interaction, `//` comments allowed (parse with comments ignored); dialogue is `.dlg` plain text in assets/data/dialogue/; the graph layout lives in `<name>.dlg.layout.json`. The brief's section 4 is the contract: field names, the condition functions (`has`, `need`, `skill`, `trait`, `opinion`, `kin`, `flag`, `tag`, `time`, `season`, `distance`) and the effect verbs (`give`, `take`, `set`, `flag`, `opinion`, `remember`, `start`, `talk`, `say`, `fx`, `sound`, `after`, `chronicle`). Adding a function or verb is allowed when a story needs it: document it in the guide in the same commit.
+- One language: interactions and dialogue share one condition and effect language, parsed once into expression trees (std::variant nodes), evaluated against a read-only view of the world. Errors always name file, line and field (Charter rule 7); bad data never crashes the game: the last good data stays loaded.
+- Layers (Charter rules 1, 3, 9): the language, the registry, the action runner, dialogue parsing, selection and validation live in src/sim/ (no Engine, Platform or SDL); panels and Editor tabs live in src/game/; the node-graph widget lives in Luna Engine and knows nothing about dialogue.
+- Determinism (Charter rule 6): NPC choices and small-talk picks use seeded PCG32 streams; things are referred to by id, never by pointer; the determinism hash covers interaction state, flags and conversation memories.
+- Saves (Charter rule 8): thing states, running actions, flags and conversation memories are saved; every save or level format change bumps its version with a migration from the previous one.
+- Comments: Editor saves keep `note` fields and `.dlg` `#` notes; JSON `//` comments are lost on an Editor save, and the guide says so.
+- Tests: every shipped JSON and .dlg file is validated in a CI test; round-trip tests (load, save, load) for every format; the M5 and M6 behaviour is the regression baseline for US-152.
+
+```xml
+<prompt id="K-M7" codex="2.0" name="Kick off M7 World interactions">
+<instructions>
+1. Confirm that M5 (X-M5) and P-009 (docs/gates/test-debt.md) are done, and that D-34 and D-35 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M7 stories leave open after the brief and D-34/D-35 (for example: the progress-ring look, which actions an NPC may interrupt, whether animals flee from the hero). Record the answers in docs/decisions.md and in the milestone design document.
+3. Architect: write docs/plans/M7-interactions-design.md before US-150, following the design notes: the grammar of the language (tokens and precedence), the registry and matching, the action runner and timers, state storage and save migrations, the NPC scoring loop, the hot-reload swap, and the test plan.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-150, US-151, US-156, US-152, US-153, US-155, US-154.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-150 Interaction data and the rule language
+```xml
+<prompt id="S-US-150" codex="2.0" milestone="M7" story="US-150" priority="Must" size="L">
+<context>
+Story US-150: Interaction data and the rule language.
+As the owner, I want every action and interaction described in JSON files I can edit offline, with conditions and effects in plain words, so that I can change how the world works without code.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-01, INT-03, ADR-019.
+</context>
+<dependencies>
+Stories that must be Done: US-060.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation layer: src/sim/rules/ (lexer, parser and evaluator of the condition and effect language; the interaction registry and its JSON loader with nlohmann/json, comments allowed). Data: assets/data/interactions/. Guide: docs/guides/interaction-data.md (mraw-writer), one example per condition function and effect verb. Ship one example interaction (gather.json) so the tests have real data.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Load">
+Given gather.json with a range, a duration, two conditions and three effects
+When the game starts
+Then the interaction is registered and offered on edible plants
+</scenario>
+<scenario name="Error">
+Given a file with an unknown effect verb on line 12
+When the game starts
+Then the error reads 'interactions/gather.json:12: unknown effect verb "giv"' and the rest of the data loads
+</scenario>
+<scenario name="Guide">
+Given every condition function and effect verb
+When the owner opens docs/guides/interaction-data.md
+Then each has a one-line meaning and an example
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-150`: Debug and Release builds with zero warnings; every test passes in both, including the "US-150 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-150.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-150/.
+</verification>
+<teach_back>C++ concept for the owner: A small expression parser (tokens, recursive descent).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-151 Tags and smart objects
+```xml
+<prompt id="S-US-151" codex="2.0" milestone="M7" story="US-151" priority="Must" size="M">
+<context>
+Story US-151: Tags and smart objects.
+As the owner, I want things to carry tags and states and to advertise the interactions that fit them, so that a new plant or object gets its actions just by its tags.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-01, INT-02, GD-04.
+</context>
+<dependencies>
+Stories that must be Done: US-150.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Catalogs in assets/data/ gain `tags` and `states` (with a default) for plants, animals, characters and items; the loaders validate them. Matching (actor kind, target tags, state) lives in src/sim/rules/; the Game asks it which interactions a thing offers.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Advertise">
+Given a new plant kind tagged edible and plant
+When the hero right-clicks it
+Then Gather and Inspect are offered without any code change
+</scenario>
+<scenario name="State">
+Given a bush in state picked
+When the hero right-clicks it
+Then Gather is shown disabled with 'Nothing to pick yet'
+</scenario>
+<scenario name="Unknown tag">
+Given an interaction targeting a tag no catalog uses
+When the data loads
+Then a warning names the file and the tag
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-151`: Debug and Release builds with zero warnings; every test passes in both, including the "US-151 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-151.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-151/.
+</verification>
+<teach_back>C++ concept for the owner: Sets of tags and matching with std::ranges.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-156 Hot reload and the validation panel
+```xml
+<prompt id="S-US-156" codex="2.0" milestone="M7" story="US-156" priority="Must" size="M">
+<context>
+Story US-156: Hot reload and the validation panel.
+As the owner, I want to press F5 after editing a file offline and see my change, or a clear list of mistakes, so that I can iterate fast without restarting.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-03.
+</context>
+<dependencies>
+Stories that must be Done: US-150.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: F5 (new intent Reload) reloads assets/data/ catalogs, interactions and dialogue: load into new structures, validate, swap only when valid. Errors collect into a list shown by a Game panel (Luna UI) with file:line: message; the last good data stays live. Works in Game and Editor modes.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Reload">
+Given the game running and gather.json edited in Notepad
+When the owner presses F5
+Then the change is live within a second
+</scenario>
+<scenario name="Bad file">
+Given a file with a syntax error
+When the owner presses F5
+Then a panel lists 'file:line: message' and the last good data stays in use
+</scenario>
+<scenario name="Fix">
+Given the panel showing an error
+When the owner fixes the file and presses F5
+Then the panel closes and the new data is used
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-156`: Debug and Release builds with zero warnings; every test passes in both, including the "US-156 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-156.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-156/.
+</verification>
+<teach_back>C++ concept for the owner: Watching files and swapping data safely.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-152 The context menu from data
+```xml
+<prompt id="S-US-152" codex="2.0" milestone="M7" story="US-152" priority="Must" size="L">
+<context>
+Story US-152: The context menu from data.
+As the player, I want right-click actions to come from the data, so that the owner's changes appear in the game; nothing I could do before is lost.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-01, INT-03.
+</context>
+<dependencies>
+Stories that must be Done: US-151, US-061.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Move every action built in RunFlow::openContext (src/game/run_flow.cpp: Talk, Give berries, Ask to teach, Craft, Craft at the fire, Eat berries, Tend the fire, Tend the sacred fire) and the plant Inspect and chop actions into assets/data/interactions/*.json. Effects that need Game code (open the craft screen, start a dialogue) are named effect verbs the Game registers. The context menu is built from the registry; a failed condition's `else` text is the disabled reason. Run every M5 and M6 test before and after; behaviour must not change.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Same actions">
+Given the M5 camp level
+When the hero right-clicks a person, the fire and the knapping stone
+Then Talk, Give berries, Ask to teach, Craft, Eat berries and Tend the fire are offered as before
+</scenario>
+<scenario name="Data change">
+Given the owner renames 'Tend the fire' in tend-fire.json
+When the game reloads the data
+Then the menu shows the new name
+</scenario>
+<scenario name="Regression">
+Given the M5 and M6 tests
+When they run
+Then they pass unchanged
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-152`: Debug and Release builds with zero warnings; every test passes in both, including the "US-152 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-152.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-152/.
+</verification>
+<teach_back>C++ concept for the owner: Replacing hard-coded behaviour behind a stable interface (refactoring with tests).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-153 Timed actions and world state
+```xml
+<prompt id="S-US-153" codex="2.0" milestone="M7" story="US-153" priority="Must" size="M">
+<context>
+Story US-153: Timed actions and world state.
+As the player, I want actions to take time, show progress and change the thing I act on, so that the world reacts and remembers.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-04.
+</context>
+<dependencies>
+Stories that must be Done: US-152.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: An action runner in src/sim/rules/: the running action per actor (interaction id, target id, elapsed ticks), interruption by Move or Attack intents, effects applied at the end, `after` effects queued on the world timer; target state stored per thing id and written into saves (region and level save versions bumped with a migration). Progress ring and effects drawn by the Game.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Progress">
+Given Gather with a duration of 3 s
+When the hero starts it
+Then a progress ring fills over 3 s and the berries arrive at the end
+</scenario>
+<scenario name="Interrupt">
+Given a timed action under way
+When the player moves or attacks
+Then the action stops and gives nothing
+</scenario>
+<scenario name="Saved">
+Given a bush picked and a fire lit
+When the game saves and loads
+Then the bush is still picked and the fire still burns
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-153`: Debug and Release builds with zero warnings; every test passes in both, including the "US-153 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-153.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-153/.
+</verification>
+<teach_back>C++ concept for the owner: Timers in the fixed timestep; saving component state.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-155 Age 1 world objects
+```xml
+<prompt id="S-US-155" codex="2.0" milestone="M7" story="US-155" priority="Should" size="M">
+<context>
+Story US-155: Age 1 world objects.
+As a level designer, I want fire pits, knapping stones, stores, shelters, flint nodules, water and sleeping furs as placeable objects with their own actions, so that a camp is something to interact with.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-02, INT-04.
+</context>
+<dependencies>
+Stories that must be Done: US-151.
+Owner decisions that must be Decided: D-34, D-35.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: assets/data/objects.json with the seven Age 1 objects (D-35): fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs, each with tags, states, atlas frame (programmer art allowed) and its interactions in assets/data/interactions/. Objects are a new Editor palette page and are saved in levels (level format version bump with migration).
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Place">
+Given the Editor's object palette
+When the owner places a fire pit
+Then it appears in the level and is saved
+</scenario>
+<scenario name="Use">
+Given a fire pit with no fire
+When the hero chooses Light fire with a fire drill
+Then the fire burns and warms people nearby
+</scenario>
+<scenario name="Data">
+Given a new object kind added to objects.json
+When the game reloads
+Then it appears in the palette with its tags
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-155`: Debug and Release builds with zero warnings; every test passes in both, including the "US-155 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-155.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-155/.
+</verification>
+<teach_back>C++ concept for the owner: Data-driven object kinds.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-154 NPCs and animals use interactions
+```xml
+<prompt id="S-US-154" codex="2.0" milestone="M7" story="US-154" priority="Must" size="L">
+<context>
+Story US-154: NPCs and animals use interactions.
+As the player, I want clan members and animals to do the same things I can do, chosen by their needs and traits, so that I see them live in the world.
+Epic E14 World interactions: Every thing in the world offers actions from data; the player, NPCs and animals act on things with timed, visible, saved results.
+Traces to: INT-05, SDC-02.
+</context>
+<dependencies>
+Stories that must be Done: US-153, US-030.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: NPC choice in the Simulation: each idle clan member and animal scores the interactions it can do with the `npc.score` expression and `cooldown`, picks the best with the clan's seeded PCG32 stream for ties, walks to the target and runs it with the same action runner. The M3 view places actions on real targets instead of fixed spots. Extend the determinism hash test to cover interaction state. assets/data/sim/actions.json keeps only tuning numbers that are not interactions.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Hungry">
+Given a hungry clan member near a ripe bush
+When time passes
+Then they walk to the bush and gather, and the bush shows as picked
+</scenario>
+<scenario name="Animals">
+Given a deer near grass and a wolf nearby
+When time passes
+Then the deer grazes and flees from the wolf
+</scenario>
+<scenario name="Deterministic">
+Given the same seed and inputs
+When two runs simulate 10,000 ticks
+Then the world hashes match
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-154`: Debug and Release builds with zero warnings; every test passes in both, including the "US-154 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-154.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-154/.
+</verification>
+<teach_back>C++ concept for the owner: Utility scoring; sharing one system between player and AI.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M7" codex="2.0" name="Exit review M7">
+<instructions>
+1. Demonstrate the exit criteria: Every action in today's game comes from data files; the player, NPCs and animals act on things with timed, visible, saved results; files edited offline reload with F5 and errors name file and line.
+2. Collect evidence (test output, CI run, screenshots, data files) into docs/gates/M7.md, one section per criterion, each marked met or not met. Also: the hand-written actions are gone from RunFlow::openContext; a clip or screenshot sequence shows a clan member gathering and an animal fleeing; the owner's offline edit loop (edit a file, F5, see the change) is shown in the evidence.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m7-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M8 Speak to NPCs
+Exit criteria: The player talks to any clan member; written conversations branch on the simulation; without a script NPCs make small talk from their memories; talk changes opinions, items and memories; NPCs talk to each other in bubbles.
+
+Why this milestone exists: the owner wants to speak to NPCs (SDC-03). Hybrid talk (D-34): written `.dlg` trees that read the simulation, and generated small talk from memories, gossip and needs when no written line fits. The design notes under M7 apply to every M8 prompt; the dialogue panel pauses the game (D-35).
+
+```xml
+<prompt id="K-M8" codex="2.0" name="Kick off M8 Speak to NPCs">
+<instructions>
+1. Confirm that M7 (docs/gates/M7.md) and its stories are done, and that D-34 and D-35 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round, the open design questions of the M8 stories (for example: the mood words, how many choices fit the panel, which small-talk topics come first). Record the answers.
+3. Architect: write docs/plans/M8-dialogue-design.md before US-160: the .dlg grammar, the runtime state machine, selection rules, the small-talk generator, the memory and chronicle links, bubbles, and the test plan.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-160, US-161, US-162, US-163, US-164, US-165.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-160 The dialogue script format
+```xml
+<prompt id="S-US-160" codex="2.0" milestone="M8" story="US-160" priority="Must" size="L">
+<context>
+Story US-160: The dialogue script format.
+As the owner, I want to write conversations as plain text with speakers, choices, conditions and effects, so that I can write dialogue in any text editor.
+Epic E15 Speak to NPCs: The player talks to any clan member; written and generated conversations read the simulation and change it; NPCs talk to each other.
+Traces to: SDC-03, SDC-04, ADR-019.
+</context>
+<dependencies>
+Stories that must be Done: US-150.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: src/sim/dialogue/: line-based parser for .dlg (headers @who, @when, @priority; nodes `=== id`; speaker lines with optional [if ...]; choices `-> text [if ...] {effects} => node`; END; `#` notes kept and attached to the next element), using the US-150 condition and effect language; a canonical writer. Format guide docs/guides/dialogue-format.md (mraw-writer) with the brief's example. Ship assets/data/dialogue/elder-fire.dlg.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Parse">
+Given elder-fire.dlg with three nodes, a conditional line and three choices
+When the game loads it
+Then the conversation has three nodes and the choices link to them
+</scenario>
+<scenario name="Error">
+Given a choice that points to a missing node on line 9
+When the game loads it
+Then the error reads 'dialogue/elder-fire.dlg:9: unknown node "hunts"'
+</scenario>
+<scenario name="Round trip">
+Given every shipped .dlg file
+When it is loaded and written back
+Then the text is the same, # notes included
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-160`: Debug and Release builds with zero warnings; every test passes in both, including the "US-160 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-160.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-160/.
+</verification>
+<teach_back>C++ concept for the owner: Writing a line-based parser and a printer that round-trip.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-161 Conversations and the dialogue panel
+```xml
+<prompt id="S-US-161" codex="2.0" milestone="M8" story="US-161" priority="Must" size="L">
+<context>
+Story US-161: Conversations and the dialogue panel.
+As the player, I want to talk to an NPC in a panel with their name, mood, words and my choices, so that speaking to people is part of play.
+Epic E15 Speak to NPCs: The player talks to any clan member; written and generated conversations read the simulation and change it; NPCs talk to each other.
+Traces to: SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-160.
+Owner decisions that must be Decided: D-34, D-35.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Conversation runtime in src/sim/dialogue/ (current node, visible lines and choices, effects applied through the effect runner); Talk opens it. The dialogue panel in src/game/ (Luna UI): speaker name, mood word from opinion and needs, text, numbered choices (mouse or keys 1-9), Esc leaves. The game pauses while the panel is open (D-35).
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Talk">
+Given the hero next to the elder
+When the player chooses Talk
+Then the game pauses and the panel shows the elder's name, mood, first line and numbered choices
+</scenario>
+<scenario name="Choose">
+Given the choice 'Offer berries' with its effects
+When the player picks it with the mouse or the key 2
+Then a berry leaves the bag, the elder's opinion rises by 5 and the next node is shown
+</scenario>
+<scenario name="Hidden">
+Given a choice whose condition is false
+When the node is shown
+Then the choice is hidden, or shown disabled when the script marks it so
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-161`: Debug and Release builds with zero warnings; every test passes in both, including the "US-161 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-161.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-161/.
+</verification>
+<teach_back>C++ concept for the owner: A small state machine over data; immediate-mode UI.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-162 Who says what
+```xml
+<prompt id="S-US-162" codex="2.0" milestone="M8" story="US-162" priority="Must" size="M">
+<context>
+Story US-162: Who says what.
+As the owner, I want conversations chosen by character, role, kind, opinion and priority, with short greetings, so that each NPC sounds like themselves.
+Epic E15 Speak to NPCs: The player talks to any clan member; written and generated conversations read the simulation and change it; NPCs talk to each other.
+Traces to: SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-161.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Selection in src/sim/dialogue/: candidates whose @who matches (placed id > role > kind) and whose @when holds, highest @priority wins, ties by the seeded stream. Greetings and barks are short scripts with @bark; a per-NPC cooldown of 60 s.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Specific first">
+Given a script for the placed character 'Ama' and one for all elders
+When the hero talks to Ama
+Then Ama's own script is used
+</scenario>
+<scenario name="Opinion">
+Given a script with @when opinion(npc, hero) < -30
+When an NPC who dislikes the hero is spoken to
+Then that script is used
+</scenario>
+<scenario name="Greeting">
+Given the hero passing within 3 m of a friendly NPC
+When it happens
+Then a short greeting bubble appears, at most once a minute per NPC
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-162`: Debug and Release builds with zero warnings; every test passes in both, including the "US-162 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-162.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-162/.
+</verification>
+<teach_back>C++ concept for the owner: Ranking candidates with std::ranges::max_element.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-163 Generated small talk
+```xml
+<prompt id="S-US-163" codex="2.0" milestone="M8" story="US-163" priority="Must" size="M">
+<context>
+Story US-163: Generated small talk.
+As the player, I want NPCs without a written line to talk about what they remember, what they heard and how they feel, so that every clan member has something to say.
+Epic E15 Speak to NPCs: The player talks to any clan member; written and generated conversations read the simulation and change it; NPCs talk to each other.
+Traces to: SDC-03, STO-02.
+</context>
+<dependencies>
+Stories that must be Done: US-161, US-012.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: assets/data/dialogue/smalltalk.json: topics (memories, people/gossip, needs, season, the hero) with at least three templates each and tokens filled from the NPC's memories, gossip, needs and opinion (US-012 memory system). Used when no script fits and through `{smalltalk.<topic>}` tokens. mraw-designer writes the templates; the owner reads 50 samples at X-M8.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Memory">
+Given an NPC who saw a wolf at the fire yesterday
+When the hero talks to them with no script
+Then they mention the wolf in their own words
+</scenario>
+<scenario name="Gossip">
+Given an NPC who heard that Bo blamed Ama
+When the topic 'people' comes up
+Then they repeat the gossip and say how they feel about it
+</scenario>
+<scenario name="Variety">
+Given 50 small-talk lines from one seed
+When the owner reads them
+Then no line repeats more than twice
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-163`: Debug and Release builds with zero warnings; every test passes in both, including the "US-163 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-163.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-163/.
+</verification>
+<teach_back>C++ concept for the owner: Text templates with tokens.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-164 Conversations are remembered
+```xml
+<prompt id="S-US-164" codex="2.0" milestone="M8" story="US-164" priority="Must" size="M">
+<context>
+Story US-164: Conversations are remembered.
+As the player, I want what I say to matter later, so that people remember kindness and insults and talk about them.
+Epic E15 Speak to NPCs: The player talks to any clan member; written and generated conversations read the simulation and change it; NPCs talk to each other.
+Traces to: SDC-03, SDC-02, STO-03.
+</context>
+<dependencies>
+Stories that must be Done: US-161.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Dialogue effects `remember`, `opinion` and `flag` write into the Simulation's memory, opinion and flag stores so gossip (half strength) and the chronicle pick them up; notable conversations (marked `chronicle` in the script) get a chronicle line with its reason (STO-03). Flags and conversation memories are saved.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Memory">
+Given the hero insults Bo in a conversation
+When it ends
+Then Bo has a memory with a bad feeling and his opinion of the hero falls
+</scenario>
+<scenario name="Gossip">
+Given that memory
+When two days pass
+Then Bo's friends have heard it at half strength
+</scenario>
+<scenario name="Saved">
+Given flags set in conversations
+When the game saves and loads
+Then the flags and the conversation memories are still there
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-164`: Debug and Release builds with zero warnings; every test passes in both, including the "US-164 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-164.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-164/.
+</verification>
+<teach_back>C++ concept for the owner: Linking dialogue effects to the memory system.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-165 NPCs talk to each other
+```xml
+<prompt id="S-US-165" codex="2.0" milestone="M8" story="US-165" priority="Should" size="M">
+<context>
+Story US-165: NPCs talk to each other.
+As the player, I want to see clan members talk in speech bubbles, so that quarrels, courtship and sharing happen in front of me.
+Epic E15 Speak to NPCs: The player talks to any clan member; written and generated conversations read the simulation and change it; NPCs talk to each other.
+Traces to: SDC-05, SDC-02.
+</context>
+<dependencies>
+Stories that must be Done: US-162, US-154.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: When the social simulation (M2b: quarrels, courtship, sharing) fires between two people near the camera, play an exchange of bubbles from scripts with @who pairs or @bark topics; bubbles drawn by the Game, 3 s each, one at a time per speaker. Outcomes still come from the simulation; the bubbles show them.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Bubbles">
+Given two friends at the fire in the evening
+When they talk
+Then bubbles with short lines appear over their heads in turn
+</scenario>
+<scenario name="Quarrel">
+Given a quarrel started by the social simulation
+When it happens near the hero
+Then the quarrel is shown as angry lines and both opinions fall
+</scenario>
+<scenario name="Readable">
+Given a bubble on screen
+When 3 s pass or the next line starts
+Then it disappears
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-165`: Debug and Release builds with zero warnings; every test passes in both, including the "US-165 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-165.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-165/.
+</verification>
+<teach_back>C++ concept for the owner: Scheduling short timed events.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M8" codex="2.0" name="Exit review M8">
+<instructions>
+1. Demonstrate the exit criteria: The player talks to any clan member; written conversations branch on the simulation; without a script NPCs make small talk from their memories; talk changes opinions, items and memories; NPCs talk to each other in bubbles.
+2. Collect evidence (test output, CI run, screenshots, data files) into docs/gates/M8.md, one section per criterion, each marked met or not met. Also: 50 small-talk samples from one seed are saved to docs/gates/M8-smalltalk.md for the owner to read, with the count of repeated lines.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M9 Interaction and dialogue editor
+Exit criteria: The owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it and saves it, and the file still reads well in a text editor.
+
+Why this milestone exists: the owner chose a full visual graph editor (D-34) for dialogue and interactions. Risk (brief section 8): the graph widget (US-170) is the largest UI work so far; if it passes 4 weeks of effort, Mraw writes a decision request offering a form-based editor instead, and the owner decides. The design notes under M7 apply to every M9 prompt.
+
+```xml
+<prompt id="K-M9" codex="2.0" name="Kick off M9 Interaction and dialogue editor">
+<instructions>
+1. Confirm that M8 (docs/gates/M8.md) and its stories are done, and that D-34 and D-35 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round, the open design questions of the M9 stories (for example: node look, where the Dialogue and Interactions tabs sit in the tool bar, which values Test-play can set). Record the answers.
+3. Architect: write docs/plans/M9-graph-editor-design.md before US-170: the graph model and commands, text-graph mapping for .dlg, the interaction graph's layout, overrides in levels, Test-play isolation, validation, and the test plan.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-170, US-171, US-172, US-175, US-173, US-174.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-170 Node-graph widget
+```xml
+<prompt id="S-US-170" codex="2.0" milestone="M9" story="US-170" priority="Must" size="L">
+<context>
+Story US-170: Node-graph widget.
+As the owner, I want a canvas with nodes and wires that I can pan, zoom, select, drag and undo, so that rules and conversations can be edited visually.
+Epic E16 Interaction and dialogue editor: The owner edits every conversation and interaction as a graph in the Editor, test-plays it and saves readable files.
+Traces to: INT-06, SDC-06, ARC-09.
+</context>
+<dependencies>
+Stories that must be Done: US-121, US-126.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna Engine (game-agnostic): src/luna/engine/ui/node_graph.{h,cpp}: graph model (nodes with ports, wires by node and port id), canvas with pan (right drag), zoom (wheel, 50-200%), selection box, drag, connect and delete; every edit is a Command in the existing History (US-126). Tested headless with the RecordingRenderer.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Edit">
+Given an empty graph
+When the owner adds two nodes and drags a wire between their ports
+Then the wire connects them
+</scenario>
+<scenario name="Navigate">
+Given a graph larger than the screen
+When the owner drags with the right button and turns the wheel
+Then the view pans and zooms around the cursor
+</scenario>
+<scenario name="Undo">
+Given ten graph edits
+When the owner presses Ctrl+Z ten times
+Then the graph is as it was
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-170`: Debug and Release builds with zero warnings; every test passes in both, including the "US-170 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-170.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-170/.
+</verification>
+<teach_back>C++ concept for the owner: Graph data structures; hit testing; the Command pattern.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-171 Dialogue graph editor
+```xml
+<prompt id="S-US-171" codex="2.0" milestone="M9" story="US-171" priority="Must" size="L">
+<context>
+Story US-171: Dialogue graph editor.
+As the owner, I want to open a conversation as a graph, edit lines, choices, conditions and effects, and save it, so that I can write dialogue in the game.
+Epic E16 Interaction and dialogue editor: The owner edits every conversation and interaction as a graph in the Editor, test-plays it and saves readable files.
+Traces to: SDC-06, INT-03.
+</context>
+<dependencies>
+Stories that must be Done: US-170, US-160.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: a Dialogue tab in the Editor (src/game/editor_dialogue.*): .dlg to graph and back through the US-160 parser and writer; node boxes show speaker lines; choices are wires with their text, condition and effects edited in a side panel; positions saved in <name>.dlg.layout.json beside the script; Ctrl+S saves.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Open">
+Given elder-fire.dlg
+When the owner opens it in the Editor
+Then each node is a box with its lines and each choice is a wire to its target
+</scenario>
+<scenario name="Save">
+Given a node added and a choice rewired
+When the owner presses Ctrl+S
+Then the .dlg text shows the change in canonical form and the positions are in elder-fire.dlg.layout.json
+</scenario>
+<scenario name="Hand edits">
+Given a file edited in Notepad with # notes
+When it is opened, changed in the graph and saved
+Then the notes are still there
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-171`: Debug and Release builds with zero warnings; every test passes in both, including the "US-171 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-171.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-171/.
+</verification>
+<teach_back>C++ concept for the owner: Mapping between a text format and a graph.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-172 Interaction graph editor
+```xml
+<prompt id="S-US-172" codex="2.0" milestone="M9" story="US-172" priority="Must" size="L">
+<context>
+Story US-172: Interaction graph editor.
+As the owner, I want to see and edit interactions as actor, verb and target nodes with condition and effect blocks, so that I can design how things act on each other.
+Epic E16 Interaction and dialogue editor: The owner edits every conversation and interaction as a graph in the Editor, test-plays it and saves readable files.
+Traces to: INT-06.
+</context>
+<dependencies>
+Stories that must be Done: US-170, US-150.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: an Interactions tab in the Editor: actor, verb and target-tag nodes with each interaction a path between them; selecting an interaction shows its fields as condition and effect blocks (add, remove, reorder) with pickers filled from the catalogs; saves the interaction's JSON (fields in the guide's order; `note` fields kept).
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="View">
+Given the interactions folder
+When the owner opens the interaction graph
+Then actors, verbs and target tags are nodes and each interaction is a path between them
+</scenario>
+<scenario name="Edit">
+Given Gather selected
+When the owner changes its duration to 2 s and adds the effect 'fx leaves'
+Then gather.json is saved with the change
+</scenario>
+<scenario name="Pickers">
+Given a condition or effect field
+When the owner types
+Then items, tags, needs and nodes are offered from the catalogs
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-172`: Debug and Release builds with zero warnings; every test passes in both, including the "US-172 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-172.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-172/.
+</verification>
+<teach_back>C++ concept for the owner: Forms built from a schema; pickers over catalogs.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-175 Graph validation
+```xml
+<prompt id="S-US-175" codex="2.0" milestone="M9" story="US-175" priority="Must" size="S">
+<context>
+Story US-175: Graph validation.
+As the owner, I want unreachable nodes, dead ends and unknown names listed and clickable, so that broken conversations never reach players.
+Epic E16 Interaction and dialogue editor: The owner edits every conversation and interaction as a graph in the Editor, test-plays it and saves readable files.
+Traces to: INT-03, SDC-06.
+</context>
+<dependencies>
+Stories that must be Done: US-171, US-172.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Validation in src/sim/ (headless): breadth-first search from `start` for unreachable nodes, nodes with no choice and no END, unknown nodes, items, tags, needs and effect verbs; the Editor lists the findings and clicking one selects the node or block. The same check runs in CI over every shipped file.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Unreachable">
+Given a node no choice leads to
+When validation runs
+Then it is listed and clicking it selects the node
+</scenario>
+<scenario name="Dead end">
+Given a node with no choice and no END
+When validation runs
+Then it is listed as a dead end
+</scenario>
+<scenario name="Unknown">
+Given an effect giving an item no catalog has
+When validation runs
+Then the item name and the node are listed
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-175`: Debug and Release builds with zero warnings; every test passes in both, including the "US-175 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-175.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-175/.
+</verification>
+<teach_back>C++ concept for the owner: Graph traversal (breadth-first search).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-173 Attach to placed things
+```xml
+<prompt id="S-US-173" codex="2.0" milestone="M9" story="US-173" priority="Must" size="M">
+<context>
+Story US-173: Attach to placed things.
+As a level designer, I want to give a placed character a conversation and a placed object its own interactions, so that each level can have its own people and places.
+Epic E16 Interaction and dialogue editor: The owner edits every conversation and interaction as a graph in the Editor, test-plays it and saves readable files.
+Traces to: SDC-06, INT-06.
+</context>
+<dependencies>
+Stories that must be Done: US-171, US-172.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Level format: placed characters gain `dialogue`, placed things gain `overrides` (interaction id -> changed fields). The Editor's properties panel gets a dialogue picker and an overrides list; the registry applies overrides per thing id.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Attach">
+Given a placed character selected
+When the owner picks 'elder-fire' as its dialogue
+Then talking to that character in Game mode starts elder-fire
+</scenario>
+<scenario name="Override">
+Given a placed bush selected
+When the owner sets its regrow time to 60 s
+Then only that bush regrows in 60 s
+</scenario>
+<scenario name="Saved">
+Given attached dialogues and overrides
+When the level is saved and loaded
+Then they are still attached
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-173`: Debug and Release builds with zero warnings; every test passes in both, including the "US-173 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-173.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-173/.
+</verification>
+<teach_back>C++ concept for the owner: Per-instance overrides of shared data.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-174 Test-play from the Editor
+```xml
+<prompt id="S-US-174" codex="2.0" milestone="M9" story="US-174" priority="Should" size="M">
+<context>
+Story US-174: Test-play from the Editor.
+As the owner, I want to play a conversation or an interaction from the Editor with conditions I choose, so that I can check every branch without playing the game for hours.
+Epic E16 Interaction and dialogue editor: The owner edits every conversation and interaction as a graph in the Editor, test-plays it and saves readable files.
+Traces to: SDC-06, INT-06.
+</context>
+<dependencies>
+Stories that must be Done: US-171, US-172.
+Owner decisions that must be Decided: D-34.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Editor: a Test-play panel that runs the dialogue runtime or the action runner on a copy of the world with chosen values (opinion, needs, items, flags, time, season); Play from here starts at the selected node; nothing is written to the level or saves.
+Follow the formats in the milestone's design notes and the brief docs/plans/M7-M9-interactions-brief.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Branch">
+Given a choice that needs opinion >= 20
+When the owner sets the opinion to 25 and test-plays
+Then the choice is offered
+</scenario>
+<scenario name="Start anywhere">
+Given a node selected
+When the owner chooses Play from here
+Then the conversation starts at that node
+</scenario>
+<scenario name="No side effects">
+Given a test-play that gives items
+When it ends
+Then the level and the save are unchanged
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-174`: Debug and Release builds with zero warnings; every test passes in both, including the "US-174 ..." cases and the determinism hash test.
+Green CI on qa after the merge.
+Manual checks in docs/plans/US-174.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-174/.
+</verification>
+<teach_back>C++ concept for the owner: Faking inputs for tests (test doubles).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M9" codex="2.0" name="Exit review M9">
+<instructions>
+1. Demonstrate the exit criteria: The owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it and saves it, and the file still reads well in a text editor.
+2. Collect evidence (test output, CI run, screenshots, data files) into docs/gates/M9.md, one section per criterion, each marked met or not met. Also: one conversation and one interaction are built from scratch in the Editor, test-played, saved, and shown as text beside the graph in the evidence. Then X-M6 (kill gate 2) is next: end the session after this report, because it needs people.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
 ### M6 Playtest and go/no-go (KILL GATE 2)
 Exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 
 ```xml
-<prompt id="K-M6" codex="1.8" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
+<prompt id="K-M6" codex="2.0" name="Kick off M6 Playtest and go/no-go (KILL GATE 2)">
 <instructions>
-1. Confirm the previous milestone's exit review exists in docs/gates/ and passed (skip for M0).
+1. Confirm the previous milestone's exit review exists in docs/gates/ and passed: since v2.0 that is M9 (docs/gates/M9.md, D-34). M6's stories US-090..US-092 are already Done; if so, go straight to X-M6.
 2. Read docs/decisions.md. For every decision this milestone needs (D-11) that is not Decided, write its decision request now, all at once, so the owner can answer them in one sitting.
 3. Set this milestone's stories to To do in docs/status.md in this order: US-090, US-091, US-092.
 4. Continue with the first story prompt.
@@ -4264,7 +5316,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -4285,6 +5337,8 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | CHANGELOG.md | Every change set with verification evidence, updated before each push or merge. | mraw-writer |
 | docs/evidence/US-xxx/ | Raw logs proving acceptance criteria. | mraw-tester |
 | docs/reports/ | Assembly reports and checkpoints, one per session or story. | mraw-orchestrator |
+| docs/guides/interaction-data.md, docs/guides/dialogue-format.md | The owner's reference for every field, condition function and effect verb; updated in the same commit as any format change (from US-150, US-160). | mraw-writer |
+| docs/gates/test-debt.md | The P-009 run that paid the M2d-M6 test debt. | mraw-tester |
 | AGENTS.md | Owner rules for any AI agent (for example the changelog rule); points to CLAUDE.md. | Owner |
 
 ## 9. Amendment log
@@ -4300,3 +5354,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 1.7 | 2026-09-30 | Level editor (source of truth v1.7, Round 10): Kill Gate 1 passed (D-GATE-M2b: Go). Before M3 the owner asked for a level editor (D-19) with his own art (D-05 decided: own art, placeholder quality). New milestone M2c Level editor between M2b and M3 with K-M2c, S-US-120..S-US-126 (real art cut from the owner's sheets into atlases; pointer, font and widgets; levels as data; Game mode and Editor mode; painting ground tiles with undo and redo; placing characters with properties; level and character settings and a guide) and X-M2c (no kill gate); design notes for the milestone (layers, art pipeline, stb_image and ADR-018, data files, tests, UX); D-15 chain includes M2c; new P-006 adopts v1.7. Built from Mraw's brief docs/plans/M2c-editor-brief.md. |
 | 1.8 | 2026-09-30 | Content and combat (source of truth v1.8, Round 11): M2c done. The owner added seven sprite sheets and took every design decision in six chat rounds (D-21). New milestone M2d Content and combat between M2c and M3 with K-M2d, S-US-130..S-US-138 (content catalogs; hero HP, strike-back and death; effect player; eight weapon classes and a 16-weapon starter set; pickups and a 9-slot hotbar with level format version 2; elements; plants; animals in the Editor; placed effects and random weather) and X-M2d (ends by stopping for the owner before K-M3); design notes for the milestone. Charter: human gate 3, design decisions are the owner's (D-22), replacing delegation to Dominus. D-15 chain includes M2d; new P-007 adopts v1.8. Built from Mraw's brief docs/plans/M2d-content-brief.md. |
 | 1.9 | 2026-10-01 | Aiming and ballistics (source of truth v1.9): the owner asked, before plants, to aim weapons with the mouse, to have ballistics and several shootable ranged weapons (D-25, two chat rounds). Three stories S-US-139 (mouse aiming), S-US-140 (arc ballistics with Luna Physics), S-US-141 (bows, crossbows, thrown weapons and staff bolts, with a shooting-range level) are added to M2d between S-US-135 and S-US-136; K-M2d sets the new order; design notes for the milestone; D-25 in the decision table; new P-008 adopts v1.9. Built from Mraw's brief docs/plans/M2d-aiming-brief.md. |
+| 2.0 | 2026-10-01 | World interactions, dialogue and their editor (source of truth v2.0, Round 13; Mraw's brief docs/plans/M7-M9-interactions-brief.md). The owner decided D-34 (plain-text .dlg dialogue + JSON interactions; hybrid talk; full visual graph editor plus F5 hot reload; build first, kill gate 2 after) and, with Anima, D-35 (design questions to the owner at each kickoff; P-009 pays the test debt, then per-story verification and CI; the seven proposed world objects; the dialogue panel pauses). New milestones before M6: M7 World interactions (K-M7, S-US-150..S-US-156, X-M7), M8 Speak to NPCs (K-M8, S-US-160..S-US-165, X-M8), M9 Interaction and dialogue editor (K-M9, S-US-170..S-US-175, X-M9), with shared design notes; K-M6 now follows X-M9; D-08 Decided, D-15 chain, D-34 and D-35 in the decision table; new state files (format guides, test-debt record); new P-009 adopts v2.0 and pays the test debt. L-01 step 1 corrected: an undecided D-xx goes to the owner (Charter human gate 3), no longer to Dominus; this contradiction existed since v1.8. Section 0 records that the delegated period of D-30..D-33 ended with M6. |

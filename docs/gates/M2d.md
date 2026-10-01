@@ -12,7 +12,7 @@
 | Effects play; the weather changes by itself | met | US-132, US-138 `docs/evidence/US-138/` |
 | Every M2c feature and the spear and sword demos still work | not re-run | the full test run after US-141 (25 of 25 in Debug and Release) covered them; the later stories (US-136..US-138, the hero-orientation fix) were only built |
 
-## Checks owed at the M4 gate
+## Checks owed at the M4 gate (closed by P-009, see docs/gates/test-debt.md)
 - `tools/verify.ps1` (Debug and Release, zero warnings, all tests) for the work after US-141: the hero-orientation fix (US-139 follow-up), US-136, US-137, US-138. Their new tests were written with the code and never run: `US-139 The hero always faces the pointer`, `US-139 No flicker walking past the pointer`, `US-139 Facing with hysteresis` (these three did pass in Debug and Release on the orientation branch), `US-136 ...` (7 cases passed in Debug), `US-137 ...` (4 cases, never run), `US-138 ...` (3 cases, never run).
 - The toolbar labels changed to make room for new buttons (Weapon is Arms, Grid is #); the end-to-end scripts in `tests/game/*.cmake` click by position and may need their coordinates checked.
 - CI on `qa`, then merge `qa` into `main`, tag `m2d-done`.

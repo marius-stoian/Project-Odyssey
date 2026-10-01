@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## P-009: Adopt Codex v2.0 and pay the test debt (Avengers) - 2026-10-01
+
+**State:** Docs only; no code changed. Verified: Debug and Release build with 0 warnings, 25 of 25 tests pass in each (`docs/evidence/P-009/`).
+
+- `docs/status.md` lists P-009 and the M7, M8, M9 prompts; `docs/decisions.md` records D-08 (answered by D-34) and D-35; `CLAUDE.md` and `docs/Codex.md` are at v2.0; the requirements and backlog are synced from Drive.
+- `docs/gates/test-debt.md` records the run; the owed test checks of M2d, M4, M5, M6 are closed there.
+
+
 ## M6: Playtest readiness - US-090, US-091, US-092 (Avengers) - 2026-10-01
 
 **State:** Built and compiled; tests written, not run; merged into local `qa`. X-M6 waits for the owner (D-GATE-M6).
