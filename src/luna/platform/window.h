@@ -15,11 +15,12 @@
 #include <vector>
 
 struct SDL_Window;
-struct SDL_Renderer;
 struct SDL_Gamepad;
-struct SDL_Texture;
 
 namespace luna::platform {
+
+// What the window draws with (US-230): the GPU (SDL_GPU with shaders), SDL_Renderer, or Auto: the GPU when it works, else SDL_Renderer with the reason logged.
+enum class RendererChoice { Auto, Gpu, Sdl };
 
 struct WindowSettings {
     std::string title;
@@ -28,6 +29,7 @@ struct WindowSettings {
     int virtualWidth = 480;  // everything is drawn at this size, then scaled up
     int virtualHeight = 270;
     bool hidden = false;     // tests draw into a window nobody sees
+    RendererChoice renderer = RendererChoice::Auto;
 };
 
 // A screenshot: width x height pixels, 4 bytes each (red, green, blue, alpha).
@@ -37,7 +39,9 @@ struct Pixels {
     std::vector<std::uint8_t> rgba;
 };
 
-// The game window and its drawing surface (SDL_Window + SDL_Renderer). RAII: both are
+class RenderBackend;
+
+// The game window and its drawing surface (an SDL_Window and a RenderBackend: SDL_GPU or SDL_Renderer). RAII: both are
 // destroyed with the Window. Needs a live System.
 class Window {
 public:
@@ -56,6 +60,9 @@ public:
 
     // True when presenting waits for the monitor's refresh (smooth, no wasted CPU).
     bool vsyncEnabled() const;
+
+    // Which backend draws: "gpu (direct3d12)" or "sdl (direct3d11)" (logged at start).
+    std::string backendName() const;
 
     // Uploads an image (4 bytes per pixel: red, green, blue, alpha) and returns its number.
     // Textures are sampled nearest-neighbour: pixels stay square when scaled up.
@@ -92,22 +99,14 @@ private:
     struct WindowDeleter {
         void operator()(SDL_Window* window) const;
     };
-    struct RendererDeleter {
-        void operator()(SDL_Renderer* renderer) const;
-    };
     struct GamepadDeleter {
         void operator()(SDL_Gamepad* gamepad) const;
     };
     using GamepadHandle = std::unique_ptr<SDL_Gamepad, GamepadDeleter>;
-    struct TextureDeleter {
-        void operator()(SDL_Texture* texture) const;
-    };
-
+    // Destroyed in reverse order: the gamepads, the backend (its textures and device), then the window.
     std::unique_ptr<SDL_Window, WindowDeleter> window_;
-    std::unique_ptr<SDL_Renderer, RendererDeleter> renderer_;
+    std::unique_ptr<RenderBackend> backend_;
     std::vector<std::pair<int, GamepadHandle>> gamepads_; // (gamepad id, open gamepad)
-    std::vector<std::unique_ptr<SDL_Texture, TextureDeleter>> textures_; // index = texture number
-    bool vsync_ = false;
 };
 
 } // namespace luna::platform

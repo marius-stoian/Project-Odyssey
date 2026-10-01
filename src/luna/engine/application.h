@@ -57,6 +57,7 @@ struct RunOptions {
     std::vector<ScriptedHold> holds;    // scripted input, see ScriptedHold
     std::vector<ScriptedPointer> pointer; // scripted mouse, see ScriptedPointer
     std::vector<ScriptedText> typing;     // scripted typing, see ScriptedText
+    std::string renderer = "auto";        // "auto" (the GPU, else SDL_Renderer), "gpu" (fails when it cannot start) or "sdl" (US-230)
 };
 
 // Opens the window and runs the loop until the player closes it. Logs the window size,

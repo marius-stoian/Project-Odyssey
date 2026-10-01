@@ -24,3 +24,4 @@ From Project Odyssey.docx v1.3, section 7.5. New ADRs get their own file here (A
 
 Luna (ARC-09, ARC-10): the Platform, Physics and Engine layers form our game-agnostic engine in src/luna/.
 - [ADR-018](ADR-018-stb-image-and-own-ui.md): PNG with stb, and our own editor UI (M2c)
+- [ADR-021](ADR-021-sdl-gpu-renderer.md): the SDL_GPU renderer with HLSL shaders compiled by the Windows SDK's dxc.exe, behind the Window; SDL_Renderer stays as fallback (US-230).

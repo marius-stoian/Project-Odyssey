@@ -30,11 +30,14 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
     using namespace odysseus::core;
 
     platform::System system;
+    platform::RendererChoice choice = platform::RendererChoice::Auto;
+    if (options.renderer == "gpu") choice = platform::RendererChoice::Gpu;
+    else if (options.renderer == "sdl") choice = platform::RendererChoice::Sdl;
     platform::Window window({config.title, config.windowWidth, config.windowHeight, config.virtualWidth,
-                             config.virtualHeight});
-    logInfo(std::format("Window opened: {}x{}, virtual screen {}x{}, VSync {}", config.windowWidth,
+                             config.virtualHeight, false, choice});
+    logInfo(std::format("Window opened: {}x{}, virtual screen {}x{}, VSync {}, renderer {}", config.windowWidth,
                         config.windowHeight, config.virtualWidth, config.virtualHeight,
-                        window.vsyncEnabled() ? "on" : "off"));
+                        window.vsyncEnabled() ? "on" : "off", window.backendName()));
 
     WindowRenderer renderer(window);
     InputMap input;

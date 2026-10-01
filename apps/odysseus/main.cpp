@@ -2,6 +2,7 @@
 //   --quit-after <seconds>   close by itself after that long, exactly like the close button
 //   --log-dir <folder>       write the session log there instead of the per-user folder
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
+//   --renderer <auto|gpu|sdl>  how the picture is drawn: auto (the graphics card, else the first renderer with the reason in the log; the default), gpu (stop if the card cannot be used), sdl (the first renderer)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
 //   --new-game               start at the New Game screen (seed, Growing Period, Comfort)
@@ -44,6 +45,7 @@ struct Arguments {
     double quitAfterSeconds = 0.0;
     std::filesystem::path logDirectory;
     std::filesystem::path screenshot;
+    std::string renderer = "auto";
     std::filesystem::path level;
     bool editor = false;
     std::optional<std::uint64_t> seed; // fixes the weather sequence (US-138)
@@ -141,6 +143,11 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.level = argv[++i];
         } else if (name == "--screenshot") {
             arguments.screenshot = argv[++i];
+        } else if (name == "--renderer") {
+            arguments.renderer = argv[++i];
+            if (arguments.renderer != "auto" && arguments.renderer != "gpu" && arguments.renderer != "sdl") {
+                throw std::invalid_argument("--renderer is auto, gpu or sdl");
+            }
         } else if (name == "--click") {
             const auto f = fields(argv[++i]);
             const double t = std::stod(f.at(2));
@@ -219,7 +226,7 @@ int main(int argc, char* argv[]) {
             game.switchMode(odysseus::game::Mode::Editor);
         }
         const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
-                                               {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds, arguments.pointer, arguments.typing});
+                                               {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds, arguments.pointer, arguments.typing, arguments.renderer});
         const odysseus::game::Hero& hero = game.hero();
         odysseus::core::logInfo(std::format("Hero at ({:.1f}, {:.1f}) facing {}, {}", hero.feetX(), hero.feetY(),
                                             odysseus::game::facingName(hero.facing()), hero.walking() ? "walking" : "idle"));

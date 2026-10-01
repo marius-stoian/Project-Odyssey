@@ -1165,3 +1165,18 @@ The exchange itself is a little timetable: a list of lines, a counter of ticks l
 **Try it (15 minutes).** The manual checks in [docs/plans/US-165.md](plans/US-165.md); then write a `.dlg` file with `@pair elder person` and `@bark sharing`, so the elder has their own words when they share food.
 
 **Check yourself.** Why does `Exchanges::update` check `seenEntries_ > entries.size()` before reading the chronicle, and when can the chronicle be shorter than the last time it was looked at?
+
+
+## M8b: how a picture gets from the game to the screen (US-230)
+
+When the game "draws a sprite", it does not touch the screen. It says *draw this part of that picture there*, and a **renderer** turns that into work for the graphics card. Our first renderer (SDL_Renderer) did that with a fixed set of tricks: draw a picture, maybe see-through, maybe adding light. The new one (SDL_GPU) works the way modern games do, with a **pipeline**: the card is told *how* to draw using two small programs called **shaders**. A *vertex shader* places each corner of a rectangle on the screen; a *fragment shader* decides the colour of each pixel inside it. We write them in a language called HLSL, and the Windows SDK's compiler turns them into the card's own language when the game is built.
+
+Two ideas make this fast. **Batching:** instead of asking the card to draw each sprite with its own call (slow), the game writes every rectangle into one list, in the order they were drawn, and the card draws many at once; a new call is only needed when the picture or the blend mode changes. **A virtual screen:** everything is first drawn onto a small picture (480 by 270 pixels), and only at the end is that picture enlarged into the window by a whole number. That is why the pixels stay square and crisp, and why the two renderers, drawing on the same small picture, give the same result to the last pixel. (A test proves it: it draws the same scene with both and counts the differing pixels. The count is zero.)
+
+One detail is worth remembering: a sprite drawn at three quarters of its size has pixels that fall *exactly* between two source pixels, and the two renderers rounded the last bit of a floating-point number differently, so 352 pixels differed. Moving both by a five-hundredth of a pixel made them agree. Floating-point numbers are not exact, and sometimes you have to decide for them.
+
+**Where to look.** `GpuBackend::drawTexture`, `recordScene` and `recordBlit` in [src/luna/platform/gpu_backend.cpp](../src/luna/platform/gpu_backend.cpp); the four shaders in [src/luna/platform/shaders/](../src/luna/platform/shaders/); how CMake compiles them in [CMakeLists.txt](../CMakeLists.txt) (search for `LUNA_DXC`).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-230.md](plans/US-230.md); then in `sprite.frag.hlsl` change `texel.rgb * color.rgb` to `texel.rgb * color.rgb * 0.5`, rebuild, run with `--renderer gpu` and with `--renderer sdl`, and see the picture darken only on the GPU (then undo it).
+
+**Check yourself.** Why does the GPU renderer collect all the rectangles of a frame into one list and send them together at the end, instead of drawing each one the moment the game asks for it?
