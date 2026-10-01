@@ -603,15 +603,60 @@ std::vector<int> OdysseyGame::attendeesAt(double x, double y, int radiusTiles) c
 }
 
 void OdysseyGame::loadInteractions() {
-    interactionReport_ = {};
+    // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
     options.knownTags = knownTags(); // an interaction aimed at a tag nothing carries gets a warning naming file and tag
+    interactionReport_ = {};
     interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_, options);
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
     for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
     core::logInfo(std::format("Interactions: {} loaded from {} file(s), {} error(s)", interactionReport_.loaded, interactionReport_.filesRead, interactionReport_.errors.size()));
 }
 
+// F5 (US-156): all or nothing. The files are read into a registry on the side; only a clean one replaces the data in use, so a typo
+// never leaves the game half-reloaded.
+bool OdysseyGame::reloadInteractions() {
+    const auto started = std::chrono::steady_clock::now();
+    sim::rules::LoadOptions options;
+    options.knownTags = knownTags();
+    sim::rules::LoadReport report;
+    sim::rules::InteractionRegistry fresh = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", report, options);
+    lastInteractionReloadMs_ = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
+    interactionReport_ = report; // the panel always shows the latest result
+    for (const sim::rules::Diagnostic& d : report.errors) core::logWarning("Interactions: " + d.text());
+    for (const sim::rules::Diagnostic& d : report.warnings) core::logWarning("Interactions: " + d.text());
+    if (!report.errors.empty()) {
+        core::logWarning(std::format("Interactions: reload found {} mistake(s); the last good data stays in use", report.errors.size()));
+        return false;
+    }
+    interactions_ = std::move(fresh);
+    core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
+    return true;
+}
+
+// The mistakes, top of the screen, until the files are fixed and F5 is pressed again.
+void OdysseyGame::drawInteractionPanel(luna::engine::Renderer& renderer) const {
+    if (interactionReport_.errors.empty()) return;
+    constexpr std::size_t kMaxLines = 8;
+    const int width = kVirtualWidth - 20;
+    const int maxChars = (width - 8) / luna::engine::kTextAdvance;
+    const std::size_t shown = std::min(kMaxLines, interactionReport_.errors.size());
+    const luna::engine::Rect box{10, 34, width, static_cast<int>(shown + 2) * luna::engine::kLineHeight + 6};
+    luna::engine::UiPainter painter(renderer, uiSheet_);
+    painter.fill(box, luna::engine::UiColor::Panel);
+    painter.outline(box, luna::engine::UiColor::Red);
+    painter.text(box.x + 4, box.y + 4, std::format("Interaction files: {} mistake(s). Fix them, then press F5.", interactionReport_.errors.size()), luna::engine::UiColor::Gold);
+    int y = box.y + 4 + luna::engine::kLineHeight;
+    for (std::size_t i = 0; i < shown; ++i) {
+        std::string line = interactionReport_.errors[i].text();
+        if (static_cast<int>(line.size()) > maxChars) line = line.substr(0, static_cast<std::size_t>(maxChars - 3)) + "...";
+        painter.text(box.x + 4, y, line, luna::engine::UiColor::Red);
+        y += luna::engine::kLineHeight;
+    }
+    if (interactionReport_.errors.size() > shown) {
+        painter.text(box.x + 4, y, std::format("...and {} more (see the log)", interactionReport_.errors.size() - shown), luna::engine::UiColor::Dim);
+    }
+}
 std::set<std::string> OdysseyGame::knownTags() const {
     std::set<std::string> tags = catalogs_.knownTags();
     for (const CharacterKindDef& kind : definitions_.characters) tags.insert(kind.tags.begin(), kind.tags.end());
@@ -1389,6 +1434,7 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
+    if (intents.pressed(luna::engine::Intent::Reload)) reloadInteractions();
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
     } else if (intents.pressed(luna::engine::Intent::ModeGame)) {
@@ -1709,6 +1755,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     lastRender_ = renderStarted;
     if (mode_ == Mode::Editor) {
         editor_.render(renderer, alpha);
+        drawInteractionPanel(renderer); // F5 works in the Editor too, so its mistakes show there
         drawModeLabel(renderer);
         return;
     }
@@ -1827,6 +1874,7 @@ void OdysseyGame::render(luna::engine::Renderer& renderer, double alpha) {
     drawTutorial(renderer);
     runFlow_.draw(renderer, uiSheet_);
     drawOverlay(renderer);
+    drawInteractionPanel(renderer);
     drawModeLabel(renderer);
 }
 

@@ -89,6 +89,11 @@ public:
     std::vector<sim::rules::Offer> plantOffers(std::size_t index) const;
     void setPlantState(std::size_t index, const std::string& state); // "picked", "ripe"...
     std::set<std::string> knownTags() const; // every tag a catalog or character kind carries
+    // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the
+    // last good data stays in use and the panel lists "file:line: message". Returns true when the new data was taken.
+    bool reloadInteractions();
+    bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }
+    double lastInteractionReloadMilliseconds() const { return lastInteractionReloadMs_; }
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
     // pickup puts its weapon in the first free slot; keys 1-9 hold a slot, Shift the next filled one.
     static constexpr int kHotbarSlots = 9;
@@ -254,7 +259,9 @@ private:
     Catalogs catalogs_;
     sim::rules::InteractionRegistry interactions_;
     sim::rules::LoadReport interactionReport_;
-    void loadInteractions(); // reads the interaction files and logs every mistake as "file:line: message"
+    void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
+    double lastInteractionReloadMs_ = 0.0;
+    void drawInteractionPanel(luna::engine::Renderer& renderer) const;
     ContentAtlas content_;
     bool contentLoaded_ = false;
     luna::engine::Texture effectsTexture_;

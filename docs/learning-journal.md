@@ -1026,3 +1026,15 @@ Tags that were never written are **derived** from the fields that were (a plant 
 **Try it (15 minutes).** Follow the manual checks in [docs/plans/US-151.md](plans/US-151.md): add a mango to `plants.json`, then change its tags and watch the menu change.
 
 **Check yourself.** Why does a plant that bears fruit and blocks walking get the tag `fruit-bearing` and not `edible`, and what would change in the game if it got `edible`?
+
+## M7: changing the data while the game is running (US-156)
+
+Reloading a file sounds simple until you ask what happens if the file is wrong, or if the game is in the middle of using the old data. The safe pattern has three steps: **load into a new structure on the side, check it, swap only if it is good.** `reloadInteractions` builds a whole new `InteractionRegistry` from the folder; if even one mistake turns up, the new one is thrown away and the old one stays, untouched, while the panel lists what to fix. Because the game runs one thing at a time (single-threaded), the swap is one line, `interactions_ = std::move(fresh);`, done at the start of a tick when nothing else is reading it. `std::move` hands the new registry's insides to the old name instead of copying them.
+
+The reason the catalogs are *not* reloaded yet is the other half of the lesson: the play state keeps **raw pointers** into them (`WorldPlant::def`). A swap would leave those pointing at freed memory, which is the classic C++ crash. Data that others point into needs either ids instead of pointers, or a re-pointing step after the swap; see codex issue CI-007.
+
+**Where to look.** `OdysseyGame::reloadInteractions` and `drawInteractionPanel` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); the key path `Key::F5` to `Intent::Reload` in [src/luna/engine/input.cpp](../src/luna/engine/input.cpp).
+
+**Try it (15 minutes).** The three manual checks in [docs/plans/US-156.md](plans/US-156.md).
+
+**Check yourself.** Why is "keep the old data when the new data has any mistake" safer than "load every good file and skip the bad one" during a reload, even though the game does the second at start?
