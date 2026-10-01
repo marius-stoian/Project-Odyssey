@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Docs: Codex v2.5, requirements v2.7, playtest plan (Dominus, Anima, D-48) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- Codex v2.5 synced from Anima: K-M13 reminds the owner to recruit the eight playtesters; X-M6 runs the playtest by the plan; D-14, D-48.
+- Requirements v2.7 and the backlog mirrored from Drive: ARC-01..ARC-08 Decided (ARC-01 renamed Six-layer architecture), D-14 plan ready, D-48.
+- `docs/plans/M6-playtest-plan.md`: who, recruiting, session script, interview, evidence and privacy for kill gate 2.
+- `docs/decisions.md`: D-14 updated, D-48.
+
 ## Docs: completeness review, Codex v2.4 and requirements v2.6 (Dominus, Anima, D-47) - 2026-10-01
 
 **State:** Documents and the workspace sync only; merged into `qa`.

@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.4
+# Project Odyssey Codex v2.5
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.6 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.7 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -24,7 +24,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.4)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.5)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -32,7 +32,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.6 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.7 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -235,7 +235,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Decided (closed by what M5-M6 built; D-32, D-33; owner D-47, 2026-10-01) |
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
-| D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
+| D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open: plan ready (docs/plans/M6-playtest-plan.md), recruiting from K-M13 (D-48) |
 | D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M8d > M8e > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
@@ -251,13 +251,14 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-42 | Resolution, lighting and buildings (owner, three chat rounds with Dominus, 2026-10-01): 960x540 virtual resolution with whole-step scaling or Fill, windowed, borderless and full screen, camera zoom (default 2x) and UI scale; Luna moves to SDL_GPU shaders (ADR-021); sun and moon cycle, fire, torch and effect lights, seasonal day length, weather dimming and lightning; shadows from the sun, the moon and nearby fires for characters, plants and buildings; normal maps generated from the art, placeholder building art; buildings from whole blueprints and from pieces, clan members help, rival clans build, wear and repair, damage and fire; interiors per building (roof fade or interior map, set in the Editor); prefabs composed from pieces in the Editor; all right after M8 | M8b | US-230..US-257 | Decided (owner, 2026-10-01) |
 | D-43 | Assembly of M8b-M8e (owner, one chat round with Anima, 2026-10-01): M8d split into M8d Buildings (US-250, US-251, US-252, US-256) and M8e Building life (US-253, US-254, US-255, US-257); US-256 no longer waits for US-254; the M7-M9 rules (D-35) apply; D-06 answered | M8b | P-011, US-230..US-257 | Decided (owner, 2026-10-01) |
 | D-47 | Housekeeping (owner, one chat round, 2026-10-01): D-07, D-09 and D-11 closed by what M4-M6 built under delegated decisions; D-10 superseded by the four pillars; STO-01 and SDC-01 absorbed, OPEN-08, OPEN-10 and OPEN-15 answered; every MVP scope item Decided; on GitHub's GPU-less runners the first-frame limit is 10 s, and every exit review runs the strict 3 s check on the owner's PC (`tools/verify.ps1 -Config Release`); the reading PDFs on Drive are not mirrored | all | X-M8b..X-M14 | Decided (owner, 2026-10-01) |
+| D-48 | Remaining open items, one by one (owner, 2026-10-01): ARC-01..ARC-08 confirmed as built (ARC-01 renamed Six-layer architecture); the kill gate 2 playtest is planned now in docs/plans/M6-playtest-plan.md and recruiting starts at K-M13; the Anima Prompt Catalog becomes a Google Doc on Drive | M13 | K-M13, X-M6 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.4 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.5 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -7562,7 +7563,8 @@ Why this milestone exists: Politics returns to the MVP as the third playable pil
 1. Confirm that M12 (docs/gates/M12.md) and its stories are done (for M10: X-M9 also ran its full verification and CI), and that D-40 and D-41 are Decided in docs/decisions.md.
 2. Architect: write docs/plans/M13-politics-design.md (stance model and reasons, alliances, oaths and tribute, council voting, marriage ties, leadership, levers, victory and balance check) before the first story. Every design question it meets, Dominus decides (D-41) and records as delegated.
 3. Set this milestone's stories to To do in docs/status.md in this order: US-210, US-211, US-212, US-213, US-214, US-215, US-216.
-4. Continue with the first story prompt.
+4. Recruiting for kill gate 2 starts now (D-48): remind the owner in the assembly report to recruit the eight playtesters as docs/plans/M6-playtest-plan.md section 3 describes. Recruiting needs people, so it is the owner's task; agents never contact anyone.
+5. Continue with the first story prompt.
 </instructions>
 <output_format>Short kickoff note in the assembly report: milestone goal, stories, delegated decisions.</output_format>
 </prompt>
@@ -8438,6 +8440,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```xml
 <prompt id="X-M6" codex="1.8" name="Exit review M6">
 <instructions>
+0. Run the playtest exactly as docs/plans/M6-playtest-plan.md says (session script, interview, evidence table, privacy); agents prepare the package and the evidence template, the owner runs the sessions.
 1. Demonstrate the exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M6.md, one section per criterion, each marked met or not met.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m6-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -8499,3 +8502,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.2 | 2026-10-01 | Resolution, lighting and buildings (source of truth v2.4, Rounds 16 and 17; Mraw's brief docs/plans/M8b-M8d-render-light-build-brief.md). The owner decided D-42 (960x540 with window modes, camera zoom and UI scale; SDL_GPU shaders; sun, moon, fire, torch and effect lights, seasonal day length, weather light; shadows from the sun, the moon and nearby fires; generated normal maps; buildings from blueprints and pieces, built by the clans, with wear, repair, fire, interiors and Editor prefabs; right after M8) and, with Anima, D-43 (M8d split into M8d Buildings and M8e Building life; US-256 no longer waits for US-254; the D-35 assembly rules apply) and D-06 (a mid-range target PC). New: P-011; K-M8b..X-M8e with 21 story prompts (S-US-230..S-US-234, S-US-240..S-US-247, S-US-250..S-US-252, S-US-256, S-US-253..S-US-255, S-US-257) and shared design notes, between X-M8 and K-M9; K-M9 now follows X-M8e. Charter: architecture rule 11 (rendering). D-06 Decided, D-15 chain, D-42 and D-43 in the decision table; new state files (lighting and buildings guides, ADR-021). |
 | 2.3 | 2026-10-01 | Faster verification (owner, D-46): the local check (`tools/verify.ps1`, new `-Config Debug|Release|Both`, default Debug) builds and tests Debug with AddressSanitizer; CI builds and tests Release on qa and both on main; CI runs only on pushes to qa and main, skips docs-only pushes, cancels superseded runs and caches built vcpkg libraries (`.github/workflows/ci.yml`). Charter Definition of Done, L-01 step 7, the M10-M14 notes and every prompt still To do (M8b onward) now say which configuration is checked where. No scope change. |
 | 2.4 | 2026-10-01 | Completeness review (source of truth v2.6, Round 19, D-47). Codex issue CI-009 resolved: K-M8b now checks that M8 is done and K-M9 that M8e is done (v2.2 had swapped them by a text replacement). Every remaining exit review (X-M8b..X-M14, 10 prompts) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check, which CI only checks at 10 s. Decision table: D-07, D-09, D-11 closed, D-10 superseded, D-47 added. No scope change. |
+| 2.5 | 2026-10-01 | Remaining open items (source of truth v2.7, Round 20, D-48): K-M13 reminds the owner to start recruiting the eight playtesters (docs/plans/M6-playtest-plan.md, written by Dominus); X-M6 runs the playtest by that plan; D-14 and D-48 in the decision table. No scope change. |
