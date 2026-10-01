@@ -127,6 +127,7 @@ add_library(odysseus_sim STATIC
     src/sim/rule_effect.cpp
     src/sim/interaction.cpp
     src/sim/action_runner.cpp
+    src/sim/npc_chooser.cpp
     src/sim/world.cpp
     src/sim/world_story.cpp
     src/sim/world_care.cpp
@@ -172,6 +173,7 @@ add_library(odysseus_game STATIC
     src/game/tags.cpp
     src/game/game_rules.cpp
     src/game/object_art.cpp
+    src/game/npc_life.cpp
     src/game/builtin_actions.cpp
     src/game/weapons.cpp
     src/game/arc_shots.cpp
@@ -334,7 +336,8 @@ add_executable(odysseus_game_tests
     tests/game/pickups_test.cpp
     tests/game/interactions_test.cpp
     tests/game/tags_test.cpp
-    tests/game/menu_test.cpp)
+    tests/game/menu_test.cpp
+    tests/game/npc_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")

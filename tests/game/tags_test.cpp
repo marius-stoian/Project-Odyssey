@@ -70,7 +70,7 @@ TEST_CASE("US-151 Catalog entries get tags, and written tags replace them") {
     REQUIRE(wheat != nullptr);
     CHECK(wheat->tags == std::vector<std::string>{"plant", "edible"});
     CHECK(wheat->states == std::vector<std::string>{"ripe", "picked"});
-    const game::PlantDef* clover = catalogs.plant("clover");
+    const game::PlantDef* clover = catalogs.plant("lavender"); // a flower with nothing written: only the derived tag
     REQUIRE(clover != nullptr);
     CHECK(clover->tags == std::vector<std::string>{"plant"});
     CHECK(clover->states.empty()); // a plant that never changes has no state
@@ -127,7 +127,7 @@ TEST_CASE("US-151 Bad tags and states are named with their file and field") {
 
 TEST_CASE("US-151 A new plant kind tagged edible and plant is offered Gather and Inspect with no code change") {
     const fs::path data = dataCopy("advertise", kMango);
-    game::OdysseyGame odyssey(data, levelWith(data, "advertise", {{"mango", 1}, {"clover", 1}, {"mango", 10}}));
+    game::OdysseyGame odyssey(data, levelWith(data, "advertise", {{"mango", 1}, {"lavender", 1}, {"mango", 10}}));
     REQUIRE(odyssey.interactionReport().errors.empty());
     REQUIRE(odyssey.plants().size() == 3);
 

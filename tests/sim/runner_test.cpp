@@ -1,6 +1,8 @@
 // US-153: the action runner (timed actions, interruption, effects that wait) in the simulation layer, headless.
 #include "sim/action_runner.h"
+#include "core/random.h"
 #include "sim/interaction.h"
+#include "sim/npc_chooser.h"
 
 #include <doctest/doctest.h>
 
@@ -196,4 +198,54 @@ TEST_CASE("US-153 The same inputs give the same runner state") {
     CHECK(first.second == second.second);
     rules::ActionRunner other;
     CHECK(other.hash() != first.first);
+}
+
+// ---- US-154: how clan members and animals choose
+
+TEST_CASE("US-154 The best score wins, below the minimum nothing is chosen") {
+    odysseus::core::Pcg32 random(1, 1);
+    CHECK(rules::pickBest({10, 80, 40}, 30, random) == 1);
+    CHECK(rules::pickBest({10, 20, 29}, 30, random) == std::nullopt);
+    CHECK(rules::pickBest({}, 30, random) == std::nullopt);
+    CHECK(rules::pickBest({30}, 30, random) == 0); // exactly the minimum is enough
+    CHECK(rules::pickBest({0, 0}, 0, random).has_value());
+}
+
+TEST_CASE("US-154 Ties are broken by the seeded stream, the same way every time") {
+    const std::vector<int> scores = {50, 90, 90, 90, 10};
+    const auto picks = [&](std::uint64_t seed) {
+        odysseus::core::Pcg32 random(seed, 3);
+        std::vector<std::size_t> chosen;
+        for (int i = 0; i < 40; ++i) chosen.push_back(*rules::pickBest(scores, 30, random));
+        return chosen;
+    };
+    CHECK(picks(7) == picks(7)); // same seed, same picks
+    const auto chosen = picks(7);
+    for (const std::size_t i : chosen) CHECK((i == 1 || i == 2 || i == 3)); // only among the best
+    bool varied = false;
+    for (const std::size_t i : chosen) varied = varied || i != chosen.front();
+    CHECK(varied); // and not always the first
+    // The stream moves by one draw per choice whether or not there was a tie or a winner.
+    odysseus::core::Pcg32 a(5, 5);
+    odysseus::core::Pcg32 b(5, 5);
+    rules::pickBest({10, 20}, 30, a); // nothing chosen
+    rules::pickBest({90, 90}, 30, b); // a tie
+    CHECK(a.state() == b.state());
+}
+
+TEST_CASE("US-154 An interaction an actor just did rests for its cooldown") {
+    rules::CooldownTable table;
+    CHECK(table.ready(7, "gather", 0));
+    table.start(7, "gather", 100);
+    CHECK_FALSE(table.ready(7, "gather", 99));
+    CHECK(table.ready(7, "gather", 100));
+    CHECK(table.ready(8, "gather", 50));      // others are not resting
+    CHECK(table.ready(7, "graze", 50));       // nor is another interaction
+    const std::uint64_t hash = table.hash();
+    rules::CooldownTable same;
+    same.start(7, "gather", 100);
+    CHECK(same.hash() == hash);
+    table.forget(7);
+    CHECK(table.ready(7, "gather", 0));
+    CHECK(table.hash() != hash);
 }

@@ -1,0 +1,11 @@
+// Prey run from a hostile creature (a wolf, a goblin) that comes within 6 m: the closer, the higher the score.
+{
+  "id": "flee-predator",
+  "label": "Flee",
+  "actors": ["prey"],
+  "target": { "tags": ["hostile"] },
+  "range": 30,
+  "order": 501,
+  "effects": [ "do flee" ],
+  "npc": { "score": "(6 - distance) * 40", "cooldown": 1 }
+}

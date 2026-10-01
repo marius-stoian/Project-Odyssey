@@ -59,6 +59,8 @@ public:
     // Outside help for a need (US-155: a fire pit warms people, a bed rests them): it rises by `amount`, capped at the maximum. The
     // dead and unknown ids are ignored. Whole numbers, so the world stays deterministic.
     void satisfyPersonNeed(int personId, Need need, int amount);
+    // The opposite, for a hazard (a cold wind, a bad meal): the need falls by `amount`, never below 0.
+    void drainPersonNeed(int personId, Need need, int amount);
 
     // Everyone who ever lived, in id order (the dead keep their place).
     const std::vector<Person>& people() const { return people_; }

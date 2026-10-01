@@ -75,6 +75,8 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         game.run().setMessage(hero->holdRitual(game.attendeesAt(subject.x, subject.y, game.heroData()->config.fire.ritualRadiusTiles)).message);
     } else if (name == "open-barter") {
         game.run().openBarter(subject.index);
+    } else if (name == "graze" || name == "flee") {
+        return false; // for animals and clan members, never the hero
     } else if (name == "restore") {
         // restore energy 30: the hero's need rises (a bed, a shelter).
         const std::optional<sim::Need> need = args.size() == 2 ? needByName(args[0]) : std::nullopt;
@@ -111,9 +113,13 @@ public:
         if (index >= 0) game_.setPlantState(static_cast<std::size_t>(index), state);
     }
 
-    void apply(const sim::rules::Effect& effect, int /*actor*/, const sim::rules::ThingRef& target) override {
+    void apply(const sim::rules::Effect& effect, int actor, const sim::rules::ThingRef& target) override {
         const std::optional<Subject> subject = subjectFor(game_, target);
         if (!subject) return; // the thing is gone: nothing to act on
+        if (actor != kHeroActor) {
+            applyForNpc(effect, actor, *subject);
+            return;
+        }
         if (effect.verb == "do") {
             std::vector<std::string> args;
             for (std::size_t i = 1; i < effect.args.size(); ++i) {
@@ -139,6 +145,23 @@ public:
         }
     }
 
+    // What an effect means when a clan member or an animal does it (US-154): the few built-ins they use, and a visual effect.
+    void applyForNpc(const sim::rules::Effect& effect, int actor, const Subject& subject) {
+        const ActorRef who = actorOfRunnerId(actor);
+        if (effect.verb == "fx") {
+            if (!effect.args.empty()) game_.playEffect(effect.args[0]->text, subject.x, subject.y - 16.0, 48);
+            return;
+        }
+        if (effect.verb != "do" || effect.args.empty()) return;
+        const std::string& name = effect.args[0]->text;
+        if (name == "gather-berries" && who.kind == ActorRef::Kind::Person) {
+            game_.helpPerson(who.index, sim::Need::Hunger, 30); // they eat a little of what they pick
+        } else if (name == "flee") {
+            game_.npcs().fleeFrom(game_, actor, subject);
+        }
+        // graze: the animal stays at the grass for the length of the action; nothing else happens
+    }
+
     int ticksPerDay() const override { return game_.clan() != nullptr ? game_.clan()->calendar().ticksPerDay() : 24 * 20 * 60; }
 
 private:
@@ -149,7 +172,7 @@ private:
 
 const std::vector<std::string>& builtInActionNames() {
     static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "give-berries", "ask-to-teach",
-                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "restore", "warm-nearby"};
+                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }
 
@@ -160,6 +183,13 @@ bool startInteraction(OdysseyGame& game, const std::string& interactionId, const
     game.actions().cancel(0); // a new action replaces the one the hero was doing
     game.actions().start(*interaction, 0, refOf(game, subject), game.actionClock(), host);
     return true;
+}
+
+bool startInteractionFor(OdysseyGame& game, int actor, const std::string& interactionId, const sim::rules::ThingRef& target) {
+    const sim::rules::Interaction* interaction = game.interactions().find(interactionId);
+    if (interaction == nullptr) return false;
+    GameEffectHost host(game);
+    return game.actions().start(*interaction, actor, target, game.actionClock(), host);
 }
 
 void tickInteractions(OdysseyGame& game) {

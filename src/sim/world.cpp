@@ -72,6 +72,12 @@ void World::satisfyPersonNeed(int personId, Need need, int amount) {
     satisfy(people_[static_cast<std::size_t>(personId)].needs, need, amount, config_.needs.maximum);
 }
 
+void World::drainPersonNeed(int personId, Need need, int amount) {
+    if (personId < 0 || static_cast<std::size_t>(personId) >= people_.size() || !people_[static_cast<std::size_t>(personId)].alive || amount <= 0) return;
+    int& value = people_[static_cast<std::size_t>(personId)].needs[need];
+    value = std::max(0, value - amount);
+}
+
 int World::population() const {
     return static_cast<int>(std::count_if(people_.begin(), people_.end(), [](const Person& p) { return p.alive; }));
 }

@@ -55,6 +55,41 @@ Add an entry, restart the game: it is in the palette with its tags. Give it acti
 
 Two built-in actions serve them: `do warm-nearby 6 25` (everyone within 6 tiles of the thing, the hero too, gets 25 warmth) and `do restore energy 40` (the hero's need rises). The verb `fx flame` plays an effect from `effects.json` once over the thing.
 
+## Clan members and animals act on their own (US-154)
+
+The `npc` block of an interaction file is what lets clan members and animals do it by themselves, with the same file, the same menu rules and the same timed runner as the hero:
+
+```jsonc
+"npc": { "score": "need(hunger) * 2 + trait(diligent) * 10", "cooldown": 60 }
+```
+
+- **score** is a sum like a condition, but its number is what counts: the higher, the more they want to do it. A score below **30** is not worth getting up for. Scores below 0 count as 0.
+- **cooldown** is how many seconds an actor rests from this interaction after doing it.
+- Once a second an idle actor looks at everything within **12 m**: for a clan member the plants, for an animal the plants, the hostile creatures and the hero. It scores every interaction its kind may do to each, leaves out the ones that are resting, and starts the best. Ties are settled by a seeded random draw, so a world always plays out the same way.
+- Far from the thing, they walk to it (people at their usual pace, animals at 1.25 m/s; a fleeing animal runs at 2.5 m/s) and start the interaction when they are in reach; then it runs for its `duration`, as for the hero. The hero's menu rules (`range`, `requires`) apply to them too, except that range is about doing it, not about wanting it.
+- **Danger.** A hostile creature within **6 m** drops whatever a clan member or animal was walking to do or doing; a clan member with a hostile close by does not set off on a new errand. Animals still look around, because they may want to flee.
+
+What the score can read for a clan member: `need(hunger)` (and `energy`, `warmth`, `social`) is **how much the need is missing**, 0 when full to 100 when desperate, so a hungry person scores high; `trait(diligent)` is 1 when they have that trait; `distance` is the metres from them to the target. A clan member's berries are not modelled, so `has(...)` is 0 for them.
+
+Who is who:
+
+| Actor | Matches `actors` | Tags the score may use (`tag(...)`) |
+|---|---|---|
+| clan member | `person`, `clan` | `person`, `clan` |
+| harmless animal (deer, rabbit) | its kind name, `animal`, `prey` | `animal`, `prey` |
+
+The shipped files:
+
+| File | Who | What |
+|---|---|---|
+| `gather` | clan members, the hero | a hungry clan member walks to a ripe plant and gathers it (they eat a little, 30 hunger); the plant is picked and ripens again after 15 s |
+| `graze` | prey | walks to a patch of grass (plants tagged `grass`) and stays four seconds |
+| `flee-predator` | prey | runs from a hostile creature within 6 m: `(6 - distance) * 40` |
+| `flee-armed-hero` | prey | runs from a hero holding a weapon within 5 m (D-36) |
+| `flee-moving-hero` | prey | runs from a hero who is moving, within 5 m (D-36): a hero standing still is no threat |
+
+The hero as a target has the tags `hero`, `person` and, while it is true, `armed` (a weapon in hand) and `moving` (walking). `do flee` (a built-in action for animals) makes the animal run about 8 m directly away from the thing.
+
 ## Built-in actions: `do`
 
 Some things a menu item does need the game itself: open the crafting screen, change what a clan member thinks of the hero, harvest a plant. Those are **built-in actions**. An interaction names one with `do`:
@@ -83,6 +118,8 @@ A `do` that names anything the game does not have is an error at load (`do names
 | `open-barter` | opens the barter screen with a rival camp |
 | `restore <need> <amount>` | raises the hero's need (hunger, energy, warmth or social): `do restore energy 40` |
 | `warm-nearby <tiles> <amount>` | warmth for everyone within that many tiles of the thing, the hero too: `do warm-nearby 6 25` |
+| `graze` | for animals: stay at the grass for the length of the action, nothing else |
+| `flee` | for animals: run about 8 m directly away from the thing |
 
 ### What the game's own things are tagged
 
@@ -203,7 +240,7 @@ A condition is a small sum that comes out true or false. A score is the same kin
 | Function | Meaning |
 |---|---|
 | `has(item, n)` | 1 when someone holds at least n of an item: has(berries, 2) for the actor, has(hero, berries, 2) for anyone |
-| `need(name)` | how full a need is, 0 to 100: need(hunger) |
+| `need(name)` | how much a need is missing, 0 (full) to 100 (desperate): need(hunger) |
 | `skill(profession)` | the actor's skill in a profession: skill(hunter) |
 | `trait(name)` | 1 when the actor has the trait, else 0: trait(diligent) |
 | `opinion(a, b)` | what the first thinks of the second, -100 to 100: opinion(npc, hero) |
