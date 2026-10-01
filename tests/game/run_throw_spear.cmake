@@ -8,7 +8,7 @@ file(REMOVE_RECURSE "${WORK_DIR}")
 file(MAKE_DIRECTORY "${WORK_DIR}/hit" "${WORK_DIR}/flight")
 
 function(run_game folder quit_after screenshot)
-    execute_process(COMMAND "${GAME}" --level "${LEVEL}" --quit-after ${quit_after} --aim 10:135:0:4 --hold MoveLeft:0.25:0.35 --hold Interact:0.5:0.6 --log-dir "${WORK_DIR}/${folder}"
+    execute_process(COMMAND "${GAME}" --level "${LEVEL}" --quit-after ${quit_after} --aim 10:270:0:4 --hold MoveLeft:0.25:0.35 --hold Interact:0.5:0.6 --log-dir "${WORK_DIR}/${folder}"
                             --screenshot "${WORK_DIR}/${screenshot}"
         RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
     file(GLOB logs "${WORK_DIR}/${folder}/session-*.log")

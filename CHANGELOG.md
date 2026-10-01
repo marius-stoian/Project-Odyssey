@@ -4,6 +4,95 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-234: frame budget at the new size (Mraw) - 2026-10-01
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); 10-minute run in `docs/evidence/US-234/`.
+
+- F3 overlay shows CPU (tick, draw) and GPU time; GPU time is measured on the card with a fence (SDL_GPU has no timestamp queries), only while the overlay or `--perf` is on. `--perf` logs frame figures each minute; `--people N` starts the clan with N people.
+- Dev PC (RX 7900 XTX), Release, 1080p, 500 people, 10 minutes: 59.9 FPS average, draw 0.14 ms, GPU 0.20 ms, 32 of 35,920 frames over 20 ms (autosave at day end). Scaled to the D-06 minimum PC (4x GPU, 2x CPU): about 1.4 ms of 16.7 ms. Method in `docs/plans/US-234.md`.
+- New test `US-234 The overlay shows CPU and GPU times`.
+## US-233: every screen at the new size (Mraw) - 2026-10-01
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); contact sheet for the owner in `docs/evidence/US-233/`.
+
+- `RunFlow` lays its panel out from the interface size (centred, as tall as its content, up to 600 x 420) and its shade covers the whole interface; paragraphs wrap to the panel width. All run screens, the menu, Settings and the dialogue panel use it.
+- New test `US-233 Screens fit the interface at both UI scales`.
+## US-232: camera zoom and UI scale (Mraw) - 2026-10-01
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings), GPU screenshots in `docs/evidence/US-232/`.
+
+- `ScaledRenderer` (Engine) draws a whole-number larger; the world is drawn at camera zoom 1x or 2x (default 2x) and the interface at UI scale 1x or 2x (default 1x), each laid out in its own pixels. `Camera::setViewSize`; pointer mapping goes through zoom and UI scale.
+- Settings screen buttons; keys + and - and the mouse wheel zoom in play; `cameraZoom` and `uiScale` in `settings.json` (guide updated).
+- Tests: `tests/luna/zoom_test.cpp`, two US-232 cases in `aiming_test.cpp`; older game tests run at zoom 1x.
+## US-231: 960x540 virtual screen, window modes, hero facing and eight directions (Mraw) - 2026-10-01
+
+**State:** Merged into `qa` locally; verified in Debug (27 of 27, zero warnings).
+
+- Virtual screen 960x540 (`src/core/presentation.*`), windowed sizes, borderless and exclusive modes, Whole and Fill scaling, settings and pointer mapping (D-44, requirements v2.6).
+- Tests and scripted window runs moved from the 480x270 coordinates to 960x540.
+- Fix: a held left or right key always turns the hero that way (`odyssey_game.cpp`); the pointer keeps the aim.
+- Hero art: eight facings use real frames from the owner's turn-around sheet (`ArtSet::frame`); West no longer shows a right-facing hero. New tests: "US-139 Left and right keys turn him", "US-231 Eight hero directions".
+
+## Docs: merged parallel versions: Codex v2.6, requirements v2.8 (Dominus, Anima) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- While Anima published Codex v2.4 and v2.5 and requirements v2.6 and v2.7, Mraw aligned US-231 and US-232 with the owner's M8b answers (D-44, CI-010) on `story/US-231` and published its own "v2.4" Codex and "v2.6" requirements to Drive. Both lines are merged: Codex v2.6 and requirements v2.8 contain every change from both sides (Mraw's S-US-231 and S-US-232 prompts are kept word for word).
+- `docs/project/requirements/`: requirements v2.8 and the backlog; `docs/Codex.md`, `CLAUDE.md`: Codex v2.6; `docs/codex-issues.md`: CI-010 resolved.
+- For `story/US-231` when it merges `qa`: take `qa`'s version of `docs/Codex.md`, `CLAUDE.md`, `docs/codex-issues.md` and the two files in `docs/project/requirements/` (they already contain the branch's changes); keep the branch's own versions of `Handover.md`, `Limit.md`, `docs/status.md` and `docs/project/README.md`.
+- From now on Codex changes go through Anima (A-002) so versions stay in one line.
+
+## Docs: Codex v2.5, requirements v2.7, playtest plan (Dominus, Anima, D-48) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- Codex v2.5 synced from Anima: K-M13 reminds the owner to recruit the eight playtesters; X-M6 runs the playtest by the plan; D-14, D-48.
+- Requirements v2.7 and the backlog mirrored from Drive: ARC-01..ARC-08 Decided (ARC-01 renamed Six-layer architecture), D-14 plan ready, D-48.
+- `docs/plans/M6-playtest-plan.md`: who, recruiting, session script, interview, evidence and privacy for kill gate 2.
+- `docs/decisions.md`: D-14 updated, D-48.
+
+## Docs: completeness review, Codex v2.4 and requirements v2.6 (Dominus, Anima, D-47) - 2026-10-01
+
+**State:** Documents and the workspace sync only; merged into `qa`.
+
+- Codex v2.4 synced from Anima: CI-009 resolved (K-M8b checks that M8 is done, K-M9 that M8e is done); every remaining exit review (X-M8b..X-M14) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check; D-07, D-09, D-10, D-11 closed or superseded; D-47.
+- Requirements v2.6 and the backlog mirrored from Drive: stale decisions closed, STO-01 and SDC-01 absorbed, OPEN-08/10/15 answered, every MVP scope item Decided, ADR-018 in the ADR table, glossary extended, Figure 2 redrawn (`docs/project/diagrams/Odysseus - MVP Timeline.png`).
+- `tools/sync-workspace.ps1`: the reading PDFs on Drive (Matt Ganzak guides) are no longer reported as unmirrored files.
+- `docs/decisions.md`: D-07, D-09, D-10, D-11 closed, D-47; `docs/codex-issues.md`: CI-009 resolved.
+
+## CI: guides keep LF too (Dominus) - 2026-10-01
+
+**State:** Merged into `qa`.
+
+- `.gitattributes`: `docs/guides/** text eol=lf`. The US-160 guide test looks for the text of `elder-fire.dlg` inside `docs/guides/dialogue-format.md`; Windows runners checked the guide out with CRLF, so it failed on CI (run 36890828492, the last test still red after the `.dlg` fix).
+
+## US-230: Luna's SDL_GPU renderer (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-230`); merged into `qa`.
+
+- Platform: `RenderBackend` with two implementations, `GpuBackend` (SDL_GPU device and swapchain, a virtual-screen texture, nearest-neighbour sampling, batched quads, Normal and Add pipelines, a whole-number blit into the window, screenshots) and `SdlRendererBackend` (the old drawing, now also drawing through a virtual-screen texture so both give the same picture); HLSL shaders compiled with the Windows SDK's `dxc.exe` at build time (`-DLUNA_GPU=OFF` or no `dxc.exe`: the GPU backend is left out); the Window falls back to SDL_Renderer with the reason logged.
+- Engine and app: `--renderer auto|gpu|sdl`; the log says which renderer is used. The `Renderer` interface and `src/game/` did not change.
+- Docs: `docs/adr/ADR-021-sdl-gpu-renderer.md`, `docs/plans/US-230.md`, teach-back, evidence `docs/evidence/US-230/` (demo level and camp on both renderers: byte-identical).
+- Tests: `tests/game/renderer_test.cpp` (the demo level and the camp, GPU against SDL_Renderer, 0 different pixels; fallback), `tests/luna/pixels_window_test.cpp` (crisp pixels with each renderer; alpha, additive and scaled draws identical).
+
+
+## CI: failures were hidden; fixed (Dominus) - 2026-10-01
+
+**State:** Merged into `qa`.
+
+- `.github/workflows/ci.yml`: each test step ran two `ctest` commands and PowerShell reported only the last exit code, so failing headless tests were hidden whenever the window tests passed. Both exit codes are now checked. Runs on `qa` since US-160 reported green while `odysseus_game_tests_c` and `odysseus_sim_tests` failed in Debug and Release on CI.
+- `.gitattributes`: `*.dlg text eol=lf`. Windows runners checked the dialogue scripts out with CRLF, so the US-160 round-trip and reload tests failed on CI (they pass locally, where the files stay LF).
+- `tests/luna/run_game_window.cmake`: on GitHub runners (no GPU) the Release first-frame limit is 10 s (3517 ms was measured); the 3-second player criterion is checked on the owner's PC with `tools/verify.ps1 -Config Release` at milestone exits.
+
+## CI: faster verification (Dominus, D-46) - 2026-10-01
+
+**State:** Merged into `qa`; this push is the first CI run with the new workflow.
+
+- `.github/workflows/ci.yml`: runs on pushes to `qa` and `main` only (plus manual runs), skips docs-only pushes (`docs/**`, `*.md`), cancels a run when a newer push to the same branch arrives, caches the built vcpkg libraries (`actions/cache`, `VCPKG_BINARY_SOURCES`); builds and tests Release on `qa`, and also Debug on `main`.
+- `tools/verify.ps1`: new `-Config Debug|Release|Both` (default Debug): the local check builds and tests Debug with AddressSanitizer.
+- Codex v2.3 synced from Anima (`docs/Codex.md`, `CLAUDE.md`): Definition of Done, L-01 step 7 and every prompt still To do say which configuration is checked where.
+- Requirements v2.5 and the backlog mirrored from Drive (ADR-014 trimmed, D-46); `docs/decisions.md`: D-46.
+
 ## Docs: Codex v2.2, requirements v2.4 and the M8b-M8e brief (Anima, Dominus) - 2026-10-01
 
 **State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).
@@ -13,6 +102,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## K-M8b: kick off M8b Resolution and GPU renderer (Avengers) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- `docs/decisions.md`: D-44, the owner's answers to the M8b design questions (window sizes, whole steps with bars by default, zoom and UI scale in Settings and zoom on wheel and keys, first start at windowed 1280x720, zoom 2x, UI scale 1x, lighting Medium).
+- `docs/plans/M8b-renderer-design.md`: the GPU path (device and swapchain, a virtual screen texture, batching, HLSL shaders compiled with the Windows SDK's `dxc.exe` at build time, fallback to SDL_Renderer), presentation and window modes, camera zoom and UI scale, layout rules, tests without a GPU, performance method.
+- `docs/codex-issues.md`: CI-009 (K-M8b step 1 asks to confirm M8e, which cannot be done before M8b).
+- `docs/status.md`: K-M8b Done; `Milestone-75.md`, `Limit.md`.
 ## X-M8: exit review of Speak to NPCs (Avengers) - 2026-10-01
 
 **State:** Documents only; all five exit criteria met; `qa` merged into `main`, tag `m8-done`.

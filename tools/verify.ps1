@@ -1,11 +1,18 @@
-# The tester's standard check for a story (Codex L-01 step 7): configure, build Debug and
-# Release, count warnings, run every test in both, and save the results as evidence.
+# The tester's standard check for a story (Codex L-01 step 7): configure, build, count warnings,
+# run every test, and save the results as evidence.
 #
-# Usage:  pwsh tools/verify.ps1 -Story US-011
-# Exit code 0 only when both builds have zero warning lines and every test passes.
+# Who tests what (owner, 2026-10-01, D-46): this local check builds and tests Debug (with
+# AddressSanitizer, the configuration that finds memory bugs); CI builds and tests Release on qa,
+# and both on main. -Config Release or -Config Both runs the other configuration here too, for
+# example to reproduce a CI failure.
+#
+# Usage:  pwsh tools/verify.ps1 -Story US-011 [-Config Debug|Release|Both]
+# Exit code 0 only when every build has zero warning lines and every test passes.
 param(
-    [Parameter(Mandatory = $true)][string]$Story
+    [Parameter(Mandatory = $true)][string]$Story,
+    [ValidateSet('Debug', 'Release', 'Both')][string]$Config = 'Debug'
 )
+$configs = if ($Config -eq 'Both') { @('debug', 'release') } else { @($Config.ToLower()) }
 
 $ErrorActionPreference = 'Continue'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -21,7 +28,7 @@ $ok = $true
 cmake --preset windows-x64-debug *> (Join-Path $logs 'configure.log')
 if ($LASTEXITCODE -ne 0) { Write-Output 'configure FAILED'; Get-Content (Join-Path $logs 'configure.log') -Tail 20; exit 1 }
 
-foreach ($config in 'debug', 'release') {
+foreach ($config in $configs) {
     $log = Join-Path $logs "build-$config.log"
     cmake --build --preset "windows-x64-$config" *> $log
     $warnings = @(Select-String -Path $log -Pattern 'warning').Count
@@ -32,7 +39,7 @@ foreach ($config in 'debug', 'release') {
     }
 }
 
-foreach ($config in 'debug', 'release') {
+foreach ($config in $configs) {
     $log = Join-Path $logs "ctest-$config.log"
     ctest --preset "windows-x64-$config" --timeout 600 *> $log
     $result = $LASTEXITCODE

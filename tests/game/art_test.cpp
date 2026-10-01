@@ -1,5 +1,6 @@
 // US-120 Real art in the game.
 #include "game/art.h"
+#include "game/hero.h"
 #include "game/placeholder_art.h"
 
 #include "luna/engine/image_io.h"
@@ -182,4 +183,35 @@ TEST_CASE("US-120 Cut list errors name the field") {
     CHECK(problem(R"({"tolerance": 12, "tileInset": 4, "cuts": [{"name": "a", "kind": "tile", "sheet": "s.png", "rect": [0,0,0,1]}]})").find("cuts[0].rect") != std::string::npos);
     CHECK(problem(R"({"tolerance": 12, "tileInset": 4, "cuts": [{"name": "a", "kind": "tile", "mirrorOf": "b"}]})").find("cuts[0].mirrorOf") != std::string::npos);
     CHECK(problem(R"({"tileInset": 4, "cuts": []})").find("tolerance") != std::string::npos);
+}
+
+TEST_CASE("US-231 Eight hero directions") {
+    using game::Facing;
+    // Keys to facing: up is north, down is south, left is west, right is east, pairs are diagonals.
+    CHECK(game::facingFor(0, 1, Facing::East) == Facing::South);
+    CHECK(game::facingFor(-1, 1, Facing::East) == Facing::SouthWest);
+    CHECK(game::facingFor(-1, 0, Facing::East) == Facing::West);
+    CHECK(game::facingFor(-1, -1, Facing::East) == Facing::NorthWest);
+    CHECK(game::facingFor(0, -1, Facing::East) == Facing::North);
+    CHECK(game::facingFor(1, -1, Facing::East) == Facing::NorthEast);
+    CHECK(game::facingFor(1, 0, Facing::South) == Facing::East);
+    CHECK(game::facingFor(1, 1, Facing::South) == Facing::SouthEast);
+
+    // Every facing has its own row in the hero sheet; no two rows are the same picture.
+    const game::ArtSet art = game::makeArtSet(sprites(), kGround);
+    REQUIRE_MESSAGE(art.ownArt, art.problem);
+    const int count = static_cast<int>(Facing::Count);
+    for (int a = 0; a < count; ++a) {
+        for (int b = a + 1; b < count; ++b) {
+            bool same = true;
+            for (int y = 0; y < game::kCharacterHeight && same; ++y) {
+                for (int x = 0; x < game::kCharacterWidth && same; ++x) {
+                    const auto p = art.heroSheet.get(x, a * game::kCharacterHeight + y);
+                    const auto q = art.heroSheet.get(x, b * game::kCharacterHeight + y);
+                    same = p.red == q.red && p.green == q.green && p.blue == q.blue && p.alpha == q.alpha;
+                }
+            }
+            CHECK_FALSE(same);
+        }
+    }
 }

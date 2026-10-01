@@ -245,14 +245,14 @@ TEST_CASE("US-134 Hotbar drawn") {
     play.tick();
     play.renderer.clear();
     play.odyssey.render(play.renderer, 1.0);
-    // Three weapons in the hotbar: three 18-pixel icons, at the bottom centre of the 480 x 270 picture.
+    // Three weapons in the hotbar: three 18-pixel icons, at the bottom centre of the 960 x 540 picture.
     int icons = 0;
     for (const auto& draw : play.renderer.draws()) {
         if (draw.styled && draw.destination.width == 18) {
             ++icons;
-            CHECK(draw.destination.y > 230);
-            CHECK(draw.destination.x > 100);
-            CHECK(draw.destination.x < 380);
+            CHECK(draw.destination.y > 460);
+            CHECK(draw.destination.x > 200);
+            CHECK(draw.destination.x < 760);
         }
     }
     CHECK(icons == 3);

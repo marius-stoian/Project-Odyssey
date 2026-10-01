@@ -1,5 +1,7 @@
 #include "luna/engine/input.h"
 
+#include "core/presentation.h"
+
 #include <doctest/doctest.h>
 
 using luna::engine::InputMap;
@@ -10,6 +12,8 @@ using luna::platform::EventType;
 using luna::platform::GamepadAxis;
 using luna::platform::GamepadButton;
 using luna::platform::Key;
+using odysseus::core::ScalingMode;
+using odysseus::core::presentationArea;
 
 namespace {
 
@@ -37,6 +41,51 @@ Event button(EventType type, GamepadButton which) {
 }
 
 } // namespace
+
+TEST_CASE("US-231 Odd sizes pointer mapping") {
+    InputMap input;
+    Event moved;
+    moved.type = EventType::MouseMoved;
+
+    SUBCASE("Whole rejects the black bars and maps the displayed edge") {
+        const auto area = presentationArea(2560, 1440, 960, 540, ScalingMode::Whole);
+        input.setPointerArea(area, 960, 540);
+        moved.x = 319.0F;
+        moved.y = 180.0F;
+        input.handle(moved);
+        CHECK_FALSE(input.nextTick().pointer().inside());
+        moved.x = 320.0F;
+        moved.y = 180.0F;
+        input.handle(moved);
+        CHECK(input.nextTick().pointer().x == 0);
+        moved.x = 2239.0F;
+        moved.y = 1259.0F;
+        input.handle(moved);
+        const auto edge = input.nextTick().pointer();
+        CHECK(edge.x == 959);
+        CHECK(edge.y == 539);
+        moved.x = 2240.0F;
+        input.handle(moved);
+        CHECK_FALSE(input.nextTick().pointer().inside());
+    }
+
+    SUBCASE("fractional Fill maps through the destination ratio") {
+        const auto area = presentationArea(2560, 1440, 960, 540, ScalingMode::Fill);
+        input.setPointerArea(area, 960, 540);
+        moved.x = 1280.0F;
+        moved.y = 720.0F;
+        input.handle(moved);
+        const auto centre = input.nextTick().pointer();
+        CHECK(centre.x == 480);
+        CHECK(centre.y == 270);
+        moved.x = 2559.0F;
+        moved.y = 1439.0F;
+        input.handle(moved);
+        const auto edge = input.nextTick().pointer();
+        CHECK(edge.x == 959);
+        CHECK(edge.y == 539);
+    }
+}
 
 TEST_CASE("US-021 Default bindings") {
     InputMap input;

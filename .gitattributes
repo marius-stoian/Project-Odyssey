@@ -1,3 +1,9 @@
 # docs/project/ mirrors files from Google Drive byte for byte (tools/sync-workspace.ps1 compares
 # hashes), so Git must not convert their line endings.
 docs/project/** -text
+
+# Dialogue scripts are compared byte for byte with what the writer prints (LF), so Git must check
+# them out with LF on every machine, including Windows CI runners (core.autocrlf=true).
+*.dlg text eol=lf
+# The guides quote the shipped scripts and data files, and the tests check those quotes byte for byte.
+docs/guides/** text eol=lf

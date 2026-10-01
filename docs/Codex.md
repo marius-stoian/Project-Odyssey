@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.2
+# Project Odyssey Codex v2.6
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -24,7 +24,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.2)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.6)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -32,7 +32,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -65,7 +65,7 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 </coding_standards>
 
 <definition_of_done>
-- Code compiles with zero warnings in Debug and Release (x64).
+- Code compiles with zero warnings in Debug and Release (x64): Debug in the local check (`pwsh tools/verify.ps1`, which also runs every Debug test with AddressSanitizer), Release in CI on qa (build and every Release test); a merge into main builds and tests both in CI (owner, 2026-10-01, D-46).
 - All acceptance criteria verified; automated tests written where the story is testable headless.
 - CI is green on the qa branch after the merge (from US-002 on, when CI exists); main is checked at milestone exits. Exception for M10-M14 stories (D-41): the story's tests are written and compile, Debug and Release build with zero warnings, and the story is merged into qa; the tests and CI run at the milestone's exit review, which must end green before the milestone counts as done.
 - No layer rule broken (Simulation does not include Engine, Platform or SDL3; Luna does not include Simulation or Game).
@@ -204,7 +204,7 @@ Used by mraw-orchestrator for every story prompt S-US-xxx. The Charter (CLAUDE.m
 4. Tests first: delegate to mraw-tester -> failing tests for every headless-testable scenario; manual checks for the rest.
 5. Content (only if the story needs data): delegate to mraw-designer.
 6. Implement: delegate to mraw-programmer until tests pass with zero warnings.
-7. Verify (M10-M14, D-41: build Debug and Release with zero warnings and save the build log to docs/evidence/US-xxx/; the full run below happens at X-Mx): delegate to mraw-tester -> run `pwsh tools/verify.ps1 -Story US-xxx` (configure, Debug and Release builds with zero warning lines, every test in both, results saved to docs/evidence/US-xxx/); add story-specific evidence (end-to-end runs, screenshots via `odysseus.exe --screenshot`, measurements) to the same folder.
+7. Verify (M10-M14, D-41: build Debug with zero warnings and save the build log to docs/evidence/US-xxx/; the full run below happens at X-Mx): delegate to mraw-tester -> run `pwsh tools/verify.ps1 -Story US-xxx` (configure, the Debug build with zero warning lines and every Debug test, results saved to docs/evidence/US-xxx/; Release is built and tested by CI on qa after the merge, D-46; use `-Config Both` to reproduce a Release failure locally); add story-specific evidence (end-to-end runs, screenshots via `odysseus.exe --screenshot`, measurements) to the same folder.
 8. Accept: delegate to mraw-acceptor. On REJECT, return to step 6 with the reasons. After 3 rejections, mark the story Failed, write a codex issue, and stop this story.
 9. Document and teach: delegate to mraw-writer -> docs + teach-back entry.
 10. Integrate: update CHANGELOG.md, commit, merge into qa, push; when CI on qa is green, set the story to Done in docs/status.md. In M10-M14 (D-41) set it to Done after the merge; X-Mx runs CI.
@@ -228,14 +228,14 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-04 | Sprite size and facing directions (OPEN-11); owner answer 2026-09-29: 32x48 px, 8 directions | M1 | US-022, US-024, US-030 | Decided |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M2c | US-120, US-030 | Decided (owner, 2026-09-30): own art in assets/sprites/, placeholder quality; licence checked before any public release |
 | D-06 | Minimum PC spec (OPEN-19): a mid-range PC, 6-core CPU, 16 GB RAM, RX 6600 / RTX 3060 class GPU (8 GB) with DirectX 12, Windows 10/11; 60 FPS at 1080p on High lighting, Low for weaker PCs (development PC: RX 7900 XTX, 32 GB RAM, 6-core CPU) | M8b | US-082, US-234, US-247 | Decided (owner, 2026-10-01) |
-| D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Open |
+| D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Decided (closed by what M4-M5 built; D-31, D-32; owner D-47, 2026-10-01) |
 | D-08 | Interactions interview: verbs, objects, crafting (OPEN-09) | M4 | US-061, US-062 | Decided (answered by D-34) |
-| D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Proposed |
-| D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Proposed |
-| D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Open |
+| D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Decided (closed by what M5 built; D-32; owner D-47, 2026-10-01) |
+| D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Superseded by D-40 and D-41 (four pillars; MVP-08, MVP-09) |
+| D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Decided (closed by what M5-M6 built; D-32, D-33; owner D-47, 2026-10-01) |
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
-| D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
+| D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open: plan ready (docs/plans/M6-playtest-plan.md), recruiting from K-M13 (D-48) |
 | D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M8d > M8e > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
@@ -250,13 +250,16 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-41 | Technology and assembly of M10-M14 (owner, two chat rounds with Anima, 2026-10-01): Technology joins as the fourth pillar in M14 (tech tree as data, research by doing, workshops and inventors, espionage and theft; victory = Ember Strand held with a 60% Technology share, or all four pillars averaging 50%); Politics victory 60% vassals confirmed; Game Rules default assets/data/rules/standard.json, New Game and levels may name another; in M10-M14 Dominus decides design questions (delegated) and tests run at exit reviews; kill gate 2 after M14 | M10 | P-010, US-180..US-226 | Decided (owner, 2026-10-01) |
 | D-42 | Resolution, lighting and buildings (owner, three chat rounds with Dominus, 2026-10-01): 960x540 virtual resolution with whole-step scaling or Fill, windowed, borderless and full screen, camera zoom (default 2x) and UI scale; Luna moves to SDL_GPU shaders (ADR-021); sun and moon cycle, fire, torch and effect lights, seasonal day length, weather dimming and lightning; shadows from the sun, the moon and nearby fires for characters, plants and buildings; normal maps generated from the art, placeholder building art; buildings from whole blueprints and from pieces, clan members help, rival clans build, wear and repair, damage and fire; interiors per building (roof fade or interior map, set in the Editor); prefabs composed from pieces in the Editor; all right after M8 | M8b | US-230..US-257 | Decided (owner, 2026-10-01) |
 | D-43 | Assembly of M8b-M8e (owner, one chat round with Anima, 2026-10-01): M8d split into M8d Buildings (US-250, US-251, US-252, US-256) and M8e Building life (US-253, US-254, US-255, US-257); US-256 no longer waits for US-254; the M7-M9 rules (D-35) apply; D-06 answered | M8b | P-011, US-230..US-257 | Decided (owner, 2026-10-01) |
+| D-44 | M8b window and scale settings: windowed sizes 1280x720, 1600x900, 1920x1080, 2560x1440; borderless and exclusive full screen; Whole scaling with black bars by default on non-whole sizes, Fill as a Settings option; camera zoom 1x/2x and UI scale 1x/2x in Settings, zoom also on the mouse wheel and keys in play; first start without settings.json uses windowed 1280x720, zoom 2x, UI scale 1x and lighting Medium | M8b | US-231..US-233 | Decided (owner, 2026-10-01) |
+| D-47 | Housekeeping (owner, one chat round, 2026-10-01): D-07, D-09 and D-11 closed by what M4-M6 built under delegated decisions; D-10 superseded by the four pillars; STO-01 and SDC-01 absorbed, OPEN-08, OPEN-10 and OPEN-15 answered; every MVP scope item Decided; on GitHub's GPU-less runners the first-frame limit is 10 s, and every exit review runs the strict 3 s check on the owner's PC (`tools/verify.ps1 -Config Release`); the reading PDFs on Drive are not mirrored | all | X-M8b..X-M14 | Decided (owner, 2026-10-01) |
+| D-48 | Remaining open items, one by one (owner, 2026-10-01): ARC-01..ARC-08 confirmed as built (ARC-01 renamed Six-layer architecture); the kill gate 2 playtest is planned now in docs/plans/M6-playtest-plan.md and recruiting starts at K-M13; the Anima Prompt Catalog becomes a Google Doc on Drive | M13 | K-M13, X-M6 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.2 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.6 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -4882,7 +4885,7 @@ Design notes for every M8b-M8e prompt (Anima, from the brief docs/plans/M8b-M8d-
 ```xml
 <prompt id="K-M8b" codex="2.2" name="Kick off M8b Resolution and GPU renderer">
 <instructions>
-1. Confirm that M8e (docs/gates/M8e.md) and its stories are done (since v2.2 M8b-M8e come between M8 and M9), and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+1. Confirm that M8 is done (docs/gates/M8.md, tag m8-done), and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
 2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8b stories leave open after the brief and D-42/D-43 (for example: the window sizes offered, whether Fill is the default on odd screens, where the UI scale and camera zoom live in the settings screen). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
 3. Architect: write docs/plans/M8b-renderer-design.md (GPU device and swapchain ownership, the Renderer interface changes, batching, shader build, fallback, scaling and window modes, zoom and UI scale, layout rules, performance method) before the first story.
 4. Set this milestone's stories to To do in docs/status.md in this order: US-230, US-231, US-232, US-233, US-234.
@@ -4931,8 +4934,8 @@ Then no game file changed its drawing code
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-230/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-230`: Debug and Release builds with zero warnings; every test passes in both, including the "US-230 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-230`: the Debug build with zero warnings and every Debug test passes, including the "US-230 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-230.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-230/.
 </verification>
 <teach_back>C++ concept for the owner: Graphics pipelines, shaders and sprite batching.</teach_back>
@@ -4943,7 +4946,7 @@ Manual checks in docs/plans/US-230.md done on the owner's PC with the GPU render
 
 #### S-US-231 960x540 and window modes
 ```xml
-<prompt id="S-US-231" codex="2.2" milestone="M8b" story="US-231" priority="Must" size="M">
+<prompt id="S-US-231" codex="2.4" milestone="M8b" story="US-231" priority="Must" size="M">
 <context>
 Story US-231: 960x540 and window modes.
 As the player, I want the game at 960x540 that fills my screen crisply in a window or full screen, so that it looks sharp on any monitor.
@@ -4952,11 +4955,11 @@ Traces to: ENV-18, US-081.
 </context>
 <dependencies>
 Stories that must be Done: US-230, US-081.
-Owner decisions that must be Decided: D-42.
+Owner decisions that must be Decided: D-42, D-44.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Luna Platform and Engine: virtual size 960x540 in ApplicationSettings; whole-step scaling with a centred border, or Fill (scale to fit, nearest filtering above 2x); window modes (windowed sizes 960x540, 1920x1080, 2880x1620; borderless; exclusive full screen) applied at once and saved in settings.json (US-081 settings screen extended); high-DPI aware.
+Where the work belongs: Luna Platform and Engine: virtual size 960x540 in ApplicationSettings; Whole scaling (largest whole multiple that fits, centred with black bars) by default, or Fill (scale to fit); window modes (windowed sizes 1280x720, 1600x900, 1920x1080, 2560x1440; borderless; exclusive full screen) applied at once and saved in settings.json (US-081 settings screen extended); high-DPI aware. On first start without settings.json, use windowed 1280x720, camera zoom 2x, UI scale 1x and lighting Medium. Follow D-44 and docs/plans/M8b-renderer-design.md for these settings and migration from version 1 settings.
 Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -4969,19 +4972,24 @@ Then it scales by 2 and by 4 with no blur and no border
 </scenario>
 <scenario name="Modes">
 Given the settings screen
-When the player picks windowed (with sizes), borderless or exclusive full screen
-Then the mode changes at once and is saved
+When the player picks 1280x720, 1600x900, 1920x1080 or 2560x1440 windowed, borderless or exclusive full screen
+Then the mode and size change at once and are saved
 </scenario>
 <scenario name="Odd sizes">
 Given a 2560x1440 screen
 When the game runs
-Then it scales by 2 with a thin border, or fills the screen smoothly if the player chooses Fill
+Then Whole centres the 960x540 image at 2x with black bars; Fill uses the screen area when selected
+</scenario>
+<scenario name="First start">
+Given no settings.json exists
+When the game launches
+Then it opens windowed at 1280x720 with Whole scaling, and defaults to camera zoom 2x, UI scale 1x and lighting Medium
 </scenario>
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-231/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-231`: Debug and Release builds with zero warnings; every test passes in both, including the "US-231 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-231`: the Debug build with zero warnings and every Debug test passes, including the "US-231 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-231.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-231/.
 </verification>
 <teach_back>C++ concept for the owner: Viewports and scaling maths.</teach_back>
@@ -4992,7 +5000,7 @@ Manual checks in docs/plans/US-231.md done on the owner's PC with the GPU render
 
 #### S-US-232 Camera zoom and UI scale
 ```xml
-<prompt id="S-US-232" codex="2.2" milestone="M8b" story="US-232" priority="Must" size="M">
+<prompt id="S-US-232" codex="2.4" milestone="M8b" story="US-232" priority="Must" size="M">
 <context>
 Story US-232: Camera zoom and UI scale.
 As the player, I want to zoom the world and size the interface, so that I can see more of the land or read more easily.
@@ -5001,11 +5009,11 @@ Traces to: ENV-18.
 </context>
 <dependencies>
 Stories that must be Done: US-231.
-Owner decisions that must be Decided: D-42.
+Owner decisions that must be Decided: D-42, D-44.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Engine: the camera gains a zoom (1x or 2x, default 2x so the world looks as before); the UI draws in its own pass with a UI scale (1x or 2x); the 5x7 font is drawn crisp at both scales; pointer mapping (US-121) goes through zoom and UI scale; scripted input tests updated.
+Where the work belongs: Engine: the camera gains a zoom (1x or 2x, default 2x so the world looks as before); the UI draws in its own pass with a UI scale (1x or 2x, default 1x); the 5x7 font is drawn crisp at both scales; pointer mapping (US-121) goes through zoom and UI scale; scripted input tests updated. Put camera zoom and UI scale in the Settings screen; allow camera zoom through the mouse wheel and keys in play, while UI scale stays in Settings (D-44).
 Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -5013,12 +5021,12 @@ Completion: the story is complete only when every scenario passes with evidence,
 <acceptance_criteria>
 <scenario name="Zoom">
 Given the default camera zoom of 2x
-When the player zooms out
+When the player zooms out in Settings or with the mouse wheel or zoom keys in play
 Then the view shows 1x (30 x 17 tiles) and back, around the hero
 </scenario>
 <scenario name="UI">
 Given UI scale 1x and 2x
-When the player switches
+When the player switches UI scale in Settings
 Then panels, the font and the hotbar resize and stay crisp
 </scenario>
 <scenario name="Pointer">
@@ -5029,8 +5037,8 @@ Then the pointer hits the same world spot as before
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-232/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-232`: Debug and Release builds with zero warnings; every test passes in both, including the "US-232 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-232`: the Debug build with zero warnings and every Debug test passes, including the "US-232 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-232.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-232/.
 </verification>
 <teach_back>C++ concept for the owner: Two coordinate systems: world and screen.</teach_back>
@@ -5078,8 +5086,8 @@ Then they play the same
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-233/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-233`: Debug and Release builds with zero warnings; every test passes in both, including the "US-233 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-233`: the Debug build with zero warnings and every Debug test passes, including the "US-233 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-233.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-233/.
 </verification>
 <teach_back>C++ concept for the owner: Layout from data instead of fixed numbers.</teach_back>
@@ -5127,8 +5135,8 @@ Then its numbers are saved in docs/evidence/
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-234/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-234`: Debug and Release builds with zero warnings; every test passes in both, including the "US-234 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-234`: the Debug build with zero warnings and every Debug test passes, including the "US-234 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-234.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-234/.
 </verification>
 <teach_back>C++ concept for the owner: Measuring GPU and CPU time.</teach_back>
@@ -5141,6 +5149,7 @@ Manual checks in docs/plans/US-234.md done on the owner's PC with the GPU render
 <prompt id="X-M8b" codex="2.2" name="Exit review M8b">
 <instructions>
 1. Demonstrate the exit criteria: The game renders at 960x540 through Luna's SDL_GPU renderer (with the old renderer as fallback) and looks the same at 2x camera zoom; windowed sizes, borderless and exclusive full screen work; every screen and editor panel is laid out for the new size; 60 FPS at 1080p on the target mid-range PC (D-06).
+   Also run `pwsh tools/verify.ps1 -Story X-M8b -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8b.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8b.md, one section per criterion, each marked met or not met. Also: side-by-side screenshots (old 480x270 and new 960x540 at 2x zoom) and the frame-time table from US-234.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8b-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -5205,8 +5214,8 @@ Then the frame budget of US-234 still holds
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-240/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-240`: Debug and Release builds with zero warnings; every test passes in both, including the "US-240 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-240`: the Debug build with zero warnings and every Debug test passes, including the "US-240 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-240.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-240/.
 </verification>
 <teach_back>C++ concept for the owner: Shader inputs, uniform data and lighting maths.</teach_back>
@@ -5254,8 +5263,8 @@ Then the hand-made one is kept
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-241/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-241`: Debug and Release builds with zero warnings; every test passes in both, including the "US-241 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-241`: the Debug build with zero warnings and every Debug test passes, including the "US-241 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-241.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-241/.
 </verification>
 <teach_back>C++ concept for the owner: Image processing: height and slopes from pixels.</teach_back>
@@ -5303,8 +5312,8 @@ Then the moon gives a dim, blue light and a direction for shadows
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-242/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-242`: Debug and Release builds with zero warnings; every test passes in both, including the "US-242 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-242`: the Debug build with zero warnings and every Debug test passes, including the "US-242 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-242.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-242/.
 </verification>
 <teach_back>C++ concept for the owner: Interpolating curves over time.</teach_back>
@@ -5352,8 +5361,8 @@ Then the light moves with them
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-243/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-243`: Debug and Release builds with zero warnings; every test passes in both, including the "US-243 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-243`: the Debug build with zero warnings and every Debug test passes, including the "US-243 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-243.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-243/.
 </verification>
 <teach_back>C++ concept for the owner: Noise for natural flicker.</teach_back>
@@ -5401,8 +5410,8 @@ Then the shadows fade
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-244/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-244`: Debug and Release builds with zero warnings; every test passes in both, including the "US-244 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-244`: the Debug build with zero warnings and every Debug test passes, including the "US-244 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-244.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-244/.
 </verification>
 <teach_back>C++ concept for the owner: Projecting silhouettes with a shear transform.</teach_back>
@@ -5450,8 +5459,8 @@ Then only the nearest fires (from lights.json) cast shadows and the frame budget
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-245/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-245`: Debug and Release builds with zero warnings; every test passes in both, including the "US-245 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-245`: the Debug build with zero warnings and every Debug test passes, including the "US-245 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-245.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-245/.
 </verification>
 <teach_back>C++ concept for the owner: Choosing the nearest lights per object within a budget.</teach_back>
@@ -5499,8 +5508,8 @@ Then the game uses it
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-246/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-246`: Debug and Release builds with zero warnings; every test passes in both, including the "US-246 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-246`: the Debug build with zero warnings and every Debug test passes, including the "US-246 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-246.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-246/.
 </verification>
 <teach_back>C++ concept for the owner: Blending light settings.</teach_back>
@@ -5548,8 +5557,8 @@ Then fire shadows and normal maps switch off and the frame time drops
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-247/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-247`: Debug and Release builds with zero warnings; every test passes in both, including the "US-247 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-247`: the Debug build with zero warnings and every Debug test passes, including the "US-247 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-247.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-247/.
 </verification>
 <teach_back>C++ concept for the owner: Settings that change a pipeline.</teach_back>
@@ -5562,6 +5571,7 @@ Manual checks in docs/plans/US-247.md done on the owner's PC with the GPU render
 <prompt id="X-M8c" codex="2.2" name="Exit review M8c">
 <instructions>
 1. Demonstrate the exit criteria: The world is lit by the sun and moon through the day and the seasons, by fires, torches and effects at night, and dimmed by weather; sprites are shaded with generated normal maps; characters, plants and buildings cast shadows from the sun, the moon and nearby fires; the Editor previews any time of day; High lighting holds 60 FPS on the target PC.
+   Also run `pwsh tools/verify.ps1 -Story X-M8c -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8c.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8c.md, one section per criterion, each marked met or not met. Also: a time-lapse screenshot sheet (dawn, noon, dusk, night with fires, rain) and the frame-time table on High and Low.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8c-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -5626,8 +5636,8 @@ Then their interactions are offered
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-250/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-250`: Debug and Release builds with zero warnings; every test passes in both, including the "US-250 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-250`: the Debug build with zero warnings and every Debug test passes, including the "US-250 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-250.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-250/.
 </verification>
 <teach_back>C++ concept for the owner: Composite data: a whole made of parts.</teach_back>
@@ -5675,8 +5685,8 @@ Then the delivered materials are dropped on the site
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-251/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-251`: Debug and Release builds with zero warnings; every test passes in both, including the "US-251 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-251`: the Debug build with zero warnings and every Debug test passes, including the "US-251 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-251.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-251/.
 </verification>
 <teach_back>C++ concept for the owner: Placement validity on a grid.</teach_back>
@@ -5724,8 +5734,8 @@ Then they go through the door, never through walls
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-252/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-252`: Debug and Release builds with zero warnings; every test passes in both, including the "US-252 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-252`: the Debug build with zero warnings and every Debug test passes, including the "US-252 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-252.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-252/.
 </verification>
 <teach_back>C++ concept for the owner: Flood fill to find enclosed rooms.</teach_back>
@@ -5773,8 +5783,8 @@ Then the player can build it from the build menu
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-256/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-256`: Debug and Release builds with zero warnings; every test passes in both, including the "US-256 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-256`: the Debug build with zero warnings and every Debug test passes, including the "US-256 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-256.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-256/.
 </verification>
 <teach_back>C++ concept for the owner: Saving a group of parts as one reusable asset.</teach_back>
@@ -5787,6 +5797,7 @@ Manual checks in docs/plans/US-256.md done on the owner's PC with the GPU render
 <prompt id="X-M8d" codex="2.2" name="Exit review M8d">
 <instructions>
 1. Demonstrate the exit criteria: The hero builds from blueprints and piece by piece on a building grid, and rooms form; the owner composes prefabs from pieces in the Editor and places them in levels; prefabs marked buildable are offered as blueprints.
+   Also run `pwsh tools/verify.ps1 -Story X-M8d -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8d.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8d.md, one section per criterion, each marked met or not met. Also: a camp built in the game from blueprints and pieces, and a prefab composed in the Editor and placed, with screenshots.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8d-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -5851,8 +5862,8 @@ Then the same buildings stand in the same places
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-253/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-253`: Debug and Release builds with zero warnings; every test passes in both, including the "US-253 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-253`: the Debug build with zero warnings and every Debug test passes, including the "US-253 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-253.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-253/.
 </verification>
 <teach_back>C++ concept for the owner: Job queues for many workers.</teach_back>
@@ -5900,8 +5911,8 @@ Then the game follows it
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-254/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-254`: Debug and Release builds with zero warnings; every test passes in both, including the "US-254 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-254`: the Debug build with zero warnings and every Debug test passes, including the "US-254 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-254.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-254/.
 </verification>
 <teach_back>C++ concept for the owner: Linking two maps by doors.</teach_back>
@@ -5949,8 +5960,8 @@ Then the wall loses condition and falls at zero
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-255/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-255`: Debug and Release builds with zero warnings; every test passes in both, including the "US-255 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-255`: the Debug build with zero warnings and every Debug test passes, including the "US-255 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-255.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-255/.
 </verification>
 <teach_back>C++ concept for the owner: Spreading state across neighbours (cellular rules).</teach_back>
@@ -5998,8 +6009,8 @@ Then everything is kept
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-257/.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-257`: Debug and Release builds with zero warnings; every test passes in both, including the "US-257 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-257`: the Debug build with zero warnings and every Debug test passes, including the "US-257 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-257.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-257/.
 </verification>
 <teach_back>C++ concept for the owner: Linking world objects to simulation needs.</teach_back>
@@ -6012,6 +6023,7 @@ Manual checks in docs/plans/US-257.md done on the owner's PC with the GPU render
 <prompt id="X-M8e" codex="2.2" name="Exit review M8e">
 <instructions>
 1. Demonstrate the exit criteria: Clan members help build and rival clans build; each building fades its roof or opens an interior map as set in the Editor; buildings wear, are repaired, take damage, burn and fall; they shelter, warm and store for the clan and are saved.
+   Also run `pwsh tools/verify.ps1 -Story X-M8e -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8e.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8e.md, one section per criterion, each marked met or not met. Also: a season of play where clan members and a rival clan build, a hut is repaired, a wall burns, and the hero enters a roof-fade hut and an interior-map lodge.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8e-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -6027,7 +6039,7 @@ Why this milestone exists: the owner chose a full visual graph editor (D-34) for
 ```xml
 <prompt id="K-M9" codex="2.0" name="Kick off M9 Interaction and dialogue editor">
 <instructions>
-1. Confirm that M8 (docs/gates/M8.md) and its stories are done, and that D-34 and D-35 are Decided in docs/decisions.md.
+1. Confirm that M8e (docs/gates/M8e.md) and its stories are done (since v2.2 M8b-M8e come between M8 and M9), and that D-34 and D-35 are Decided in docs/decisions.md.
 2. Ask the owner, in one chat round, the open design questions of the M9 stories (for example: node look, where the Dialogue and Interactions tabs sit in the tool bar, which values Test-play can set). Record the answers.
 3. Architect: write docs/plans/M9-graph-editor-design.md before US-170: the graph model and commands, text-graph mapping for .dlg, the interaction graph's layout, overrides in levels, Test-play isolation, validation, and the test plan.
 4. Set this milestone's stories to To do in docs/status.md in this order: US-170, US-171, US-172, US-175, US-173, US-174.
@@ -6076,8 +6088,8 @@ Then the graph is as it was
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-170`: Debug and Release builds with zero warnings; every test passes in both, including the "US-170 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-170`: the Debug build with zero warnings and every Debug test passes, including the "US-170 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-170.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-170/.
 </verification>
 <teach_back>C++ concept for the owner: Graph data structures; hit testing; the Command pattern.</teach_back>
@@ -6125,8 +6137,8 @@ Then the notes are still there
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-171`: Debug and Release builds with zero warnings; every test passes in both, including the "US-171 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-171`: the Debug build with zero warnings and every Debug test passes, including the "US-171 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-171.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-171/.
 </verification>
 <teach_back>C++ concept for the owner: Mapping between a text format and a graph.</teach_back>
@@ -6174,8 +6186,8 @@ Then items, tags, needs and nodes are offered from the catalogs
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-172`: Debug and Release builds with zero warnings; every test passes in both, including the "US-172 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-172`: the Debug build with zero warnings and every Debug test passes, including the "US-172 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-172.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-172/.
 </verification>
 <teach_back>C++ concept for the owner: Forms built from a schema; pickers over catalogs.</teach_back>
@@ -6223,8 +6235,8 @@ Then the item name and the node are listed
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-175`: Debug and Release builds with zero warnings; every test passes in both, including the "US-175 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-175`: the Debug build with zero warnings and every Debug test passes, including the "US-175 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-175.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-175/.
 </verification>
 <teach_back>C++ concept for the owner: Graph traversal (breadth-first search).</teach_back>
@@ -6272,8 +6284,8 @@ Then they are still attached
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-173`: Debug and Release builds with zero warnings; every test passes in both, including the "US-173 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-173`: the Debug build with zero warnings and every Debug test passes, including the "US-173 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-173.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-173/.
 </verification>
 <teach_back>C++ concept for the owner: Per-instance overrides of shared data.</teach_back>
@@ -6321,8 +6333,8 @@ Then the level and the save are unchanged
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in the guide with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
 <verification>
-`pwsh tools/verify.ps1 -Story US-174`: Debug and Release builds with zero warnings; every test passes in both, including the "US-174 ..." cases and the determinism hash test.
-Green CI on qa after the merge.
+`pwsh tools/verify.ps1 -Story US-174`: the Debug build with zero warnings and every Debug test passes, including the "US-174 ..." cases and the determinism hash test.
+Green CI on qa after the merge (Release build and every Release test, D-46).
 Manual checks in docs/plans/US-174.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-174/.
 </verification>
 <teach_back>C++ concept for the owner: Faking inputs for tests (test doubles).</teach_back>
@@ -6335,6 +6347,7 @@ Manual checks in docs/plans/US-174.md done, with results and screenshots (`odyss
 <prompt id="X-M9" codex="2.0" name="Exit review M9">
 <instructions>
 1. Demonstrate the exit criteria: The owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it and saves it, and the file still reads well in a text editor.
+   Also run `pwsh tools/verify.ps1 -Story X-M9 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M9.md.
 2. Collect evidence (test output, CI run, screenshots, data files) into docs/gates/M9.md, one section per criterion, each marked met or not met. Also: one conversation and one interaction are built from scratch in the Editor, test-played, saved, and shown as text beside the graph in the evidence. Then X-M6 (kill gate 2) is next: end the session after this report, because it needs people.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -6349,7 +6362,7 @@ Why this milestone exists: the owner wants the Editor to be the game's authoring
 
 Design notes for every M10-M14 prompt (Anima, from the brief docs/plans/M10-M13-authoring-brief.md):
 - Decisions (D-41): Dominus decides design questions in these milestones with the recommended option; each goes into docs/decisions.md as "Decided by Dominus (delegated)" with docs/decision-requests/<ID>.md (options, choice, reasoning) and into the next Milestone file. The owner may override any of them later. Scope changes (new stories, new systems) are not design questions: they become codex issues.
-- Tests (D-41): every story writes its tests as before, and they must compile; stories are Done after zero-warning Debug and Release builds and the merge into qa. Each X-Mx runs `pwsh tools/verify.ps1` and CI, fixes every failure, and only then merges into main.
+- Tests (D-41): every story writes its tests as before, and they must compile; stories are Done after a zero-warning Debug build and the merge into qa (CI on qa builds Release, D-46). Each X-Mx runs `pwsh tools/verify.ps1` and CI, fixes every failure, and only then merges into main.
 - Formats: the brief's section 4 (quests, story events, schemas, Game Rules, routines, world file, politics) and section 10 (technologies, research) are the contract. One rule language for everything (ADR-019); one schema validator for loading, CI and the Editor (ADR-020); errors name file, line and field; bad data never crashes the game.
 - Layers (Charter rules 1, 3, 9): runtimes, validators, routines, region overrides, politics and research in src/sim/ (headless, deterministic, saved); tabs, forms, graphs, the region view and the debugger in src/game/; any new widget (form fields, minimap, timeline) in Luna Engine, game-agnostic.
 - Determinism and saves (Charter rules 6, 8): seeded streams for every new random choice; ids, never pointers (this also enables catalog reload, CI-007); every save, level and world format change bumps its version with a migration.
@@ -6386,7 +6399,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: src/sim/quests/ (quest loader with comments allowed, the quest state machine per quest: locked, available, active, done, failed; steps, branches, hints, fail rules, rewards through the effect runner; quest state in saves with a save version bump and migration). Data: assets/data/quests/ in the brief's section 4.1 format. Guide: docs/guides/quests.md.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Load">
@@ -6407,7 +6420,7 @@ Then the error reads 'quests/<file>.json:14: unknown step' and the rest loads
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-180/. The "US-180 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-180/. The "US-180 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-180.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: State machines over data; saving progress.</teach_back>
@@ -6434,7 +6447,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: a world event bus (interaction finished, dialogue node reached, item gained, given, crafted, enemy defeated, place entered, flag set, time passed) published by the existing systems with the actor id; the quest runtime subscribes and counts only the hero's events.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Count">
@@ -6455,7 +6468,7 @@ Then the hero's quest does not count it
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-181/. The "US-181 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-181/. The "US-181 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-181.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: An event bus (observer pattern).</teach_back>
@@ -6482,7 +6495,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Dialogue (src/sim/dialogue/) gains the effects `quest start|complete|fail <id>` and the conditions `quest(<id>)`, `step(<id>)`; giver resolution (person id, role:<role>); the Game draws a quest sign over NPCs with an available quest or a finished one to hand in.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Offer">
@@ -6503,7 +6516,7 @@ Then the turn-in line plays and the reward is given
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-182/. The "US-182 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-182/. The "US-182 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-182.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: Linking two data systems through ids.</teach_back>
@@ -6530,7 +6543,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: Journal screen (Luna UI, J key via a new intent), tracker in a screen corner, markers over target things, people and places; a Markers switch in settings.json (default on).
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Journal">
@@ -6551,7 +6564,7 @@ Then a marker shows over it; with markers off, none shows
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-183/. The "US-183 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-183/. The "US-183 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-183.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: Immediate-mode UI lists.</teach_back>
@@ -6578,7 +6591,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: Play here (Editor) starts Game mode at the cursor on a copy of the level or region; F10 debug panel (Editor builds only): quest controls, flags, items, opinions, time and season jump, teleport, and a 'why not' view that evaluates the selected step's conditions and shows each value.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Play here">
@@ -6599,7 +6612,7 @@ Then the failing condition and its current values are shown
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-186/. The "US-186 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-186/. The "US-186 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-186.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: Debug-only code paths.</teach_back>
@@ -6626,7 +6639,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: a Quests tab in the Editor using the M9 node graph (steps = nodes, next and branches = wires), step blocks for objective, conditions, hint, effects with pickers from catalogs, people and places; a quest list view drawing prerequisite links; saves <id>.json and <id>.quest.layout.json.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Steps">
@@ -6647,7 +6660,7 @@ Then B's prerequisites name A and the view draws the link
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-184/. The "US-184 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-184/. The "US-184 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-184.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: Reusing a generic widget for a new data type.</teach_back>
@@ -6674,7 +6687,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation (headless) validator over quests: unreachable steps, unknown items, people, places, interactions and quests, prerequisite cycles (depth-first search); listed in the Quests tab, clickable; a CI test runs it on every shipped quest.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Unreachable">
@@ -6695,7 +6708,7 @@ Then the prerequisite cycle is listed
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-187/. The "US-187 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-187/. The "US-187 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-187.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: Cycle detection in a graph.</teach_back>
@@ -6722,7 +6735,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Rebuild assets/data/hero/tutorial.json as assets/data/quests/first-day.json and remove the tutorial code path once the quest reproduces it (the US-090 tests are the baseline); crossroads.json becomes assets/data/story/events/*.json with a `trigger`, loaded by the existing crossroads code; a Story events list in the Editor edits them as forms.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Tutorial">
@@ -6743,7 +6756,7 @@ Then they pass
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-185/. The "US-185 ..." tests exist and compile; they run at X-M10.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-185/. The "US-185 ..." tests exist and compile; they run at X-M10.
 Manual checks in docs/plans/US-185.md listed, to be run at X-M10.
 </verification>
 <teach_back>C++ concept for the owner: Migrating data without changing behaviour.</teach_back>
@@ -6755,7 +6768,8 @@ Manual checks in docs/plans/US-185.md listed, to be run at X-M10.
 ```xml
 <prompt id="X-M10" codex="2.1" name="Exit review M10">
 <instructions>
-1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M10` on qa (Debug and Release, every test), then push qa and wait for CI. Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M10` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M10 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M10.md.
 2. Demonstrate the exit criteria: The owner writes a quest in the Editor's graph (or offline in JSON), test-plays it with the debugger and saves it; a player gets it from an NPC, follows it in the journal, tracker and markers, and finishes it; the elder tutorial is a quest and crossroads events are edited as story events.
 3. Collect evidence into docs/gates/M10.md, one section per criterion, met or not met. Also: the owner's quest loop is shown in the evidence: a quest built in the graph, test-played with the debugger, saved, then played from an NPC to the reward. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m10-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -6799,7 +6813,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: src/sim/schema/ (schema loader and validator for the brief's section 4.3 subset); assets/data/schemas/<file>.schema.json for every file under assets/data/; every loader validates against its schema; a CI test checks every data file and compares each schema's fields with its loader's. Guide: docs/guides/schemas.md.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Coverage">
@@ -6820,7 +6834,7 @@ Then the broken link is listed
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-190/. The "US-190 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-190/. The "US-190 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-190.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Describing data with data (a schema interpreter).</teach_back>
@@ -6847,7 +6861,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: a Data tab in the Editor: file list, entry list with search, forms built from the schema (number with range, text, enum, bool, list, nested object, reference picker), help text, undo through History, Ctrl+S writes canonical JSON (note fields kept). Saving reloads the file into the running game. This resolves CI-007: catalogs (plants, animals, weapons, characters, objects) must be swappable, so every holder of a catalog definition (WorldPlant::def, the hotbar's weapons, starters_, enemies' kinds and the like) keeps the kind's id and looks the definition up, never a raw pointer; F5 then reloads catalogs too.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Open">
@@ -6868,7 +6882,7 @@ Then the data is as before
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-191/. The "US-191 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-191/. The "US-191 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-191.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Building UI from a description at run time.</teach_back>
@@ -6895,7 +6909,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: entity actions in the Data tab for catalogs (create, copy, rename, delete) with a reference index built from the schemas' `ref` fields, so a rename updates every reference across data, quests, dialogue and levels and a delete lists uses and asks to confirm; tags, states and the kind's interactions (opens the M9 interaction graph).
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Create">
@@ -6916,7 +6930,7 @@ Then the uses are listed and the delete waits for confirmation
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-193/. The "US-193 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-193/. The "US-193 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-193.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Keeping references consistent (rename refactoring).</teach_back>
@@ -6943,7 +6957,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game + headless: forms for every mechanics and story file (sim/*.json, hero/*.json); a Quick check button runs odysseus_headless for 20 years with the edited data and the current seed and shows population, deaths by cause and episodes beside the previous run.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Forms">
@@ -6964,7 +6978,7 @@ Then the summaries are the same
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-194/. The "US-194 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-194/. The "US-194 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-194.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Running the simulation headless from the game.</teach_back>
@@ -6991,7 +7005,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: assets/data/rules/standard.json (brief section 4.4) loaded by every system that has a switch; New Game screen gets a rules picker; a level may name `rules`; the Game Rules page in the Data tab. Victory thresholds move here from code or other files.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Switches">
@@ -7012,7 +7026,7 @@ Then victory follows the new value
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-195/. The "US-195 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-195/. The "US-195 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-195.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Feature flags read once at start.</teach_back>
@@ -7039,7 +7053,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: assets/data/sim/routines.json (per role; per person in the world from M12); the M7 utility scoring multiplies an interaction's score by the active block's weight for matching tags; needs below their danger level ignore routines. Game: a Routines editor with a 24-hour timeline of blocks.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Routine">
@@ -7060,7 +7074,7 @@ Then they eat first
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-196/. The "US-196 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-196/. The "US-196 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-196.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Time blocks and weighting a utility AI.</teach_back>
@@ -7087,7 +7101,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: picture pickers for atlas-frame fields, animation and effect previews in the form; a Cut tool on a sheet in assets/sprites/ that adds a named rectangle to cuts.json and rebuilds the atlas through the existing odysseus_atlas code.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Pick">
@@ -7108,7 +7122,7 @@ Then cuts.json gains the cut and the atlas is rebuilt
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-192/. The "US-192 ..." tests exist and compile; they run at X-M11.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-192/. The "US-192 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-192.md listed, to be run at X-M11.
 </verification>
 <teach_back>C++ concept for the owner: Image regions and previews.</teach_back>
@@ -7120,7 +7134,8 @@ Manual checks in docs/plans/US-192.md listed, to be run at X-M11.
 ```xml
 <prompt id="X-M11" codex="2.1" name="Exit review M11">
 <instructions>
-1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M11` on qa (Debug and Release, every test), then push qa and wait for CI. Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M11` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M11 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M11.md.
 2. Demonstrate the exit criteria: Every data file has a schema; the owner edits any entity, mechanic, story tuning value, game rule and daily routine in Editor forms with pickers and validation, and the running game reloads it.
 3. Collect evidence into docs/gates/M11.md, one section per criterion, met or not met. Also: one new plant kind and one changed mechanic are made in the Data tab only, saved and seen in the running game; the schema CI test is green. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m11-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -7164,7 +7179,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: a Region view in the Editor that streams the 32-tile chunks around the camera from the existing generator (US-040), a cached minimap for zoomed-out views, layer switches (terrain, water, plants, things, people, places, camps). Performance budget in the design document.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Open">
@@ -7185,7 +7200,7 @@ Then they are identical
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-200/. The "US-200 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-200/. The "US-200 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-200.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Streaming chunks and level of detail.</teach_back>
@@ -7212,7 +7227,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Generator settings moved to assets/data/sim/region.json with a schema (all biome, noise, river, resource and camp settings); the Region view's Settings form with Preview (regenerate a low-resolution map off the main world) and Apply; conflicts with hand edits listed.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Preview">
@@ -7233,7 +7248,7 @@ Then the edits stay and conflicts are listed
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-201/. The "US-201 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-201/. The "US-201 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-201.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Pure functions of a seed.</teach_back>
@@ -7260,7 +7275,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: world file assets/worlds/<name>.json (brief section 4.6): seed + generator settings + overrides per chunk; the region loader applies overrides after generation; brush, rectangle and fill tools from the level editor work on the region and record Commands for undo.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Paint">
@@ -7281,7 +7296,7 @@ Then they are undone as in the level editor
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-202/. The "US-202 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-202/. The "US-202 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-202.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Storing differences (overlays) instead of copies.</teach_back>
@@ -7308,7 +7323,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Region tools for rivers (path with width, fords), lakes (area), cliffs and cave mouths, stored as overrides; walking and shot blocking follow the existing solid rules.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="River">
@@ -7329,7 +7344,7 @@ Then land replaces it and the change is an override
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-203/. The "US-203 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-203/. The "US-203 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-203.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Path tools and connected areas.</teach_back>
@@ -7356,7 +7371,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Region placement of plants, animals, world objects (objects ride on the plant machinery, CI-008), NPCs and named places, with ids kept across regeneration; places become pickers for quests and dialogue.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Place">
@@ -7377,7 +7392,7 @@ Then region people and places are offered
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-204/. The "US-204 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-204/. The "US-204 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-204.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Ids that survive regeneration.</teach_back>
@@ -7404,7 +7419,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Camps (player and rivals) and resource spots with amounts as world-file entries; rival clan worlds (US-041) start at the placed camps; placement rules validated with reasons.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Camps">
@@ -7425,7 +7440,7 @@ Then it is refused with the reason
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-205/. The "US-205 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-205/. The "US-205 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-205.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Validating placements against rules.</teach_back>
@@ -7452,7 +7467,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: Inspector panels for a clan and a person in the Region view: members, kinship, leader, opinions and grudges (with reasons), rival stance, owned items, store contents, debts, trade partners, routine, allowed actions and property overrides (M9 overrides extended to region things); stored in the world file's clans and people sections and applied when a game starts.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Social">
@@ -7473,7 +7488,7 @@ Then only that person changes
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-206/. The "US-206 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-206/. The "US-206 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-206.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Editing a graph of relations safely.</teach_back>
@@ -7500,7 +7515,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: New Game picks a world file (default: generated from a seed); Play here works on the region; save and world versions bumped with migrations so older saves load.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="New game">
@@ -7521,7 +7536,7 @@ Then it still works
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-207/. The "US-207 ..." tests exist and compile; they run at X-M12.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-207/. The "US-207 ..." tests exist and compile; they run at X-M12.
 Manual checks in docs/plans/US-207.md listed, to be run at X-M12.
 </verification>
 <teach_back>C++ concept for the owner: Versioned save formats.</teach_back>
@@ -7533,7 +7548,8 @@ Manual checks in docs/plans/US-207.md listed, to be run at X-M12.
 ```xml
 <prompt id="X-M12" codex="2.1" name="Exit review M12">
 <instructions>
-1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M12` on qa (Debug and Release, every test), then push qa and wait for CI. Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M12` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M12 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M12.md.
 2. Demonstrate the exit criteria: The owner opens the procedural region in the Editor, tunes the generator with a live preview, paints terrain, water and mountains, places things, people and camps, and edits each clan's and person's relations, economy, routines and actions; edits are saved on top of the seed and a new game plays them.
 3. Collect evidence into docs/gates/M12.md, one section per criterion, met or not met. Also: an edited region (terrain, a river, a camp moved, a clan's store and a grudge set) is saved as a small world file and a new game starts on it. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m12-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -7553,7 +7569,8 @@ Why this milestone exists: Politics returns to the MVP as the third playable pil
 1. Confirm that M12 (docs/gates/M12.md) and its stories are done (for M10: X-M9 also ran its full verification and CI), and that D-40 and D-41 are Decided in docs/decisions.md.
 2. Architect: write docs/plans/M13-politics-design.md (stance model and reasons, alliances, oaths and tribute, council voting, marriage ties, leadership, levers, victory and balance check) before the first story. Every design question it meets, Dominus decides (D-41) and records as delegated.
 3. Set this milestone's stories to To do in docs/status.md in this order: US-210, US-211, US-212, US-213, US-214, US-215, US-216.
-4. Continue with the first story prompt.
+4. Recruiting for kill gate 2 starts now (D-48): remind the owner in the assembly report to recruit the eight playtesters as docs/plans/M6-playtest-plan.md section 3 describes. Recruiting needs people, so it is the owner's task; agents never contact anyone.
+5. Continue with the first story prompt.
 </instructions>
 <output_format>Short kickoff note in the assembly report: milestone goal, stories, delegated decisions.</output_format>
 </prompt>
@@ -7577,7 +7594,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: src/sim/politics/ with clan-to-clan stance (-100..100, moved by events with reasons), alliance and vassal relations, and the Politics share; assets/data/sim/politics.json (brief section 4.7) with a schema; politics on/off follows the Game Rules switch.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Relations">
@@ -7598,7 +7615,7 @@ Then every political rule is a form
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-210/. The "US-210 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-210/. The "US-210 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-210.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: Modelling relations between groups.</teach_back>
@@ -7625,7 +7642,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Alliance and oath proposals between clans (AI and hero), tribute each season in goods, oath breaking by stance and chance from the seeded stream, chronicle lines with reasons.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Alliance">
@@ -7646,7 +7663,7 @@ Then it may break the oath, and the chronicle says why
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-211/. The "US-211 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-211/. The "US-211 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-211.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: Contracts as data with conditions.</teach_back>
@@ -7673,7 +7690,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Elders' council for clan decisions (move camp, war, sharing, alliances): votes from needs, traits and opinions; the hero sways votes through dialogue choices and gifts; results in the chronicle.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Vote">
@@ -7694,7 +7711,7 @@ Then the chronicle records it with the votes
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-212/. The "US-212 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-212/. The "US-212 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-212.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: Simple voting rules and weights.</teach_back>
@@ -7721,7 +7738,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Inter-clan marriages from the M2b courtship system create marriage ties that raise stance and weigh alliance answers; parting weakens them.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Tie">
@@ -7742,7 +7759,7 @@ Then the tie weakens and the stance falls
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-213/. The "US-213 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-213/. The "US-213 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-213.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: Events that affect two systems.</teach_back>
@@ -7769,7 +7786,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Leadership: challenges when the clan's opinion of the leader falls below the limit, decided by council or contest rules from politics.json; contested succession on a leader's death; the hero can challenge or back a leader.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Challenge">
@@ -7790,7 +7807,7 @@ Then succession is contested between candidates with reasons
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-214/. The "US-214 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-214/. The "US-214 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-214.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: State transitions with guards.</teach_back>
@@ -7817,7 +7834,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Levers: trade pacts (barter terms), tribute in goods, embargoes, and teaching crafts and recipes to allies (uses the M5 recipes and the US-222 teaching once M14 lands; here, recipes only), each moving stance and dependence as politics.json says.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Pact">
@@ -7838,7 +7855,7 @@ Then the ally can craft it and its stance and dependence rise
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-215/. The "US-215 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-215/. The "US-215 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-215.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: Interfaces between subsystems.</teach_back>
@@ -7865,7 +7882,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Politics in the dominion screen and the end-of-game rules (thresholds from Game Rules); diplomacy choices (alliance, oath, pact, embargo) offered in conversations with clan leaders through dialogue effects.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Victory">
@@ -7886,7 +7903,7 @@ Then alliance, oath, pact and embargo choices are offered in the conversation
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-216/. The "US-216 ..." tests exist and compile; they run at X-M13.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-216/. The "US-216 ..." tests exist and compile; they run at X-M13.
 Manual checks in docs/plans/US-216.md listed, to be run at X-M13.
 </verification>
 <teach_back>C++ concept for the owner: Combining scores from several systems.</teach_back>
@@ -7898,7 +7915,8 @@ Manual checks in docs/plans/US-216.md listed, to be run at X-M13.
 ```xml
 <prompt id="X-M13" codex="2.1" name="Exit review M13">
 <instructions>
-1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M13` on qa (Debug and Release, every test), then push qa and wait for CI. Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M13` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M13 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M13.md.
 2. Demonstrate the exit criteria: Clans form alliances and vassal oaths, hold elders' councils, bind themselves by marriage, challenge leaders and use trade and craft knowledge as levers; the player can win the region through Politics; every political rule is editable in the Editor.
 3. Collect evidence into docs/gates/M13.md, one section per criterion, met or not met. Also: a 10-seed headless balance check reports how often and how fast each victory happens with Politics on; the owner gets the table. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m13-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -7942,7 +7960,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: assets/data/sim/technologies.json and research.json (brief section 10) with schemas; the tech registry with unlocks applied to recipes, interactions, professions and objects; Game: a Tech tree view in the Editor on the M9 node graph.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Load">
@@ -7963,7 +7981,7 @@ Then the cycle is listed
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-220/. The "US-220 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-220/. The "US-220 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-220.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Directed acyclic graphs and topological order.</teach_back>
@@ -7990,7 +8008,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Simulation: research points per clan and technology from interactions and skills tagged in `discover.by`; discovery when points reach the threshold and prerequisites are known; chronicle lines naming the discoverer.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Discover">
@@ -8011,7 +8029,7 @@ Then it is not discovered
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-221/. The "US-221 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-221/. The "US-221 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-221.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Accumulators and thresholds.</teach_back>
@@ -8038,7 +8056,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Game: Technology screen (Luna UI) with known, reachable and locked technologies as a tree, details, progress, unlocks and who else knows a secret.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Tree">
@@ -8059,7 +8077,7 @@ Then who else is known to have it is listed
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-226/. The "US-226 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-226/. The "US-226 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-226.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Laying out a tree for reading.</teach_back>
@@ -8086,7 +8104,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Workshop factor per object kind, inventive trait bonus and solo discovery, teaching as an interaction between members of allied clans (completes the US-215 craft-sharing lever for technologies).
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Workshop">
@@ -8107,7 +8125,7 @@ Then that clan knows it after the teaching time
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-222/. The "US-222 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-222/. The "US-222 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-222.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Modifiers that stack in a defined order.</teach_back>
@@ -8134,7 +8152,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Rival clans research by their priorities from research.json; the Technology share per clan; Technology in the dominion screen.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Rivals">
@@ -8155,7 +8173,7 @@ Then rivals follow the new priorities
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-224/. The "US-224 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-224/. The "US-224 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-224.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Comparing scores across actors.</teach_back>
@@ -8182,7 +8200,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: Theft by observation and trade with chances from research.json and the seeded stream; secret technologies and secret-keepers; caught spies lower stance with reasons.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Steal">
@@ -8203,7 +8221,7 @@ Then the same thefts happen
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-223/. The "US-223 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-223/. The "US-223 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-223.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Probabilities from a seeded stream.</teach_back>
@@ -8230,7 +8248,7 @@ Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D
 Where the work belongs: The Ember chain (technologies + a recipe forged at the sacred fire), the Technology victory and the four-pillar combined rule in Game Rules; chronicle for a rival forging Ember.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
-Completion: the story is complete when its code and tests are written, Debug and Release build with zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
+Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
 </instructions>
 <acceptance_criteria>
 <scenario name="Chain">
@@ -8251,7 +8269,7 @@ Then the chronicle tells it and the player can still win another way or take it
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done (M10-M14 exception), plus: every new data field has a schema entry and a guide line with an example; round-trip tests for every new format.</definition_of_done>
 <verification>
-Debug and Release builds with zero warnings; build log in docs/evidence/US-225/. The "US-225 ..." tests exist and compile; they run at X-M14.
+The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-225/. The "US-225 ..." tests exist and compile; they run at X-M14.
 Manual checks in docs/plans/US-225.md listed, to be run at X-M14.
 </verification>
 <teach_back>C++ concept for the owner: Long multi-step goals as data.</teach_back>
@@ -8263,7 +8281,8 @@ Manual checks in docs/plans/US-225.md listed, to be run at X-M14.
 ```xml
 <prompt id="X-M14" codex="2.1" name="Exit review M14">
 <instructions>
-1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M14` on qa (Debug and Release, every test), then push qa and wait for CI. Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M14` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M14 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M14.md.
 2. Demonstrate the exit criteria: Clans research by doing in workshops with inventors, pass knowledge by teaching, steal and guard secrets, and unlock recipes, interactions and professions from an editable tech tree; the player can win by forging the Ember Strand while leading in known technologies.
 3. Collect evidence into docs/gates/M14.md, one section per criterion, met or not met. Also: a 10-seed headless balance check covers all four pillars. Then X-M6 (kill gate 2) is next: end the session after this report, because it needs people. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m14-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -8427,6 +8446,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```xml
 <prompt id="X-M6" codex="1.8" name="Exit review M6">
 <instructions>
+0. Run the playtest exactly as docs/plans/M6-playtest-plan.md says (session script, interview, evidence table, privacy); agents prepare the package and the evidence template, the owner runs the sessions.
 1. Demonstrate the exit criteria: 8 outside playtesters play; success criteria measured; go/no-go decision recorded.
 2. Collect evidence (test output, headless run logs, FPS logs, screenshots) into docs/gates/M6.md, one section per criterion, each marked met or not met.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m6-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -8486,3 +8506,7 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.0 | 2026-10-01 | World interactions, dialogue and their editor (source of truth v2.0, Round 13; Mraw's brief docs/plans/M7-M9-interactions-brief.md). The owner decided D-34 (plain-text .dlg dialogue + JSON interactions; hybrid talk; full visual graph editor plus F5 hot reload; build first, kill gate 2 after) and, with Anima, D-35 (design questions to the owner at each kickoff; P-009 pays the test debt, then per-story verification and CI; the seven proposed world objects; the dialogue panel pauses). New milestones before M6: M7 World interactions (K-M7, S-US-150..S-US-156, X-M7), M8 Speak to NPCs (K-M8, S-US-160..S-US-165, X-M8), M9 Interaction and dialogue editor (K-M9, S-US-170..S-US-175, X-M9), with shared design notes; K-M6 now follows X-M9; D-08 Decided, D-15 chain, D-34 and D-35 in the decision table; new state files (format guides, test-debt record); new P-009 adopts v2.0 and pays the test debt. L-01 step 1 corrected: an undecided D-xx goes to the owner (Charter human gate 3), no longer to Dominus; this contradiction existed since v1.8. Section 0 records that the delegated period of D-30..D-33 ended with M6. |
 | 2.1 | 2026-10-01 | Authoring tools, Politics and Technology (source of truth v2.2, Rounds 14 and 15; Mraw's brief docs/plans/M10-M13-authoring-brief.md). The owner decided D-40 (M10 Quests and story authoring, M11 Data editors, M12 World editing, M13 Politics) and, with Anima, D-41 (Technology as the fourth pillar in M14; Politics victory confirmed; Game Rules files; for M10-M14 Dominus decides design questions as delegated and tests run at exit reviews; kill gate 2 after M14). New: P-010; K-M10..X-M14 with 37 story prompts (S-US-180..S-US-187, S-US-190..S-US-196, S-US-200..S-US-207, S-US-210..S-US-216, S-US-220..S-US-226) and shared design notes; exit reviews run the deferred tests and CI before merging into main. Charter: human gate 3 and Definition of Done gain the M10-M14 exceptions; L-01 steps 1, 7 and 10 follow them. K-M6 now follows X-M14; D-15 chain; D-40 and D-41 in the decision table; new state files (guides, assets/worlds/). Codex issues resolved: CI-007 (catalog hot reload joins US-191, which replaces raw pointers into catalogs with ids; dialogue reload as built in M8), CI-008 (world objects ride on the plant machinery; noted in the M12 design notes). |
 | 2.2 | 2026-10-01 | Resolution, lighting and buildings (source of truth v2.4, Rounds 16 and 17; Mraw's brief docs/plans/M8b-M8d-render-light-build-brief.md). The owner decided D-42 (960x540 with window modes, camera zoom and UI scale; SDL_GPU shaders; sun, moon, fire, torch and effect lights, seasonal day length, weather light; shadows from the sun, the moon and nearby fires; generated normal maps; buildings from blueprints and pieces, built by the clans, with wear, repair, fire, interiors and Editor prefabs; right after M8) and, with Anima, D-43 (M8d split into M8d Buildings and M8e Building life; US-256 no longer waits for US-254; the D-35 assembly rules apply) and D-06 (a mid-range target PC). New: P-011; K-M8b..X-M8e with 21 story prompts (S-US-230..S-US-234, S-US-240..S-US-247, S-US-250..S-US-252, S-US-256, S-US-253..S-US-255, S-US-257) and shared design notes, between X-M8 and K-M9; K-M9 now follows X-M8e. Charter: architecture rule 11 (rendering). D-06 Decided, D-15 chain, D-42 and D-43 in the decision table; new state files (lighting and buildings guides, ADR-021). |
+| 2.3 | 2026-10-01 | Faster verification (owner, D-46): the local check (`tools/verify.ps1`, new `-Config Debug|Release|Both`, default Debug) builds and tests Debug with AddressSanitizer; CI builds and tests Release on qa and both on main; CI runs only on pushes to qa and main, skips docs-only pushes, cancels superseded runs and caches built vcpkg libraries (`.github/workflows/ci.yml`). Charter Definition of Done, L-01 step 7, the M10-M14 notes and every prompt still To do (M8b onward) now say which configuration is checked where. No scope change. |
+| 2.4 | 2026-10-01 | Completeness review (source of truth v2.6, Round 19, D-47). Codex issue CI-009 resolved: K-M8b now checks that M8 is done and K-M9 that M8e is done (v2.2 had swapped them by a text replacement). Every remaining exit review (X-M8b..X-M14, 10 prompts) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check, which CI only checks at 10 s. Decision table: D-07, D-09, D-11 closed, D-10 superseded, D-47 added. No scope change. |
+| 2.5 | 2026-10-01 | Remaining open items (source of truth v2.7, Round 20, D-48): K-M13 reminds the owner to start recruiting the eight playtesters (docs/plans/M6-playtest-plan.md, written by Dominus); X-M6 runs the playtest by that plan; D-14 and D-48 in the decision table. No scope change. |
+| 2.6 | 2026-10-01 | Merge (source of truth v2.8). During US-231 Mraw found that S-US-231 contradicted the owner's M8b answers (CI-010, D-44) and aligned S-US-231 and S-US-232 itself on its story branch, labelled 2.4 there, while Anima published 2.4 and 2.5 in parallel. This version contains both: the D-44 alignment (four windowed sizes, Whole scaling with Fill in Settings, first-start defaults, zoom and UI scale controls) and every change of 2.4 and 2.5. CI-010 resolved. From now on Codex changes go through Anima (A-002), so versions stay in one line. |

@@ -1,4 +1,4 @@
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.2)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.6)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -6,7 +6,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -39,7 +39,7 @@ Adding any other library: allowed, but record an ADR in docs/adr/ explaining why
 </coding_standards>
 
 <definition_of_done>
-- Code compiles with zero warnings in Debug and Release (x64).
+- Code compiles with zero warnings in Debug and Release (x64): Debug in the local check (`pwsh tools/verify.ps1`, which also runs every Debug test with AddressSanitizer), Release in CI on qa (build and every Release test); a merge into main builds and tests both in CI (owner, 2026-10-01, D-46).
 - All acceptance criteria verified; automated tests written where the story is testable headless.
 - CI is green on the qa branch after the merge (from US-002 on, when CI exists); main is checked at milestone exits. Exception for M10-M14 stories (D-41): the story's tests are written and compile, Debug and Release build with zero warnings, and the story is merged into qa; the tests and CI run at the milestone's exit review, which must end green before the milestone counts as done.
 - No layer rule broken (Simulation does not include Engine, Platform or SDL3; Luna does not include Simulation or Game).

@@ -30,21 +30,25 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
     using namespace odysseus::core;
 
     platform::System system;
+    platform::RendererChoice choice = platform::RendererChoice::Auto;
+    if (options.renderer == "gpu") choice = platform::RendererChoice::Gpu;
+    else if (options.renderer == "sdl") choice = platform::RendererChoice::Sdl;
     platform::Window window({config.title, config.windowWidth, config.windowHeight, config.virtualWidth,
-                             config.virtualHeight});
-    logInfo(std::format("Window opened: {}x{}, virtual screen {}x{}, VSync {}", config.windowWidth,
+                             config.virtualHeight, false, choice, config.windowMode, config.scaling});
+    logInfo(std::format("Window opened: {}x{}, virtual screen {}x{}, VSync {}, renderer {}", config.windowWidth,
                         config.windowHeight, config.virtualWidth, config.virtualHeight,
-                        window.vsyncEnabled() ? "on" : "off"));
+                        window.vsyncEnabled() ? "on" : "off", window.backendName()));
 
     WindowRenderer renderer(window);
     InputMap input;
-    const auto logScale = [&](int width, int height) {
-        const PixelScale pixels = integerScale(width, height, config.virtualWidth, config.virtualHeight);
-        input.setPointerArea(pixels.area, pixels.scale); // mouse positions become virtual pixels
-        logInfo(std::format("Window {}x{}: pixel art scaled x{}, picture {}x{} at ({}, {})", width, height, pixels.scale,
-                            pixels.area.width, pixels.area.height, pixels.area.x, pixels.area.y));
+    const auto logScale = [&]() {
+        const Rect output = window.outputRect();
+        const Rect area = window.presentationRect();
+        input.setPointerArea(area, config.virtualWidth, config.virtualHeight);
+        logInfo(std::format("Window {}x{}: picture {}x{} at ({}, {})", output.width, output.height,
+                            area.width, area.height, area.x, area.y));
     };
-    logScale(config.windowWidth, config.windowHeight);
+    logScale();
     game.start(renderer);
 
     FixedStepClock clock(config.ticksPerSecond);
@@ -73,7 +77,7 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
             } else if (event.type == platform::EventType::GamepadRemoved) {
                 logInfo(std::format("Gamepad {} disconnected", event.gamepad));
             } else if (event.type == platform::EventType::WindowResized) {
-                logScale(event.width, event.height);
+                logScale();
             }
             input.handle(event);
         }
@@ -118,11 +122,10 @@ int run(const AppConfig& config, Game& game, const RunOptions& options) {
         for (int tick = 0; tick < ticks; ++tick) {
             game.update(input.nextTick());
             if (const auto change = game.takeWindowChange()) {
-                window.setFullscreen(change->fullscreen);
-                if (!change->fullscreen && change->width > 0 && change->height > 0) window.setSize(change->width, change->height);
+                window.applyResolution(change->resolution);
                 const odysseus::core::Rect out = window.outputRect();
-                logScale(out.width, out.height);
-                logInfo(std::format("Window change: {} {}x{}", change->fullscreen ? "full screen" : "windowed", out.width, out.height));
+                logScale();
+                logInfo(std::format("Window change: {}x{}", out.width, out.height));
             }
         }
 

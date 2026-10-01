@@ -17,6 +17,9 @@ public:
     // Centres on a point at once (for the first frame, or teleports).
     void centreOn(double x, double y);
 
+    // Zoom (US-232): a smaller view shows less of the world. Keeps the centre of the picture where it was.
+    void setViewSize(int viewWidth, int viewHeight);
+
     // Once per tick: moves `smoothing` of the way (0..1) towards centring on (x, y).
     void follow(double x, double y, double smoothing = kDefaultSmoothing);
 

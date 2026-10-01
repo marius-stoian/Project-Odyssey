@@ -6,7 +6,7 @@ if(NOT DEFINED GAME OR NOT DEFINED WORK_DIR OR NOT DEFINED LEVEL)
 endif()
 file(REMOVE_RECURSE "${WORK_DIR}")
 file(MAKE_DIRECTORY "${WORK_DIR}")
-execute_process(COMMAND "${GAME}" --level "${LEVEL}" --quit-after 4 --aim 470:135:0:4 --hold MoveRight:0.2:3.2 --log-dir "${WORK_DIR}"
+execute_process(COMMAND "${GAME}" --level "${LEVEL}" --quit-after 4 --aim 950:270:0:4 --hold MoveRight:0.2:3.2 --log-dir "${WORK_DIR}"
                         --screenshot "${WORK_DIR}/walked-to-rock.bmp"
     RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
 file(GLOB logs "${WORK_DIR}/session-*.log")

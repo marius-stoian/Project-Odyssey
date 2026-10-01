@@ -2,6 +2,7 @@
 //   --quit-after <seconds>   close by itself after that long, exactly like the close button
 //   --log-dir <folder>       write the session log there instead of the per-user folder
 //   --screenshot <file.bmp>  save the last frame as a picture (for evidence and progress reports)
+//   --renderer <auto|gpu|sdl>  how the picture is drawn: auto (the graphics card, else the first renderer with the reason in the log; the default), gpu (stop if the card cannot be used), sdl (the first renderer)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
 //   --new-game               start at the New Game screen (seed, Growing Period, Comfort)
@@ -11,7 +12,7 @@
 //   --clan                   run the simulated clan in this level (levels marked "clan": true do it by themselves)
 //   --weather <name>         start under that weather, for example `steady rain` (screenshots and demos)
 //   --seed <number>          fix the weather sequence (the same seed gives the same weathers in the same order)
-//   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 480x270) at that time
+//   --click <x>:<y>:<time>[:right]  click there (virtual pixels, 960x540) at that time
 //   --drag <x1>:<y1>:<x2>:<y2>:<from>:<to>  hold the left button and move from one point to the other
 //   --point <x>:<y>:<from>:<to>  rest the pointer there without pressing (hover)
 //   --aim <x>:<y>:<from>:<to>  the same as --point: where the hero aims (Game mode); fire with --hold Attack:<from>:<to>
@@ -44,12 +45,15 @@ struct Arguments {
     double quitAfterSeconds = 0.0;
     std::filesystem::path logDirectory;
     std::filesystem::path screenshot;
+    std::string renderer = "auto";
     std::filesystem::path level;
     bool editor = false;
     std::optional<std::uint64_t> seed; // fixes the weather sequence (US-138)
     std::string weather;               // start under this weather (screenshots)
     bool clan = false;                 // run the simulated clan in this level
     int clanSpeed = 1;                 // clan simulation ticks per game tick (fast forward)
+    bool perf = false;                 // a performance run: overlay on, GPU time measured, figures logged each minute (US-234)
+    int people = 0;                    // start the clan with this many people (performance runs)
     std::optional<std::uint64_t> region; // play a generated region
     std::filesystem::path saveDirectory; // where autosaves go
     bool load = false;                 // load the autosave at start
@@ -82,6 +86,8 @@ luna::engine::Intent intentNamed(std::string_view name) {
     if (name == "Inspect") return Intent::Inspect;
     if (name == "DevTools") return Intent::DevTools;
     if (name == "Overlay") return Intent::Overlay;
+    if (name == "ZoomIn") return Intent::ZoomIn;
+    if (name == "ZoomOut") return Intent::ZoomOut;
     if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
         return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
     }
@@ -112,6 +118,10 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.load = true;
             continue;
         }
+        if (name == "--perf") { // a flag without a value
+            arguments.perf = true;
+            continue;
+        }
         if (name == "--clan") { // a flag without a value: run the simulated clan in this level
             arguments.clan = true;
             continue;
@@ -131,6 +141,8 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.region = std::stoull(argv[++i]);
         } else if (name == "--save-dir") {
             arguments.saveDirectory = argv[++i];
+        } else if (name == "--people") {
+            arguments.people = std::stoi(argv[++i]);
         } else if (name == "--clan-speed") {
             arguments.clanSpeed = std::stoi(argv[++i]);
         } else if (name == "--weather") {
@@ -141,6 +153,11 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.level = argv[++i];
         } else if (name == "--screenshot") {
             arguments.screenshot = argv[++i];
+        } else if (name == "--renderer") {
+            arguments.renderer = argv[++i];
+            if (arguments.renderer != "auto" && arguments.renderer != "gpu" && arguments.renderer != "sdl") {
+                throw std::invalid_argument("--renderer is auto, gpu or sdl");
+            }
         } else if (name == "--click") {
             const auto f = fields(argv[++i]);
             const double t = std::stod(f.at(2));
@@ -205,6 +222,8 @@ int main(int argc, char* argv[]) {
         if (arguments.newGame) {
             game.run().openNewGame();
         }
+        game.setStartingPeople(arguments.people);
+        game.setPerformanceLog(arguments.perf);
         if (arguments.clan) {
             game.setClan(true);
         }
@@ -218,8 +237,14 @@ int main(int argc, char* argv[]) {
         if (arguments.editor) {
             game.switchMode(odysseus::game::Mode::Editor);
         }
-        const int exitCode = luna::engine::run(odysseus::game::odysseyAppConfig(), game,
-                                               {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds, arguments.pointer, arguments.typing});
+        luna::engine::AppConfig app = odysseus::game::odysseyAppConfig();
+        app.windowWidth = game.settings().resolution.width;
+        app.windowHeight = game.settings().resolution.height;
+        app.windowMode = game.settings().resolution.mode;
+        app.scaling = game.settings().resolution.scaling;
+        game.takeWindowChange(); // the first window already uses the saved settings
+        const int exitCode = luna::engine::run(app, game,
+                                               {start, arguments.quitAfterSeconds, arguments.screenshot, arguments.holds, arguments.pointer, arguments.typing, arguments.renderer});
         const odysseus::game::Hero& hero = game.hero();
         odysseus::core::logInfo(std::format("Hero at ({:.1f}, {:.1f}) facing {}, {}", hero.feetX(), hero.feetY(),
                                             odysseus::game::facingName(hero.facing()), hero.walking() ? "walking" : "idle"));

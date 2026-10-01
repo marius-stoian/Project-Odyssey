@@ -62,10 +62,56 @@ add_library(odysseus_core STATIC
     src/core/version.cpp
     src/core/log.cpp
     src/core/assertions.cpp
+    src/core/presentation.cpp
     src/core/random.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
+
+# The GPU renderer (US-230, ADR-021) draws with shaders written in HLSL and compiled at build time to DXIL with the Windows SDK's dxc.exe, then built into
+# the program as byte arrays (no shader files to ship). Without dxc.exe the GPU backend is left out and the game uses SDL_Renderer.
+set(LUNA_SHADER_DIR "${CMAKE_BINARY_DIR}/luna_shaders")
+set(LUNA_SHADER_HEADERS "")
+option(LUNA_GPU "Build the GPU renderer (needs dxc.exe from the Windows SDK)" ON)
+if(NOT LUNA_GPU)
+    set(LUNA_DXC "")
+    message(STATUS "GPU renderer: switched off by -DLUNA_GPU=OFF; the game will use SDL_Renderer only")
+elseif(NOT LUNA_DXC)
+    set(_luna_sdk_roots "$ENV{WindowsSdkDir}" "$ENV{ProgramFiles\(x86\)}/Windows Kits/10" "C:/Program Files (x86)/Windows Kits/10")
+    foreach(_root IN LISTS _luna_sdk_roots)
+        if(_root AND NOT LUNA_DXC)
+            file(GLOB _versions "${_root}/bin/10.*")
+            list(SORT _versions ORDER DESCENDING)
+            foreach(_version IN LISTS _versions)
+                if(NOT LUNA_DXC AND EXISTS "${_version}/x64/dxc.exe")
+                    set(LUNA_DXC "${_version}/x64/dxc.exe")
+                endif()
+            endforeach()
+        endif()
+    endforeach()
+endif()
+if(LUNA_GPU AND LUNA_DXC)
+    message(STATUS "GPU renderer: shaders are compiled with ${LUNA_DXC}")
+    foreach(_shader sprite.vert sprite.frag blit.vert blit.frag)
+        if(_shader MATCHES "[.]vert$")
+            set(_profile vs_6_0)
+        else()
+            set(_profile ps_6_0)
+        endif()
+        string(REPLACE "." "_" _symbol "g_${_shader}")
+        set(_source "${CMAKE_SOURCE_DIR}/src/luna/platform/shaders/${_shader}.hlsl")
+        set(_header "${LUNA_SHADER_DIR}/${_shader}.h")
+        add_custom_command(OUTPUT "${_header}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${LUNA_SHADER_DIR}"
+            COMMAND "${LUNA_DXC}" -T ${_profile} -E main -O3 -Fh "${_header}" -Vn ${_symbol} "${_source}"
+            DEPENDS "${_source}"
+            COMMENT "Compiling shader ${_shader}.hlsl"
+            VERBATIM)
+        list(APPEND LUNA_SHADER_HEADERS "${_header}")
+    endforeach()
+elseif(LUNA_GPU)
+    message(STATUS "GPU renderer: dxc.exe was not found (Windows SDK); the game will use SDL_Renderer only. Set -DLUNA_DXC=<path> to change that.")
+endif()
 
 add_library(luna_platform STATIC
     src/luna/platform/layer.cpp
@@ -73,7 +119,14 @@ add_library(luna_platform STATIC
     src/luna/platform/crash.cpp
     src/luna/platform/system.cpp
     src/luna/platform/user_paths.cpp
-    src/luna/platform/window.cpp)
+    src/luna/platform/sdl_renderer_backend.cpp
+    src/luna/platform/gpu_backend.cpp
+    src/luna/platform/window.cpp
+    ${LUNA_SHADER_HEADERS})
+target_include_directories(luna_platform PRIVATE "${LUNA_SHADER_DIR}")
+if(LUNA_GPU AND LUNA_DXC)
+    target_compile_definitions(luna_platform PRIVATE LUNA_GPU=1)
+endif()
 target_link_libraries(luna_platform PUBLIC odysseus_core)
 # PRIVATE: only Platform sees SDL3 headers (Charter rule 2); callers still link it.
 target_link_libraries(luna_platform PRIVATE SDL3::SDL3)
@@ -102,6 +155,7 @@ add_library(luna_engine STATIC
     src/luna/engine/input.cpp
     src/luna/engine/renderer.cpp
     src/luna/engine/camera.cpp
+    src/luna/engine/scaled_renderer.cpp
     src/luna/engine/tile_map.cpp
     src/luna/engine/collision.cpp
     src/luna/engine/physics_view.cpp
@@ -223,6 +277,7 @@ add_executable(odysseus_tests
     tests/main.cpp
     tests/core/version_test.cpp
     tests/core/log_test.cpp
+    tests/core/presentation_test.cpp
     tests/architecture/layer_rules_test.cpp)
 target_link_libraries(odysseus_tests PRIVATE odysseus_core doctest::doctest)
 target_compile_definitions(odysseus_tests PRIVATE
@@ -279,7 +334,8 @@ add_executable(luna_tests
     tests/luna/tile_map_test.cpp
     tests/luna/collision_test.cpp
     tests/luna/ui_test.cpp
-    tests/luna/effects_test.cpp)
+    tests/luna/effects_test.cpp
+    tests/luna/zoom_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
@@ -327,6 +383,7 @@ add_executable(odysseus_game_tests
     tests/game/paint_test.cpp
     tests/game/place_test.cpp
     tests/game/settings_test.cpp
+    tests/game/presentation_settings_test.cpp
     tests/game/content_test.cpp
     tests/game/combat_test.cpp
     tests/game/weapons_test.cpp
@@ -346,7 +403,8 @@ add_executable(odysseus_game_tests
     tests/game/npc_test.cpp
     tests/game/conversation_test.cpp
     tests/game/greeting_test.cpp
-    tests/game/exchange_test.cpp)
+    tests/game/exchange_test.cpp
+    tests/game/renderer_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")

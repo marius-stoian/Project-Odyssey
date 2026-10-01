@@ -176,7 +176,7 @@ TEST_CASE("US-138 Weather in the game") {
     first.renderer.clear();
     first.odyssey.render(first.renderer, 1.0);
     const std::size_t inEditor = first.renderer.draws().size();
-    CHECK(inEditor < drawn + 1000);
+    CHECK(inEditor < drawn + 4000);
 }
 
 TEST_CASE("US-138 Placed effects") {

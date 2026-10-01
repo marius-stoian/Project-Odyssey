@@ -152,7 +152,7 @@ TEST_CASE("US-124 Undo") {
     const game::Definitions definitions = game::loadDefinitions(ODYSSEUS_DATA_DIR);
     for (unsigned seed = 1; seed <= 5; ++seed) {
         game::Level level = game::makeLevel("Test", 12, 10, 0);
-        game::Editor editor(level, definitions, fs::temp_directory_path() / "odysseus-us124-undo.json", 480, 270);
+        game::Editor editor(level, definitions, fs::temp_directory_path() / "odysseus-us124-undo.json", 960, 540);
         std::mt19937 random(seed);
         auto pick = [&](int n) { return static_cast<int>(random() % static_cast<unsigned>(n)); };
         const int kinds = static_cast<int>(definitions.tiles.size());
@@ -191,7 +191,7 @@ TEST_CASE("US-124 Undo") {
     }
     // At most 100 steps are kept: the 101st edit makes the first one permanent.
     game::Level level = game::makeLevel("Long", 12, 10, 0);
-    game::Editor editor(level, definitions, fs::temp_directory_path() / "odysseus-us124-long.json", 480, 270);
+    game::Editor editor(level, definitions, fs::temp_directory_path() / "odysseus-us124-long.json", 960, 540);
     for (int i = 0; i < 101; ++i) {
         editor.run(std::make_unique<game::PaintCommand>("edit", std::vector<game::CellChange>{{i % 12, i / 12, level.at(i % 12, i / 12), 1}}));
     }

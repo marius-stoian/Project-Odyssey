@@ -45,7 +45,7 @@ game::WeaponDef weaponOf(game::WeaponClass weaponClass, double range) {
 struct Play {
     game::OdysseyGame odyssey;
     luna::engine::RecordingRenderer renderer;
-    explicit Play(const fs::path& data = ODYSSEUS_DATA_DIR) : odyssey(data, ODYSSEUS_DEMO_LEVEL) { odyssey.start(renderer); }
+    explicit Play(const fs::path& data = ODYSSEUS_DATA_DIR) : odyssey(data, ODYSSEUS_DEMO_LEVEL) { odyssey.setViewScales(1, 1); odyssey.start(renderer); }
     void tick(int count = 1, Intents intents = {}) {
         for (int i = 0; i < count; ++i) odyssey.update(intents);
     }
@@ -138,8 +138,8 @@ TEST_CASE("US-133 Starters fight") {
             // Thrown weapons fly in arcs (US-140): they land where the pointer is, so aim at the goblin's feet.
             play.tick(30); // the camera settles on the hero, who then stands at the middle of the picture
             luna::engine::Pointer pointer;
-            pointer.x = 240 + static_cast<int>(std::lround(goblin.feetX() - play.odyssey.hero().feetX()));
-            pointer.y = 135 + static_cast<int>(std::lround(goblin.feetY() - play.odyssey.hero().feetY()));
+            pointer.x = 480 + static_cast<int>(std::lround(goblin.feetX() - play.odyssey.hero().feetX()));
+            pointer.y = 270 + static_cast<int>(std::lround(goblin.feetY() - play.odyssey.hero().feetY()));
             Intents aim;
             aim.set(Intent::Attack, true, true);
             aim.setPointer(pointer);

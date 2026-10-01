@@ -1,11 +1,28 @@
-# Builds Debug and Release and runs every test on each push (US-002, ADR-014).
+# Builds and tests every push to qa and main (US-002, ADR-014; trimmed by D-46).
 # It uses the same CMake presets as the owner's PC, so "works on my machine" means "works in CI".
+#
+# Who tests what (owner, 2026-10-01, D-46): the local check (tools/verify.ps1) builds and tests
+# Debug, with AddressSanitizer; CI builds and tests Release on qa. A merge into main (a milestone
+# exit) builds and tests both, as the safety net. Story branches and docs-only pushes do not run CI.
 name: CI
 
 on:
   push:
-  pull_request:
+    branches: [qa, main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
+
+# A newer push to the same branch cancels the run still going for the older one.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Built libraries (SDL3, json, doctest...) are kept between runs in this folder and restored
+  # by actions/cache, so vcpkg only rebuilds them when vcpkg.json or its baseline changes.
+  VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}\vcpkg-cache,readwrite
 
 jobs:
   windows-x64:
@@ -21,6 +38,14 @@ jobs:
         run: |
           $baseline = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
           "sha=$baseline" >> $env:GITHUB_OUTPUT
+          New-Item -ItemType Directory -Force vcpkg-cache | Out-Null
+
+      - name: Restore built vcpkg libraries
+        uses: actions/cache@v6
+        with:
+          path: vcpkg-cache
+          key: vcpkg-${{ runner.os }}-${{ steps.baseline.outputs.sha }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ runner.os }}-${{ steps.baseline.outputs.sha }}-
 
       - name: Check out vcpkg at that baseline
         uses: actions/checkout@v7
@@ -39,20 +64,26 @@ jobs:
       - name: Configure
         run: cmake --preset windows-x64-debug
 
-      - name: Build Debug
-        run: cmake --build --preset windows-x64-debug
-
       - name: Build Release
         run: cmake --build --preset windows-x64-release
 
       # The tests that open no window run side by side (the runner has 4 cores); the window tests
-      # run one at a time afterwards because they depend on frame timing.
-      - name: Test Debug
-        run: |
-          ctest --preset windows-x64-debug -LE window -j 4
-          ctest --preset windows-x64-debug -L window
-
+      # run one at a time afterwards because they depend on frame timing. Both exit codes are
+      # checked: PowerShell reports only the last command's, which once hid failing tests.
       - name: Test Release
         run: |
-          ctest --preset windows-x64-release -LE window -j 4
-          ctest --preset windows-x64-release -L window
+          ctest --preset windows-x64-release -LE window -j 4; $headless = $LASTEXITCODE
+          ctest --preset windows-x64-release -L window; $windowed = $LASTEXITCODE
+          if ($headless -ne 0 -or $windowed -ne 0) { exit 1 }
+
+      # Milestone exits only: main also builds and tests Debug (AddressSanitizer).
+      - name: Build Debug (main only)
+        if: github.ref == 'refs/heads/main'
+        run: cmake --build --preset windows-x64-debug
+
+      - name: Test Debug (main only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          ctest --preset windows-x64-debug -LE window -j 4; $headless = $LASTEXITCODE
+          ctest --preset windows-x64-debug -L window; $windowed = $LASTEXITCODE
+          if ($headless -ne 0 -or $windowed -ne 0) { exit 1 }

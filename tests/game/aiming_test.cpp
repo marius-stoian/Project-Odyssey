@@ -19,9 +19,9 @@ using luna::engine::PointerButton;
 
 namespace {
 
-// The camera centres on the hero at the start, so the hero stands at the middle of the 480x270 picture.
-constexpr int kHeroScreenX = 240;
-constexpr int kHeroScreenY = 135;
+// The camera centres on the hero at the start, so the hero stands at the middle of the 960x540 picture.
+constexpr int kHeroScreenX = 480;
+constexpr int kHeroScreenY = 270;
 
 Intents pointingAt(int x, int y, bool attack = false) {
     Intents intents;
@@ -62,7 +62,7 @@ fs::path levelWithGoblinAt(const std::string& name, int offsetX, int offsetY) {
 struct Play {
     game::OdysseyGame odyssey;
     luna::engine::RecordingRenderer renderer;
-    explicit Play(const fs::path& level) : odyssey(ODYSSEUS_DATA_DIR, level) { odyssey.start(renderer); }
+    explicit Play(const fs::path& level) : odyssey(ODYSSEUS_DATA_DIR, level) { odyssey.setViewScales(1, 1); odyssey.start(renderer); }
     void tick(int count = 1, Intents intents = {}) {
         for (int i = 0; i < count; ++i) odyssey.update(intents);
     }
@@ -112,6 +112,19 @@ TEST_CASE("US-139 Face the cursor") {
     CHECK(aimed > play.renderer.draws().size());
 }
 
+TEST_CASE("US-139 Left and right keys turn him") {
+    Play play(levelWithGoblinAt("keys", 200, 0));
+    // The pointer is far to the west, yet pressing right turns him east (and left turns him west).
+    Intents right = pointingAt(kHeroScreenX - 200, kHeroScreenY);
+    right.set(Intent::MoveRight, true, true);
+    play.tick(1, right);
+    CHECK(play.odyssey.hero().facing() == game::Facing::East);
+    Intents left = pointingAt(kHeroScreenX + 200, kHeroScreenY);
+    left.set(Intent::MoveLeft, true, true);
+    play.tick(1, left);
+    CHECK(play.odyssey.hero().facing() == game::Facing::West);
+}
+
 TEST_CASE("US-139 Swing toward the cursor") {
     // A goblin 30 px east and 30 px north of the hero (42 px away, inside the sword's 48 px reach).
     SUBCASE("pointer north-east: hit") {
@@ -155,14 +168,14 @@ TEST_CASE("US-139 Interact goes along the facing even with the pointer elsewhere
     CHECK(play.goblin().hp() == 100 - play.odyssey.catalogs().weapon("iron sword")->damage);
 }
 
-TEST_CASE("US-139 The hero always faces the pointer") {
-    // Even with empty hands: walking does not turn him away from the pointer.
+TEST_CASE("US-139 The hero faces the pointer, except while a left or right key is held") {
+    // Even with empty hands the pointer turns him; a held left or right key wins over it (owner, 2026-10-01).
     Play play(levelWithGoblinAt("empty-hands", 200, 0));
     Intents walkEastPointingWest = pointingAt(kHeroScreenX - 80, kHeroScreenY - 20);
     walkEastPointingWest.set(Intent::MoveRight, true, false);
     play.tick(10, walkEastPointingWest);
     CHECK_FALSE(play.odyssey.aiming()); // nothing is held, so no aim line...
-    CHECK(play.odyssey.hero().facing() == game::Facing::West); // ...but he faces the pointer while walking east
+    CHECK(play.odyssey.hero().facing() == game::Facing::East); // ...and the right key turns him east, whatever the pointer says
     // With the pointer off the picture he faces the way he walks again.
     Intents walkEast;
     walkEast.set(Intent::MoveRight, true, false);
@@ -217,4 +230,63 @@ TEST_CASE("US-139 Facing with hysteresis") {
     CHECK(game::facingToward(1.0, 0.75, game::Facing::East, 10.0) == game::Facing::SouthEast); // 37 degrees: turns
     CHECK(game::facingToward(1.0, 0.45, game::Facing::SouthEast, 10.0) == game::Facing::SouthEast);
     CHECK(game::facingToward(1.0, 0.0, game::Facing::SouthEast, 10.0) == game::Facing::East); // 45 degrees off: turns
+}
+
+TEST_CASE("US-232 The pointer hits the same world spot at any zoom") {
+    // A goblin 30 px east and 30 px north of the hero: the pointer is placed on it at each zoom.
+    for (const int zoom : {1, 2}) {
+        Play play(levelWithGoblinAt("zoom-hit", 30, -30));
+        play.odyssey.setViewScales(zoom, 1);
+        play.hold("iron sword");
+        CHECK(play.odyssey.viewWidth() == 960 / zoom);
+        play.tick(1, pointingAt(kHeroScreenX + 30 * zoom, kHeroScreenY - 30 * zoom, true));
+        CHECK(play.goblin().hp() == 100 - play.odyssey.catalogs().weapon("iron sword")->damage);
+    }
+}
+
+TEST_CASE("US-232 Zoom keys and the wheel") {
+    Play play(levelWithGoblinAt("zoom-keys", 200, 0));
+    play.odyssey.setSaveDirectory(fs::temp_directory_path() / "odysseus-us232-zoom");
+    play.odyssey.setViewScales(2, 1);
+    play.tick(1, pressing(Intent::ZoomOut));
+    CHECK(play.odyssey.cameraZoom() == 1); // 30 x 17 tiles
+    CHECK(play.odyssey.viewWidth() == 960);
+    play.tick(1, pressing(Intent::ZoomIn));
+    CHECK(play.odyssey.cameraZoom() == 2); // back
+    CHECK(play.odyssey.viewWidth() == 480);
+    Intents wheel = pointingAt(kHeroScreenX, kHeroScreenY);
+    Pointer pointer = wheel.pointer();
+    pointer.wheel = -1;
+    wheel.setPointer(pointer);
+    play.tick(1, wheel);
+    CHECK(play.odyssey.cameraZoom() == 1);
+    // The interface scale is separate: the panels and the hotbar resize with it.
+    play.odyssey.setViewScales(1, 2);
+    CHECK(play.odyssey.uiWidth() == 480);
+    CHECK(play.odyssey.viewWidth() == 960);
+}
+
+namespace {
+// A renderer that says the card needed 2.5 ms and remembers whether it was asked to measure (US-234).
+class TimedRenderer final : public luna::engine::RecordingRenderer {
+public:
+    void measureGpu(bool on) override { measuring = on; }
+    double gpuMilliseconds() const override { return measuring ? 2.5 : -1.0; }
+    bool measuring = false;
+};
+} // namespace
+
+TEST_CASE("US-234 The overlay shows CPU and GPU times") {
+    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
+    TimedRenderer renderer;
+    odyssey.start(renderer);
+    odyssey.update(Intents{});
+    odyssey.render(renderer, 1.0);
+    CHECK_FALSE(renderer.measuring);            // the card is not slowed down while nobody looks
+    CHECK(odyssey.gpuMilliseconds() == -1.0);
+    odyssey.update(pressing(Intent::Overlay)); // F3
+    odyssey.render(renderer, 1.0);
+    CHECK(renderer.measuring);                  // F3 turns the GPU measuring on
+    CHECK(odyssey.gpuMilliseconds() == doctest::Approx(2.5));
+    CHECK(odyssey.drawMilliseconds() >= 0.0);   // the CPU time of drawing
 }

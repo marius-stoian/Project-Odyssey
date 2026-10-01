@@ -64,6 +64,7 @@ TEST_CASE("US-029 Throw") {
     // The straw target stands 8 tiles west of the hero's start; one step left faces it.
     OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     luna::engine::RecordingRenderer renderer;
+    odyssey.setViewScales(1, 1);
     odyssey.start(renderer);
     odyssey.update(holding(Intent::MoveLeft));
     REQUIRE(odyssey.hero().facing() == game::Facing::West);

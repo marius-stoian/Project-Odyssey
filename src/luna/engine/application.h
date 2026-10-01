@@ -4,6 +4,7 @@
 
 #include "game.h"
 #include "input.h"
+#include "core/presentation.h"
 
 #include <cstdint>
 #include <filesystem>
@@ -16,8 +17,10 @@ struct AppConfig {
     std::string title = "Luna";
     int windowWidth = 1280;
     int windowHeight = 720;
-    int virtualWidth = 480;
-    int virtualHeight = 270;
+    int virtualWidth = odysseus::core::kVirtualWidth;
+    int virtualHeight = odysseus::core::kVirtualHeight;
+    odysseus::core::WindowMode windowMode = odysseus::core::WindowMode::Windowed;
+    odysseus::core::ScalingMode scaling = odysseus::core::ScalingMode::Whole;
     int ticksPerSecond = 20; // ADR-006
     int clearRed = 0;
     int clearGreen = 0;
@@ -57,6 +60,7 @@ struct RunOptions {
     std::vector<ScriptedHold> holds;    // scripted input, see ScriptedHold
     std::vector<ScriptedPointer> pointer; // scripted mouse, see ScriptedPointer
     std::vector<ScriptedText> typing;     // scripted typing, see ScriptedText
+    std::string renderer = "auto";        // "auto" (the GPU, else SDL_Renderer), "gpu" (fails when it cannot start) or "sdl" (US-230)
 };
 
 // Opens the window and runs the loop until the player closes it. Logs the window size,

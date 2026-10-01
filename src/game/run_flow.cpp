@@ -20,7 +20,8 @@ constexpr int kTalkWrap = 56; // characters of a line of speech in the conversat
 
 enum ScreenIds {
     kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
-    kTabBase = 300, kResolutionBase = 320, kFullscreen = 330, kVolumeDown = 331, kVolumeUp = 332, kFoundFire = 340, kRitual = 341, kTendFire = 342,
+    kTabBase = 300, kResolutionBase = 320, kWindowed = 330, kVolumeDown = 331, kVolumeUp = 332, kBorderless = 333, kExclusive = 334,
+    kScalingWhole = 335, kScalingFill = 336, kZoomOut = 337, kZoomIn = 338, kUiSmall = 339, kUiLarge = 343, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
     kAcceptCounter = 582, kPayDebtBase = 600, kActionBase = 700
 };
@@ -73,7 +74,7 @@ void RunFlow::line(const std::string& text, UiColor colour) {
 }
 
 void RunFlow::paragraph(const std::string& text, UiColor colour, int width) {
-    for (const std::string& part : wrapped(text, width)) line(part, colour);
+    for (const std::string& part : wrapped(text, std::max(width, fitChars()))) line(part, colour); // the panel's whole width
 }
 
 void RunFlow::button(const std::string& label, int id, bool enabled, bool selected, int x, int width) {
@@ -110,6 +111,11 @@ void RunFlow::openMenu() {
 // ---- building the screens
 
 void RunFlow::build(OdysseyGame& game) {
+    // US-233: the panel is laid out from the interface size (960 x 540 divided by the UI scale), centred, never from fixed numbers.
+    screenArea_ = {0, 0, game.uiWidth(), game.uiHeight()};
+    const int width = std::min(screenArea_.width - 40, kMaxPanelWidth);
+    const int height = std::min(screenArea_.height - 40, kMaxPanelHeight);
+    panel_ = {(screenArea_.width - width) / 2, (screenArea_.height - height) / 2, width, height}; // the tallest it may be; shrunk below
     widgets_.clear();
     lines_.clear();
     cursorY_ = panel_.y + 6;
@@ -128,8 +134,13 @@ void RunFlow::build(OdysseyGame& game) {
     case Screen::Privacy: buildPrivacy(); break;
     default: break;
     }
+    // The panel is only as tall as what it shows (and the message under it), so a short screen is not a big empty box.
+    int bottom = cursorY_;
+    for (const Widget& w : widgets_) bottom = std::max(bottom, w.area.y + w.area.height);
+    const std::vector<std::string> parts = message_.empty() ? std::vector<std::string>{} : wrapped(message_, std::max(62, fitChars()));
+    bottom += 6 + static_cast<int>(parts.size()) * luna::engine::kLineHeight;
+    panel_.height = std::clamp(bottom - panel_.y, kMinPanelHeight, height);
     if (!message_.empty() && screen_ != Screen::None) {
-        const std::vector<std::string> parts = wrapped(message_, 62);
         int y = panel_.y + panel_.height - 6 - static_cast<int>(parts.size()) * luna::engine::kLineHeight;
         for (const std::string& part : parts) {
             lines_.push_back({part, UiColor::Gold, panel_.x + 8, y});
@@ -196,7 +207,7 @@ void RunFlow::buildEvent(OdysseyGame& game) {
     paragraph(event->text);
     gap(6);
     for (std::size_t i = 0; i < event->options.size(); ++i) {
-        for (const std::string& part : wrapped(event->options[i].text, 60)) {
+        for (const std::string& part : wrapped(event->options[i].text, std::max(60, fitChars() - 4))) {
             (void)part;
         }
         button(std::format("{}. {}", i + 1, event->options[i].text), kOptionBase + static_cast<int>(i), true, false, panel_.x + 8, panel_.width - 16);
@@ -289,12 +300,29 @@ void RunFlow::buildMenu(OdysseyGame& game) {
     case MenuTab::Settings: {
         const GameSettings& s = game.settings();
         title("Settings");
-        button(std::format("Full screen: {}", s.fullscreen ? "on" : "off"), kFullscreen, true, false, panel_.x + 8, 130);
+        button("Windowed", kWindowed, true, s.resolution.mode == core::WindowMode::Windowed, panel_.x + 8, 78);
+        button("Borderless", kBorderless, true, s.resolution.mode == core::WindowMode::Borderless);
+        button("Exclusive", kExclusive, true, s.resolution.mode == core::WindowMode::Exclusive);
         newRow();
         cursorY_ += kRowHeight + 4;
         line("Window size:", UiColor::Dim);
-        const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}};
-        for (int i = 0; i < 3; ++i) button(std::format("{}x{}", sizes[i][0], sizes[i][1]), kResolutionBase + i, true, s.width == sizes[i][0]);
+        const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}, {2560, 1440}};
+        for (int i = 0; i < 4; ++i) button(std::format("{}x{}", sizes[i][0], sizes[i][1]), kResolutionBase + i, true, s.resolution.width == sizes[i][0]);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("Scaling:", UiColor::Dim);
+        button("Whole", kScalingWhole, true, s.resolution.scaling == core::ScalingMode::Whole, panel_.x + 8, 62);
+        button("Fill", kScalingFill, true, s.resolution.scaling == core::ScalingMode::Fill);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("Camera zoom (also + - and the mouse wheel):", UiColor::Dim);
+        button("1x", kZoomOut, true, s.cameraZoom == 1, panel_.x + 8, 40);
+        button("2x", kZoomIn, true, s.cameraZoom == 2, panel_.x + 52, 40);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("UI scale:", UiColor::Dim);
+        button("1x", kUiSmall, true, s.uiScale == 1, panel_.x + 8, 40);
+        button("2x", kUiLarge, true, s.uiScale == 2, panel_.x + 52, 40);
         newRow();
         cursorY_ += kRowHeight + 4;
         line(std::format("Volume: {}", s.volume), UiColor::Text);
@@ -630,12 +658,24 @@ void RunFlow::act(OdysseyGame& game, int id) {
             const double fy = hero->fire().tileY * kTileSize + 16;
             message_ = hero->holdRitual(game.attendeesAt(fx, fy, data->config.fire.ritualRadiusTiles)).message;
         } else if (id == kTendFire && hero != nullptr) message_ = hero->tendFire().message;
-        else if (id == kFullscreen) { GameSettings s = game.settings(); s.fullscreen = !s.fullscreen; game.applySettings(s); }
-        else if (id >= kResolutionBase && id < kResolutionBase + 3) {
-            const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}};
+        else if (id == kWindowed || id == kBorderless || id == kExclusive) {
             GameSettings s = game.settings();
-            s.width = sizes[id - kResolutionBase][0];
-            s.height = sizes[id - kResolutionBase][1];
+            s.resolution.mode = id == kWindowed ? core::WindowMode::Windowed : id == kBorderless ? core::WindowMode::Borderless : core::WindowMode::Exclusive;
+            game.applySettings(s);
+        } else if (id == kScalingWhole || id == kScalingFill) {
+            GameSettings s = game.settings();
+            s.resolution.scaling = id == kScalingWhole ? core::ScalingMode::Whole : core::ScalingMode::Fill;
+            game.applySettings(s);
+        } else if (id >= kResolutionBase && id < kResolutionBase + 4) {
+            const int sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}, {2560, 1440}};
+            GameSettings s = game.settings();
+            s.resolution.width = sizes[id - kResolutionBase][0];
+            s.resolution.height = sizes[id - kResolutionBase][1];
+            game.applySettings(s);
+        } else if (id == kZoomOut || id == kZoomIn || id == kUiSmall || id == kUiLarge) {
+            GameSettings s = game.settings();
+            if (id == kZoomOut || id == kZoomIn) s.cameraZoom = id == kZoomIn ? 2 : 1;
+            else s.uiScale = id == kUiLarge ? 2 : 1;
             game.applySettings(s);
         } else if (id == kVolumeDown || id == kVolumeUp) {
             GameSettings s = game.settings();
@@ -715,7 +755,7 @@ void RunFlow::act(OdysseyGame& game, int id) {
 void RunFlow::draw(luna::engine::Renderer& renderer, const luna::engine::Texture& uiSheet) const {
     if (screen_ == Screen::None) return;
     UiPainter painter(renderer, uiSheet);
-    painter.fill({0, 0, 480, 270}, UiColor::Shade);
+    painter.fill(screenArea_, UiColor::Shade);
     painter.fill(panel_, UiColor::Dark);
     painter.outline(panel_, UiColor::Gold);
     for (const Line& l : lines_) painter.text(l.x, l.y, l.text, l.colour);

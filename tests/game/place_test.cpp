@@ -124,7 +124,7 @@ TEST_CASE("US-125 Edit") {
     CHECK(editor.level().characters.front().facing == game::Facing::SouthWest);
     // Properties: the HP field in the panel, typed into.
     odyssey.update(mouse(-1, -1, false, false, false)); // the panel now shows the goblin
-    const auto hpField = std::pair{480 - 136 - 2 + 80, 22 + 32 + 5};
+    const auto hpField = std::pair{960 - 136 - 2 + 80, 22 + 32 + 5};
     odyssey.update(mouse(hpField.first, hpField.second, true, true, false));
     odyssey.update(mouse(hpField.first, hpField.second, false, false, true, "250"));
     Intents confirm = pressing(Intent::Confirm);

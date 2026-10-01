@@ -1165,3 +1165,95 @@ The exchange itself is a little timetable: a list of lines, a counter of ticks l
 **Try it (15 minutes).** The manual checks in [docs/plans/US-165.md](plans/US-165.md); then write a `.dlg` file with `@pair elder person` and `@bark sharing`, so the elder has their own words when they share food.
 
 **Check yourself.** Why does `Exchanges::update` check `seenEntries_ > entries.size()` before reading the chronicle, and when can the chronicle be shorter than the last time it was looked at?
+
+
+## M8b: how a picture gets from the game to the screen (US-230)
+
+When the game "draws a sprite", it does not touch the screen. It says *draw this part of that picture there*, and a **renderer** turns that into work for the graphics card. Our first renderer (SDL_Renderer) did that with a fixed set of tricks: draw a picture, maybe see-through, maybe adding light. The new one (SDL_GPU) works the way modern games do, with a **pipeline**: the card is told *how* to draw using two small programs called **shaders**. A *vertex shader* places each corner of a rectangle on the screen; a *fragment shader* decides the colour of each pixel inside it. We write them in a language called HLSL, and the Windows SDK's compiler turns them into the card's own language when the game is built.
+
+Two ideas make this fast. **Batching:** instead of asking the card to draw each sprite with its own call (slow), the game writes every rectangle into one list, in the order they were drawn, and the card draws many at once; a new call is only needed when the picture or the blend mode changes. **A virtual screen:** everything is first drawn onto a small picture (480 by 270 pixels), and only at the end is that picture enlarged into the window by a whole number. That is why the pixels stay square and crisp, and why the two renderers, drawing on the same small picture, give the same result to the last pixel. (A test proves it: it draws the same scene with both and counts the differing pixels. The count is zero.)
+
+One detail is worth remembering: a sprite drawn at three quarters of its size has pixels that fall *exactly* between two source pixels, and the two renderers rounded the last bit of a floating-point number differently, so 352 pixels differed. Moving both by a five-hundredth of a pixel made them agree. Floating-point numbers are not exact, and sometimes you have to decide for them.
+
+**Where to look.** `GpuBackend::drawTexture`, `recordScene` and `recordBlit` in [src/luna/platform/gpu_backend.cpp](../src/luna/platform/gpu_backend.cpp); the four shaders in [src/luna/platform/shaders/](../src/luna/platform/shaders/); how CMake compiles them in [CMakeLists.txt](../CMakeLists.txt) (search for `LUNA_DXC`).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-230.md](plans/US-230.md); then in `sprite.frag.hlsl` change `texel.rgb * color.rgb` to `texel.rgb * color.rgb * 0.5`, rebuild, run with `--renderer gpu` and with `--renderer sdl`, and see the picture darken only on the GPU (then undo it).
+
+**Check yourself.** Why does the GPU renderer collect all the rectangles of a frame into one list and send them together at the end, instead of drawing each one the moment the game asks for it?
+
+
+## M8b: where the virtual picture lands (US-231)
+
+The game draws one 960 by 540 picture. A **viewport** is the rectangle where that picture appears in the actual window. It is calculated from the window's drawable pixel size, which may differ from the window's size in desktop coordinates on a high DPI display. Both renderers use the same rectangle, so the choice of renderer cannot move the picture or change the size of the black bars.
+
+With **Whole** scaling, the scale is the largest whole number that fits both dimensions. On a 2560 by 1440 screen, 2 copies of each virtual pixel fit: the picture is 1920 by 1080, centred at (320, 180). Each virtual pixel becomes a clean 2 by 2 block. With **Fill**, the aspect ratio is kept but the scale may be fractional. The same screen gets a 2560 by 1440 picture. A mouse click must use the very same viewport: subtract its top-left corner, then multiply by the ratio of virtual size to viewport size. A click in the black bars is outside the game.
+
+The settings file records the chosen window mode, last windowed size and scaling method. Loading the older file translates its full-screen flag into a mode and fills the new fields with their defaults, so an update does not discard the player's volume and statistics choices.
+
+**Where to look.** `presentationArea` in [src/core/presentation.cpp](../src/core/presentation.cpp); the two renderer backends in `src/luna/platform/`; the pointer mapping in [src/luna/engine/input.cpp](../src/luna/engine/input.cpp); the saved preferences in [src/game/settings.cpp](../src/game/settings.cpp).
+
+**Try it (15 minutes).** Use the Settings screen to switch between Whole and Fill in a 2560 by 1440 window. Compare the bars and click near the picture edge; then restart and confirm that the choice persists.
+
+**Check yourself.** Why would subtracting the black bar but still dividing mouse coordinates by an integer give the wrong answer in Fill mode?
+
+## US-232 Camera zoom and UI scale: two coordinate systems
+
+**What we built.** You can zoom the world (1x or 2x) and size the interface (1x or 2x) independently. The game still thinks in small pixels; a `ScaledRenderer` multiplies every drawing by a whole number on its way to the screen.
+
+**The C++ idea: wrapping an interface (the decorator).** `ScaledRenderer` *is a* `Renderer` and *holds* another `Renderer`. The game code does not know the difference:
+
+```cpp
+luna::engine::ScaledRenderer world(output, settings_.cameraZoom); // draws 2x larger
+luna::engine::Renderer& renderer = world;                          // the old code keeps calling renderer.draw(...)
+```
+
+Each `draw` call is turned into a `drawStyled` call with a destination `scale` times bigger, and passed on. Because the number is whole, every pixel becomes a clean block and the 5x7 font stays crisp.
+
+**Two coordinate systems.** World pixels move with the camera; screen pixels do not. The mouse arrives in screen pixels, so it is divided by the zoom before the game asks "which world spot is this?": `world = view.x + pointer.x / zoom` (`scaledPointer` in `src/luna/engine/scaled_renderer.cpp`).
+
+**Where to look.** `src/luna/engine/scaled_renderer.*`, `OdysseyGame::render` and the top of `OdysseyGame::update` in `src/game/odyssey_game.cpp`, `Camera::setViewSize`.
+
+**Try it (15 minutes).** Press `-` and `+` in the game and scroll the wheel; then open Settings and set UI scale 2x. Add a `std::printf` of `view.x + pointer.x` in `updateAim` and check that it is the same number at both zooms when you point at the same tree.
+
+**Check yourself.** Why must the UI pointer be divided by the UI scale but the world pointer by the camera zoom, instead of one pointer for both?
+
+## US-233 Every screen at the new size: layout from data, not fixed numbers
+
+**What we built.** The New Game, menu, Settings, crafting and dialogue panels now size and place themselves from the interface size instead of a fixed 420 x 250 box.
+
+**The C++ idea: compute, don't hard-code.** Before, the panel was a constant: `Rect panel_{30, 10, 420, 250};`. Now it is calculated each time the screen is built:
+
+```cpp
+const int width = std::min(screenArea_.width - 40, kMaxPanelWidth);
+panel_ = {(screenArea_.width - width) / 2, top, width, height};
+```
+
+`std::min` keeps it from getting too wide, and the height is measured from what was added (`bottom = max(widget bottoms, cursorY_)`). Change the window or UI scale and the same code gives a new, correct answer.
+
+**Where to look.** `RunFlow::build` in `src/game/run_flow.cpp`; the test in `tests/game/menu_test.cpp` ("US-233 Screens fit...").
+
+**Try it (15 minutes).** Change `kMaxPanelWidth` in `run_flow.h` to 400, rebuild, and open the menu: lines wrap earlier. Then set it back.
+
+**Check yourself.** Why is it safer to measure the panel's content than to give every screen its own fixed height?
+
+## US-234 Frame budget: measuring CPU and GPU time
+
+**What we built.** F3 now shows how long the CPU spends on the simulation tick and on drawing, and how long the graphics card needs for the frame. A 10-minute run with 500 people logged the numbers.
+
+**The C++ idea: a timer that stops itself (RAII).** We want the draw time of every frame, even when `render` leaves early. A small struct starts a clock in its constructor and reports in its destructor, which C++ runs automatically when the function ends:
+
+```cpp
+struct DrawTimer {
+    OdysseyGame& game;
+    std::chrono::steady_clock::time_point started = std::chrono::steady_clock::now();
+    ~DrawTimer() { game.recordFrame(/* now - started */ ...); }
+} drawTimer{*this};
+```
+
+No matter which `return` is taken, the time is recorded. The GPU is harder: the card works while the CPU moves on, so we wait for a *fence* (a flag the card sets when it is done) and time that wait.
+
+**Where to look.** `OdysseyGame::render` and `recordFrame` in `src/game/odyssey_game.cpp`; `present()` in `src/luna/platform/gpu_backend.cpp`.
+
+**Try it (15 minutes).** Run the game with `--perf --people 500`, watch the F3 overlay, then try `--people 20`: which number changes, CPU or GPU?
+
+**Check yourself.** Why did our first GPU numbers read about 16 ms for a frame that really takes 0.2 ms?

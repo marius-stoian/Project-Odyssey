@@ -51,6 +51,10 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::F12: return KeyBinding{Intent::DevTools, kKeyboardA};
     case Key::F3: return KeyBinding{Intent::Overlay, kKeyboardA};
     case Key::F5: return KeyBinding{Intent::Reload, kKeyboardA};
+    case Key::Equals: return KeyBinding{Intent::ZoomIn, kKeyboardA};
+    case Key::KpPlus: return KeyBinding{Intent::ZoomIn, kKeyboardB};
+    case Key::Minus: return KeyBinding{Intent::ZoomOut, kKeyboardA};
+    case Key::KpMinus: return KeyBinding{Intent::ZoomOut, kKeyboardB};
     case Key::Delete: return KeyBinding{Intent::Delete, kKeyboardA};
     case Key::Backspace: return KeyBinding{Intent::Erase, kKeyboardA};
     case Key::G: return KeyBinding{Intent::ToggleGrid, kKeyboardA};
@@ -198,14 +202,22 @@ void InputMap::setScripted(Intent intent, bool held) {
 void InputMap::setPointerArea(const odysseus::core::Rect& area, int scale) {
     area_ = area;
     scale_ = std::max(1, scale);
+    virtualWidth_ = area.width / scale_;
+    virtualHeight_ = area.height / scale_;
+}
+
+void InputMap::setPointerArea(const odysseus::core::Rect& area, int virtualWidth, int virtualHeight) {
+    area_ = area;
+    virtualWidth_ = virtualWidth;
+    virtualHeight_ = virtualHeight;
 }
 
 void InputMap::movePointer(float windowX, float windowY) {
     const int x = static_cast<int>(windowX);
     const int y = static_cast<int>(windowY);
     const bool inside = x >= area_.x && y >= area_.y && x < area_.x + area_.width && y < area_.y + area_.height;
-    pointer_.x = inside ? (x - area_.x) / scale_ : -1;
-    pointer_.y = inside ? (y - area_.y) / scale_ : -1;
+    pointer_.x = inside && area_.width > 0 ? static_cast<int>(static_cast<long long>(x - area_.x) * virtualWidth_ / area_.width) : -1;
+    pointer_.y = inside && area_.height > 0 ? static_cast<int>(static_cast<long long>(y - area_.y) * virtualHeight_ / area_.height) : -1;
 }
 
 void InputMap::setButton(std::size_t button, bool down) {

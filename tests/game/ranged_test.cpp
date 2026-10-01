@@ -47,7 +47,7 @@ fs::path levelWithGoblins(const std::string& name, const std::vector<std::pair<i
 struct Play {
     game::OdysseyGame odyssey;
     luna::engine::RecordingRenderer renderer;
-    explicit Play(const fs::path& level) : odyssey(ODYSSEUS_DATA_DIR, level) { odyssey.start(renderer); }
+    explicit Play(const fs::path& level) : odyssey(ODYSSEUS_DATA_DIR, level) { odyssey.setViewScales(1, 1); odyssey.start(renderer); }
     void tick(int count = 1, Intents intents = {}) {
         for (int i = 0; i < count; ++i) odyssey.update(intents);
     }

@@ -187,13 +187,14 @@ TEST_CASE("US-140 In the game") {
 
     game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, folder / "level.json");
     luna::engine::RecordingRenderer renderer;
+    odyssey.setViewScales(1, 1);
     odyssey.start(renderer);
     REQUIRE(odyssey.pickUp("wooden longbow"));
     odyssey.selectSlot(0);
     luna::engine::Intents aim;
     luna::engine::Pointer pointer;
-    pointer.x = 240; // the hero is at the middle of the picture; the goblin 4 m to the south
-    pointer.y = 135 + 4 * 32;
+    pointer.x = 480; // the hero is at the middle of the picture; the goblin 4 m to the south
+    pointer.y = 270 + 4 * 32;
     aim.set(luna::engine::Intent::Attack, true, true);
     aim.setPointer(pointer);
     odyssey.update(aim);

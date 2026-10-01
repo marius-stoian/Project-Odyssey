@@ -1,45 +1,64 @@
-# Handover: M2d assembly (2026-09-30)
+# Handover: continue assembling Project Odyssey (2026-10-01)
 
-Progress saved at the owner's request. Resume by finishing the US-134 integration check before starting another story.
+## Resume update, 2026-10-01
 
-## State
-- Repository: `C:\Users\Amek\.amek-ai\Odysseus\odysseus`.
-- Current branch: `qa`, synchronized with `origin/qa` at `810a41ad81c1285e4e0be33d516c11eafa85eb1b` when this handover was written.
-- Assembly plan and requirements: v1.8; M2d Content and combat. K-M2d and US-130..US-133 complete. US-134 is implemented, locally verified, merged and pushed; hosted CI is still running.
-- US-134 story commit: `8c595ec`; merge: `fa30d35`; latest pushed handover-status commit: `810a41a`.
-- The owner explicitly authorized `push qa`, and it succeeded. The earlier push-approval blocker is resolved for that push. The separate `story/US-134` branch was not pushed; its implementation is included in remote `qa`.
-- CI for the pushed head: https://github.com/marius-stoian/Project-Odyssey/actions/runs/36766225054 — `in_progress` at the last check. Do not assume success.
+The owner confirmed D-44 takes precedence. The local requirements document is now v2.6: ENV-18, US-231 and US-232 specify the four windowed sizes, Whole/Fill scaling, first-start defaults and control locations. The local MVP backlog mirrors those changes. Anima revised `docs/Codex.md` to v2.4 and marked CI-010 resolved; S-US-231 and S-US-232 acceptance scenarios match requirements v2.6. `CLAUDE.md` identifies the current versions.
 
-## US-134: Pickups and the hotbar
-- Level format version 2 adds weapon pickups; version 1 files still load.
-- Editor Weapon palette offers 16 starters and the two built-in demo weapons. Place, move, delete, undo and redo work for pickups.
-- The hero starts empty-handed. Walking within 16 pixels collects a pickup into the first free of nine slots, with a spark and log entry. A full hotbar leaves it lying and displays "Hotbar full".
-- Keys 1-9 select slots; Shift cycles filled slots. Restarting the level restores pickups and clears the hotbar.
-- `assets/levels/demo.json` places "Spear throw" and "Sword" by the hero to preserve earlier demos.
-- Owner choices are recorded as D-23 in `docs/decisions.md`. D-22 remains in force: ask the owner about design decisions; never delegate them.
+**Remaining block:** the authoritative Drive copy of `Project Odyssey.docx` is still v2.5. Automatic approval review rejected replacing that Drive file with the reviewed v2.6 local document because the owner had not explicitly authorized that Drive file and destination. No workaround or second upload was attempted. The backlog Drive copy is likewise unchanged. The workspace sync may overwrite these local mirrors, so do not run it until the Drive copies are updated or the owner changes the source rule. The document renderer was unavailable (LibreOffice absent; Word automation could not start), so the DOCX passed structural and content checks but not visual page review. S-US-231 remains Blocked in `docs/status.md` until the source is synced or the owner directs assembly to use the local v2.6 copy. No game implementation or verification was attempted and no story was completed.
 
-## Verification and evidence
-- Final local verification: `tools/verify.ps1 -Story US-134` passed. Debug and Release both built with zero warnings and passed all 25 checks, including simulation determinism and earlier end-to-end tests.
-- Fixed the earlier editor test's hard-coded character ID by reading the demo's next available ID and checking the saved goblin identity.
-- Restored the approved pickup spark; combat and held-icon tests wait for pickup sparks to finish before counting their own drawings/effects, preserving their assertions.
-- One Release paint test missed a scripted click in an earlier run; the complete final rerun passed. If it recurs in CI, investigate it rather than weakening the assertion.
-- Evidence: `docs/evidence/US-134/windows-debug.txt`, `windows-release.txt`, `hotbar.png`, `editor-weapons.png`. Both screenshots were visually reviewed.
-- Plan: `docs/plans/US-134.md`. Editor guide and learning journal are updated. Progress snapshot: `Milestone-46.md`, AP-047.
+This work is on local `story/US-231` branched from `qa`; earlier handover commits `94e3818` and `110783e` remain local because a remote push was rejected by automatic approval review. Keep the owner's local changes in `assets/levels/valley.json` and `docs/project/requirements/Project Odyssey - MVP Backlog - Copy.xlsx` untouched. Resume S-US-231 only after resolving the source copy, then follow the build loop below. Do not start S-US-232 first.
 
-## To finish US-134 (next session, first)
-1. Check the CI run above against head `810a41ad81c1285e4e0be33d516c11eafa85eb1b`. Fix any failures and repeat the relevant verification.
-2. Once CI is green, mark S-US-134 Done in `docs/status.md` and update `CHANGELOG.md`, `Milestone-46.md`, `Limit.md` and the plan's integration note.
-3. Those files currently contain pre-push wording such as "awaiting authorization" or "integration pending". This handover supersedes that wording: `qa` has already been pushed, but CI has not yet been confirmed.
-4. Preserve this handover and completion documentation in the normal assembly commit workflow. This file was created after the latest push and is not included in `810a41a`.
+Written by Mraw (Dominus Avengers) at the owner's request. You are taking over the build. Read this file, then `CLAUDE.md` (the Charter; `AGENTS.md` points to it), `docs/Codex.md` (v2.3, the prompts), `docs/status.md` and `Limit.md`, then continue with the first prompt in Codex order that is `To do`.
 
-## Then
-- Next story: S-US-135 Elements, followed in order by S-US-136..S-US-138 and X-M2d. Read the current assembly prompt before implementing; do not build directly from requirements.
-- M3 only when the owner says so.
-- Use the owner's current Amek Protocol naming: Dominus, Avengers and Anima. Anima owns assembly-prompt amendments. Ask the owner if a design or scope decision is needed.
+## 1. What this is
+Project Odyssey (codename Odysseus): a C++20 / SDL3 pixel-art civilization simulation for Windows x64, built by the owner (a C++ beginner; every story ends with a teach-back in `docs/learning-journal.md`). Repository: `C:\Users\Amek\.amek-ai\Odysseus\odysseus`, remote https://github.com/marius-stoian/Project-Odyssey.git. The owner works in three phases: Brief (Mraw to Anima), Codex (Anima writes `docs/Codex.md`), Assemble (Mraw builds prompt by prompt, in order). Do not build from the requirements directly; if a Codex prompt is wrong or blocked, append a `CI-###` line to `docs/codex-issues.md` and work elsewhere (the owner takes it to Anima).
 
-## Notes
-- The owner's uncommitted `assets/levels/valley.json` edits remain untouched and uncommitted. Never overwrite, restore or include them in an assembly commit.
-- Valley SHA-256 at resume: `BA6E9E0C1A1B3FAB018C80CD2B3297014FBE9AC0811730CBFAECB6B6CEDE298E`.
-- The valley has no pickups until the owner places them with F2 → Weapon; F1 returns to play.
-- The verification script requires access to the installed dependency cache under `C:\dev\vcpkg`; the restricted execution environment initially denied its lock file. Verification succeeded with approved access.
-- Honor the owner's prohibition on vendor/model attribution in project content and commits; credit the team roles.
+## 2. Hard rules (permanent)
+- Never write the names of AI vendors or models, "Co-Authored-By" or "Generated with" lines into code, comments, docs, commits, PRs or branch names. Credit "Mraw", "Dominus", "Anima" or "the AI team".
+- Design and scope decisions are the owner's: ask in chat, in rounds of 2 to 4 options with the recommended one first, then record "Decided (owner, <date>)" in `docs/decisions.md`. M8 to M9 and M8b to M8e keep D-35 (the owner answers the design questions at each kickoff `K-xxx`). M10 to M14 design is delegated to Dominus (D-41): record each choice in `docs/decision-requests/<ID>.md` as "Decided by Dominus (delegated)".
+- Technical choices (how to build what the owner decided) are yours: record them in an ADR (`docs/adr/`) or the story plan.
+- Human gates: kill-gate results that need people (X-M2, X-M6), accounts, credentials, money, destructive actions outside the repo. Never create accounts or type credentials.
+- Never touch the owner's uncommitted work: `assets/levels/valley.json` (leave it alone) and the Drive mirror `docs/project/requirements/Project Odyssey - MVP Backlog - Copy.xlsx` (Excel keeps it open; `git status` shows it as ` D`). Never `git add docs` or `git add -A`: add explicit paths.
+- Architecture rules (Charter): six layers (Game > Engine > Platform > Core; Engine > Physics > Core; Game > Simulation > Physics > Core). Only `src/luna/platform/` touches SDL (and SDL_GPU, rule 11). The simulation is deterministic (seeded PCG32, one stream per system, one draw per call, no wall clock, no unordered iteration, integers for money and resources). Every project header starts with `#pragma once` then `#include "boundary.h"` (ADR-016). `src/game/*` and `apps/odysseus/main.cpp` must not contain the string "SDL" (the US-021 check fails otherwise, even in a comment).
+- Code style: RAII, no raw new/delete, PascalCase types, camelCase functions, `kPascalCase` constants, comments explain WHY in plain English.
+
+## 3. The build loop for every story (L-01, Charter)
+1. `git checkout qa && git pull`, then `git checkout -b story/US-xxx`.
+2. Read the Codex prompt; write `docs/plans/US-xxx.md`; implement; write tests where testable headless (except M10 to M14, D-41: tests are written and compile, but run at the exit review).
+3. `pwsh tools/verify.ps1 -Story US-xxx` (since D-46 it builds and tests **Debug** by default with AddressSanitizer; `-Config Both` reproduces a Release problem; it saves evidence to `docs/evidence/US-xxx/`). Zero warnings and every ctest group green (27 groups at this point). Do not build under `%TEMP%` (warning MSB8029).
+4. Update: a new `Milestone-<n>.md` at the root with the next AP-### id (the newest is `Milestone-76.md`, AP-077), a `CHANGELOG.md` entry (newest on top), the row in `docs/status.md`, a teach-back in `docs/learning-journal.md`, and `Limit.md`.
+5. Commit "US-xxx: <imperative summary>" (explicit paths only), `git checkout qa`, `git merge --no-ff story/US-xxx -m "Merge story/US-xxx: <title>"`, `git push origin qa`. Green CI on `qa` (Release) makes the story Done. CI runs only on pushes to `qa` and `main`, skips docs-only pushes and cancels superseded runs (D-46); do not push story branches.
+6. Milestone exits (`X-Mx`): review, merge `qa` into `main`, push, CI green on `main` (Debug and Release), tag `mx-done` and push the tag.
+7. End every session with the assembly report (format in `CLAUDE.md`).
+
+Tooling tips (Windows): CMake presets `windows-x64-debug` and `windows-x64-release`; vcpkg at `C:\dev\vcpkg`; Visual Studio 2026 (MSVC 19.51); `gh` is logged in as marius-stoian. On merge conflicts in `CHANGELOG.md` keep both sides (newest entry on top, no duplicates). Write files with an editor tool rather than shell heredocs with apostrophes. Keep simulation checks small (at most 10 seeds) and tool output short.
+
+## 4. Where the work stands
+- Codex v2.3, requirements v2.5 (Drive; mirrored in `docs/project/requirements/`). M0 to M8 are done and tagged (`m8-done` at d058dfc). M8b "Resolution and GPU renderer" is in progress: K-M8b Done, **S-US-230 Done locally** (merged into `qa` at 4d97913 and pushed).
+- **CI result:** green on qa at 9f51a9c (run 36892611637, Release build and tests) with US-230 merged, so S-US-230 is Done. The first CI run of the merge (4d97913) failed on one check only: US-160 Guide ... found CRLF in the guide on the Windows runner; fixed upstream by 9f51a9c (guides keep LF via .gitattributes). The runner built the GPU backend or skipped it as ADR-021 allows; check the log line enderer if you care. Next, start S-US-231.
+- Local verification of US-230: Debug and Release, zero warnings, 27/27 tests (log in `docs/evidence/US-230/`).
+
+### What US-230 built (read `docs/plans/US-230.md` and `docs/adr/ADR-021-sdl-gpu-renderer.md`)
+- `src/luna/platform/backend.h`: `RenderBackend` interface; `sdl_renderer_backend.cpp` (the old SDL_Renderer drawing, now into a virtual-screen texture, then enlarged); `gpu_backend.cpp` (SDL_GPU, Direct3D 12, HLSL shaders compiled at build time by the Windows SDK `dxc.exe` into DXIL headers, batching, Normal and Add blend pipelines, whole-step blit with black bars, screenshots through a download buffer). Shaders: `src/luna/platform/shaders/*.hlsl`.
+- `Window` owns the OS window, events and gamepads and asks a backend to draw. `--renderer auto|gpu|sdl` (default auto: GPU, fall back to SDL_Renderer with the reason logged). `-DLUNA_GPU=OFF` builds without the GPU backend.
+- The `Renderer` interface and everything in `src/game/` are unchanged. GPU and SDL_Renderer pictures are identical to the pixel (tests compare 921,600 pixels, 0 different; `kTexelNudge = 1/512` in both backends).
+
+## 5. Next stories, in order
+1. **S-US-231** (M8b): 960x540 virtual screen and window modes. Uses the owner's answers D-44: window sizes 1280x720, 1600x900, 1920x1080, 2560x1440 (2560x1440 recommended); whole-number scaling with black bars by default; zoom and UI scale in Settings plus mouse wheel and keys for zoom; first start windowed 1280x720, zoom 2x, UI scale 1x, lighting Medium. Both backends read the virtual size from `WindowSettings`. Design: `docs/plans/M8b-renderer-design.md`.
+2. S-US-232, S-US-233, S-US-234, then **X-M8b** (exit review, merge `qa` to `main`, tag `m8b-done`).
+3. K-M8c (Lighting and shadows: ask the owner its design questions first), then M8c stories and X-M8c; M8d Buildings; M8e Building life; K-M9 (this one also checks that M8e is done). Brief: `docs/plans/M8b-M8d-render-light-build-brief.md`. Decided so far: D-06, D-42, D-43, D-44, D-46.
+4. M10 to M14 follow D-41; X-M6 waits for X-M14.
+
+## 6. Open items
+- `docs/codex-issues.md` CI-009 (K-M8b step 1 says to confirm M8e is done; it should say M8 is done): open, for Anima.
+- The owner reads `docs/gates/M8-smalltalk.md` (50 NPC small-talk samples) and judges the greeting rule `kGreetingBubblesAtOnce = 2` whenever convenient; do not change either without the owner.
+- Dialogue format (`.dlg`) and the conversation system are documented in `docs/guides/dialogue-format.md`; M8 gate review in `docs/gates/M8.md`.
+
+## 7. Useful commands
+```text
+pwsh tools/verify.ps1 -Story US-231        # local build + tests (Debug), evidence saved
+pwsh tools/verify.ps1 -Story US-231 -Config Both
+build\...\odysseus.exe --renderer sdl      # force the old renderer
+build\...\odysseus.exe --screenshot a.bmp --quit-after 3   # screenshot (BMP)
+```
+Seeded run for screenshots: a packaged copy of the game (odysseus.exe, SDL3.dll, the sanitizer DLL, `assets/` in one folder) with `--new-game --type 7:1.2 --click 128:101:0.5 --click 264:56:1.0 --click 68:119:1.5 --click 67:147:3.0`; settings go to `--save-dir`.
