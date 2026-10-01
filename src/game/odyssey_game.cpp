@@ -74,6 +74,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
     dataDirectory_ = dataDirectory;
+    loadInteractions();
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
     {
@@ -597,6 +598,15 @@ std::vector<int> OdysseyGame::attendeesAt(double x, double y, int radiusTiles) c
         if (figure.present && std::hypot(figure.x - x, figure.y - y) <= radiusTiles * kTileSize) near.push_back(static_cast<int>(i));
     }
     return near;
+}
+
+void OdysseyGame::loadInteractions() {
+    interactionReport_ = {};
+    // No known tags yet: the catalogs get tags in US-151, which turns on the unknown-tag warning.
+    interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_);
+    for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
+    for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
+    core::logInfo(std::format("Interactions: {} loaded from {} file(s), {} error(s)", interactionReport_.loaded, interactionReport_.filesRead, interactionReport_.errors.size()));
 }
 
 void OdysseyGame::applySettings(const GameSettings& settings) {

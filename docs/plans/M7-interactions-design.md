@@ -14,10 +14,10 @@ Goal of M7: every action in today's game comes from data; the player, clan membe
 ## 2. Where things live (layers)
 | Part | Layer | Why |
 |---|---|---|
-| Lexer, parser, expression trees, evaluator | `src/sim/rules/` | Pure logic, headless, shared by interactions and dialogue (ADR-019). No Engine, Platform or SDL. |
-| Interaction registry, JSON loader, validator | `src/sim/rules/` | Same. Reads files with nlohmann/json (comments allowed). |
-| Thing states, running actions, flags (the saved state) | `src/sim/rules/` (`ThingStore`, `ActionRunner`) | Saved with the world; the determinism hash covers it. |
-| NPC and animal scoring loop | `src/sim/rules/` (`Chooser`) | Uses the simulation's seeded streams. |
+| Lexer, parser, expression trees, evaluator | `src/sim/rule_*.{h,cpp}` (flat: the layer check wants every header to include its own `boundary.h`; US-150) | Pure logic, headless, shared by interactions and dialogue (ADR-019). No Engine, Platform or SDL. |
+| Interaction registry, JSON loader, validator | `src/sim/interaction.{h,cpp}` | Same. Reads files with nlohmann/json (comments allowed). |
+| Thing states, running actions, flags (the saved state) | `src/sim/` (`ThingStore`, `ActionRunner`, new files in US-153) | Saved with the world; the determinism hash covers it. |
+| NPC and animal scoring loop | `src/sim/` (`Chooser`, US-154) | Uses the simulation's seeded streams. |
 | What things exist, where they stand, what they look like | `src/game/` (plants, animals, objects, clan figures) | They are Game objects today (`WorldPlant`, animals, `Figure`). They are shown to the rules through a small interface, `WorldView`. |
 | Context menu, progress ring, validation panel, F5 | `src/game/` | Presentation. |
 
@@ -46,7 +46,7 @@ Precedence from loosest to tightest: `or`, `and`, `not`, comparison, `+ -`, `* /
 `has(item, n)`, `need(name)`, `skill(profession)`, `trait(name)`, `opinion(a, b)`, `kin(a, b)`, `flag(name)`, `tag(thing, name)`, `time`, `season`, `distance`, as in the brief. Added when a story needs them, documented in the guide in the same commit: `count(item)` (how many of an item the actor holds) is expected in US-152 for the barter/craft conditions. Paths resolve against `actor`, `target`, `npc`, `hero`: `target.state`, `target.kind`, `actor.name`.
 
 ### 3.4 Effects
-One verb per string: `give actor berries 2`, `take`, `set target.state picked`, `flag name [value]`, `opinion a b +5`, `remember`, `start`, `talk`, `say`, `fx`, `sound`, `after <t> <effect>`, `chronicle`. Parsed into `Effect` nodes: `std::variant<Give, Take, Set, Flag, Opinion, Remember, Start, Talk, Say, Fx, Sound, After, Chronicle>`. `after` wraps another effect and becomes a timer (section 5). Effect arguments are expressions, so `give actor berries 1 + skill(gather)` is legal.
+One verb per string: `give actor berries 2`, `take`, `set target.state picked`, `flag name [value]`, `opinion a b +5`, `remember`, `start`, `talk`, `say`, `fx`, `sound`, `after <t> <effect>`, `chronicle`. Parsed into `Effect` nodes: `std::variant<Give, Take, Set, Flag, Opinion, Remember, Start, Talk, Say, Fx, Sound, After, Chronicle>`. `after` wraps another effect and becomes a timer (section 5). Arguments are separated by spaces; each is one word, number, "quoted text", call or (bracketed expression), so a sum needs brackets: `give actor berries (1 + skill(gather))` (settled in US-150).
 
 ### 3.5 Errors
 Every error is `file:line: message` plus the field (`requires[1].if`). The lexer tracks line and column inside a string by the line of the JSON field (nlohmann reports byte offsets; the loader converts them to lines). The loader collects every error in a file, not only the first, so F5 can list them all (US-156). A file with errors is rejected as a whole; the last good version of that file stays.

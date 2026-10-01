@@ -4,7 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
-## K-M7: M7 World interactions kickoff (Avengers) - 2026-10-01
+## US-150: Interaction data and the rule language (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-150`: 0 warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
+
+- Simulation: `rule_json` (line-aware JSON reader with comments), `rule_expr` (condition and score language: lexer, recursive-descent parser, evaluator, 8 functions), `rule_effect` (13 effect verbs, `after` delays), `interaction` (registry that loads a folder, matching with reasons, `file:line: message` errors, canonical writer).
+- Data and docs: `assets/data/interactions/gather.json`, `docs/guides/interaction-data.md`, `docs/plans/US-150.md`, teach-back in `docs/learning-journal.md`.
+- Game: loads the interactions at start and logs mistakes (`odyssey_game.*`).
+- Tests: `tests/sim/rules_test.cpp` (20 cases, includes the line-12 error, the guide check, 300 damaged-file mutations), `tests/game/interactions_test.cpp`. Evidence `docs/evidence/US-150/`.
+ (Avengers) - 2026-10-01
 
 **State:** Docs only. D-36 records the owner's four design answers; the design is `docs/plans/M7-interactions-design.md`; Milestone-57.md (AP-058).
 
