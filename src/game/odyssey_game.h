@@ -118,6 +118,8 @@ public:
     const luna::engine::TileMap& tileMap() const { return map_; }
     // Outside help for a clan member's need (a fire pit's warmth, a bed): false when there is no clan or the person is gone.
     bool helpPerson(int personId, sim::Need need, int amount);
+    // What `who` thinks of `about` changes by `delta` (a conversation's choice, US-161); the world keeps it between -100 and 100.
+    void changeOpinion(int who, int about, int delta);
     // And harm: a clan member's need falls (a hazard, or a test that wants someone hungry).
     bool harmPerson(int personId, sim::Need need, int amount);
     bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }

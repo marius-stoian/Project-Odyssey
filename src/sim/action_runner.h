@@ -60,6 +60,10 @@ public:
     // already busy with another action.
     bool start(const Interaction& interaction, int actor, const ThingRef& target, std::int64_t now, EffectHost& host);
 
+    // Carries out effects now, in order, for an actor on a target: the same path an interaction's effects take (fter waits in the queue,
+    // set target.state reaches the host's setState). A conversation's choices use it (US-161).
+    void runEffects(const std::vector<Effect>& effects, int actor, const ThingRef& target, std::int64_t now, EffectHost& host);
+
     // Stops an action: no effects, nothing given (US-153 "Interrupt").
     void cancel(int actor);
 

@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v2.0. Edited only by mraw-orchestrator.
+Codex v2.1. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
@@ -117,7 +117,7 @@ Codex v2.0. Edited only by mraw-orchestrator.
 | X-M7 | - | M7 | Done | 2026-10-01 |
 | K-M8 | - | M8 | Done | 2026-10-01 |
 | S-US-160 | US-160 | M8 | Done | 2026-10-01 |
-| S-US-161 | US-161 | M8 | To do |  |
+| S-US-161 | US-161 | M8 | Done | 2026-10-01 |
 | S-US-162 | US-162 | M8 | To do |  |
 | S-US-163 | US-163 | M8 | To do |  |
 | S-US-164 | US-164 | M8 | To do |  |

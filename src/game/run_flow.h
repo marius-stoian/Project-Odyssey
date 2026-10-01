@@ -4,7 +4,9 @@
 
 #include "luna/engine/input.h"
 #include "luna/engine/renderer.h"
+#include "game/game_rules.h"
 #include "luna/engine/ui.h"
+#include "sim/conversation.h"
 #include "sim/hero_life.h"
 
 #include <functional>
@@ -18,11 +20,11 @@ namespace odysseus::game {
 class OdysseyGame;
 
 // The screens of a run (M5, D-32): the New Game screen, the yearly Focus choice and Crossroads events of the Growing Period, the
-// Mantle summary, the menu (bag, skills, dominion, settings), crafting, bartering, the context menu of a thing, and the end of
-// the run. Each is a panel of text lines and buttons made fresh every tick from the run's state (immediate mode), so a screen can
+// Mantle summary, the menu (bag, skills, dominion, settings), crafting, bartering, the context menu of a thing, a conversation
+// with a clan member (US-161), and the end of the run. Each is a panel of text lines and buttons made fresh every tick from the run's state (immediate mode), so a screen can
 // never show anything stale; a click on a button changes the run through the simulation layer's own functions. While a screen
 // is open the world stands still.
-enum class Screen { None, NewGame, Focus, Event, Mantle, Menu, Craft, Barter, Context, Ended, Privacy };
+enum class Screen { None, NewGame, Focus, Event, Mantle, Menu, Craft, Barter, Context, Talk, Ended, Privacy };
 enum class MenuTab { Bag, Skills, Dominion, Settings };
 
 class RunFlow {
@@ -41,6 +43,9 @@ public:
     void openEnded() { screen_ = Screen::Ended; }
     void openCraft(const std::string& station);
     void openBarter(int rival);
+    // A conversation with a clan member (US-161): the panel shows their name, mood, words and numbered choices; the world waits.
+    void openTalk(sim::rules::Conversation conversation, Subject subject);
+    const sim::rules::Conversation* conversation() const { return conversation_ ? &*conversation_ : nullptr; }
     void setMessage(const std::string& text);
 
     // A right click on something in the world at (worldX, worldY): the things there offer their actions in a context menu
@@ -65,6 +70,13 @@ public:
     const std::string& contextTitle() const { return contextTitle_; }
     static constexpr int kContextBase = 700;
 
+    // The text lines the open screen shows now, top to bottom (for tests and scripted play): the heading first.
+    std::vector<std::string> shownText() const {
+        std::vector<std::string> out;
+        for (const Line& l : lines_) out.push_back(l.text);
+        return out;
+    }
+
     // What the last action said (shown on the screen and kept for tests).
     const std::string& message() const { return message_; }
 
@@ -80,6 +92,8 @@ public:
     // Presses a widget by id as if it had been clicked (tests and scripted play).
     bool press(OdysseyGame& game, int id);
     static constexpr int kClose = 999;
+    // The choices of a conversation: widget kTalkChoiceBase + n is the n-th choice shown (keys 1 to 5 press the same widgets).
+    static constexpr int kTalkChoiceBase = 800;
 
     // Screen-specific choices the tests and the game set.
     int seedDigitsMax = 18;
@@ -106,6 +120,7 @@ private:
     void buildCraft(OdysseyGame& game);
     void buildBarter(OdysseyGame& game);
     void buildContext();
+    void buildTalk(OdysseyGame& game);
     void buildEnded(OdysseyGame& game);
     void buildPrivacy();
     void act(OdysseyGame& game, int id);
@@ -146,6 +161,9 @@ private:
     // Context
     std::vector<ContextAction> actions_;
     std::string contextTitle_;
+    // Talk
+    std::optional<sim::rules::Conversation> conversation_;
+    std::optional<Subject> talkSubject_;
     // Sacred fire name being typed
     std::string fireName_;
     int pointerX_ = -1;

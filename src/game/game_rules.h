@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "sim/action_runner.h"
+#include "sim/conversation.h"
 #include "sim/interaction.h"
 #include "sim/rule_expr.h"
 
@@ -63,7 +64,8 @@ std::vector<std::string> builtInThingTags(const OdysseyGame& game);
 // The real world as the rule language sees it (US-150, US-151): what `target.state`, `season`, `has(berries, 2)` mean in the game.
 // It is made for one moment and one target, reads the game and changes nothing.
 // Answered so far: actor.name, target.name, target.kind, target.state, target.inspect, season, time, distance, has(...), tag(...) and
-// flag(sacred-fire). need, skill, trait, opinion, kin and other flags answer 0 until the stories that give them a meaning (US-154, US-164).
+// flag(sacred-fire), and opinion(a, b) between the hero and a clan member (US-161). skill, kin and other flags answer 0 until the stories that
+// give them a meaning (US-164).
 class GameRuleContext : public sim::rules::RuleContext {
 public:
     // `actor` is who acts (the hero unless said): it decides what actor.name, distance, need(...) and trait(...) mean.
@@ -77,6 +79,10 @@ private:
     Subject subject_;
     ActorRef actor_;
 };
+
+// Which clan member a word of the rule language means in a conversation: npc or target is the person talked to, hero or actor is the hero.
+// -1 for anything else (or when the thing is not a person).
+int personNamed(const OdysseyGame& game, const Subject& subject, const std::string& word);
 
 // The part of the day as the files name it: morning (6-11), afternoon (12-17), evening (18-21), night (22-5).
 std::string timeOfDayWord(int hour);
@@ -92,5 +98,11 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 
 // One tick of the runner: effects waiting for their time happen, finished actions do their effects. Called by the game each play tick.
 void tickInteractions(OdysseyGame& game);
+
+// Talk (US-161): opens the conversation panel with the script that speaks for this clan member and pauses the world. False when no
+// script fits them (then the caller keeps to the plain talk).
+bool openConversation(OdysseyGame& game, const Subject& subject);
+// The player picks choice `index` (0-based, as the panel lists them): its effects happen in the world, then the talk moves on or ends.
+bool chooseConversationOption(OdysseyGame& game, sim::rules::Conversation& conversation, const Subject& subject, int index);
 
 } // namespace odysseus::game

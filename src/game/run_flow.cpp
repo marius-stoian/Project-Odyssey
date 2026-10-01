@@ -16,6 +16,7 @@ using luna::engine::UiColor;
 using luna::engine::UiPainter;
 
 constexpr int kRowHeight = 12;
+constexpr int kTalkWrap = 56; // characters of a line of speech in the conversation panel (the design of M8)
 
 enum ScreenIds {
     kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
@@ -122,6 +123,7 @@ void RunFlow::build(OdysseyGame& game) {
     case Screen::Craft: buildCraft(game); break;
     case Screen::Barter: buildBarter(game); break;
     case Screen::Context: buildContext(); break;
+    case Screen::Talk: buildTalk(game); break;
     case Screen::Ended: buildEnded(game); break;
     case Screen::Privacy: buildPrivacy(); break;
     default: break;
@@ -440,6 +442,40 @@ void RunFlow::openCraft(const std::string& station) {
     screen_ = Screen::Craft;
 }
 
+void RunFlow::openTalk(sim::rules::Conversation conversation, Subject subject) {
+    conversation_ = std::move(conversation);
+    talkSubject_ = std::move(subject);
+    screen_ = Screen::Talk;
+}
+
+// The panel of a conversation: who, how they feel, what they say, and up to five numbered choices (D-38). Made fresh every tick from the
+// simulation, like every screen, so a choice whose condition changed is never shown stale.
+void RunFlow::buildTalk(OdysseyGame& game) {
+    if (!conversation_ || !talkSubject_ || game.clan() == nullptr || game.life() == nullptr) {
+        screen_ = Screen::None;
+        return;
+    }
+    const GameRuleContext context(game, *talkSubject_);
+    const sim::World& world = *game.clan();
+    const int person = talkSubject_->index;
+    std::string mood = "neutral";
+    if (person >= 0 && static_cast<std::size_t>(person) < world.people().size()) {
+        mood = sim::rules::moodWord(world.opinion(person, game.life()->personId()), world.people()[static_cast<std::size_t>(person)].needs);
+    }
+    title(std::format("{}   ({})", talkSubject_->name, mood));
+    const sim::rules::ConversationView view = conversation_->view(context);
+    for (const sim::rules::ConversationLine& said : view.lines) paragraph(said.speaker.empty() ? said.text : said.speaker + ": " + said.text, UiColor::Text, kTalkWrap);
+    gap(6);
+    for (std::size_t i = 0; i < view.choices.size(); ++i) {
+        const sim::rules::ConversationChoice& choice = view.choices[i];
+        const std::string label = std::format("{}. {}{}", i + 1, choice.text, choice.enabled || choice.reason.empty() ? "" : "  (" + choice.reason + ")");
+        button(label, kTalkChoiceBase + static_cast<int>(i), choice.enabled, false, panel_.x + 8, panel_.width - 16);
+        cursorX_ = -1;
+        cursorY_ += kRowHeight + 2;
+    }
+    if (view.choices.empty()) button("Leave", kClose, true, false, panel_.x + 8, 60);
+}
+
 void RunFlow::openBarter(int rival) {
     rival_ = rival;
     screen_ = Screen::Barter;
@@ -467,6 +503,21 @@ bool RunFlow::update(OdysseyGame& game, const luna::engine::Intents& intents) {
         if (intents.pressed(luna::engine::Intent::Erase) && !fireName_.empty()) fireName_.pop_back();
     }
     build(game);
+    // A conversation: keys 1 to 5 pick a choice, Esc walks away (the world has stood still all the while).
+    if (screen_ == Screen::Talk) {
+        if (intents.pressed(luna::engine::Intent::OpenMenu)) {
+            act(game, kClose);
+            return screen_ != Screen::None;
+        }
+        for (int k = 0; k < sim::rules::kMaxVisibleChoices; ++k) {
+            const auto slot = static_cast<luna::engine::Intent>(static_cast<int>(luna::engine::Intent::Slot1) + k);
+            if (intents.pressed(slot)) {
+                act(game, kTalkChoiceBase + k);
+                build(game);
+                return screen_ != Screen::None;
+            }
+        }
+    }
     if ((screen_ == Screen::Menu || screen_ == Screen::Craft || screen_ == Screen::Barter || screen_ == Screen::Context) && intents.pressed(luna::engine::Intent::OpenMenu)) {
         screen_ = screen_ == Screen::Menu ? Screen::None : Screen::Menu;
         if (screen_ == Screen::Menu) build(game);
@@ -504,7 +555,8 @@ void RunFlow::act(OdysseyGame& game, int id) {
     sim::HeroLife* hero = game.life();
     const sim::HeroData* data = game.heroData();
     if (id == kClose) {
-        screen_ = screen_ == Screen::Craft || screen_ == Screen::Barter ? Screen::None : Screen::None;
+        screen_ = Screen::None;
+        conversation_.reset(); // walking away from a talk: no effects
         message_.clear();
         return;
     }
@@ -641,6 +693,16 @@ void RunFlow::act(OdysseyGame& game, int id) {
                 const auto run = actions_[index].run;
                 screen_ = Screen::None; // the action may open another screen
                 run(game);
+            }
+        }
+        break;
+    }
+    case Screen::Talk: {
+        if (conversation_ && talkSubject_ && id >= kTalkChoiceBase && id < kTalkChoiceBase + sim::rules::kMaxVisibleChoices) {
+            chooseConversationOption(game, *conversation_, *talkSubject_, id - kTalkChoiceBase);
+            if (conversation_->finished()) {
+                conversation_.reset();
+                screen_ = Screen::None;
             }
         }
         break;
