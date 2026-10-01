@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Docs: Codex v2.2, requirements v2.4 and the M8b-M8e brief (Anima, Dominus) - 2026-10-01
+
+**State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).
+
+- Codex v2.2 synced from Anima (`docs/Codex.md`, `CLAUDE.md`): P-011; M8b Resolution and GPU renderer, M8c Lighting and shadows, M8d Buildings, M8e Building life (K, 21 story prompts, X each) between X-M8 and K-M9; Charter architecture rule 11 (rendering); D-06, D-42, D-43.
+- Requirements v2.4 and the backlog mirrored from Drive: ENV-18..ENV-21, ARC-11, INT-07, INT-08, EDT-07, MVP-16, ADR-021; epics E22-E25, US-230..US-257; D-06 answered (mid-range target PC); M8d split into M8d and M8e.
+- `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
+- Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
+
 ## US-161: Conversations and the dialogue panel (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-161`: zero warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
