@@ -52,6 +52,8 @@ struct Arguments {
     std::string weather;               // start under this weather (screenshots)
     bool clan = false;                 // run the simulated clan in this level
     int clanSpeed = 1;                 // clan simulation ticks per game tick (fast forward)
+    bool perf = false;                 // a performance run: overlay on, GPU time measured, figures logged each minute (US-234)
+    int people = 0;                    // start the clan with this many people (performance runs)
     std::optional<std::uint64_t> region; // play a generated region
     std::filesystem::path saveDirectory; // where autosaves go
     bool load = false;                 // load the autosave at start
@@ -116,6 +118,10 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.load = true;
             continue;
         }
+        if (name == "--perf") { // a flag without a value
+            arguments.perf = true;
+            continue;
+        }
         if (name == "--clan") { // a flag without a value: run the simulated clan in this level
             arguments.clan = true;
             continue;
@@ -135,6 +141,8 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.region = std::stoull(argv[++i]);
         } else if (name == "--save-dir") {
             arguments.saveDirectory = argv[++i];
+        } else if (name == "--people") {
+            arguments.people = std::stoi(argv[++i]);
         } else if (name == "--clan-speed") {
             arguments.clanSpeed = std::stoi(argv[++i]);
         } else if (name == "--weather") {
@@ -214,6 +222,8 @@ int main(int argc, char* argv[]) {
         if (arguments.newGame) {
             game.run().openNewGame();
         }
+        game.setStartingPeople(arguments.people);
+        game.setPerformanceLog(arguments.perf);
         if (arguments.clan) {
             game.setClan(true);
         }

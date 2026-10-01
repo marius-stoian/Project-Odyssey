@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-01, US-234):** S-US-234 DONE (Milestone-80.md, AP-081). Next: X-M8b (exit review: qa into main, CI green on main, tag m8b-done), then K-M8c. Finding: the daily autosave stalls one frame (25 to 35 ms) with 500 people.
+
 **Resume update (2026-10-01, US-233):** S-US-233 DONE (Milestone-79.md, AP-080). Next: S-US-234 (frame budget at the new size; needs D-06), X-M8b. The owner reviews docs/evidence/US-233/contact-sheet.png.
 
 **Resume update (2026-10-01, US-232):** S-US-232 DONE (Milestone-78.md, AP-079). Next: S-US-233 (every screen at the new size), US-234, X-M8b. The owner said Mraw never asks for permission: commit, merge, pull, push and sync Drive on your own.

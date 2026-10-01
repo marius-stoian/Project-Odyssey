@@ -63,6 +63,8 @@ public:
 
     // True when presenting waits for the monitor's refresh (smooth, no wasted CPU).
     bool vsyncEnabled() const;
+    void setGpuTiming(bool on);
+    double gpuMilliseconds() const; // the last frame's time on the card; -1 when not measured (SDL renderer, or timing off)
 
     // Which backend draws: "gpu (direct3d12)" or "sdl (direct3d11)" (logged at start).
     std::string backendName() const;

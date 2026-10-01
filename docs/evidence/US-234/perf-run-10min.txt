@@ -1,0 +1,14 @@
+US-234 performance run, 2026-10-01. Release build, GPU renderer (Direct3D 12), 1920x1080 window, camera zoom 2x, UI scale 1x, camp level, clan of 500 people, 10 minutes.
+Dev PC: RX 7900 XTX, 6-core CPU, 32 GB. Command: odysseus.exe --level assets/levels/camp.json --clan --people 500 --perf --renderer gpu --quit-after 600
+
+[INFO] Window opened: 1920x1080, virtual screen 960x540, VSync on, renderer gpu (direct3d12)
+[INFO] Perf: 3599 frames, 59.4 FPS average, frame 16.85 ms (max 631.0), 8 frames over 20 ms, draw 0.14 ms (max 0.5), gpu 0.19 ms (max 1.5), tick 0.15 ms (worst 0.6), people 500
+[INFO] Perf: 7196 frames, 59.6 FPS average, frame 16.76 ms (max 631.0), 8 frames over 20 ms, draw 0.13 ms (max 0.5), gpu 0.19 ms (max 1.6), tick 0.12 ms (worst 0.6), people 500
+[INFO] Perf: 10793 frames, 59.7 FPS average, frame 16.74 ms (max 631.0), 10 frames over 20 ms, draw 0.14 ms (max 0.5), gpu 0.19 ms (max 1.6), tick 0.11 ms (worst 25.7), people 500
+[INFO] Perf: 14390 frames, 59.8 FPS average, frame 16.72 ms (max 631.0), 17 frames over 20 ms, draw 0.14 ms (max 0.7), gpu 0.19 ms (max 4.4), tick 0.12 ms (worst 25.7), people 500
+[INFO] Perf: 17976 frames, 59.8 FPS average, frame 16.72 ms (max 631.0), 20 frames over 20 ms, draw 0.14 ms (max 0.7), gpu 0.19 ms (max 4.4), tick 0.14 ms (worst 35.4), people 500
+[INFO] Perf: 21573 frames, 59.8 FPS average, frame 16.72 ms (max 631.0), 20 frames over 20 ms, draw 0.14 ms (max 0.7), gpu 0.20 ms (max 4.4), tick 0.14 ms (worst 35.4), people 500
+[INFO] Perf: 25170 frames, 59.8 FPS average, frame 16.71 ms (max 631.0), 24 frames over 20 ms, draw 0.14 ms (max 0.7), gpu 0.20 ms (max 4.4), tick 0.15 ms (worst 35.4), people 500
+[INFO] Perf: 28765 frames, 59.8 FPS average, frame 16.71 ms (max 631.0), 27 frames over 20 ms, draw 0.14 ms (max 0.7), gpu 0.20 ms (max 4.4), tick 0.43 ms (worst 35.4), people 500
+[INFO] Perf: 32362 frames, 59.9 FPS average, frame 16.71 ms (max 631.0), 32 frames over 20 ms, draw 0.14 ms (max 0.7), gpu 0.20 ms (max 4.4), tick 0.12 ms (worst 35.4), people 500
+[INFO] Average frame rate: 59.9 FPS over 600.0 s (35920 frames); 11998 simulation ticks

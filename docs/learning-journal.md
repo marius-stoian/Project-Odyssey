@@ -1235,3 +1235,25 @@ panel_ = {(screenArea_.width - width) / 2, top, width, height};
 **Try it (15 minutes).** Change `kMaxPanelWidth` in `run_flow.h` to 400, rebuild, and open the menu: lines wrap earlier. Then set it back.
 
 **Check yourself.** Why is it safer to measure the panel's content than to give every screen its own fixed height?
+
+## US-234 Frame budget: measuring CPU and GPU time
+
+**What we built.** F3 now shows how long the CPU spends on the simulation tick and on drawing, and how long the graphics card needs for the frame. A 10-minute run with 500 people logged the numbers.
+
+**The C++ idea: a timer that stops itself (RAII).** We want the draw time of every frame, even when `render` leaves early. A small struct starts a clock in its constructor and reports in its destructor, which C++ runs automatically when the function ends:
+
+```cpp
+struct DrawTimer {
+    OdysseyGame& game;
+    std::chrono::steady_clock::time_point started = std::chrono::steady_clock::now();
+    ~DrawTimer() { game.recordFrame(/* now - started */ ...); }
+} drawTimer{*this};
+```
+
+No matter which `return` is taken, the time is recorded. The GPU is harder: the card works while the CPU moves on, so we wait for a *fence* (a flag the card sets when it is done) and time that wait.
+
+**Where to look.** `OdysseyGame::render` and `recordFrame` in `src/game/odyssey_game.cpp`; `present()` in `src/luna/platform/gpu_backend.cpp`.
+
+**Try it (15 minutes).** Run the game with `--perf --people 500`, watch the F3 overlay, then try `--people 20`: which number changes, CPU or GPU?
+
+**Check yourself.** Why did our first GPU numbers read about 16 ms for a frame that really takes 0.2 ms?

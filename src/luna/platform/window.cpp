@@ -101,6 +101,14 @@ void Window::present() {
     backend_->present();
 }
 
+void Window::setGpuTiming(bool on) {
+    backend_->setGpuTiming(on);
+}
+
+double Window::gpuMilliseconds() const {
+    return backend_->gpuMilliseconds();
+}
+
 bool Window::vsyncEnabled() const {
     return backend_->vsyncEnabled();
 }

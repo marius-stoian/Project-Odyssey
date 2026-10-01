@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-234: frame budget at the new size (Mraw) - 2026-10-01
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); 10-minute run in `docs/evidence/US-234/`.
+
+- F3 overlay shows CPU (tick, draw) and GPU time; GPU time is measured on the card with a fence (SDL_GPU has no timestamp queries), only while the overlay or `--perf` is on. `--perf` logs frame figures each minute; `--people N` starts the clan with N people.
+- Dev PC (RX 7900 XTX), Release, 1080p, 500 people, 10 minutes: 59.9 FPS average, draw 0.14 ms, GPU 0.20 ms, 32 of 35,920 frames over 20 ms (autosave at day end). Scaled to the D-06 minimum PC (4x GPU, 2x CPU): about 1.4 ms of 16.7 ms. Method in `docs/plans/US-234.md`.
+- New test `US-234 The overlay shows CPU and GPU times`.
 ## US-233: every screen at the new size (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); contact sheet for the owner in `docs/evidence/US-233/`.

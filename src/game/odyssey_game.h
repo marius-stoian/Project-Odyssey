@@ -176,6 +176,12 @@ public:
     // inside the game, one simulation tick per game tick, and the view puts each person somewhere and walks them there.
     void setClan(bool on);
     bool clanOn() const { return clan_ != nullptr; }
+    // A performance run (US-234, --perf): the overlay is on, GPU time is measured and the frame figures are written to the log
+    // once a minute, with the totals so far. --people N starts the clan with N people instead of the usual twenty.
+    void setPerformanceLog(bool on) { perfLog_ = on; overlayOn_ = on || overlayOn_; }
+    void setStartingPeople(int people) { startingPeople_ = people; }
+    double drawMilliseconds() const;
+    double gpuMilliseconds() const { return gpuMs_; }
     // Runs the clan's simulation this many ticks for each game tick (fast forward, for demos and screenshots; 1 is real time).
     void setClanSpeed(int ticksPerTick) { clanSpeed_ = ticksPerTick < 1 ? 1 : ticksPerTick; }
     const sim::World* clan() const { return clan_.get(); }
@@ -378,6 +384,20 @@ private:
     bool privacyAsked_ = false;
     void drawTutorial(luna::engine::Renderer& renderer) const;
     bool overlayOn_ = false;
+    bool perfLog_ = false;
+    int startingPeople_ = 0; // 0: the data's number
+    std::array<double, 60> drawTimes_{};
+    std::size_t drawTimeAt_ = 0;
+    std::size_t drawTimesFilled_ = 0;
+    double gpuMs_ = -1.0;
+    struct PerfTotals {
+        std::uint64_t frames = 0;
+        std::uint64_t over20 = 0; // frames that took longer than 20 ms (the 60 FPS budget is 16.7)
+        double frameSum = 0.0, frameMax = 0.0, drawSum = 0.0, drawMax = 0.0, gpuSum = 0.0, gpuMax = 0.0, tickWorst = 0.0;
+        std::uint64_t gpuFrames = 0;
+    } perf_;
+    std::chrono::steady_clock::time_point perfLastLog_{};
+    void recordFrame(double drawMs, double gpuMs);
     std::array<double, 100> tickTimes_{};
     std::array<double, 60> frameTimes_{};
     std::size_t tickTimeAt_ = 0;

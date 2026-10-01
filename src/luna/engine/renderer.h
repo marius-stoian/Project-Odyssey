@@ -47,6 +47,10 @@ public:
     // Draws `source` stretched onto `destination`, see-through by `style.alpha` (255: solid)
     // and, with Blend::Add, adding light (M2d: effects and weather).
     virtual void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) = 0;
+
+    // GPU time of the last frame in milliseconds, -1 when it is not measured (US-234). measureGpu(true) turns the measuring on.
+    virtual void measureGpu(bool) {}
+    virtual double gpuMilliseconds() const { return -1.0; }
 };
 
 // The real renderer: draws into the Luna window.
@@ -57,13 +61,15 @@ public:
     Texture createTexture(const Image& image) override;
     void draw(const Texture& texture, const Rect& source, Point at) override;
     void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) override;
+    void measureGpu(bool on) override;
+    double gpuMilliseconds() const override;
 
 private:
     platform::Window& window_;
 };
 
 // A renderer that only writes down what it was asked to draw. For tests.
-class RecordingRenderer final : public Renderer {
+class RecordingRenderer : public Renderer {
 public:
     struct Draw {
         int texture;

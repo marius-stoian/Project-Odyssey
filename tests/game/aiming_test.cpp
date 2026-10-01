@@ -265,3 +265,28 @@ TEST_CASE("US-232 Zoom keys and the wheel") {
     CHECK(play.odyssey.uiWidth() == 480);
     CHECK(play.odyssey.viewWidth() == 960);
 }
+
+namespace {
+// A renderer that says the card needed 2.5 ms and remembers whether it was asked to measure (US-234).
+class TimedRenderer final : public luna::engine::RecordingRenderer {
+public:
+    void measureGpu(bool on) override { measuring = on; }
+    double gpuMilliseconds() const override { return measuring ? 2.5 : -1.0; }
+    bool measuring = false;
+};
+} // namespace
+
+TEST_CASE("US-234 The overlay shows CPU and GPU times") {
+    game::OdysseyGame odyssey(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
+    TimedRenderer renderer;
+    odyssey.start(renderer);
+    odyssey.update(Intents{});
+    odyssey.render(renderer, 1.0);
+    CHECK_FALSE(renderer.measuring);            // the card is not slowed down while nobody looks
+    CHECK(odyssey.gpuMilliseconds() == -1.0);
+    odyssey.update(pressing(Intent::Overlay)); // F3
+    odyssey.render(renderer, 1.0);
+    CHECK(renderer.measuring);                  // F3 turns the GPU measuring on
+    CHECK(odyssey.gpuMilliseconds() == doctest::Approx(2.5));
+    CHECK(odyssey.drawMilliseconds() >= 0.0);   // the CPU time of drawing
+}
