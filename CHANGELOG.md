@@ -13,6 +13,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## US-164: Conversations are remembered (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-164`); merged into `qa`.
+
+- Simulation: `World::rememberConversation` (an ordinary memory, Gift or Quarrel by the feeling, major from 60, plus a free-text note), `MemoryNote::clause`, `FlagStore` (story notes, ordered, saved, hashed).
+- Game: the effects `remember`, `flag` and `chronicle` are carried out; `flag(name)` reads the store; flags are saved in `things.json` and start empty in a new run; the rude answer of generated small talk leaves a bad memory (-40); the elder remembers the berries (20).
+- Docs: the guide section "Being remembered", `docs/plans/US-164.md`, teach-back.
+- Tests: `tests/sim/memory_talk_test.cpp` (7 cases: memory, gossip at half strength, two days, flags, saved), 4 new game cases in `tests/game/conversation_test.cpp`.
 ## US-163: Generated small talk (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-163`); merged into `qa`.

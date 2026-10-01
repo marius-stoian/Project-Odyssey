@@ -251,8 +251,9 @@ TEST_CASE("US-163 {smalltalk.topic} in a script is filled once for each node, an
     REQUIRE(view.choices.size() == 2);
     CHECK(view.choices[0].text == "Thank you");
     CHECK(view.choices[1].text == "Be quiet");
-    CHECK(made.nodes[0].choices[1].effects.size() == 1); // the rude answer costs opinion
+    REQUIRE(made.nodes[0].choices[1].effects.size() == 2); // the rude answer costs opinion and is remembered
     CHECK(made.nodes[0].choices[1].effects[0].source == "opinion npc hero -10");
+    CHECK(made.nodes[0].choices[1].effects[1].source.rfind("remember npc ", 0) == 0);
 }
 
 TEST_CASE("US-163 What a person remembers is saved, loaded and part of the world's hash") {

@@ -270,3 +270,103 @@ TEST_CASE("US-163 A mistake in smalltalk.json shows in the red panel with its li
     camp.odyssey.update(reloadPressed());
     CHECK(camp.odyssey.interactionReport().errors.empty());
 }
+TEST_CASE("US-164 Memory: being rude to someone leaves a bad memory and lowers their opinion") {
+    const fs::path data = dataCopy("mem-rude");
+    std::filesystem::remove(data / "dialogue" / "elder-fire.dlg");
+    Camp camp("mem-rude", data);
+    const int person = camp.person();
+    REQUIRE(person >= 0);
+    const int hero = camp.odyssey.life()->personId();
+    const std::string heroName = camp.odyssey.life()->name();
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
+    camp.play(1);
+    const int before = camp.odyssey.clan()->opinion(person, hero);
+    camp.odyssey.update(keyPressed(luna::engine::Intent::Slot2)); // Be quiet
+    CHECK(camp.odyssey.run().screen() == game::Screen::None); // it ends
+    CHECK(camp.odyssey.clan()->opinion(person, hero) == before - 10);
+    const sim::Person& them = camp.odyssey.clan()->people()[static_cast<std::size_t>(person)];
+    const sim::Memory* memory = nullptr;
+    for (const sim::Memory& m : them.memories) {
+        if (m.subject == hero && m.kind == sim::MemoryKind::Quarrel) memory = &m;
+    }
+    REQUIRE(memory != nullptr);
+    CHECK(memory->feeling == -40);
+    REQUIRE_FALSE(them.notes.empty());
+    CHECK(them.notes.back().text == heroName + " told " + them.name + " to be quiet");
+}
+
+TEST_CASE("US-164 Memory: the elder remembers the berries they were given") {
+    Camp camp("mem-berries");
+    const int elder = elderOf(camp);
+    REQUIRE(elder >= 0);
+    const int hero = camp.odyssey.life()->personId();
+    camp.odyssey.life()->give("berries", 1);
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, elder)));
+    camp.play(1);
+    camp.odyssey.update(keyPressed(luna::engine::Intent::Slot2)); // Offer berries
+    const sim::Person& them = camp.odyssey.clan()->people()[static_cast<std::size_t>(elder)];
+    const sim::Memory* memory = nullptr;
+    for (const sim::Memory& m : them.memories) {
+        if (m.subject == hero && m.kind == sim::MemoryKind::Gift && !m.secondHand && m.feeling == 20) memory = &m;
+    }
+    REQUIRE(memory != nullptr);
+    REQUIRE_FALSE(them.notes.empty());
+    CHECK(them.notes.back().text == camp.odyssey.life()->name() + " shared berries");
+}
+
+TEST_CASE("US-164 Saved: flags set in a conversation, the memories it left and its chronicle line are there after a save and a load") {
+    const fs::path data = dataCopy("mem-saved");
+    std::filesystem::remove(data / "dialogue" / "elder-fire.dlg");
+    writeText(data / "dialogue" / "promise.dlg",
+              "@who person\n=== start\nTalker: Hello.\n"
+              "-> Promise a hunt {flag promised-hunt; flag trust 3; chronicle \"{hero} promised {npc} a hunt\"; remember npc \"{hero} promised a hunt\" 30} => next\n"
+              "-> Leave => END\n\n"
+              "=== next\nTalker: Good.   [if flag(promised-hunt)]\nTalker: Hm.   [if not flag(promised-hunt)]\n-> Leave => END\n");
+    Camp camp("mem-saved", data);
+    const int person = camp.person();
+    REQUIRE(person >= 0);
+    const int hero = camp.odyssey.life()->personId();
+    const std::string heroName = camp.odyssey.life()->name();
+    const std::string theirName = camp.odyssey.clan()->people()[static_cast<std::size_t>(person)].name;
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
+    camp.play(1);
+    CHECK(camp.odyssey.flags().get("promised-hunt") == 0);
+    camp.odyssey.update(keyPressed(luna::engine::Intent::Slot1)); // Promise a hunt
+    CHECK(camp.odyssey.flags().get("promised-hunt") == 1);
+    CHECK(camp.odyssey.flags().get("trust") == 3);
+    const std::vector<std::string> shown = camp.odyssey.run().shownText();
+    REQUIRE(shown.size() >= 2);
+    CHECK(shown[1] == "Talker: Good."); // flag(promised-hunt) reads what the choice set
+
+    const std::string line = heroName + " promised " + theirName + " a hunt";
+    const auto chronicleHas = [&](const sim::World& world) {
+        for (const auto& entry : world.chronicle().entries()) {
+            if (entry.text == line) return true;
+        }
+        return false;
+    };
+    CHECK(chronicleHas(*camp.odyssey.clan()));
+
+    REQUIRE(camp.odyssey.autosave());
+    luna::engine::RecordingRenderer renderer;
+    game::OdysseyGame again(data, Camp::makeLevel(data, "mem-saved"));
+    again.start(renderer);
+    REQUIRE(again.loadAutosave());
+    CHECK(again.flags().get("promised-hunt") == 1);
+    CHECK(again.flags().get("trust") == 3);
+    const sim::Person& them = again.clan()->people()[static_cast<std::size_t>(person)];
+    bool memory = false;
+    for (const sim::Memory& m : them.memories) memory = memory || (m.subject == hero && m.kind == sim::MemoryKind::Gift && m.feeling == 30);
+    CHECK(memory);
+    bool note = false;
+    for (const sim::MemoryNote& n : them.notes) note = note || n.text == heroName + " promised a hunt";
+    CHECK(note);
+    CHECK(chronicleHas(*again.clan()));
+}
+
+TEST_CASE("US-164 A new run starts with no flags") {
+    Camp camp("mem-fresh");
+    camp.odyssey.flags().set("old", 1);
+    camp.odyssey.startNewRun({1, 2, 1}, false, false);
+    CHECK(camp.odyssey.flags().get("old") == 0);
+}

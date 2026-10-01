@@ -101,8 +101,11 @@ DlgScript smalltalkScript(const std::string& speaker, const std::string& line) {
     DlgChoice rude;
     rude.text = "Be quiet";
     rude.target = "END";
-    const ParsedEffect insult = parseEffect("opinion npc hero -10");
-    if (!insult.problem) rude.effects.push_back(insult.effect);
+    // The rude answer lowers their opinion and is remembered (US-164): they can tell others, and it comes up in their small talk.
+    for (const char* source : {"opinion npc hero -10", "remember npc \"{hero} told {npc} to be quiet\" -40"}) {
+        const ParsedEffect effect = parseEffect(source);
+        if (!effect.problem) rude.effects.push_back(effect.effect);
+    }
     node.choices.push_back(std::move(friendly));
     node.choices.push_back(std::move(rude));
     script.nodes.push_back(std::move(node));

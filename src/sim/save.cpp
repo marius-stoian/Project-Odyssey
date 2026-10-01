@@ -58,7 +58,7 @@ json savePerson(const Person& p) {
         memories.push_back(saveMemory(memory));
     }
     json notes = json::array();
-    for (const MemoryNote& note : p.notes) notes.push_back(json{{"text", note.text}, {"day", note.day}, {"feeling", note.feeling}, {"secondHand", note.secondHand}});
+    for (const MemoryNote& note : p.notes) notes.push_back(json{{"text", note.text}, {"day", note.day}, {"feeling", note.feeling}, {"secondHand", note.secondHand}, {"clause", note.clause}});
     json grudges = json::array();
     for (const Grudge& grudge : p.grudges) {
         grudges.push_back(saveGrudge(grudge));
@@ -140,7 +140,7 @@ Person loadPerson(const json& value) {
     }
     if (value.contains("notes")) { // saves from before US-163 have none
         for (const json& note : value.at("notes")) {
-            p.notes.push_back({note.at("text").get<std::string>(), note.at("day").get<std::int64_t>(), note.at("feeling").get<int>(), note.at("secondHand").get<bool>()});
+            p.notes.push_back({note.at("text").get<std::string>(), note.at("day").get<std::int64_t>(), note.at("feeling").get<int>(), note.at("secondHand").get<bool>(), note.value("clause", false)});
         }
     }
     p.opinions = value.at("opinions").get<std::vector<int>>();
