@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## CI: guides keep LF too (Dominus) - 2026-10-01
+
+**State:** Merged into `qa`.
+
+- `.gitattributes`: `docs/guides/** text eol=lf`. The US-160 guide test looks for the text of `elder-fire.dlg` inside `docs/guides/dialogue-format.md`; Windows runners checked the guide out with CRLF, so it failed on CI (run 36890828492, the last test still red after the `.dlg` fix).
+
 ## US-230: Luna's SDL_GPU renderer (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-230`); merged into `qa`.
