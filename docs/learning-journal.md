@@ -1277,3 +1277,21 @@ The shader declares the same layout (`float4 lights[128]`) and reads it back. Th
 **Try it (15 minutes).** In `assets/data/light/lights.json` set `ambient.strength` to 0.5 and start the game: the world dims, the HUD does not. Set it back to 1.0.
 
 **Check yourself.** Why does a sprite with no normal map still brighten near a light, and why only a little at the edge of the light's radius?
+## US-241 Generated normal maps: height and slopes from pixels
+
+**What we built.** A tool makes a "normal map" for every sprite sheet: a second picture that says which way each pixel of a sprite faces, so lights can shade the art without anyone painting a second image.
+
+**The C++ idea: image processing is loops over pixels.** First a height per pixel (higher in the middle of a body, from the distance to the edge, plus brightness). Then the slope: how fast the height changes to the right and downward, measured with the Sobel filter, a weighted difference of the neighbours:
+
+```cpp
+const double dx = (s(x+1,y-1) + 2*s(x+1,y) + s(x+1,y+1)) - (s(x-1,y-1) + 2*s(x-1,y) + s(x-1,y+1));
+const double nx = -dx * strength / 4.0;   // the surface leans toward lower ground
+```
+
+The direction (nx, ny, 1) is shortened to length 1 and stored in the colour channels: red is x, green is y, blue is z.
+
+**Where to look.** `normalAtlas` in `src/luna/engine/image_ops.cpp`; `writeNormalAtlases` in `src/game/normal_art.cpp`; the tool flag in `apps/atlas/main.cpp`.
+
+**Try it (15 minutes).** Open `assets/sprites/atlas/characters_n.png` in an image viewer: the purple-blue picture is the hero's surface directions. Then change `kBodyStrength` in `normal_art.cpp` to 4.0, run `odysseus_atlas --normals` and look again.
+
+**Check yourself.** Why is the colour of a flat surface (128, 128, 255), a light purple-blue, and not black?
