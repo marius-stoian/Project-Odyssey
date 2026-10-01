@@ -32,8 +32,19 @@ if(NOT log MATCHES "Straw target at \\(24.50, 32.75\\) m: 1 hits")
     message(FATAL_ERROR "The open straw target does not report exactly one hit")
 endif()
 
-run_game(flight 0.85 spear-in-flight.bmp)
-if(NOT log MATCHES "Threw a flint spear" OR log MATCHES "Spear \\(flint\\) hit")
+# The window closes on wall-clock time, so one slow frame on a busy runner can let the spear land
+# before the quit (seen on CI at 12 FPS). The spear lands about 0.55 s after the throw, so the run
+# is tried up to 3 times; it fails only if the spear never ends a run in the air.
+set(inFlight FALSE)
+foreach(attempt RANGE 1 3)
+    run_game(flight 0.75 spear-in-flight.bmp)
+    if(log MATCHES "Threw a flint spear" AND NOT log MATCHES "Spear \\(flint\\) hit")
+        set(inFlight TRUE)
+        break()
+    endif()
+    message(STATUS "Flight run ${attempt}: the spear was not in the air at the quit, trying again")
+endforeach()
+if(NOT inFlight)
     message(FATAL_ERROR "The flight screenshot run should end with the spear still in the air")
 endif()
 message(STATUS "US-029 end to end: the flint spear hit the straw target for ${damage} damage")
