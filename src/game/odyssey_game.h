@@ -40,6 +40,7 @@
 #include "game/bubbles.h"
 #include "sim/dialogue_script.h"
 #include "sim/npc_chooser.h"
+#include "sim/smalltalk.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -115,6 +116,8 @@ public:
     const Bubbles& bubbles() const { return bubbles_; }
     sim::rules::CooldownTable& greetingCooldowns() { return greetingCooldowns_; }
     core::Pcg32& dialogueRandom() { return dialogueRng_; }
+    // Generated small talk (US-163): what people say when no script fits them, and for `{smalltalk.topic}`.
+    sim::rules::SmallTalk& smalltalk() { return smalltalk_; }
     int plantIndexById(int id) const;
     // What clan members and animals do on their own (US-154), and what they need to do it: the ground, the animals and the people to move.
     NpcLife& npcs() { return npcLife_; }
@@ -298,10 +301,12 @@ private:
     sim::rules::InteractionRegistry interactions_;
     sim::rules::LoadReport interactionReport_;
     sim::rules::DialogueLibrary dialogues_;
+    sim::rules::SmallTalk smalltalk_;
     Bubbles bubbles_;
     sim::rules::CooldownTable greetingCooldowns_;
     core::Pcg32 dialogueRng_{1, 8};
-    void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
+    void loadInteractions();
+    sim::rules::SmallTalk loadSmalltalk(sim::rules::LoadReport& report) const; // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
     sim::rules::ActionRunner actions_;
     std::int64_t actionClock_ = 0;

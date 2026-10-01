@@ -167,13 +167,106 @@ TEST_CASE("US-161 Hidden: a greyed choice cannot be picked, and without an [else
     CHECK(own.odyssey.run().widgets()[0].label == "1. Wave");
 }
 
-TEST_CASE("US-161 Without a script for them, Talk is the plain talk of before") {
+TEST_CASE("US-161 Without a script for them and without small talk, Talk is the plain talk of before") {
     const fs::path data = dataCopy("talk-plain");
     std::filesystem::remove(data / "dialogue" / "elder-fire.dlg");
+    std::filesystem::remove(data / "dialogue" / "smalltalk.json");
     Camp camp("talk-plain", data);
     const int person = camp.person();
     REQUIRE(person >= 0);
     REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
     CHECK(camp.odyssey.run().screen() == game::Screen::None);
     CHECK_FALSE(camp.odyssey.run().message().empty());
+}
+
+TEST_CASE("US-163 Memory: Talk with no script, and they mention the wolf they saw at the fire yesterday") {
+    const fs::path data = dataCopy("talk-wolf");
+    std::filesystem::remove(data / "dialogue" / "elder-fire.dlg");
+    Camp camp("talk-wolf", data);
+    const int person = camp.person();
+    REQUIRE(person >= 0);
+    const int hero = camp.odyssey.life()->personId();
+    // Memories are the simulation's; the game reads them through the world it was given.
+    sim::World* world = const_cast<sim::World*>(camp.odyssey.clan());
+    sim::Person* them = world->personMutable(person);
+    them->memories.clear();
+    them->notes.push_back({"a wolf at the fire", world->date().day - 1, -30, false});
+    camp.odyssey.changeOpinion(person, hero, 30);
+
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
+    REQUIRE(camp.odyssey.run().screen() == game::Screen::Talk);
+    camp.play(1);
+    // With a fresh memory most lines are about it; ask again until it is (a few draws at most).
+    bool aboutTheWolf = false;
+    for (int tries = 0; tries < 30 && !aboutTheWolf; ++tries) {
+        const std::vector<std::string> shown = camp.odyssey.run().shownText();
+        for (const std::string& text : shown) aboutTheWolf = aboutTheWolf || text.find("wolf at the fire") != std::string::npos;
+        if (!aboutTheWolf) {
+            camp.odyssey.run().press(camp.odyssey, game::RunFlow::kTalkChoiceBase); // Thank you: the talk ends
+            REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
+            camp.play(1);
+        }
+    }
+    CHECK(aboutTheWolf);
+    const auto& widgets = camp.odyssey.run().widgets();
+    REQUIRE(widgets.size() == 2);
+    CHECK(widgets[0].label == "1. Thank you");
+    CHECK(widgets[1].label == "2. Be quiet");
+}
+
+TEST_CASE("US-163 Be quiet costs 10 opinion, Thank you costs nothing") {
+    const fs::path data = dataCopy("talk-quiet");
+    std::filesystem::remove(data / "dialogue" / "elder-fire.dlg");
+    Camp camp("talk-quiet", data);
+    const int person = camp.person();
+    REQUIRE(person >= 0);
+    const int hero = camp.odyssey.life()->personId();
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
+    camp.play(1);
+    const int before = camp.odyssey.clan()->opinion(person, hero);
+    camp.odyssey.update(keyPressed(luna::engine::Intent::Slot1)); // Thank you
+    CHECK(camp.odyssey.run().screen() == game::Screen::None);
+    CHECK(camp.odyssey.clan()->opinion(person, hero) == before);
+
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, person)));
+    camp.play(1);
+    const int beforeRude = camp.odyssey.clan()->opinion(person, hero);
+    camp.odyssey.update(keyPressed(luna::engine::Intent::Slot2)); // Be quiet
+    CHECK(camp.odyssey.run().screen() == game::Screen::None);
+    CHECK(camp.odyssey.clan()->opinion(person, hero) == beforeRude - 10);
+}
+
+TEST_CASE("US-163 The elder's {smalltalk.hunt} is a real line, the same while the panel stays open") {
+    Camp camp("talk-hunt");
+    const int elder = elderOf(camp);
+    REQUIRE(elder >= 0);
+    REQUIRE(game::startInteraction(camp.odyssey, "talk", personSubjectOf(camp, elder)));
+    camp.play(1);
+    camp.odyssey.update(keyPressed(luna::engine::Intent::Slot1)); // Ask about the hunt
+    camp.play(1);
+    const std::vector<std::string> first = camp.odyssey.run().shownText();
+    REQUIRE(first.size() >= 2);
+    CHECK(first[1].rfind("Elder: ", 0) == 0);
+    CHECK(first[1].find('{') == std::string::npos);
+    CHECK(first[1] != "Elder: {smalltalk.hunt}");
+    camp.play(10);
+    CHECK(camp.odyssey.run().shownText() == first); // not a new line every frame
+}
+
+TEST_CASE("US-163 A mistake in smalltalk.json shows in the red panel with its line, and F5 with a good file takes it") {
+    const fs::path data = dataCopy("talk-file");
+    const fs::path file = data / "dialogue" / "smalltalk.json";
+    std::string text = readText(file);
+    const std::size_t at = text.find("It is {season}") + 6; // inside a template, not the comment at the top of the file
+    REQUIRE(at != std::string::npos);
+    text.replace(at, 8, "{sesaon}");
+    writeText(file, text);
+    Camp camp("talk-file", data);
+    bool named = false;
+    for (const auto& d : camp.odyssey.interactionReport().errors) named = named || d.text().find("dialogue/smalltalk.json:") == 0;
+    CHECK(named);
+    // Fix it and press F5: the data loads.
+    writeText(file, readText(dataCopy("talk-file-good") / "dialogue" / "smalltalk.json"));
+    camp.odyssey.update(reloadPressed());
+    CHECK(camp.odyssey.interactionReport().errors.empty());
 }

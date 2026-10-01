@@ -40,17 +40,31 @@ std::string fillDialogueTokens(const std::string& text, const RuleContext& conte
 
 ConversationView Conversation::view(const RuleContext& context) const {
     ConversationView out;
+    // `{smalltalk.topic}` is asked of the source once for each node entered; the answer is kept until the talk moves on.
+    const auto speak = [&](const std::string& text) {
+        std::string result = text;
+        for (std::size_t at = result.find("{smalltalk."); smalltalk_ && at != std::string::npos; at = result.find("{smalltalk.", at)) {
+            const std::size_t close = result.find('}', at);
+            if (close == std::string::npos) break;
+            const std::string topic = result.substr(at + 11, close - at - 11);
+            auto found = spoken_.find(topic);
+            if (found == spoken_.end()) found = spoken_.emplace(topic, smalltalk_(topic)).first;
+            result.replace(at, close - at + 1, found->second);
+            at += found->second.size();
+        }
+        return fillDialogueTokens(result, context);
+    };
     const DlgNode* node = finished_ ? nullptr : script_.find(node_);
     if (node == nullptr) return out;
     for (const DlgLine& line : node->lines) {
-        if (holds(line.condition, context)) out.lines.push_back({line.speaker, fillDialogueTokens(line.text, context)});
+        if (holds(line.condition, context)) out.lines.push_back({line.speaker, speak(line.text)});
     }
     for (std::size_t i = 0; i < node->choices.size() && static_cast<int>(out.choices.size()) < kMaxVisibleChoices; ++i) {
         const DlgChoice& choice = node->choices[i];
         if (holds(choice.condition, context)) {
-            out.choices.push_back({static_cast<int>(i), fillDialogueTokens(choice.text, context), true, {}});
+            out.choices.push_back({static_cast<int>(i), speak(choice.text), true, {}});
         } else if (!choice.elseText.empty()) {
-            out.choices.push_back({static_cast<int>(i), fillDialogueTokens(choice.text, context), false, fillDialogueTokens(choice.elseText, context)});
+            out.choices.push_back({static_cast<int>(i), speak(choice.text), false, speak(choice.elseText)});
         } // else: hidden
     }
     return out;
@@ -69,8 +83,30 @@ bool Conversation::choose(int visibleIndex, const RuleContext& context, ActionRu
         finished_ = true;
     } else {
         node_ = choice.target;
+        spoken_.clear(); // a node entered again says something new
     }
     return true;
+}
+
+DlgScript smalltalkScript(const std::string& speaker, const std::string& line) {
+    DlgScript script;
+    script.name = "smalltalk";
+    script.file = "smalltalk";
+    DlgNode node;
+    node.id = "start";
+    node.lines.push_back({speaker, line, {}, nullptr, {}, 0});
+    DlgChoice friendly;
+    friendly.text = "Thank you";
+    friendly.target = "END";
+    DlgChoice rude;
+    rude.text = "Be quiet";
+    rude.target = "END";
+    const ParsedEffect insult = parseEffect("opinion npc hero -10");
+    if (!insult.problem) rude.effects.push_back(insult.effect);
+    node.choices.push_back(std::move(friendly));
+    node.choices.push_back(std::move(rude));
+    script.nodes.push_back(std::move(node));
+    return script;
 }
 
 std::string moodWord(int opinion, const Needs& needs) {

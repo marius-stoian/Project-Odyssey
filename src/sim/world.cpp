@@ -899,6 +899,12 @@ std::uint64_t World::hash() const {
             hasher.add(memory.secondHand);
             hasher.add(memory.event);
         }
+        for (const MemoryNote& note : person.notes) { // none unless a conversation or the Game gave one
+            for (const char c : note.text) hasher.add(static_cast<int>(c));
+            hasher.add(note.day);
+            hasher.add(note.feeling);
+            hasher.add(note.secondHand);
+        }
         for (const int value : person.opinions) {
             hasher.add(value);
         }

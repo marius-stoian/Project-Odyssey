@@ -7,6 +7,8 @@
 #include "sim/needs.h"
 
 #include <cstdint>
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -54,13 +56,24 @@ public:
     // The player walks away (Esc): the talk ends, no effects.
     void leave() { finished_ = true; }
 
+    // Where `{smalltalk.hunt}` gets its line (US-163): asked once per token each time a node is entered, so what is said does not change from one
+    // frame to the next. Without a source the token stays as written.
+    using SmalltalkSource = std::function<std::string(const std::string& topic)>;
+    void setSmalltalk(SmalltalkSource source) { smalltalk_ = std::move(source); }
+
 private:
     DlgScript script_;
     int actor_ = 0;
     ThingRef target_;
     std::string node_;
     bool finished_ = false;
+    SmalltalkSource smalltalk_;
+    mutable std::map<std::string, std::string> spoken_; // the {smalltalk.topic} lines of the node the talk is at
 };
+
+// The conversation a person has when no script was written for them (US-163): their line, then a friendly answer and a rude one (D-38).
+// The rude one costs 10 opinion.
+DlgScript smalltalkScript(const std::string& speaker, const std::string& line);
 
 // The one word the panel shows next to the NPC's name (D-38): how they feel about the hero, unless a need is pressing and they are not
 // hostile. Opinion is -100..100; each need is 0 (empty) to 100 (full), as in Needs.

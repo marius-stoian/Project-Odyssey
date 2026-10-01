@@ -57,6 +57,8 @@ json savePerson(const Person& p) {
     for (const Memory& memory : p.memories) {
         memories.push_back(saveMemory(memory));
     }
+    json notes = json::array();
+    for (const MemoryNote& note : p.notes) notes.push_back(json{{"text", note.text}, {"day", note.day}, {"feeling", note.feeling}, {"secondHand", note.secondHand}});
     json grudges = json::array();
     for (const Grudge& grudge : p.grudges) {
         grudges.push_back(saveGrudge(grudge));
@@ -86,6 +88,7 @@ json savePerson(const Person& p) {
                 {"lastScores", p.lastDecision.scores},
                 {"lastChosen", static_cast<int>(p.lastDecision.chosen)},
                 {"memories", memories},
+                {"notes", notes},
                 {"opinions", p.opinions},
                 {"grudges", grudges},
                 {"lastGiftDay", p.lastGiftDay},
@@ -134,6 +137,11 @@ Person loadPerson(const json& value) {
     p.lastDecision.chosen = static_cast<Action>(value.at("lastChosen").get<int>());
     for (const json& memory : value.at("memories")) {
         p.memories.push_back(loadMemory(memory));
+    }
+    if (value.contains("notes")) { // saves from before US-163 have none
+        for (const json& note : value.at("notes")) {
+            p.notes.push_back({note.at("text").get<std::string>(), note.at("day").get<std::int64_t>(), note.at("feeling").get<int>(), note.at("secondHand").get<bool>()});
+        }
     }
     p.opinions = value.at("opinions").get<std::vector<int>>();
     for (const json& grudge : value.at("grudges")) {

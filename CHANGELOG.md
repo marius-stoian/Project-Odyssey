@@ -13,6 +13,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## US-163: Generated small talk (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-163`); merged into `qa`.
+
+- Data: `assets/data/dialogue/smalltalk.json` (topics memory, people, needs, season, hero, hunt; templates for any mood and for a mood).
+- Simulation: `smalltalk` (the checked file reader and the generator: topic by weights, one of the three newest facts, a template for the mood that is not tired out), `MemoryNote` and `Person::notes` (free-text memories: saved, hashed, never read by the simulation), `{smalltalk.topic}` in scripts, the generated talk with Thank you and Be quiet (opinion -10).
+- Game: Talk with no script opens small talk (and still warms the two); the file loads and reloads with the dialogue files.
+- Tests: `tests/sim/smalltalk_test.cpp` (11 cases), 4 new game cases in `tests/game/conversation_test.cpp`; the older Talk checks of US-152 and US-161 follow the new behaviour. Docs: the small-talk section of the dialogue guide, `docs/plans/US-163.md`, teach-back, evidence `docs/evidence/US-163/` (50 sample lines, a screenshot).
 ## P-011: adopt Codex v2.2 and record D-40..D-43 (Avengers) - 2026-10-01
 
 **State:** Documents only; merged into `qa`.

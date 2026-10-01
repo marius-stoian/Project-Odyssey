@@ -76,7 +76,9 @@ TEST_CASE("US-152 Choosing an item does what it did before") {
     camp.menuAt(figure.x, figure.y - 8);
     camp.odyssey.run().setMessage("");
     camp.choose(0); // Talk
-    CHECK_FALSE(camp.odyssey.run().message().empty());
+    // Talk opens a conversation panel (a script, or small talk: US-161, US-163); the plain message is for people with neither.
+    CHECK((camp.odyssey.run().screen() == game::Screen::Talk || !camp.odyssey.run().message().empty()));
+    camp.odyssey.run().press(camp.odyssey, game::RunFlow::kClose);
     camp.menuAt(figure.x, figure.y - 8);
     camp.choose(1); // Give berries
     CHECK(life.count("berries") == berries - 2);

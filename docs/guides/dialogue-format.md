@@ -87,6 +87,34 @@ Elder: The fire keeps you well, {hero}.
 
 Shipped examples: `greet-elder.dlg`, and two plain ones for anyone, `greet-friend.dlg` and `greet-friend-warm.dlg` (equally fitting, so the seeded stream chooses).
 
+## Small talk: what people say when no script fits (US-163)
+
+When Talk finds no script for a person, they make small talk: one plain, short line made up from what they remember, what they heard, what they need and the season, and two answers: **Thank you** (nothing happens) and **Be quiet** (the person's opinion of the hero falls by 10). The same lines fill `{smalltalk.<topic>}` in your own scripts: `Elder: {smalltalk.hunt}` says a line of the topic `hunt`, chosen when the node is shown and kept while it stays on screen.
+
+The lines are templates in `assets/data/dialogue/smalltalk.json`, read at start and again on F5 (a mistake is named as `dialogue/smalltalk.json:<line>: message` and the old lines stay in use):
+
+```json
+{
+  "topics": {
+    "memory": [
+      "I keep thinking about {memory.what}.",
+      "{memory.what}, {memory.when}. I have not forgotten.",
+      { "text": "Why do you ask? {memory.what}, {memory.when}. That is all.", "mood": ["wary", "hostile"] }
+    ],
+    "people": [ "They say {gossip.what}. It leaves me {gossip.feeling}.", ... ],
+    "needs": [ "I could do with some {need.name}.", ... ],
+    "season": [ "It is {season}. The days go by.", ... ],
+    "hero": [ "{hero}, what brings you here?", ... ],
+    "hunt": [ "The deer are thin this {season}.", ... ]
+  }
+}
+```
+
+- **Topics.** `memory`, `people`, `needs`, `season` and `hero` must be there, each with **at least 3 templates**; you may add topics of your own (like `hunt`) for `{smalltalk.<topic>}`. Without a topic asked for, the game weighs the topics by the person: a pressing need, a fresh memory, gossip they have heard, the season, the hero. Asking for `memory`, `people` or `needs` when the person has nothing to say about it falls back to the season.
+- **A template** is a quoted sentence (any mood) or `{ "text": "...", "mood": ["warm", "friendly"] }`, used only while the person feels one of those ways. The moods are `warm`, `friendly`, `neutral`, `wary`, `hostile` (from their opinion of the hero) and `hungry`, `tired`, `cold`, `lonely` (a pressing need). Keep each template **plain and short**: 140 characters at most.
+- **Tokens**, filled when it is said. Everywhere: `{season}` (spring...), `{hero}` (the hero's name), `{npc}` and `{npc.name}` (the speaker). In `memory`: `{memory.what}` ("a wolf at the fire", "Bo blaming Ama", "you giving me a gift"), `{memory.who}` (who did it) and `{memory.when}` (today, yesterday, 3 days ago, a long time ago). In `people`: `{gossip.what}`, `{gossip.who}`, `{gossip.about}` and `{gossip.feeling}` (angry, uneasy, unsure, glad, delighted: how the heard memory sits with them). In `needs`: `{need.name}` (food, rest, warmth, company). A token used in the wrong topic, or one that does not exist, is a mistake with its line.
+- **Variety.** A person does not say a line they said in their last three, and nobody says the same line more than twice in fifty. Add templates to widen it.
+
 ## Not in this story yet
 
-Small talk for people without a script and the `{smalltalk.topic}` lines (US-163), memories and flags (US-164) and bubbles between NPCs talking to each other (US-165) come in the next stories. Until US-163 a `{smalltalk.hunt}` shows as written.
+Writing a memory from a conversation (`remember`), flags and gossip of free-text memories (US-164) and bubbles between NPCs talking to each other (US-165) come in the next stories.
