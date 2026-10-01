@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## CI: faster verification (Dominus, D-46) - 2026-10-01
+
+**State:** Merged into `qa`; this push is the first CI run with the new workflow.
+
+- `.github/workflows/ci.yml`: runs on pushes to `qa` and `main` only (plus manual runs), skips docs-only pushes (`docs/**`, `*.md`), cancels a run when a newer push to the same branch arrives, caches the built vcpkg libraries (`actions/cache`, `VCPKG_BINARY_SOURCES`); builds and tests Release on `qa`, and also Debug on `main`.
+- `tools/verify.ps1`: new `-Config Debug|Release|Both` (default Debug): the local check builds and tests Debug with AddressSanitizer.
+- Codex v2.3 synced from Anima (`docs/Codex.md`, `CLAUDE.md`): Definition of Done, L-01 step 7 and every prompt still To do say which configuration is checked where.
+- Requirements v2.5 and the backlog mirrored from Drive (ADR-014 trimmed, D-46); `docs/decisions.md`: D-46.
+
 ## Docs: Codex v2.2, requirements v2.4 and the M8b-M8e brief (Anima, Dominus) - 2026-10-01
 
 **State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).
