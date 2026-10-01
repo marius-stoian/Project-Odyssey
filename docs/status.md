@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v1.6. Edited only by mraw-orchestrator.
+Codex v2.0. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
@@ -13,6 +13,7 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | P-006 | - | - | Done | 2026-09-30 |
 | P-007 | - | - | Done | 2026-09-30 |
 | P-008 | - | - | Done | 2026-10-01 |
+| P-009 | - | - | Done | 2026-10-01 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -104,11 +105,36 @@ Codex v1.6. Edited only by mraw-orchestrator.
 | S-US-081 | US-081 | M5 | Done | 2026-10-01 |
 | S-US-082 | US-082 | M5 | Done | 2026-10-01 |
 | X-M5 | - | M5 | To do |  |
+| K-M7 | - | M7 | To do |  |
+| S-US-150 | US-150 | M7 | To do |  |
+| S-US-151 | US-151 | M7 | To do |  |
+| S-US-156 | US-156 | M7 | To do |  |
+| S-US-152 | US-152 | M7 | To do |  |
+| S-US-153 | US-153 | M7 | To do |  |
+| S-US-155 | US-155 | M7 | To do |  |
+| S-US-154 | US-154 | M7 | To do |  |
+| X-M7 | - | M7 | To do |  |
+| K-M8 | - | M8 | To do |  |
+| S-US-160 | US-160 | M8 | To do |  |
+| S-US-161 | US-161 | M8 | To do |  |
+| S-US-162 | US-162 | M8 | To do |  |
+| S-US-163 | US-163 | M8 | To do |  |
+| S-US-164 | US-164 | M8 | To do |  |
+| S-US-165 | US-165 | M8 | To do |  |
+| X-M8 | - | M8 | To do |  |
+| K-M9 | - | M9 | To do |  |
+| S-US-170 | US-170 | M9 | To do |  |
+| S-US-171 | US-171 | M9 | To do |  |
+| S-US-172 | US-172 | M9 | To do |  |
+| S-US-175 | US-175 | M9 | To do |  |
+| S-US-173 | US-173 | M9 | To do |  |
+| S-US-174 | US-174 | M9 | To do |  |
+| X-M9 | - | M9 | To do |  |
 | K-M6 | - | M6 | Done | 2026-10-01 |
 | S-US-090 | US-090 | M6 | Done | 2026-10-01 |
 | S-US-091 | US-091 | M6 | Done | 2026-10-01 |
 | S-US-092 | US-092 | M6 | Done | 2026-10-01 |
-| X-M6 | - | M6 | Blocked | waits for the owner (D-GATE-M6) |
+| X-M6 | - | M6 | Blocked | waits for X-M9 and the owner (D-GATE-M6) |
 
 
 US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Mraw on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).
