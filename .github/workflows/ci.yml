@@ -45,8 +45,14 @@ jobs:
       - name: Build Release
         run: cmake --build --preset windows-x64-release
 
+      # The tests that open no window run side by side (the runner has 4 cores); the window tests
+      # run one at a time afterwards because they depend on frame timing.
       - name: Test Debug
-        run: ctest --preset windows-x64-debug
+        run: |
+          ctest --preset windows-x64-debug -LE window -j 4
+          ctest --preset windows-x64-debug -L window
 
       - name: Test Release
-        run: ctest --preset windows-x64-release
+        run: |
+          ctest --preset windows-x64-release -LE window -j 4
+          ctest --preset windows-x64-release -L window

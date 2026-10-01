@@ -327,7 +327,13 @@ target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
-add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
+# The game tests are split into three runs so CTest can run them side by side (CI uses -j 4). The
+# files in A and B are named; C runs every other file, so a new test file is never left out.
+set(ODYSSEUS_SHARD_A "*aiming_test.cpp,*weapons_test.cpp,*combat_test.cpp")
+set(ODYSSEUS_SHARD_B "*plants_test.cpp,*ranged_test.cpp,*elements_test.cpp,*settings_test.cpp")
+add_test(NAME odysseus_game_tests_a COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_A}")
+add_test(NAME odysseus_game_tests_b COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_B}")
+add_test(NAME odysseus_game_tests_c COMMAND odysseus_game_tests "--source-file-exclude=${ODYSSEUS_SHARD_A},${ODYSSEUS_SHARD_B}")
 
 # --- End-to-end: walk right into the boulder in the real window (US-024) ---
 add_test(NAME "US-024 Walk to the rock"

@@ -9,6 +9,8 @@ its PR changes rather than leaving an outdated description.
 **State:** Docs only; no code changed. Verified: Debug and Release build with 0 warnings, 25 of 25 tests pass in each (`docs/evidence/P-009/`).
 
 - `docs/status.md` lists P-009 and the M7, M8, M9 prompts; `docs/decisions.md` records D-08 (answered by D-34) and D-35; `CLAUDE.md` and `docs/Codex.md` are at v2.0; the requirements and backlog are synced from Drive.
+- CI speed: the tests that open no window run in parallel (`ctest -LE window -j 4`), window tests one at a time after them; `odysseus_game_tests` is split into three CTest runs by source file (A, B, and C = everything else); Debug-only trims (Release keeps the full sizes) of `US-139 No flicker walking past the pointer` (108 to 16 combinations), `US-040 Playable` (30 to 8 seeds) and `US-014 No two living people share a name` (2 to 1 seed). Locally the non-window Debug tests went from about 450 s to 94 s.
+- `US-029` flight run is retried up to 3 times because one slow frame on a CI runner let the spear land before the quit (CI run 36828924780); the check itself is unchanged.
 - `docs/gates/test-debt.md` records the run; the owed test checks of M2d, M4, M5, M6 are closed there.
 
 
