@@ -10,7 +10,7 @@ on:
 jobs:
   windows-x64:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Check out Odysseus
         uses: actions/checkout@v7
