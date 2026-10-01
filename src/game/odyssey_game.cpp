@@ -136,6 +136,9 @@ void OdysseyGame::resetPlay() {
     fullTicks_ = 0;
     actions_.clear(); // a restart drops what was under way and what was waiting
     actionClock_ = 0;
+    bubbles_.clear(); // a restart starts the run's talk afresh
+    greetingCooldowns_.clear();
+    dialogueRng_ = core::Pcg32(1, 8);
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
@@ -416,6 +419,15 @@ void OdysseyGame::drawClan(luna::engine::Renderer& renderer, const luna::engine:
         const luna::engine::Rect source{figure->animationFrame() * kCharacterWidth, static_cast<int>(figure->facing) * kCharacterHeight, kCharacterWidth, kCharacterHeight};
         renderer.drawStyled(found->second, source, {feetX - width / 2, feetY - height, width, height}, {});
         if (figure->emote != Emote::None) drawEmote(renderer, figure->emote, feetX, feetY - height - 14);
+        if (const Bubble* said = bubbles_.of(static_cast<int>(figure - clanView_.figures().data()))) {
+            // Words over the head, above the face of a need if there is one.
+            luna::engine::UiPainter painter(renderer, uiSheet_);
+            const int w = luna::engine::UiPainter::textWidth(said->text) + 8;
+            const luna::engine::Rect box{feetX - w / 2, feetY - height - 14 - (figure->emote != Emote::None ? 14 : 0) - 2, w, 14};
+            painter.fill(box, luna::engine::UiColor::Shade);
+            painter.outline(box, luna::engine::UiColor::Border);
+            painter.text(box.x + 4, box.y + 4, said->text, luna::engine::UiColor::Text);
+        }
     }
 }
 
@@ -1583,6 +1595,8 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             if (lastSavedDay_ >= 0) autosave();
             lastSavedDay_ = day;
         }
+        bubbles_.tick();
+        updateGreetings(*this);
         npcLife_.tick(*this); // clan members and animals look around, walk and do things with the same interactions as the hero (US-154)
     }
     if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});

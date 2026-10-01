@@ -1,0 +1,6 @@
+# A plain greeting for any friendly clan member (US-162).
+@who person
+@bark greet
+
+=== start
+Friend: Good day, {hero}.

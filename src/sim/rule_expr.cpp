@@ -329,6 +329,7 @@ const std::vector<FunctionInfo>& knownFunctions() {
         {"skill", 1, 1, "the actor's skill in a profession: skill(hunter)"},
         {"trait", 1, 1, "1 when the actor has the trait, else 0: trait(diligent)"},
         {"opinion", 2, 2, "what the first thinks of the second, -100 to 100: opinion(npc, hero)"},
+        {"mood", 1, 1, "one word for how someone feels about the hero (warm, friendly, neutral, wary, hostile, or hungry, tired, cold, lonely): mood(npc) == wary"},
         {"kin", 2, 2, "1 when the two are family: kin(npc, hero)"},
         {"flag", 1, 1, "a note the story has set (0 when never set): flag(met-elder)"},
         {"tag", 2, 2, "1 when a thing carries a tag: tag(target, edible)"},

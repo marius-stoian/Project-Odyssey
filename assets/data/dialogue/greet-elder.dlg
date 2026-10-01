@@ -1,0 +1,9 @@
+# What the elder says when you pass by and they think well of you (US-162). A greeting is a short script: @bark names it, and the first
+# line that holds is shown for a few seconds over their head. It is chosen like a conversation: their own name first, then a role, then the kind.
+@who elder
+@when opinion(npc, hero) >= 0
+@priority 10
+@bark greet
+
+=== start
+Elder: The fire keeps you well, {hero}.

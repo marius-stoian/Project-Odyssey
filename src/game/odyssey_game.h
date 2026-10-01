@@ -37,7 +37,9 @@
 #include "core/random.h"
 
 #include "sim/hero_life.h"
+#include "game/bubbles.h"
 #include "sim/dialogue_script.h"
+#include "sim/npc_chooser.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -107,6 +109,12 @@ public:
     sim::rules::ActionRunner& actions() { return actions_; }
     const sim::rules::ActionRunner& actions() const { return actions_; }
     std::int64_t actionClock() const { return actionClock_; }
+    // Greetings (US-162): the bubbles over heads, the minute each NPC waits between greetings, and the seeded stream that chooses between
+    // equally fitting scripts (the stream "dialogue", Charter rule 6).
+    Bubbles& bubbles() { return bubbles_; }
+    const Bubbles& bubbles() const { return bubbles_; }
+    sim::rules::CooldownTable& greetingCooldowns() { return greetingCooldowns_; }
+    core::Pcg32& dialogueRandom() { return dialogueRng_; }
     int plantIndexById(int id) const;
     // What clan members and animals do on their own (US-154), and what they need to do it: the ground, the animals and the people to move.
     NpcLife& npcs() { return npcLife_; }
@@ -290,6 +298,9 @@ private:
     sim::rules::InteractionRegistry interactions_;
     sim::rules::LoadReport interactionReport_;
     sim::rules::DialogueLibrary dialogues_;
+    Bubbles bubbles_;
+    sim::rules::CooldownTable greetingCooldowns_;
+    core::Pcg32 dialogueRng_{1, 8};
     void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
     sim::rules::ActionRunner actions_;

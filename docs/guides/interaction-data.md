@@ -244,6 +244,7 @@ A condition is a small sum that comes out true or false. A score is the same kin
 | `skill(profession)` | the actor's skill in a profession: skill(hunter) |
 | `trait(name)` | 1 when the actor has the trait, else 0: trait(diligent) |
 | `opinion(a, b)` | what the first thinks of the second, -100 to 100: opinion(npc, hero) |
+| `mood(who)` | one word for how someone feels about the hero (warm, friendly, neutral, wary, hostile, or hungry, tired, cold, lonely): mood(npc) == wary |
 | `kin(a, b)` | 1 when the two are family: kin(npc, hero) |
 | `flag(name)` | a note the story has set (0 when never set): flag(met-elder) |
 | `tag(thing, name)` | 1 when a thing carries a tag: tag(target, edible) |

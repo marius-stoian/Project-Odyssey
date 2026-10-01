@@ -187,6 +187,7 @@ add_library(odysseus_game STATIC
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
+    src/game/bubbles.cpp
     src/game/run_flow.cpp
     src/game/settings.cpp
     src/game/tutorial.cpp
@@ -341,7 +342,8 @@ add_executable(odysseus_game_tests
     tests/game/tags_test.cpp
     tests/game/menu_test.cpp
     tests/game/npc_test.cpp
-    tests/game/conversation_test.cpp)
+    tests/game/conversation_test.cpp
+    tests/game/greeting_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -387,7 +389,8 @@ add_executable(odysseus_sim_tests
     tests/sim/rules_test.cpp
     tests/sim/runner_test.cpp
     tests/sim/dialogue_test.cpp
-    tests/sim/conversation_test.cpp)
+    tests/sim/conversation_test.cpp
+    tests/sim/selection_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
