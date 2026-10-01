@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Docs: merged parallel versions: Codex v2.6, requirements v2.8 (Dominus, Anima) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- While Anima published Codex v2.4 and v2.5 and requirements v2.6 and v2.7, Mraw aligned US-231 and US-232 with the owner's M8b answers (D-44, CI-010) on `story/US-231` and published its own "v2.4" Codex and "v2.6" requirements to Drive. Both lines are merged: Codex v2.6 and requirements v2.8 contain every change from both sides (Mraw's S-US-231 and S-US-232 prompts are kept word for word).
+- `docs/project/requirements/`: requirements v2.8 and the backlog; `docs/Codex.md`, `CLAUDE.md`: Codex v2.6; `docs/codex-issues.md`: CI-010 resolved.
+- For `story/US-231` when it merges `qa`: take `qa`'s version of `docs/Codex.md`, `CLAUDE.md`, `docs/codex-issues.md` and the two files in `docs/project/requirements/` (they already contain the branch's changes); keep the branch's own versions of `Handover.md`, `Limit.md`, `docs/status.md` and `docs/project/README.md`.
+- From now on Codex changes go through Anima (A-002) so versions stay in one line.
+
 ## Docs: Codex v2.5, requirements v2.7, playtest plan (Dominus, Anima, D-48) - 2026-10-01
 
 **State:** Documents only; merged into `qa`.
