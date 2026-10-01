@@ -228,7 +228,7 @@ TEST_CASE("US-156 A bad file lists file:line: message and the last good data sta
     odyssey.render(renderer, 0.0);
     const std::size_t quietDraws = renderer.draws().size();
 
-    editGather(data, "\"do gather\"", "\"giv gather\"");
+    editGather(data, "\"do gather-berries\"", "\"giv gather-berries\"");
     editGather(data, "\"range\": 2,", "\"range\": 3,"); // a good change in the same file must not sneak in
     odyssey.update(reloadPressed());
     REQUIRE(odyssey.interactionPanelOpen());
@@ -242,7 +242,7 @@ TEST_CASE("US-156 A bad file lists file:line: message and the last good data sta
     odyssey.render(renderer, 0.0);
     CHECK(renderer.draws().size() > quietDraws); // the panel is on screen
 
-    editGather(data, "\"giv gather\"", "\"do gather\"");
+    editGather(data, "\"giv gather-berries\"", "\"do gather-berries\"");
     odyssey.update(reloadPressed());
     CHECK_FALSE(odyssey.interactionPanelOpen());
     CHECK(odyssey.interactions().find("gather")->rangeMilli == 3000); // now the new data
@@ -278,14 +278,14 @@ TEST_CASE("US-156 F5 works in the Editor and the panel shows there too") {
     odyssey.render(renderer, 0.0);
     const std::size_t quietDraws = renderer.draws().size();
 
-    editGather(data, "\"do gather\"", "\"giv gather\"");
+    editGather(data, "\"do gather-berries\"", "\"giv gather-berries\"");
     odyssey.update(reloadPressed());
     REQUIRE(odyssey.interactionPanelOpen());
     renderer.clear();
     odyssey.render(renderer, 0.0);
     CHECK(renderer.draws().size() > quietDraws);
 
-    editGather(data, "\"giv gather\"", "\"do gather\"");
+    editGather(data, "\"giv gather-berries\"", "\"do gather-berries\"");
     odyssey.update(reloadPressed());
     CHECK_FALSE(odyssey.interactionPanelOpen());
 }

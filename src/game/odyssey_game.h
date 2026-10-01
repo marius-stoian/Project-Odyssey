@@ -18,6 +18,7 @@
 #include "game/editor.h"
 #include "game/enemy.h"
 #include "game/game_rules.h"
+#include "sim/action_runner.h"
 #include "game/hero.h"
 #include "game/pickups.h"
 #include "game/effect_art.h"
@@ -96,6 +97,12 @@ public:
     // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the
     // last good data stays in use and the panel lists "file:line: message". Returns true when the new data was taken.
     bool reloadInteractions();
+    // Timed actions (US-153): the runner, its clock (play ticks since the run began; it stops while a screen is open), and the plant
+    // with a given id (-1 when there is none).
+    sim::rules::ActionRunner& actions() { return actions_; }
+    const sim::rules::ActionRunner& actions() const { return actions_; }
+    std::int64_t actionClock() const { return actionClock_; }
+    int plantIndexById(int id) const;
     bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }
     double lastInteractionReloadMilliseconds() const { return lastInteractionReloadMs_; }
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
@@ -265,6 +272,12 @@ private:
     sim::rules::LoadReport interactionReport_;
     void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
+    sim::rules::ActionRunner actions_;
+    std::int64_t actionClock_ = 0;
+    void tickActions(const luna::engine::Intents& intents);
+    void drawActionRing(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
+    std::string thingsText() const;                          // the plants' states and the waiting effects, as saved in things.json
+    std::vector<std::string> restoreThings(const std::string& text);
     void drawInteractionPanel(luna::engine::Renderer& renderer) const;
     ContentAtlas content_;
     bool contentLoaded_ = false;

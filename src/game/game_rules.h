@@ -2,6 +2,7 @@
 
 #include "boundary.h"
 
+#include "sim/action_runner.h"
 #include "sim/interaction.h"
 #include "sim/rule_expr.h"
 
@@ -32,6 +33,11 @@ struct Subject {
 std::optional<Subject> subjectAt(const OdysseyGame& game, double worldX, double worldY);
 Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex);
 
+// A Subject as a stable name the runner can keep (a plant by its id, a clan member by their index) and back (US-153). Empty when the
+// thing is gone (a plant not in the level any more, a rival camp that moved away).
+sim::rules::ThingRef refOf(const OdysseyGame& game, const Subject& subject);
+std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::ThingRef& ref);
+
 // The tags the game gives its own things (people, fires, the stone, camps), for the unknown-tag check of the interaction files.
 std::vector<std::string> builtInThingTags(const OdysseyGame& game);
 
@@ -57,8 +63,11 @@ std::string timeOfDayWord(int hour);
 // The actions built into the game that interaction files may name with `do` (US-152).
 const std::vector<std::string>& builtInActionNames();
 
-// Carries out one interaction the hero chose on `subject`: its effects, in order. `do` runs a built-in action; `say` shows the text;
-// the other verbs wait for the action runner (US-153) and are only noted in the log. False when the interaction no longer exists.
-bool runInteraction(OdysseyGame& game, const std::string& interactionId, const Subject& subject);
+// The hero starts an interaction on `subject` (US-153). An instant one does its effects now; a timed one runs for its duration (a ring fills
+// over the target) and does its effects only if the hero is not interrupted. False when the interaction no longer exists.
+bool startInteraction(OdysseyGame& game, const std::string& interactionId, const Subject& subject);
+
+// One tick of the runner: effects waiting for their time happen, finished actions do their effects. Called by the game each play tick.
+void tickInteractions(OdysseyGame& game);
 
 } // namespace odysseus::game

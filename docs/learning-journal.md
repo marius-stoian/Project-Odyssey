@@ -1050,3 +1050,15 @@ The old code did not disappear; it moved. Each item's body became a **built-in a
 **Try it (15 minutes).** Do the three manual checks in [docs/plans/US-152.md](plans/US-152.md); then add `"order": 5` to `eat-berries.json`, press F5 and see it jump to the top of the fire's menu.
 
 **Check yourself.** Why was it important to write the tests for the old menu *before* connecting the new one, and what would you not know if you had written them afterwards from the new code?
+
+## M7: a clock the game can count on (US-153)
+
+A three-second action in a game that runs 20 times a second is just "do something when 60 ticks have passed". The runner keeps one number, the **clock** (how many play ticks have happened), and each running action remembers two numbers: the tick it started and the tick it ends. Progress is `100 * (now - start) / (end - start)`; the job is done when `now >= end`. Nothing reads the computer's real clock, so the same inputs give the same result on every machine, and when a menu is open the clock simply stops, so a job pauses with the world. A **timer** is the same idea for effects that wait (`after 15s ...`): a list of "at tick T, do X", kept in order. When two timers are due on the same tick a counter that goes up by one each time decides who goes first, so the order never depends on chance.
+
+Saving a clock is a trap: tick 5000 means nothing to a game that starts again from tick 0. So the saved file does not say "at tick 5300" but "in 300 ticks", and loading adds that to the new clock. The same thought applies to what is saved: only the things that are *not* in their starting state (a picked plant), because everything else can be rebuilt from the level. `saveWorld` for the clan, `hero.json` for the hero and now `things.json` for the plants and their timers are written the same careful way: first to a temporary file, then renamed, keeping three older copies.
+
+**Where to look.** `ActionRunner::tick`, `start` and `savePending` in [src/sim/action_runner.cpp](../src/sim/action_runner.cpp); `OdysseyGame::tickActions` and `thingsText` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `GameEffectHost::setState` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp).
+
+**Try it (15 minutes).** The four manual checks in [docs/plans/US-153.md](plans/US-153.md); then set `"after 15s"` in `gather.json` to `"after 3s"` and see plants come back quickly.
+
+**Check yourself.** Why does the saved file store "in 200 ticks" rather than "at tick 5200", and what would go wrong after loading if it stored the second?

@@ -110,7 +110,7 @@ Codex v2.0. Edited only by mraw-orchestrator.
 | S-US-151 | US-151 | M7 | Done | 2026-10-01 |
 | S-US-156 | US-156 | M7 | Done | 2026-10-01 |
 | S-US-152 | US-152 | M7 | Done | 2026-10-01 |
-| S-US-153 | US-153 | M7 | To do |  |
+| S-US-153 | US-153 | M7 | Done | 2026-10-01 |
 | S-US-155 | US-155 | M7 | To do |  |
 | S-US-154 | US-154 | M7 | To do |  |
 | X-M7 | - | M7 | To do |  |

@@ -49,7 +49,7 @@ struct Camp {
     fs::path data;
     game::OdysseyGame odyssey;
 
-    static fs::path makeLevel(const fs::path& data, const std::string& name) {
+    static fs::path makeLevel(const fs::path& data, const std::string& name, bool wheat = false) {
         const fs::path folder = data.parent_path() / ("level-" + name);
         fs::create_directories(folder);
         const game::Definitions definitions = game::loadDefinitions(data);
@@ -58,11 +58,13 @@ struct Camp {
         level.characters.clear();
         level.clan = true;
         level.effects.push_back({level.nextId++, "flame", level.heroStart});
+        if (wheat) level.plants.push_back({level.nextId++, "wheat", {level.heroStart.x + 32, level.heroStart.y}}); // 1 m east of the hero, ripe
         game::saveLevel(level, definitions, folder / "level.json");
         return folder / "level.json";
     }
 
-    explicit Camp(const std::string& name, const fs::path& dataFolder = {}) : data(dataFolder.empty() ? dataCopy(name) : dataFolder), odyssey(data, makeLevel(data, name)) {
+    explicit Camp(const std::string& name, const fs::path& dataFolder = {}, bool wheat = false)
+        : data(dataFolder.empty() ? dataCopy(name) : dataFolder), odyssey(data, makeLevel(data, name, wheat)) {
         odyssey.start(renderer);
         odyssey.startNewRun({1, 2, 1}, false, false); // preset 2 = "Off": the hero starts grown
         odyssey.run().close();
@@ -80,6 +82,13 @@ struct Camp {
     void choose(std::size_t index) { odyssey.run().press(odyssey, game::RunFlow::kContextBase + static_cast<int>(index)); }
 
     game::PixelPoint fire() const { return odyssey.campPixels(); }
+    // Plays n ticks of nothing, or of the given intents.
+    void play(int n, const luna::engine::Intents& intents = {}) {
+        for (int i = 0; i < n; ++i) odyssey.update(intents);
+    }
+    int berries() const { return odyssey.life()->count("berries"); }
+    // The hero chooses Gather on the first plant (the menu item runs exactly this; the clan stands around the fire, so a click there may find a person).
+    void gather() { REQUIRE(game::startInteraction(odyssey, "gather", game::plantSubject(odyssey, 0))); }
     // A clan member standing where a click finds them.
     int person() const {
         const auto& figures = odyssey.clanView().figures();
@@ -240,4 +249,137 @@ TEST_CASE("US-152 Every action the old menu had is now a file") {
         }
     }
     for (const std::string& name : game::builtInActionNames()) CHECK_MESSAGE(used.count(name) == 1, name);
+}
+
+// ---- US-153: timed actions and world state
+
+TEST_CASE("US-153 Gather takes three seconds under a ring, then gives berries and hides the plant until it is ripe again") {
+    Camp camp("timed-gather", {}, true);
+    REQUIRE(camp.odyssey.plants().size() == 1);
+    const game::WorldPlant& plant = camp.odyssey.plants()[0];
+    REQUIRE(plant.state == "ripe");
+    const int before = camp.berries();
+
+    CHECK(camp.odyssey.plantOffers(0)[0].interaction->id == "gather");
+    camp.gather(); // what choosing Gather in the menu does
+    REQUIRE(camp.odyssey.actions().running(0) != nullptr);
+    CHECK(camp.berries() == before); // nothing yet
+
+    // The ring is on screen while it fills.
+    camp.renderer.clear();
+    camp.odyssey.render(camp.renderer, 0.0);
+    const std::size_t withRing = camp.renderer.draws().size();
+
+    camp.play(30); // 1.5 s
+    CHECK(camp.odyssey.actions().progress(0, camp.odyssey.actionClock()) == 50);
+    CHECK(camp.berries() == before);
+    camp.play(29);
+    CHECK(camp.berries() == before); // one tick short
+    camp.play(1);
+    CHECK(camp.berries() == before + 2); // after 3 s
+    CHECK(camp.odyssey.actions().running(0) == nullptr);
+    CHECK(plant.state == "picked");
+    CHECK_FALSE(plant.present()); // hidden
+    CHECK(camp.odyssey.plantAtWorld(plant.feet.x, plant.feet.y - 8) == -1);
+
+    camp.renderer.clear();
+    camp.odyssey.render(camp.renderer, 0.0);
+    CHECK(camp.renderer.draws().size() < withRing); // the ring and the plant are gone
+
+    // Greyed out while it waits, even though it cannot be clicked: asked directly.
+    const auto offers = camp.odyssey.plantOffers(0);
+    CHECK_FALSE(offers[0].enabled);
+    CHECK(offers[0].reason == "Nothing to pick yet");
+
+    camp.play(299);
+    CHECK(plant.state == "picked");
+    camp.play(1); // 15 s after the pick
+    CHECK(plant.state == "ripe");
+    CHECK(plant.present());
+    CHECK(camp.odyssey.plantAtWorld(plant.feet.x, plant.feet.y - 8) == 0); // back in the same spot
+}
+
+TEST_CASE("US-153 Moving or attacking stops a timed action and it gives nothing") {
+    for (const luna::engine::Intent stopper : {luna::engine::Intent::MoveRight, luna::engine::Intent::Attack}) {
+        Camp camp("timed-interrupt", {}, true);
+        const game::WorldPlant& plant = camp.odyssey.plants()[0];
+        const int before = camp.berries();
+        camp.gather();
+        camp.play(20);
+        REQUIRE(camp.odyssey.actions().running(0) != nullptr);
+        luna::engine::Intents stop;
+        stop.set(stopper, true, true);
+        camp.play(1, stop);
+        CHECK(camp.odyssey.actions().running(0) == nullptr);
+        camp.play(200);
+        CHECK(camp.berries() == before);
+        CHECK(plant.state == "ripe");
+        CHECK(plant.present());
+    }
+}
+
+TEST_CASE("US-153 Standing still lets the action finish; opening a screen pauses it") {
+    Camp camp("timed-pause", {}, true);
+    const int before = camp.berries();
+    camp.gather();
+    camp.play(20);
+    camp.odyssey.run().openMenu(); // the world waits while a screen is open
+    camp.play(100);
+    CHECK(camp.berries() == before);
+    CHECK(camp.odyssey.actions().running(0) != nullptr);
+    camp.odyssey.run().close();
+    camp.play(40);
+    CHECK(camp.berries() == before + 2);
+}
+
+TEST_CASE("US-153 A picked bush and a lit fire are still there after a save and a load") {
+    const fs::path data = dataCopy("timed-save");
+    Camp camp("timed-save", data, true);
+    auto& life = *camp.odyssey.life();
+    life.setSkillPoints(3, 30);
+    const game::PixelPoint spot{camp.fire().x + 96, camp.fire().y};
+    REQUIRE(life.foundFire("Hearth", spot.x / 32, spot.y / 32).ok);
+    REQUIRE(life.fire().lit);
+
+    const game::WorldPlant& plant = camp.odyssey.plants()[0];
+    camp.gather();
+    camp.play(60);
+    REQUIRE(plant.state == "picked");
+    camp.play(100); // 5 s into the ripening: 10 s are left
+    REQUIRE(camp.odyssey.autosave());
+    const int berries = camp.berries();
+
+    // A new game over the same folder, as after closing and starting the game again.
+    luna::engine::RecordingRenderer renderer;
+    game::OdysseyGame again(data, Camp::makeLevel(data, "timed-save", true));
+    again.start(renderer);
+    REQUIRE(again.loadAutosave());
+    REQUIRE(again.plants().size() == 1);
+    CHECK(again.plants()[0].state == "picked"); // still picked
+    CHECK_FALSE(again.plants()[0].present());
+    REQUIRE(again.life() != nullptr);
+    CHECK(again.life()->fire().founded); // the fire is still lit
+    CHECK(again.life()->fire().lit);
+    CHECK(again.life()->count("berries") == berries);
+
+    for (int i = 0; i < 199; ++i) again.update({});
+    CHECK(again.plants()[0].state == "picked");
+    again.update({}); // 10 s after loading: the 15 s are over
+    CHECK(again.plants()[0].state == "ripe");
+}
+
+TEST_CASE("US-153 Things that never changed save nothing, and a damaged things file is reported") {
+    const fs::path data = dataCopy("timed-clean");
+    Camp camp("timed-clean", data, true);
+    REQUIRE(camp.odyssey.autosave());
+    const std::string text = readText(data.parent_path() / "saves" / "things.json");
+    CHECK(text.find("\"plants\": {}") != std::string::npos); // a ripe plant is the default: not written
+    CHECK(text.find("\"pending\": []") != std::string::npos);
+
+    writeText(data.parent_path() / "saves" / "things.json", "{ not json");
+    luna::engine::RecordingRenderer renderer;
+    game::OdysseyGame again(data, Camp::makeLevel(data, "timed-clean", true));
+    again.start(renderer);
+    CHECK(again.loadAutosave()); // the clan and the hero still load
+    CHECK(again.message().find("things.json could not be read") != std::string::npos);
 }

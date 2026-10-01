@@ -6,6 +6,22 @@ Every action in the game is one **interaction**: a small text file in `assets/da
 
 > Every action in the game's right-click menu is one of these files (US-152). They carry out their work with `do`, which names an action built into the game (see "Built-in actions" below); US-153 lets files spell out their own effects, with durations.
 
+## Timed actions and things that change (US-153)
+
+- `duration` is how long the job takes, in seconds. While it runs the hero stands where they are and a ring of twelve dots fills over the target. If the player **moves or attacks before the ring is full, the job stops and nothing happens**: no berries, no change to the target. With `duration` 0 (or none) the effects happen at once.
+- When the job is done, the `effects` happen in the order written. `set target.state picked` changes the target's state; `after 15s set target.state ripe` puts a change on a timer, so the plant is ripe again 15 seconds later. A timer counts game time: it waits while a screen is open, and it is saved with the game.
+- A plant that is in any state but its first (the starting one) is **hidden** until it is back to it: it cannot be seen, clicked, inspected or hit. So a picked plant disappears and comes back in the same spot (D-37).
+- What is saved: every plant that is not in its starting state, and every effect still waiting on a timer (file `things.json` in the save folder, written with the autosave). The job in progress is not saved: loading starts you with nothing under way, and since nothing had happened yet nothing is lost but the time.
+- The timer units are `s` (seconds), `m` (minutes) and `d` (in-game days); a day is as long as the clan's calendar says.
+
+Example, the shipped `gather.json`:
+
+```jsonc
+"duration": 3,
+"requires": [ { "if": "target.state == ripe", "else": "Nothing to pick yet" } ],
+"effects": [ "do gather-berries", "set target.state picked", "after 15s set target.state ripe" ]
+```
+
 ## Built-in actions: `do`
 
 Some things a menu item does need the game itself: open the crafting screen, change what a clan member thinks of the hero, harvest a plant. Those are **built-in actions**. An interaction names one with `do`:
@@ -18,7 +34,7 @@ A `do` that names anything the game does not have is an error at load (`do names
 
 | Name | What it does |
 |---|---|
-| `gather` | the hero gathers berries from the plant (and the plant regrows elsewhere) |
+| `gather-berries` | the hero gets berries, the gatherer skill grows, and the message says so (the plant itself is handled by the file: see `gather.json`) |
 | `knap` | knaps flint from a flint nodule (needs a hammerstone) |
 | `pick-flint` | picks flint up from a nodule by hand |
 | `chop` | chops wood from a solid plant |
@@ -204,7 +220,7 @@ A mistake reads like `interactions/gather.json:12: unknown effect verb "giv"`: t
 
 1. It lists every interaction whose `actors` match who is acting and whose `target` tags match the thing.
 2. Too far away, or a failing `requires`: the item is shown greyed out with its reason.
-3. When the actor starts it, the action runs for `duration` seconds, then the `effects` happen in order (US-153).
+3. When the actor starts it, the action runs for `duration` seconds (a ring fills over the target), then the `effects` happen in order (see "Timed actions" below).
 4. Clan members and animals score the interactions near them with `npc.score` and pick the best (US-154).
 
 ## Checks the build makes
