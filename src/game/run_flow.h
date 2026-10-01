@@ -141,6 +141,11 @@ private:
     std::string message_;
     int cursorY_ = 0;
     int cursorX_ = -1;
+    static constexpr int kMaxPanelWidth = 600;  // US-233: wide enough for long lines, narrow enough to read
+    static constexpr int kMaxPanelHeight = 420;
+    static constexpr int kMinPanelHeight = 120;
+    int fitChars() const { return (panel_.width - 16) / luna::engine::kTextAdvance; }
+    luna::engine::Rect screenArea_{0, 0, 480, 270};
     luna::engine::Rect panel_{30, 10, 420, 250};
 
     // New game

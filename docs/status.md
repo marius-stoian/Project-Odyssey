@@ -128,7 +128,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-230 | US-230 | M8b | Done | 2026-10-01 |
 | S-US-231 | US-231 | M8b | Done | 2026-10-01 |
 | S-US-232 | US-232 | M8b | Done | 2026-10-01 |
-| S-US-233 | US-233 | M8b | To do |  |
+| S-US-233 | US-233 | M8b | Done | 2026-10-01 |
 | S-US-234 | US-234 | M8b | To do |  |
 | X-M8b | - | M8b | To do |  |
 | K-M8c | - | M8c | To do |  |

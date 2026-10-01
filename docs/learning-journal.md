@@ -1216,3 +1216,22 @@ Each `draw` call is turned into a `drawStyled` call with a destination `scale` t
 **Try it (15 minutes).** Press `-` and `+` in the game and scroll the wheel; then open Settings and set UI scale 2x. Add a `std::printf` of `view.x + pointer.x` in `updateAim` and check that it is the same number at both zooms when you point at the same tree.
 
 **Check yourself.** Why must the UI pointer be divided by the UI scale but the world pointer by the camera zoom, instead of one pointer for both?
+
+## US-233 Every screen at the new size: layout from data, not fixed numbers
+
+**What we built.** The New Game, menu, Settings, crafting and dialogue panels now size and place themselves from the interface size instead of a fixed 420 x 250 box.
+
+**The C++ idea: compute, don't hard-code.** Before, the panel was a constant: `Rect panel_{30, 10, 420, 250};`. Now it is calculated each time the screen is built:
+
+```cpp
+const int width = std::min(screenArea_.width - 40, kMaxPanelWidth);
+panel_ = {(screenArea_.width - width) / 2, top, width, height};
+```
+
+`std::min` keeps it from getting too wide, and the height is measured from what was added (`bottom = max(widget bottoms, cursorY_)`). Change the window or UI scale and the same code gives a new, correct answer.
+
+**Where to look.** `RunFlow::build` in `src/game/run_flow.cpp`; the test in `tests/game/menu_test.cpp` ("US-233 Screens fit...").
+
+**Try it (15 minutes).** Change `kMaxPanelWidth` in `run_flow.h` to 400, rebuild, and open the menu: lines wrap earlier. Then set it back.
+
+**Check yourself.** Why is it safer to measure the panel's content than to give every screen its own fixed height?

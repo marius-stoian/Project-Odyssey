@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-01, US-233):** S-US-233 DONE (Milestone-79.md, AP-080). Next: S-US-234 (frame budget at the new size; needs D-06), X-M8b. The owner reviews docs/evidence/US-233/contact-sheet.png.
+
 **Resume update (2026-10-01, US-232):** S-US-232 DONE (Milestone-78.md, AP-079). Next: S-US-233 (every screen at the new size), US-234, X-M8b. The owner said Mraw never asks for permission: commit, merge, pull, push and sync Drive on your own.
 
 **Resume update (2026-10-01, later):** S-US-231 DONE (Milestone-77.md, AP-078), merged into local `qa`, NOT pushed (push needs the owner's go). Next: push qa and check CI, sync the Drive requirements to v2.6, then S-US-232, US-233, US-234, X-M8b.

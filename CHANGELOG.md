@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-233: every screen at the new size (Mraw) - 2026-10-01
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); contact sheet for the owner in `docs/evidence/US-233/`.
+
+- `RunFlow` lays its panel out from the interface size (centred, as tall as its content, up to 600 x 420) and its shade covers the whole interface; paragraphs wrap to the panel width. All run screens, the menu, Settings and the dialogue panel use it.
+- New test `US-233 Screens fit the interface at both UI scales`.
 ## US-232: camera zoom and UI scale (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings), GPU screenshots in `docs/evidence/US-232/`.

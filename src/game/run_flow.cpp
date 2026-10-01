@@ -74,7 +74,7 @@ void RunFlow::line(const std::string& text, UiColor colour) {
 }
 
 void RunFlow::paragraph(const std::string& text, UiColor colour, int width) {
-    for (const std::string& part : wrapped(text, width)) line(part, colour);
+    for (const std::string& part : wrapped(text, std::max(width, fitChars()))) line(part, colour); // the panel's whole width
 }
 
 void RunFlow::button(const std::string& label, int id, bool enabled, bool selected, int x, int width) {
@@ -111,6 +111,11 @@ void RunFlow::openMenu() {
 // ---- building the screens
 
 void RunFlow::build(OdysseyGame& game) {
+    // US-233: the panel is laid out from the interface size (960 x 540 divided by the UI scale), centred, never from fixed numbers.
+    screenArea_ = {0, 0, game.uiWidth(), game.uiHeight()};
+    const int width = std::min(screenArea_.width - 40, kMaxPanelWidth);
+    const int height = std::min(screenArea_.height - 40, kMaxPanelHeight);
+    panel_ = {(screenArea_.width - width) / 2, (screenArea_.height - height) / 2, width, height}; // the tallest it may be; shrunk below
     widgets_.clear();
     lines_.clear();
     cursorY_ = panel_.y + 6;
@@ -129,8 +134,13 @@ void RunFlow::build(OdysseyGame& game) {
     case Screen::Privacy: buildPrivacy(); break;
     default: break;
     }
+    // The panel is only as tall as what it shows (and the message under it), so a short screen is not a big empty box.
+    int bottom = cursorY_;
+    for (const Widget& w : widgets_) bottom = std::max(bottom, w.area.y + w.area.height);
+    const std::vector<std::string> parts = message_.empty() ? std::vector<std::string>{} : wrapped(message_, std::max(62, fitChars()));
+    bottom += 6 + static_cast<int>(parts.size()) * luna::engine::kLineHeight;
+    panel_.height = std::clamp(bottom - panel_.y, kMinPanelHeight, height);
     if (!message_.empty() && screen_ != Screen::None) {
-        const std::vector<std::string> parts = wrapped(message_, 62);
         int y = panel_.y + panel_.height - 6 - static_cast<int>(parts.size()) * luna::engine::kLineHeight;
         for (const std::string& part : parts) {
             lines_.push_back({part, UiColor::Gold, panel_.x + 8, y});
@@ -197,7 +207,7 @@ void RunFlow::buildEvent(OdysseyGame& game) {
     paragraph(event->text);
     gap(6);
     for (std::size_t i = 0; i < event->options.size(); ++i) {
-        for (const std::string& part : wrapped(event->options[i].text, 60)) {
+        for (const std::string& part : wrapped(event->options[i].text, std::max(60, fitChars() - 4))) {
             (void)part;
         }
         button(std::format("{}. {}", i + 1, event->options[i].text), kOptionBase + static_cast<int>(i), true, false, panel_.x + 8, panel_.width - 16);
@@ -745,7 +755,7 @@ void RunFlow::act(OdysseyGame& game, int id) {
 void RunFlow::draw(luna::engine::Renderer& renderer, const luna::engine::Texture& uiSheet) const {
     if (screen_ == Screen::None) return;
     UiPainter painter(renderer, uiSheet);
-    painter.fill({0, 0, 480, 270}, UiColor::Shade);
+    painter.fill(screenArea_, UiColor::Shade);
     painter.fill(panel_, UiColor::Dark);
     painter.outline(panel_, UiColor::Gold);
     for (const Line& l : lines_) painter.text(l.x, l.y, l.text, l.colour);

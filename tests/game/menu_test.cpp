@@ -491,3 +491,40 @@ TEST_CASE("US-155 The other objects have their actions") {
         CHECK(camp.odyssey.run().screen() == game::Screen::Craft);
     }
 }
+
+// ---- US-233: every screen is laid out from the interface size
+
+TEST_CASE("US-233 Screens fit the interface at both UI scales") {
+    for (const int scale : {1, 2}) {
+        Camp camp("layout-" + std::to_string(scale), {}, true);
+        camp.odyssey.setViewScales(2, scale);
+        const int width = camp.odyssey.uiWidth();
+        const int height = camp.odyssey.uiHeight();
+        CHECK(width == 960 / scale);
+        auto& run = camp.odyssey.run();
+        for (const int tab : {300, 301, 302, 303}) { // Bag, Skills, Dominion, Settings
+            run.openMenu();
+            camp.play(1);
+            if (tab != 300) {
+                REQUIRE(run.press(camp.odyssey, tab));
+                camp.play(1);
+            }
+            const auto& widgets = run.widgets();
+            REQUIRE_FALSE(widgets.empty());
+            for (std::size_t a = 0; a < widgets.size(); ++a) {
+                const auto& r = widgets[a].area;
+                INFO("scale " << scale << " tab " << tab << " widget " << widgets[a].label);
+                CHECK(r.x >= 0);
+                CHECK(r.y >= 0);
+                CHECK(r.x + r.width <= width);
+                CHECK(r.y + r.height <= height);
+                for (std::size_t b = a + 1; b < widgets.size(); ++b) { // nothing overlaps
+                    const auto& s = widgets[b].area;
+                    const bool apart = r.x + r.width <= s.x || s.x + s.width <= r.x || r.y + r.height <= s.y || s.y + s.height <= r.y;
+                    CHECK_MESSAGE(apart, widgets[a].label << " overlaps " << widgets[b].label);
+                }
+            }
+            run.close();
+        }
+    }
+}
