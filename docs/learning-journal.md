@@ -1014,3 +1014,15 @@ The tree nodes are `std::shared_ptr<const Expr>`: shared so that a registry can 
 **Try it (15 minutes).** In `assets/data/interactions/gather.json` change `"range": 1.5` to `"range": 99` and read the error in the log; then change `season != winter` to `season != autumn` and think about what the game would now offer in autumn.
 
 **Check yourself.** Why does `1 or 0 and 0` come out as 1, and which function of the parser decides that?
+
+## M7: asking "what is it?" instead of "which one is it?" (US-151)
+
+The old menu code said "if it is a bush, offer this; if it is moss, offer that". Every new plant needed new code. Now each thing carries **tags**, a short list of words, and an interaction says which tags it needs. Matching is a question about sets: *does the thing's list contain every tag the interaction wants?* In C++ that is a small loop over the wanted tags with `std::find` on the thing's list (see `matchesTarget` in [src/sim/interaction.cpp](../src/sim/interaction.cpp)); C++20 `std::ranges::find` and `std::ranges::all_of` say the same thing in one line, and `std::set` makes the lookup fast when the lists grow. Because the answer depends only on the tags, adding a mango to `plants.json` with the tags `edible` and `plant` is enough for Gather to appear: the code does not know a mango exists.
+
+Tags that were never written are **derived** from the fields that were (a plant that is `edible` and does not `block` is tagged `edible`). That keeps 153 old entries working while the new tags get used, and a list written in the file replaces the derived one. One decision hides in there: a tree that bears fruit is *not* tagged `edible`, because today you chop it rather than gather from it, and a menu must not change just because the code underneath was reorganised.
+
+**Where to look.** `matchesTarget` in [src/sim/interaction.cpp](../src/sim/interaction.cpp); `readTags` in [src/game/tags.cpp](../src/game/tags.cpp); the derived tags in `loadCatalogs` ([src/game/catalogs.cpp](../src/game/catalogs.cpp)); `GameRuleContext::path` in [src/game/game_rules.cpp](../src/game/game_rules.cpp).
+
+**Try it (15 minutes).** Follow the manual checks in [docs/plans/US-151.md](plans/US-151.md): add a mango to `plants.json`, then change its tags and watch the menu change.
+
+**Check yourself.** Why does a plant that bears fruit and blocks walking get the tag `fruit-bearing` and not `edible`, and what would change in the game if it got `edible`?

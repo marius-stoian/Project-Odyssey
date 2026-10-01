@@ -52,6 +52,33 @@ You may write `//` and `/* ... */` comments anywhere. The in-game Editor (M9) ke
 
 Any other field is an error (`unknown field "efects"`), which catches typos.
 
+## Tags and states: how a thing gets its actions (US-151)
+
+An interaction does not name things one by one; it names **tags**. A thing offers every interaction whose target tags it carries all of. Give a new plant the tags `edible` and `plant` and Gather shows up in its menu with no code change.
+
+Catalog entries in `plants.json`, `animals.json`, `weapons.json` and `characters.json` take two optional fields:
+
+```jsonc
+{ "name": "mango", "frame": "bush", "size": "tall", "blocks": false, "edible": false, "inspect": "Sweet and heavy.",
+  "tags":   ["edible", "plant"],     // what it is
+  "states": ["ripe", "picked"] }     // what condition it can be in; the first one is where it starts
+```
+
+- Tags are single words of letters, digits, `-` or `_`, no repeats. A mistake is reported as `plants.json: plants[0].tags[1]: ...`.
+- `target.state` in a condition reads the state; `set target.state picked` changes it. A thing with no `states` has an empty state.
+- When an entry has no `tags` or `states`, the game works them out from the entry's other fields, so older files keep working. A list you write replaces the worked-out one.
+
+| Catalog | Worked-out tags | Worked-out states |
+|---|---|---|
+| plants | `plant`; `edible` if edible and walk-through; `fruit-bearing` if edible and solid (it is chopped, not gathered); `solid` if it blocks; `tree` if its size is tree | `ripe`, `picked` for an edible walk-through plant; none otherwise |
+| animals | `animal`, and `hostile` (fights back) or `prey` | none |
+| weapons | `item`, `weapon`, its class (`sword`, `bow`...), its element if any, `starter` | none |
+| characters | `hero` and `person` for the hero, `person` for friendly people, `hostile` for enemies | none |
+
+`actors` match in the same way: `hero`, `person`, `animal` or a kind name matches a thing that is that kind or carries that tag.
+
+If an interaction targets a tag that no catalog uses, the game still loads it but warns at start: `interactions/warm.json:1: unknown tag "hearth": no catalog uses it, so this will never match`.
+
 ## Conditions and scores
 
 A condition is a small sum that comes out true or false. A score is the same kind of sum that comes out as a number.
@@ -75,7 +102,7 @@ A condition is a small sum that comes out true or false. A score is the same kin
 
 | Function | Meaning |
 |---|---|
-| `has(item, n)` | how many of an item someone holds: has(berries, 2) for the actor, has(hero, berries, 2) for anyone |
+| `has(item, n)` | 1 when someone holds at least n of an item: has(berries, 2) for the actor, has(hero, berries, 2) for anyone |
 | `need(name)` | how full a need is, 0 to 100: need(hunger) |
 | `skill(profession)` | the actor's skill in a profession: skill(hunter) |
 | `trait(name)` | 1 when the actor has the trait, else 0: trait(diligent) |

@@ -1,5 +1,6 @@
 #include "game/run_flow.h"
 
+#include "game/game_rules.h"
 #include "game/odyssey_game.h"
 
 #include <algorithm>
@@ -498,13 +499,7 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
         const bool close = near(plant.feet.x, plant.feet.y, kReachPixels);
         contextTitle_ = plant.kind;
         const std::size_t index = static_cast<std::size_t>(plantIndex);
-        if (plant.def != nullptr && plant.def->edible && !plant.def->blocks) {
-            actions_.push_back({"Gather", tooFar(close, ""), [index](OdysseyGame& g) {
-                                    g.run().setMessage(g.life()->gatherBerries().message);
-                                    g.tutorial().notify("gather");
-                                    g.harvestPlant(index);
-                                }});
-        } else if (plant.kind == "moss") { // the flint nodule
+        if (plant.kind == "moss") { // the flint nodule
             actions_.push_back({"Knap", !close ? "Too far away" : (hero->count("hammerstone") == 0 ? "Needs a hammerstone" : ""), [index](OdysseyGame& g) {
                                     g.run().setMessage(g.life()->knapFlint().message);
                                     g.harvestPlant(index);
@@ -519,7 +514,24 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
                                     g.harvestPlant(index);
                                 }});
         }
-        actions_.push_back({"Inspect", "", [index](OdysseyGame& g) { g.run().setMessage(g.plants()[index].def != nullptr ? g.plants()[index].def->inspect : std::string()); }});
+        // What the interaction files offer for this plant (US-151): Gather on ripe edible plants, Inspect on every plant. Until the action
+        // runner exists (US-153), the two of them are carried out by the code that already did it, found here by the interaction id.
+        const GameRuleContext context(game, plantIndex);
+        for (const sim::rules::Offer& offer : game.plantOffers(index)) {
+            const std::string id = offer.interaction->id;
+            const std::string label = sim::rules::fillTokens(offer.interaction->label, context);
+            actions_.push_back({label, offer.enabled ? std::string() : offer.reason, [id, label, index](OdysseyGame& g) {
+                                    if (id == "gather") {
+                                        g.run().setMessage(g.life()->gatherBerries().message);
+                                        g.tutorial().notify("gather");
+                                        g.harvestPlant(index);
+                                    } else if (id == "inspect") {
+                                        g.run().setMessage(g.plants()[index].def != nullptr ? g.plants()[index].def->inspect : std::string());
+                                    } else {
+                                        g.run().setMessage(label + ": no code runs this yet (the action runner comes with US-153)");
+                                    }
+                                }});
+        }
         screen_ = Screen::Context;
         return true;
     }

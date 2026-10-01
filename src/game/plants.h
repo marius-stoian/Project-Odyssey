@@ -45,6 +45,7 @@ struct WorldPlant {
     PixelPoint feet;
     bool alive = true;
     int regrowTicks = 0; // destroyed: ticks left before the same kind grows back somewhere else
+    std::string state;   // US-151: "ripe", "picked"...; the first of the plant's states, empty for a plant that never changes
 };
 
 inline constexpr int kInspectReachPixels = 48;  // 1.5 m: Interact looks at a plant this close

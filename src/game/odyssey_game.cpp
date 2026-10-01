@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "game/game_rules.h"
+
 #include "luna/engine/image_ops.h"
 
 #include "core/log.h"
@@ -602,11 +604,35 @@ std::vector<int> OdysseyGame::attendeesAt(double x, double y, int radiusTiles) c
 
 void OdysseyGame::loadInteractions() {
     interactionReport_ = {};
-    // No known tags yet: the catalogs get tags in US-151, which turns on the unknown-tag warning.
-    interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_);
+    sim::rules::LoadOptions options;
+    options.knownTags = knownTags(); // an interaction aimed at a tag nothing carries gets a warning naming file and tag
+    interactions_ = sim::rules::InteractionRegistry::load(dataDirectory_ / "interactions", interactionReport_, options);
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
     for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
     core::logInfo(std::format("Interactions: {} loaded from {} file(s), {} error(s)", interactionReport_.loaded, interactionReport_.filesRead, interactionReport_.errors.size()));
+}
+
+std::set<std::string> OdysseyGame::knownTags() const {
+    std::set<std::string> tags = catalogs_.knownTags();
+    for (const CharacterKindDef& kind : definitions_.characters) tags.insert(kind.tags.begin(), kind.tags.end());
+    return tags;
+}
+
+sim::rules::ThingInfo OdysseyGame::plantThing(std::size_t index) const {
+    const WorldPlant& plant = plants_.at(index);
+    return {plant.kind, plant.def != nullptr ? plant.def->tags : std::vector<std::string>{}};
+}
+
+std::vector<sim::rules::Offer> OdysseyGame::plantOffers(std::size_t index) const {
+    const WorldPlant& plant = plants_.at(index);
+    const double pixels = std::hypot(plant.feet.x - hero_.feetX(), plant.feet.y - hero_.feetY());
+    const sim::rules::ThingInfo hero{"hero", {"hero", "person"}};
+    const GameRuleContext context(*this, static_cast<int>(index));
+    return interactions_.offered(hero, plantThing(index), static_cast<long long>(pixels * 1000.0 / kTileSize), context);
+}
+
+void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {
+    if (index < plants_.size()) plants_[index].state = state;
 }
 
 void OdysseyGame::applySettings(const GameSettings& settings) {
@@ -998,7 +1024,7 @@ void OdysseyGame::populatePlants() {
     for (const PlacedPlant& placed : level_.plants) {
         const PlantDef* def = catalogs_.plant(placed.kind);
         if (def == nullptr) continue; // the level names a plant the catalog lost: skipped
-        plants_.push_back({placed.id, placed.kind, def, placed.feet, true, 0});
+        plants_.push_back({placed.id, placed.kind, def, placed.feet, true, 0, def->states.empty() ? std::string() : def->states.front()});
         if (const double height = plantObstacleHeight(*def); height > 0.0) {
             const PixelPoint cell = plantCell(placed.feet);
             map_.setObstacle(cell.x, cell.y, height);
@@ -1063,6 +1089,7 @@ void OdysseyGame::tickPlants() {
             if (!plantSpotFree(cellX, cellY)) continue;
             plant.feet = {cellX * kTileSize + kTileSize / 2, cellY * kTileSize + kTileSize - 4};
             plant.alive = true;
+            if (plant.def != nullptr) plant.state = plant.def->states.empty() ? std::string() : plant.def->states.front(); // grows back ripe
             if (plant.def != nullptr) {
                 if (const double height = plantObstacleHeight(*plant.def); height > 0.0) map_.setObstacle(cellX, cellY, height);
             }
