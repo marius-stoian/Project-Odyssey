@@ -13,6 +13,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## US-230: Luna's SDL_GPU renderer (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-230`); merged into `qa`.
+
+- Platform: `RenderBackend` with two implementations, `GpuBackend` (SDL_GPU device and swapchain, a virtual-screen texture, nearest-neighbour sampling, batched quads, Normal and Add pipelines, a whole-number blit into the window, screenshots) and `SdlRendererBackend` (the old drawing, now also drawing through a virtual-screen texture so both give the same picture); HLSL shaders compiled with the Windows SDK's `dxc.exe` at build time (`-DLUNA_GPU=OFF` or no `dxc.exe`: the GPU backend is left out); the Window falls back to SDL_Renderer with the reason logged.
+- Engine and app: `--renderer auto|gpu|sdl`; the log says which renderer is used. The `Renderer` interface and `src/game/` did not change.
+- Docs: `docs/adr/ADR-021-sdl-gpu-renderer.md`, `docs/plans/US-230.md`, teach-back, evidence `docs/evidence/US-230/` (demo level and camp on both renderers: byte-identical).
+- Tests: `tests/game/renderer_test.cpp` (the demo level and the camp, GPU against SDL_Renderer, 0 different pixels; fallback), `tests/luna/pixels_window_test.cpp` (crisp pixels with each renderer; alpha, additive and scaled draws identical).
 ## K-M8b: kick off M8b Resolution and GPU renderer (Avengers) - 2026-10-01
 
 **State:** Documents only; merged into `qa`.

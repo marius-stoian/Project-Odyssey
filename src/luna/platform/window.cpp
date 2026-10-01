@@ -1,11 +1,15 @@
 #include "luna/platform/window.h"
 
+#include "luna/platform/backend.h"
 #include "luna/platform/sdl_events.h"
+
+#include "core/log.h"
 
 #include <SDL3/SDL.h>
 
 #include <algorithm>
 
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -23,39 +27,43 @@ void Window::WindowDeleter::operator()(SDL_Window* window) const {
     SDL_DestroyWindow(window);
 }
 
-void Window::RendererDeleter::operator()(SDL_Renderer* renderer) const {
-    SDL_DestroyRenderer(renderer);
-}
-
 void Window::GamepadDeleter::operator()(SDL_Gamepad* gamepad) const {
     SDL_CloseGamepad(gamepad);
 }
 
-void Window::TextureDeleter::operator()(SDL_Texture* texture) const {
-    SDL_DestroyTexture(texture);
-}
-
 Window::Window(const WindowSettings& settings) {
     const SDL_WindowFlags flags = SDL_WINDOW_RESIZABLE | (settings.hidden ? SDL_WINDOW_HIDDEN : 0);
-    window_.reset(SDL_CreateWindow(settings.title.c_str(), settings.width, settings.height, flags));
-    if (!window_) {
-        fail("Cannot open the window");
+    const auto openWindow = [&] {
+        window_.reset(SDL_CreateWindow(settings.title.c_str(), settings.width, settings.height, flags));
+        if (!window_) {
+            fail("Cannot open the window");
+        }
+        SDL_StartTextInput(window_.get()); // typed characters arrive as TextInput (for text fields)
+    };
+    openWindow();
+
+    // The GPU first, unless asked not to. When it cannot start, Auto says why and goes on with SDL_Renderer (a fresh window: a window the GPU
+    // device claimed is not used for SDL_Renderer); asking for the GPU by name fails loudly instead.
+    if (settings.renderer != RendererChoice::Sdl) {
+        try {
+            if (!gpuBackendCompiledIn()) {
+                throw std::runtime_error("this build has no GPU backend (the Windows SDK's dxc.exe was not found when it was made)");
+            }
+            backend_ = makeGpuBackend(window_.get(), settings.virtualWidth, settings.virtualHeight);
+        } catch (const std::exception& error) {
+            if (settings.renderer == RendererChoice::Gpu) {
+                throw;
+            }
+            odysseus::core::logWarning(std::format("The GPU renderer cannot start ({}); using SDL_Renderer instead", error.what()));
+            openWindow();
+        }
     }
-    SDL_StartTextInput(window_.get()); // typed characters arrive as TextInput (for text fields)
-    renderer_.reset(SDL_CreateRenderer(window_.get(), nullptr));
-    if (!renderer_) {
-        fail("Cannot create the renderer");
+    if (!backend_) {
+        backend_ = makeSdlRendererBackend(window_.get(), settings.virtualWidth, settings.virtualHeight);
     }
-    // Draw at a small virtual size, scaled by the largest whole number that fits the
-    // window, with black bars for the rest: pixel art stays crisp (US-022).
-    if (!SDL_SetRenderLogicalPresentation(renderer_.get(), settings.virtualWidth, settings.virtualHeight,
-                                          SDL_LOGICAL_PRESENTATION_INTEGER_SCALE)) {
-        fail("Cannot set the virtual screen size");
-    }
-    vsync_ = SDL_SetRenderVSync(renderer_.get(), 1);
 }
 
-Window::~Window() = default; // members are destroyed in reverse order: textures, gamepads, renderer, window
+Window::~Window() = default; // members are destroyed in reverse order: gamepads, the backend (textures and device), the window
 
 void Window::pollEvents(std::vector<Event>& events) {
     SDL_Event sdlEvent;
@@ -85,56 +93,35 @@ void Window::pollEvents(std::vector<Event>& events) {
 }
 
 void Window::clear(int red, int green, int blue) {
-    // Black bars outside the virtual screen, then the requested colour inside it.
-    SDL_SetRenderDrawColor(renderer_.get(), 0, 0, 0, 255);
-    SDL_RenderClear(renderer_.get());
-    SDL_SetRenderDrawColor(renderer_.get(), static_cast<Uint8>(red), static_cast<Uint8>(green),
-                           static_cast<Uint8>(blue), 255);
-    SDL_RenderFillRect(renderer_.get(), nullptr);
+    backend_->clear(red, green, blue);
 }
 
 void Window::present() {
-    SDL_RenderPresent(renderer_.get());
+    backend_->present();
 }
 
 bool Window::vsyncEnabled() const {
-    return vsync_;
+    return backend_->vsyncEnabled();
+}
+
+std::string Window::backendName() const {
+    return backend_->name();
 }
 
 int Window::createTexture(int width, int height, const std::uint8_t* rgba) {
-    SDL_Texture* texture = SDL_CreateTexture(renderer_.get(), SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, width, height);
-    if (!texture) {
-        fail("Cannot create a texture");
-    }
-    textures_.emplace_back(texture);
-    SDL_UpdateTexture(texture, nullptr, rgba, width * 4);
-    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND); // transparent pixels stay transparent
-    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST); // square pixels, never blurred
-    return static_cast<int>(textures_.size()) - 1;
+    return backend_->createTexture(width, height, rgba);
 }
 
 void Window::drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination) {
-    const SDL_FRect from{static_cast<float>(source.x), static_cast<float>(source.y), static_cast<float>(source.width),
-                         static_cast<float>(source.height)};
-    const SDL_FRect to{static_cast<float>(destination.x), static_cast<float>(destination.y),
-                       static_cast<float>(destination.width), static_cast<float>(destination.height)};
-    SDL_RenderTexture(renderer_.get(), textures_.at(static_cast<std::size_t>(texture)).get(), &from, &to);
+    backend_->drawTexture(texture, source, destination, 255, false);
 }
 
 void Window::drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive) {
-    SDL_Texture* picture = textures_.at(static_cast<std::size_t>(texture)).get();
-    SDL_SetTextureAlphaMod(picture, alpha);
-    SDL_SetTextureBlendMode(picture, additive ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_BLEND);
-    drawTexture(texture, source, destination);
-    // Back to plain drawing: other draws of this texture must not inherit the style.
-    SDL_SetTextureAlphaMod(picture, 255);
-    SDL_SetTextureBlendMode(picture, SDL_BLENDMODE_BLEND);
+    backend_->drawTexture(texture, source, destination, alpha, additive);
 }
 
 odysseus::core::Rect Window::presentationRect() const {
-    SDL_FRect rect{};
-    SDL_GetRenderLogicalPresentationRect(renderer_.get(), &rect);
-    return {static_cast<int>(rect.x), static_cast<int>(rect.y), static_cast<int>(rect.w), static_cast<int>(rect.h)};
+    return backend_->presentationRect();
 }
 
 void Window::setFullscreen(bool fullscreen) {
@@ -152,41 +139,11 @@ void Window::setSize(int width, int height) {
 }
 
 odysseus::core::Rect Window::outputRect() const {
-    int width = 0;
-    int height = 0;
-    SDL_GetRenderOutputSize(renderer_.get(), &width, &height);
-    return {0, 0, width, height};
+    return backend_->outputRect();
 }
 
 Pixels Window::readPixels() {
-    // With the virtual screen active, SDL reads only the picture area; switch it off for
-    // the read so the black bars are included, then switch it back on.
-    int logicalWidth = 0;
-    int logicalHeight = 0;
-    SDL_RendererLogicalPresentation mode = SDL_LOGICAL_PRESENTATION_DISABLED;
-    SDL_GetRenderLogicalPresentation(renderer_.get(), &logicalWidth, &logicalHeight, &mode);
-    SDL_SetRenderLogicalPresentation(renderer_.get(), 0, 0, SDL_LOGICAL_PRESENTATION_DISABLED);
-    SDL_Surface* raw = SDL_RenderReadPixels(renderer_.get(), nullptr);
-    SDL_SetRenderLogicalPresentation(renderer_.get(), logicalWidth, logicalHeight, mode);
-    if (!raw) {
-        fail("Cannot read the screen");
-    }
-    SDL_Surface* rgba = SDL_ConvertSurface(raw, SDL_PIXELFORMAT_RGBA32);
-    SDL_DestroySurface(raw);
-    if (!rgba) {
-        fail("Cannot convert the screen pixels");
-    }
-    Pixels pixels;
-    pixels.width = rgba->w;
-    pixels.height = rgba->h;
-    pixels.rgba.resize(static_cast<std::size_t>(rgba->w) * static_cast<std::size_t>(rgba->h) * 4);
-    for (int row = 0; row < rgba->h; ++row) {
-        const auto* source = static_cast<const std::uint8_t*>(rgba->pixels) + static_cast<std::ptrdiff_t>(row) * rgba->pitch;
-        std::copy(source, source + static_cast<std::ptrdiff_t>(rgba->w) * 4,
-                  pixels.rgba.begin() + static_cast<std::ptrdiff_t>(row) * rgba->w * 4);
-    }
-    SDL_DestroySurface(rgba);
-    return pixels;
+    return backend_->readPixels();
 }
 
 void Window::saveScreenshot(const std::filesystem::path& file) {
