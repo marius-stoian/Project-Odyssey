@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Docs: completeness review, Codex v2.4 and requirements v2.6 (Dominus, Anima, D-47) - 2026-10-01
+
+**State:** Documents and the workspace sync only; merged into `qa`.
+
+- Codex v2.4 synced from Anima: CI-009 resolved (K-M8b checks that M8 is done, K-M9 that M8e is done); every remaining exit review (X-M8b..X-M14) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check; D-07, D-09, D-10, D-11 closed or superseded; D-47.
+- Requirements v2.6 and the backlog mirrored from Drive: stale decisions closed, STO-01 and SDC-01 absorbed, OPEN-08/10/15 answered, every MVP scope item Decided, ADR-018 in the ADR table, glossary extended, Figure 2 redrawn (`docs/project/diagrams/Odysseus - MVP Timeline.png`).
+- `tools/sync-workspace.ps1`: the reading PDFs on Drive (Matt Ganzak guides) are no longer reported as unmirrored files.
+- `docs/decisions.md`: D-07, D-09, D-10, D-11 closed, D-47; `docs/codex-issues.md`: CI-009 resolved.
+
 ## CI: guides keep LF too (Dominus) - 2026-10-01
 
 **State:** Merged into `qa`.

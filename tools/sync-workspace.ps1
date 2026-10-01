@@ -33,6 +33,8 @@ $map = [ordered]@{
 }
 # Handled elsewhere or not a real file: the Codex (sync-codex.ps1), Google-native shortcuts.
 $ignored = @('Codex.md')
+# Reading material the owner keeps on Drive, not project documents (D-47).
+$ignoredPatterns = @('*Matt Ganzak*')
 
 # No Drive on this machine (CI, another PC): nothing to mirror, stay silent.
 if (-not (Test-Path -LiteralPath $Source)) { exit 0 }
@@ -54,6 +56,7 @@ foreach ($name in $map.Keys) {
 $unknown = Get-ChildItem -LiteralPath $Source -File |
     Where-Object { -not $map.Contains($_.Name) -and $ignored -notcontains $_.Name -and $_.Extension -notmatch '^\.g(sheet|doc|slides)$' } |
     ForEach-Object { $_.Name }
+$unknown = @($unknown | Where-Object { $file = $_; -not ($ignoredPatterns | Where-Object { $file -like $_ }) })
 
 if (-not $updated -and -not $unknown) { exit 0 }
 

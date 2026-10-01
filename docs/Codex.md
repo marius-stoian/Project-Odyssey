@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.3
+# Project Odyssey Codex v2.4
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.6 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -24,7 +24,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.3)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.4)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -32,7 +32,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.4 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.6 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -228,11 +228,11 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-04 | Sprite size and facing directions (OPEN-11); owner answer 2026-09-29: 32x48 px, 8 directions | M1 | US-022, US-024, US-030 | Decided |
 | D-05 | Art source for placeholders: own, free asset pack, or hired (OPEN-12) | M2c | US-120, US-030 | Decided (owner, 2026-09-30): own art in assets/sprites/, placeholder quality; licence checked before any public release |
 | D-06 | Minimum PC spec (OPEN-19): a mid-range PC, 6-core CPU, 16 GB RAM, RX 6600 / RTX 3060 class GPU (8 GB) with DirectX 12, Windows 10/11; 60 FPS at 1080p on High lighting, Low for weaker PCs (development PC: RX 7900 XTX, 32 GB RAM, 6-core CPU) | M8b | US-082, US-234, US-247 | Decided (owner, 2026-10-01) |
-| D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Open |
+| D-07 | Calendar display (OPEN-15) | M4 | US-050, US-083 | Decided (closed by what M4-M5 built; D-31, D-32; owner D-47, 2026-10-01) |
 | D-08 | Interactions interview: verbs, objects, crafting (OPEN-09) | M4 | US-061, US-062 | Decided (answered by D-34) |
-| D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Proposed |
-| D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Proposed |
-| D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Open |
+| D-09 | Confirm the five Age 1 professions (MVP-07) | M4 | US-060 | Decided (closed by what M5 built; D-32; owner D-47, 2026-10-01) |
+| D-10 | Confirm MVP pillars Trade + Religion (MVP-08) and victory thresholds (MVP-09) | M5 | US-070..US-073 | Superseded by D-40 and D-41 (four pillars; MVP-08, MVP-09) |
+| D-11 | Story interview: tone of events, onboarding elder (OPEN-08) | M5 | US-052, US-090 | Decided (closed by what M5-M6 built; D-32, D-33; owner D-47, 2026-10-01) |
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open |
@@ -250,13 +250,14 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-41 | Technology and assembly of M10-M14 (owner, two chat rounds with Anima, 2026-10-01): Technology joins as the fourth pillar in M14 (tech tree as data, research by doing, workshops and inventors, espionage and theft; victory = Ember Strand held with a 60% Technology share, or all four pillars averaging 50%); Politics victory 60% vassals confirmed; Game Rules default assets/data/rules/standard.json, New Game and levels may name another; in M10-M14 Dominus decides design questions (delegated) and tests run at exit reviews; kill gate 2 after M14 | M10 | P-010, US-180..US-226 | Decided (owner, 2026-10-01) |
 | D-42 | Resolution, lighting and buildings (owner, three chat rounds with Dominus, 2026-10-01): 960x540 virtual resolution with whole-step scaling or Fill, windowed, borderless and full screen, camera zoom (default 2x) and UI scale; Luna moves to SDL_GPU shaders (ADR-021); sun and moon cycle, fire, torch and effect lights, seasonal day length, weather dimming and lightning; shadows from the sun, the moon and nearby fires for characters, plants and buildings; normal maps generated from the art, placeholder building art; buildings from whole blueprints and from pieces, clan members help, rival clans build, wear and repair, damage and fire; interiors per building (roof fade or interior map, set in the Editor); prefabs composed from pieces in the Editor; all right after M8 | M8b | US-230..US-257 | Decided (owner, 2026-10-01) |
 | D-43 | Assembly of M8b-M8e (owner, one chat round with Anima, 2026-10-01): M8d split into M8d Buildings (US-250, US-251, US-252, US-256) and M8e Building life (US-253, US-254, US-255, US-257); US-256 no longer waits for US-254; the M7-M9 rules (D-35) apply; D-06 answered | M8b | P-011, US-230..US-257 | Decided (owner, 2026-10-01) |
+| D-47 | Housekeeping (owner, one chat round, 2026-10-01): D-07, D-09 and D-11 closed by what M4-M6 built under delegated decisions; D-10 superseded by the four pillars; STO-01 and SDC-01 absorbed, OPEN-08, OPEN-10 and OPEN-15 answered; every MVP scope item Decided; on GitHub's GPU-less runners the first-frame limit is 10 s, and every exit review runs the strict 3 s check on the owner's PC (`tools/verify.ps1 -Config Release`); the reading PDFs on Drive are not mirrored | all | X-M8b..X-M14 | Decided (owner, 2026-10-01) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.3 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.4 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -4882,7 +4883,7 @@ Design notes for every M8b-M8e prompt (Anima, from the brief docs/plans/M8b-M8d-
 ```xml
 <prompt id="K-M8b" codex="2.2" name="Kick off M8b Resolution and GPU renderer">
 <instructions>
-1. Confirm that M8e (docs/gates/M8e.md) and its stories are done (since v2.2 M8b-M8e come between M8 and M9), and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+1. Confirm that M8 is done (docs/gates/M8.md, tag m8-done), and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
 2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8b stories leave open after the brief and D-42/D-43 (for example: the window sizes offered, whether Fill is the default on odd screens, where the UI scale and camera zoom live in the settings screen). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
 3. Architect: write docs/plans/M8b-renderer-design.md (GPU device and swapchain ownership, the Renderer interface changes, batching, shader build, fallback, scaling and window modes, zoom and UI scale, layout rules, performance method) before the first story.
 4. Set this milestone's stories to To do in docs/status.md in this order: US-230, US-231, US-232, US-233, US-234.
@@ -5141,6 +5142,7 @@ Manual checks in docs/plans/US-234.md done on the owner's PC with the GPU render
 <prompt id="X-M8b" codex="2.2" name="Exit review M8b">
 <instructions>
 1. Demonstrate the exit criteria: The game renders at 960x540 through Luna's SDL_GPU renderer (with the old renderer as fallback) and looks the same at 2x camera zoom; windowed sizes, borderless and exclusive full screen work; every screen and editor panel is laid out for the new size; 60 FPS at 1080p on the target mid-range PC (D-06).
+   Also run `pwsh tools/verify.ps1 -Story X-M8b -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8b.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8b.md, one section per criterion, each marked met or not met. Also: side-by-side screenshots (old 480x270 and new 960x540 at 2x zoom) and the frame-time table from US-234.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8b-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -5562,6 +5564,7 @@ Manual checks in docs/plans/US-247.md done on the owner's PC with the GPU render
 <prompt id="X-M8c" codex="2.2" name="Exit review M8c">
 <instructions>
 1. Demonstrate the exit criteria: The world is lit by the sun and moon through the day and the seasons, by fires, torches and effects at night, and dimmed by weather; sprites are shaded with generated normal maps; characters, plants and buildings cast shadows from the sun, the moon and nearby fires; the Editor previews any time of day; High lighting holds 60 FPS on the target PC.
+   Also run `pwsh tools/verify.ps1 -Story X-M8c -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8c.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8c.md, one section per criterion, each marked met or not met. Also: a time-lapse screenshot sheet (dawn, noon, dusk, night with fires, rain) and the frame-time table on High and Low.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8c-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -5787,6 +5790,7 @@ Manual checks in docs/plans/US-256.md done on the owner's PC with the GPU render
 <prompt id="X-M8d" codex="2.2" name="Exit review M8d">
 <instructions>
 1. Demonstrate the exit criteria: The hero builds from blueprints and piece by piece on a building grid, and rooms form; the owner composes prefabs from pieces in the Editor and places them in levels; prefabs marked buildable are offered as blueprints.
+   Also run `pwsh tools/verify.ps1 -Story X-M8d -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8d.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8d.md, one section per criterion, each marked met or not met. Also: a camp built in the game from blueprints and pieces, and a prefab composed in the Editor and placed, with screenshots.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8d-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -6012,6 +6016,7 @@ Manual checks in docs/plans/US-257.md done on the owner's PC with the GPU render
 <prompt id="X-M8e" codex="2.2" name="Exit review M8e">
 <instructions>
 1. Demonstrate the exit criteria: Clan members help build and rival clans build; each building fades its roof or opens an interior map as set in the Editor; buildings wear, are repaired, take damage, burn and fall; they shelter, warm and store for the clan and are saved.
+   Also run `pwsh tools/verify.ps1 -Story X-M8e -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M8e.md.
 2. Collect evidence (test output, CI run, screenshots, frame-time tables) into docs/gates/M8e.md, one section per criterion, each marked met or not met. Also: a season of play where clan members and a rival clan build, a hut is repaired, a wall burns, and the hero enters a roof-fade hut and an interior-map lodge.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m8e-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -6027,7 +6032,7 @@ Why this milestone exists: the owner chose a full visual graph editor (D-34) for
 ```xml
 <prompt id="K-M9" codex="2.0" name="Kick off M9 Interaction and dialogue editor">
 <instructions>
-1. Confirm that M8 (docs/gates/M8.md) and its stories are done, and that D-34 and D-35 are Decided in docs/decisions.md.
+1. Confirm that M8e (docs/gates/M8e.md) and its stories are done (since v2.2 M8b-M8e come between M8 and M9), and that D-34 and D-35 are Decided in docs/decisions.md.
 2. Ask the owner, in one chat round, the open design questions of the M9 stories (for example: node look, where the Dialogue and Interactions tabs sit in the tool bar, which values Test-play can set). Record the answers.
 3. Architect: write docs/plans/M9-graph-editor-design.md before US-170: the graph model and commands, text-graph mapping for .dlg, the interaction graph's layout, overrides in levels, Test-play isolation, validation, and the test plan.
 4. Set this milestone's stories to To do in docs/status.md in this order: US-170, US-171, US-172, US-175, US-173, US-174.
@@ -6335,6 +6340,7 @@ Manual checks in docs/plans/US-174.md done, with results and screenshots (`odyss
 <prompt id="X-M9" codex="2.0" name="Exit review M9">
 <instructions>
 1. Demonstrate the exit criteria: The owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it and saves it, and the file still reads well in a text editor.
+   Also run `pwsh tools/verify.ps1 -Story X-M9 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M9.md.
 2. Collect evidence (test output, CI run, screenshots, data files) into docs/gates/M9.md, one section per criterion, each marked met or not met. Also: one conversation and one interaction are built from scratch in the Editor, test-played, saved, and shown as text beside the graph in the evidence. Then X-M6 (kill gate 2) is next: end the session after this report, because it needs people.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
@@ -6756,6 +6762,7 @@ Manual checks in docs/plans/US-185.md listed, to be run at X-M10.
 <prompt id="X-M10" codex="2.1" name="Exit review M10">
 <instructions>
 1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M10` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M10 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M10.md.
 2. Demonstrate the exit criteria: The owner writes a quest in the Editor's graph (or offline in JSON), test-plays it with the debugger and saves it; a player gets it from an NPC, follows it in the journal, tracker and markers, and finishes it; the elder tutorial is a quest and crossroads events are edited as story events.
 3. Collect evidence into docs/gates/M10.md, one section per criterion, met or not met. Also: the owner's quest loop is shown in the evidence: a quest built in the graph, test-played with the debugger, saved, then played from an NPC to the reward. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m10-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -7121,6 +7128,7 @@ Manual checks in docs/plans/US-192.md listed, to be run at X-M11.
 <prompt id="X-M11" codex="2.1" name="Exit review M11">
 <instructions>
 1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M11` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M11 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M11.md.
 2. Demonstrate the exit criteria: Every data file has a schema; the owner edits any entity, mechanic, story tuning value, game rule and daily routine in Editor forms with pickers and validation, and the running game reloads it.
 3. Collect evidence into docs/gates/M11.md, one section per criterion, met or not met. Also: one new plant kind and one changed mechanic are made in the Data tab only, saved and seen in the running game; the schema CI test is green. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m11-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -7534,6 +7542,7 @@ Manual checks in docs/plans/US-207.md listed, to be run at X-M12.
 <prompt id="X-M12" codex="2.1" name="Exit review M12">
 <instructions>
 1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M12` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M12 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M12.md.
 2. Demonstrate the exit criteria: The owner opens the procedural region in the Editor, tunes the generator with a live preview, paints terrain, water and mountains, places things, people and camps, and edits each clan's and person's relations, economy, routines and actions; edits are saved on top of the seed and a new game plays them.
 3. Collect evidence into docs/gates/M12.md, one section per criterion, met or not met. Also: an edited region (terrain, a river, a camp moved, a clan's store and a grudge set) is saved as a small world file and a new game starts on it. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m12-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -7899,6 +7908,7 @@ Manual checks in docs/plans/US-216.md listed, to be run at X-M13.
 <prompt id="X-M13" codex="2.1" name="Exit review M13">
 <instructions>
 1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M13` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M13 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M13.md.
 2. Demonstrate the exit criteria: Clans form alliances and vassal oaths, hold elders' councils, bind themselves by marriage, challenge leaders and use trade and craft knowledge as levers; the player can win the region through Politics; every political rule is editable in the Editor.
 3. Collect evidence into docs/gates/M13.md, one section per criterion, met or not met. Also: a 10-seed headless balance check reports how often and how fast each victory happens with Politics on; the owner gets the table. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m13-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -8264,6 +8274,7 @@ Manual checks in docs/plans/US-225.md listed, to be run at X-M14.
 <prompt id="X-M14" codex="2.1" name="Exit review M14">
 <instructions>
 1. Run the deferred tests (D-41): `pwsh tools/verify.ps1 -Story X-M14` on qa (Debug, every test), then push qa and wait for CI (Release, every test). Fix every failure in the code the failing test covers, one commit per fix; change a test only when it is provably wrong about the requirements, and list each such change with its reason. Run every story's manual checks from docs/plans/US-xxx.md.
+   Also run `pwsh tools/verify.ps1 -Story X-M14 -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M14.md.
 2. Demonstrate the exit criteria: Clans research by doing in workshops with inventors, pass knowledge by teaching, steal and guard secrets, and unlock recipes, interactions and professions from an editable tech tree; the player can win by forging the Ember Strand while leading in known technologies.
 3. Collect evidence into docs/gates/M14.md, one section per criterion, met or not met. Also: a 10-seed headless balance check covers all four pillars. Then X-M6 (kill gate 2) is next: end the session after this report, because it needs people. List every decision Dominus took as delegated in this milestone, for the owner to review.
 4. If all are met and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m14-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
@@ -8487,3 +8498,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.1 | 2026-10-01 | Authoring tools, Politics and Technology (source of truth v2.2, Rounds 14 and 15; Mraw's brief docs/plans/M10-M13-authoring-brief.md). The owner decided D-40 (M10 Quests and story authoring, M11 Data editors, M12 World editing, M13 Politics) and, with Anima, D-41 (Technology as the fourth pillar in M14; Politics victory confirmed; Game Rules files; for M10-M14 Dominus decides design questions as delegated and tests run at exit reviews; kill gate 2 after M14). New: P-010; K-M10..X-M14 with 37 story prompts (S-US-180..S-US-187, S-US-190..S-US-196, S-US-200..S-US-207, S-US-210..S-US-216, S-US-220..S-US-226) and shared design notes; exit reviews run the deferred tests and CI before merging into main. Charter: human gate 3 and Definition of Done gain the M10-M14 exceptions; L-01 steps 1, 7 and 10 follow them. K-M6 now follows X-M14; D-15 chain; D-40 and D-41 in the decision table; new state files (guides, assets/worlds/). Codex issues resolved: CI-007 (catalog hot reload joins US-191, which replaces raw pointers into catalogs with ids; dialogue reload as built in M8), CI-008 (world objects ride on the plant machinery; noted in the M12 design notes). |
 | 2.2 | 2026-10-01 | Resolution, lighting and buildings (source of truth v2.4, Rounds 16 and 17; Mraw's brief docs/plans/M8b-M8d-render-light-build-brief.md). The owner decided D-42 (960x540 with window modes, camera zoom and UI scale; SDL_GPU shaders; sun, moon, fire, torch and effect lights, seasonal day length, weather light; shadows from the sun, the moon and nearby fires; generated normal maps; buildings from blueprints and pieces, built by the clans, with wear, repair, fire, interiors and Editor prefabs; right after M8) and, with Anima, D-43 (M8d split into M8d Buildings and M8e Building life; US-256 no longer waits for US-254; the D-35 assembly rules apply) and D-06 (a mid-range target PC). New: P-011; K-M8b..X-M8e with 21 story prompts (S-US-230..S-US-234, S-US-240..S-US-247, S-US-250..S-US-252, S-US-256, S-US-253..S-US-255, S-US-257) and shared design notes, between X-M8 and K-M9; K-M9 now follows X-M8e. Charter: architecture rule 11 (rendering). D-06 Decided, D-15 chain, D-42 and D-43 in the decision table; new state files (lighting and buildings guides, ADR-021). |
 | 2.3 | 2026-10-01 | Faster verification (owner, D-46): the local check (`tools/verify.ps1`, new `-Config Debug|Release|Both`, default Debug) builds and tests Debug with AddressSanitizer; CI builds and tests Release on qa and both on main; CI runs only on pushes to qa and main, skips docs-only pushes, cancels superseded runs and caches built vcpkg libraries (`.github/workflows/ci.yml`). Charter Definition of Done, L-01 step 7, the M10-M14 notes and every prompt still To do (M8b onward) now say which configuration is checked where. No scope change. |
+| 2.4 | 2026-10-01 | Completeness review (source of truth v2.6, Round 19, D-47). Codex issue CI-009 resolved: K-M8b now checks that M8 is done and K-M9 that M8e is done (v2.2 had swapped them by a text replacement). Every remaining exit review (X-M8b..X-M14, 10 prompts) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check, which CI only checks at 10 s. Decision table: D-07, D-09, D-11 closed, D-10 superseded, D-47 added. No scope change. |
