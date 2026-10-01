@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-154: NPCs and animals use interactions (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-154`); merged into `qa`.
+
+- Simulation: `pickBest` and `CooldownTable` (`npc_chooser`), `World::drainPersonNeed`.
+- Game: `NpcLife` (clan members and animals score the interactions near them with the files' `npc.score`, walk there, and do them with the same runner as the hero; danger drops what they were doing), actors and new subjects (animals, the hero with `armed` and `moving` tags) in the rule context, `need(...)` now means how much is missing, built-in `graze` and `flee`, errands in the clan view, placed harmless animals now walk, graze and flee.
+- Data and docs: `graze`, `flee-predator`, `flee-armed-hero`, `flee-moving-hero`; the grasses tagged `grass`; guide section "Clan members and animals act on their own"; `docs/plans/US-154.md`; teach-back.
+- Tests: 3 sim cases, 6 game cases (`tests/game/npc_test.cpp`); the menu test helper moved to `tests/game/camp.h`.
+
 ## US-155: Age 1 world objects (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-155`); merged into `qa`.

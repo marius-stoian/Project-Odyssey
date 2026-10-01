@@ -1074,3 +1074,15 @@ Look at how little the fire pit's behaviour needs: its interaction file says "ne
 **Try it (15 minutes).** The three manual checks in [docs/plans/US-155.md](plans/US-155.md); then change `warm-nearby 6 25` to `warm-nearby 12 50` in `light-fire.json`, press F5 and light a fire again.
 
 **Check yourself.** Why does an object without `tags` in the file still get Inspect, and which one line in the code makes that so?
+
+## M7: one system for the player and everyone else (US-154)
+
+Until now the clan lived in two layers: the simulation decided what each person did each hour, and the view moved them to a fixed spot. The new idea is that **a clan member or an animal chooses from the same list of interactions as the hero.** Each interaction file says how much a doer wants it: `need(hunger) * 2 + trait(diligent) * 10`. Once a second an idle doer looks at what is near, evaluates that sum for every interaction it could do, and takes the biggest. That is **utility scoring**: not a script of "if hungry then gather", but a number for each choice, and the highest wins. A hungry person scores high on Gather and walks to the bush; a full one scores below the minimum and does nothing special; a deer scores Graze at 40 and Flee at `(6 - distance) * 40`, so a wolf at 3 m makes the Flee score 120 and the deer runs.
+
+Sharing one system with the player means the same timed runner, the same menu rules and the same data files serve everyone. The pieces that differ are small and live in one place: how a doer walks (the clan view for people, a step per tick for animals), and what a built-in effect means for them (the hero's `gather-berries` gives berries; a clan member's gives a little hunger back). The one random draw per choice comes from a seeded stream, so ties never depend on chance, and the world hash test (two runs, same inputs, thousands of ticks) proves nothing slipped in.
+
+**Where to look.** `NpcLife::think` and `NpcLife::runMind` in [src/game/npc_life.cpp](../src/game/npc_life.cpp); `pickBest` in [src/sim/npc_chooser.cpp](../src/sim/npc_chooser.cpp); the NPC rule context in [src/game/game_rules.cpp](../src/game/game_rules.cpp); [assets/data/interactions/graze.json](../assets/data/interactions/graze.json) and [flee-predator.json](../assets/data/interactions/flee-predator.json).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-154.md](plans/US-154.md); then change the Flee score in `flee-predator.json` to `(6 - distance) * 10` and see the deer wait longer before running.
+
+**Check yourself.** Why does `pickBest` draw a random number even when there is no tie, and what would go wrong with the world-hash test if it drew only when there was one?

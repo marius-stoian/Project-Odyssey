@@ -136,6 +136,7 @@ void OdysseyGame::resetPlay() {
     fullTicks_ = 0;
     actions_.clear(); // a restart drops what was under way and what was waiting
     actionClock_ = 0;
+    npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
 }
@@ -696,6 +697,12 @@ void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {
 bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {
     if (!clan_ || personId < 0 || static_cast<std::size_t>(personId) >= clan_->people().size() || !clan_->people()[static_cast<std::size_t>(personId)].alive) return false;
     clan_->satisfyPersonNeed(personId, need, amount);
+    return true;
+}
+
+bool OdysseyGame::harmPerson(int personId, sim::Need need, int amount) {
+    if (!clan_ || personId < 0 || static_cast<std::size_t>(personId) >= clan_->people().size() || !clan_->people()[static_cast<std::size_t>(personId)].alive) return false;
+    clan_->drainPersonNeed(personId, need, amount);
     return true;
 }
 
@@ -1558,6 +1565,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             if (lastSavedDay_ >= 0) autosave();
             lastSavedDay_ = day;
         }
+        npcLife_.tick(*this); // clan members and animals look around, walk and do things with the same interactions as the hero (US-154)
     }
     if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});
     if (life_ && clan_) {

@@ -18,6 +18,7 @@
 #include "game/editor.h"
 #include "game/enemy.h"
 #include "game/game_rules.h"
+#include "game/npc_life.h"
 #include "sim/action_runner.h"
 #include "game/hero.h"
 #include "game/pickups.h"
@@ -103,8 +104,18 @@ public:
     const sim::rules::ActionRunner& actions() const { return actions_; }
     std::int64_t actionClock() const { return actionClock_; }
     int plantIndexById(int id) const;
+    // What clan members and animals do on their own (US-154), and what they need to do it: the ground, the animals and the people to move.
+    NpcLife& npcs() { return npcLife_; }
+    const NpcLife& npcs() const { return npcLife_; }
+    Enemy& enemyAt(std::size_t index) { return enemies_.at(index); }
+    // The harmless animals and people placed in the level (deer, rabbits): the ones that walk and graze (US-154) are moved here.
+    std::vector<PlacedCharacter>& bystandersMutable() { return bystanders_; }
+    ClanView& clanViewMutable() { return clanView_; }
+    const luna::engine::TileMap& tileMap() const { return map_; }
     // Outside help for a clan member's need (a fire pit's warmth, a bed): false when there is no clan or the person is gone.
     bool helpPerson(int personId, sim::Need need, int amount);
+    // And harm: a clan member's need falls (a hazard, or a test that wants someone hungry).
+    bool harmPerson(int personId, sim::Need need, int amount);
     bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }
     double lastInteractionReloadMilliseconds() const { return lastInteractionReloadMs_; }
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
@@ -276,6 +287,7 @@ private:
     double lastInteractionReloadMs_ = 0.0;
     sim::rules::ActionRunner actions_;
     std::int64_t actionClock_ = 0;
+    NpcLife npcLife_;
     void tickActions(const luna::engine::Intents& intents);
     void drawActionRing(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
     std::string thingsText() const;                          // the plants' states and the waiting effects, as saved in things.json
