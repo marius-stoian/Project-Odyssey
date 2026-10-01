@@ -7,6 +7,7 @@
 #include "core/log.h"
 #include "core/version.h"
 #include "game/art.h"
+#include "game/object_art.h"
 #include "game/placeholder_art.h"
 #include "game/region_level.h"
 #include "luna/engine/physics_view.h"
@@ -690,6 +691,12 @@ std::vector<sim::rules::Offer> OdysseyGame::offersFor(const Subject& subject) co
 
 void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {
     if (index < plants_.size()) plants_[index].state = state;
+}
+
+bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {
+    if (!clan_ || personId < 0 || static_cast<std::size_t>(personId) >= clan_->people().size() || !clan_->people()[static_cast<std::size_t>(personId)].alive) return false;
+    clan_->satisfyPersonNeed(personId, need, amount);
+    return true;
 }
 
 int OdysseyGame::plantIndexById(int id) const {
@@ -1815,6 +1822,18 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             const auto frame = content_.frames.find(plant.frame);
             const auto rect = content_.rect(plant.frame);
             if (frame != content_.frames.end() && rect) plantArt_.sources[plant.name] = {frame->second.page, *rect};
+        }
+        {
+            // The world objects (US-155) have no pictures in the atlas: the game draws them itself (programmer art).
+            std::vector<const PlantDef*> objects;
+            for (const PlantDef& plant : catalogs_.plants) {
+                if (plant.object) objects.push_back(&plant);
+            }
+            if (!objects.empty()) {
+                std::map<std::string, core::Rect> rects;
+                plantArt_.pages["objects"] = renderer.createTexture(makeObjectPage(objects, rects));
+                for (const auto& [name, rect] : rects) plantArt_.sources[name] = {"objects", rect};
+            }
         }
         for (const WeaponDef& weapon : catalogs_.weapons) {
             if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;

@@ -36,6 +36,7 @@ struct Definitions {
     std::vector<CharacterKindDef> characters;
     std::vector<std::string> loopingEffects; // names of the effects of effects.json that loop (US-138): what an Editor may place
     std::vector<std::string> plants;    // names of plants.json (US-136): what a placed plant may be
+    std::vector<std::string> objects;   // names of objects.json (US-155): world objects, placed in the Editor like plants
     std::vector<std::string> weapons;   // names a pickup may carry (US-134): the weapons of weapons.json, then the built-in demo weapons
 
     int tileNumber(const std::string& name) const;                     // -1 when unknown

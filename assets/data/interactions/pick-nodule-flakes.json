@@ -1,0 +1,18 @@
+// By hand: one piece of flint.
+{
+  "id": "pick-nodule-flakes",
+  "label": "Pick up flakes",
+  "actors": ["hero"],
+  "target": { "tags": ["flint-nodule"] },
+  "range": 2,
+  "duration": 2,
+  "order": 20,
+  "requires": [
+    { "if": "target.state == full", "else": "Nothing left to chip" }
+  ],
+  "effects": [
+    "give actor flint 1",
+    "set target.state chipped",
+    "after 2m set target.state full"
+  ]
+}

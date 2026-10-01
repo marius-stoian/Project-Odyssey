@@ -47,7 +47,7 @@ TEST_CASE("US-130 Cut") {
     }
     const auto catalogs = game::loadCatalogs(ODYSSEUS_DATA_DIR, &*atlas);
     CHECK(catalogs.weapons.size() == 150);
-    CHECK(catalogs.plants.size() == 153);
+    CHECK(std::count_if(catalogs.plants.begin(), catalogs.plants.end(), [](const game::PlantDef& p) { return !p.object; }) == 153); // the plants of the sheet; the world objects (US-155) are listed after them
     CHECK(catalogs.animals.size() == 50);
     CHECK(catalogs.effects.size() == 200);
     CHECK(catalogs.weather.size() == 101); // the 100 of the sheet and "clear"

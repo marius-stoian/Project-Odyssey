@@ -75,6 +75,10 @@ TEST_CASE("US-151 Catalog entries get tags, and written tags replace them") {
     CHECK(clover->tags == std::vector<std::string>{"plant"});
     CHECK(clover->states.empty()); // a plant that never changes has no state
     for (const game::PlantDef& plant : catalogs.plants) {
+        if (plant.object) {
+            CHECK_MESSAGE(has(plant.tags, "object"), plant.name); // world objects (US-155) are tagged "object", not "plant"
+            continue;
+        }
         CHECK_MESSAGE(has(plant.tags, "plant"), plant.name);
         if (plant.edible && !plant.blocks) CHECK_MESSAGE(has(plant.tags, "edible"), plant.name);
         if (plant.edible && plant.blocks) CHECK_MESSAGE((has(plant.tags, "fruit-bearing") && !has(plant.tags, "edible")), plant.name); // chopped, not gathered

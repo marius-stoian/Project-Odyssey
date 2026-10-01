@@ -1,0 +1,18 @@
+{
+  "objects": [
+    { "name": "fire pit",       "frame": "fire-pit",       "blocks": false, "inspect": "A ring of stones around old ash.",
+      "tags": ["object", "fire", "fire-pit"], "states": ["cold", "burning"] },
+    { "name": "knapping stone", "frame": "knapping-stone", "blocks": false, "inspect": "A flat stone scarred by many blows.",
+      "tags": ["object", "workstation", "knapping-stone"] },
+    { "name": "food store",     "frame": "food-store",     "blocks": false, "inspect": "A basket on a frame, out of the animals' reach.",
+      "tags": ["object", "store"], "states": ["empty", "stocked"] },
+    { "name": "shelter",        "frame": "shelter",        "blocks": false, "inspect": "Hides leaned on poles. It keeps off the wind.",
+      "tags": ["object", "shelter"] },
+    { "name": "flint nodule",   "frame": "flint-nodule",   "blocks": false, "inspect": "A grey lump with a glassy heart.",
+      "tags": ["object", "flint-nodule"], "states": ["full", "chipped"] },
+    { "name": "water source",   "frame": "water-source",   "blocks": false, "inspect": "Clear water seeps up between the stones.",
+      "tags": ["object", "water"] },
+    { "name": "sleeping furs",  "frame": "sleeping-furs",  "blocks": false, "inspect": "Furs worn soft by sleepers.",
+      "tags": ["object", "bedding"] }
+  ]
+}

@@ -67,6 +67,11 @@ void World::tick() {
     }
 }
 
+void World::satisfyPersonNeed(int personId, Need need, int amount) {
+    if (personId < 0 || static_cast<std::size_t>(personId) >= people_.size() || !people_[static_cast<std::size_t>(personId)].alive || amount <= 0) return;
+    satisfy(people_[static_cast<std::size_t>(personId)].needs, need, amount, config_.needs.maximum);
+}
+
 int World::population() const {
     return static_cast<int>(std::count_if(people_.begin(), people_.end(), [](const Person& p) { return p.alive; }));
 }

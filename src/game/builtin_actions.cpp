@@ -21,6 +21,17 @@ int professionIndex(const OdysseyGame& game, const std::string& id) {
     return -1;
 }
 
+// "energy" to the need, case does not matter.
+std::optional<sim::Need> needByName(std::string name) {
+    for (char& c : name) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    for (std::size_t n = 0; n < sim::kNeedCount; ++n) {
+        std::string candidate = sim::needName(static_cast<sim::Need>(n));
+        for (char& c : candidate) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        if (candidate == name) return static_cast<sim::Need>(n);
+    }
+    return std::nullopt;
+}
+
 // Runs the built-in action `name` on `subject`. False when the game has no action of that name.
 bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<std::string>& args, const Subject& subject) {
     sim::HeroLife* hero = game.life();
@@ -64,6 +75,25 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         game.run().setMessage(hero->holdRitual(game.attendeesAt(subject.x, subject.y, game.heroData()->config.fire.ritualRadiusTiles)).message);
     } else if (name == "open-barter") {
         game.run().openBarter(subject.index);
+    } else if (name == "restore") {
+        // restore energy 30: the hero's need rises (a bed, a shelter).
+        const std::optional<sim::Need> need = args.size() == 2 ? needByName(args[0]) : std::nullopt;
+        if (!need) return false;
+        game.helpPerson(hero->personId(), *need, std::atoi(args[1].c_str()));
+        game.run().setMessage(std::format("You feel better: {} +{}.", args[0], args[1]));
+    } else if (name == "warm-nearby") {
+        // warm-nearby 6 25: everyone within 6 tiles of the thing, the hero too, gets 25 Warmth (a fire pit).
+        if (args.size() != 2) return false;
+        const double reach = std::atoi(args[0].c_str()) * static_cast<double>(kTileSize);
+        const int amount = std::atoi(args[1].c_str());
+        int warmed = 0;
+        const auto& figures = game.clanView().figures();
+        for (std::size_t i = 0; i < figures.size(); ++i) {
+            if (figures[i].present && std::hypot(figures[i].x - subject.x, figures[i].y - subject.y) <= reach && game.helpPerson(static_cast<int>(i), sim::Need::Warmth, amount)) ++warmed;
+        }
+        if (std::hypot(game.hero().feetX() - subject.x, game.hero().feetY() - subject.y) <= reach && game.helpPerson(hero->personId(), sim::Need::Warmth, amount)) ++warmed;
+        core::logInfo(std::format("The fire warms {} people", warmed));
+        game.run().setMessage(std::format("The fire warms {} people.", warmed));
     } else {
         return false;
     }
@@ -94,6 +124,9 @@ public:
         } else if (effect.verb == "say") {
             const GameRuleContext context(game_, *subject);
             game_.run().setMessage(sim::rules::fillTokens(effect.args.empty() ? std::string() : effect.args[0]->text, context));
+        } else if (effect.verb == "fx") {
+            // fx flame: a visual effect of effects.json, played once over the thing.
+            if (!effect.args.empty()) game_.playEffect(effect.args[0]->text, subject->x, subject->y - 16.0, 48);
         } else if (effect.verb == "give" || effect.verb == "take") {
             // give actor berries 2: the hero's bag, the only one with items so far.
             if (effect.args.size() == 3 && game_.life() != nullptr && effect.args[0]->text != "npc" && effect.args[0]->text != "target") {
@@ -116,7 +149,7 @@ private:
 
 const std::vector<std::string>& builtInActionNames() {
     static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "give-berries", "ask-to-teach",
-                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter"};
+                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "restore", "warm-nearby"};
     return names;
 }
 

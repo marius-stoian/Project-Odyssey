@@ -22,6 +22,39 @@ Example, the shipped `gather.json`:
 "effects": [ "do gather-berries", "set target.state picked", "after 15s set target.state ripe" ]
 ```
 
+## World objects: objects.json (US-155)
+
+The things of a camp are listed in `assets/data/objects.json`, the way plants are listed in `plants.json`. Seven ship: fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs. They are placed in the Editor (F2, the plant tool, the **last page** of the palette is the objects), saved in the level with the plants, and each has its own interactions in `assets/data/interactions/`.
+
+```jsonc
+{ "name": "fire pit", "frame": "fire-pit", "blocks": false, "inspect": "A ring of stones around old ash.",
+  "tags":   ["object", "fire", "fire-pit"],
+  "states": ["cold", "burning"] }
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | what the Editor and the menus call it; it must not be a plant's name |
+| `frame` | which picture the game draws for it (programmer art until real art is chosen): `fire-pit`, `knapping-stone`, `food-store`, `shelter`, `flint-nodule`, `water-source`, `sleeping-furs`; any other word draws a grey block, so a new object always shows |
+| `blocks` | `true` makes it block walking |
+| `inspect` | the line the Inspect item shows |
+| `tags`, `states` | as for plants (see above); with no `tags` an object is tagged just `object`. Objects are never hidden by their states, unlike plants |
+
+Add an entry, restart the game: it is in the palette with its tags. Give it actions by writing interaction files that target its tags. The shipped ones:
+
+| Object | Interactions (files) |
+|---|---|
+| fire pit | `light-fire`: 3 s, needs a fire drill, state `burning`, warms everyone within 6 m now and after 1 and 2 minutes, goes out after 3 |
+| knapping stone | `craft-at-stone` (the same Craft as the camp's stone) |
+| food store | `put-in-store` (2 berries in, state `stocked`), `take-from-store` (2 berries out, state `empty`) |
+| shelter | `rest-in-shelter`: 5 s, energy +15 |
+| flint nodule | `chip-flint` (needs a hammerstone: 2 flint), `pick-nodule-flakes` (by hand: 1 flint); then `chipped` for 2 minutes |
+| water source | `drink`: 2 s |
+| sleeping furs | `sleep-on-furs`: 8 s, energy +40 and warmth +10 |
+| every object | `inspect-object` |
+
+Two built-in actions serve them: `do warm-nearby 6 25` (everyone within 6 tiles of the thing, the hero too, gets 25 warmth) and `do restore energy 40` (the hero's need rises). The verb `fx flame` plays an effect from `effects.json` once over the thing.
+
 ## Built-in actions: `do`
 
 Some things a menu item does need the game itself: open the crafting screen, change what a clan member thinks of the hero, harvest a plant. Those are **built-in actions**. An interaction names one with `do`:
@@ -48,6 +81,8 @@ A `do` that names anything the game does not have is an error at load (`do names
 | `tend-sacred-fire` | tends the hero's sacred fire |
 | `hold-ritual` | holds a ritual at the sacred fire |
 | `open-barter` | opens the barter screen with a rival camp |
+| `restore <need> <amount>` | raises the hero's need (hunger, energy, warmth or social): `do restore energy 40` |
+| `warm-nearby <tiles> <amount>` | warmth for everyone within that many tiles of the thing, the hero too: `do warm-nearby 6 25` |
 
 ### What the game's own things are tagged
 

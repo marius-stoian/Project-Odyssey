@@ -71,7 +71,8 @@ bool Definitions::hasLoopingEffect(const std::string& name) const {
 }
 
 bool Definitions::hasPlant(const std::string& name) const {
-    return std::find(plants.begin(), plants.end(), name) != plants.end();
+    // A placed "plant" may also be a world object (US-155): both are placed the same way and saved in the level's plant list.
+    return std::find(plants.begin(), plants.end(), name) != plants.end() || std::find(objects.begin(), objects.end(), name) != objects.end();
 }
 
 const CharacterKindDef* Definitions::character(const std::string& name) const {
@@ -177,6 +178,16 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
         }
         for (std::size_t i = 0; i < plants.at("plants").size(); ++i) {
             definitions.plants.push_back(text(plants.at("plants").at(i), plantsFile, "name"));
+        }
+    }
+    const std::filesystem::path objectsFile = dataDirectory / "objects.json";
+    if (std::filesystem::exists(objectsFile)) {
+        const json objects = sim::readJsonFile(objectsFile);
+        if (!objects.contains("objects") || !objects.at("objects").is_array()) {
+            throw DataError(objectsFile, "objects", "must be a list of objects");
+        }
+        for (std::size_t i = 0; i < objects.at("objects").size(); ++i) {
+            definitions.objects.push_back(text(objects.at("objects").at(i), objectsFile, "name"));
         }
     }
     const std::filesystem::path effectsFile = dataDirectory / "effects.json";

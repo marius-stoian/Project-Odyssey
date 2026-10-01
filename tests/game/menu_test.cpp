@@ -1,5 +1,6 @@
 // US-152: the context menu is made from the interaction files and does what the old menu did.
 #include "game/catalogs.h"
+#include "game/editor.h"
 #include "game/level.h"
 #include "game/odyssey_game.h"
 #include "luna/engine/renderer.h"
@@ -49,7 +50,7 @@ struct Camp {
     fs::path data;
     game::OdysseyGame odyssey;
 
-    static fs::path makeLevel(const fs::path& data, const std::string& name, bool wheat = false) {
+    static fs::path makeLevel(const fs::path& data, const std::string& name, bool wheat = false, const std::string& object = {}) {
         const fs::path folder = data.parent_path() / ("level-" + name);
         fs::create_directories(folder);
         const game::Definitions definitions = game::loadDefinitions(data);
@@ -59,12 +60,13 @@ struct Camp {
         level.clan = true;
         level.effects.push_back({level.nextId++, "flame", level.heroStart});
         if (wheat) level.plants.push_back({level.nextId++, "wheat", {level.heroStart.x + 32, level.heroStart.y}}); // 1 m east of the hero, ripe
+        if (!object.empty()) level.plants.push_back({level.nextId++, object, {level.heroStart.x + 32, level.heroStart.y}}); // a world object 1 m east of the hero
         game::saveLevel(level, definitions, folder / "level.json");
         return folder / "level.json";
     }
 
-    explicit Camp(const std::string& name, const fs::path& dataFolder = {}, bool wheat = false)
-        : data(dataFolder.empty() ? dataCopy(name) : dataFolder), odyssey(data, makeLevel(data, name, wheat)) {
+    explicit Camp(const std::string& name, const fs::path& dataFolder = {}, bool wheat = false, const std::string& object = {})
+        : data(dataFolder.empty() ? dataCopy(name) : dataFolder), odyssey(data, makeLevel(data, name, wheat, object)) {
         odyssey.start(renderer);
         odyssey.startNewRun({1, 2, 1}, false, false); // preset 2 = "Off": the hero starts grown
         odyssey.run().close();
@@ -382,4 +384,206 @@ TEST_CASE("US-153 Things that never changed save nothing, and a damaged things f
     again.start(renderer);
     CHECK(again.loadAutosave()); // the clan and the hero still load
     CHECK(again.message().find("things.json could not be read") != std::string::npos);
+}
+
+// ---- US-155: the world objects of the first Age
+
+TEST_CASE("US-155 objects.json has the seven objects with tags and states") {
+    const game::Catalogs catalogs = game::loadCatalogs(ODYSSEUS_DATA_DIR);
+    std::vector<std::string> objects;
+    for (const game::PlantDef& plant : catalogs.plants) {
+        if (plant.object) objects.push_back(plant.name);
+    }
+    CHECK(objects == std::vector<std::string>{"fire pit", "knapping stone", "food store", "shelter", "flint nodule", "water source", "sleeping furs"});
+    const auto tagged = [&](const std::string& name, const std::string& tag) {
+        const game::PlantDef* def = catalogs.plant(name);
+        REQUIRE(def != nullptr);
+        return std::find(def->tags.begin(), def->tags.end(), tag) != def->tags.end();
+    };
+    CHECK(tagged("fire pit", "fire-pit"));
+    CHECK(tagged("knapping stone", "knapping-stone"));
+    CHECK(tagged("food store", "store"));
+    CHECK(tagged("shelter", "shelter"));
+    CHECK(tagged("flint nodule", "flint-nodule"));
+    CHECK(tagged("water source", "water"));
+    CHECK(tagged("sleeping furs", "bedding"));
+    CHECK(catalogs.plant("fire pit")->states == std::vector<std::string>{"cold", "burning"});
+    CHECK(catalogs.plant("food store")->states == std::vector<std::string>{"empty", "stocked"});
+    CHECK(catalogs.plant("shelter")->states.empty());
+    // The plants are untouched: 153 of them, none an object.
+    CHECK(std::count_if(catalogs.plants.begin(), catalogs.plants.end(), [](const game::PlantDef& p) { return !p.object; }) == 153);
+    // Objects are in the Editor's list of what may be placed.
+    const game::Definitions definitions = game::loadDefinitions(ODYSSEUS_DATA_DIR);
+    CHECK(definitions.objects.size() == 7);
+    CHECK(definitions.hasPlant("fire pit"));
+}
+
+TEST_CASE("US-155 A new object kind added to objects.json shows up with its tags, and mistakes are named") {
+    const fs::path data = dataCopy("objects-data");
+    std::string text = readText(data / "objects.json");
+    const std::string marker = "\"objects\": [";
+    text.insert(text.find(marker) + marker.size(), "\n    { \"name\": \"stone cairn\", \"frame\": \"cairn\", \"blocks\": false, \"inspect\": \"A heap of stones.\", \"tags\": [\"object\", \"landmark\"] },");
+    writeText(data / "objects.json", text);
+    const game::Catalogs catalogs = game::loadCatalogs(data);
+    const game::PlantDef* cairn = catalogs.plant("stone cairn");
+    REQUIRE(cairn != nullptr);
+    CHECK(cairn->object);
+    CHECK(cairn->tags == std::vector<std::string>{"object", "landmark"});
+    CHECK(catalogs.knownTags().count("landmark") == 1);
+    CHECK(game::loadDefinitions(data).objects.size() == 8);
+    // An object with no tags written is still tagged "object", so Inspect works on it.
+    text = readText(data / "objects.json");
+    text.insert(text.find(marker) + marker.size(), "\n    { \"name\": \"plain\", \"frame\": \"x\", \"blocks\": false, \"inspect\": \"Plain.\" },");
+    writeText(data / "objects.json", text);
+    CHECK(game::loadCatalogs(data).plant("plain")->tags == std::vector<std::string>{"object"});
+
+    // Mistakes name the file and the field.
+    const auto problem = [&](const std::string& entry) {
+        const fs::path bad = dataCopy("objects-bad");
+        std::string t = readText(bad / "objects.json");
+        t.insert(t.find(marker) + marker.size(), "\n" + entry + ",");
+        writeText(bad / "objects.json", t);
+        try {
+            game::loadCatalogs(bad);
+        } catch (const odysseus::sim::DataError& error) {
+            return std::string(error.what());
+        }
+        return std::string();
+    };
+    CHECK(problem("{ \"name\": \"x\", \"blocks\": false, \"inspect\": \"i\" }").find("objects.json: objects[0].frame") != std::string::npos);
+    CHECK(problem("{ \"name\": \"wheat\", \"frame\": \"x\", \"blocks\": false, \"inspect\": \"i\" }").find("\"wheat\" is already a plant") != std::string::npos);
+    CHECK(problem("{ \"name\": \"y\", \"frame\": \"x\", \"blocks\": false, \"inspect\": \"i\", \"tags\": [\"a b\"] }").find("objects[0].tags[0]") != std::string::npos);
+}
+
+TEST_CASE("US-155 The Editor places a fire pit and it is saved in the level") {
+    const fs::path data = dataCopy("objects-editor");
+    luna::engine::RecordingRenderer renderer;
+    const fs::path file = Camp::makeLevel(data, "objects-editor");
+    game::OdysseyGame odyssey(data, file);
+    odyssey.start(renderer);
+    luna::engine::Intents toEditor;
+    toEditor.set(luna::engine::Intent::ModeEditor, true, true);
+    odyssey.update(toEditor);
+    game::Editor& editor = odyssey.editor();
+
+    const game::Definitions definitions = game::loadDefinitions(data);
+    const int firePit = static_cast<int>(definitions.plants.size()); // the objects follow the plants in the palette: the fire pit is the first
+    editor.setTool(game::EditorTool::Plant);
+    editor.setPlant(firePit);
+    const auto view = editor.camera().view();
+    const auto mouse = [&](bool press, bool hold, bool release) {
+        luna::engine::Intents intents;
+        luna::engine::Pointer pointer;
+        pointer.x = 1100 - view.x;
+        pointer.y = 1090 - view.y;
+        const auto left = static_cast<std::size_t>(luna::engine::PointerButton::Left);
+        pointer.pressed[left] = press;
+        pointer.held[left] = hold;
+        pointer.released[left] = release;
+        intents.setPointer(pointer);
+        return intents;
+    };
+    odyssey.update(mouse(true, true, false)); // a click: down, then up
+    odyssey.update(mouse(false, false, true));    REQUIRE(editor.level().plants.size() == 1);
+    CHECK(editor.level().plants[0].kind == "fire pit");
+    REQUIRE(editor.save());
+    CHECK(game::loadLevel(file, definitions).level.plants == editor.level().plants); // saved, and it loads again
+    CHECK(editor.undo());
+    CHECK(editor.level().plants.empty());
+
+    // The palette: the plants fill their pages, the objects have the last page to themselves.
+    editor.setTool(game::EditorTool::Plant);
+    odyssey.update({});
+    CHECK(editor.plantPage() == 0);
+}
+
+TEST_CASE("US-155 Light a fire in a fire pit with a fire drill, and it warms people nearby") {
+    Camp camp("objects-fire", {}, false, "fire pit");
+    REQUIRE(camp.odyssey.plants().size() == 1);
+    const game::WorldPlant& pit = camp.odyssey.plants()[0];
+    CHECK(pit.state == "cold");
+    CHECK(pit.present()); // an object is always there: its states never hide it
+    CHECK(game::plantSubject(camp.odyssey, 0).info.tags == std::vector<std::string>{"object", "fire", "fire-pit"});
+
+    // No drill: greyed out, with the reason.
+    auto offers = camp.odyssey.plantOffers(0);
+    REQUIRE(offers.size() == 2);
+    CHECK(offers[0].interaction->id == "light-fire");
+    CHECK_FALSE(offers[0].enabled);
+    CHECK(offers[0].reason == "You need a fire drill");
+    CHECK(offers[1].interaction->id == "inspect-object");
+
+    // The hero gets a fire drill and lights the fire.
+    camp.odyssey.life()->give("fire-drill", 1);
+    offers = camp.odyssey.plantOffers(0);
+    CHECK(offers[0].enabled);
+    REQUIRE(game::startInteraction(camp.odyssey, "light-fire", game::plantSubject(camp.odyssey, 0)));
+    camp.play(59);
+    CHECK(pit.state == "cold"); // three seconds to light it
+    camp.play(1);
+    CHECK(pit.state == "burning");
+    CHECK(camp.odyssey.run().message().rfind("The fire warms ", 0) == 0); // and says how many people it warmed
+    CHECK(camp.odyssey.run().message() != "The fire warms 0 people.");
+    CHECK(camp.odyssey.actions().pending().size() == 3); // two more warmings, and the fire going out
+
+    // While it burns, lighting it again is not offered as possible.
+    offers = camp.odyssey.plantOffers(0);
+    CHECK_FALSE(offers[0].enabled);
+    CHECK(offers[0].reason == "It is already burning");
+}
+
+TEST_CASE("US-155 The other objects have their actions") {
+    {   // The food store takes two berries in and gives them back.
+        Camp camp("objects-store", {}, false, "food store");
+        auto& life = *camp.odyssey.life();
+        life.gatherBerries();
+        const int berries = life.count("berries");
+        auto offers = camp.odyssey.plantOffers(0);
+        REQUIRE(offers.size() == 3); // put in, take out, inspect
+        CHECK(offers[0].interaction->id == "put-in-store");
+        CHECK(offers[0].enabled);
+        CHECK_FALSE(offers[1].enabled);
+        CHECK(offers[1].reason == "The store is empty");
+        REQUIRE(game::startInteraction(camp.odyssey, "put-in-store", game::plantSubject(camp.odyssey, 0)));
+        camp.play(40);
+        CHECK(life.count("berries") == berries - 2);
+        CHECK(camp.odyssey.plants()[0].state == "stocked");
+        REQUIRE(game::startInteraction(camp.odyssey, "take-from-store", game::plantSubject(camp.odyssey, 0)));
+        camp.play(40);
+        CHECK(life.count("berries") == berries);
+        CHECK(camp.odyssey.plants()[0].state == "empty");
+    }
+    {   // The flint nodule gives flint, then needs two minutes.
+        Camp camp("objects-flint", {}, false, "flint nodule");
+        auto& life = *camp.odyssey.life();
+        const int flint = life.count("flint");
+        REQUIRE(game::startInteraction(camp.odyssey, "pick-nodule-flakes", game::plantSubject(camp.odyssey, 0)));
+        camp.play(40);
+        CHECK(life.count("flint") == flint + 1);
+        CHECK(camp.odyssey.plants()[0].state == "chipped");
+        const auto offers = camp.odyssey.plantOffers(0);
+        CHECK_FALSE(offers[0].enabled);
+        CHECK(offers[0].reason == "Nothing left to chip");
+    }
+    {   // Sleeping on the furs restores energy; the shelter and the water only have what they say.
+        Camp camp("objects-sleep", {}, false, "sleeping furs");
+        REQUIRE(game::startInteraction(camp.odyssey, "sleep-on-furs", game::plantSubject(camp.odyssey, 0)));
+        camp.play(160);
+        CHECK(camp.odyssey.run().message() == "You feel better: warmth +10.");
+    }
+    {
+        Camp camp("objects-water", {}, false, "water source");
+        REQUIRE(game::startInteraction(camp.odyssey, "drink", game::plantSubject(camp.odyssey, 0)));
+        camp.play(40);
+        CHECK(camp.odyssey.run().message() == "The water is cold and clear.");
+    }
+    {   // The knapping stone object opens the same crafting as the camp's stone.
+        Camp camp("objects-stone", {}, false, "knapping stone");
+        const auto offers = camp.odyssey.plantOffers(0);
+        REQUIRE(offers.size() == 2);
+        CHECK(offers[0].interaction->id == "craft-at-stone");
+        CHECK(offers[0].enabled);
+        REQUIRE(game::startInteraction(camp.odyssey, "craft-at-stone", game::plantSubject(camp.odyssey, 0)));
+        CHECK(camp.odyssey.run().screen() == game::Screen::Craft);
+    }
 }

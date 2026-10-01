@@ -103,6 +103,8 @@ public:
     const sim::rules::ActionRunner& actions() const { return actions_; }
     std::int64_t actionClock() const { return actionClock_; }
     int plantIndexById(int id) const;
+    // Outside help for a clan member's need (a fire pit's warmth, a bed): false when there is no clan or the person is gone.
+    bool helpPerson(int personId, sim::Need need, int amount);
     bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }
     double lastInteractionReloadMilliseconds() const { return lastInteractionReloadMs_; }
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a

@@ -67,6 +67,8 @@ In the game the hero starts with empty hands. Walk over a pickup and its weapon 
 2. Click a plant in the palette, then click a cell of the map: the plant grows there, with its feet in the middle of the bottom edge of the cell. Only one plant grows in a cell.
 3. With **Select** you can click a plant, drag it to another cell and press **Delete** to remove it. **Ctrl+Z** and **Ctrl+Y** undo and redo all of it.
 4. In the game: walk next to a plant and press **E**, **Space** or **Enter** with empty hands (or the **right mouse button** at any time) and its name and a line about it show for three seconds. Hit it with any weapon and it is destroyed with a burst of leaves; an **edible** plant heals you 10 HP. Fifteen seconds later the same plant grows back at a random free spot inside the picture.
+## World objects (US-155)
+The **last page** of the Plant palette (its number says `6/6 objects`) holds the world objects: fire pit, knapping stone, food store, shelter, flint nodule, water source and sleeping furs. Place, select, move, delete and undo them exactly like plants; they are saved in the level with the plants. In the game you right-click them to use them (see `docs/guides/interaction-data.md`: "World objects"). To add your own, add an entry to `assets/data/objects.json` and restart the game.
 ## Animals
 The character palette has six pages (the arrows **<** and **>** under it): the first is the twelve characters, the others the 50 animals. Place, select, move, turn (**R**), rename and delete them like any character; their **Facing** picks the side they look toward (west shows the picture turned around). Hovering a button tells the animal's name and whether it is an enemy.
 

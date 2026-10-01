@@ -158,6 +158,29 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         return def;
     });
 
+    // World objects (US-155): placed like plants and kept in the same list, flagged `object`; the game draws them itself, so no atlas frame is
+    // needed ("frame" names the picture the game draws). Tags and states are written in the file (an object with none has only "object").
+    const auto objectsFile = dataDirectory / "objects.json";
+    if (std::filesystem::exists(objectsFile)) {
+        const std::vector<PlantDef> objects = readList<PlantDef>(objectsFile, "objects", [&](const json& entry, const std::string& where) {
+            const Fields f{objectsFile, entry, where};
+            PlantDef def;
+            def.frame = f.text("frame");
+            def.size = "small";
+            def.blocks = f.flag("blocks");
+            def.edible = false;
+            def.object = true;
+            def.inspect = f.text("inspect");
+            def.tags = readTags(entry, objectsFile, where, {"object"});
+            def.states = readStates(entry, objectsFile, where, {});
+            return def;
+        });
+        for (const PlantDef& object : objects) {
+            if (catalogs.plant(object.name) != nullptr) throw sim::DataError(objectsFile, "objects", "\"" + object.name + "\" is already a plant in plants.json");
+            catalogs.plants.push_back(object);
+        }
+    }
+
     const auto animalsFile = dataDirectory / "animals.json";
     catalogs.animals = readList<AnimalDef>(animalsFile, "animals", [&](const json& entry, const std::string& where) {
         const Fields f{animalsFile, entry, where};

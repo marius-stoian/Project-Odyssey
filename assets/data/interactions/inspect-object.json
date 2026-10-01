@@ -1,0 +1,12 @@
+// Look at a world object (objects.json); the text is its own line.
+{
+  "id": "inspect-object",
+  "label": "Inspect",
+  "actors": ["hero"],
+  "target": { "tags": ["object"] },
+  "range": 30,
+  "order": 900,
+  "effects": [
+    "do inspect"
+  ]
+}
