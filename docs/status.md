@@ -1,6 +1,6 @@
 # Assembly status
 
-Codex v2.1. Edited only by mraw-orchestrator.
+Codex v2.2. Edited only by mraw-orchestrator.
 
 | Prompt | Story | Milestone | Status | Last report date |
 |---|---|---|---|---|
@@ -15,6 +15,7 @@ Codex v2.1. Edited only by mraw-orchestrator.
 | P-008 | - | - | Done | 2026-10-01 |
 | P-009 | - | - | Done | 2026-10-01 |
 | P-010 | - | - | Done | 2026-10-01 |
+| P-011 | - | - | Done | 2026-10-01 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -123,6 +124,35 @@ Codex v2.1. Edited only by mraw-orchestrator.
 | S-US-164 | US-164 | M8 | To do |  |
 | S-US-165 | US-165 | M8 | To do |  |
 | X-M8 | - | M8 | To do |  |
+| K-M8b | - | M8b | To do |  |
+| S-US-230 | US-230 | M8b | To do |  |
+| S-US-231 | US-231 | M8b | To do |  |
+| S-US-232 | US-232 | M8b | To do |  |
+| S-US-233 | US-233 | M8b | To do |  |
+| S-US-234 | US-234 | M8b | To do |  |
+| X-M8b | - | M8b | To do |  |
+| K-M8c | - | M8c | To do |  |
+| S-US-240 | US-240 | M8c | To do |  |
+| S-US-241 | US-241 | M8c | To do |  |
+| S-US-242 | US-242 | M8c | To do |  |
+| S-US-243 | US-243 | M8c | To do |  |
+| S-US-244 | US-244 | M8c | To do |  |
+| S-US-245 | US-245 | M8c | To do |  |
+| S-US-246 | US-246 | M8c | To do |  |
+| S-US-247 | US-247 | M8c | To do |  |
+| X-M8c | - | M8c | To do |  |
+| K-M8d | - | M8d | To do |  |
+| S-US-250 | US-250 | M8d | To do |  |
+| S-US-251 | US-251 | M8d | To do |  |
+| S-US-252 | US-252 | M8d | To do |  |
+| S-US-256 | US-256 | M8d | To do |  |
+| X-M8d | - | M8d | To do |  |
+| K-M8e | - | M8e | To do |  |
+| S-US-253 | US-253 | M8e | To do |  |
+| S-US-254 | US-254 | M8e | To do |  |
+| S-US-255 | US-255 | M8e | To do |  |
+| S-US-257 | US-257 | M8e | To do |  |
+| X-M8e | - | M8e | To do |  |
 | K-M9 | - | M9 | To do |  |
 | S-US-170 | US-170 | M9 | To do |  |
 | S-US-171 | US-171 | M9 | To do |  |

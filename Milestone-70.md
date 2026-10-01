@@ -18,3 +18,6 @@
 
 ### Next
 - Confirm green CI on `qa`, then S-US-163 (generated small talk and `{smalltalk.topic}`; the owner reads 50 samples at X-M8).
+
+### Also in this session: P-011
+- A new Codex (v2.2, requirements v2.4) arrived on `origin/qa` while US-162 was being merged (M8b Resolution and GPU renderer, M8c Lighting and shadows, M8d Buildings, M8e Building life, all between X-M8 and K-M9; D-42, D-43, D-06). It was merged into `qa` and P-011 was done: D-06 and D-42/D-43 recorded in `docs/decisions.md`, 29 new status rows. P-010 had not recorded D-40 and D-41 in `docs/decisions.md` (they were only in the Codex); they are there now.

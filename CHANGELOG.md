@@ -13,6 +13,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## P-011: adopt Codex v2.2 and record D-40..D-43 (Avengers) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- `docs/decisions.md`: D-06 Decided (mid-range target PC); D-40 and D-41 (missing since P-010) and D-42 and D-43 added.
+- `docs/status.md`: P-011 Done; K-M8b..X-M8e (29 rows, To do) between X-M8 and K-M9; Codex v2.2 in the header.
+- `Limit.md` updated. CLAUDE.md, the Codex and the requirements were already synced.
+
 ## US-162: Who says what (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-162`); merged into `qa`.
