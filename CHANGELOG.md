@@ -13,6 +13,14 @@ its PR changes rather than leaving an outdated description.
 - `docs/plans/M8b-M8d-render-light-build-brief.md`: the build brief, with the Round 17 answers in section 9.
 - Left for P-011: D-06, D-42 and D-43 in `docs/decisions.md` and the new prompts in `docs/status.md`.
 
+## K-M8b: kick off M8b Resolution and GPU renderer (Avengers) - 2026-10-01
+
+**State:** Documents only; merged into `qa`.
+
+- `docs/decisions.md`: D-44, the owner's answers to the M8b design questions (window sizes, whole steps with bars by default, zoom and UI scale in Settings and zoom on wheel and keys, first start at windowed 1280x720, zoom 2x, UI scale 1x, lighting Medium).
+- `docs/plans/M8b-renderer-design.md`: the GPU path (device and swapchain, a virtual screen texture, batching, HLSL shaders compiled with the Windows SDK's `dxc.exe` at build time, fallback to SDL_Renderer), presentation and window modes, camera zoom and UI scale, layout rules, tests without a GPU, performance method.
+- `docs/codex-issues.md`: CI-009 (K-M8b step 1 asks to confirm M8e, which cannot be done before M8b).
+- `docs/status.md`: K-M8b Done; `Milestone-75.md`, `Limit.md`.
 ## X-M8: exit review of Speak to NPCs (Avengers) - 2026-10-01
 
 **State:** Documents only; all five exit criteria met; `qa` merged into `main`, tag `m8-done`.
