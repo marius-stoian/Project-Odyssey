@@ -1,4 +1,12 @@
-# Handover to ChatGPT: continue assembling Project Odyssey (2026-10-01)
+# Handover: continue assembling Project Odyssey (2026-10-01)
+
+## Resume update, 2026-10-01
+
+Rechecked during the requested one-story assembly session: `docs/Codex.md` v2.3 still contains the conflicting S-US-231 windowed size list, CI-010 remains open, and `docs/status.md` still marks the story Blocked. The next action is an Anima revision of S-US-231; the Avengers must then verify the revised prompt against D-44 before building. No story was completed in this session.
+
+S-US-231 is **Blocked before implementation** by CI-010 in `docs/codex-issues.md`. Its prompt lists windowed sizes 960x540, 1920x1080 and 2880x1620; the owner's D-44 decision and `docs/plans/M8b-renderer-design.md` specify 1280x720, 1600x900, 1920x1080 and 2560x1440, with 1280x720 on first start. The assembly rules require Anima to revise the prompt before Avengers build it. `docs/status.md` now marks S-US-231 Blocked. No story branch was created, no implementation or verification was attempted, and no story was completed in this session. Stop here as the owner requested one story only; do not move to S-US-232.
+
+To resume: obtain Anima's revised S-US-231 prompt, confirm it matches D-44 and the M8b design, then follow the build loop below from `qa`. Keep the owner's local changes in `assets/levels/valley.json` and `docs/project/requirements/Project Odyssey - MVP Backlog - Copy.xlsx` untouched.
 
 Written by Mraw (Dominus Avengers) at the owner's request. You are taking over the build. Read this file, then `CLAUDE.md` (the Charter; `AGENTS.md` points to it), `docs/Codex.md` (v2.3, the prompts), `docs/status.md` and `Limit.md`, then continue with the first prompt in Codex order that is `To do`.
 
