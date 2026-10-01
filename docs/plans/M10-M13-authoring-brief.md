@@ -141,6 +141,24 @@ Every new data file has a schema and a guide page (`docs/guides/quests.md`, `sch
 | Schemas drift from the loaders | CI test compares each schema with its loader's fields |
 | Six data systems (quests, events, schemas, rules, routines, politics) can overwhelm the owner | One Data tab, one validator, guide pages, help text from schemas |
 
-## 9. Open for Anima (TBD)
-- The "economical and technological" reading in section 2 (confirm with the owner at K-M13).
-- The default rules file name and whether levels may carry their own rules (Mraw default: `standard.json`; levels may name one).
+## 9. Answered with Anima (D-41, 2026-10-01, Round 15)
+- "Economical and technological" = the levers as read **and the Technology pillar**: new milestone **M14 Technology** (below), before kill gate 2.
+- Politics victory confirmed: 60% vassals, or the combined rule (now the average of four pillars at 50%).
+- Game Rules: `assets/data/rules/standard.json` is the default; New Game and any level may name another rules file.
+- Assembly of M10-M14: **Dominus decides design questions** (recorded "Decided by Dominus (delegated)"; the owner may override) and **tests run at each exit review** (stories build with zero warnings; X-Mx runs the full verification and CI and fixes failures).
+- Requirements v2.2: PIL-09, MVP-08 (four pillars), MVP-09, cut list (Military and Ideology stay cut; Mythic Strands 2-10 stay cut).
+
+## 10. M14 Technology (E21)
+Exit: clans research by doing in workshops with inventors, pass knowledge by teaching, steal and guard secrets, and unlock recipes, interactions and professions from an editable tech tree; the player can win by forging the Ember Strand while leading in known technologies.
+
+| ID | Story | Size | Priority | Depends on |
+|---|---|---|---|---|
+| US-220 | The tech tree as data (technologies.json, tree view in the Editor) | L | Must | US-191, US-170 |
+| US-221 | Research by doing | M | Must | US-220 |
+| US-226 | The technology screen | M | Must | US-220 |
+| US-222 | Workshops, inventors and teaching | M | Must | US-221, US-155 |
+| US-224 | Rival research and the Technology share | M | Must | US-221 |
+| US-223 | Espionage, theft and secrets | M | Must | US-222, US-210 |
+| US-225 | The Ember Strand and Technology victory (Ember held + 60% share) | L | Must | US-224, US-195, US-062 |
+
+Format: `assets/data/sim/technologies.json`: `{ id, name, requires: [tech ids], discover: { by: [interaction or skill tags], points }, unlocks: { recipes, interactions, professions, objects }, secret: false }`; the Ember chain is a set of technologies plus a recipe forged at the sacred fire. Research points, workshop factors, inventor bonus, theft chances and rival priorities live in `assets/data/sim/research.json`. Estimate 9 / 13 / 18 weeks.

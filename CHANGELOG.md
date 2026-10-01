@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## Docs: Codex v2.1, requirements v2.2 and the M10-M14 brief (Anima, Dominus) - 2026-10-01
+
+**State:** Documents only, no code; merged into `qa`. The sync scripts ran (`tools/sync-codex.ps1`, `tools/sync-workspace.ps1`).
+
+- Codex v2.1 synced from Anima (`docs/Codex.md`, `CLAUDE.md`): P-010; M10 Quests and story authoring, M11 Data editors, M12 World editing, M13 Politics, M14 Technology (K, 37 story prompts, X each); kill gate 2 after M14; M10-M14 exceptions in the Charter and L-01 (D-41: Dominus decides design questions as delegated, tests run at exit reviews); CI-007 and CI-008 resolved in the Codex.
+- Requirements v2.2 and the backlog mirrored from Drive: STO-04, STO-05, EDT-01..EDT-06, SDC-07, PIL-08 (Politics), PIL-09 (Technology), MVP-08 (four pillars), MVP-09, MVP-15, ADR-020; epics E17-E21, US-180..US-226; D-40, D-41.
+- `docs/plans/M10-M13-authoring-brief.md`: owner answers of Round 15 (section 9) and M14 Technology (section 10).
+- Left for P-010: D-40 and D-41 in `docs/decisions.md`, the new prompts in `docs/status.md`, CI-007 and CI-008 marked resolved in `docs/codex-issues.md`.
+
 ## US-154: NPCs and animals use interactions (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-154`); merged into `qa`.
