@@ -122,6 +122,10 @@ add_library(odysseus_sim STATIC
     src/sim/calendar.cpp
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
+    src/sim/rule_json.cpp
+    src/sim/rule_expr.cpp
+    src/sim/rule_effect.cpp
+    src/sim/interaction.cpp
     src/sim/world.cpp
     src/sim/world_story.cpp
     src/sim/world_care.cpp
@@ -322,7 +326,8 @@ add_executable(odysseus_game_tests
     tests/game/weather_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
-    tests/game/pickups_test.cpp)
+    tests/game/pickups_test.cpp
+    tests/game/interactions_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -364,7 +369,8 @@ add_executable(odysseus_sim_tests
     tests/sim/story_hunt_test.cpp
     tests/sim/story_episode_test.cpp
     tests/sim/region_test.cpp
-    tests/sim/hero_test.cpp)
+    tests/sim/hero_test.cpp
+    tests/sim/rules_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

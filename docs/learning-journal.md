@@ -1002,3 +1002,15 @@ A playtest needs numbers, but numbers about people need their yes. The statistic
 **Try it (15 minutes).** Change `hintAfterSeconds` in `assets/data/hero/tutorial.json` to 5, start a New Game and wait.
 
 **Check yourself.** Why does the crash code live in the Platform layer while the statistics live in the Game layer?
+
+## M7: a small language inside the game (US-150)
+
+Instead of writing "if the bush is ripe and it is not winter" in C++ for every action, the game now reads those sentences from text files. To do that it needs a **parser**: code that turns the text `need(hunger) * 2 + trait(diligent) * 10` into a tree it can evaluate. The trick is the same idea at every level, called *recursive descent*: one function per level of strength. `orExpression` asks `andExpression` for its parts, which asks `notExpression`, and so on down to `primary`, which reads one number, word or bracket. Because `*` lives deeper than `+`, `1 + 2 * 3` automatically groups as `1 + (2 * 3)`; the order of the functions *is* the precedence table.
+
+The tree nodes are `std::shared_ptr<const Expr>`: shared so that a registry can be copied cheaply, `const` so that nothing can change a loaded rule by accident. The game never crashes on a typo: a bad sum is an error message with a line number, a nonsense comparison is simply false, and the loader skips only the broken file.
+
+**Where to look.** `Parser::orExpression`, `Parser::primary` and `evaluate` in [src/sim/rule_expr.cpp](../src/sim/rule_expr.cpp); `FileParser::run` in [src/sim/interaction.cpp](../src/sim/interaction.cpp); the language in plain words in [docs/guides/interaction-data.md](guides/interaction-data.md).
+
+**Try it (15 minutes).** In `assets/data/interactions/gather.json` change `"range": 1.5` to `"range": 99` and read the error in the log; then change `season != winter` to `season != autumn` and think about what the game would now offer in autumn.
+
+**Check yourself.** Why does `1 or 0 and 0` come out as 1, and which function of the parser decides that?

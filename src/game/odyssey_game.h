@@ -34,6 +34,7 @@
 #include "core/random.h"
 
 #include "sim/hero_life.h"
+#include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
 #include "sim/rivals.h"
@@ -77,6 +78,9 @@ public:
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }
+    // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
+    const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
+    const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
     // pickup puts its weapon in the first free slot; keys 1-9 hold a slot, Shift the next filled one.
     static constexpr int kHotbarSlots = 9;
@@ -240,6 +244,9 @@ private:
     void resetPlay(); // the whole play state again, from the level
     void drawModeLabel(luna::engine::Renderer& renderer) const;
     Catalogs catalogs_;
+    sim::rules::InteractionRegistry interactions_;
+    sim::rules::LoadReport interactionReport_;
+    void loadInteractions(); // reads the interaction files and logs every mistake as "file:line: message"
     ContentAtlas content_;
     bool contentLoaded_ = false;
     luna::engine::Texture effectsTexture_;

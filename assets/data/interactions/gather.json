@@ -1,0 +1,21 @@
+// Gather from a plant that is ripe (US-150). The owner may edit this file in any text editor;
+// the game reads it when it starts, and F5 reloads it while the game runs.
+{
+  "id": "gather",
+  "label": "Gather {target.name}",
+  "note": "The first interaction written as data. Today's Gather still runs from code until US-152 moves it here.",
+  "actors": ["hero", "person"],
+  "target": { "tags": ["edible", "plant"] },
+  "range": 1.5,        // metres
+  "duration": 3.0,     // seconds
+  "requires": [
+    { "if": "season != winter",     "else": "Nothing grows in winter" },
+    { "if": "target.state == ripe", "else": "Nothing to pick yet" }
+  ],
+  "effects": [
+    "give actor berries 2",
+    "set target.state picked",
+    "after 15s set target.state ripe"
+  ],
+  "npc": { "score": "need(hunger) * 2 + trait(diligent) * 10", "cooldown": 60 }
+}
