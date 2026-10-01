@@ -26,6 +26,7 @@
 #include "game/plants.h"
 #include "game/run_flow.h"
 #include "game/session_stats.h"
+#include "game/lighting.h"
 #include "game/settings.h"
 #include "game/tutorial.h"
 #include "game/weather.h"
@@ -407,6 +408,7 @@ private:
     std::chrono::steady_clock::time_point lastRender_{};
     void drawOverlay(luna::engine::Renderer& renderer) const;
     GameSettings settings_;
+    LightingData lighting_; // assets/data/light/lights.json (US-240): the ambient colour and the kinds of light
     std::optional<WindowChange> pendingWindow_;
     void drawRunHud(luna::engine::Renderer& renderer) const;
     void drawRunWorld(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;

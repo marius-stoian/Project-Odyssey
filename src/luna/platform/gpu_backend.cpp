@@ -19,6 +19,7 @@
 #include "blit.frag.h"
 #include "blit.vert.h"
 #include "sprite.frag.h"
+#include "sprite_lit.frag.h"
 #include "sprite.vert.h"
 #endif
 
@@ -48,6 +49,7 @@ struct Vertex {
 struct Batch {
     int texture = 0;
     bool additive = false;
+    int light = -1; // the lighting state this batch is lit by (an index into lightSets_), -1 for drawn unlit (US-240)
     Uint32 first = 0;
     Uint32 count = 0;
 };
@@ -85,6 +87,8 @@ public:
     void clear(int red, int green, int blue) override {
         vertices_.clear();
         batches_.clear();
+        lightSets_.clear();
+        currentLight_ = -1;
         clearColor_ = {static_cast<float>(red) / 255.0F, static_cast<float>(green) / 255.0F, static_cast<float>(blue) / 255.0F, 1.0F};
     }
 
@@ -159,11 +163,26 @@ public:
         vertices_.push_back({x1, y0, u1, v0, 1.0F, 1.0F, 1.0F, a});
         vertices_.push_back({x1, y1, u1, v1, 1.0F, 1.0F, 1.0F, a});
         vertices_.push_back({x0, y1, u0, v1, 1.0F, 1.0F, 1.0F, a});
-        if (!batches_.empty() && batches_.back().texture == texture && batches_.back().additive == additive) {
+        const int light = additive ? -1 : currentLight_; // glows and weather add light themselves: they are not lit
+        if (!batches_.empty() && batches_.back().texture == texture && batches_.back().additive == additive && batches_.back().light == light) {
             batches_.back().count += 6;
         } else {
-            batches_.push_back({texture, additive, first, 6});
+            batches_.push_back({texture, additive, light, first, 6});
         }
+    }
+
+    void setLighting(const LightingState* state) override {
+        if (state == nullptr) {
+            currentLight_ = -1;
+            return;
+        }
+        lightSets_.push_back(*state);
+        currentLight_ = static_cast<int>(lightSets_.size()) - 1;
+    }
+
+    void setNormalMap(int texture, int normals) override {
+        if (static_cast<std::size_t>(texture) >= normalOf_.size()) normalOf_.resize(static_cast<std::size_t>(texture) + 1, -1);
+        normalOf_[static_cast<std::size_t>(texture)] = normals;
     }
 
     bool timing_ = false;
@@ -217,6 +236,8 @@ public:
         SDL_SubmitGPUCommandBuffer(commands);
         vertices_.clear();
         batches_.clear();
+        lightSets_.clear();
+        currentLight_ = -1;
     }
     Pixels readPixels() override {
         // The frame so far is drawn once more into a picture the size of the window, then copied back. Slow; for tests and screenshots.
@@ -329,10 +350,14 @@ private:
 
         spriteVertex_ = makeShader(g_sprite_vert, sizeof(g_sprite_vert), SDL_GPU_SHADERSTAGE_VERTEX, 0, 1);
         spriteFragment_ = makeShader(g_sprite_frag, sizeof(g_sprite_frag), SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0);
+        litFragment_ = makeShader(g_sprite_lit_frag, sizeof(g_sprite_lit_frag), SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 1); // picture and normal map; the lights
         blitVertex_ = makeShader(g_blit_vert, sizeof(g_blit_vert), SDL_GPU_SHADERSTAGE_VERTEX, 0, 0);
         blitFragment_ = makeShader(g_blit_frag, sizeof(g_blit_frag), SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0);
-        spriteNormal_ = makeSpritePipeline(false);
-        spriteAdd_ = makeSpritePipeline(true);
+        spriteNormal_ = makeSpritePipeline(false, spriteFragment_);
+        spriteAdd_ = makeSpritePipeline(true, spriteFragment_);
+        spriteLit_ = makeSpritePipeline(false, litFragment_);
+        const std::uint8_t flat[4] = {128, 128, 255, 255}; // a surface that faces the viewer: the normal of a sprite with no normal map
+        flatNormal_ = createTexture(1, 1, flat);
         blitToWindow_ = makeBlitPipeline(windowFormat_);
     }
 
@@ -345,10 +370,10 @@ private:
         textures_.clear();
         if (vertexBuffer_ != nullptr) SDL_ReleaseGPUBuffer(device_, vertexBuffer_);
         if (vertexTransfer_ != nullptr) SDL_ReleaseGPUTransferBuffer(device_, vertexTransfer_);
-        for (SDL_GPUGraphicsPipeline* pipeline : {spriteNormal_, spriteAdd_, blitToWindow_, blitToPicture_}) {
+        for (SDL_GPUGraphicsPipeline* pipeline : {spriteNormal_, spriteAdd_, spriteLit_, blitToWindow_, blitToPicture_}) {
             if (pipeline != nullptr) SDL_ReleaseGPUGraphicsPipeline(device_, pipeline);
         }
-        for (SDL_GPUShader* shader : {spriteVertex_, spriteFragment_, blitVertex_, blitFragment_}) {
+        for (SDL_GPUShader* shader : {spriteVertex_, spriteFragment_, litFragment_, blitVertex_, blitFragment_}) {
             if (shader != nullptr) SDL_ReleaseGPUShader(device_, shader);
         }
         if (sampler_ != nullptr) SDL_ReleaseGPUSampler(device_, sampler_);
@@ -375,7 +400,7 @@ private:
     }
 
     // Quads of the sprite shader: normal blending (the picture's see-through parts show what is below) or additive (adds light).
-    SDL_GPUGraphicsPipeline* makeSpritePipeline(bool additive) {
+    SDL_GPUGraphicsPipeline* makeSpritePipeline(bool additive, SDL_GPUShader* fragment) {
         SDL_GPUVertexBufferDescription buffer{};
         buffer.slot = 0;
         buffer.pitch = sizeof(Vertex);
@@ -397,7 +422,7 @@ private:
 
         SDL_GPUGraphicsPipelineCreateInfo info{};
         info.vertex_shader = spriteVertex_;
-        info.fragment_shader = spriteFragment_;
+        info.fragment_shader = fragment;
         info.vertex_input_state.vertex_buffer_descriptions = &buffer;
         info.vertex_input_state.num_vertex_buffers = 1;
         info.vertex_input_state.vertex_attributes = attributes;
@@ -466,20 +491,52 @@ private:
             SDL_PushGPUVertexUniformData(commands, 0, size, sizeof(size));
             SDL_GPUBufferBinding binding{vertexBuffer_, 0};
             SDL_BindGPUVertexBuffers(pass, 0, &binding, 1);
-            bool boundAdditive = false;
-            bool pipelineBound = false;
+            SDL_GPUGraphicsPipeline* bound = nullptr;
+            int uploadedLight = -1;
             for (const Batch& batch : batches_) {
-                if (!pipelineBound || batch.additive != boundAdditive) {
-                    SDL_BindGPUGraphicsPipeline(pass, batch.additive ? spriteAdd_ : spriteNormal_);
-                    boundAdditive = batch.additive;
-                    pipelineBound = true;
+                const bool lit = batch.light >= 0;
+                SDL_GPUGraphicsPipeline* wanted = batch.additive ? spriteAdd_ : (lit ? spriteLit_ : spriteNormal_);
+                if (wanted != bound) {
+                    SDL_BindGPUGraphicsPipeline(pass, wanted);
+                    bound = wanted;
+                    uploadedLight = -1; // a new pipeline: its uniforms are set again
                 }
-                const SDL_GPUTextureSamplerBinding picture{textures_[static_cast<std::size_t>(batch.texture)].texture, sampler_};
-                SDL_BindGPUFragmentSamplers(pass, 0, &picture, 1);
+                SDL_GPUTexture* albedo = textures_[static_cast<std::size_t>(batch.texture)].texture;
+                if (lit) {
+                    if (batch.light != uploadedLight) {
+                        const auto packed = pack(lightSets_[static_cast<std::size_t>(batch.light)]);
+                        SDL_PushGPUFragmentUniformData(commands, 0, packed.data(), static_cast<Uint32>(packed.size() * sizeof(float)));
+                        uploadedLight = batch.light;
+                    }
+                    const auto normalId = static_cast<std::size_t>(batch.texture) < normalOf_.size() ? normalOf_[static_cast<std::size_t>(batch.texture)] : -1;
+                    SDL_GPUTexture* normals = textures_[static_cast<std::size_t>(normalId >= 0 ? normalId : flatNormal_)].texture;
+                    const SDL_GPUTextureSamplerBinding both[2] = {{albedo, sampler_}, {normals, sampler_}};
+                    SDL_BindGPUFragmentSamplers(pass, 0, both, 2);
+                } else {
+                    const SDL_GPUTextureSamplerBinding picture{albedo, sampler_};
+                    SDL_BindGPUFragmentSamplers(pass, 0, &picture, 1);
+                }
                 SDL_DrawGPUPrimitives(pass, batch.count, 1, batch.first, 0);
             }
         }
         SDL_EndGPURenderPass(pass);
+    }
+
+    // The lighting state as the shader reads it: (ambient rgb, count), then two float4 per light.
+    static std::vector<float> pack(const LightingState& state) {
+        std::vector<float> data(4U + 8U * static_cast<std::size_t>(LightingState::kMaxLights), 0.0F);
+        data[0] = state.ambient[0];
+        data[1] = state.ambient[1];
+        data[2] = state.ambient[2];
+        const int count = std::clamp(state.count, 0, LightingState::kMaxLights);
+        data[3] = static_cast<float>(count);
+        for (int i = 0; i < count; ++i) {
+            const LightingState::Light& light = state.lights[i];
+            float* at = data.data() + 4 + 8 * i;
+            at[0] = light.x; at[1] = light.y; at[2] = light.radius; at[3] = light.strength;
+            at[4] = light.r; at[5] = light.g; at[6] = light.b; at[7] = light.height;
+        }
+        return data;
     }
 
     // Step 3: the virtual screen into the selected area, centred with black outside it.
@@ -535,10 +592,16 @@ private:
     SDL_GPUSampler* sampler_ = nullptr;
     SDL_GPUShader* spriteVertex_ = nullptr;
     SDL_GPUShader* spriteFragment_ = nullptr;
+    SDL_GPUShader* litFragment_ = nullptr;
     SDL_GPUShader* blitVertex_ = nullptr;
     SDL_GPUShader* blitFragment_ = nullptr;
     SDL_GPUGraphicsPipeline* spriteNormal_ = nullptr;
     SDL_GPUGraphicsPipeline* spriteAdd_ = nullptr;
+    SDL_GPUGraphicsPipeline* spriteLit_ = nullptr;
+    int flatNormal_ = 0;                   // texture number of the 1 x 1 flat normal
+    std::vector<int> normalOf_;            // texture number -> the texture number of its normal map; -1 or missing: none
+    std::vector<LightingState> lightSets_; // this frame lighting states, in the order they were set
+    int currentLight_ = -1;
     SDL_GPUGraphicsPipeline* blitToWindow_ = nullptr;
     SDL_GPUGraphicsPipeline* blitToPicture_ = nullptr; // made when the first screenshot is taken
     SDL_GPUBuffer* vertexBuffer_ = nullptr;

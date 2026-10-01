@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-02, US-240):** S-US-240 DONE (Milestone-82.md, AP-083); K-M8c Done (D-49, docs/plans/M8c-lighting-design.md). Next: S-US-241 (generated normal maps), then US-242 (day, night, seasons), US-243, US-244, US-245, US-246, US-247, X-M8c.
+
 **Resume update (2026-10-01, US-234):** S-US-234 DONE (Milestone-80.md, AP-081). Next: X-M8b (exit review: qa into main, CI green on main, tag m8b-done), then K-M8c. Finding: the daily autosave stalls one frame (25 to 35 ms) with 500 people.
 
 **Resume update (2026-10-01, US-233):** S-US-233 DONE (Milestone-79.md, AP-080). Next: S-US-234 (frame budget at the new size; needs D-06), X-M8b. The owner reviews docs/evidence/US-233/contact-sheet.png.

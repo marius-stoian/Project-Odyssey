@@ -14,6 +14,7 @@ struct Output {
     float4 position : SV_Position;
     float2 uv : TEXCOORD0;
     float4 color : TEXCOORD1;
+    float2 pixel : TEXCOORD2; // the same corner in virtual pixels: the lit shader measures distances to lights with it (US-240)
 };
 
 Output main(Input input) {
@@ -22,5 +23,6 @@ Output main(Input input) {
     output.position = float4(input.position.x / virtualSize.x * 2.0 - 1.0, 1.0 - input.position.y / virtualSize.y * 2.0, 0.0, 1.0);
     output.uv = input.uv;
     output.color = input.color;
+    output.pixel = input.position;
     return output;
 }

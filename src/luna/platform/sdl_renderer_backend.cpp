@@ -42,6 +42,11 @@ public:
     bool vsyncEnabled() const override { return vsync_; }
     void setScalingMode(odysseus::core::ScalingMode mode) override { scaling_ = mode; }
 
+    // Light (US-240): this renderer has no shaders, so lit draws are only tinted by the ambient colour.
+    void setLighting(const LightingState* state) override {
+        for (int c = 0; c < 3; ++c) tint_[c] = state == nullptr ? 255 : static_cast<Uint8>(std::clamp(state->ambient[c], 0.0F, 1.0F) * 255.0F + 0.5F);
+    }
+
     void clear(int red, int green, int blue) override {
         // A new frame starts on the virtual screen: the requested colour all over it.
         SDL_SetRenderTarget(renderer_.get(), virtualScreen_.get());
@@ -68,6 +73,8 @@ public:
 
     void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive) override {
         SDL_Texture* picture = textures_.at(static_cast<std::size_t>(texture)).get();
+        const bool tinted = !additive && (tint_[0] != 255 || tint_[1] != 255 || tint_[2] != 255);
+        if (tinted) SDL_SetTextureColorMod(picture, tint_[0], tint_[1], tint_[2]);
         const bool plain = alpha == 255 && !additive;
         if (!plain) {
             SDL_SetTextureAlphaMod(picture, alpha);
@@ -77,6 +84,7 @@ public:
         const SDL_FRect to{static_cast<float>(destination.x), static_cast<float>(destination.y), static_cast<float>(destination.width),
                            static_cast<float>(destination.height)};
         SDL_RenderTexture(renderer_.get(), picture, &from, &to);
+        if (tinted) SDL_SetTextureColorMod(picture, 255, 255, 255);
         if (!plain) {
             // Back to plain drawing: other draws of this texture must not inherit the style.
             SDL_SetTextureAlphaMod(picture, 255);
@@ -151,6 +159,7 @@ private:
     std::vector<std::unique_ptr<SDL_Texture, TextureDeleter>> textures_; // index = texture number
     std::unique_ptr<SDL_Texture, TextureDeleter> virtualScreen_;         // destroyed before the renderer too (declared after the renderer)
     bool vsync_ = false;
+    Uint8 tint_[3] = {255, 255, 255}; // the ambient colour of the lit draws, 255 = none
     int virtualWidth_ = 0;
     int virtualHeight_ = 0;
     odysseus::core::ScalingMode scaling_ = odysseus::core::ScalingMode::Whole;

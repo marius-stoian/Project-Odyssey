@@ -92,7 +92,7 @@ elseif(NOT LUNA_DXC)
 endif()
 if(LUNA_GPU AND LUNA_DXC)
     message(STATUS "GPU renderer: shaders are compiled with ${LUNA_DXC}")
-    foreach(_shader sprite.vert sprite.frag blit.vert blit.frag)
+    foreach(_shader sprite.vert sprite.frag sprite_lit.frag blit.vert blit.frag)
         if(_shader MATCHES "[.]vert$")
             set(_profile vs_6_0)
         else()
@@ -240,6 +240,7 @@ add_library(odysseus_game STATIC
     src/game/plants.cpp
     src/game/animals.cpp
     src/game/weather.cpp
+    src/game/lighting.cpp
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
@@ -364,7 +365,8 @@ add_test(NAME "US-021 Game reads only intents"
 # --- Luna window tests: a real hidden window, reading back pixels (US-022) ---
 add_executable(luna_window_tests
     tests/main.cpp
-    tests/luna/pixels_window_test.cpp)
+    tests/luna/pixels_window_test.cpp
+    tests/luna/lighting_window_test.cpp)
 target_link_libraries(luna_window_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_window_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_window_tests)
@@ -378,6 +380,7 @@ add_executable(odysseus_game_tests
     tests/game/m6_test.cpp
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
+    tests/game/lighting_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
     tests/game/paint_test.cpp
