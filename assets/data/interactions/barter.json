@@ -1,0 +1,10 @@
+// A rival camp, reached from 3 m.
+{
+  "id": "barter",
+  "label": "Barter",
+  "actors": ["hero"],
+  "target": { "tags": ["rival"] },
+  "range": 3,
+  "order": 10,
+  "effects": [ "do open-barter" ]
+}

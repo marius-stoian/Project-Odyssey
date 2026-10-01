@@ -1,0 +1,11 @@
+// Prey run from a hero who is moving (running up on them), within 5 m (D-36): a hero standing still is not a threat.
+{
+  "id": "flee-moving-hero",
+  "label": "Flee",
+  "actors": ["prey"],
+  "target": { "tags": ["hero", "moving"] },
+  "range": 30,
+  "order": 503,
+  "effects": [ "do flee" ],
+  "npc": { "score": "(5 - distance) * 40", "cooldown": 1 }
+}

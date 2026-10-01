@@ -4,11 +4,76 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-154: NPCs and animals use interactions (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-154`); merged into `qa`.
+
+- Simulation: `pickBest` and `CooldownTable` (`npc_chooser`), `World::drainPersonNeed`.
+- Game: `NpcLife` (clan members and animals score the interactions near them with the files' `npc.score`, walk there, and do them with the same runner as the hero; danger drops what they were doing), actors and new subjects (animals, the hero with `armed` and `moving` tags) in the rule context, `need(...)` now means how much is missing, built-in `graze` and `flee`, errands in the clan view, placed harmless animals now walk, graze and flee.
+- Data and docs: `graze`, `flee-predator`, `flee-armed-hero`, `flee-moving-hero`; the grasses tagged `grass`; guide section "Clan members and animals act on their own"; `docs/plans/US-154.md`; teach-back.
+- Tests: 3 sim cases, 6 game cases (`tests/game/npc_test.cpp`); the menu test helper moved to `tests/game/camp.h`.
+
+## US-155: Age 1 world objects (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-155`); merged into `qa`.
+
+- Data: `assets/data/objects.json` (fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs) and 9 interaction files.
+- Game: objects are loaded into the plant catalog (flagged `object`) and placed, saved and edited like plants (codex issue CI-008: no level format bump); programmer art by code (`object_art`); the Editor's plant tool gets the objects as a last page; built-in actions `restore` and `warm-nearby`, effect verb `fx`.
+- Simulation: `World::satisfyPersonNeed`.
+- Docs and tests: guide section "World objects", `docs/plans/US-155.md`, teach-back, 6 new game cases and 1 sim case; `US-130 Cut`, `US-136 Editor` and `US-151 Catalog` adapted (reasons in the plan).
+
+## US-153: Timed actions and world state (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-153`); merged into `qa`.
+
+- Simulation: `ActionRunner` (durations, progress, interruption, waiting effects in a deterministic order, saved timers), `EffectHost`, `ThingRef`.
+- Game: the hero's timed actions with a ring of dots over the target; moving or attacking stops the action and gives nothing; plants have states and a plant out of its starting state is hidden (D-37); `things.json` saved with the autosave (plant states and waiting effects); `gather.json` is a 3 s job that picks the plant and ripens it again after 15 s; built-in `gather` became `gather-berries`.
+- Docs and tests: guide section "Timed actions and things that change", `docs/plans/US-153.md`, teach-back, `tests/sim/runner_test.cpp` (9 cases), 5 new cases in `tests/game/menu_test.cpp`; D-37 recorded.
+
+## US-152: The context menu from data (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-152`); merged into `qa`.
+
+- Simulation: the effect verb `do` (a built-in action of the game); `LoadOptions::knownBuiltins` makes an unknown built-in a load error.
+- Game: `Subject` and `subjectAt` (what the hero can act on), `GameRuleContext` for any subject, 14 built-in actions moved unchanged out of the old menu code (`builtin_actions.cpp`), `RunFlow::openContext` now builds the menu from the registry.
+- Data: 20 interaction files (every action the old menu had); `gather.json` now does what the game did (instant, 2 m, "Gather").
+- Docs and tests: guide sections "Built-in actions" and the tags of the game's things, `docs/plans/US-152.md`, teach-back, `tests/game/menu_test.cpp` (6 cases); US-150 and US-156 tests adapted (see the plan).
+
+## US-156: Hot reload (F5) and the validation panel (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-156`); merged into `qa`.
+
+- Luna: key F5 and the intent `Reload` (platform, engine).
+- Game: `OdysseyGame::reloadInteractions()` (all or nothing: only a clean registry replaces the data in use), the error panel (`file:line: message`, Game and Editor modes, also shown at start when a file was left out).
+- Docs and tests: guide section "Editing while the game runs: F5", `docs/plans/US-156.md`, codex issue CI-007 (catalog reload not part of this story), teach-back, 4 cases in `tests/game/tags_test.cpp`.
+
+## US-151: Tags and smart objects (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-151`); merged into `qa`.
+
+- Tags and states: optional `tags` and `states` in plants, animals, weapons and characters (derived from the old fields when not written); `Catalogs::knownTags()`; unknown tag in an interaction file = warning naming file and tag.
+- Game: `GameRuleContext` (the real world for the rule language), `plantOffers` / `plantThing` / `setPlantState`, `WorldPlant::state`; the plant context menu lists the interaction files' offers (Gather, Inspect); `assets/data/interactions/inspect.json`.
+- Docs and tests: guide section "Tags and states", `docs/plans/US-151.md`, teach-back, `tests/game/tags_test.cpp` (5 cases).
+
+## US-150: Interaction data and the rule language (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-150`: 0 warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
+
+- Simulation: `rule_json` (line-aware JSON reader with comments), `rule_expr` (condition and score language: lexer, recursive-descent parser, evaluator, 8 functions), `rule_effect` (13 effect verbs, `after` delays), `interaction` (registry that loads a folder, matching with reasons, `file:line: message` errors, canonical writer).
+- Data and docs: `assets/data/interactions/gather.json`, `docs/guides/interaction-data.md`, `docs/plans/US-150.md`, teach-back in `docs/learning-journal.md`.
+- Game: loads the interactions at start and logs mistakes (`odyssey_game.*`).
+- Tests: `tests/sim/rules_test.cpp` (20 cases, includes the line-12 error, the guide check, 300 damaged-file mutations), `tests/game/interactions_test.cpp`. Evidence `docs/evidence/US-150/`.
+ (Avengers) - 2026-10-01
+
+**State:** Docs only. D-36 records the owner's four design answers; the design is `docs/plans/M7-interactions-design.md`; Milestone-57.md (AP-058).
+
 ## P-009: Adopt Codex v2.0 and pay the test debt (Avengers) - 2026-10-01
 
 **State:** Docs only; no code changed. Verified: Debug and Release build with 0 warnings, 25 of 25 tests pass in each (`docs/evidence/P-009/`).
 
 - `docs/status.md` lists P-009 and the M7, M8, M9 prompts; `docs/decisions.md` records D-08 (answered by D-34) and D-35; `CLAUDE.md` and `docs/Codex.md` are at v2.0; the requirements and backlog are synced from Drive.
+- CI speed: the tests that open no window run in parallel (`ctest -LE window -j 4`), window tests one at a time after them; `odysseus_game_tests` is split into three CTest runs by source file (A, B, and C = everything else); Debug-only trims (Release keeps the full sizes) of `US-139 No flicker walking past the pointer` (108 to 16 combinations), `US-040 Playable` (30 to 8 seeds) and `US-014 No two living people share a name` (2 to 1 seed). Locally the non-window Debug tests went from about 450 s to 94 s.
+- `US-029` flight run is retried up to 3 times because one slow frame on a CI runner let the spear land before the quit (CI run 36828924780); the check itself is unchanged.
 - `docs/gates/test-debt.md` records the run; the owed test checks of M2d, M4, M5, M6 are closed there.
 
 

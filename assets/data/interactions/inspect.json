@@ -1,0 +1,10 @@
+// Look at a plant. Works from anywhere in view; the text is the plant's own line in plants.json.
+{
+  "id": "inspect",
+  "label": "Inspect",
+  "actors": ["hero"],
+  "target": { "tags": ["plant"] },
+  "range": 30,
+  "order": 900,
+  "effects": [ "do inspect" ]
+}

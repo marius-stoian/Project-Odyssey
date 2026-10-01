@@ -1,0 +1,22 @@
+// A fire pit: a fire drill lights it; it warms everyone within 6 m now and again after one and two minutes, then goes out.
+{
+  "id": "light-fire",
+  "label": "Light fire",
+  "actors": ["hero"],
+  "target": { "tags": ["fire-pit"] },
+  "range": 2,
+  "duration": 3,
+  "order": 10,
+  "requires": [
+    { "if": "target.state == cold", "else": "It is already burning" },
+    { "if": "has(fire-drill, 1)", "else": "You need a fire drill" }
+  ],
+  "effects": [
+    "fx flame",
+    "set target.state burning",
+    "do warm-nearby 6 25",
+    "after 1m do warm-nearby 6 25",
+    "after 2m do warm-nearby 6 25",
+    "after 3m set target.state cold"
+  ]
+}

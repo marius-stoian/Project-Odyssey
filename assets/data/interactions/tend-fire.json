@@ -1,0 +1,10 @@
+// Rename it here and press F5 in the game: the menu shows the new name.
+{
+  "id": "tend-fire",
+  "label": "Tend the fire",
+  "actors": ["hero"],
+  "target": { "tags": ["camp-fire"] },
+  "range": 2,
+  "order": 30,
+  "effects": [ "do tend-camp-fire" ]
+}

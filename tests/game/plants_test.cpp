@@ -222,12 +222,12 @@ TEST_CASE("US-136 Editor") {
         clickAt(play.odyssey, 14, 30); // the "<" arrow
         play.odyssey.update({});
         CHECK(editor.plantPage() == 0);
-        // The last page is 153 - 4 * 36 = 9 plants; the arrow stops there.
+        // The plants end on page 4 (153 - 4 * 36 = 9 plants); the world objects of US-155 have page 5 to themselves, and the arrow stops there.
         for (int i = 0; i < 8; ++i) {
             clickAt(play.odyssey, 80, 30);
             play.odyssey.update({});
         }
-        CHECK(editor.plantPage() == 4);
+        CHECK(editor.plantPage() == 5);
     }
     SUBCASE("select, move and delete") {
         editor.setTool(game::EditorTool::Plant);

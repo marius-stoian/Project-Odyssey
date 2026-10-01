@@ -1,0 +1,21 @@
+// Gather from a plant that is ripe: a three-second job (a ring fills over the plant), then two berries, and the plant is gone from
+// sight until it is ripe again fifteen seconds later (US-153, D-37: no winter rule, gathering works all year).
+{
+  "id": "gather",
+  "label": "Gather",
+  "note": "Reach 2 m. Moving or attacking before the ring is full stops the job and gives nothing.",
+  "actors": ["hero", "person"],
+  "target": { "tags": ["edible", "plant"] },
+  "range": 2,
+  "duration": 3,
+  "order": 10,
+  "requires": [
+    { "if": "target.state == ripe", "else": "Nothing to pick yet" }
+  ],
+  "effects": [
+    "do gather-berries",
+    "set target.state picked",
+    "after 15s set target.state ripe"
+  ],
+  "npc": { "score": "need(hunger) * 2 + trait(diligent) * 10", "cooldown": 60 }
+}

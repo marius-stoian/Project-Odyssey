@@ -21,5 +21,5 @@
 
 ### Still open
 - Owner's uncommitted edits to `assets/levels/valley.json` (extra wanderers) are not touched or committed by this step.
-- CI on `qa` after the push: see the follow-up line in `docs/gates/test-debt.md`.
+- CI on `qa` is green ([run 36832983954](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36832983954)). One test fix was needed on the way (`US-029` flight run timing, commit `9a4b200`), and the owner asked for shorter CI: parallel non-window tests, three game-test shards, thinner Debug-only grids (commit `820d629`). Details in `docs/gates/test-debt.md`.
 - M5 `run_test.cpp` never written; M6 zip, soak and stability checks; X-M6 waits for X-M9.

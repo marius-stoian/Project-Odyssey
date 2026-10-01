@@ -173,11 +173,19 @@ TEST_CASE("US-139 The hero always faces the pointer") {
 TEST_CASE("US-139 No flicker walking past the pointer") {
     // Walking sideways with the pointer near the hero's chest, or near the edge of a facing, must not
     // make the sprite flip from side to side: count how often the facing changes over 3 seconds.
+    // Release runs the full grid; Debug (with its checks, about 20 times slower) runs a thinner one that
+    // still covers the chest and the facing edges.
+#ifdef NDEBUG
     const int offsets[] = {-40, -24, -12, -6, 0, 6, 12, 24, 40};
+    const int heights[] = {-30, -20, -10};
+#else
+    const int offsets[] = {-24, -6, 6, 24};
+    const int heights[] = {-20};
+#endif
     for (const bool armed : {false, true}) {
         for (const Intent direction : {Intent::MoveRight, Intent::MoveLeft}) {
             for (const int dx : offsets) {
-                for (const int dy : {-30, -20, -10}) {
+                for (const int dy : heights) {
                     CAPTURE(armed);
                     CAPTURE(dx);
                     CAPTURE(dy);

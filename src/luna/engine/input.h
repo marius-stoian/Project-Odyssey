@@ -29,6 +29,8 @@ enum class Intent {
     DevTools,
     // Overlay (US-082): F3 shows the frame rate and the time each simulation tick takes (every build).
     Overlay,
+    // Reload (US-156): F5 reads the data files again while the game runs.
+    Reload,
     Count
 };
 

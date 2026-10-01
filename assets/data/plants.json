@@ -1,10 +1,10 @@
 {
   "plants": [
-    {"name":"grass","frame":"grass","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},
-    {"name":"tall grass","frame":"tall grass","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},
+    {"name":"grass","frame":"grass","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet.","tags":["plant","grass"]},
+    {"name":"tall grass","frame":"tall grass","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet.","tags":["plant","grass"]},
     {"name":"bush","frame":"bush","size":"tall","blocks":true,"edible":false,"inspect":"Its flowers smell sweet."},
-    {"name":"clover","frame":"clover","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},
-    {"name":"fern","frame":"fern","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},
+    {"name":"clover","frame":"clover","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet.","tags":["plant","grass"]},
+    {"name":"fern","frame":"fern","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet.","tags":["plant","grass"]},
     {"name":"moss","frame":"moss","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},
     {"name":"ivy","frame":"ivy","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},
     {"name":"vine","frame":"vine","size":"small","blocks":false,"edible":false,"inspect":"Green and quiet."},

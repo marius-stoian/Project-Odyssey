@@ -1,0 +1,10 @@
+// The sacred fire itself, reached from 4 m.
+{
+  "id": "tend-sacred-fire",
+  "label": "Tend the fire",
+  "actors": ["hero"],
+  "target": { "tags": ["sacred-fire"] },
+  "range": 4,
+  "order": 10,
+  "effects": [ "do tend-sacred-fire" ]
+}

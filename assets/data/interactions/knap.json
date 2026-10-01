@@ -1,0 +1,13 @@
+// The flint nodule (the plant moss).
+{
+  "id": "knap",
+  "label": "Knap",
+  "actors": ["hero"],
+  "target": { "tags": ["plant"], "kinds": ["moss"] },
+  "range": 2,
+  "order": 10,
+  "requires": [
+    { "if": "has(hammerstone, 1)", "else": "Needs a hammerstone" }
+  ],
+  "effects": [ "do knap" ]
+}

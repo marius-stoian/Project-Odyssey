@@ -1002,3 +1002,87 @@ A playtest needs numbers, but numbers about people need their yes. The statistic
 **Try it (15 minutes).** Change `hintAfterSeconds` in `assets/data/hero/tutorial.json` to 5, start a New Game and wait.
 
 **Check yourself.** Why does the crash code live in the Platform layer while the statistics live in the Game layer?
+
+## M7: a small language inside the game (US-150)
+
+Instead of writing "if the bush is ripe and it is not winter" in C++ for every action, the game now reads those sentences from text files. To do that it needs a **parser**: code that turns the text `need(hunger) * 2 + trait(diligent) * 10` into a tree it can evaluate. The trick is the same idea at every level, called *recursive descent*: one function per level of strength. `orExpression` asks `andExpression` for its parts, which asks `notExpression`, and so on down to `primary`, which reads one number, word or bracket. Because `*` lives deeper than `+`, `1 + 2 * 3` automatically groups as `1 + (2 * 3)`; the order of the functions *is* the precedence table.
+
+The tree nodes are `std::shared_ptr<const Expr>`: shared so that a registry can be copied cheaply, `const` so that nothing can change a loaded rule by accident. The game never crashes on a typo: a bad sum is an error message with a line number, a nonsense comparison is simply false, and the loader skips only the broken file.
+
+**Where to look.** `Parser::orExpression`, `Parser::primary` and `evaluate` in [src/sim/rule_expr.cpp](../src/sim/rule_expr.cpp); `FileParser::run` in [src/sim/interaction.cpp](../src/sim/interaction.cpp); the language in plain words in [docs/guides/interaction-data.md](guides/interaction-data.md).
+
+**Try it (15 minutes).** In `assets/data/interactions/gather.json` change `"range": 1.5` to `"range": 99` and read the error in the log; then change `season != winter` to `season != autumn` and think about what the game would now offer in autumn.
+
+**Check yourself.** Why does `1 or 0 and 0` come out as 1, and which function of the parser decides that?
+
+## M7: asking "what is it?" instead of "which one is it?" (US-151)
+
+The old menu code said "if it is a bush, offer this; if it is moss, offer that". Every new plant needed new code. Now each thing carries **tags**, a short list of words, and an interaction says which tags it needs. Matching is a question about sets: *does the thing's list contain every tag the interaction wants?* In C++ that is a small loop over the wanted tags with `std::find` on the thing's list (see `matchesTarget` in [src/sim/interaction.cpp](../src/sim/interaction.cpp)); C++20 `std::ranges::find` and `std::ranges::all_of` say the same thing in one line, and `std::set` makes the lookup fast when the lists grow. Because the answer depends only on the tags, adding a mango to `plants.json` with the tags `edible` and `plant` is enough for Gather to appear: the code does not know a mango exists.
+
+Tags that were never written are **derived** from the fields that were (a plant that is `edible` and does not `block` is tagged `edible`). That keeps 153 old entries working while the new tags get used, and a list written in the file replaces the derived one. One decision hides in there: a tree that bears fruit is *not* tagged `edible`, because today you chop it rather than gather from it, and a menu must not change just because the code underneath was reorganised.
+
+**Where to look.** `matchesTarget` in [src/sim/interaction.cpp](../src/sim/interaction.cpp); `readTags` in [src/game/tags.cpp](../src/game/tags.cpp); the derived tags in `loadCatalogs` ([src/game/catalogs.cpp](../src/game/catalogs.cpp)); `GameRuleContext::path` in [src/game/game_rules.cpp](../src/game/game_rules.cpp).
+
+**Try it (15 minutes).** Follow the manual checks in [docs/plans/US-151.md](plans/US-151.md): add a mango to `plants.json`, then change its tags and watch the menu change.
+
+**Check yourself.** Why does a plant that bears fruit and blocks walking get the tag `fruit-bearing` and not `edible`, and what would change in the game if it got `edible`?
+
+## M7: changing the data while the game is running (US-156)
+
+Reloading a file sounds simple until you ask what happens if the file is wrong, or if the game is in the middle of using the old data. The safe pattern has three steps: **load into a new structure on the side, check it, swap only if it is good.** `reloadInteractions` builds a whole new `InteractionRegistry` from the folder; if even one mistake turns up, the new one is thrown away and the old one stays, untouched, while the panel lists what to fix. Because the game runs one thing at a time (single-threaded), the swap is one line, `interactions_ = std::move(fresh);`, done at the start of a tick when nothing else is reading it. `std::move` hands the new registry's insides to the old name instead of copying them.
+
+The reason the catalogs are *not* reloaded yet is the other half of the lesson: the play state keeps **raw pointers** into them (`WorldPlant::def`). A swap would leave those pointing at freed memory, which is the classic C++ crash. Data that others point into needs either ids instead of pointers, or a re-pointing step after the swap; see codex issue CI-007.
+
+**Where to look.** `OdysseyGame::reloadInteractions` and `drawInteractionPanel` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); the key path `Key::F5` to `Intent::Reload` in [src/luna/engine/input.cpp](../src/luna/engine/input.cpp).
+
+**Try it (15 minutes).** The three manual checks in [docs/plans/US-156.md](plans/US-156.md).
+
+**Check yourself.** Why is "keep the old data when the new data has any mistake" safer than "load every good file and skip the bad one" during a reload, even though the game does the second at start?
+
+## M7: swapping the engine of a menu without changing how it drives (US-152)
+
+The right-click menu was 150 lines of "if it is a person, offer these; if it is the fire, offer those", each item with its own little function. The goal was to move all of that into data files while the game feels *exactly* the same, which is the textbook definition of **refactoring**: change the inside, keep the outside. Two habits made it safe. First, a **stable interface**: the menu still ends in "a list of labelled items with a reason when greyed out, and something to run when clicked", so the screen code that draws it did not change at all. Second, **tests first**: before the data was wired, the old behaviour was written down as tests (the same labels, order, reasons and results for a person, the fire and the stone), and the new menu had to pass the same sentences.
+
+The old code did not disappear; it moved. Each item's body became a **built-in action** with a name (`give-berries`, `tend-camp-fire`), and a data file points at it with `do give-berries`. That is a small version of a pattern you will see everywhere: a table from a name to a function (here `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp)). Later stories replace `do ...` lines with plain effects one at a time, and each replacement is again checked against the same tests.
+
+**Where to look.** `RunFlow::openContext` in [src/game/run_flow.cpp](../src/game/run_flow.cpp) (now short); `subjectAt` in [src/game/game_rules.cpp](../src/game/game_rules.cpp); `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp); any file in [assets/data/interactions/](../assets/data/interactions/).
+
+**Try it (15 minutes).** Do the three manual checks in [docs/plans/US-152.md](plans/US-152.md); then add `"order": 5` to `eat-berries.json`, press F5 and see it jump to the top of the fire's menu.
+
+**Check yourself.** Why was it important to write the tests for the old menu *before* connecting the new one, and what would you not know if you had written them afterwards from the new code?
+
+## M7: a clock the game can count on (US-153)
+
+A three-second action in a game that runs 20 times a second is just "do something when 60 ticks have passed". The runner keeps one number, the **clock** (how many play ticks have happened), and each running action remembers two numbers: the tick it started and the tick it ends. Progress is `100 * (now - start) / (end - start)`; the job is done when `now >= end`. Nothing reads the computer's real clock, so the same inputs give the same result on every machine, and when a menu is open the clock simply stops, so a job pauses with the world. A **timer** is the same idea for effects that wait (`after 15s ...`): a list of "at tick T, do X", kept in order. When two timers are due on the same tick a counter that goes up by one each time decides who goes first, so the order never depends on chance.
+
+Saving a clock is a trap: tick 5000 means nothing to a game that starts again from tick 0. So the saved file does not say "at tick 5300" but "in 300 ticks", and loading adds that to the new clock. The same thought applies to what is saved: only the things that are *not* in their starting state (a picked plant), because everything else can be rebuilt from the level. `saveWorld` for the clan, `hero.json` for the hero and now `things.json` for the plants and their timers are written the same careful way: first to a temporary file, then renamed, keeping three older copies.
+
+**Where to look.** `ActionRunner::tick`, `start` and `savePending` in [src/sim/action_runner.cpp](../src/sim/action_runner.cpp); `OdysseyGame::tickActions` and `thingsText` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `GameEffectHost::setState` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp).
+
+**Try it (15 minutes).** The four manual checks in [docs/plans/US-153.md](plans/US-153.md); then set `"after 15s"` in `gather.json` to `"after 3s"` and see plants come back quickly.
+
+**Check yourself.** Why does the saved file store "in 200 ticks" rather than "at tick 5200", and what would go wrong after loading if it stored the second?
+
+## M7: data-driven object kinds (US-155)
+
+A "fire pit" is not a new kind of C++ class. It is a row of data: a name, a picture name, some **tags** and a few **states**. Everything the game does with plants (place in the Editor, select, move, delete, undo, save in a level, look at, act on) works on that row, so a fire pit gets it all for free as soon as it is in `objects.json`. This is the idea behind "data-driven" design: write the machinery once for *any* thing with tags and states, then add new things by adding rows. The only C++ written for the seven objects is what is truly new: a tiny drawing routine for their programmer art, and two built-in actions, `warm-nearby` and `restore`.
+
+Look at how little the fire pit's behaviour needs: its interaction file says "needs a fire drill, three seconds, set the state to burning, warm everyone within six metres now and twice more later, then go out." The runner you met in US-153 does the timing; the new `World::satisfyPersonNeed` is the one small door through which the game may help a person's need, and it is capped and deterministic like everything in the simulation.
+
+**Where to look.** `loadCatalogs` (the objects part) in [src/game/catalogs.cpp](../src/game/catalogs.cpp); `makeObjectPage` in [src/game/object_art.cpp](../src/game/object_art.cpp); `Editor::plantKinds` and `plantPageSize` in [src/game/editor.cpp](../src/game/editor.cpp); [assets/data/objects.json](../assets/data/objects.json) and [assets/data/interactions/light-fire.json](../assets/data/interactions/light-fire.json).
+
+**Try it (15 minutes).** The three manual checks in [docs/plans/US-155.md](plans/US-155.md); then change `warm-nearby 6 25` to `warm-nearby 12 50` in `light-fire.json`, press F5 and light a fire again.
+
+**Check yourself.** Why does an object without `tags` in the file still get Inspect, and which one line in the code makes that so?
+
+## M7: one system for the player and everyone else (US-154)
+
+Until now the clan lived in two layers: the simulation decided what each person did each hour, and the view moved them to a fixed spot. The new idea is that **a clan member or an animal chooses from the same list of interactions as the hero.** Each interaction file says how much a doer wants it: `need(hunger) * 2 + trait(diligent) * 10`. Once a second an idle doer looks at what is near, evaluates that sum for every interaction it could do, and takes the biggest. That is **utility scoring**: not a script of "if hungry then gather", but a number for each choice, and the highest wins. A hungry person scores high on Gather and walks to the bush; a full one scores below the minimum and does nothing special; a deer scores Graze at 40 and Flee at `(6 - distance) * 40`, so a wolf at 3 m makes the Flee score 120 and the deer runs.
+
+Sharing one system with the player means the same timed runner, the same menu rules and the same data files serve everyone. The pieces that differ are small and live in one place: how a doer walks (the clan view for people, a step per tick for animals), and what a built-in effect means for them (the hero's `gather-berries` gives berries; a clan member's gives a little hunger back). The one random draw per choice comes from a seeded stream, so ties never depend on chance, and the world hash test (two runs, same inputs, thousands of ticks) proves nothing slipped in.
+
+**Where to look.** `NpcLife::think` and `NpcLife::runMind` in [src/game/npc_life.cpp](../src/game/npc_life.cpp); `pickBest` in [src/sim/npc_chooser.cpp](../src/sim/npc_chooser.cpp); the NPC rule context in [src/game/game_rules.cpp](../src/game/game_rules.cpp); [assets/data/interactions/graze.json](../assets/data/interactions/graze.json) and [flee-predator.json](../assets/data/interactions/flee-predator.json).
+
+**Try it (15 minutes).** The manual checks in [docs/plans/US-154.md](plans/US-154.md); then change the Flee score in `flee-predator.json` to `(6 - distance) * 10` and see the deer wait longer before running.
+
+**Check yourself.** Why does `pickBest` draw a random number even when there is no tie, and what would go wrong with the world-hash test if it drew only when there was one?

@@ -25,6 +25,9 @@ public:
     // wind-up ends: the strike lands now, if the hero is still within reach.
     bool update();
 
+    // An animal that walks (US-154): the game moves it, one step at a time, after checking the ground.
+    void setFeet(double x, double y) { feetX_ = x; feetY_ = y; }
+
     double feetX() const { return feetX_; }
     double feetY() const { return feetY_; }
     int hp() const { return hp_; }

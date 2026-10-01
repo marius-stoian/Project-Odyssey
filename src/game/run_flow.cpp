@@ -1,5 +1,6 @@
 #include "game/run_flow.h"
 
+#include "game/game_rules.h"
 #include "game/odyssey_game.h"
 
 #include <algorithm>
@@ -15,8 +16,6 @@ using luna::engine::UiColor;
 using luna::engine::UiPainter;
 
 constexpr int kRowHeight = 12;
-constexpr int kReachPixels = 64;       // how close the hero must be to work with a thing: 2 m
-constexpr int kBarterReachPixels = 96; // and to trade with a rival camp: 3 m
 
 enum ScreenIds {
     kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
@@ -414,118 +413,26 @@ void RunFlow::buildEnded(OdysseyGame& game) {
 // ---- acting
 
 bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
-    sim::HeroLife* hero = game.life();
-    const sim::HeroData* data = game.heroData();
-    if (hero == nullptr || data == nullptr || hero->phase() != sim::Phase::Free) return false;
+    const sim::HeroLife* hero = game.life();
+    if (hero == nullptr || game.heroData() == nullptr || hero->phase() != sim::Phase::Free) return false;
     actions_.clear();
-    const double distanceFromHero = [&](double x, double y) { return std::hypot(x - game.hero().feetX(), y - game.hero().feetY()); }(wx, wy);
-    (void)distanceFromHero;
-    const auto near = [&](double x, double y, int reach) { return std::hypot(x - game.hero().feetX(), y - game.hero().feetY()) <= reach; };
-    const auto tooFar = [](bool closeEnough, const std::string& what) { return closeEnough ? std::string() : "Too far away" + what; };
-
-    // A person.
-    if (const int person = game.personAtWorld(wx, wy); person >= 0) {
-        const Figure& figure = game.clanView().figures()[static_cast<std::size_t>(person)];
-        const bool close = near(figure.x, figure.y, kReachPixels);
-        contextTitle_ = game.clan()->people()[static_cast<std::size_t>(person)].name;
-        actions_.push_back({"Talk", tooFar(close, ""), [person](OdysseyGame& g) { g.run().setMessage(g.life()->talkTo(person).message); }});
-        actions_.push_back({"Give berries", !close ? "Too far away" : (hero->count("berries") == 0 ? "You have no berries" : ""), [person](OdysseyGame& g) { g.run().setMessage(g.life()->giveBerriesTo(person).message); }});
-        for (int p = 0; p < static_cast<int>(sim::kProfessionCount); ++p) {
-            if (hero->masterOf(p) == person && hero->apprenticeOf(p) < 0) {
-                actions_.push_back({std::format("Ask to teach you {}", data->professions[static_cast<std::size_t>(p)].name), tooFar(close, ""), [p](OdysseyGame& g) { g.run().setMessage(g.life()->askToApprentice(p).message); }});
-            }
-        }
-        backTo_ = Screen::None;
-        screen_ = Screen::Context;
-        return true;
-    }
-    // A workstation: the knapping stone, or the camp's fire.
-    const PixelPoint stone = game.knappingStone();
-    if (std::abs(wx - stone.x) < 20 && wy > stone.y - 26 && wy < stone.y + 6) {
-        const bool close = near(stone.x, stone.y, kReachPixels);
-        contextTitle_ = "Knapping stone";
-        actions_.push_back({"Craft", tooFar(close, ""), [](OdysseyGame& g) { g.run().openCraft("knapping-stone"); }});
-        screen_ = Screen::Context;
-        return true;
-    }
-    const PixelPoint camp = game.campPixels();
-    if (std::hypot(wx - camp.x, wy - (camp.y - 12)) < 22) {
-        const bool close = near(camp.x, camp.y, kReachPixels);
-        contextTitle_ = "The clan's fire";
-        actions_.push_back({"Craft at the fire", tooFar(close, ""), [](OdysseyGame& g) { g.run().openCraft("fire"); }});
-        actions_.push_back({"Eat berries", !close ? "Too far away" : (hero->count("berries") == 0 ? "You have no berries" : ""), [](OdysseyGame& g) {
-                                g.run().setMessage(g.life()->eatBerries().message);
-                                g.tutorial().notify("eat");
+    // The thing under the pointer (a clan member, a fire, the stone, a rival camp, a plant), and what the interaction files offer the hero
+    // for it (US-152). The menu is made entirely from data: labels, disabled reasons and order come from the files.
+    const std::optional<Subject> subject = subjectAt(game, wx, wy);
+    if (!subject) return false;
+    contextTitle_ = subject->title;
+    const GameRuleContext context(game, *subject);
+    for (const sim::rules::Offer& offer : game.offersFor(*subject)) {
+        const std::string id = offer.interaction->id; // by id: the data may be reloaded (F5) while the menu is open
+        actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), offer.enabled ? std::string() : offer.reason,
+                            [id, subject = *subject](OdysseyGame& g) {
+                                if (!startInteraction(g, id, subject)) g.run().setMessage("That action is no longer in the data.");
                             }});
-        actions_.push_back({"Tend the fire", tooFar(close, ""), [](OdysseyGame& g) {
-                                g.run().setMessage(g.life()->tendCampFire().message);
-                                g.tutorial().notify("tend");
-                            }});
-        actions_.push_back({"Tend the sacred fire", hero->fire().founded ? "" : "No sacred fire yet", [](OdysseyGame& g) { g.run().setMessage(g.life()->tendFire().message); }});
-        screen_ = Screen::Context;
-        return true;
     }
-    // The sacred fire.
-    if (hero->fire().founded && std::hypot(wx - (hero->fire().tileX * kTileSize + 16), wy - (hero->fire().tileY * kTileSize + 16)) < 24) {
-        const double fx = hero->fire().tileX * kTileSize + 16;
-        const double fy = hero->fire().tileY * kTileSize + 16;
-        const bool close = near(fx, fy, kReachPixels * 2);
-        contextTitle_ = std::format("Sacred fire {}", hero->fire().name);
-        actions_.push_back({"Tend the fire", tooFar(close, ""), [](OdysseyGame& g) { g.run().setMessage(g.life()->tendFire().message); }});
-        actions_.push_back({"Hold a ritual", tooFar(close, ""), [fx, fy](OdysseyGame& g) { g.run().setMessage(g.life()->holdRitual(g.attendeesAt(fx, fy, g.heroData()->config.fire.ritualRadiusTiles)).message); }});
-        screen_ = Screen::Context;
-        return true;
-    }
-    // A rival camp.
-    if (game.rivals() != nullptr) {
-        for (std::size_t i = 0; i < game.rivals()->clans().size(); ++i) {
-            const sim::Tile camp2 = game.rivals()->clans()[i].camp;
-            const double cx = camp2.x * kTileSize + 16;
-            const double cy = camp2.y * kTileSize + 16;
-            if (std::hypot(wx - cx, wy - (cy - 12)) < 26) {
-                const bool close = near(cx, cy, kBarterReachPixels);
-                contextTitle_ = game.rivals()->clans()[i].name;
-                const int index = static_cast<int>(i);
-                actions_.push_back({"Barter", tooFar(close, ""), [index](OdysseyGame& g) { g.run().openBarter(index); }});
-                screen_ = Screen::Context;
-                return true;
-            }
-        }
-    }
-    // A plant: berries, flint, a tree.
-    if (const int plantIndex = game.plantAtWorld(wx, wy); plantIndex >= 0) {
-        const WorldPlant& plant = game.plants()[static_cast<std::size_t>(plantIndex)];
-        const bool close = near(plant.feet.x, plant.feet.y, kReachPixels);
-        contextTitle_ = plant.kind;
-        const std::size_t index = static_cast<std::size_t>(plantIndex);
-        if (plant.def != nullptr && plant.def->edible && !plant.def->blocks) {
-            actions_.push_back({"Gather", tooFar(close, ""), [index](OdysseyGame& g) {
-                                    g.run().setMessage(g.life()->gatherBerries().message);
-                                    g.tutorial().notify("gather");
-                                    g.harvestPlant(index);
-                                }});
-        } else if (plant.kind == "moss") { // the flint nodule
-            actions_.push_back({"Knap", !close ? "Too far away" : (hero->count("hammerstone") == 0 ? "Needs a hammerstone" : ""), [index](OdysseyGame& g) {
-                                    g.run().setMessage(g.life()->knapFlint().message);
-                                    g.harvestPlant(index);
-                                }});
-            actions_.push_back({"Pick up by hand", tooFar(close, ""), [index](OdysseyGame& g) {
-                                    g.run().setMessage(g.life()->pickFlint().message);
-                                    g.harvestPlant(index);
-                                }});
-        } else if (plant.def != nullptr && plant.def->blocks) {
-            actions_.push_back({"Chop wood", tooFar(close, ""), [index](OdysseyGame& g) {
-                                    g.run().setMessage(g.life()->chopWood().message);
-                                    g.harvestPlant(index);
-                                }});
-        }
-        actions_.push_back({"Inspect", "", [index](OdysseyGame& g) { g.run().setMessage(g.plants()[index].def != nullptr ? g.plants()[index].def->inspect : std::string()); }});
-        screen_ = Screen::Context;
-        return true;
-    }
-    return false;
+    backTo_ = Screen::None;
+    screen_ = Screen::Context;
+    return true;
 }
-
 void RunFlow::setMessage(const std::string& text) { message_ = text; }
 
 void RunFlow::openCraft(const std::string& station) {

@@ -1,0 +1,9 @@
+{
+  "id": "pick-flint",
+  "label": "Pick up by hand",
+  "actors": ["hero"],
+  "target": { "tags": ["plant"], "kinds": ["moss"] },
+  "range": 2,
+  "order": 20,
+  "effects": [ "do pick-flint" ]
+}

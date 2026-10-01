@@ -17,6 +17,9 @@
 #include "luna/engine/effects.h"
 #include "game/editor.h"
 #include "game/enemy.h"
+#include "game/game_rules.h"
+#include "game/npc_life.h"
+#include "sim/action_runner.h"
 #include "game/hero.h"
 #include "game/pickups.h"
 #include "game/effect_art.h"
@@ -34,6 +37,7 @@
 #include "core/random.h"
 
 #include "sim/hero_life.h"
+#include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
 #include "sim/rivals.h"
@@ -47,6 +51,8 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
+#include <string>
 #include <vector>
 
 namespace odysseus::game {
@@ -77,6 +83,41 @@ public:
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }
+    // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
+    const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
+    const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    // Smart objects (US-151): what a plant is to the rules (its kind and tags), and what the hero may do to it now, in menu order,
+    // with the reason when an item is disabled.
+    sim::rules::ThingInfo plantThing(std::size_t index) const;
+    std::vector<sim::rules::Offer> plantOffers(std::size_t index) const;
+    // The same for any Subject (a clan member, a fire, the stone, a rival camp, a plant): what the hero may do to it now, in menu order,
+    // with the reason for a disabled item (US-152).
+    std::vector<sim::rules::Offer> offersFor(const Subject& subject) const;
+    void setPlantState(std::size_t index, const std::string& state); // "picked", "ripe"...
+    std::set<std::string> knownTags() const; // every tag a catalog or character kind carries
+    // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the
+    // last good data stays in use and the panel lists "file:line: message". Returns true when the new data was taken.
+    bool reloadInteractions();
+    // Timed actions (US-153): the runner, its clock (play ticks since the run began; it stops while a screen is open), and the plant
+    // with a given id (-1 when there is none).
+    sim::rules::ActionRunner& actions() { return actions_; }
+    const sim::rules::ActionRunner& actions() const { return actions_; }
+    std::int64_t actionClock() const { return actionClock_; }
+    int plantIndexById(int id) const;
+    // What clan members and animals do on their own (US-154), and what they need to do it: the ground, the animals and the people to move.
+    NpcLife& npcs() { return npcLife_; }
+    const NpcLife& npcs() const { return npcLife_; }
+    Enemy& enemyAt(std::size_t index) { return enemies_.at(index); }
+    // The harmless animals and people placed in the level (deer, rabbits): the ones that walk and graze (US-154) are moved here.
+    std::vector<PlacedCharacter>& bystandersMutable() { return bystanders_; }
+    ClanView& clanViewMutable() { return clanView_; }
+    const luna::engine::TileMap& tileMap() const { return map_; }
+    // Outside help for a clan member's need (a fire pit's warmth, a bed): false when there is no clan or the person is gone.
+    bool helpPerson(int personId, sim::Need need, int amount);
+    // And harm: a clan member's need falls (a hazard, or a test that wants someone hungry).
+    bool harmPerson(int personId, sim::Need need, int amount);
+    bool interactionPanelOpen() const { return !interactionReport_.errors.empty(); }
+    double lastInteractionReloadMilliseconds() const { return lastInteractionReloadMs_; }
     // What the hero carries (US-134): a hotbar of 9 slots, empty at the start. Walking over a
     // pickup puts its weapon in the first free slot; keys 1-9 hold a slot, Shift the next filled one.
     static constexpr int kHotbarSlots = 9;
@@ -240,6 +281,18 @@ private:
     void resetPlay(); // the whole play state again, from the level
     void drawModeLabel(luna::engine::Renderer& renderer) const;
     Catalogs catalogs_;
+    sim::rules::InteractionRegistry interactions_;
+    sim::rules::LoadReport interactionReport_;
+    void loadInteractions(); // at start: reads the interaction files; a file with mistakes is left out, the rest load
+    double lastInteractionReloadMs_ = 0.0;
+    sim::rules::ActionRunner actions_;
+    std::int64_t actionClock_ = 0;
+    NpcLife npcLife_;
+    void tickActions(const luna::engine::Intents& intents);
+    void drawActionRing(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
+    std::string thingsText() const;                          // the plants' states and the waiting effects, as saved in things.json
+    std::vector<std::string> restoreThings(const std::string& text);
+    void drawInteractionPanel(luna::engine::Renderer& renderer) const;
     ContentAtlas content_;
     bool contentLoaded_ = false;
     luna::engine::Texture effectsTexture_;

@@ -1,0 +1,12 @@
+// A deer (any prey animal) grazes: it walks to a patch of grass and stays four seconds. Nothing is taken from the grass.
+{
+  "id": "graze",
+  "label": "Graze",
+  "actors": ["prey"],
+  "target": { "tags": ["grass"] },
+  "range": 2,
+  "duration": 4,
+  "order": 500,
+  "effects": [ "do graze" ],
+  "npc": { "score": "40", "cooldown": 10 }
+}

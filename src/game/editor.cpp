@@ -180,10 +180,35 @@ void Editor::buildCharacterPalette() {
     Button& next = characterPalette_->add<Button>(Rect{4 + kKindColumns * kKindWidth - 22, arrowsTop, 20, 12}, ">", [this] { kindPageWanted_ = kindPage_ + 1; });
     next.hint = "Next page of characters";
 }
-// One page of the plant palette: two arrows, then up to 36 plants by picture (drawn in render()).
-void Editor::buildPlantPalette() {
+// The plants, then the world objects: one list, the objects on the last page(s).
+std::vector<std::string> Editor::plantKinds() const {
+    std::vector<std::string> kinds = definitions_.plants;
+    kinds.insert(kinds.end(), definitions_.objects.begin(), definitions_.objects.end());
+    return kinds;
+}
+
+int Editor::plantPageCount() const {
+    const int plantPages = (static_cast<int>(definitions_.plants.size()) + kPlantsPerPage - 1) / kPlantsPerPage;
+    return std::max(1, plantPages + (definitions_.objects.empty() ? 0 : 1));
+}
+
+int Editor::plantPageFirst(int page) const {
     const int plants = static_cast<int>(definitions_.plants.size());
-    const int pages = std::max(1, (plants + kPlantsPerPage - 1) / kPlantsPerPage);
+    const int plantPages = (plants + kPlantsPerPage - 1) / kPlantsPerPage;
+    return page < plantPages ? page * kPlantsPerPage : plants;
+}
+
+int Editor::plantPageSize(int page) const {
+    const int plants = static_cast<int>(definitions_.plants.size());
+    const int plantPages = (plants + kPlantsPerPage - 1) / kPlantsPerPage;
+    if (page < plantPages) return std::min(kPlantsPerPage, plants - page * kPlantsPerPage);
+    return std::min(kPlantsPerPage, static_cast<int>(definitions_.objects.size()));
+}
+
+// One page of the plant palette: two arrows, then up to 36 plants (or the world objects) by picture (drawn in render()).
+void Editor::buildPlantPalette() {
+    const std::vector<std::string> kinds = plantKinds();
+    const int pages = plantPageCount();
     plantPage_ = std::clamp(plantPageWanted_, 0, pages - 1);
     plantPageWanted_ = plantPage_;
     const int columns = 4;
@@ -194,15 +219,14 @@ void Editor::buildPlantPalette() {
     previous.hint = "Previous page of plants";
     Button& next = plantPalette_->add<Button>(Rect{4 + columns * kPaletteCell - 22, top, 20, 12}, ">", [this] { plantPageWanted_ = plantPage_ + 1; });
     next.hint = "Next page of plants";
-    for (int i = 0; i < kPlantsPerPage; ++i) {
-        const int index = plantPage_ * kPlantsPerPage + i;
-        if (index >= plants) break;
+    for (int i = 0; i < plantPageSize(plantPage_); ++i) {
+        const int index = plantPageFirst(plantPage_) + i;
         const Rect cell{4 + (i % columns) * kPaletteCell, top + 14 + (i / columns) * kPaletteCell, kPaletteCell - 2, kPaletteCell - 2};
         Button& button = plantPalette_->add<Button>(cell, "", [this, index] {
             plant_ = index;
-            tool_ = EditorTool::Plant; // choosing a plant means placing it
+            tool_ = EditorTool::Plant; // choosing a plant (or an object) means placing it
         });
-        button.hint = definitions_.plants[static_cast<std::size_t>(index)];
+        button.hint = kinds[static_cast<std::size_t>(index)];
     }
 }
 
@@ -703,7 +727,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         if (auto* b = dynamic_cast<Button*>(effectPalette_->children()[i].get())) b->selected = static_cast<int>(i) == effect_;
     }
     for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
-        if (auto* b = dynamic_cast<Button*>(plantPalette_->children()[i].get())) b->selected = plantPage_ * kPlantsPerPage + static_cast<int>(i) - 2 == plant_;
+        if (auto* b = dynamic_cast<Button*>(plantPalette_->children()[i].get())) b->selected = plantPageFirst(plantPage_) + static_cast<int>(i) - 2 == plant_;
     }
     // Painting tools show the ground palette, Weapon the weapons; Place and Select the characters.
     palette_->visible = paints(tool_);
@@ -778,8 +802,8 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         return;
     }
     if (tool_ == EditorTool::Plant) {
-        if (pressed && hover_ && !definitions_.plants.empty()) {
-            const std::string& kind = definitions_.plants[static_cast<std::size_t>(plant_)];
+        if (pressed && hover_ && !plantKinds().empty()) {
+            const std::string kind = plantKinds()[static_cast<std::size_t>(plant_)];
             const PixelPoint feet{hover_->first * kTileSize + kTileSize / 2, hover_->second * kTileSize + kTileSize - 4};
             for (const PlacedPlant& there : level_.plants) {
                 if (plantCell(there.feet) == plantCell(feet)) {
@@ -1144,9 +1168,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         }
     }
     plantPalette_->draw(painter);    if (plantPalette_->visible && textures_.plants != nullptr) {
-        const int plants = static_cast<int>(definitions_.plants.size());
-        const int pages = std::max(1, (plants + kPlantsPerPage - 1) / kPlantsPerPage);
-        const std::string label = std::format("{}/{}", plantPage_ + 1, pages);
+        const std::vector<std::string> kinds = plantKinds();
+        const int pages = plantPageCount();
+        const std::string label = std::format("{}/{}{}", plantPage_ + 1, pages, onObjectPage(plantPage_) ? " objects" : "");
         const Rect& panel = plantPalette_->bounds;
         painter.text(panel.x + (panel.width - UiPainter::textWidth(label)) / 2, panel.y + 4, label, UiColor::Text);
         for (std::size_t i = 0; i < effectPalette_->children().size(); ++i) {
@@ -1154,9 +1178,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     }
     for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
             const Rect& cell = plantPalette_->children()[i]->bounds;
-            const std::size_t index = static_cast<std::size_t>(plantPage_ * kPlantsPerPage) + i - 2;
-            if (index < definitions_.plants.size()) {
-                drawPlantIcon(renderer, *textures_.plants, definitions_.plants[index], {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
+            const std::size_t index = static_cast<std::size_t>(plantPageFirst(plantPage_)) + i - 2;
+            if (index < kinds.size()) {
+                drawPlantIcon(renderer, *textures_.plants, kinds[index], {cell.x + 1, cell.y + 1, cell.width - 2, cell.height - 2});
             }
         }
     }
@@ -1184,7 +1208,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     } else if (selected_ && findEffect(*selected_) != nullptr) {
         what = findEffect(*selected_)->name;
     } else if (tool_ == EditorTool::Plant) {
-        what = definitions_.plants.empty() ? "no plants" : definitions_.plants[static_cast<std::size_t>(plant_)];
+        what = plantKinds().empty() ? "no plants" : plantKinds()[static_cast<std::size_t>(plant_)];
     } else if (selected_ && findPlant(*selected_) != nullptr) {
         what = findPlant(*selected_)->kind;
     } else if (selected_ && findPickup(*selected_) != nullptr) {

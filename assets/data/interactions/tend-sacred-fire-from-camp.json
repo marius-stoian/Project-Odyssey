@@ -1,0 +1,13 @@
+// Offered at the clan's fire; greyed out until the hero has founded a sacred fire. No distance limit (30 m is the most a range can be).
+{
+  "id": "tend-sacred-fire-from-camp",
+  "label": "Tend the sacred fire",
+  "actors": ["hero"],
+  "target": { "tags": ["camp-fire"] },
+  "range": 30,
+  "order": 40,
+  "requires": [
+    { "if": "flag(sacred-fire)", "else": "No sacred fire yet" }
+  ],
+  "effects": [ "do tend-sacred-fire" ]
+}

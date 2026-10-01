@@ -168,7 +168,12 @@ TEST_CASE("US-014 A clan lives for generations") {
 
 TEST_CASE("US-014 No two living people share a name") {
     // Readers must never meet two Kals at once (found while preparing Kill Gate 1).
-    for (const std::uint64_t seed : {7ULL, 42ULL}) {
+#ifdef NDEBUG
+    const std::vector<std::uint64_t> seeds = {7ULL, 42ULL};
+#else
+    const std::vector<std::uint64_t> seeds = {7ULL}; // Debug is slow; Release checks both
+#endif
+    for (const std::uint64_t seed : seeds) {
         World world(seed, realConfig());
         for (int decade = 0; decade < 6; ++decade) {
             world.runTicks(world.calendar().ticksPerYear() * 10);

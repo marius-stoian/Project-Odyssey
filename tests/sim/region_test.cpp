@@ -99,7 +99,12 @@ TEST_CASE("US-040 Repeatable") {
 }
 
 TEST_CASE("US-040 Playable") {
-    for (std::uint64_t seed = 1; seed <= 30; ++seed) {
+#ifdef NDEBUG
+    const std::uint64_t seeds = 30;
+#else
+    const std::uint64_t seeds = 8; // Debug builds with their checks are several times slower; Release runs all 30
+#endif
+    for (std::uint64_t seed = 1; seed <= seeds; ++seed) {
         CAPTURE(seed);
         const auto began = std::chrono::steady_clock::now();
         sim::Region region(seed, config());

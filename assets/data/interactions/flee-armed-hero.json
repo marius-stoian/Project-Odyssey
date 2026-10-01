@@ -1,0 +1,11 @@
+// Prey run from a hero who holds a weapon, within 5 m (D-36).
+{
+  "id": "flee-armed-hero",
+  "label": "Flee",
+  "actors": ["prey"],
+  "target": { "tags": ["hero", "armed"] },
+  "range": 30,
+  "order": 502,
+  "effects": [ "do flee" ],
+  "npc": { "score": "(5 - distance) * 40", "cooldown": 1 }
+}

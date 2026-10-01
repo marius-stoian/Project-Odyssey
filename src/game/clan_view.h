@@ -8,6 +8,7 @@
 #include "sim/world.h"
 
 #include <cstdint>
+#include <map>
 #include <vector>
 
 namespace odysseus::game {
@@ -64,6 +65,12 @@ public:
     // The person the player plays is drawn as the hero avatar, not as a clan member: no figure for them.
     void setHidden(int personId) { hidden_ = personId; }
 
+    // An errand (US-154): a person walks to a place of their own choosing (a ripe bush) instead of where their hour's action
+    // would take them, until the errand is cleared.
+    void setErrand(int personId, PixelPoint where) { errands_[personId] = where; }
+    void clearErrand(int personId) { errands_.erase(personId); }
+    bool hasErrand(int personId) const { return errands_.count(personId) != 0; }
+
     // Where a person doing `action` goes, in world pixels (before nudging it onto free ground): the place of the action
     // plus the person's own spot there.
     static PixelPoint targetOf(int personId, sim::Action action, PixelPoint camp, std::int64_t hourNumber);
@@ -72,6 +79,7 @@ private:
     PixelPoint camp_;
     int hidden_ = -1;
     std::vector<Figure> figures_;
+    std::map<int, PixelPoint> errands_;
 };
 
 } // namespace odysseus::game

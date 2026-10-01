@@ -1,0 +1,10 @@
+// The clan's fire.
+{
+  "id": "craft-at-fire",
+  "label": "Craft at the fire",
+  "actors": ["hero"],
+  "target": { "tags": ["camp-fire"] },
+  "range": 2,
+  "order": 10,
+  "effects": [ "do open-craft fire" ]
+}

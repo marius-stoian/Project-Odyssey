@@ -1,0 +1,13 @@
+// Out of the wind, a short rest gives some energy back.
+{
+  "id": "rest-in-shelter",
+  "label": "Rest",
+  "actors": ["hero"],
+  "target": { "tags": ["shelter"] },
+  "range": 2,
+  "duration": 5,
+  "order": 10,
+  "effects": [
+    "do restore energy 15"
+  ]
+}

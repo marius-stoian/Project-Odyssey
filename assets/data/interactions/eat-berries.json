@@ -1,0 +1,12 @@
+{
+  "id": "eat-berries",
+  "label": "Eat berries",
+  "actors": ["hero"],
+  "target": { "tags": ["camp-fire"] },
+  "range": 2,
+  "order": 20,
+  "requires": [
+    { "if": "has(berries, 1)", "else": "You have no berries" }
+  ],
+  "effects": [ "do eat-berries" ]
+}

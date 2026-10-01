@@ -120,7 +120,8 @@ void ClanView::update(const sim::World& world, const luna::engine::TileMap& map)
         figure.child = ageYears < kChildYears;
         figure.emote = emoteOf(person);
 
-        const PixelPoint target = targetOf(person.id, person.action, camp_, hourNumber);
+        const auto errand = errands_.find(person.id);
+        const PixelPoint target = errand != errands_.end() ? errand->second : targetOf(person.id, person.action, camp_, hourNumber);
         double goalX = target.x;
         double goalY = target.y;
         nudgeOntoFreeGround(map, goalX, goalY);

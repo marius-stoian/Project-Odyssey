@@ -122,6 +122,12 @@ add_library(odysseus_sim STATIC
     src/sim/calendar.cpp
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
+    src/sim/rule_json.cpp
+    src/sim/rule_expr.cpp
+    src/sim/rule_effect.cpp
+    src/sim/interaction.cpp
+    src/sim/action_runner.cpp
+    src/sim/npc_chooser.cpp
     src/sim/world.cpp
     src/sim/world_story.cpp
     src/sim/world_care.cpp
@@ -164,6 +170,11 @@ add_library(odysseus_game STATIC
     src/game/art.cpp
     src/game/content_art.cpp
     src/game/catalogs.cpp
+    src/game/tags.cpp
+    src/game/game_rules.cpp
+    src/game/object_art.cpp
+    src/game/npc_life.cpp
+    src/game/builtin_actions.cpp
     src/game/weapons.cpp
     src/game/arc_shots.cpp
     src/game/pickups.cpp
@@ -322,12 +333,22 @@ add_executable(odysseus_game_tests
     tests/game/weather_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
-    tests/game/pickups_test.cpp)
+    tests/game/pickups_test.cpp
+    tests/game/interactions_test.cpp
+    tests/game/tags_test.cpp
+    tests/game/menu_test.cpp
+    tests/game/npc_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
-add_test(NAME odysseus_game_tests COMMAND odysseus_game_tests)
+# The game tests are split into three runs so CTest can run them side by side (CI uses -j 4). The
+# files in A and B are named; C runs every other file, so a new test file is never left out.
+set(ODYSSEUS_SHARD_A "*aiming_test.cpp,*weapons_test.cpp,*combat_test.cpp")
+set(ODYSSEUS_SHARD_B "*plants_test.cpp,*ranged_test.cpp,*elements_test.cpp,*settings_test.cpp")
+add_test(NAME odysseus_game_tests_a COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_A}")
+add_test(NAME odysseus_game_tests_b COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_B}")
+add_test(NAME odysseus_game_tests_c COMMAND odysseus_game_tests "--source-file-exclude=${ODYSSEUS_SHARD_A},${ODYSSEUS_SHARD_B}")
 
 # --- End-to-end: walk right into the boulder in the real window (US-024) ---
 add_test(NAME "US-024 Walk to the rock"
@@ -358,7 +379,9 @@ add_executable(odysseus_sim_tests
     tests/sim/story_hunt_test.cpp
     tests/sim/story_episode_test.cpp
     tests/sim/region_test.cpp
-    tests/sim/hero_test.cpp)
+    tests/sim/hero_test.cpp
+    tests/sim/rules_test.cpp
+    tests/sim/runner_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

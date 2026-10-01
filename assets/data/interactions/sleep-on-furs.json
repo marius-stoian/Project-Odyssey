@@ -1,0 +1,14 @@
+// Furs to sleep on: more energy and a little warmth.
+{
+  "id": "sleep-on-furs",
+  "label": "Sleep",
+  "actors": ["hero"],
+  "target": { "tags": ["bedding"] },
+  "range": 2,
+  "duration": 8,
+  "order": 10,
+  "effects": [
+    "do restore energy 40",
+    "do restore warmth 10"
+  ]
+}

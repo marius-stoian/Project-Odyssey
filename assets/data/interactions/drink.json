@@ -1,0 +1,13 @@
+// There is no thirst need in Age 1, so the water only refreshes.
+{
+  "id": "drink",
+  "label": "Drink",
+  "actors": ["hero"],
+  "target": { "tags": ["water"] },
+  "range": 2,
+  "duration": 2,
+  "order": 10,
+  "effects": [
+    "say \"The water is cold and clear.\""
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "hold-ritual",
+  "label": "Hold a ritual",
+  "actors": ["hero"],
+  "target": { "tags": ["sacred-fire"] },
+  "range": 4,
+  "order": 20,
+  "effects": [ "do hold-ritual" ]
+}
