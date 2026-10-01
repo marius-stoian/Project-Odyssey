@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-156: Hot reload (F5) and the validation panel (Avengers) - 2026-10-01
+
+**State:** Built and verified (`tools/verify.ps1 -Story US-156`); merged into `qa`.
+
+- Luna: key F5 and the intent `Reload` (platform, engine).
+- Game: `OdysseyGame::reloadInteractions()` (all or nothing: only a clean registry replaces the data in use), the error panel (`file:line: message`, Game and Editor modes, also shown at start when a file was left out).
+- Docs and tests: guide section "Editing while the game runs: F5", `docs/plans/US-156.md`, codex issue CI-007 (catalog reload not part of this story), teach-back, 4 cases in `tests/game/tags_test.cpp`.
+
 ## US-151: Tags and smart objects (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-151`); merged into `qa`.

@@ -2,6 +2,7 @@
 #include "game/catalogs.h"
 #include "game/level.h"
 #include "game/odyssey_game.h"
+#include "luna/engine/renderer.h"
 #include "sim/data.h"
 
 #include <doctest/doctest.h>
@@ -174,4 +175,117 @@ TEST_CASE("US-151 An interaction aimed at a tag no catalog uses gets a warning n
     // The shipped files are clean.
     game::OdysseyGame shipped(ODYSSEUS_DATA_DIR, ODYSSEUS_DEMO_LEVEL);
     CHECK(shipped.interactionReport().warnings.empty());
+}
+
+// ---- US-156: F5 reload and the validation panel
+
+namespace {
+
+// gather.json with one text swapped for another, in a copy of the data folder.
+void editGather(const fs::path& data, const std::string& from, const std::string& to) {
+    const fs::path file = data / "interactions" / "gather.json";
+    std::string text = readText(file);
+    const std::size_t at = text.find(from);
+    REQUIRE_MESSAGE(at != std::string::npos, from);
+    text.replace(at, from.size(), to);
+    writeText(file, text);
+}
+
+luna::engine::Intents reloadPressed() {
+    luna::engine::Intents intents;
+    intents.set(luna::engine::Intent::Reload, true, true);
+    return intents;
+}
+
+} // namespace
+
+TEST_CASE("US-156 F5 takes an edited file within a second") {
+    const fs::path data = dataCopy("reload", "");
+    luna::engine::RecordingRenderer renderer;
+    game::OdysseyGame odyssey(data, levelWith(data, "reload", {}));
+    odyssey.start(renderer);
+    REQUIRE(odyssey.interactions().find("gather")->rangeMilli == 1500);
+
+    editGather(data, "\"range\": 1.5,", "\"range\": 2.5,");
+    odyssey.update(reloadPressed()); // the F5 key, as the game receives it
+    REQUIRE(odyssey.interactions().find("gather") != nullptr);
+    CHECK(odyssey.interactions().find("gather")->rangeMilli == 2500);
+    CHECK_FALSE(odyssey.interactionPanelOpen());
+    CHECK(odyssey.lastInteractionReloadMilliseconds() < 1000.0);
+
+    // A new file appears too.
+    writeText(data / "interactions" / "wave.json", "{ \"id\": \"wave\", \"label\": \"Wave\", \"actors\": [\"hero\"], \"target\": { \"tags\": [\"plant\"] }, \"effects\": [\"fx leaves\"] }");
+    CHECK(odyssey.reloadInteractions());
+    CHECK(odyssey.interactions().find("wave") != nullptr);
+}
+
+TEST_CASE("US-156 A bad file lists file:line: message and the last good data stays; fixing it closes the panel") {
+    const fs::path data = dataCopy("bad-file", "");
+    luna::engine::RecordingRenderer renderer;
+    game::OdysseyGame odyssey(data, levelWith(data, "bad-file", {}));
+    odyssey.start(renderer);
+    REQUIRE_FALSE(odyssey.interactionPanelOpen());
+    odyssey.render(renderer, 0.0);
+    const std::size_t quietDraws = renderer.draws().size();
+
+    editGather(data, "\"give actor berries 2\"", "\"giv actor berries 2\"");
+    editGather(data, "\"range\": 1.5,", "\"range\": 2.5,"); // a good change in the same file must not sneak in
+    odyssey.update(reloadPressed());
+    REQUIRE(odyssey.interactionPanelOpen());
+    REQUIRE(odyssey.interactionReport().errors.size() == 1);
+    CHECK(odyssey.interactionReport().errors[0].text().find("interactions/gather.json:") == 0);
+    CHECK(odyssey.interactionReport().errors[0].message == "unknown effect verb \"giv\"");
+    REQUIRE(odyssey.interactions().find("gather") != nullptr);
+    CHECK(odyssey.interactions().find("gather")->rangeMilli == 1500); // the old data, whole
+
+    renderer.clear();
+    odyssey.render(renderer, 0.0);
+    CHECK(renderer.draws().size() > quietDraws); // the panel is on screen
+
+    editGather(data, "\"giv actor berries 2\"", "\"give actor berries 2\"");
+    odyssey.update(reloadPressed());
+    CHECK_FALSE(odyssey.interactionPanelOpen());
+    CHECK(odyssey.interactions().find("gather")->rangeMilli == 2500); // now the new data
+    renderer.clear();
+    odyssey.render(renderer, 0.0);
+    CHECK(renderer.draws().size() == quietDraws);
+}
+
+TEST_CASE("US-156 A syntax error is reported with its line and a missing folder never crashes") {
+    const fs::path data = dataCopy("syntax", "");
+    game::OdysseyGame odyssey(data, levelWith(data, "syntax", {}));
+    editGather(data, "\"range\": 1.5,", "\"range\": 1.5\n  \"duration\": 3.0,"); // a comma is missing
+    CHECK_FALSE(odyssey.reloadInteractions());
+    REQUIRE(odyssey.interactionReport().errors.size() == 1);
+    CHECK(odyssey.interactionReport().errors[0].line > 0);
+    CHECK(odyssey.interactionReport().errors[0].message.find("not valid JSON") == 0);
+
+    fs::remove_all(data / "interactions");
+    CHECK_FALSE(odyssey.reloadInteractions());
+    CHECK(odyssey.interactionPanelOpen());
+    CHECK(odyssey.interactions().find("gather") != nullptr); // still the data from before
+}
+
+TEST_CASE("US-156 F5 works in the Editor and the panel shows there too") {
+    const fs::path data = dataCopy("editor-reload", "");
+    luna::engine::RecordingRenderer renderer;
+    game::OdysseyGame odyssey(data, levelWith(data, "editor-reload", {}));
+    odyssey.start(renderer);
+    luna::engine::Intents toEditor;
+    toEditor.set(luna::engine::Intent::ModeEditor, true, true);
+    odyssey.update(toEditor);
+    REQUIRE(odyssey.mode() == game::Mode::Editor);
+    odyssey.render(renderer, 0.0);
+    const std::size_t quietDraws = renderer.draws().size();
+
+    editGather(data, "\"give actor berries 2\"", "\"giv actor berries 2\"");
+    odyssey.update(reloadPressed());
+    REQUIRE(odyssey.interactionPanelOpen());
+    renderer.clear();
+    odyssey.render(renderer, 0.0);
+    CHECK(renderer.draws().size() > quietDraws);
+
+    editGather(data, "\"giv actor berries 2\"", "\"give actor berries 2\"");
+    odyssey.update(reloadPressed());
+    CHECK_FALSE(odyssey.interactionPanelOpen());
 }

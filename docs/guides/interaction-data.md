@@ -4,7 +4,17 @@ How to change what things in the world offer and do, without touching code (US-1
 
 Every action in the game is one **interaction**: a small text file in `assets/data/interactions/`, one file per interaction, named after its id (`gather.json` holds the interaction `gather`). Edit the files in any text editor. The game reads them when it starts, and a mistake is reported as `file:line: message` so you can fix it in seconds. A file with a mistake is skipped, the rest still load.
 
-> Today only `gather.json` ships, and the game still runs its own built-in Gather. US-152 moves every built-in action into these files. F5 reloading while the game runs comes in US-156.
+> Today `gather.json` and `inspect.json` ship, and the game still runs most of its actions from code. US-152 moves every built-in action into these files.
+
+## Editing while the game runs: F5
+
+Edit a file in any text editor, save it, and press **F5** in the game (Game or Editor mode). The game reads the whole folder again:
+
+- No mistakes: the new data is live at once (well under a second), and the log says `Interactions reloaded: 2 from 2 file(s) in 3.1 ms`.
+- Any mistake: nothing changes. The data you had stays in use, and a red panel at the top of the screen lists each mistake as `file:line: message` (the first eight; the log has all of them). Fix the file and press F5 again; the panel closes by itself.
+- If a file has a mistake when the game *starts*, that file is left out, the others load, and the same panel shows until you fix it and press F5.
+
+F5 reads the interaction files. Plants, animals, weapons and characters (the catalogs) are read only at start for now.
 
 ## A whole file
 
