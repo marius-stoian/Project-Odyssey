@@ -37,6 +37,7 @@ void WindowRenderer::setLighting(const LightFrame* frame) {
     state.ambient[0] = frame->ambientR;
     state.ambient[1] = frame->ambientG;
     state.ambient[2] = frame->ambientB;
+    state.normalMaps = frame->normalMaps;
     state.count = std::min(static_cast<int>(frame->lights.size()), LightFrame::kMaxLights);
     for (int i = 0; i < state.count; ++i) {
         const PointLight& light = frame->lights[static_cast<std::size_t>(i)];

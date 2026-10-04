@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-247: lighting in the Editor and quality settings (Mraw) - 2026-10-04
+
+**State:** On `story/US-247`, merged into `qa`. Built with zero warnings in Debug; tests written (`tests/game/lighting_editor_test.cpp`) and run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots and frame times are manual (`docs/plans/US-247.md`).
+
+- Level version 3 (`kLevelVersion`): `lights` (`PlacedLight`: id, kind of `lights.json`, x, y); versions 1 and 2 load without them and are written as 3 on save. `Definitions::lightKinds` from `lights.json`. Tests that read "levelVersion": 2 after a save now expect 3.
+- Editor: Light tool and palette (place, select, move, delete, undo; `LightsCommand`), Sky button and time-of-day slider (`previewHour`, view only), lit preview through `OdysseyGame::editorLightFrame`. `levelLightSources()` gives the level's lights to the game and the preview; `pointLights()` shares the conversion.
+- Quality: `LightFrame::normalMaps` / `LightingState::normalMaps`: Low lights sprites flat (the GPU backend binds the flat normal), fire shadows stay off on Low (US-245). Medium and High are the same today (Milestone-91.md). Guides: lighting, editor, settings.
+
 ## US-246: weather and light (Mraw) - 2026-10-04
 
 **State:** On `story/US-246`, merged into `qa`. Tests written (`tests/game/weather_light_test.cpp`); run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots are manual (`docs/plans/US-246.md`).

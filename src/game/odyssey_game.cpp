@@ -84,6 +84,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+    editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
@@ -2143,6 +2144,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     luna::engine::Renderer& renderer = world;
     // The world is lit (US-240): the ambient colour tints everything drawn until the lighting is cleared below; the interface is never dimmed.
     luna::engine::LightFrame lightFrame = ambientLightFrame(alpha); // the time of day (US-242) and an eclipse (US-248) tint the ambient light
+    lightFrame.normalMaps = settings_.lighting != "Low"; // the Low lighting quality shades sprites flat (US-247)
     // Fires and torches light the dark (US-243): the darker the ambient light, the stronger they shine; in full daylight they add nothing.
     if (const double darkness = darknessOf(lightFrame); darkness > 0.0) lightFrame.lights = worldLights(camera_.view(alpha), alpha, darkness);
     renderer.setLighting(&lightFrame);

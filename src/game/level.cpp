@@ -1,5 +1,6 @@
 #include "game/level.h"
 
+#include "game/lighting.h"
 #include "game/tags.h"
 #include "sim/data.h"
 #include "sim/json_data.h"
@@ -68,6 +69,10 @@ bool Definitions::hasWeapon(const std::string& name) const {
 
 bool Definitions::hasLoopingEffect(const std::string& name) const {
     return std::find(loopingEffects.begin(), loopingEffects.end(), name) != loopingEffects.end();
+}
+
+bool Definitions::hasLightKind(const std::string& name) const {
+    return std::find(lightKinds.begin(), lightKinds.end(), name) != lightKinds.end();
 }
 
 bool Definitions::hasPlant(const std::string& name) const {
@@ -216,6 +221,8 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             if (entry.value("loop", false)) definitions.loopingEffects.push_back(text(entry, effectsFile, "name"));
         }
     }
+    // The kinds of light a level may place (US-247); a missing lights.json means none.
+    for (const LightKindDef& kind : loadLighting(dataDirectory / "light" / "lights.json").kinds) definitions.lightKinds.push_back(kind.name);
     definitions.weapons.push_back(kSpearThrowName);
     definitions.weapons.push_back(kSwordSlashName);
     return definitions;
@@ -250,6 +257,7 @@ Level resized(const Level& level, int width, int height) {
     std::erase_if(out.pickups, [&](const PlacedPickup& p) { return !inside(p.at); });
     std::erase_if(out.plants, [&](const PlacedPlant& p) { return !inside(p.feet); });
     std::erase_if(out.effects, [&](const PlacedEffect& p) { return !inside(p.at); });
+    std::erase_if(out.lights, [&](const PlacedLight& p) { return !inside(p.at); });
     out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
     return out;
 }
@@ -398,6 +406,27 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.effects.push_back(effect);
         }
     }
+    if (data.contains("lights")) { // level version 3 (US-247); older files have none
+        if (!data.at("lights").is_array()) throw DataError(file, "lights", "must be a list");
+        for (std::size_t i = 0; i < data.at("lights").size(); ++i) {
+            const json& entry = data.at("lights").at(i);
+            const std::string where = std::format("lights[{}]", i);
+            PlacedLight light;
+            light.id = whole(entry, file, "id", 1, level.nextId - 1);
+            const auto used = [&] { return DataError(file, where + ".id", std::format("{} is used twice", light.id)); };
+            for (const PlacedCharacter& other : level.characters) if (other.id == light.id) throw used();
+            for (const PlacedPickup& other : level.pickups) if (other.id == light.id) throw used();
+            for (const PlacedPlant& other : level.plants) if (other.id == light.id) throw used();
+            for (const PlacedEffect& other : level.effects) if (other.id == light.id) throw used();
+            for (const PlacedLight& other : level.lights) if (other.id == light.id) throw used();
+            light.kind = text(entry, file, "kind");
+            if (!definitions.hasLightKind(light.kind)) {
+                throw DataError(file, where + ".kind", "\"" + light.kind + "\" is not a kind of light in lights.json");
+            }
+            light.at = point(json::array({entry.value("x", -1), entry.value("y", -1)}), file, where + ".x/y", level);
+            level.lights.push_back(light);
+        }
+    }
     if (data.contains("targets")) {
         if (!data.at("targets").is_array()) throw DataError(file, "targets", "must be a list of [x, y]");
         for (std::size_t i = 0; i < data.at("targets").size(); ++i) {
@@ -453,6 +482,8 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     for (const PlacedPlant& p : level.plants) plants.push_back({{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}});
     json effects = json::array();
     for (const PlacedEffect& e : level.effects) effects.push_back({{"id", e.id}, {"name", e.name}, {"x", e.at.x}, {"y", e.at.y}});
+    json lights = json::array();
+    for (const PlacedLight& l : level.lights) lights.push_back({{"id", l.id}, {"kind", l.kind}, {"x", l.at.x}, {"y", l.at.y}});
     json targets = json::array();
     for (const PixelPoint& t : level.targets) targets.push_back({t.x, t.y});
     json data{{"levelVersion", kLevelVersion},
@@ -466,6 +497,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"pickups", pickups},
                     {"plants", plants},
                     {"effects", effects},
+                    {"lights", lights},
                     {"targets", targets},
                     {"ground", ground}};
     if (level.clan) data["clan"] = true;

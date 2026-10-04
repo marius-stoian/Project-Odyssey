@@ -57,6 +57,7 @@ struct LightingState {
         float height = 24.0F;         // how far above the ground, in pixels: the higher, the flatter the light on a surface
     };
     float ambient[3] = {1.0F, 1.0F, 1.0F};
+    bool normalMaps = true; // false: every sprite is lit as a flat surface (Low lighting quality)
     int count = 0;
     Light lights[kMaxLights];
 };

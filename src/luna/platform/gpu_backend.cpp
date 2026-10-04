@@ -508,7 +508,8 @@ private:
                         SDL_PushGPUFragmentUniformData(commands, 0, packed.data(), static_cast<Uint32>(packed.size() * sizeof(float)));
                         uploadedLight = batch.light;
                     }
-                    const auto normalId = static_cast<std::size_t>(batch.texture) < normalOf_.size() ? normalOf_[static_cast<std::size_t>(batch.texture)] : -1;
+                    const bool useNormals = lightSets_[static_cast<std::size_t>(batch.light)].normalMaps;
+                    const auto normalId = useNormals && static_cast<std::size_t>(batch.texture) < normalOf_.size() ? normalOf_[static_cast<std::size_t>(batch.texture)] : -1;
                     SDL_GPUTexture* normals = textures_[static_cast<std::size_t>(normalId >= 0 ? normalId : flatNormal_)].texture;
                     const SDL_GPUTextureSamplerBinding both[2] = {{albedo, sampler_}, {normals, sampler_}};
                     SDL_BindGPUFragmentSamplers(pass, 0, both, 2);
