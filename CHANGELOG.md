@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-263: the NPC store and detail by distance (Mraw) - 2026-10-04
+
+**State:** On `story/US-263`, merged into `qa`. Builds with zero warnings in Debug and Release; tests written (`tests/sim/npc_scale_test.cpp`, `US-263 Frame` in `tests/game/npc_people_test.cpp`), run once at X-M9a; the four sim cases were run once in Release to take the ADR-022 measurements (all passed).
+
+- `NpcPopulation`: spatial grid (256-pixel cells, `near`, `move`), focus and near radius (800 px), hourly simulation of near persons and a day-end catch-up of everyone with a state that is the same whichever way the day was split, hash and save include the hours applied, compact save format version 2 (one array per person). The game sets the focus to the hero each tick and finds who meets the hero through the grid (no size limit).
+- ADR-022 written with the measured numbers (100,000 persons: a day in 1.5 ms, worst tick 1.0 ms, save 16 ms). Guide and plan updated.
+
 ## US-262: placed NPCs are full persons (Mraw) - 2026-10-04
 
 **State:** On `story/US-262`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_population_test.cpp`, `tests/game/npc_people_test.cpp`), run once at X-M9a.

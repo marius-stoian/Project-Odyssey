@@ -476,6 +476,7 @@ add_executable(odysseus_sim_tests
     tests/sim/npc_class_test.cpp
     tests/sim/npc_kind_test.cpp
     tests/sim/npc_population_test.cpp
+    tests/sim/npc_scale_test.cpp
     tests/sim/runner_test.cpp
     tests/sim/dialogue_test.cpp
     tests/sim/conversation_test.cpp
