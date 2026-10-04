@@ -444,12 +444,13 @@ void RunFlow::buildEnded(OdysseyGame& game) {
 
 bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
     const sim::HeroLife* hero = game.life();
-    if (hero == nullptr || game.heroData() == nullptr || hero->phase() != sim::Phase::Free) return false;
+    const bool inRun = hero != nullptr && game.heroData() != nullptr && hero->phase() == sim::Phase::Free;
     actions_.clear();
     // The thing under the pointer (a clan member, a fire, the stone, a rival camp, a plant), and what the interaction files offer the hero
     // for it (US-152). The menu is made entirely from data: labels, disabled reasons and order come from the files.
     const std::optional<Subject> subject = subjectAt(game, wx, wy);
     if (!subject) return false;
+    if (!inRun && subject->kind != Subject::Kind::Npc) return false; // outside a run only the placed people of a level have a menu (US-265)
     contextTitle_ = subject->title;
     const GameRuleContext context(game, *subject);
     for (const sim::rules::Offer& offer : game.offersFor(*subject)) {
@@ -479,15 +480,17 @@ void RunFlow::openTalk(sim::rules::Conversation conversation, Subject subject) {
 // The panel of a conversation: who, how they feel, what they say, and up to five numbered choices (D-38). Made fresh every tick from the
 // simulation, like every screen, so a choice whose condition changed is never shown stale.
 void RunFlow::buildTalk(OdysseyGame& game) {
-    if (!conversation_ || !talkSubject_ || game.clan() == nullptr || game.life() == nullptr) {
+    const bool placedPerson = talkSubject_.has_value() && talkSubject_->kind == Subject::Kind::Npc;
+    if (!conversation_ || !talkSubject_ || (!placedPerson && (game.clan() == nullptr || game.life() == nullptr))) {
         screen_ = Screen::None;
         return;
     }
     const GameRuleContext context(game, *talkSubject_);
-    const sim::World& world = *game.clan();
     const int person = talkSubject_->index;
     std::string mood = "neutral";
-    if (person >= 0 && static_cast<std::size_t>(person) < world.people().size()) {
+    if (placedPerson) {
+        mood = game.attitudeWordOf(person); // a placed person feels about the hero by the attitude word (US-264)
+    } else if (const sim::World& world = *game.clan(); person >= 0 && static_cast<std::size_t>(person) < world.people().size()) {
         mood = sim::rules::moodWord(world.opinion(person, game.life()->personId()), world.people()[static_cast<std::size_t>(person)].needs);
     }
     title(std::format("{}   ({})", talkSubject_->name, mood));

@@ -102,6 +102,11 @@ public:
     const sim::NpcPopulation& npcPopulation() const { return npcPopulation_; }
     sim::NpcPopulation& npcPopulationMutable() { return npcPopulation_; }
     bool isPersonKind(const PlacedCharacter& placed) const;
+    // The placed character with this id, or nullptr.
+    const PlacedCharacter* placedCharacter(int id) const;
+    // The dialogue a placed person speaks to the player: the "player" dialogue of its classes, kind and own fields, found by name among the loaded scripts.
+    // nullptr when there is none (US-265).
+    const sim::rules::DlgScript* npcDialogueFor(int placedId) const;
     // Whether a placed character fights the hero (US-264): with a kind file it is its attitude being hostile, without one the old enemy switch of its kind.
     bool fightsHero(const PlacedCharacter& placed) const;
     // The attitude word of a placed character to the hero: the person's own opinion when they are a person of the population, else the attitude of its

@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-265):** S-US-265 DONE (Milestone-98.md, AP-99). Next: S-US-266 (Confront, key C), then US-267 (actions and the Actions pop-up, key X), US-268..US-270 and X-M9a.
+
 **Resume update (2026-10-04, US-264):** S-US-264 DONE (Milestone-97.md, AP-98). Next: S-US-265 (talk with placed NPCs), then US-266 (confront) .. US-270 and X-M9a.
 
 **Resume update (2026-10-04, US-263):** S-US-263 DONE (Milestone-96.md, AP-97). Next: S-US-264 (attitudes and opinions), then US-265 (talk with placed NPCs) .. US-270 and X-M9a.

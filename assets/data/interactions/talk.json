@@ -1,9 +1,9 @@
-// Talk to a clan member (US-152). Until the conversations of M8, the line comes from the simulation.
+// Talk to someone who has something to say (US-152, US-265): a clan member, or a placed person that has a dialogue for the player (tag "speaks").
 {
   "id": "talk",
   "label": "Talk",
   "actors": ["hero"],
-  "target": { "tags": ["person"] },
+  "target": { "tags": ["speaks"] },
   "range": 2,
   "order": 10,
   "effects": [ "do talk" ]

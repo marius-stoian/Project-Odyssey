@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-265: talk with placed NPCs (Mraw) - 2026-10-04
+
+**State:** On `story/US-265`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_talk_test.cpp`), run once at X-M9a.
+
+- New subject kind `Npc` (`npcSubject`, found through the grid of the population in `subjectAt`); tags = resolved tags + `npc` + `speaks` when it has a dialogue for the player (`OdysseyGame::npcDialogueFor`, `placedCharacter`). `talk.json` now targets `speaks`; clan members carry it too.
+- `runBuiltin("talk")` and `openConversation` open the NPC's player script; `RunFlow::openContext` and `buildTalk` work for placed people without a run of the hero; the title shows the attitude word. Rule context: `opinion(npc, hero)`, `mood(npc)`; effects `opinion` and `remember` for placed people. Guides extended.
+
 ## US-264: attitudes and opinions (Mraw) - 2026-10-04
 
 **State:** On `story/US-264`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/opinion_test.cpp`, `tests/game/npc_attitude_test.cpp`), run once at X-M9a.
