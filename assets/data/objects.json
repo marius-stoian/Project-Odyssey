@@ -13,6 +13,14 @@
     { "name": "water source",   "frame": "water-source",   "blocks": false, "inspect": "Clear water seeps up between the stones.",
       "tags": ["object", "water"] },
     { "name": "sleeping furs",  "frame": "sleeping-furs",  "blocks": false, "inspect": "Furs worn soft by sleepers.",
-      "tags": ["object", "bedding"] }
+      "tags": ["object", "bedding"] },
+    { "name": "sun", "frame": "sun", "blocks": false, "inspect": "The sun.",
+      "celestial": { "body": "sun", "light": "sun", "follows": "clock", "orbitRadius": 400, "tilt": 0, "height": 100 } },
+    { "name": "moon", "frame": "moon", "blocks": false, "inspect": "The moon.",
+      "celestial": { "body": "moon", "light": "moon", "follows": "clock", "orbitRadius": 380, "tilt": 0, "height": 90 } },
+    { "name": "sun (placed)", "frame": "sun", "blocks": false, "inspect": "A sun standing still where it was put.",
+      "celestial": { "body": "sun", "light": "sun", "follows": "fixed", "orbitRadius": 400, "tilt": 0, "height": 40 } },
+    { "name": "moon (placed)", "frame": "moon", "blocks": false, "inspect": "A moon standing still where it was put.",
+      "celestial": { "body": "moon", "light": "moon", "follows": "fixed", "orbitRadius": 380, "tilt": 0, "height": 35 } }
   ]
 }

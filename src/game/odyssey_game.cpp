@@ -97,6 +97,36 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         for (const WeaponDef& def : catalogs_.weapons) check(def.light, "weapons.json", "weapon \"" + def.name + "\"");
         for (const PlantDef& def : catalogs_.plants) check(def.light, def.object ? "objects.json" : "plants.json", "object \"" + def.name + "\"");
     }
+    // The sun and moon (US-248): each names a kind of light of lights.json. A mistake in one of them, or in the eclipse file, does not stop the game:
+    // the bad entry is left out, the level keeps its default pair, and the problem (file and field) is shown as a message.
+    std::vector<std::string> celestialNotes = catalogs_.notes;
+    std::erase_if(catalogs_.plants, [&](const PlantDef& def) {
+        if (!def.celestial || lighting_.kind(def.sky.lightKind) != nullptr) return false;
+        celestialNotes.push_back(sim::DataError(dataDirectory / "objects.json", "object \"" + def.name + "\".celestial.light",
+                                                "\"" + def.sky.lightKind + "\" is not a kind of light in light/lights.json").what());
+        return true;
+    });
+    for (const char* body : {"sun", "moon"}) {
+        const bool has = std::any_of(catalogs_.plants.begin(), catalogs_.plants.end(), [&](const PlantDef& def) { return def.celestial && def.sky.followsClock && def.sky.body == body; });
+        if (has) continue;
+        PlantDef fallback; // the built-in default: a plain sun or moon on the usual orbit
+        fallback.name = body;
+        fallback.frame = body;
+        fallback.object = true;
+        fallback.celestial = true;
+        fallback.tags = {"object", "celestial"};
+        fallback.sky.body = body;
+        catalogs_.plants.push_back(fallback);
+    }
+    for (const PlantDef& def : catalogs_.plants) {
+        if (def.celestial && def.sky.followsClock) defaultBodies_.push_back(&def);
+    }
+    try {
+        celestialEvents_ = loadCelestialEvents(dataDirectory / "light" / "celestial-events.json");
+    } catch (const sim::DataError& problem) {
+        celestialNotes.push_back(problem.what()); // no eclipses, the sky goes on
+    }
+    if (!celestialNotes.empty()) message_ = celestialNotes.front();
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
@@ -860,12 +890,43 @@ void OdysseyGame::applySettings(const GameSettings& settings) {
     setViewScales(settings_.cameraZoom, settings_.uiScale);
 }
 
-SkyState OdysseyGame::sky() const {
-    if (!clan_) return skyAt(sky_, 12.0, 0); // no clock: noon of a spring day
+GameClock OdysseyGame::gameClock() const {
+    GameClock clock; // no clan, no clock: noon of a spring day
+    if (!clan_) return clock;
     const std::uint64_t ticks = clan_->ticks();
     const auto perDay = static_cast<std::uint64_t>(clan_->calendar().ticksPerDay());
-    const double hour = static_cast<double>(ticks % perDay) * 24.0 / static_cast<double>(perDay);
-    return skyAt(sky_, hour, static_cast<int>(clan_->calendar().dateAt(ticks).season));
+    clock.hour = static_cast<double>(ticks % perDay) * 24.0 / static_cast<double>(perDay);
+    clock.day = static_cast<int>(ticks / perDay);
+    clock.season = static_cast<int>(clan_->calendar().dateAt(ticks).season);
+    return clock;
+}
+
+SkyState OdysseyGame::sky() const {
+    const GameClock clock = gameClock();
+    return skyAt(sky_, clock.hour, clock.season);
+}
+
+std::vector<CelestialBody> OdysseyGame::celestialBodies() const {
+    std::vector<CelestialBody> placed;
+    for (const WorldPlant& plant : plants_) {
+        if (plant.alive && plant.def != nullptr && plant.def->celestial) placed.push_back({plant.def, static_cast<double>(plant.feet.x), static_cast<double>(plant.feet.y)});
+    }
+    return bodiesOf(defaultBodies_, placed);
+}
+
+CelestialLight OdysseyGame::celestialLight(double alpha) const {
+    return currentLight(celestialBodies(), sky_, lighting_, celestialEvents_, gameClock(), hero_.feetX(alpha), hero_.feetY(alpha));
+}
+
+// The sun and the moon in the sky band at the top of the picture, moving with the clock (US-248). Drawn unlit: they are the light.
+void OdysseyGame::drawSkyBodies(luna::engine::Renderer& renderer, double alpha) const {
+    const int width = viewWidth();
+    const int band = viewHeight() / 4;
+    for (const SkySprite& sprite : skySprites(celestialBodies(), sky_, celestialEvents_, gameClock(), hero_.feetX(alpha), hero_.feetY(alpha))) {
+        const int x = 20 + static_cast<int>(sprite.x * (width - 40));
+        const int y = 8 + kObjectPictureSize + static_cast<int>(sprite.y * (band - kObjectPictureSize));
+        drawPlant(renderer, plantArt_, sprite.name, x, y);
+    }
 }
 
 void OdysseyGame::setViewScales(int cameraZoom, int uiScale) {
@@ -2080,6 +2141,12 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     lightFrame.ambientR *= skyNow.ambientR;
     lightFrame.ambientG *= skyNow.ambientG;
     lightFrame.ambientB *= skyNow.ambientB;
+    // An eclipse takes light from the world too: the ambient light of its body dims by what the eclipse leaves (US-248).
+    if (const CelestialLight celestial = celestialLight(alpha); celestial.valid && celestial.dimming < 1.0) {
+        lightFrame.ambientR *= static_cast<float>(celestial.dimming);
+        lightFrame.ambientG *= static_cast<float>(celestial.dimming);
+        lightFrame.ambientB *= static_cast<float>(celestial.dimming);
+    }
     // Fires and torches light the dark (US-243): the darker the ambient light, the stronger they shine; in full daylight they add nothing.
     {
         const double ambient = (lightFrame.ambientR + lightFrame.ambientG + lightFrame.ambientB) / 3.0;
@@ -2191,6 +2258,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
     renderer.setLighting(nullptr);
+    drawSkyBodies(renderer, alpha);
     drawWeather(ui);
     drawInspection(renderer, view);
     drawRivals(renderer, view);

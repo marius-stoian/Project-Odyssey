@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "events": [
+    { "body": "sun", "startDay": 20, "startHour": 11.0, "lengthHours": 2.0, "depth": 0.7 },
+    { "body": "moon", "startDay": 41, "startHour": 22.0, "lengthHours": 1.5, "depth": 0.6 }
+  ]
+}

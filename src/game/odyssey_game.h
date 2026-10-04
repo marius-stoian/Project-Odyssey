@@ -28,6 +28,7 @@
 #include "game/session_stats.h"
 #include "game/lighting.h"
 #include "game/settings.h"
+#include "game/celestial.h"
 #include "game/sky.h"
 #include "game/tutorial.h"
 #include "game/weather.h"
@@ -228,6 +229,12 @@ public:
     void setViewScales(int cameraZoom, int uiScale);
     // The sky now (US-242): the light follows the clan's game clock (a level without a clan has no clock and stays at noon).
     SkyState sky() const;
+    // The clock the sky and the celestial bodies follow (a level without a clan has no clock and stays at noon of day 0).
+    GameClock gameClock() const;
+    // The sun and moon of this level (US-248): the ones placed in the Editor, and the default pair for any kind it places none of.
+    std::vector<CelestialBody> celestialBodies() const;
+    // The light the scene has now, from the sun by day and the moon by night, seen from the hero: the direction shadows fall (US-244 draws them).
+    CelestialLight celestialLight(double alpha = 1.0) const;
     // The point lights of the world now (US-243), in the pixels of the picture they light: placed effects, burning objects and the held weapon that
     // have a `light`, and the torches clan members carry at night. They shine in proportion to how dark it is (`darkness` 0 to 1).
     std::vector<luna::engine::PointLight> worldLights(const luna::engine::Rect& view, double alpha, double darkness) const;
@@ -417,6 +424,9 @@ private:
     GameSettings settings_;
     SkyData sky_;           // assets/data/light/sky.json and the daylight of calendar.json (US-242)
     LightingData lighting_; // assets/data/light/lights.json (US-240): the ambient colour and the kinds of light
+    CelestialEvents celestialEvents_; // assets/data/light/celestial-events.json (US-248): scripted eclipses
+    std::vector<const PlantDef*> defaultBodies_; // the sun and moon of objects.json that follow the clock: used when a level places none
+    void drawSkyBodies(luna::engine::Renderer& renderer, double alpha) const;
     std::optional<WindowChange> pendingWindow_;
     void drawRunHud(luna::engine::Renderer& renderer) const;
     void drawRunWorld(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;

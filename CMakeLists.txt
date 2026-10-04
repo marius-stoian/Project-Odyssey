@@ -243,6 +243,7 @@ add_library(odysseus_game STATIC
     src/game/lighting.cpp
     src/game/world_lights.cpp
     src/game/sky.cpp
+    src/game/celestial.cpp
     src/game/normal_art.cpp
     src/game/clan_art.cpp
     src/game/clan_view.cpp
@@ -387,6 +388,7 @@ add_executable(odysseus_game_tests
     tests/game/lighting_test.cpp
     tests/game/normals_test.cpp
     tests/game/sky_test.cpp
+    tests/game/celestial_test.cpp
     tests/game/world_lights_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp

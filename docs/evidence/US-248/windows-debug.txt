@@ -1,0 +1,1844 @@
+US-248 Windows ctest, debug (2026-10-04). Build: see build logs.
+
+Test project C:/Users/Amek/.amek-ai/Odysseus/odysseus/build/windows-x64
+      Start  1: odysseus_tests
+ 1/27 Test  #1: odysseus_tests ..........................   Passed    0.15 sec
+      Start  2: US-003 Allowed use
+ 2/27 Test  #2: US-003 Allowed use ......................   Passed    7.29 sec
+      Start  3: US-003 Forbidden use
+ 3/27 Test  #3: US-003 Forbidden use ....................   Passed    4.87 sec
+      Start  4: US-003 Luna stays game-agnostic
+ 4/27 Test  #4: US-003 Luna stays game-agnostic .........   Passed    6.05 sec
+      Start  5: US-003 Guard completeness
+ 5/27 Test  #5: US-003 Guard completeness ...............   Passed    8.86 sec
+      Start  6: US-025 Physics layer rules
+ 6/27 Test  #6: US-025 Physics layer rules ..............   Passed   14.08 sec
+      Start  7: luna_physics_tests
+ 7/27 Test  #7: luna_physics_tests ......................   Passed    4.10 sec
+      Start  8: US-025 Physics uses no floating point
+ 8/27 Test  #8: US-025 Physics uses no floating point ...   Passed    0.03 sec
+      Start  9: luna_tests
+ 9/27 Test  #9: luna_tests ..............................   Passed    0.15 sec
+      Start 10: US-020 Open and close
+10/27 Test #10: US-020 Open and close ...................   Passed    5.83 sec
+      Start 11: luna_platform_tests
+11/27 Test #11: luna_platform_tests .....................   Passed    0.05 sec
+      Start 12: US-021 Game reads only intents
+12/27 Test #12: US-021 Game reads only intents ..........   Passed    0.04 sec
+      Start 13: luna_window_tests
+13/27 Test #13: luna_window_tests .......................   Passed    5.42 sec
+      Start 14: odysseus_game_tests_a
+14/27 Test #14: odysseus_game_tests_a ...................   Passed   99.06 sec
+      Start 15: odysseus_game_tests_b
+15/27 Test #15: odysseus_game_tests_b ...................   Passed   81.21 sec
+      Start 16: odysseus_game_tests_c
+16/27 Test #16: odysseus_game_tests_c ...................***Failed  170.21 sec
+[doctest] doctest version is "2.5.3"
+[doctest] run with "--help" for options
+2026-10-04 16:17:09.206Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us137\place\level.json
+2026-10-04 16:17:09.482Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:09.482Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:09.568Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:10.886Z [INFO] Mode: Editor
+2026-10-04 16:17:11.055Z [INFO] Editor: place grey wolf #4
+2026-10-04 16:17:11.055Z [INFO] Editor: place fox #5
+2026-10-04 16:17:11.056Z [INFO] Editor: place bear #6
+2026-10-04 16:17:11.056Z [INFO] Editor: place deer #7
+2026-10-04 16:17:11.057Z [INFO] Editor: place stag #8
+2026-10-04 16:17:11.057Z [INFO] Editor: place doe #9
+2026-10-04 16:17:11.058Z [INFO] Editor: place elk #10
+2026-10-04 16:17:11.058Z [INFO] Editor: place moose #11
+2026-10-04 16:17:11.059Z [INFO] Editor: place boar #12
+2026-10-04 16:17:11.059Z [INFO] Editor: place wild pig #13
+2026-10-04 16:17:11.060Z [INFO] Editor: place cougar #14
+2026-10-04 16:17:11.060Z [INFO] Editor: place lynx #15
+2026-10-04 16:17:11.061Z [INFO] Editor: place leopard #16
+2026-10-04 16:17:11.062Z [INFO] Editor: place jaguar #17
+2026-10-04 16:17:11.062Z [INFO] Editor: place cheetah #18
+2026-10-04 16:17:11.063Z [INFO] Editor: place lion #19
+2026-10-04 16:17:11.063Z [INFO] Editor: place tiger #20
+2026-10-04 16:17:11.064Z [INFO] Editor: place snow leopard #21
+2026-10-04 16:17:11.064Z [INFO] Editor: place hyena #22
+2026-10-04 16:17:11.065Z [INFO] Editor: place jackal #23
+2026-10-04 16:17:11.066Z [INFO] Editor: place elephant #24
+2026-10-04 16:17:11.066Z [INFO] Editor: place rhino #25
+2026-10-04 16:17:11.067Z [INFO] Editor: place hippopotamus #26
+2026-10-04 16:17:11.068Z [INFO] Editor: place giraffe #27
+2026-10-04 16:17:11.068Z [INFO] Editor: place zebra #28
+2026-10-04 16:17:11.069Z [INFO] Editor: place buffalo #29
+2026-10-04 16:17:11.070Z [INFO] Editor: place bison #30
+2026-10-04 16:17:11.070Z [INFO] Editor: place camel #31
+2026-10-04 16:17:11.071Z [INFO] Editor: place llama #32
+2026-10-04 16:17:11.072Z [INFO] Editor: place alpaca #33
+2026-10-04 16:17:11.073Z [INFO] Editor: place cow #34
+2026-10-04 16:17:11.073Z [INFO] Editor: place bull #35
+2026-10-04 16:17:11.074Z [INFO] Editor: place horse #36
+2026-10-04 16:17:11.075Z [INFO] Editor: place donkey #37
+2026-10-04 16:17:11.076Z [INFO] Editor: place goat #38
+2026-10-04 16:17:11.077Z [INFO] Editor: place sheep #39
+2026-10-04 16:17:11.077Z [INFO] Editor: place pig #40
+2026-10-04 16:17:11.078Z [INFO] Editor: place reindeer #41
+2026-10-04 16:17:11.079Z [INFO] Editor: place yak #42
+2026-10-04 16:17:11.080Z [INFO] Editor: place water buffalo #43
+2026-10-04 16:17:11.081Z [INFO] Editor: place dog #44
+2026-10-04 16:17:11.081Z [INFO] Editor: place cat #45
+2026-10-04 16:17:11.082Z [INFO] Editor: place rabbit #46
+2026-10-04 16:17:11.083Z [INFO] Editor: place squirrel #47
+2026-10-04 16:17:11.084Z [INFO] Editor: place raccoon #48
+2026-10-04 16:17:11.085Z [INFO] Editor: place badger #49
+2026-10-04 16:17:11.086Z [INFO] Editor: place beaver #50
+2026-10-04 16:17:11.087Z [INFO] Editor: place otter #51
+2026-10-04 16:17:11.088Z [INFO] Editor: place skunk #52
+2026-10-04 16:17:11.089Z [INFO] Editor: place porcupine #53
+2026-10-04 16:17:11.129Z [INFO] Editor: Saved level.json
+2026-10-04 16:17:11.159Z [INFO] Mode: Game (level "The Valley", hero at (1040, 1048))
+2026-10-04 16:17:11.159Z [INFO] Mode: Editor
+2026-10-04 16:17:11.386Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us137\enemy\level.json
+2026-10-04 16:17:11.657Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:11.657Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:11.743Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:13.062Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.062Z [INFO] grey wolf took 5 damage, HP 75 / 80
+2026-10-04 16:17:13.063Z [INFO] grey wolf struck the hero for 10, HP 90 / 100
+2026-10-04 16:17:13.063Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.063Z [INFO] grey wolf took 5 damage, HP 70 / 80
+2026-10-04 16:17:13.064Z [INFO] grey wolf struck the hero for 10, HP 80 / 100
+2026-10-04 16:17:13.064Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.064Z [INFO] grey wolf took 5 damage, HP 65 / 80
+2026-10-04 16:17:13.064Z [INFO] grey wolf struck the hero for 10, HP 70 / 100
+2026-10-04 16:17:13.065Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.065Z [INFO] grey wolf took 5 damage, HP 60 / 80
+2026-10-04 16:17:13.065Z [INFO] grey wolf struck the hero for 10, HP 60 / 100
+2026-10-04 16:17:13.065Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.066Z [INFO] grey wolf took 5 damage, HP 55 / 80
+2026-10-04 16:17:13.066Z [INFO] grey wolf struck the hero for 10, HP 50 / 100
+2026-10-04 16:17:13.066Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.066Z [INFO] grey wolf took 5 damage, HP 50 / 80
+2026-10-04 16:17:13.067Z [INFO] grey wolf struck the hero for 10, HP 40 / 100
+2026-10-04 16:17:13.067Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.067Z [INFO] grey wolf took 5 damage, HP 45 / 80
+2026-10-04 16:17:13.068Z [INFO] grey wolf struck the hero for 10, HP 30 / 100
+2026-10-04 16:17:13.068Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.068Z [INFO] grey wolf took 5 damage, HP 40 / 80
+2026-10-04 16:17:13.068Z [INFO] grey wolf struck the hero for 10, HP 20 / 100
+2026-10-04 16:17:13.069Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.069Z [INFO] grey wolf took 5 damage, HP 35 / 80
+2026-10-04 16:17:13.069Z [INFO] grey wolf struck the hero for 10, HP 10 / 100
+2026-10-04 16:17:13.069Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.069Z [INFO] grey wolf took 5 damage, HP 30 / 80
+2026-10-04 16:17:13.070Z [INFO] grey wolf struck the hero for 10, HP 0 / 100
+2026-10-04 16:17:13.070Z [INFO] The hero fell
+2026-10-04 16:17:13.071Z [INFO] The hero is back at the start with 100 HP
+2026-10-04 16:17:13.071Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.071Z [INFO] grey wolf took 5 damage, HP 25 / 80
+2026-10-04 16:17:13.071Z [INFO] grey wolf struck the hero for 10, HP 90 / 100
+2026-10-04 16:17:13.072Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.072Z [INFO] grey wolf took 5 damage, HP 20 / 80
+2026-10-04 16:17:13.072Z [INFO] grey wolf struck the hero for 10, HP 80 / 100
+2026-10-04 16:17:13.072Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.073Z [INFO] grey wolf took 5 damage, HP 15 / 80
+2026-10-04 16:17:13.073Z [INFO] grey wolf struck the hero for 10, HP 70 / 100
+2026-10-04 16:17:13.073Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.073Z [INFO] grey wolf took 5 damage, HP 10 / 80
+2026-10-04 16:17:13.074Z [INFO] grey wolf struck the hero for 10, HP 60 / 100
+2026-10-04 16:17:13.074Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.074Z [INFO] grey wolf took 5 damage, HP 5 / 80
+2026-10-04 16:17:13.075Z [INFO] grey wolf struck the hero for 10, HP 50 / 100
+2026-10-04 16:17:13.075Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-04 16:17:13.075Z [INFO] grey wolf took 5 damage, HP 0 / 80
+2026-10-04 16:17:13.075Z [INFO] grey wolf was defeated
+2026-10-04 16:17:13.273Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us137\enemy-drawn\level.json
+2026-10-04 16:17:13.543Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:13.543Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:13.630Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:15.148Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us137\enemy-bare\level.json
+2026-10-04 16:17:15.418Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:15.418Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:15.505Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:17.093Z [INFO] Level "The Valley" (64x64 tiles, 3 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us137\bystanders\level.json
+2026-10-04 16:17:17.367Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:17.367Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:17.455Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:18.778Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 0 hit
+2026-10-04 16:17:18.778Z [INFO] iron sword (sword) swung toward 90 degrees, facing South: 0 hit
+2026-10-04 16:17:18.779Z [INFO] iron sword (sword) swung toward 90 degrees, facing South: 0 hit
+2026-10-04 16:17:18.779Z [INFO] iron sword (sword) swung toward 180 degrees, facing West: 0 hit
+2026-10-04 16:17:18.780Z [INFO] iron sword (sword) swung toward 180 degrees, facing West: 0 hit
+2026-10-04 16:17:18.978Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us137\bystanders-bare\level.json
+2026-10-04 16:17:19.253Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:19.254Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:19.340Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:21.090Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us140\level.json
+2026-10-04 16:17:21.358Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:21.358Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:21.444Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:22.767Z [INFO] wooden longbow (bow) arced toward 90 degrees, 3.7 m away
+2026-10-04 16:17:22.769Z [INFO] wooden longbow hit an enemy at (32.5, 36.5) m, 0.13 m up
+2026-10-04 16:17:22.769Z [INFO] Goblin took 5 damage, HP 95 / 100
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\art_test.cpp(103):
+TEST CASE:  US-120 The committed atlas is the owner's sheets, cut
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\art_test.cpp(112): MESSAGE: 74 character frames, 16 tiles
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\art_test.cpp(151):
+TEST CASE:  US-120 Missing art
+  no atlas at all
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\art_test.cpp(156): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us120/missing/atlas/atlas.json: (file): cannot be opened
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\art_test.cpp(151):
+TEST CASE:  US-120 Missing art
+  a damaged picture
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\art_test.cpp(166): MESSAGE: C:\Users\Amek\AppData\Local\Temp\odysseus-us120\damaged\atlas\characters.png is not a readable PNG (unknown image type)
+
+2026-10-04 16:17:25.882Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\eclipse-game\data\celestial-level.json
+2026-10-04 16:17:26.182Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:26.182Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:26.222Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/eclipse-game/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:26.227Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/eclipse-game/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:26.769Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\placed-game\data\celestial-level.json
+2026-10-04 16:17:27.073Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:27.073Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:27.113Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/placed-game/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:27.118Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/placed-game/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:27.394Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\bad-events\data\celestial-level.json
+2026-10-04 16:17:27.693Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:27.693Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:27.732Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/bad-events/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:27.737Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/bad-events/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:28.004Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\bad-sun\data\celestial-level.json
+2026-10-04 16:17:28.312Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:28.312Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:28.353Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/bad-sun/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:28.358Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/bad-sun/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:28.622Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\bad-light\data\celestial-level.json
+2026-10-04 16:17:28.920Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:28.920Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:28.959Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/bad-light/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:28.965Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/bad-light/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:29.252Z [INFO] Level "The Camp" (44x30 tiles, 0 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels\camp.json
+2026-10-04 16:17:29.525Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:29.526Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:29.640Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:31.335Z [INFO] Level "The Camp" (44x30 tiles, 0 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels\camp.json
+2026-10-04 16:17:31.601Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:31.601Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:31.715Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:36.894Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-opens\level-talk-opens\level.json
+2026-10-04 16:17:37.195Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:37.195Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:37.234Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-opens/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:37.238Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-opens/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:37.264Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:37.556Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-key\level-talk-key\level.json
+2026-10-04 16:17:37.853Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:37.853Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:37.891Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-key/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:37.896Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-key/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:37.923Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:38.196Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-mouse\level-talk-mouse\level.json
+2026-10-04 16:17:38.497Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:38.497Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:38.536Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-mouse/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:38.541Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-mouse/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:38.566Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:38.847Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-hidden\level-talk-hidden\level.json
+2026-10-04 16:17:39.148Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:39.148Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:39.187Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-hidden/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:39.192Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-hidden/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:39.217Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:39.483Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-hidden-own\level-talk-hidden-own\level.json
+2026-10-04 16:17:39.780Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:39.780Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:39.819Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-hidden-own/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:39.824Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-hidden-own/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:39.849Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:40.128Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-plain\level-talk-plain\level.json
+2026-10-04 16:17:40.415Z [INFO] Dialogue: 4 conversation(s) loaded from 4 file(s)
+2026-10-04 16:17:40.416Z [INFO] Interactions: 33 loaded from 37 file(s), 0 error(s)
+2026-10-04 16:17:40.455Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-plain/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:40.459Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-plain/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:40.485Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:40.753Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-wolf\level-talk-wolf\level.json
+2026-10-04 16:17:41.047Z [INFO] Dialogue: 4 conversation(s) loaded from 5 file(s)
+2026-10-04 16:17:41.047Z [INFO] Interactions: 33 loaded from 38 file(s), 0 error(s)
+2026-10-04 16:17:41.087Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-wolf/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:41.091Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-wolf/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:41.117Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:41.385Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-quiet\level-talk-quiet\level.json
+2026-10-04 16:17:41.683Z [INFO] Dialogue: 4 conversation(s) loaded from 5 file(s)
+2026-10-04 16:17:41.684Z [INFO] Interactions: 33 loaded from 38 file(s), 0 error(s)
+2026-10-04 16:17:41.722Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-quiet/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:41.728Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-quiet/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:41.753Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:42.025Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-hunt\level-talk-hunt\level.json
+2026-10-04 16:17:42.323Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:42.324Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:42.362Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-hunt/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:42.367Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-hunt/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:42.393Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:42.666Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\talk-file\level-talk-file\level.json
+2026-10-04 16:17:42.964Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:42.964Z [WARNING] Interactions: dialogue/smalltalk.json:47: unknown token {sesaon} (the tokens are: season, hero, npc, npc.name, memory.what, memory.who, memory.when, gossip.who, gossip.about, gossip.what, gossip.feeling, need.name)
+2026-10-04 16:17:42.964Z [INFO] Interactions: 33 loaded from 39 file(s), 1 error(s)
+2026-10-04 16:17:43.003Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-file/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:43.008Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/talk-file/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:43.033Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:43.141Z [INFO] Interactions reloaded: 33 from 39 file(s) in 63.4 ms
+2026-10-04 16:17:43.413Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\mem-rude\level-mem-rude\level.json
+2026-10-04 16:17:43.707Z [INFO] Dialogue: 4 conversation(s) loaded from 5 file(s)
+2026-10-04 16:17:43.707Z [INFO] Interactions: 33 loaded from 38 file(s), 0 error(s)
+2026-10-04 16:17:43.746Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-rude/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:43.750Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-rude/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:43.775Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:44.043Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\mem-berries\level-mem-berries\level.json
+2026-10-04 16:17:44.339Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:44.339Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:44.378Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-berries/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:44.382Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-berries/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:44.408Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:44.675Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\mem-saved\level-mem-saved\level.json
+2026-10-04 16:17:44.975Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:44.975Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:45.015Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-saved/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:45.020Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-saved/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:45.045Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:45.089Z [INFO] Autosaved day 0 in 40.0 ms
+2026-10-04 16:17:45.284Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\mem-saved\level-mem-saved\level.json
+2026-10-04 16:17:45.555Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:45.555Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:45.590Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-saved/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:45.594Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-saved/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:45.638Z [INFO] Loaded clan.json: day 0
+2026-10-04 16:17:45.917Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\mem-fresh\level-mem-fresh\level.json
+2026-10-04 16:17:46.215Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:46.215Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:46.255Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-fresh/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:46.260Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/mem-fresh/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:46.285Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:46.310Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:46.576Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\exch-talk\level-exch-talk\level.json
+2026-10-04 16:17:46.873Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:46.873Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:46.913Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-talk/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:46.918Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-talk/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:46.943Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:47.247Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\exch-quarrel\level-exch-quarrel\level.json
+2026-10-04 16:17:47.551Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:47.551Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:47.592Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-quarrel/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:47.596Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-quarrel/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:47.623Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:47.910Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\exch-pair\level-exch-pair\level.json
+2026-10-04 16:17:48.210Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:48.210Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:48.249Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-pair/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:48.253Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-pair/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:48.279Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:48.545Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\exch-queue\level-exch-queue\level.json
+2026-10-04 16:17:48.842Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:48.842Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:48.881Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-queue/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:48.885Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-queue/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:48.912Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:49.192Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\exch-old\level-exch-old\level.json
+2026-10-04 16:17:49.492Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:49.493Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:49.533Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-old/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:49.538Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/exch-old/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:49.564Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:49.828Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\greet-friendly\level-greet-friendly\level.json
+2026-10-04 16:17:50.126Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:50.126Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:50.165Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-friendly/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:50.170Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-friendly/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:50.195Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:50.488Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\greet-minute\level-greet-minute\level.json
+2026-10-04 16:17:50.789Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:50.789Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:50.827Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-minute/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:50.832Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-minute/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:50.858Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:51.380Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\greet-unfriendly\level-greet-unfriendly\level.json
+2026-10-04 16:17:51.686Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:51.687Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:51.725Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-unfriendly/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:51.730Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-unfriendly/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:51.756Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:52.041Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\greet-mood\level-greet-mood\level.json
+2026-10-04 16:17:52.348Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:52.348Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:52.387Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-mood/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:52.391Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/greet-mood/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:52.417Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:17:52.513Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:17:52.789Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:52.789Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:52.976Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:17:53.246Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:53.246Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:53.322Z [INFO] Level "Snowfield" (20x12 tiles, 2 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us122\other\snow.json
+2026-10-04 16:17:53.592Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:53.592Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\level_test.cpp(126):
+TEST CASE:  US-122 Damaged
+  a damaged file: the last good backup is used, and the problem is named
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\level_test.cpp(144): MESSAGE: skipped level.json: C:/Users/Amek/AppData/Local/Temp/odysseus-us122/damaged/level.json: (syntax): [json.exception.parse_error.101] parse error at line 1, column 30: syntax error while parsing value - unexpected end of input; expected '[', '{', or a literal
+
+2026-10-04 16:17:54.324Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:17:54.619Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:54.619Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:54.628Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lighting-ambient/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:17:54.633Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lighting-ambient/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:17:54.633Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:17:54.633Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:17:54.935Z [INFO] Level "The Camp" (44x30 tiles, 0 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels\camp.json
+2026-10-04 16:17:55.210Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:55.210Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:55.342Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:56.919Z [INFO] Autosaved day 1 in 42.9 ms
+2026-10-04 16:17:57.023Z [INFO] Autosaved day 2 in 49.5 ms
+2026-10-04 16:17:57.161Z [INFO] Autosaved day 3 in 48.5 ms
+2026-10-04 16:17:57.297Z [INFO] Autosaved day 4 in 53.2 ms
+2026-10-04 16:17:57.450Z [INFO] Autosaved day 5 in 54.0 ms
+2026-10-04 16:17:57.608Z [INFO] Autosaved day 6 in 57.5 ms
+2026-10-04 16:17:57.763Z [INFO] Level "The Camp" (44x30 tiles, 0 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels\camp.json
+2026-10-04 16:17:58.034Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:58.034Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:17:58.150Z [INFO] Art: the owner's atlas
+2026-10-04 16:17:59.545Z [INFO] The latest save was damaged: loaded the newest backup (clan.json.bak1). skipped clan.json: C:/Users/Amek/AppData/Local/Temp/odysseus-m4-saves/clan.json: (syntax): [json.exception.parse_error.101] parse error at line 1, column 3: syntax error while parsing object key - invalid literal; last read: '{ b'; expected string literal
+2026-10-04 16:17:59.710Z [INFO] Level "The Camp" (44x30 tiles, 0 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels\camp.json
+2026-10-04 16:17:59.984Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:17:59.985Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:00.116Z [INFO] Art: the owner's atlas
+2026-10-04 16:18:01.792Z [INFO] Autosaved day 1 in 44.0 ms
+2026-10-04 16:18:01.890Z [INFO] Level "The Camp" (44x30 tiles, 0 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels\camp.json
+2026-10-04 16:18:02.160Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:02.160Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:02.275Z [INFO] Art: the owner's atlas
+2026-10-04 16:18:04.031Z [INFO] Region 1: start at tile (128, 128), 64 chunks made for the start
+2026-10-04 16:18:04.031Z [INFO] The Editor is for hand-made levels; a generated region cannot be edited
+2026-10-04 16:18:04.040Z [INFO] The Editor is for hand-made levels; a generated region cannot be edited
+2026-10-04 16:18:04.887Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\menu-same\level-menu-same\level.json
+2026-10-04 16:18:05.187Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:05.188Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:05.227Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:05.234Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:05.259Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:05.531Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\menu-acts\level-menu-acts\level.json
+2026-10-04 16:18:05.832Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:05.832Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:05.871Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-acts/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:05.876Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-acts/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:05.902Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:06.178Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\menu-sacred\level-menu-sacred\level.json
+2026-10-04 16:18:06.485Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:06.486Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:06.525Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-sacred/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:06.530Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-sacred/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:06.555Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:06.826Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\menu-rename\level-menu-rename\level.json
+2026-10-04 16:18:07.128Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:07.129Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:07.168Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-rename/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:07.173Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/menu-rename/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:07.199Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:07.270Z [INFO] Interactions reloaded: 33 from 39 file(s) in 67.0 ms
+2026-10-04 16:18:07.425Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:18:07.725Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:07.725Z [WARNING] Interactions: interactions/oops.json:2: do names "talks", which the game does not know (it knows: ask-to-teach, chop, eat-berries, flee, gather-berries, give-berries, graze, hold-ritual, inspect, knap, open-barter, open-craft, pick-flint, restore, talk, tend-camp-fire, tend-sacred-fire, warm-nearby)
+2026-10-04 16:18:07.725Z [INFO] Interactions: 33 loaded from 40 file(s), 1 error(s)
+2026-10-04 16:18:07.828Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:18:08.097Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:08.097Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:08.372Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-gather\level-timed-gather\level.json
+2026-10-04 16:18:08.685Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:08.685Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:08.724Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-gather/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:08.729Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-gather/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:08.754Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:09.300Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-interrupt\level-timed-interrupt\level.json
+2026-10-04 16:18:09.601Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:09.601Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:09.641Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-interrupt/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:09.646Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-interrupt/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:09.672Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:09.681Z [INFO] The hero stopped what they were doing
+2026-10-04 16:18:10.033Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-interrupt\level-timed-interrupt\level.json
+2026-10-04 16:18:10.338Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:10.338Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:10.377Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-interrupt/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:10.381Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-interrupt/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:10.407Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:10.416Z [INFO] The hero stopped what they were doing
+2026-10-04 16:18:10.763Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-pause\level-timed-pause\level.json
+2026-10-04 16:18:11.065Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:11.065Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:11.104Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-pause/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:11.110Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-pause/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:11.135Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:11.441Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-save\level-timed-save\level.json
+2026-10-04 16:18:11.739Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:11.739Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:11.778Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-save/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:11.783Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-save/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:11.808Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:11.895Z [INFO] Autosaved day 0 in 39.4 ms
+2026-10-04 16:18:12.092Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-save\level-timed-save\level.json
+2026-10-04 16:18:12.360Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:12.361Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:12.395Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-save/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:12.400Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-save/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:12.445Z [INFO] Loaded clan.json: day 0
+2026-10-04 16:18:12.766Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-clean\level-timed-clean\level.json
+2026-10-04 16:18:13.067Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:13.067Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:13.106Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-clean/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:13.111Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-clean/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:13.136Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:13.175Z [INFO] Autosaved day 0 in 38.1 ms
+2026-10-04 16:18:13.372Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\timed-clean\level-timed-clean\level.json
+2026-10-04 16:18:13.641Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:13.641Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:13.676Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-clean/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:13.681Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/timed-clean/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:13.724Z [INFO] things.json could not be read: [json.exception.parse_error.101] parse error at line 1, column 4: syntax error while parsing object key - invalid literal; last read: '{ no'; expected string literal
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\menu_test.cpp(295):
+TEST CASE:  US-155 objects.json has the seven objects with tags and states
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\menu_test.cpp(301): ERROR: CHECK( objects == std::vector<std::string>{"fire pit", "knapping stone", "food store", "shelter", "flint nodule", "water source", "sleeping furs"} ) is NOT correct!
+  values: CHECK( {fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs, sun, moon, sun (placed), moon (placed)} == {fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs} )
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\menu_test.cpp(321): ERROR: CHECK( definitions.objects.size() == 7 ) is NOT correct!
+  values: CHECK( 9 == 7 )
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\menu_test.cpp(325):
+TEST CASE:  US-155 A new object kind added to objects.json shows up with its tags, and mistakes are named
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\menu_test.cpp(337): ERROR: CHECK( game::loadDefinitions(data).objects.size() == 8 ) is NOT correct!
+  values: CHECK( 10 == 8 )
+
+2026-10-04 16:18:15.146Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-editor\level-objects-editor\level.json
+2026-10-04 16:18:15.442Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:15.443Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:15.481Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-editor/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:15.486Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-editor/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:15.486Z [INFO] Mode: Editor
+2026-10-04 16:18:15.555Z [INFO] Editor: place fire pit #5
+2026-10-04 16:18:15.582Z [INFO] Editor: Saved level.json
+2026-10-04 16:18:15.601Z [INFO] Editor: Undone
+2026-10-04 16:18:15.869Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-fire\level-objects-fire\level.json
+2026-10-04 16:18:16.170Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:16.170Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:16.209Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-fire/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:16.214Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-fire/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:16.239Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:16.255Z [INFO] The fire warms 20 people
+2026-10-04 16:18:16.524Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-store\level-objects-store\level.json
+2026-10-04 16:18:16.825Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:16.825Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:16.863Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-store/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:16.868Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-store/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:16.894Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:17.207Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-flint\level-objects-flint\level.json
+2026-10-04 16:18:17.509Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:17.509Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:17.549Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-flint/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:17.554Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-flint/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:17.580Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:17.858Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-sleep\level-objects-sleep\level.json
+2026-10-04 16:18:18.162Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:18.162Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:18.202Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-sleep/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:18.206Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-sleep/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:18.233Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:18.590Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-water\level-objects-water\level.json
+2026-10-04 16:18:18.896Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:18.896Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:18.938Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-water/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:18.942Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-water/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:18.969Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:19.248Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\objects-stone\level-objects-stone\level.json
+2026-10-04 16:18:19.553Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:19.554Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:19.593Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-stone/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:19.598Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/objects-stone/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:19.624Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:19.919Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\layout-1\level-layout-1\level.json
+2026-10-04 16:18:20.222Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:20.222Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:20.262Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/layout-1/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:20.266Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/layout-1/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:20.293Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:20.567Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\layout-2\level-layout-2\level.json
+2026-10-04 16:18:20.867Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:20.867Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:20.906Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/layout-2/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:20.910Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/layout-2/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:20.936Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:21.038Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:18:21.316Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:21.316Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:21.403Z [INFO] Art: the owner's atlas
+2026-10-04 16:18:22.776Z [INFO] Mode: Editor
+2026-10-04 16:18:22.904Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:18:23.175Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:23.175Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:23.262Z [INFO] Art: the owner's atlas
+2026-10-04 16:18:24.639Z [INFO] Mode: Editor
+2026-10-04 16:18:24.640Z [INFO] Mode: Game (level "The Valley", hero at (1200, 1100))
+2026-10-04 16:18:24.774Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:18:25.047Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:25.047Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:25.134Z [INFO] Art: the owner's atlas
+2026-10-04 16:18:26.471Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:18:26.472Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:18:26.474Z [INFO] Threw a flint spear facing West
+2026-10-04 16:18:26.475Z [INFO] Mode: Editor
+2026-10-04 16:18:26.475Z [INFO] Mode: Game (level "The Valley", hero at (1040, 1048))
+2026-10-04 16:18:26.476Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:18:26.476Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:18:50.832Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-hungry\level-npc-hungry\level.json
+2026-10-04 16:18:51.164Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:51.164Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:51.210Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hungry/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:51.215Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hungry/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:51.246Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:51.637Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-fed\level-npc-fed\level.json
+2026-10-04 16:18:51.963Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:51.964Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:52.006Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-fed/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:52.011Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-fed/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:52.038Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:52.589Z [INFO] Level "The Valley" (64x64 tiles, 2 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-deer\level-npc-deer\level.json
+2026-10-04 16:18:52.949Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:52.950Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:52.995Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-deer/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:53.000Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-deer/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:53.031Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:53.380Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-hero-scare\level-npc-hero-scare\level.json
+2026-10-04 16:18:53.725Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:53.726Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:53.768Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hero-scare/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:53.773Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hero-scare/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:53.801Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:54.107Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-danger\level-npc-danger\level.json
+2026-10-04 16:18:54.460Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:54.461Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:54.503Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-danger/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:54.508Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-danger/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:54.536Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:54.851Z [INFO] Level "The Valley" (64x64 tiles, 3 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-hash-a\level-npc-hash-a\level.json
+2026-10-04 16:18:55.190Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:55.190Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:55.232Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hash-a/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:55.237Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hash-a/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:55.265Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:56.784Z [INFO] Autosaved day 1 in 53.1 ms
+2026-10-04 16:18:57.325Z [INFO] Level "The Valley" (64x64 tiles, 3 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\npc-hash-b\level-npc-hash-b\level.json
+2026-10-04 16:18:57.641Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:57.641Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:57.681Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hash-b/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:18:57.686Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/npc-hash-b/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:18:57.712Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:18:59.056Z [INFO] Autosaved day 1 in 48.9 ms
+2026-10-04 16:18:59.406Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us124\paint\valley.json
+2026-10-04 16:18:59.681Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:18:59.682Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:18:59.767Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:01.148Z [INFO] Mode: Editor
+2026-10-04 16:19:01.148Z [INFO] Editor: paint water (1 cells)
+2026-10-04 16:19:01.149Z [INFO] Editor: paint water (7 cells)
+2026-10-04 16:19:01.149Z [INFO] Editor: erase (1 cells)
+2026-10-04 16:19:01.150Z [INFO] Mode: Game (level "The Valley", hero at (1040, 1048))
+2026-10-04 16:19:01.150Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:01.150Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:19:01.284Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us124\fill\valley.json
+2026-10-04 16:19:01.562Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:01.562Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:01.658Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:03.019Z [INFO] Mode: Editor
+2026-10-04 16:19:03.019Z [INFO] Editor: rectangle of sand (12 cells)
+2026-10-04 16:19:03.133Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us124\fill\valley.json
+2026-10-04 16:19:03.428Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:03.429Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:03.515Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:04.841Z [INFO] Mode: Editor
+2026-10-04 16:19:04.842Z [INFO] Editor: fill with sand (47 cells)
+2026-10-04 16:19:04.842Z [INFO] Editor: Undone
+2026-10-04 16:19:04.968Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:04.969Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:04.969Z [INFO] Editor: Undone
+2026-10-04 16:19:04.969Z [INFO] Editor: edit (112 cells)
+2026-10-04 16:19:04.970Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:04.970Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:04.970Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:04.971Z [INFO] Editor: edit (94 cells)
+2026-10-04 16:19:04.971Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:04.971Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:04.972Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:04.972Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:04.972Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.972Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:04.973Z [INFO] Editor: edit (57 cells)
+2026-10-04 16:19:04.973Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:04.973Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.974Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:04.974Z [INFO] Editor: edit (27 cells)
+2026-10-04 16:19:04.974Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.974Z [INFO] Editor: Undone
+2026-10-04 16:19:04.974Z [INFO] Editor: Undone
+2026-10-04 16:19:04.975Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:04.975Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:04.975Z [INFO] Editor: edit (11 cells)
+2026-10-04 16:19:04.975Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:04.976Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:04.976Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.976Z [INFO] Editor: edit (26 cells)
+2026-10-04 16:19:04.977Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.977Z [INFO] Editor: edit (70 cells)
+2026-10-04 16:19:04.977Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.977Z [INFO] Editor: Undone
+2026-10-04 16:19:04.977Z [INFO] Editor: Redone
+2026-10-04 16:19:04.978Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.978Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.978Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.978Z [INFO] Editor: Undone
+2026-10-04 16:19:04.978Z [INFO] Editor: Undone
+2026-10-04 16:19:04.978Z [INFO] Editor: Redone
+2026-10-04 16:19:04.979Z [INFO] Editor: Redone
+2026-10-04 16:19:04.979Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:04.979Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.979Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:04.979Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:04.980Z [INFO] Editor: edit (88 cells)
+2026-10-04 16:19:04.980Z [INFO] Editor: edit (15 cells)
+2026-10-04 16:19:04.980Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:04.981Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.981Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.981Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:04.981Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:04.982Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.982Z [INFO] Editor: Undone
+2026-10-04 16:19:04.982Z [INFO] Editor: edit (46 cells)
+2026-10-04 16:19:04.982Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:04.983Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:04.983Z [INFO] Editor: Undone
+2026-10-04 16:19:04.983Z [INFO] Editor: Undone
+2026-10-04 16:19:04.983Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:04.984Z [INFO] Editor: edit (47 cells)
+2026-10-04 16:19:04.984Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.984Z [INFO] Editor: Undone
+2026-10-04 16:19:04.984Z [INFO] Editor: edit (59 cells)
+2026-10-04 16:19:04.984Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:04.985Z [INFO] Editor: edit (60 cells)
+2026-10-04 16:19:04.985Z [INFO] Editor: Undone
+2026-10-04 16:19:04.985Z [INFO] Editor: Redone
+2026-10-04 16:19:04.985Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.986Z [INFO] Editor: Undone
+2026-10-04 16:19:04.986Z [INFO] Editor: edit (60 cells)
+2026-10-04 16:19:04.986Z [INFO] Editor: edit (60 cells)
+2026-10-04 16:19:04.987Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.987Z [INFO] Editor: Undone
+2026-10-04 16:19:04.987Z [INFO] Editor: edit (24 cells)
+2026-10-04 16:19:04.987Z [INFO] Editor: Undone
+2026-10-04 16:19:04.987Z [INFO] Editor: Redone
+2026-10-04 16:19:04.988Z [INFO] Editor: Undone
+2026-10-04 16:19:04.988Z [INFO] Editor: Redone
+2026-10-04 16:19:04.988Z [INFO] Editor: edit (48 cells)
+2026-10-04 16:19:04.988Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.989Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:04.989Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:04.989Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.989Z [INFO] Editor: Undone
+2026-10-04 16:19:04.989Z [INFO] Editor: Redone
+2026-10-04 16:19:04.990Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.990Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.990Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:04.990Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:04.990Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.991Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:04.991Z [INFO] Editor: edit (35 cells)
+2026-10-04 16:19:04.991Z [INFO] Editor: edit (29 cells)
+2026-10-04 16:19:04.991Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:04.992Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:04.992Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:04.993Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.993Z [INFO] Editor: Undone
+2026-10-04 16:19:04.993Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:04.993Z [INFO] Editor: Undone
+2026-10-04 16:19:04.993Z [INFO] Editor: Redone
+2026-10-04 16:19:04.994Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.994Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:04.994Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:04.994Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.994Z [INFO] Editor: Undone
+2026-10-04 16:19:04.995Z [INFO] Editor: edit (26 cells)
+2026-10-04 16:19:04.995Z [INFO] Editor: Undone
+2026-10-04 16:19:04.995Z [INFO] Editor: Redone
+2026-10-04 16:19:04.995Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:04.996Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:04.996Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.996Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:04.996Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:04.996Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:04.997Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:04.997Z [INFO] Editor: Undone
+2026-10-04 16:19:05.032Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.033Z [INFO] Editor: Nothing to undo
+2026-10-04 16:19:05.033Z [INFO] Editor: edit (35 cells)
+2026-10-04 16:19:05.033Z [INFO] Editor: edit (70 cells)
+2026-10-04 16:19:05.033Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.034Z [INFO] Editor: edit (18 cells)
+2026-10-04 16:19:05.034Z [INFO] Editor: edit (30 cells)
+2026-10-04 16:19:05.034Z [INFO] Editor: Undone
+2026-10-04 16:19:05.034Z [INFO] Editor: edit (14 cells)
+2026-10-04 16:19:05.035Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.035Z [INFO] Editor: edit (42 cells)
+2026-10-04 16:19:05.035Z [INFO] Editor: edit (52 cells)
+2026-10-04 16:19:05.036Z [INFO] Editor: edit (14 cells)
+2026-10-04 16:19:05.036Z [INFO] Editor: Undone
+2026-10-04 16:19:05.036Z [INFO] Editor: edit (55 cells)
+2026-10-04 16:19:05.036Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.037Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.037Z [INFO] Editor: Undone
+2026-10-04 16:19:05.037Z [INFO] Editor: Undone
+2026-10-04 16:19:05.037Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.037Z [INFO] Editor: edit (44 cells)
+2026-10-04 16:19:05.038Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.038Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.038Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.039Z [INFO] Editor: edit (11 cells)
+2026-10-04 16:19:05.039Z [INFO] Editor: edit (30 cells)
+2026-10-04 16:19:05.039Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.039Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.040Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.040Z [INFO] Editor: Undone
+2026-10-04 16:19:05.040Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.040Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.040Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.041Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.041Z [INFO] Editor: edit (22 cells)
+2026-10-04 16:19:05.041Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.041Z [INFO] Editor: Undone
+2026-10-04 16:19:05.041Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:05.042Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.042Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.042Z [INFO] Editor: edit (43 cells)
+2026-10-04 16:19:05.043Z [INFO] Editor: edit (53 cells)
+2026-10-04 16:19:05.043Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.043Z [INFO] Editor: edit (54 cells)
+2026-10-04 16:19:05.043Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.044Z [INFO] Editor: Undone
+2026-10-04 16:19:05.044Z [INFO] Editor: Redone
+2026-10-04 16:19:05.044Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.044Z [INFO] Editor: edit (24 cells)
+2026-10-04 16:19:05.045Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.045Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.045Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.045Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.046Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.046Z [INFO] Editor: edit (19 cells)
+2026-10-04 16:19:05.046Z [INFO] Editor: Undone
+2026-10-04 16:19:05.046Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.047Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.047Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.047Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.047Z [INFO] Editor: Undone
+2026-10-04 16:19:05.048Z [INFO] Editor: Redone
+2026-10-04 16:19:05.048Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.048Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.048Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.048Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.048Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.049Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.049Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.049Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.049Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.050Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.050Z [INFO] Editor: Undone
+2026-10-04 16:19:05.050Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.050Z [INFO] Editor: Undone
+2026-10-04 16:19:05.051Z [INFO] Editor: edit (17 cells)
+2026-10-04 16:19:05.051Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.051Z [INFO] Editor: Undone
+2026-10-04 16:19:05.051Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.051Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.052Z [INFO] Editor: Undone
+2026-10-04 16:19:05.052Z [INFO] Editor: Redone
+2026-10-04 16:19:05.053Z [INFO] Editor: Undone
+2026-10-04 16:19:05.053Z [INFO] Editor: Undone
+2026-10-04 16:19:05.053Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.053Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.054Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.054Z [INFO] Editor: Undone
+2026-10-04 16:19:05.054Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.054Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.055Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.055Z [INFO] Editor: Undone
+2026-10-04 16:19:05.055Z [INFO] Editor: Redone
+2026-10-04 16:19:05.055Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.055Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.056Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.056Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.056Z [INFO] Editor: edit (64 cells)
+2026-10-04 16:19:05.056Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.056Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.057Z [INFO] Editor: edit (19 cells)
+2026-10-04 16:19:05.057Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.057Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.057Z [INFO] Editor: Undone
+2026-10-04 16:19:05.057Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.058Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.058Z [INFO] Editor: Undone
+2026-10-04 16:19:05.058Z [INFO] Editor: edit (36 cells)
+2026-10-04 16:19:05.058Z [INFO] Editor: edit (58 cells)
+2026-10-04 16:19:05.059Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.059Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.059Z [INFO] Editor: Undone
+2026-10-04 16:19:05.059Z [INFO] Editor: edit (67 cells)
+2026-10-04 16:19:05.060Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.060Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.060Z [INFO] Editor: Undone
+2026-10-04 16:19:05.060Z [INFO] Editor: edit (67 cells)
+2026-10-04 16:19:05.061Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.061Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.096Z [INFO] Editor: Nothing to undo
+2026-10-04 16:19:05.096Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.097Z [INFO] Editor: Nothing to undo
+2026-10-04 16:19:05.097Z [INFO] Editor: Nothing to undo
+2026-10-04 16:19:05.097Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.097Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.097Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.098Z [INFO] Editor: edit (30 cells)
+2026-10-04 16:19:05.098Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.098Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.099Z [INFO] Editor: edit (78 cells)
+2026-10-04 16:19:05.099Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.099Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.099Z [INFO] Editor: Undone
+2026-10-04 16:19:05.100Z [INFO] Editor: Redone
+2026-10-04 16:19:05.100Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.100Z [INFO] Editor: edit (25 cells)
+2026-10-04 16:19:05.101Z [INFO] Editor: edit (25 cells)
+2026-10-04 16:19:05.101Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.101Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.101Z [INFO] Editor: Undone
+2026-10-04 16:19:05.101Z [INFO] Editor: Undone
+2026-10-04 16:19:05.102Z [INFO] Editor: edit (45 cells)
+2026-10-04 16:19:05.102Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.102Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.102Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.102Z [INFO] Editor: edit (54 cells)
+2026-10-04 16:19:05.103Z [INFO] Editor: edit (18 cells)
+2026-10-04 16:19:05.103Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.103Z [INFO] Editor: edit (42 cells)
+2026-10-04 16:19:05.103Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.104Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.104Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.104Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.104Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.104Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.105Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.105Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.105Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.106Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.106Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.106Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.106Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.106Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.107Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.107Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.107Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.107Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.107Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.108Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.108Z [INFO] Editor: Undone
+2026-10-04 16:19:05.108Z [INFO] Editor: edit (14 cells)
+2026-10-04 16:19:05.108Z [INFO] Editor: Undone
+2026-10-04 16:19:05.108Z [INFO] Editor: Undone
+2026-10-04 16:19:05.109Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.109Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.109Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.110Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.110Z [INFO] Editor: Undone
+2026-10-04 16:19:05.110Z [INFO] Editor: Redone
+2026-10-04 16:19:05.110Z [INFO] Editor: Undone
+2026-10-04 16:19:05.111Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.111Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.111Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.111Z [INFO] Editor: Undone
+2026-10-04 16:19:05.111Z [INFO] Editor: Redone
+2026-10-04 16:19:05.112Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.112Z [INFO] Editor: Undone
+2026-10-04 16:19:05.112Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.112Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.113Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.113Z [INFO] Editor: Undone
+2026-10-04 16:19:05.113Z [INFO] Editor: Redone
+2026-10-04 16:19:05.113Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.113Z [INFO] Editor: Undone
+2026-10-04 16:19:05.114Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.114Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.114Z [INFO] Editor: Undone
+2026-10-04 16:19:05.114Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.115Z [INFO] Editor: edit (18 cells)
+2026-10-04 16:19:05.115Z [INFO] Editor: edit (17 cells)
+2026-10-04 16:19:05.115Z [INFO] Editor: edit (36 cells)
+2026-10-04 16:19:05.115Z [INFO] Editor: edit (36 cells)
+2026-10-04 16:19:05.116Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.116Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.116Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.117Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.117Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.118Z [INFO] Editor: edit (24 cells)
+2026-10-04 16:19:05.118Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.118Z [INFO] Editor: Undone
+2026-10-04 16:19:05.118Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.119Z [INFO] Editor: edit (14 cells)
+2026-10-04 16:19:05.119Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.119Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.119Z [INFO] Editor: edit (26 cells)
+2026-10-04 16:19:05.120Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.120Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.120Z [INFO] Editor: Undone
+2026-10-04 16:19:05.120Z [INFO] Editor: Redone
+2026-10-04 16:19:05.120Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.121Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.121Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.121Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.121Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.121Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.122Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.122Z [INFO] Editor: Undone
+2026-10-04 16:19:05.122Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.122Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.123Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.123Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.123Z [INFO] Editor: Undone
+2026-10-04 16:19:05.123Z [INFO] Editor: Undone
+2026-10-04 16:19:05.123Z [INFO] Editor: Undone
+2026-10-04 16:19:05.124Z [INFO] Editor: edit (32 cells)
+2026-10-04 16:19:05.124Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.124Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.160Z [INFO] Editor: edit (36 cells)
+2026-10-04 16:19:05.160Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.160Z [INFO] Editor: Undone
+2026-10-04 16:19:05.161Z [INFO] Editor: edit (120 cells)
+2026-10-04 16:19:05.161Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.161Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.162Z [INFO] Editor: edit (109 cells)
+2026-10-04 16:19:05.162Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.162Z [INFO] Editor: Undone
+2026-10-04 16:19:05.162Z [INFO] Editor: Redone
+2026-10-04 16:19:05.163Z [INFO] Editor: edit (112 cells)
+2026-10-04 16:19:05.163Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.163Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:05.163Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.163Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.164Z [INFO] Editor: Undone
+2026-10-04 16:19:05.164Z [INFO] Editor: Redone
+2026-10-04 16:19:05.164Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.164Z [INFO] Editor: edit (55 cells)
+2026-10-04 16:19:05.165Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.165Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.165Z [INFO] Editor: edit (24 cells)
+2026-10-04 16:19:05.165Z [INFO] Editor: Undone
+2026-10-04 16:19:05.166Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.166Z [INFO] Editor: Undone
+2026-10-04 16:19:05.166Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.166Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.167Z [INFO] Editor: edit (29 cells)
+2026-10-04 16:19:05.167Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.168Z [INFO] Editor: edit (29 cells)
+2026-10-04 16:19:05.168Z [INFO] Editor: Undone
+2026-10-04 16:19:05.168Z [INFO] Editor: Undone
+2026-10-04 16:19:05.168Z [INFO] Editor: Undone
+2026-10-04 16:19:05.168Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.169Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.169Z [INFO] Editor: Undone
+2026-10-04 16:19:05.169Z [INFO] Editor: Redone
+2026-10-04 16:19:05.169Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.169Z [INFO] Editor: Undone
+2026-10-04 16:19:05.170Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.170Z [INFO] Editor: Undone
+2026-10-04 16:19:05.170Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.170Z [INFO] Editor: edit (22 cells)
+2026-10-04 16:19:05.171Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.171Z [INFO] Editor: Undone
+2026-10-04 16:19:05.171Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.171Z [INFO] Editor: edit (34 cells)
+2026-10-04 16:19:05.171Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.172Z [INFO] Editor: Undone
+2026-10-04 16:19:05.172Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.172Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.173Z [INFO] Editor: edit (32 cells)
+2026-10-04 16:19:05.173Z [INFO] Editor: edit (36 cells)
+2026-10-04 16:19:05.173Z [INFO] Editor: edit (90 cells)
+2026-10-04 16:19:05.173Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.173Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.174Z [INFO] Editor: Undone
+2026-10-04 16:19:05.174Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.174Z [INFO] Editor: edit (32 cells)
+2026-10-04 16:19:05.174Z [INFO] Editor: edit (28 cells)
+2026-10-04 16:19:05.175Z [INFO] Editor: edit (28 cells)
+2026-10-04 16:19:05.175Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.175Z [INFO] Editor: edit (56 cells)
+2026-10-04 16:19:05.175Z [INFO] Editor: Undone
+2026-10-04 16:19:05.176Z [INFO] Editor: edit (24 cells)
+2026-10-04 16:19:05.176Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.176Z [INFO] Editor: Undone
+2026-10-04 16:19:05.176Z [INFO] Editor: Undone
+2026-10-04 16:19:05.177Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.177Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.177Z [INFO] Editor: Undone
+2026-10-04 16:19:05.177Z [INFO] Editor: Undone
+2026-10-04 16:19:05.177Z [INFO] Editor: Redone
+2026-10-04 16:19:05.178Z [INFO] Editor: Redone
+2026-10-04 16:19:05.178Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.178Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.179Z [INFO] Editor: Undone
+2026-10-04 16:19:05.179Z [INFO] Editor: Undone
+2026-10-04 16:19:05.179Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.179Z [INFO] Editor: Undone
+2026-10-04 16:19:05.179Z [INFO] Editor: edit (27 cells)
+2026-10-04 16:19:05.180Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.180Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.180Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.180Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.181Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.181Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.181Z [INFO] Editor: edit (18 cells)
+2026-10-04 16:19:05.181Z [INFO] Editor: Undone
+2026-10-04 16:19:05.182Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.182Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:05.182Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.182Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.183Z [INFO] Editor: Undone
+2026-10-04 16:19:05.183Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.183Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.183Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.183Z [INFO] Editor: Undone
+2026-10-04 16:19:05.184Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.184Z [INFO] Editor: edit (13 cells)
+2026-10-04 16:19:05.184Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.184Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.185Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.186Z [INFO] Editor: edit (33 cells)
+2026-10-04 16:19:05.186Z [INFO] Editor: edit (33 cells)
+2026-10-04 16:19:05.186Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.186Z [INFO] Editor: Undone
+2026-10-04 16:19:05.186Z [INFO] Editor: Redone
+2026-10-04 16:19:05.187Z [INFO] Editor: edit (38 cells)
+2026-10-04 16:19:05.187Z [INFO] Editor: Undone
+2026-10-04 16:19:05.187Z [INFO] Editor: edit (38 cells)
+2026-10-04 16:19:05.188Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.188Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:05.188Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.188Z [INFO] Editor: edit (13 cells)
+2026-10-04 16:19:05.188Z [INFO] Editor: Undone
+2026-10-04 16:19:05.189Z [INFO] Editor: Undone
+2026-10-04 16:19:05.189Z [INFO] Editor: Redone
+2026-10-04 16:19:05.189Z [INFO] Editor: Undone
+2026-10-04 16:19:05.224Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.225Z [INFO] Editor: edit (116 cells)
+2026-10-04 16:19:05.225Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.225Z [INFO] Editor: edit (28 cells)
+2026-10-04 16:19:05.225Z [INFO] Editor: edit (30 cells)
+2026-10-04 16:19:05.226Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.226Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.226Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.226Z [INFO] Editor: Undone
+2026-10-04 16:19:05.227Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.227Z [INFO] Editor: Undone
+2026-10-04 16:19:05.227Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.227Z [INFO] Editor: edit (17 cells)
+2026-10-04 16:19:05.227Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.228Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.228Z [INFO] Editor: Undone
+2026-10-04 16:19:05.228Z [INFO] Editor: Redone
+2026-10-04 16:19:05.228Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.229Z [INFO] Editor: Undone
+2026-10-04 16:19:05.229Z [INFO] Editor: edit (15 cells)
+2026-10-04 16:19:05.229Z [INFO] Editor: Undone
+2026-10-04 16:19:05.229Z [INFO] Editor: edit (70 cells)
+2026-10-04 16:19:05.230Z [INFO] Editor: edit (36 cells)
+2026-10-04 16:19:05.230Z [INFO] Editor: Undone
+2026-10-04 16:19:05.230Z [INFO] Editor: Redone
+2026-10-04 16:19:05.230Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.231Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.231Z [INFO] Editor: edit (27 cells)
+2026-10-04 16:19:05.231Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.232Z [INFO] Editor: edit (29 cells)
+2026-10-04 16:19:05.232Z [INFO] Editor: Undone
+2026-10-04 16:19:05.232Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.232Z [INFO] Editor: edit (42 cells)
+2026-10-04 16:19:05.233Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.233Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.233Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.233Z [INFO] Editor: Undone
+2026-10-04 16:19:05.234Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.234Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.234Z [INFO] Editor: Undone
+2026-10-04 16:19:05.234Z [INFO] Editor: Undone
+2026-10-04 16:19:05.235Z [INFO] Editor: Redone
+2026-10-04 16:19:05.235Z [INFO] Editor: Redone
+2026-10-04 16:19:05.235Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.235Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.235Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.235Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.236Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.236Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.236Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.236Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.236Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.236Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.237Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.237Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.237Z [INFO] Editor: edit (28 cells)
+2026-10-04 16:19:05.237Z [INFO] Editor: Undone
+2026-10-04 16:19:05.238Z [INFO] Editor: Redone
+2026-10-04 16:19:05.238Z [INFO] Editor: Undone
+2026-10-04 16:19:05.238Z [INFO] Editor: Redone
+2026-10-04 16:19:05.238Z [INFO] Editor: Undone
+2026-10-04 16:19:05.238Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.239Z [INFO] Editor: Undone
+2026-10-04 16:19:05.239Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.239Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.240Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.240Z [INFO] Editor: edit (20 cells)
+2026-10-04 16:19:05.240Z [INFO] Editor: Undone
+2026-10-04 16:19:05.240Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.241Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.241Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.241Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.241Z [INFO] Editor: edit (40 cells)
+2026-10-04 16:19:05.241Z [INFO] Editor: edit (40 cells)
+2026-10-04 16:19:05.242Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.242Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.242Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.242Z [INFO] Editor: Undone
+2026-10-04 16:19:05.243Z [INFO] Editor: Redone
+2026-10-04 16:19:05.243Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.243Z [INFO] Editor: edit (42 cells)
+2026-10-04 16:19:05.243Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.244Z [INFO] Editor: edit (40 cells)
+2026-10-04 16:19:05.244Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.244Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.244Z [INFO] Editor: edit (18 cells)
+2026-10-04 16:19:05.245Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.246Z [INFO] Editor: edit (38 cells)
+2026-10-04 16:19:05.246Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.246Z [INFO] Editor: edit (42 cells)
+2026-10-04 16:19:05.246Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.247Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.247Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.247Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.247Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.248Z [INFO] Editor: edit (21 cells)
+2026-10-04 16:19:05.248Z [INFO] Editor: edit (16 cells)
+2026-10-04 16:19:05.248Z [INFO] Editor: edit (5 cells)
+2026-10-04 16:19:05.248Z [INFO] Editor: edit (7 cells)
+2026-10-04 16:19:05.248Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.249Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.249Z [INFO] Editor: edit (3 cells)
+2026-10-04 16:19:05.249Z [INFO] Editor: edit (11 cells)
+2026-10-04 16:19:05.249Z [INFO] Editor: edit (10 cells)
+2026-10-04 16:19:05.250Z [INFO] Editor: edit (12 cells)
+2026-10-04 16:19:05.250Z [INFO] Editor: edit (2 cells)
+2026-10-04 16:19:05.250Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.250Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.251Z [INFO] Editor: edit (15 cells)
+2026-10-04 16:19:05.252Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.252Z [INFO] Editor: Nothing to redo
+2026-10-04 16:19:05.252Z [INFO] Editor: Undone
+2026-10-04 16:19:05.252Z [INFO] Editor: edit (4 cells)
+2026-10-04 16:19:05.252Z [INFO] Editor: edit (6 cells)
+2026-10-04 16:19:05.253Z [INFO] Editor: Undone
+2026-10-04 16:19:05.253Z [INFO] Editor: Redone
+2026-10-04 16:19:05.253Z [INFO] Editor: edit (60 cells)
+2026-10-04 16:19:05.253Z [INFO] Editor: edit (8 cells)
+2026-10-04 16:19:05.254Z [INFO] Editor: edit (9 cells)
+2026-10-04 16:19:05.254Z [INFO] Editor: Undone
+2026-10-04 16:19:05.289Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.290Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.290Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.290Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.290Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.290Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.291Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.291Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.291Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.291Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.292Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.292Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.292Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.292Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.292Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.293Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.293Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.293Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.293Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.293Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.294Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.294Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.294Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.294Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.294Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.295Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.295Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.295Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.295Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.295Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.296Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.296Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.296Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.296Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.296Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.297Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.297Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.297Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.297Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.297Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.298Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.298Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.298Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.298Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.298Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.299Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.299Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.299Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.299Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.299Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.300Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.300Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.300Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.300Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.300Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.300Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.301Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.301Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.301Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.301Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.302Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.302Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.302Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.302Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.302Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.303Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.303Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.303Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.303Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.303Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.304Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.304Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.304Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.304Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.304Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.304Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.305Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.305Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.305Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.305Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.305Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.306Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.306Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.306Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.306Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.306Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.307Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.307Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.307Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.307Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.307Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.308Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.308Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.308Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.308Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.308Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.309Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.309Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.309Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.309Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.309Z [INFO] Editor: edit (1 cells)
+2026-10-04 16:19:05.310Z [INFO] Editor: Undone
+2026-10-04 16:19:05.310Z [INFO] Editor: Undone
+2026-10-04 16:19:05.310Z [INFO] Editor: Undone
+2026-10-04 16:19:05.310Z [INFO] Editor: Undone
+2026-10-04 16:19:05.310Z [INFO] Editor: Undone
+2026-10-04 16:19:05.311Z [INFO] Editor: Undone
+2026-10-04 16:19:05.311Z [INFO] Editor: Undone
+2026-10-04 16:19:05.311Z [INFO] Editor: Undone
+2026-10-04 16:19:05.311Z [INFO] Editor: Undone
+2026-10-04 16:19:05.311Z [INFO] Editor: Undone
+2026-10-04 16:19:05.312Z [INFO] Editor: Undone
+2026-10-04 16:19:05.312Z [INFO] Editor: Undone
+2026-10-04 16:19:05.312Z [INFO] Editor: Undone
+2026-10-04 16:19:05.312Z [INFO] Editor: Undone
+2026-10-04 16:19:05.312Z [INFO] Editor: Undone
+2026-10-04 16:19:05.312Z [INFO] Editor: Undone
+2026-10-04 16:19:05.313Z [INFO] Editor: Undone
+2026-10-04 16:19:05.313Z [INFO] Editor: Undone
+2026-10-04 16:19:05.313Z [INFO] Editor: Undone
+2026-10-04 16:19:05.313Z [INFO] Editor: Undone
+2026-10-04 16:19:05.313Z [INFO] Editor: Undone
+2026-10-04 16:19:05.314Z [INFO] Editor: Undone
+2026-10-04 16:19:05.314Z [INFO] Editor: Undone
+2026-10-04 16:19:05.314Z [INFO] Editor: Undone
+2026-10-04 16:19:05.314Z [INFO] Editor: Undone
+2026-10-04 16:19:05.314Z [INFO] Editor: Undone
+2026-10-04 16:19:05.315Z [INFO] Editor: Undone
+2026-10-04 16:19:05.315Z [INFO] Editor: Undone
+2026-10-04 16:19:05.315Z [INFO] Editor: Undone
+2026-10-04 16:19:05.315Z [INFO] Editor: Undone
+2026-10-04 16:19:05.315Z [INFO] Editor: Undone
+2026-10-04 16:19:05.315Z [INFO] Editor: Undone
+2026-10-04 16:19:05.316Z [INFO] Editor: Undone
+2026-10-04 16:19:05.316Z [INFO] Editor: Undone
+2026-10-04 16:19:05.316Z [INFO] Editor: Undone
+2026-10-04 16:19:05.316Z [INFO] Editor: Undone
+2026-10-04 16:19:05.316Z [INFO] Editor: Undone
+2026-10-04 16:19:05.317Z [INFO] Editor: Undone
+2026-10-04 16:19:05.317Z [INFO] Editor: Undone
+2026-10-04 16:19:05.317Z [INFO] Editor: Undone
+2026-10-04 16:19:05.317Z [INFO] Editor: Undone
+2026-10-04 16:19:05.317Z [INFO] Editor: Undone
+2026-10-04 16:19:05.317Z [INFO] Editor: Undone
+2026-10-04 16:19:05.318Z [INFO] Editor: Undone
+2026-10-04 16:19:05.318Z [INFO] Editor: Undone
+2026-10-04 16:19:05.318Z [INFO] Editor: Undone
+2026-10-04 16:19:05.318Z [INFO] Editor: Undone
+2026-10-04 16:19:05.319Z [INFO] Editor: Undone
+2026-10-04 16:19:05.319Z [INFO] Editor: Undone
+2026-10-04 16:19:05.319Z [INFO] Editor: Undone
+2026-10-04 16:19:05.319Z [INFO] Editor: Undone
+2026-10-04 16:19:05.319Z [INFO] Editor: Undone
+2026-10-04 16:19:05.320Z [INFO] Editor: Undone
+2026-10-04 16:19:05.320Z [INFO] Editor: Undone
+2026-10-04 16:19:05.320Z [INFO] Editor: Undone
+2026-10-04 16:19:05.320Z [INFO] Editor: Undone
+2026-10-04 16:19:05.320Z [INFO] Editor: Undone
+2026-10-04 16:19:05.320Z [INFO] Editor: Undone
+2026-10-04 16:19:05.321Z [INFO] Editor: Undone
+2026-10-04 16:19:05.321Z [INFO] Editor: Undone
+2026-10-04 16:19:05.321Z [INFO] Editor: Undone
+2026-10-04 16:19:05.321Z [INFO] Editor: Undone
+2026-10-04 16:19:05.321Z [INFO] Editor: Undone
+2026-10-04 16:19:05.322Z [INFO] Editor: Undone
+2026-10-04 16:19:05.322Z [INFO] Editor: Undone
+2026-10-04 16:19:05.322Z [INFO] Editor: Undone
+2026-10-04 16:19:05.322Z [INFO] Editor: Undone
+2026-10-04 16:19:05.322Z [INFO] Editor: Undone
+2026-10-04 16:19:05.323Z [INFO] Editor: Undone
+2026-10-04 16:19:05.323Z [INFO] Editor: Undone
+2026-10-04 16:19:05.323Z [INFO] Editor: Undone
+2026-10-04 16:19:05.323Z [INFO] Editor: Undone
+2026-10-04 16:19:05.323Z [INFO] Editor: Undone
+2026-10-04 16:19:05.323Z [INFO] Editor: Undone
+2026-10-04 16:19:05.324Z [INFO] Editor: Undone
+2026-10-04 16:19:05.324Z [INFO] Editor: Undone
+2026-10-04 16:19:05.324Z [INFO] Editor: Undone
+2026-10-04 16:19:05.324Z [INFO] Editor: Undone
+2026-10-04 16:19:05.324Z [INFO] Editor: Undone
+2026-10-04 16:19:05.325Z [INFO] Editor: Undone
+2026-10-04 16:19:05.325Z [INFO] Editor: Undone
+2026-10-04 16:19:05.325Z [INFO] Editor: Undone
+2026-10-04 16:19:05.325Z [INFO] Editor: Undone
+2026-10-04 16:19:05.325Z [INFO] Editor: Undone
+2026-10-04 16:19:05.326Z [INFO] Editor: Undone
+2026-10-04 16:19:05.326Z [INFO] Editor: Undone
+2026-10-04 16:19:05.326Z [INFO] Editor: Undone
+2026-10-04 16:19:05.326Z [INFO] Editor: Undone
+2026-10-04 16:19:05.326Z [INFO] Editor: Undone
+2026-10-04 16:19:05.326Z [INFO] Editor: Undone
+2026-10-04 16:19:05.327Z [INFO] Editor: Undone
+2026-10-04 16:19:05.327Z [INFO] Editor: Undone
+2026-10-04 16:19:05.327Z [INFO] Editor: Undone
+2026-10-04 16:19:05.327Z [INFO] Editor: Undone
+2026-10-04 16:19:05.327Z [INFO] Editor: Undone
+2026-10-04 16:19:05.328Z [INFO] Editor: Undone
+2026-10-04 16:19:05.328Z [INFO] Editor: Undone
+2026-10-04 16:19:05.328Z [INFO] Editor: Undone
+2026-10-04 16:19:05.328Z [INFO] Editor: Undone
+2026-10-04 16:19:05.328Z [INFO] Editor: Undone
+2026-10-04 16:19:05.328Z [INFO] Editor: Nothing to undo
+2026-10-04 16:19:05.423Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us124\save\valley.json
+2026-10-04 16:19:05.701Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:05.701Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:05.787Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:07.110Z [INFO] Mode: Editor
+2026-10-04 16:19:07.111Z [INFO] Editor: paint lava (1 cells)
+2026-10-04 16:19:07.139Z [INFO] Editor: Saved valley.json
+2026-10-04 16:19:07.383Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us134\place\level.json
+2026-10-04 16:19:07.664Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:07.664Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:07.750Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:09.072Z [INFO] Mode: Editor
+2026-10-04 16:19:09.072Z [INFO] Editor: place flame sword #4
+2026-10-04 16:19:09.100Z [INFO] Editor: Saved level.json
+2026-10-04 16:19:09.185Z [INFO] Editor: Undone
+2026-10-04 16:19:09.185Z [INFO] Editor: Redone
+2026-10-04 16:19:09.186Z [INFO] Editor: Undone
+2026-10-04 16:19:09.186Z [INFO] Editor: place flame sword #5
+2026-10-04 16:19:09.413Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us134\move\level.json
+2026-10-04 16:19:09.691Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:09.691Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:09.778Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:11.122Z [INFO] Mode: Editor
+2026-10-04 16:19:11.122Z [INFO] Editor: place iron spear #4
+2026-10-04 16:19:11.123Z [INFO] Editor: move iron spear to (1140, 1090)
+2026-10-04 16:19:11.123Z [INFO] Editor: Undone
+2026-10-04 16:19:11.123Z [INFO] Editor: Redone
+2026-10-04 16:19:11.124Z [INFO] Editor: remove iron spear
+2026-10-04 16:19:11.124Z [INFO] Editor: Undone
+2026-10-04 16:19:11.521Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us134\pickup\level.json
+2026-10-04 16:19:11.803Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:11.804Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:11.891Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:13.227Z [INFO] Picked up iron sword (slot 1 of 9)
+2026-10-04 16:19:13.227Z [INFO] Picked up katana (slot 2 of 9)
+2026-10-04 16:19:13.228Z [INFO] Mode: Editor
+2026-10-04 16:19:13.229Z [INFO] Mode: Game (level "The Valley", hero at (1040, 1048))
+2026-10-04 16:19:13.229Z [INFO] Picked up iron sword (slot 1 of 9)
+2026-10-04 16:19:13.229Z [INFO] Picked up katana (slot 2 of 9)
+2026-10-04 16:19:13.459Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us134\full\level.json
+2026-10-04 16:19:13.736Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:13.736Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:13.834Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:15.148Z [INFO] Picked up iron sword (slot 1 of 9)
+2026-10-04 16:19:15.149Z [INFO] Picked up iron sword (slot 2 of 9)
+2026-10-04 16:19:15.149Z [INFO] Picked up iron sword (slot 3 of 9)
+2026-10-04 16:19:15.149Z [INFO] Picked up iron sword (slot 4 of 9)
+2026-10-04 16:19:15.149Z [INFO] Picked up iron sword (slot 5 of 9)
+2026-10-04 16:19:15.150Z [INFO] Picked up iron sword (slot 6 of 9)
+2026-10-04 16:19:15.150Z [INFO] Picked up iron sword (slot 7 of 9)
+2026-10-04 16:19:15.150Z [INFO] Picked up iron sword (slot 8 of 9)
+2026-10-04 16:19:15.150Z [INFO] Picked up iron sword (slot 9 of 9)
+2026-10-04 16:19:15.150Z [INFO] Hotbar full: katana stays where it is
+2026-10-04 16:19:15.376Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us134\select\level.json
+2026-10-04 16:19:15.653Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:15.653Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:15.754Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:17.070Z [INFO] Picked up iron sword (slot 1 of 9)
+2026-10-04 16:19:17.070Z [INFO] Picked up katana (slot 2 of 9)
+2026-10-04 16:19:17.070Z [INFO] Picked up wooden longbow (slot 3 of 9)
+2026-10-04 16:19:17.070Z [INFO] Switched to wooden longbow (slot 3)
+2026-10-04 16:19:17.071Z [INFO] Switched to katana (slot 2)
+2026-10-04 16:19:17.071Z [INFO] Switched to Empty hands (slot 9)
+2026-10-04 16:19:17.071Z [INFO] Switched to iron sword (slot 1)
+2026-10-04 16:19:17.071Z [INFO] Switched to katana (slot 2)
+2026-10-04 16:19:17.071Z [INFO] Switched to wooden longbow (slot 3)
+2026-10-04 16:19:17.071Z [INFO] Switched to iron sword (slot 1)
+2026-10-04 16:19:17.305Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us134\drawn\level.json
+2026-10-04 16:19:17.580Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:17.580Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:17.681Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:19.063Z [INFO] Picked up iron sword (slot 1 of 9)
+2026-10-04 16:19:19.064Z [INFO] Picked up katana (slot 2 of 9)
+2026-10-04 16:19:19.064Z [INFO] Picked up wooden longbow (slot 3 of 9)
+2026-10-04 16:19:19.183Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us125\place\level.json
+2026-10-04 16:19:19.465Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:19.466Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:19.564Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:20.891Z [INFO] Mode: Editor
+2026-10-04 16:19:20.891Z [INFO] Editor: place skeleton #4
+2026-10-04 16:19:20.892Z [INFO] Editor: Undone
+2026-10-04 16:19:20.892Z [INFO] Editor: place skeleton #5
+2026-10-04 16:19:21.008Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us125\edit\level.json
+2026-10-04 16:19:21.285Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:21.285Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:21.383Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:22.700Z [INFO] Mode: Editor
+2026-10-04 16:19:22.700Z [INFO] Editor: move Goblin to (1144, 1080)
+2026-10-04 16:19:22.701Z [INFO] Editor: turn
+2026-10-04 16:19:22.701Z [INFO] Editor: HP 250
+2026-10-04 16:19:22.702Z [INFO] Editor: rename to Grak the Loud
+2026-10-04 16:19:22.702Z [INFO] Editor: sword damage 9
+2026-10-04 16:19:22.730Z [INFO] Editor: Saved level.json
+2026-10-04 16:19:22.752Z [INFO] Editor: remove Grak the Loud
+2026-10-04 16:19:22.752Z [INFO] Editor: Undone
+2026-10-04 16:19:22.866Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us125\play\level.json
+2026-10-04 16:19:23.140Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:23.140Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:23.226Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:24.557Z [INFO] Mode: Editor
+2026-10-04 16:19:24.558Z [INFO] Editor: place goblin #4
+2026-10-04 16:19:24.558Z [INFO] Editor: HP 12
+2026-10-04 16:19:24.559Z [INFO] Editor: place wanderer #5
+2026-10-04 16:19:24.560Z [INFO] Mode: Game (level "The Valley", hero at (1040, 1048))
+2026-10-04 16:19:24.560Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:24.560Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:19:24.561Z [INFO] Switched to Sword (slot 2)
+2026-10-04 16:19:24.561Z [INFO] Sword slash facing South
+2026-10-04 16:19:24.561Z [INFO] Goblin took 5 damage, HP 7 / 12
+2026-10-04 16:19:24.561Z [INFO] Sword slash facing South
+2026-10-04 16:19:24.561Z [INFO] Goblin took 5 damage, HP 2 / 12
+2026-10-04 16:19:24.562Z [INFO] Sword slash facing South
+2026-10-04 16:19:24.562Z [INFO] Goblin took 5 damage, HP 0 / 12
+2026-10-04 16:19:24.562Z [INFO] Goblin was defeated
+2026-10-04 16:19:25.152Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:25.461Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:25.461Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:25.470Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:25.478Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:25.479Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:25.479Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:19:25.686Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:25.968Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:25.969Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:25.977Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:25.984Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:25.985Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:25.985Z [INFO] Picked up Sword (slot 2 of 9)
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(60):
+TEST CASE:  US-230 Same picture: the demo level and the camp are drawn the same by the GPU and by SDL_Renderer
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(77): MESSAGE: demo level: SDL_Renderer against itself: 0 different
+  logged: scene.name := demo level
+
+2026-10-04 16:19:26.931Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:27.208Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:27.208Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:27.216Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:27.230Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:27.230Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:27.230Z [INFO] Picked up Sword (slot 2 of 9)
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(103): MESSAGE: demo level: differences lie in x 99999..-1, y 99999..-1, the largest channel difference is 0
+  logged: scene.name := demo level
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(105): MESSAGE: demo level: 1280x720 pixels, 0 different (first at x 0, y 0)
+  logged: scene.name := demo level
+
+2026-10-04 16:19:28.112Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\render-same\level-render-same\level.json
+2026-10-04 16:19:28.390Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:28.390Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:28.429Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:28.435Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:28.461Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:19:28.911Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\render-same\level-render-same\level.json
+2026-10-04 16:19:29.189Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:29.189Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:29.224Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:29.231Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:29.257Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(77): MESSAGE: camp: SDL_Renderer against itself: 0 different
+  logged: scene.name := camp
+
+2026-10-04 16:19:30.477Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\render-same\level-render-same\level.json
+2026-10-04 16:19:30.753Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:30.753Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:30.789Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:30.801Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/render-same/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:30.827Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(103): MESSAGE: camp: differences lie in x 99999..-1, y 99999..-1, the largest channel difference is 0
+  logged: scene.name := camp
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\renderer_test.cpp(105): MESSAGE: camp: 1280x720 pixels, 0 different (first at x 0, y 0)
+  logged: scene.name := camp
+
+2026-10-04 16:19:32.777Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\sky-clock\level-sky-clock\level.json
+2026-10-04 16:19:33.083Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:33.083Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:33.123Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/sky-clock/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:33.127Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/sky-clock/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:33.153Z [INFO] New run: seed 1, Off preset, Balanced comfort; the hero is Joro, age 26, a hunter's child
+2026-10-04 16:19:33.499Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:33.774Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:33.774Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:33.861Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:35.201Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:35.202Z [INFO] Picked up Sword (slot 2 of 9)
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(63):
+TEST CASE:  US-029 Throw
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(72): MESSAGE: target distance: 7.84961 m
+
+2026-10-04 16:19:35.204Z [INFO] Threw a flint spear facing West
+2026-10-04 16:19:35.212Z [INFO] Spear (flint) hit the straw target at (24.80, 32.75, 1.09) m, 12.7 m/s, 69.4 damage
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(115): MESSAGE: flight: 11 ticks, hand 1.41076 m, top 1.60638 m, hit at 1.08569 m, 12.7487 m/s
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(122):
+TEST CASE:  US-029 Material
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(138): MESSAGE: flint spear: 69.2693 damage (formula 69.2693); wooden spear: 12.0102 (formula 12.0102)
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(144):
+TEST CASE:  US-029 Materials are validated
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(159): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us029-materials/materials.json: materials.flint.hardness: must be between 1 and 10 (is 12)
+
+2026-10-04 16:19:35.344Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:35.621Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:35.621Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:35.628Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-04 16:19:35.628Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-04 16:19:35.630Z [INFO] Threw a flint spear facing North
+2026-10-04 16:19:35.634Z [INFO] Spear (flint) hit a rock at (32.50, 26.00, 1.36) m, 12.6 m/s, 0.0 damage
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(166):
+TEST CASE:  US-029 Blocked
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\spear_test.cpp(178): MESSAGE: hit a rock at (32.5, 26, 1.35996)
+
+2026-10-04 16:19:37.073Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\advertise\level-advertise\level.json
+2026-10-04 16:19:37.376Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:37.376Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:37.648Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\picked\level-picked\level.json
+2026-10-04 16:19:37.951Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:37.952Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:38.225Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\unknown-tag\level-unknown-tag\level.json
+2026-10-04 16:19:38.524Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:38.524Z [WARNING] Interactions: interactions/warm.json:1: unknown tag "hearth": no catalog uses it, so this will never match
+2026-10-04 16:19:38.524Z [INFO] Interactions: 34 loaded from 40 file(s), 0 error(s)
+2026-10-04 16:19:38.615Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:38.885Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:38.885Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:39.172Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\reload\level-reload\level.json
+2026-10-04 16:19:39.470Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:39.470Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:39.478Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us151/reload/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:39.483Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us151/reload/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:39.551Z [INFO] Interactions reloaded: 33 from 39 file(s) in 64.5 ms
+2026-10-04 16:19:39.623Z [INFO] Interactions reloaded: 34 from 40 file(s) in 68.8 ms
+2026-10-04 16:19:39.889Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\bad-file\level-bad-file\level.json
+2026-10-04 16:19:40.189Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:40.189Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:40.198Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us151/bad-file/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:40.203Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us151/bad-file/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:40.270Z [WARNING] Interactions: interactions/gather.json:16: unknown effect verb "giv"
+2026-10-04 16:19:40.270Z [WARNING] Interactions: reload found 1 mistake(s); the last good data stays in use
+2026-10-04 16:19:40.341Z [INFO] Interactions reloaded: 33 from 39 file(s) in 64.6 ms
+2026-10-04 16:19:40.607Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\syntax\level-syntax\level.json
+2026-10-04 16:19:40.903Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:40.903Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:40.971Z [WARNING] Interactions: interactions/gather.json:10: not valid JSON: expected ',' or '}' (is a comma missing on the line above?)
+2026-10-04 16:19:40.971Z [WARNING] Interactions: reload found 1 mistake(s); the last good data stays in use
+2026-10-04 16:19:40.995Z [WARNING] Interactions: interactions:0: the interactions folder cannot be found
+2026-10-04 16:19:40.996Z [WARNING] Interactions: reload found 1 mistake(s); the last good data stays in use
+2026-10-04 16:19:41.267Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\editor-reload\level-editor-reload\level.json
+2026-10-04 16:19:41.575Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:41.575Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:41.584Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us151/editor-reload/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:41.588Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us151/editor-reload/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:41.589Z [INFO] Mode: Editor
+2026-10-04 16:19:41.656Z [WARNING] Interactions: interactions/gather.json:16: unknown effect verb "giv"
+2026-10-04 16:19:41.656Z [WARNING] Interactions: reload found 1 mistake(s); the last good data stays in use
+2026-10-04 16:19:41.729Z [INFO] Interactions reloaded: 33 from 39 file(s) in 66.2 ms
+2026-10-04 16:19:41.995Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us151\dialogue-reload\level-dialogue-reload\level.json
+2026-10-04 16:19:42.300Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:42.300Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:42.370Z [WARNING] Interactions: dialogue/elder-fire.dlg:9: unknown node "hunts"
+2026-10-04 16:19:42.370Z [WARNING] Interactions: dialogue/elder-fire.dlg:14: node "hunt" is never reached
+2026-10-04 16:19:42.370Z [WARNING] Interactions: reload found 1 mistake(s); the last good data stays in use
+2026-10-04 16:19:42.439Z [INFO] Interactions reloaded: 33 from 39 file(s) in 63.3 ms
+2026-10-04 16:19:42.869Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us138\weather-a\level.json
+2026-10-04 16:19:43.148Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:43.148Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:43.245Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:44.785Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us138\weather-b\level.json
+2026-10-04 16:19:45.069Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:45.070Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:45.157Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:46.983Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us138\weather-clear\level.json
+2026-10-04 16:19:47.260Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:47.260Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:47.346Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:48.673Z [INFO] Mode: Editor
+2026-10-04 16:19:49.235Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us138\loop\level.json
+2026-10-04 16:19:49.515Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:49.515Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:49.601Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:51.229Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us138\editor\level.json
+2026-10-04 16:19:51.506Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:51.506Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:51.594Z [INFO] Art: the owner's atlas
+2026-10-04 16:19:52.915Z [INFO] Mode: Editor
+2026-10-04 16:19:52.916Z [INFO] Editor: place portal idle #4
+2026-10-04 16:19:52.944Z [INFO] Editor: Saved level.json
+2026-10-04 16:19:52.964Z [INFO] Editor: move portal idle to (1140, 1090)
+2026-10-04 16:19:52.964Z [INFO] Editor: Undone
+2026-10-04 16:19:52.965Z [INFO] Editor: remove portal idle
+2026-10-04 16:19:52.965Z [INFO] Editor: Undone
+2026-10-04 16:19:52.965Z [INFO] Editor: Redone
+2026-10-04 16:19:53.250Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\lights-fire\data\fire-level.json
+2026-10-04 16:19:53.556Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:53.556Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:53.597Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-fire/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:53.602Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-fire/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:54.161Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\lights-without\data\fire-level.json
+2026-10-04 16:19:54.471Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:54.471Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:54.512Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-without/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:54.517Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-without/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:55.050Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\lights-lantern\data\fire-level.json
+2026-10-04 16:19:55.359Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:55.359Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:55.401Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-lantern/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:55.407Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-lantern/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:55.824Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-04 16:19:56.291Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\lights-torch\data\fire-level.json
+2026-10-04 16:19:56.604Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:56.604Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:56.646Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-torch/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:56.652Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-torch/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:57.235Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\lights-steady\data\fire-level.json
+2026-10-04 16:19:57.549Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:57.549Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:57.590Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-steady/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:57.596Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-steady/sprites/atlas/content.json: (file): cannot be opened
+2026-10-04 16:19:58.150Z [INFO] Level "The Valley" (64x64 tiles, 0 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us152\lights-wavering\data\fire-level.json
+2026-10-04 16:19:58.459Z [INFO] Dialogue: 5 conversation(s) loaded from 6 file(s)
+2026-10-04 16:19:58.459Z [INFO] Interactions: 33 loaded from 39 file(s), 0 error(s)
+2026-10-04 16:19:58.500Z [WARNING] Art: programmer art, because C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-wavering/sprites/atlas/atlas.json: (file): cannot be opened
+2026-10-04 16:19:58.506Z [WARNING] Content art missing, no effects: C:/Users/Amek/AppData/Local/Temp/odysseus-us152/lights-wavering/sprites/atlas/content.json: (file): cannot be opened
+===============================================================================
+[doctest] test cases:    155 |    153 passed | 2 failed | 51 skipped
+[doctest] assertions: 239236 | 239233 passed | 3 failed |
+[doctest] Status: FAILURE!
+
+      Start 17: US-024 Walk to the rock
+17/27 Test #17: US-024 Walk to the rock .................   Passed    6.76 sec
+      Start 18: US-029 Throw in the game
+18/27 Test #18: US-029 Throw in the game ................   Passed    8.95 sec
+      Start 19: odysseus_sim_tests
+19/27 Test #19: odysseus_sim_tests ......................   Passed   83.20 sec
+      Start 20: US-015 Run
+20/27 Test #20: US-015 Run ..............................   Passed   19.51 sec
+      Start 21: US-015 Bad input
+21/27 Test #21: US-015 Bad input ........................   Passed    0.21 sec
+      Start 22: US-110 Traceable
+22/27 Test #22: US-110 Traceable ........................   Passed    2.74 sec
+      Start 23: US-115 Both views
+23/27 Test #23: US-115 Both views .......................   Passed   22.15 sec
+      Start 24: US-123 Modes in the game
+24/27 Test #24: US-123 Modes in the game ................   Passed    9.03 sec
+      Start 25: US-124 Paint in the game
+25/27 Test #25: US-124 Paint in the game ................   Passed    4.35 sec
+      Start 26: US-125 Place in the game
+26/27 Test #26: US-125 Place in the game ................   Passed    5.50 sec
+      Start 27: X-M2c Two scripted presses
+27/27 Test #27: X-M2c Two scripted presses ..............   Passed    3.93 sec
+
+96% tests passed, 1 tests failed out of 27
+
+Label Time Summary:
+window    =  49.78 sec*proc (8 tests)
+
+Total Test time (real) = 573.75 sec
+
+The following tests FAILED:
+	 16 - odysseus_game_tests_c (Failed)
+Errors while running CTest

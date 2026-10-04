@@ -32,6 +32,17 @@ struct WeaponDef {
     std::vector<std::string> tags; // US-151: "item", "weapon", its class, its element, "starter"; "tags" in weapons.json replaces them
 };
 
+// US-248: a sun or a moon, a `celestial` world object of objects.json. It gives the light direction and the shadows (US-244) and is drawn in the sky.
+struct CelestialDef {
+    std::string body;           // "sun" or "moon"
+    std::string lightKind;      // a kind of lights.json: how strong this body's light is
+    bool followsClock = true;   // true: travels its orbit by the game clock; false: stays where it is placed
+    double orbitRadius = 400.0; // metres: how far away a clock body is
+    double tilt = 0.0;          // degrees: turns the whole orbit around the vertical, so the sun can rise a little north or south of east
+    double height = 50.0;       // metres above the ground (1 tile = 1 m): the height of a placed body; a clock body takes its height from its orbit
+    friend bool operator==(const CelestialDef&, const CelestialDef&) = default;
+};
+
 struct PlantDef {
     std::string name;
     std::string frame;
@@ -43,6 +54,8 @@ struct PlantDef {
     std::vector<std::string> states; // US-151: the first is where it starts ("ripe", "picked"); none for a plant that never changes
     std::string light;     // US-243: a kind of light of lights.json the thing gives ("" = none) ...
     std::string lightState; // ... only while it is in this state (a fire pit: "burning"); empty: always
+    bool celestial = false; // US-248: a sun or a moon; `sky` says which
+    CelestialDef sky;
     bool object = false;   // US-155: a world object from objects.json (fire pit, shelter...), placed like a plant but drawn by the game
 };
 
@@ -99,6 +112,7 @@ struct Catalogs {
     std::vector<WeatherDef> weather;
     std::array<ClassDef, 8> classes{};    // by WeaponClass
     std::array<ElementDef, 6> elements{}; // by Element; "none" does nothing
+    std::vector<std::string> notes;       // problems that did not stop the load (US-248: a bad sun or moon is left out); each names file and field
 
     const WeaponDef* weapon(const std::string& name) const;
     const PlantDef* plant(const std::string& name) const;
