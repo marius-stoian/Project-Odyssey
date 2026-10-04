@@ -11,6 +11,7 @@ its PR changes rather than leaving an outdated description.
 - Editor: the Class panel has the tabs Classes and Kinds. The Kinds tab edits `assets/data/npcs/<kind>.json` (classes, attitude, tags, talk, allow, deny) and Save writes it at once (`Editor::showKinds`, `selectKind`, `toggleKindClass`, `saveKind`, `kindNames`). `NpcClassBook::saveKind` checks the text with the kind parser before writing (temporary file, then rename).
 - Markers: `src/game/npc_marker.{h,cpp}` (the ring split in equal arcs per class, the first class's icon, 24 8x8 icon bitmaps); drawn only by `Editor::render`, so never in play.
 - Guide extended (`docs/guides/npc-data.md`).
+
 ## US-268: Editor NPC panel (Mraw) - 2026-10-04
 
 **State:** On `story/US-268`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_editor_test.cpp`), run once at X-M9a; screenshots manual.
