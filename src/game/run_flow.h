@@ -51,6 +51,8 @@ public:
     // A right click on something in the world at (worldX, worldY): the things there offer their actions in a context menu
     // (US-061). False when there is nothing there to offer anything.
     bool openContext(OdysseyGame& game, double worldX, double worldY);
+    // The menu of the confront actions of an NPC (US-266): the interactions that say "menu": "confront". The ordinary menu never lists them.
+    bool openConfront(OdysseyGame& game, const Subject& subject);
 
     // One tick with a screen open: hit-test the buttons, act on a click. Returns true while a screen is open (the world waits).
     bool update(OdysseyGame& game, const luna::engine::Intents& intents);
@@ -111,6 +113,7 @@ private:
         std::function<void(OdysseyGame&)> run;
     };
 
+    bool openMenuFor(OdysseyGame& game, const Subject& subject, bool confront);
     void build(OdysseyGame& game);
     void buildNewGame(OdysseyGame& game);
     void buildFocus(OdysseyGame& game);

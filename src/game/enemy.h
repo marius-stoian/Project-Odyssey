@@ -21,6 +21,11 @@ public:
 
     // Hit and still standing: it winds up to strike back (US-131), unless it already is.
     void provoke();
+    // It stops winding up to strike (a successful de-escalation, US-266): the next hit makes it strike back again.
+    void calm() {
+        state_ = Strike::Idle;
+        windUpLeft_ = 0.0;
+    }
     // One simulation tick: counts down the red hit flash and the wind-up. True on the tick the
     // wind-up ends: the strike lands now, if the hero is still within reach.
     bool update();

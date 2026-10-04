@@ -46,6 +46,7 @@ struct OpinionConfig {
     std::array<int, 5> talk{-8, -4, 0, 3, 6};
     int talkFrequencyBonus = 1; // added when the pair talked within the last `talkFrequencyDays` days
     int talkFrequencyDays = 3;
+    int hearingTiles = 12;     // how far a confrontation is heard: persons this close to the target who know it think of the hero too (US-266)
 };
 
 OpinionConfig loadOpinionConfig(const std::filesystem::path& file);

@@ -1,0 +1,16 @@
+// Confront (US-266): picks a fight. The target thinks very badly of the hero and strikes back.
+{
+  "id": "antagonise",
+  "label": "Antagonise",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 40,
+  "menu": "confront",
+  "effects": [
+    "opinion npc hero -30",
+    "do spread-opinion -8",
+    "remember npc \"{hero} provoked me\" -60",
+    "do provoke"
+  ]
+}

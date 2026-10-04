@@ -21,7 +21,7 @@ struct PendingStart {
 };
 
 const std::set<std::string>& knownFields() {
-    static const std::set<std::string> fields = {"id", "label", "actors", "target", "range", "duration", "requires", "effects", "npc", "chronicle", "order", "note"};
+    static const std::set<std::string> fields = {"id", "label", "actors", "target", "range", "duration", "requires", "effects", "npc", "chronicle", "order", "note", "menu"};
     return fields;
 }
 
@@ -40,7 +40,7 @@ public:
         }
         for (std::size_t i = 0; i < root_.keys.size(); ++i) {
             if (knownFields().count(root_.keys[i]) == 0) {
-                error(root_.keyLines[i], std::format("unknown field \"{}\" (known: id, label, actors, target, range, duration, requires, effects, npc, chronicle, order, note)", root_.keys[i]));
+                error(root_.keyLines[i], std::format("unknown field \"{}\" (known: id, label, actors, target, range, duration, requires, effects, npc, chronicle, order, note, menu)", root_.keys[i]));
             }
         }
         readId(out, expectedId);
@@ -50,6 +50,10 @@ public:
         out.rangeMilli = readMilli("range", out.rangeMilli, 0, kMaxRangeMilli, "metres");
         out.durationMilli = readMilli("duration", 0, 0, kMaxDurationMilli, "seconds");
         readOrder(out);
+        if (const JsonValue* menu = root_.find("menu")) {
+            if (menu->isString() && menu->text == "confront") out.menu = menu->text;
+            else error(menu->line, "menu must be \"confront\" (the Confront menu of an NPC) or left out");
+        }
         readRequires(out);
         readEffects(out);
         readNpc(out);
@@ -504,6 +508,7 @@ std::string toJson(const Interaction& i) {
     out += std::format("  \"range\": {},\n", formatMilli(i.rangeMilli));
     out += std::format("  \"duration\": {},\n", formatMilli(i.durationMilli));
     out += std::format("  \"order\": {},\n", i.order);
+    if (!i.menu.empty()) out += std::format("  \"menu\": {},\n", quoteJson(i.menu));
     out += "  \"requires\": [";
     for (std::size_t k = 0; k < i.requires_.size(); ++k) {
         out += std::format("{}\n    {{ \"if\": {}, \"else\": {} }}", k ? "," : "", quoteJson(i.requires_[k].source), quoteJson(i.requires_[k].otherwise));

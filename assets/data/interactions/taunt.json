@@ -1,0 +1,15 @@
+// Confront (US-266): a jeer. The amounts are the data: -10 for the target, -2 for friends who hear it.
+{
+  "id": "taunt",
+  "label": "Taunt",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 10,
+  "menu": "confront",
+  "effects": [
+    "opinion npc hero -10",
+    "do spread-opinion -2",
+    "remember npc \"{hero} taunted me\" -20"
+  ]
+}

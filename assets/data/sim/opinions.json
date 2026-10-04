@@ -4,5 +4,6 @@
   "start": { "friendly": 25, "neutral": 0, "wary": -45, "hostile": -80, "scared": -10, "suspicious": -20, "enchanted": 55, "lovingly": 80, "enviously": -15 },
   "events": { "gift": 15, "trade": 5, "help": 20, "marriage-in-family": 10, "insult": -20, "theft": -30 },
   "sameFamily": 20,
+  "hearingTiles": 12,
   "talk": { "awful": -8, "bad": -4, "plain": 0, "good": 3, "great": 6, "frequencyBonus": 1, "frequencyDays": 3 }
 }

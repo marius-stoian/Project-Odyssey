@@ -1,0 +1,14 @@
+// Confront (US-266): calm someone down. With a 70 in 100 chance it stops attacking and thinks 15 better of the hero (the numbers are the data).
+{
+  "id": "de-escalate",
+  "label": "De-escalate",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 50,
+  "menu": "confront",
+  "effects": [
+    "do calm 15 70",
+    "do spread-opinion 2"
+  ]
+}

@@ -135,6 +135,22 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) 
             if (auto npc = npcSubject(game, game.npcPopulation().id(best))) return npc;
         }
     }
+    // A creature that is an NPC (an enemy or an animal with a kind file): it can be confronted (US-266).
+    {
+        int best = -1;
+        double bestDistance = 1e9;
+        for (std::size_t i = 0; i < game.enemies().size(); ++i) {
+            const Enemy& enemy = game.enemies()[i];
+            if (!enemy.isAlive() || std::abs(wx - enemy.feetX()) > 14.0 || wy < enemy.feetY() - 46.0 || wy > enemy.feetY() + 6.0) continue;
+            if (game.npcClasses().kinds().find(enemy.kindName) == nullptr) continue;
+            const double distance = std::hypot(wx - enemy.feetX(), wy - enemy.feetY());
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = static_cast<int>(i);
+            }
+        }
+        if (best >= 0) return animalSubject(game, static_cast<std::size_t>(best));
+    }
     // A workstation: the knapping stone, or the camp's fire.
     const PixelPoint stone = game.knappingStone();
     if (std::abs(wx - stone.x) < 20 && wy > stone.y - 26 && wy < stone.y + 6) return stoneSubject(game);
@@ -167,7 +183,14 @@ Subject animalSubject(const OdysseyGame& game, std::size_t enemyIndex) {
     subject.y = enemy.feetY();
     subject.info.kind = enemy.kindName;
     if (const CharacterKindDef* kind = game.definitions().character(enemy.kindName)) subject.info.tags = kind->tags;
+    if (game.npcClasses().kinds().find(enemy.kindName) != nullptr) subject.info.tags.push_back("npc"); // an NPC with a kind file can be confronted (US-266)
     return subject;
+}
+
+int placedIdOf(const OdysseyGame& game, const Subject& subject) {
+    if (subject.kind == Subject::Kind::Npc) return subject.index;
+    if (subject.kind == Subject::Kind::Animal && subject.index >= 0 && static_cast<std::size_t>(subject.index) < game.enemies().size()) return game.enemies()[static_cast<std::size_t>(subject.index)].id;
+    return -1;
 }
 
 Subject heroSubject(const OdysseyGame& game) {
@@ -371,14 +394,14 @@ Value GameRuleContext::call(const std::string& name, const std::vector<Value>& a
         if (args[0].text == "target" || args[0].text == "npc") return Value::ofNumber(hasTag(subject_.info.tags, args[1].text) ? 1 : 0);
         if (args[0].text == "actor" || args[0].text == "hero") return Value::ofNumber(hasTag(actorInfo(game_, actor_).tags, args[1].text) ? 1 : 0);
     }
-    if (subject_.kind == Subject::Kind::Npc && name == "opinion" && args.size() == 2 && args[0].isText && args[1].isText) {
+    if (placedIdOf(game_, subject_) >= 0 && name == "opinion" && args.size() == 2 && args[0].isText && args[1].isText) {
         // What a placed person thinks of the hero (US-265): opinion(npc, hero). Anything else is 0 (the hero's own opinions are not kept).
         const bool npc = args[0].text == "npc" || args[0].text == "target";
         const bool hero = args[1].text == "hero" || args[1].text == "actor";
-        return Value::ofNumber(npc && hero ? game_.npcPopulation().opinion(subject_.index, sim::NpcPopulation::kHero) : 0);
+        return Value::ofNumber(npc && hero ? game_.npcPopulation().opinion(placedIdOf(game_, subject_), sim::NpcPopulation::kHero) : 0);
     }
-    if (subject_.kind == Subject::Kind::Npc && name == "mood" && args.size() == 1 && args[0].isText) {
-        return Value::ofText(game_.attitudeWordOf(subject_.index)); // the attitude word, as in the title of the menu
+    if (placedIdOf(game_, subject_) >= 0 && name == "mood" && args.size() == 1 && args[0].isText) {
+        return Value::ofText(game_.attitudeWordOf(placedIdOf(game_, subject_))); // the attitude word, as in the title of the menu
     }
     if (name == "opinion" && args.size() == 2 && args[0].isText && args[1].isText && game_.clan() != nullptr) {
         const int who = personNamed(game_, subject_, args[0].text);

@@ -41,6 +41,46 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         if (!openConversation(game, subject)) game.run().setMessage(subject.name + " has nothing to say.");
         return true;
     }
+    // The confrontations of NPCs (US-266) need no run either.
+    if (const int placedId = placedIdOf(game, subject); placedId >= 0) {
+        sim::NpcPopulation& people = game.npcPopulationMutable();
+        if (name == "confront") {
+            game.run().openConfront(game, subject);
+            return true;
+        }
+        if (name == "spread-opinion" && args.size() == 1) {
+            // Everyone who can hear it and knows the target now thinks of the hero too: persons within the hearing range of the data.
+            const int amount = std::clamp(std::atoi(args[0].c_str()), -200, 200);
+            const int range = game.npcOpinions().hearingTiles * kTileSize;
+            int heard = 0;
+            for (const int index : people.near(static_cast<int>(subject.x), static_cast<int>(subject.y), range)) {
+                const int id = people.id(index);
+                if (id == placedId || !people.knows(id, placedId)) continue;
+                people.adjust(id, sim::NpcPopulation::kHero, amount);
+                ++heard;
+            }
+            core::logInfo(std::format("{} heard it and think of the hero {:+}", heard, amount));
+            return true;
+        }
+        if (name == "calm" && args.size() == 2) {
+            // calm 15 70: a 70 in 100 chance (a roll of the dialogue stream) that it stops attacking and thinks 15 better of the hero.
+            const int gain = std::clamp(std::atoi(args[0].c_str()), -200, 200);
+            const int percent = std::clamp(std::atoi(args[1].c_str()), 0, 100);
+            if (static_cast<int>(game.dialogueRandom().below(100)) < percent) {
+                game.calmFight(placedId);
+                people.adjust(placedId, sim::NpcPopulation::kHero, gain);
+                game.run().setMessage(subject.name + " calms down.");
+            } else {
+                game.run().setMessage(subject.name + " will not listen.");
+            }
+            return true;
+        }
+        if (name == "provoke") {
+            game.startFight(placedId);
+            game.run().setMessage(subject.name + " attacks!");
+            return true;
+        }
+    }
     sim::HeroLife* hero = game.life();
     if (hero == nullptr) return true; // no run is going on: nothing to act with
     const auto plant = static_cast<std::size_t>(subject.index);
@@ -147,13 +187,13 @@ public:
         } else if (effect.verb == "fx") {
             // fx flame: a visual effect of effects.json, played once over the thing.
             if (!effect.args.empty()) game_.playEffect(effect.args[0]->text, subject->x, subject->y - 16.0, 48);
-        } else if (effect.verb == "opinion" && effect.args.size() == 3 && subject->kind == Subject::Kind::Npc) {
-            // The same for a placed person (US-265): only what they think of the hero is kept.
+        } else if (effect.verb == "opinion" && effect.args.size() == 3 && placedIdOf(game_, *subject) >= 0) {
+            // The same for a placed person or creature (US-265, US-266): only what they think of the hero is kept.
             const GameRuleContext context(game_, *subject);
             const bool npc = effect.args[0]->text == "npc" || effect.args[0]->text == "target";
             const bool hero = effect.args[1]->text == "hero" || effect.args[1]->text == "actor";
             const long long delta = sim::rules::evaluate(*effect.args[2], context).number;
-            if (npc && hero) game_.npcPopulationMutable().adjust(subject->index, sim::NpcPopulation::kHero, static_cast<int>(std::clamp(delta, -200LL, 200LL)));
+            if (npc && hero) game_.npcPopulationMutable().adjust(placedIdOf(game_, *subject), sim::NpcPopulation::kHero, static_cast<int>(std::clamp(delta, -200LL, 200LL)));
         } else if (effect.verb == "remember" && effect.args.size() >= 2 && subject->kind == Subject::Kind::Npc) {
             // remember npc "{hero} brought flint" 20: the placed person keeps the memory (US-265).
             const GameRuleContext context(game_, *subject);
@@ -224,7 +264,7 @@ private:
 } // namespace
 
 const std::vector<std::string>& builtInActionNames() {
-    static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "give-berries", "ask-to-teach",
+    static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
                                                    "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }
