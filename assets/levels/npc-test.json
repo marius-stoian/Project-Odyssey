@@ -12,6 +12,33 @@
    "id": 1,
    "kind": "wanderer",
    "name": "Tala",
+   "schedule": [
+    {
+     "at": "market",
+     "do": "work",
+     "from": "06:00"
+    },
+    {
+     "at": "home",
+     "do": "eat",
+     "from": "12:00"
+    },
+    {
+     "at": "market",
+     "do": "work",
+     "from": "13:00"
+    },
+    {
+     "at": "hut",
+     "do": "rest",
+     "from": "20:00"
+    },
+    {
+     "at": "home",
+     "do": "sleep",
+     "from": "22:00"
+    }
+   ],
    "swordDamage": 5,
    "trade": {
     "deliveries": 1,
@@ -37,11 +64,36 @@
    "dialogues": {
     "player": "npc-ossa.dlg"
    },
+   "does": [
+    "fish"
+   ],
    "facing": "S",
    "hp": 100,
    "id": 2,
    "kind": "wanderer",
    "name": "Ossa",
+   "schedule": [
+    {
+     "at": "pond",
+     "do": "work",
+     "from": "06:00"
+    },
+    {
+     "at": "home",
+     "do": "eat",
+     "from": "12:00"
+    },
+    {
+     "at": "grove",
+     "do": "work",
+     "from": "13:00"
+    },
+    {
+     "at": "home",
+     "do": "sleep",
+     "from": "21:00"
+    }
+   ],
    "swordDamage": 5,
    "x": 280,
    "y": 450
@@ -59,6 +111,42 @@
    "id": 3,
    "kind": "wanderer",
    "name": "Harn",
+   "schedule": {
+    "day": [
+     {
+      "at": "home",
+      "do": "idle",
+      "from": "06:00"
+     },
+     {
+      "at": "market",
+      "do": "work",
+      "from": "08:00"
+     },
+     {
+      "at": "home",
+      "do": "eat",
+      "from": "12:00"
+     },
+     {
+      "at": "home",
+      "do": "idle",
+      "from": "14:00"
+     },
+     {
+      "at": "home",
+      "do": "sleep",
+      "from": "21:00"
+     }
+    ],
+    "night": [
+     {
+      "at": "home",
+      "do": "sleep",
+      "from": "21:00"
+     }
+    ]
+   },
    "swordDamage": 5,
    "trade": {
     "rare": {
@@ -68,6 +156,7 @@
      "fur": 1
     },
     "stock": {
+     "berries": 2,
      "fur": 4,
      "spearhead": 1
     },
@@ -86,11 +175,41 @@
    "dialogues": {
     "player": "npc-vell.dlg"
    },
+   "does": [
+    "pray"
+   ],
    "facing": "S",
    "hp": 100,
    "id": 4,
    "kind": "wanderer",
    "name": "Vell",
+   "schedule": [
+    {
+     "at": "home",
+     "do": "idle",
+     "from": "06:00"
+    },
+    {
+     "at": "shrine",
+     "do": "go",
+     "from": "10:00"
+    },
+    {
+     "at": "home",
+     "do": "eat",
+     "from": "12:00"
+    },
+    {
+     "at": "market",
+     "do": "go",
+     "from": "15:00"
+    },
+    {
+     "at": "home",
+     "do": "sleep",
+     "from": "21:00"
+    }
+   ],
    "swordDamage": 5,
    "x": 440,
    "y": 450
@@ -107,6 +226,23 @@
    "id": 5,
    "kind": "wanderer",
    "name": "Gur",
+   "schedule": [
+    {
+     "at": "market",
+     "do": "patrol",
+     "from": "06:00"
+    },
+    {
+     "at": "home",
+     "do": "idle",
+     "from": "18:00"
+    },
+    {
+     "at": "home",
+     "do": "sleep",
+     "from": "21:00"
+    }
+   ],
    "swordDamage": 5,
    "x": 520,
    "y": 330
@@ -339,6 +475,48 @@
  "name": "NPC test",
  "nextId": 8,
  "pickups": [],
+ "places": [
+  {
+   "name": "market",
+   "tags": [
+    "market"
+   ],
+   "x": 320,
+   "y": 390
+  },
+  {
+   "name": "grove",
+   "tags": [
+    "forage"
+   ],
+   "x": 700,
+   "y": 180
+  },
+  {
+   "name": "hut",
+   "tags": [
+    "shelter"
+   ],
+   "x": 160,
+   "y": 640
+  },
+  {
+   "name": "pond",
+   "tags": [
+    "water"
+   ],
+   "x": 1100,
+   "y": 620
+  },
+  {
+   "name": "shrine",
+   "tags": [
+    "shrine"
+   ],
+   "x": 900,
+   "y": 220
+  }
+ ],
  "plants": [],
  "targets": [],
  "width": 40

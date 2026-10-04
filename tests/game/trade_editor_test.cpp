@@ -202,5 +202,6 @@ TEST_CASE("US-284 Test level: Tala trades, Harn keeps a spearhead for people he 
     // Tala's restock: a flint a day, and a random delivery from her goods and the region's (berries and flint).
     studio.odyssey->update(pressing(luna::engine::Intent::ModeGame));
     studio.play(2400 + 10);
-    CHECK(market.stock(tala.id, "flint") >= 7);
+    // (Since US-294 Tala may swap a flint for Harn's berries during the day, so the proof of the restock is her delivery day, not the flint count.)
+    CHECK(market.find(tala.id)->restockDay >= 1);
 }

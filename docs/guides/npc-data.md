@@ -495,3 +495,35 @@ In a class file, a kind file or on a placed NPC. Keys are partner types (`class`
 ### Editor
 
 Under the **Does** line (Trade section beside the NPC panel, Class panel, Kinds tab) there is **Defaults with: animal** (a click goes to the next partner type, ending with `class`) and a **Does** line for that type: interaction ids separated by spaces. A type you added to `partner-types.json` is in the list the next time the game starts. An empty line removes the type from the NPC's own lists (the layer below shows again). For an NPC one step of Undo; **Save** writes the class or kind.
+
+## The living test level and the soak (US-294, D-54 Q15)
+
+`assets/levels/npc-test.json` now shows a day of NPC life. Five **places** (market 320,390 `market`; grove 700,180 `forage`; hut 160,640 `shelter`; pond 1100,620 `water`; shrine 900,220 `shrine`) and a schedule for each of the five people. A game day is two minutes; press **F1** (game mode) and the speed keys, and watch.
+
+| Time | Tala (trader) | Harn (hunter, wary) | Ossa (talker, does `fish`) | Vell (elder, does `pray`) | Gur (guard) |
+|---|---|---|---|---|---|
+| 06:00 | works at the market | at home | works at the pond | at home | patrols the market |
+| 08:00 | at the market | works at the market | at the pond | at home | patrols |
+| 10:00 | at the market | at the market | at the pond | goes to the shrine | patrols |
+| 12:00 | eats at home | eats at home | eats at home | eats at home | patrols |
+| 13:00 | works at the market | at home | works at the grove | at home | patrols |
+| 15:00 | at the market | at home | at the grove | goes to the market | patrols |
+| 18:00 | at the market | at home | at the grove | at the market | at home |
+| 20:00 | rests at the hut | at home | at the grove | at the market | at home |
+| 21:00-22:00 | sleeps at home | sleeps (the night variant) | sleeps at home | sleeps at home | sleeps at home |
+
+Harn also carries 2 berries now, so Tala (wants berries, has flint) and Harn (wants flint, has berries) can **swap** when they meet at the market between 08:00 and 12:00. Ossa and Vell chat when they meet; at 12:00 they all walk home to eat. The deer and the goblin have no schedule; the hunter Harn hunts the deer when he is idle. Because Tala may swap a flint for berries, her flint count is no longer "6 plus a restock" after a day.
+
+**Walk-through of one day.**
+1. Start the level, **F1**, speed 4. At 06:00 Tala goes to the market, Ossa to the pond, Gur starts patrolling.
+2. Around 08:00 to 12:00 Tala and Harn stand at the market and swap (their last action is `npc-swap`); open the trade screen with Tala: berries have gone up, flint down.
+3. At 12:00 everybody goes home and eats (hunger goes back up).
+4. At 10:00 Vell goes to the shrine, at 15:00 to the market, where she and Tala chat; a bubble with a few words shows.
+5. At 21:00 everybody sleeps at home. Harn has a night variant in the Schedule form of the Editor (21:00 sleep).
+6. Leave the level for a day (stand far away with the Editor camera): near persons are simulated by the hour, far ones in the daily pass; both land on the same schedule when you return.
+
+### The soak (`odysseus_sim_soak`)
+
+`tests/sim/npc_soak_test.cpp` builds 100,000 persons (three schedules, 1,000 traders, three places) with the shipped interaction files, runs **30 in-game days** headless and hashes the saved state (population, director and market). It runs twice with the same seed: the two hashes must be identical. In Release it also checks the ADR-022 budget: no day above 100 ms of CPU time in all, no single tick above 8 ms. In Debug (with AddressSanitizer) only the repeatable hash is checked, because Debug is many times slower. The second case shows that a different seed gives a different hash, so the hash really covers the run.
+
+Run only the soak: `ctest --preset windows-x64-release -R odysseus_sim_soak` (it takes minutes in Debug).
