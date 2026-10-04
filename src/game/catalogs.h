@@ -88,6 +88,9 @@ struct WeatherDef {
     int weight = 1;        // how often it is picked, against the others
     bool additive = true;  // light weather adds light; fog and clouds are drawn see-through
     double shadowFade = 0.0; // US-244: how much of the shadows this weather takes away (fog and heavy cloud: 1)
+    double lightDim = 1.0;   // US-246: the ambient light is multiplied by this (1 = unchanged, 0.6 = a dark storm)
+    int tintRed = 255, tintGreen = 255, tintBlue = 255; // US-246: ... and by this colour (a cool blue for rain)
+    double flashPerMinute = 0.0; // US-246: lightning flashes of the whole scene per minute (0 = none)
 };
 
 // What an element does (US-135), from weapons.json under "elements". Only the fields an element uses are

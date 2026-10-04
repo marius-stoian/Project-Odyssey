@@ -1369,3 +1369,22 @@ The comparison breaks ties by the light's id, so two fires that are equally near
 **Try it (15 minutes).** In `lights.json` set `fireShadows.maxPerObject` to 1, take a night screenshot between two fires (`docs/plans/US-245.md`): one of the two shadows is gone.
 
 **Check yourself.** Why does `castShadow` skip a light that is less than 12 pixels from the thing's feet?
+
+## US-246 Weather and light: blending settings
+
+**What we built.** Rain, snow, fog and storms now dim and tint the whole scene, and a storm flashes it with lightning. Each weather in `weather.json` says its `light` (a dim and a tint) and how often it `flash`es.
+
+**The C++ idea: blending (linear interpolation).** While one weather fades into the next we do not jump between two light settings; we walk in a straight line from the old to the new:
+
+```cpp
+const auto mix = [t](float a, float b) { return static_cast<float>(a + (b - a) * t); };
+light.red = mix(tintOf(from->tintRed, from->lightDim), tintOf(to->tintRed, to->lightDim));
+```
+
+`t` is the weather's own fade (0 to 1 over 3 s), so the light and the raindrops arrive together. The lightning uses no random generator at all: a hash of the seed and a 0.2 s slot number decides if a strike starts, so the same seed always strikes at the same moments.
+
+**Where to look.** `weatherLight` and `lightningFlash` in `src/game/weather.cpp`; `ambientLightFrame` in `src/game/world_lights.cpp`; `assets/data/weather.json`.
+
+**Try it (15 minutes).** Give "steady rain" `"light":{"dim":0.3,"tint":[255,255,255]}`, run with `--weather "steady rain"`: the rain is nearly night.
+
+**Check yourself.** Why does the lightning use a hash of the slot and not the simulation's random numbers?

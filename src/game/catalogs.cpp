@@ -312,6 +312,24 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.weight = f.whole("weight", 0, 1000);
         def.additive = f.choice("blend", std::array<const char*, 2>{"alpha", "add"}) == 1;
         if (entry.contains("shadowFade")) def.shadowFade = f.number("shadowFade", 0.0, 1.0);
+        if (entry.contains("light")) {
+            const std::string lightWhere = where + ".light";
+            if (!entry.at("light").is_object()) throw sim::DataError(weatherFile, lightWhere, "must be {\"dim\": 0.8, \"tint\": [r, g, b]}");
+            const Fields light{weatherFile, entry.at("light"), lightWhere};
+            if (entry.at("light").contains("dim")) def.lightDim = light.number("dim", 0.1, 1.0);
+            if (entry.at("light").contains("tint")) {
+                const json& tint = entry.at("light").at("tint");
+                if (!tint.is_array() || tint.size() != 3) throw sim::DataError(weatherFile, lightWhere + ".tint", "must be three numbers: [red, green, blue], each 0 to 255");
+                int* parts[3] = {&def.tintRed, &def.tintGreen, &def.tintBlue};
+                for (std::size_t i = 0; i < 3; ++i) {
+                    if (!tint[i].is_number_integer() || tint[i].get<int>() < 0 || tint[i].get<int>() > 255) {
+                        throw sim::DataError(weatherFile, std::format("{}.tint[{}]", lightWhere, i), "must be a whole number from 0 to 255");
+                    }
+                    *parts[i] = tint[i].get<int>();
+                }
+            }
+        }
+        if (entry.contains("flash")) def.flashPerMinute = f.number("flash", 0.0, 60.0);
         return def;
     });
     return catalogs;
