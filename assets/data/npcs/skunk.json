@@ -1,0 +1,5 @@
+{
+  "kind": "skunk",
+  "classes": ["animal"],
+  "attitude": "neutral"
+}

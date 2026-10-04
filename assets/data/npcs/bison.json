@@ -1,0 +1,5 @@
+{
+  "kind": "bison",
+  "classes": ["animal"],
+  "attitude": "neutral"
+}

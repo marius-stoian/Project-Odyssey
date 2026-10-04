@@ -1,0 +1,5 @@
+{
+  "kind": "hyena",
+  "classes": ["animal"],
+  "attitude": "hostile"
+}

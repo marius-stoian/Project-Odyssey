@@ -6,6 +6,7 @@
 #include "luna/engine/tile_map.h"
 
 #include <filesystem>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -72,7 +73,13 @@ struct PlacedCharacter {
     std::string name;
     int hp = 100;
     int swordDamage = 5;
-    std::vector<std::string> classes; // NPC Classes (US-260): ids of assets/data/npc-classes; level version 4
+    // What this NPC sets itself over its kind file (US-261); a field left empty is not set and the kind (then the classes) decides. Level version 4.
+    std::vector<std::string> classes;  // NPC Classes (US-260): ids of assets/data/npc-classes
+    std::string attitude;              // one of the nine attitude words
+    std::vector<std::string> tags;     // added to the tags of the kind and the classes
+    std::vector<std::pair<std::string, std::string>> dialogues; // partner type -> .dlg file
+    std::vector<std::string> allow;    // interaction ids
+    std::vector<std::string> deny;
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 

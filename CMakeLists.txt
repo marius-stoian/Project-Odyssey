@@ -182,6 +182,7 @@ add_library(odysseus_sim STATIC
     src/sim/rule_effect.cpp
     src/sim/interaction.cpp
     src/sim/npc_class.cpp
+    src/sim/npc_kind.cpp
     src/sim/action_runner.cpp
     src/sim/npc_chooser.cpp
     src/sim/dialogue_script.cpp
@@ -414,6 +415,7 @@ add_executable(odysseus_game_tests
     tests/game/weather_light_test.cpp
     tests/game/lighting_editor_test.cpp
     tests/game/npc_class_editor_test.cpp
+    tests/game/npc_kind_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -469,6 +471,7 @@ add_executable(odysseus_sim_tests
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
     tests/sim/npc_class_test.cpp
+    tests/sim/npc_kind_test.cpp
     tests/sim/runner_test.cpp
     tests/sim/dialogue_test.cpp
     tests/sim/conversation_test.cpp

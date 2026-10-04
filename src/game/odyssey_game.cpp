@@ -83,7 +83,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       camera_(kVirtualWidth / GameSettings{}.cameraZoom, kVirtualHeight / GameSettings{}.cameraZoom, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
-      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes") {
+      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");

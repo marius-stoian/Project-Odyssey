@@ -1,0 +1,5 @@
+{
+  "kind": "llama",
+  "classes": ["animal"],
+  "attitude": "neutral"
+}

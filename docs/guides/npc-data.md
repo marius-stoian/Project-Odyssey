@@ -48,3 +48,44 @@ Older levels (versions 1 to 3) load without classes and are written as version 4
 ## Editor: the Class panel
 
 **Class** opens a panel: the list of classes, then **Id** (only for a new class), **Label**, **Colour**, **Icon** (click for the next one), **Tags**, **Talk** (`player=greet.dlg, class:guard=x.dlg`), **Allow**, **Deny** (comma lists). **New** starts a blank class, **Save** checks and writes the file at once, **Delete** removes it (refused while NPCs use it). Picking a class for a placed NPC comes with the NPC panel (US-268).
+
+## Kind files: `assets/data/npcs/<kind>.json` (US-261)
+
+The defaults of every NPC of one kind (a name of `characters.json` or `animals.json`). The file name is the kind. Every field except `kind` is optional; fields are written in this order. A file with a mistake is skipped and named as `npcs/goblin.json:4: attitude must be one of ...`; **F5** reads the kind files again with the classes (all or nothing).
+
+| Field | Values | Meaning |
+|---|---|---|
+| `kind` | the file name | which kind this is |
+| `classes` | list of class ids | the classes of NPCs of this kind |
+| `attitude` | friendly, neutral, wary, hostile, scared, suspicious, enchanted, lovingly, enviously | the starting attitude |
+| `tags` | list of names | tags added to the classes' tags |
+| `dialogues` | `{ partner: "file.dlg" }` | default dialogue per partner type (same as a class) |
+| `actions` | `{ "allow": [...], "deny": [...] }` | interactions this kind may or may not do |
+
+```json
+{
+  "kind": "wanderer",
+  "classes": ["talker"],
+  "attitude": "neutral"
+}
+```
+
+Shipped: one file for every character kind except the hero and every animal. Enemies are `monster` and `hostile`, animals are `animal`, the wanderer is `talker` and `neutral`: the behaviour the game had before the kind files.
+
+## A placed NPC: what it sets itself (level version 4)
+
+A placed character may set any of the same fields in the level file; only what is set is written, so a level made before US-261 loads and saves unchanged:
+
+```json
+{ "id": 3, "kind": "wanderer", "name": "Ossa", "classes": ["trader", "elder"], "attitude": "friendly",
+  "tags": ["market"], "dialogues": { "player": "ossa.dlg" }, "actions": { "deny": ["barter"] } }
+```
+
+## Precedence
+
+Layers, lowest first: the classes the NPC has (in order), its kind file, the placed NPC itself.
+
+- **Classes:** the placed NPC's list if it has one, else the kind's. **Attitude:** placed, else kind, else `neutral`.
+- **Tags:** all layers added together.
+- **Dialogues:** per partner type; a higher layer replaces the lower one for that partner type.
+- **Allow and deny:** layer by layer, allow first and then deny; a later layer overrides an earlier one, and inside one layer a deny beats an allow. So a trader class that allows `barter` and a placed NPC that denies it: barter is denied for that NPC only. An action no layer mentions is left to the interaction's own rules.

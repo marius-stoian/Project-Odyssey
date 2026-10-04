@@ -1,0 +1,5 @@
+{
+  "kind": "elk",
+  "classes": ["animal"],
+  "attitude": "neutral"
+}

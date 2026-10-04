@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-261):** S-US-261 DONE (Milestone-94.md, AP-95). Next: S-US-262 (placed NPCs become full persons of the simulation), then US-263 (store, detail by distance, 100,000 load test, ADR-022) .. US-270, X-M9a.
+
 **Resume update (2026-10-04, US-260):** S-US-260 DONE (Milestone-93.md, AP-94). Next: S-US-261 (kind files assets/data/npcs/<kind>.json, placed-NPC overrides, precedence, F5), then US-262..US-270 and X-M9a (the one full verify for M9a, owner 2026-10-04).
 
 **Resume update (2026-10-04, X-M8c):** X-M8c DONE (Milestone-92.md, AP-093), main tagged m8c-done. Owner still to do: GPU frame times and screenshot sheet (docs/gates/M8c.md rows 7-8). Next: K-M9a, which stops on CI-012 until the requirements contain E17-E19 and US-260..294.
