@@ -9,6 +9,7 @@
 #include "sim/npc_events.h"
 #include "sim/npc_population.h"
 #include "sim/npc_schedule.h"
+#include "sim/trade_market.h"
 
 #include <cstdint>
 #include <map>
@@ -26,6 +27,16 @@ struct Place {
     int y = 0;
     std::vector<std::string> tags;
     friend bool operator==(const Place&, const Place&) = default;
+};
+
+// Something the persons did that the game shows (US-292): a few words in a bubble, a trade, a gift, a quarrel, a fight, a death.
+struct NpcEvent {
+    enum class Kind { Talk, Trade, Gift, Confront, Fight, Death };
+    Kind kind = Kind::Talk;
+    int actor = 0;  // person ids
+    int target = 0;
+    std::string text; // what is said (Talk)
+    int amount = 0;
 };
 
 // The life of the persons of an NpcPopulation (M9c, D-54 Q9-Q13). It decides where each person is and what they do: they follow their schedule hour by hour while they are
@@ -77,6 +88,16 @@ public:
     // The interaction a person last chose for themselves ("" when none yet).
     std::string lastAction(int index) const;
 
+    // ---- Persons act on each other (US-292, D-54 Q12, Q13): the same interaction files, with a person as the actor and another as the target. A free person near the hero looks at
+    // the neighbour close to them and may talk, trade, give a gift, quarrel or fight, by the `npc` scores of the files; a person far away does the same abstractly, once a day, by
+    // a seeded roll, with the same effects and nothing to show. Fights use the combat numbers of the persons (the hero's rules: strike and strike back) and death is final.
+    // The stocks of the traders are the market's (it belongs to the game and must outlive the director).
+    void setMarket(TradeMarket* market) { market_ = market; }
+    void setCombat(int index, int hp, int damage);
+    int hp(int index) const; // the hit points left (the default of schedule.json for a person nobody set)
+    // What happened near the hero since the last call (talk, trades, fights) and every death anywhere: for the game to show and to act on (a figure that has died leaves the world).
+    std::vector<NpcEvent> takeEvents();
+
     // One game tick, after NpcPopulation::tick(): on the hour the persons near the focus take up their schedule (or are interrupted); every tick a slice of the far ones does.
     void tick(NpcPopulation& population);
 
@@ -100,9 +121,24 @@ private:
     int internProfile(const NpcProfile& profile);
     // The person is free to do something of their own now: nothing in their schedule holds them (a person with no schedule is always free).
     bool isFree(const NpcPopulation& population, int index, int hour) const;
-    // The person chooses what to do among their candidates (events only when `eventsOnly`); true when they chose something and did it. Bounded by maxPerHour.
-    bool chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly);
-    void carryOut(NpcPopulation& population, int index, const rules::Interaction& interaction, const ActionTarget& target);
+    struct Option {
+        const rules::Interaction* interaction;
+        ActionTarget target;
+    };
+    bool chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly, bool abstract);
+    void collectPlaceOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool eventsOnly, std::vector<Option>& options, std::vector<int>& scores) const;
+    void collectPartnerOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool abstract, std::vector<Option>& options, std::vector<int>& scores) const;
+    void carryOut(NpcPopulation& population, int index, int hour, const rules::Interaction& interaction, const ActionTarget& target, const std::vector<std::string>& actorTags, bool abstract);
+    void applyEffect(NpcPopulation& population, int actor, int partner, const ActionTarget& target, const NpcRuleContext& rule, const rules::Effect& effect, bool abstract);
+    bool hasGoods(const NpcPopulation& population, int index) const;
+    bool canSwap(const NpcPopulation& population, int a, int b) const;
+    bool doSwap(NpcPopulation& population, int a, int b, bool abstract);
+    bool doGift(NpcPopulation& population, int a, int b, bool abstract);
+    void doChat(NpcPopulation& population, int a, int b, bool abstract);
+    void doFight(NpcPopulation& population, int a, int b, bool abstract);
+    void kill(NpcPopulation& population, int victim, int killer);
+    void spreadOpinion(NpcPopulation& population, int actor, int target, int amount);
+    void note(NpcEvent event);
     // A spot near a point, different for each person (so a crowd answering one event does not stand on one pixel).
     std::pair<int, int> pointNear(const NpcPopulation& population, int index, int x, int y) const;
 
@@ -128,6 +164,12 @@ private:
     const rules::InteractionRegistry* interactions_ = nullptr;
     std::uint64_t seed_ = 0;
     int chosenThisHour_ = 0;
+
+    // US-292.
+    std::vector<std::int16_t> hp_;     // -1: the default of the config
+    std::vector<std::int16_t> damage_; // -1: the default of the config
+    std::vector<NpcEvent> eventsOut_;
+    TradeMarket* market_ = nullptr;
 };
 
 } // namespace odysseus::sim

@@ -26,6 +26,7 @@ int NpcRuleContext::personOf(const std::string& word) const {
 
 rules::Value NpcRuleContext::path(const std::string& dotted) const {
     using rules::Value;
+    if (dotted == "actor" || dotted == "target" || dotted == "npc" || dotted == "hero") return Value::ofText(dotted); // a bare root is the word itself: opinion(actor, target)
     if (dotted == "actor.name") return Value::ofText(population_.kind(actorIndex_));
     if (dotted == "target.name" || dotted == "npc.name") return Value::ofText(target_.name);
     if (dotted == "target.kind" || dotted == "npc.kind") return Value::ofText(target_.kindName);

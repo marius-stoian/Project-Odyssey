@@ -43,6 +43,7 @@ static void applyActionLists(const OdysseyGame& game, const PlacedCharacter& pla
 std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
     const PlacedCharacter* placed = game.placedCharacter(placedId);
     if (placed == nullptr || game.npcPopulation().indexOf(placedId) < 0) return std::nullopt;
+    if (game.npcDirector().mode(game.npcPopulation().indexOf(placedId)) == sim::NpcDirector::Mode::Dead) return std::nullopt; // the dead are not there to talk to
     const sim::rules::ResolvedNpc resolved = game.npcClasses().resolve(*placed);
     Subject subject;
     subject.kind = Subject::Kind::Npc;
@@ -334,7 +335,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
+    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "can-swap", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);
     }

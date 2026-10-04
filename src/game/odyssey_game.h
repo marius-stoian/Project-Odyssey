@@ -303,6 +303,8 @@ public:
     void refreshLife();    // gives every placed person the schedule its classes, kind and own fields say now (F5, the Editor), and logs what it names that is not there
     void walkNpcPeople();  // the figures of the placed people walk to where the director sent them (US-290)
     void updateNpcDanger(); // a hostile within reach of a person sends them home (D-54 Q10)
+    void drainNpcEvents();  // what the persons did to each other near the hero: words in bubbles, a death takes the figure out of the world (US-292)
+    void removeDeadFigures(); // the figures of the persons the director says are dead leave the world (after a death, after a load)
     void syncEditorActions();
     void registerCreatures();
     void tickNpcPopulation();
@@ -419,6 +421,7 @@ private:
     sim::EventCatalog eventCatalog_;   // assets/data/sim/events.json (US-291)
     sim::NpcDirector npcDirector_;     // the life of the placed people (US-290)
     std::unordered_map<int, int> npcStuck_; // placed id -> ticks a walking figure has made no progress (it is put at its goal after a while)
+    std::map<int, std::pair<std::string, int>> npcBubbles_; // placed id -> the words over its head and the ticks they stay (US-292)
     std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;

@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-292: NPCs act on each other (Mraw) - 2026-10-05
+
+**State:** On `story/US-292`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
+
+- Simulation: `NpcDirector` lets a free person near the hero choose among the interactions it can do to its close neighbour (`npc-chat`, `npc-swap`, `npc-gift`, `npc-confront`, `npc-fight`) as well as its place and event actions; the effects `opinion`, `remember`, `give`, `take` and the words `chat`, `swap`, `gift`, `fight`, `spread-opinion`, `restore`, `walk-to` are carried out in the simulation; fights with hit points and damage, deaths, witnesses and family; far persons deal once a day by a seeded roll (abstract, no events but deaths); events for the game (`NpcEvent`); the budget `maxPerHour` goes round; `NpcPopulation::neighbour` finds the partner in the grid cell; `NpcRuleContext` reads bare roots.
+- Game: the market is the director's stock book, the combat numbers come from the placed character, events drain every tick (bubbles over speakers, deaths take the figure out of the world, also after a load), the dead are no subject.
+- Data: five interaction files `npc-*.json`; `dealings` section of `assets/data/sim/schedule.json`; built-in words `chat`, `swap`, `gift`, `fight`; the tag `can-swap`.
+- Docs: guide (NPCs act on each other), `docs/plans/US-292.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_interact_test.cpp` (11 cases), `tests/game/npc_dealings_game_test.cpp` (4 cases); the US-291 sim tests load only patrol and help-with-fire so neighbouring persons do not chat there.
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-291: action sources (Mraw) - 2026-10-05
 
 **State:** On `story/US-291`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c. D-54 Q11: no quest-action source in M9c (Codex v2.12).

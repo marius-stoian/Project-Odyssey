@@ -168,6 +168,8 @@ void OdysseyGame::buildNpcPopulation() {
     // The life of the people (US-290): the places of the level, every person's home where it was placed, and the schedules.
     npcDirector_ = sim::NpcDirector(scheduleConfig_);
     npcDirector_.setInteractions(&interactions_);
+    npcDirector_.setMarket(&tradeMarket_); // the stocks the persons trade and give from (US-292)
+    npcBubbles_.clear();
     npcDirector_.setEvents(eventCatalog_);
     npcDirector_.setSeed(weatherSeed_ ^ 0x4C494645ULL);
     std::vector<sim::Place> places;
@@ -214,6 +216,7 @@ void OdysseyGame::refreshLife() {
             else if (state == sim::rules::ActionState::Allowed) profile.allow.push_back(id);
         }
         npcDirector_.setProfile(index, profile);
+        npcDirector_.setCombat(index, placed.hp, placed.swordDamage); // the numbers of the hero's own fights (US-292)
         for (const std::vector<std::string>* actions : {&resolved.classActions, &resolved.customActions}) {
             for (const std::string& id : *actions) {
                 const sim::rules::Interaction* known = interactions_.find(id);
@@ -256,6 +259,38 @@ void OdysseyGame::walkNpcPeople() {
 }
 
 void OdysseyGame::postWorldEvent(const std::string& trigger, int x, int y) { npcDirector_.postEvent(npcPopulation_, trigger, x, y); }
+
+// What the persons did that is worth showing (US-292): a few words in a bubble over the speaker, and the log for the rest; a death takes the figure out of the world.
+void OdysseyGame::drainNpcEvents() {
+    for (const sim::NpcEvent& event : npcDirector_.takeEvents()) {
+        switch (event.kind) {
+        case sim::NpcEvent::Kind::Talk:
+            npcBubbles_[event.actor] = {event.text, 60}; // three seconds
+            break;
+        case sim::NpcEvent::Kind::Trade: core::logInfo(std::format("NPCs: {} and {} traded {}", event.actor, event.target, event.text)); break;
+        case sim::NpcEvent::Kind::Gift: core::logInfo(std::format("NPCs: {} gave {} a gift of {}", event.actor, event.target, event.text)); break;
+        case sim::NpcEvent::Kind::Confront: core::logInfo(std::format("NPCs: {} confronted {}", event.actor, event.target)); break;
+        case sim::NpcEvent::Kind::Fight: core::logInfo(std::format("NPCs: {} and {} fought", event.actor, event.target)); break;
+        case sim::NpcEvent::Kind::Death:
+            core::logInfo(std::format("NPCs: {} was killed by {}", event.actor, event.target));
+            break;
+        }
+    }
+    removeDeadFigures();
+}
+
+void OdysseyGame::removeDeadFigures() {
+    const auto dead = [this](int placedId) {
+        const int index = npcPopulation_.indexOf(placedId);
+        return index >= 0 && npcDirector_.mode(index) == sim::NpcDirector::Mode::Dead;
+    };
+    const std::size_t before = bystanders_.size() + enemies_.size();
+    std::erase_if(bystanders_, [&](const PlacedCharacter& figure) { return dead(figure.id); });
+    std::erase_if(enemies_, [&](const Enemy& enemy) { return dead(enemy.id); });
+    if (bystanders_.size() + enemies_.size() != before) {
+        for (auto it = npcBubbles_.begin(); it != npcBubbles_.end();) it = dead(it->first) ? npcBubbles_.erase(it) : std::next(it);
+    }
+}
 
 // A hostile creature within 6 m of a person sends them home; when it is gone they take up their schedule again (D-54 Q10).
 void OdysseyGame::updateNpcDanger() {
@@ -303,8 +338,10 @@ void OdysseyGame::tickNpcPopulation() {
         tradeMarket_.dailyUpdate(today, level_.economy); // a new day: every trader, near or far, gets its delivery (US-281)
     }
     if (ticks_ % 20 == 0) updateNpcDanger();
-    npcDirector_.tick(npcPopulation_); // schedules, interruptions (US-290)
+    npcDirector_.tick(npcPopulation_); // schedules, interruptions, their own actions and their dealings with each other (US-290..US-292)
+    drainNpcEvents();
     walkNpcPeople();
+    for (auto it = npcBubbles_.begin(); it != npcBubbles_.end();) it = --it->second.second <= 0 ? npcBubbles_.erase(it) : std::next(it);
     if (ticks_ % 20 != 0) return;
     const std::int64_t today = npcPopulation_.day();
     for (const int index : npcPopulation_.near(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY()), static_cast<int>(kMeetingDistance))) {
@@ -358,6 +395,8 @@ std::string OdysseyGame::loadNpcPopulation() {
             npcDirector_ = sim::NpcDirector::fromText(lifeText, scheduleConfig_);
             npcDirector_.setPlaces(std::move(places));
             refreshLife(); // the data of now wins over the schedules of the save; the homes and the modes stay
+            npcDirector_.setMarket(&tradeMarket_);
+            removeDeadFigures(); // those who died before the save do not come back
         }
         return {};
     } catch (const std::exception& error) {

@@ -2229,6 +2229,20 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
         }
     }
 
+    // Words over the heads of the placed people who are talking to each other (US-292).
+    for (const auto& [id, said] : npcBubbles_) {
+        for (const PlacedCharacter& placed : bystanders_) {
+            if (placed.id != id) continue;
+            luna::engine::UiPainter painter(renderer, uiSheet_);
+            const luna::engine::Point head = screen(placed.feet.x, placed.feet.y - kCharacterHeight);
+            const int w = luna::engine::UiPainter::textWidth(said.first) + 8;
+            const luna::engine::Rect box{static_cast<int>(head.x) - w / 2, static_cast<int>(head.y) - 16, w, 14};
+            painter.fill(box, luna::engine::UiColor::Shade);
+            painter.outline(box, luna::engine::UiColor::Border);
+            painter.text(box.x + 4, box.y + 4, said.first, luna::engine::UiColor::Text);
+        }
+    }
+
     // Enemies: red while the hit flash lasts, with a health bar and "HP/max" above their heads.
     for (const Enemy& enemy : enemies_) {
         if (!enemy.isAlive()) {

@@ -23,11 +23,16 @@ rules::ScheduleConfig exactConfig() {
     return config;
 }
 
-// The shipped interaction files, so the tests use the same patrol and help-with-fire as the game.
+// The shipped patrol and help-with-fire files, so the tests use the same ones as the game; the files of the dealings between persons (US-292) are left out, so a guard and a
+// villager standing side by side do not stop to chat in these tests.
 const rules::InteractionRegistry& shippedInteractions() {
     static const rules::InteractionRegistry registry = [] {
+        const fs::path folder = fs::temp_directory_path() / "odysseus-us291" / "interactions";
+        fs::remove_all(folder.parent_path());
+        fs::create_directories(folder);
+        for (const char* name : {"patrol.json", "help-with-fire.json"}) fs::copy_file(fs::path(ODYSSEUS_DATA_DIR) / "interactions" / name, folder / name);
         rules::LoadReport report;
-        rules::InteractionRegistry loaded = rules::InteractionRegistry::load(fs::path(ODYSSEUS_DATA_DIR) / "interactions", report);
+        rules::InteractionRegistry loaded = rules::InteractionRegistry::load(folder, report);
         for (const auto& error : report.errors) FAIL(error.text());
         return loaded;
     }();
