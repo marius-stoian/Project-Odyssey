@@ -46,6 +46,7 @@
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
 #include "game/npc_class_book.h"
+#include "sim/npc_population.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -62,6 +63,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace odysseus::game {
@@ -96,6 +98,11 @@ public:
     // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
     const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
     const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    // The placed people of the level as persons of the simulation (US-262). Animals and monsters are not in it.
+    const sim::NpcPopulation& npcPopulation() const { return npcPopulation_; }
+    sim::NpcPopulation& npcPopulationMutable() { return npcPopulation_; }
+    bool isPersonKind(const PlacedCharacter& placed) const;
+    bool saveNpcPopulation() const;
     NpcClassBook& npcClasses() { return npcClasses_; }
     const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
@@ -255,6 +262,9 @@ public:
     std::vector<LightSource> lightSources(double alpha) const;
     std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
+    void buildNpcPopulation();
+    void tickNpcPopulation();
+    std::string loadNpcPopulation(); // the problem, or empty
     luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)
     luna::engine::LightFrame ambientLightFrame(double alpha, bool withWeather = true) const; // the ambient colour of the world now (no point lights)
     static double darknessOf(const luna::engine::LightFrame& frame);
@@ -356,6 +366,10 @@ private:
     std::vector<PlacedCharacter> bystanders_; // placed characters the sword does not fight: they stand and are seen
     Editor editor_;
     NpcClassBook npcClasses_; // US-260
+    sim::CalendarConfig npcCalendar_;
+    sim::NeedsConfig npcNeeds_;
+    sim::NpcPopulation npcPopulation_; // US-262
+    std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;
 

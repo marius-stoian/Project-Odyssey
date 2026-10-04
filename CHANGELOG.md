@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-262: placed NPCs are full persons (Mraw) - 2026-10-04
+
+**State:** On `story/US-262`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_population_test.cpp`, `tests/game/npc_people_test.cpp`), run once at X-M9a.
+
+- Simulation: `src/sim/npc_population.*` `NpcPopulation`: compact store (arrays per field, ring of six notes per person, interned texts), daily rules (age, needs fall and are restored, a memory of the day), `meetHero`, `hash`, versioned JSON save (`toText`/`fromText`).
+- Game: `src/game/npc_people.cpp`: `isPersonKind` (animals, monsters and the hero's kind stay creatures), `buildNpcPopulation` at every play start, `tickNpcPopulation` each tick (days and meeting the hero), save with the autosave (`npcs.json`) and load with it. Guide `docs/guides/npc-data.md` extended.
+
 ## US-261: kind defaults and placed-NPC overrides (Mraw) - 2026-10-04
 
 **State:** On `story/US-261`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_kind_test.cpp`, `tests/game/npc_kind_test.cpp`), run once at X-M9a.
