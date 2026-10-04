@@ -39,6 +39,7 @@ struct Studio {
 
     Studio(const std::string& name, const std::function<void(game::Level&)>& changeLevel) : data(dataCopy(name)) {
         writeText(data / "interactions" / "trade-test.json", kTrade);
+        fs::remove(data / "interactions" / "trade.json"); // the shipped Trade action of M9b would add a second Trade to these menus: this test is about the gating by attitude
         const game::Definitions definitions = game::loadDefinitions(data);
         game::Level level = game::loadLevel(ODYSSEUS_DEMO_LEVEL, definitions).level;
         level.characters.clear();

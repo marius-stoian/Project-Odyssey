@@ -55,6 +55,7 @@ std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
     subject.info.tags = resolved.tags;
     subject.info.tags.push_back("npc");
     if (game.npcDialogueFor(placedId) != nullptr) subject.info.tags.push_back("speaks"); // no dialogue for the player, no Talk (D-52 Q-11)
+    if (game.tradeMarket().isTrader(placedId)) subject.info.tags.push_back("trades"); // it has a profile and a stock: the Trade action works (US-283)
     // A trader that keeps rare goods back (US-282): has-rare-goods, and rare-open when the hero stands high enough for every one it has in stock.
     if (const sim::TradeMarket::Trader* trader = game.tradeMarket().find(placedId); trader != nullptr && !trader->profile.rare.empty()) {
         subject.info.tags.push_back("has-rare-goods");
@@ -331,7 +332,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "has-rare-goods", "rare-open", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
+    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);
     }

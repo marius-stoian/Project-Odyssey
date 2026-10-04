@@ -41,6 +41,17 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         if (!openConversation(game, subject)) game.run().setMessage(subject.name + " has nothing to say.");
         return true;
     }
+    // A placed NPC with goods to trade opens the trade screen (US-283); the rival camps keep their own barter (`open-barter`).
+    if (name == "open-trade" && subject.kind == Subject::Kind::Npc) {
+        if (game.life() == nullptr) {
+            game.run().setMessage("Start a run to trade.");
+        } else if (!game.tradeMarket().isTrader(subject.index)) {
+            game.run().setMessage(subject.name + " has nothing to trade.");
+        } else {
+            game.run().openBarter(NpcTrader{subject.index});
+        }
+        return true;
+    }
     // A trader shows the rare goods it keeps for people it likes (US-282).
     if (name == "rare-goods" && subject.kind == Subject::Kind::Npc) {
         const sim::TradeMarket& market = game.tradeMarket();
@@ -281,7 +292,7 @@ private:
 
 const std::vector<std::string>& builtInActionNames() {
     static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
-                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "rare-goods", "restore", "warm-nearby", "graze", "flee"};
+                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "open-trade", "rare-goods", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }
 

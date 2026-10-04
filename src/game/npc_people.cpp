@@ -160,6 +160,14 @@ void OdysseyGame::buildNpcPopulation() {
     refreshTraders();
 }
 
+sim::ItemCounts OdysseyGame::itemValues() const {
+    sim::ItemCounts out;
+    if (const sim::HeroData* data = heroData()) {
+        for (const sim::Item& item : data->items) out[item.id] = item.value;
+    }
+    return out;
+}
+
 // Every placed person whose classes, kind and own fields give a trade profile is a trader (D-54 Q7: the Trader class is only a default profile). A trader that is
 // already registered keeps its stock and takes the new profile.
 void OdysseyGame::refreshTraders() {

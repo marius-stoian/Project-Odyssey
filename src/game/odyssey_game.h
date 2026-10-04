@@ -129,6 +129,8 @@ public:
     // The stock of the traders (US-281): placed NPCs with a trade profile. Restocked once a day, saved with the placed people (trade.json).
     const sim::TradeMarket& tradeMarket() const { return tradeMarket_; }
     sim::TradeMarket& tradeMarketMutable() { return tradeMarket_; }
+    // The base value of every item of the hero's data (the price book of the traders, in value units).
+    sim::ItemCounts itemValues() const;
     NpcClassBook& npcClasses() { return npcClasses_; }
     const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the

@@ -8,5 +8,6 @@
     "refuse": ["hostile"]
   },
   "wants": { "wantPercent": 100, "otherPercent": 50 },
-  "haggle": { "baseChance": 20, "opinionDivisor": 4, "perPersuasion": 3, "minChance": 5, "maxChance": 85, "discountPercent": 10, "failureOpinion": 5 }
+  "haggle": { "baseChance": 20, "opinionDivisor": 4, "perPersuasion": 3, "minChance": 5, "maxChance": 85, "discountPercent": 10, "failureOpinion": 5 },
+  "purse": { "start": 30, "restockPerDay": 5, "cap": 60 }
 }

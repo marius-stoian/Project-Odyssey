@@ -127,7 +127,10 @@ void RunFlow::build(OdysseyGame& game) {
     case Screen::Mantle: buildMantle(game); break;
     case Screen::Menu: buildMenu(game); break;
     case Screen::Craft: buildCraft(game); break;
-    case Screen::Barter: buildBarter(game); break;
+    case Screen::Barter:
+        if (std::holds_alternative<NpcTrader>(trader_)) buildTrade(game);
+        else buildBarter(game);
+        break;
     case Screen::Context: buildContext(); break;
     case Screen::Talk: buildTalk(game); break;
     case Screen::Ended: buildEnded(game); break;
@@ -525,13 +528,206 @@ void RunFlow::buildTalk(OdysseyGame& game) {
     if (view.choices.empty()) button("Leave", kClose, true, false, panel_.x + 8, 60);
 }
 
-void RunFlow::openBarter(int rival) {
-    rival_ = rival;
+void RunFlow::openBarter(const TraderRef& trader) {
+    trader_ = trader;
+    if (const RivalTrader* rival = std::get_if<RivalTrader>(&trader)) rival_ = rival->index;
     screen_ = Screen::Barter;
     give_.clear();
     want_.clear();
     counter_.reset();
     payLater_ = false;
+    deal_ = {};
+    tradeGive_.clear();
+    tradeGet_.clear();
+    tradeEntered_ = false; // the screen of an NPC trader takes the coins of the bag when it is first built (it needs the game)
+}
+
+// ---- the trade screen of an NPC (US-283)
+
+// Coins in the bag become the balance when the screen opens (D-54 Q1); the balance goes back as coins when it closes, highest value first.
+void RunFlow::enterTrade(OdysseyGame& game) {
+    tradeEntered_ = true;
+    sim::HeroLife* hero = game.life();
+    const sim::RegionEconomy& economy = game.level().economy;
+    if (hero == nullptr || !economy.hasCurrency()) return;
+    std::map<std::string, int> coins;
+    for (const auto& [item, count] : hero->inventory()) {
+        if (count > 0 && economy.isCurrency(item)) coins[item] = count;
+    }
+    int total = 0;
+    for (const auto& [item, count] : coins) {
+        if (hero->take(item, count)) total += count * economy.currencyValue(item);
+    }
+    sim::TradeMarket& market = game.tradeMarketMutable();
+    market.setHeroBalance(market.heroBalance() + total);
+}
+
+void RunFlow::leaveTrade(OdysseyGame& game) {
+    if (!tradeEntered_ || !std::holds_alternative<NpcTrader>(trader_)) return;
+    tradeEntered_ = false;
+    deal_ = {};
+    sim::HeroLife* hero = game.life();
+    const sim::RegionEconomy& economy = game.level().economy;
+    if (hero == nullptr || !economy.hasCurrency()) return;
+    sim::TradeMarket& market = game.tradeMarketMutable();
+    int remainder = 0;
+    for (const auto& [item, count] : sim::makeChange(economy, market.heroBalance(), remainder)) hero->give(item, count);
+    market.setHeroBalance(remainder); // what no coin can make waits in the balance for the next visit
+}
+
+void RunFlow::buildTrade(OdysseyGame& game) {
+    const NpcTrader* npc = std::get_if<NpcTrader>(&trader_);
+    sim::HeroLife* hero = game.life();
+    const sim::HeroData* data = game.heroData();
+    const PlacedCharacter* placed = npc != nullptr ? game.placedCharacter(npc->placedId) : nullptr;
+    if (npc == nullptr || hero == nullptr || data == nullptr || placed == nullptr || !game.tradeMarket().isTrader(npc->placedId)) {
+        screen_ = Screen::None;
+        message_ = "There is nobody here to trade with.";
+        return;
+    }
+    if (!tradeEntered_) enterTrade(game);
+    const int id = npc->placedId;
+    const sim::TradeMarket& market = game.tradeMarket();
+    const sim::NpcPopulation& people = game.npcPopulation();
+    const sim::Attitude attitude = people.attitude(id, sim::NpcPopulation::kHero);
+    const int opinion = people.opinion(id, sim::NpcPopulation::kHero);
+    const sim::RegionEconomy& economy = game.level().economy;
+    const sim::ItemCounts values = game.itemValues();
+    const auto name = [&](const std::string& item) { return data->item(item) != nullptr ? data->item(item)->name : item; };
+    const auto price = [](long long milli) { return sim::rules::formatMilli(milli); };
+
+    title(std::format("TRADE with {}  ({})", placed->name, sim::attitudeName(attitude)));
+    if (market.refuses(attitude)) {
+        paragraph(placed->name + " will not trade with you.", UiColor::Red);
+        gap();
+        button("Close", kClose, true, false, panel_.x + 8, 50);
+        return;
+    }
+    if (economy.hasCurrency()) {
+        std::string money;
+        for (const auto& [item, value] : economy.currencies) money += std::format("{}{} = {}", money.empty() ? "" : ", ", name(item), value);
+        line(std::format("Your balance: {}    Their purse: {}    Money here: {}", market.heroBalance(), market.purse(id), money), UiColor::Dim);
+    } else {
+        line("This region has no money: barter only.", UiColor::Dim);
+    }
+    if (const int discount = market.discountPercent(id); discount > 0) line(std::format("You haggled well: {}% off today.", discount), UiColor::Gold);
+
+    // What the hero gives: the bag (coins are in the balance), with what the trader pays for one piece.
+    line("You give (your bag, what they pay for one):", UiColor::Dim);
+    tradeGive_.clear();
+    for (const auto& [item, count] : hero->inventory()) {
+        if (count > 0 && !economy.isCurrency(item)) tradeGive_.push_back(item);
+    }
+    int column = 0;
+    for (std::size_t i = 0; i < tradeGive_.size(); ++i) {
+        const std::string& item = tradeGive_[i];
+        const int chosen = deal_.heroGives.count(item) != 0 ? deal_.heroGives.at(item) : 0;
+        button(std::format("{} {}/{} @{}", name(item), chosen, hero->count(item), price(market.traderPaysMilli(id, item, attitude, economy, values))), kTradeGive + static_cast<int>(i), true, chosen > 0, -1, 140);
+        button("-", kTradeGiveLess + static_cast<int>(i), chosen > 0, false, -1, 14);
+        if (++column % 3 == 0) newRow(), cursorY_ += kRowHeight + 2;
+    }
+    newRow();
+    cursorY_ += kRowHeight + 4;
+
+    // What the hero takes: the goods on offer (a rare good only when the trader thinks enough of him), with the price of one piece.
+    line("You take (their stock, what you pay for one):", UiColor::Dim);
+    tradeGet_ = market.offeredGoods(id, opinion, game.npcOpinions());
+    std::erase_if(tradeGet_, [&](const std::string& item) { return economy.isCurrency(item); });
+    column = 0;
+    for (std::size_t i = 0; i < tradeGet_.size(); ++i) {
+        const std::string& item = tradeGet_[i];
+        const int chosen = deal_.heroGets.count(item) != 0 ? deal_.heroGets.at(item) : 0;
+        button(std::format("{}{} {}/{} @{}", name(item), market.wants(id, item) ? "*" : "", chosen, market.stock(id, item), price(market.heroPaysMilli(id, item, attitude, economy, values))), kTradeGet + static_cast<int>(i), true, chosen > 0, -1, 140);
+        button("-", kTradeGetLess + static_cast<int>(i), chosen > 0, false, -1, 14);
+        if (++column % 3 == 0) newRow(), cursorY_ += kRowHeight + 2;
+    }
+    newRow();
+    cursorY_ += kRowHeight + 4;
+    if (tradeGet_.empty()) line("They have nothing to sell you now.", UiColor::Dim);
+    std::string kept;
+    for (const std::string& item : market.lockedGoods(id, opinion, game.npcOpinions())) kept += std::format("{}{} (needs {})", kept.empty() ? "" : ", ", name(item), market.rareWord(id, item));
+    if (!kept.empty()) line("They keep back: " + kept, UiColor::Dim);
+
+    if (economy.hasCurrency()) {
+        button("-5", kTradePayLess5, deal_.balancePays > 0, false, panel_.x + 8, 24);
+        button("-1", kTradePayLess1, deal_.balancePays > 0, false, -1, 24);
+        button(std::format("Pay from balance: {}", deal_.balancePays), 0, false, deal_.balancePays > 0, -1, 130);
+        button("+1", kTradePayMore1, deal_.balancePays < market.heroBalance(), false, -1, 24);
+        button("+5", kTradePayMore5, deal_.balancePays < market.heroBalance(), false, -1, 24);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+    }
+
+    // The live balance bar: what they receive against what they give.
+    const sim::TradeMarket::Quote quote = market.quote(id, deal_, attitude, opinion, game.npcOpinions(), economy, values);
+    const long long gives = quote.givesMilli;
+    const long long receives = quote.receivesMilli;
+    const int filled = gives <= 0 ? (receives > 0 ? 24 : 0) : static_cast<int>(std::min<long long>(24, receives * 24 / gives));
+    line(std::format("They receive {}   They give {}   [{}{}]", price(receives), price(gives), std::string(static_cast<std::size_t>(filled), '#'), std::string(static_cast<std::size_t>(24 - filled), '.')),
+         quote.acceptable ? UiColor::Text : UiColor::Dim);
+    if (quote.acceptable) {
+        const long long extra = (receives - gives) / 1000;
+        if (quote.surplusUnits > 0) line(std::format("They accept, and pay you {} back from their purse.", quote.surplusUnits), UiColor::Gold);
+        else if (extra > 0) line(std::format("They accept, and keep {} extra.", extra), UiColor::Gold);
+        else line("They accept.", UiColor::Gold);
+    } else {
+        line(quote.problem, UiColor::Red);
+    }
+    button("Deal", kTradeDeal, quote.acceptable, false, panel_.x + 8, 50);
+    button(std::format("Haggle ({}%)", market.haggleChance(opinion, hero->affinities()[static_cast<std::size_t>(sim::Affinity::Trade)] / 10)), kTradeHaggle, market.canHaggle(id), false, -1, 90);
+    button("Close", kClose, true, false, -1, 50);
+}
+
+void RunFlow::actTrade(OdysseyGame& game, int id) {
+    const NpcTrader* npc = std::get_if<NpcTrader>(&trader_);
+    sim::HeroLife* hero = game.life();
+    const sim::HeroData* data = game.heroData();
+    if (npc == nullptr || hero == nullptr || data == nullptr) return;
+    sim::TradeMarket& market = game.tradeMarketMutable();
+    const int traderId = npc->placedId;
+    const auto bump = [](std::map<std::string, int>& table, const std::string& item, int by, int limit) {
+        int& value = table[item];
+        value = std::clamp(value + by, 0, std::max(0, limit));
+        if (value == 0) table.erase(item);
+    };
+    const auto at = [](const std::vector<std::string>& items, int base, int id2) -> const std::string* {
+        const int index = id2 - base;
+        return index >= 0 && index < static_cast<int>(items.size()) ? &items[static_cast<std::size_t>(index)] : nullptr;
+    };
+    if (const std::string* item = at(tradeGive_, kTradeGive, id); item != nullptr && id < kTradeGive + 100) {
+        bump(deal_.heroGives, *item, 1, hero->count(*item));
+    } else if (const std::string* less = at(tradeGive_, kTradeGiveLess, id); less != nullptr && id < kTradeGiveLess + 100) {
+        bump(deal_.heroGives, *less, -1, hero->count(*less));
+    } else if (const std::string* take = at(tradeGet_, kTradeGet, id); take != nullptr && id < kTradeGet + 100) {
+        bump(deal_.heroGets, *take, 1, market.stock(traderId, *take));
+    } else if (const std::string* lessTake = at(tradeGet_, kTradeGetLess, id); lessTake != nullptr && id < kTradeGetLess + 100) {
+        bump(deal_.heroGets, *lessTake, -1, market.stock(traderId, *lessTake));
+    } else if (id == kTradePayLess5 || id == kTradePayLess1 || id == kTradePayMore1 || id == kTradePayMore5) {
+        const int step = id == kTradePayLess5 ? -5 : (id == kTradePayLess1 ? -1 : (id == kTradePayMore1 ? 1 : 5));
+        deal_.balancePays = std::clamp(deal_.balancePays + step, 0, market.heroBalance());
+    } else if (id == kTradeHaggle) {
+        const sim::NpcPopulation& people = game.npcPopulation();
+        const int persuasion = hero->affinities()[static_cast<std::size_t>(sim::Affinity::Trade)] / 10;
+        const sim::TradeMarket::Haggle result = market.haggle(traderId, people.opinion(traderId, sim::NpcPopulation::kHero), persuasion);
+        message_ = result.tried ? std::format("{} ({}% chance, rolled {}).", result.message, result.chance, result.roll) : result.message;
+        if (result.opinionChange != 0) game.npcPopulationMutable().adjust(traderId, sim::NpcPopulation::kHero, result.opinionChange);
+    } else if (id == kTradeDeal) {
+        const sim::NpcPopulation& people = game.npcPopulation();
+        const sim::Attitude attitude = people.attitude(traderId, sim::NpcPopulation::kHero);
+        const int opinion = people.opinion(traderId, sim::NpcPopulation::kHero);
+        const sim::TradeMarket::Outcome outcome = market.execute(traderId, deal_, attitude, opinion, game.npcOpinions(), game.level().economy, game.itemValues());
+        if (!outcome.done) {
+            message_ = outcome.message;
+            return;
+        }
+        for (const auto& [item, count] : outcome.heroGave) hero->take(item, count);
+        for (const auto& [item, count] : outcome.heroGot) hero->give(item, count);
+        game.npcPopulationMutable().event(traderId, sim::NpcPopulation::kHero, "trade"); // trading makes friends (D-52 Q-05)
+        message_ = std::format("It is a deal: you gave {}, you got {}.", goodsLine(*data, outcome.heroGave), goodsLine(*data, outcome.heroGot));
+        if (outcome.balancePaid > 0) message_ += std::format(" Paid {} from your balance.", outcome.balancePaid);
+        if (outcome.balanceGained > 0) message_ += std::format(" {} added to your balance.", outcome.balanceGained);
+        deal_ = {};
+    }
 }
 
 bool RunFlow::update(OdysseyGame& game, const luna::engine::Intents& intents) {
@@ -568,6 +764,7 @@ bool RunFlow::update(OdysseyGame& game, const luna::engine::Intents& intents) {
         }
     }
     if ((screen_ == Screen::Menu || screen_ == Screen::Craft || screen_ == Screen::Barter || screen_ == Screen::Context) && intents.pressed(luna::engine::Intent::OpenMenu)) {
+        if (screen_ == Screen::Barter) leaveTrade(game); // leaving the trade screen gives the balance back as coins
         screen_ = screen_ == Screen::Menu ? Screen::None : Screen::Menu;
         if (screen_ == Screen::Menu) build(game);
         return true;
@@ -604,6 +801,7 @@ void RunFlow::act(OdysseyGame& game, int id) {
     sim::HeroLife* hero = game.life();
     const sim::HeroData* data = game.heroData();
     if (id == kClose) {
+        if (screen_ == Screen::Barter) leaveTrade(game); // the balance goes back to the bag as coins
         screen_ = Screen::None;
         conversation_.reset(); // walking away from a talk: no effects
         message_.clear();
@@ -710,6 +908,10 @@ void RunFlow::act(OdysseyGame& game, int id) {
         break;
     case Screen::Barter: {
         if (hero == nullptr || data == nullptr) break;
+        if (std::holds_alternative<NpcTrader>(trader_)) {
+            actTrade(game, id);
+            break;
+        }
         if (id >= kGiveBase && id < kGiveBase + 20) {
             int index = 0;
             for (const auto& [item, n] : hero->inventory()) {

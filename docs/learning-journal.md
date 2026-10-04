@@ -1680,3 +1680,23 @@ Adding half of the divisor before dividing turns "throw the rest away" into "rou
 **Try it (15 minutes).** In `trade.json` set `"maxPercent": 400` under `curve` and, in `trade_price_test.cpp`, predict the new price of flint at stock 2 before running the test.
 
 **Check yourself.** Why do we multiply by 1000 first and divide last, rather than dividing after each percent?
+
+## US-283 The trade screen: one screen, two kinds of trader (std::variant)
+
+**What we built.** One trade screen that works for a rival camp *and* for any NPC with goods, with barter, the region's money, a live balance bar and a Haggle button.
+
+**The C++ idea: `std::variant` for "one of several kinds".** A trader is *either* a rival camp (known by its number) *or* a placed NPC (known by its id). Two different things, one slot. `std::variant` holds exactly one of a fixed list of types and always knows which:
+
+```cpp
+struct RivalTrader { int index = 0; };
+struct NpcTrader   { int placedId = 0; };
+using TraderRef = std::variant<RivalTrader, NpcTrader>;
+```
+
+The screen asks which one it has with `std::holds_alternative<NpcTrader>(trader_)` or reads it with `std::get_if<NpcTrader>(&trader_)` (a pointer that is null when it is the other kind). Compared with a base class and virtual functions, a variant has no heap, no pointers and cannot hold a kind nobody listed, so adding a third kind of trader later makes every place that must know about it easy to find. The old call `openBarter(3)` still works because a plain overload turns the number into a `RivalTrader`.
+
+**Where to look.** `src/game/run_flow.h` (`TraderRef`), `RunFlow::buildTrade` and `actTrade` in `src/game/run_flow.cpp`, the deal rules in `src/sim/trade_market.cpp` (`quote`, `execute`), `tests/game/trade_screen_test.cpp`.
+
+**Try it (15 minutes).** Add a third struct, `struct CaravanTrader { int id; };`, to the variant and read the compiler's errors: each place that handles the kinds is listed for you.
+
+**Check yourself.** Why does `execute` call `quote` first instead of checking the pieces again by itself?
