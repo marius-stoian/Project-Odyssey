@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-248):** S-US-248 DONE (Milestone-86.md, AP-087). Next: S-US-244 (shadows drawn from OdysseyGame::celestialLight()), then US-245, US-246, US-247, X-M8c. GPU screenshots for US-248 are manual (docs/plans/US-248.md).
+
 **Resume update (2026-10-04, US-243):** S-US-243 DONE (Milestone-85.md, AP-086). Next: S-US-244 (sun and moon shadows), then US-245, US-246, US-247, X-M8c. Test tip: rerun only a failing case with the doctest filter on the exe (odysseus_game_tests.exe -tc="US-243*"), full verify once at the end.
 **Resume update (2026-10-02, US-242):** S-US-242 DONE (Milestone-84.md, AP-085). Next: S-US-243 (fires, torches and glowing effects: lights placed from lights.json), then US-244 (sun and moon shadows), US-245, US-246, US-247, X-M8c. CI note: the 64-light budget test is judged only off GitHub.
 

@@ -62,6 +62,14 @@ void drawOne(Image& image, int ox, const std::string& frame) {
         for (int row = 0; row < 20; ++row) box(image, ox, oy, 16 - (3 + row / 2 + 2), 8 + row, 2 * (3 + row / 2 + 2), 1, row % 4 == 3 ? kWoodDark : kHide);
         box(image, ox, oy, 12, 18, 8, 10, kAsh);
         box(image, ox, oy, 4, 27, 24, 2, kWoodDark);
+    } else if (frame == "sun") {
+        ellipse(image, ox, oy, 16, 16, 9, 9, Color{255, 236, 140, 255});
+        ellipse(image, ox, oy, 16, 16, 6, 6, Color{255, 250, 205, 255});
+        for (const auto& [x, y] : {std::pair{15, 1}, std::pair{15, 27}, std::pair{1, 15}, std::pair{29, 15}}) box(image, ox, oy, x, y, 2, 4, Color{255, 220, 100, 255});
+    } else if (frame == "moon") {
+        ellipse(image, ox, oy, 16, 16, 9, 9, Color{222, 228, 240, 255});
+        ellipse(image, ox, oy, 19, 14, 7, 7, Color{196, 204, 222, 255}); // the shaded side
+        for (const auto& [x, y] : {std::pair{12, 18}, std::pair{15, 22}, std::pair{11, 12}}) ellipse(image, ox, oy, x, y, 2, 2, Color{180, 188, 208, 255});
     } else if (frame == "flint-nodule") {
         ellipse(image, ox, oy, 16, 23, 8, 5, kFlint);
         ellipse(image, ox, oy, 13, 21, 3, 2, kStone);

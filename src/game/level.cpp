@@ -187,7 +187,10 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             throw DataError(objectsFile, "objects", "must be a list of objects");
         }
         for (std::size_t i = 0; i < objects.at("objects").size(); ++i) {
-            definitions.objects.push_back(text(objects.at("objects").at(i), objectsFile, "name"));
+            const json& entry = objects.at("objects").at(i);
+            // A sun or moon that follows the clock is the level's default pair (US-248), not something to place.
+            if (entry.contains("celestial") && entry.at("celestial").is_object() && entry.at("celestial").value("follows", std::string()) == "clock") continue;
+            definitions.objects.push_back(text(entry, objectsFile, "name"));
         }
     }
     const std::filesystem::path effectsFile = dataDirectory / "effects.json";

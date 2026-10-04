@@ -1,0 +1,2 @@
+Debug build: zero warnings. ctest: 26 of 27 suites passed on the full run; the 27th (game tests) failed only on the three US-155 count checks, fixed (objects now include the placeable sun and moon). Game tests rerun in full afterwards: 206 of 206 passed, including 11 US-248 cases (89 assertions).
+GPU screenshots: manual checks in docs/plans/US-248.md (owner PC).

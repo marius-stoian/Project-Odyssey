@@ -50,7 +50,8 @@ struct WorldPlant {
     // A plant that is in any state but its first is hidden until it is back to it (D-37: a picked plant vanishes, and reappears
     // in the same spot when ripe again). A hidden plant cannot be seen, clicked, inspected or hit.
     bool hidden() const { return def != nullptr && !def->object && !def->states.empty() && state != def->states.front(); }
-    bool present() const { return alive && !hidden(); }
+    // A sun or moon (US-248) is in the sky, not on the ground: it is never drawn, clicked, inspected or hit as a plant.
+    bool present() const { return alive && !hidden() && !(def != nullptr && def->celestial); }
 };
 
 inline constexpr int kInspectReachPixels = 48;  // 1.5 m: Interact looks at a plant this close

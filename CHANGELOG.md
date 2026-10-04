@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-248: celestial bodies (Mraw) - 2026-10-04
+
+**State:** On `story/US-248`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-248/`.
+
+- Sun and moon as `celestial` world objects of `objects.json` (`body`, `light`, `follows` clock or fixed, `orbitRadius`, `tilt`, `height`); placed ones are in the Editor's object palette; the default pair follows the clock. `src/game/celestial.*`: `currentLight` (direction away from the body, clamped elevation, strongest body wins, eclipse dimming, shadow length factor with the D-49 caps), `skySprites`, `loadCelestialEvents`; `OdysseyGame::celestialLight()` is the one function US-244 uses. Sprites drawn in the sky band; an eclipse dims the world's ambient light.
+- `assets/data/light/celestial-events.json` (two sample eclipses); `sun` and `moon` kinds in `lights.json`. A mistake in an entry or the events file is a message naming file and field; the default pair stays (built-in fallback). Celestial objects are never drawn, hit or inspected as plants.
+- Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/US-248.md`. Tests: `tests/game/celestial_test.cpp`.
+
 ## US-243: fires, torches and glowing effects (Mraw) - 2026-10-04
 
 **State:** Merged into `qa`; verified in Debug (zero warnings); evidence in `docs/evidence/US-243/`.

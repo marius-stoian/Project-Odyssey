@@ -4,6 +4,8 @@
   "ambient": { "color": [255, 255, 255], "strength": 1.0 },
   "lights": [
     { "name": "campfire", "color": [255, 199, 115], "radiusTiles": 6.0, "strength": 0.9, "height": 24 },
-    { "name": "torch", "color": [255, 199, 115], "radiusTiles": 4.0, "strength": 0.9, "height": 24 }
+    { "name": "torch", "color": [255, 199, 115], "radiusTiles": 4.0, "strength": 0.9, "height": 24 },
+    { "name": "sun", "color": [255, 244, 214], "radiusTiles": 30.0, "strength": 1.0, "height": 200 },
+    { "name": "moon", "color": [191, 209, 255], "radiusTiles": 30.0, "strength": 1.0, "height": 200 }
   ]
 }

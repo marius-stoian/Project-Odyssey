@@ -163,6 +163,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
     // needed ("frame" names the picture the game draws). Tags and states are written in the file (an object with none has only "object").
     const auto objectsFile = dataDirectory / "objects.json";
     if (std::filesystem::exists(objectsFile)) {
+        std::set<std::string> skippedCelestials;
         const std::vector<PlantDef> objects = readList<PlantDef>(objectsFile, "objects", [&](const json& entry, const std::string& where) {
             const Fields f{objectsFile, entry, where};
             PlantDef def;
@@ -176,9 +177,33 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
             def.states = readStates(entry, objectsFile, where, {});
             def.light = entry.value("light", std::string());
             def.lightState = entry.value("lightState", std::string());
+            if (entry.contains("celestial")) {
+              try {
+                const json& sky = entry.at("celestial");
+                const std::string at = where + ".celestial";
+                if (!sky.is_object()) throw sim::DataError(objectsFile, at, "must be an object with body, light, follows, orbitRadius, tilt and height");
+                const Fields g{objectsFile, sky, at};
+                def.celestial = true;
+                def.sky.body = g.text("body");
+                if (def.sky.body != "sun" && def.sky.body != "moon") throw sim::DataError(objectsFile, at + ".body", "must be \"sun\" or \"moon\"");
+                def.sky.lightKind = g.text("light");
+                const std::string follows = g.text("follows");
+                if (follows != "clock" && follows != "fixed") throw sim::DataError(objectsFile, at + ".follows", "must be \"clock\" or \"fixed\"");
+                def.sky.followsClock = follows == "clock";
+                def.sky.orbitRadius = g.number("orbitRadius", 10.0, 100000.0);
+                def.sky.tilt = g.number("tilt", -90.0, 90.0);
+                def.sky.height = g.number("height", 1.0, 100000.0);
+                def.tags.push_back("celestial");
+              } catch (const sim::DataError& problem) {
+                // A mistake in one sun or moon must not stop the game: it is left out (the level keeps its default pair) and the problem is reported.
+                catalogs.notes.push_back(problem.what());
+                skippedCelestials.insert(entry.at("name").get<std::string>());
+              }
+            }
             return def;
         });
         for (const PlantDef& object : objects) {
+            if (skippedCelestials.contains(object.name)) continue;
             if (catalogs.plant(object.name) != nullptr) throw sim::DataError(objectsFile, "objects", "\"" + object.name + "\" is already a plant in plants.json");
             catalogs.plants.push_back(object);
         }

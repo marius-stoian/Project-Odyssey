@@ -1313,3 +1313,21 @@ ambientR = mix(a.red / 255.0 * a.strength, b.red / 255.0 * b.strength);
 **Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan --clan-speed 20` and watch a day pass. Then edit the `Winter` sunset in `calendar.json` to 12.0 and see how early the evening comes.
 
 **Check yourself.** Why is the first keyframe of the day not at hour 0, and how does the code make the last keyframe join it over midnight?
+## US-248 Celestial bodies: from a position to a direction with atan2
+
+**What we built.** The sun and the moon are now objects of the world. Where a body is decides where the light comes from, so which way a shadow will fall. The game has a default pair that travels by the clock, and you can place your own in the Editor. Eclipses are lines in a data file.
+
+**The C++ idea: `atan2`.** To know in which compass direction a body lies, we take its offset from the hero, `dx` east and `dy` south in metres, and ask for the angle:
+
+```cpp
+const double azimuth = std::atan2(dx, -dy) * kRadiansToDegrees; // 0 = north, 90 = east
+const double elevation = std::atan2(height, std::hypot(dx, dy)) * kRadiansToDegrees;
+```
+
+`atan2(a, b)` gives the angle of the point (b, a) in all four quadrants. Plain `atan(a / b)` cannot tell north from south, because the division throws the signs away, and it breaks when `b` is 0. The shadow falls the opposite way, so its direction is the negative of the way toward the body: `(-sin(azimuth), cos(azimuth))` on the picture, where north is up and y grows downward.
+
+**Where to look.** `viewOf` and `currentLight` in `src/game/celestial.cpp`; `OdysseyGame::celestialLight()`.
+
+**Try it (15 minutes).** In `objects.json` change the `height` of `sun (placed)` from 40 to 5, place it in the Editor east of the hero and read `elevation` in a test: the sun is now nearly on the horizon and the shadow factor hits its cap of 2.5.
+
+**Check yourself.** Why does the code clamp the elevation to at least 8 degrees before it computes `1 / tan(elevation)`?
