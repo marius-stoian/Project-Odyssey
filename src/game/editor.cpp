@@ -275,7 +275,7 @@ bool Editor::deleteClass() {
 // The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
 void Editor::buildClassPanel() {
     classesStale_ = false;
-    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 316 : 284});
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 344 : 312});
     classes_->visible = classesShown_;
     const Rect box = classes_->bounds;
     const int left = box.x + 4;
@@ -341,6 +341,7 @@ void Editor::buildClassPanel() {
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
     y += 14;
     addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
+    addScheduleRows(*classes_, left, width, y, classDraft_.extras.schedule, [this](const std::string& field, const std::string& text) { return setClassSchedule(field, text); });
     y += 4;
     classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
     classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
@@ -453,6 +454,7 @@ void Editor::buildKindForm(const Rect& box, int y) {
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(kindDraft_.layer.deny), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
         y += 14;
         addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
+        addScheduleRows(*classes_, left, width, y, kindDraft_.layer.extras.schedule, [this](const std::string& field, const std::string& text) { return setKindSchedule(field, text); });
     }
     const int bottom = box.y + box.height - 18;
     classes_->add<Button>(Rect{left, bottom, 80, 14}, "Save", [this] { saveKind(); }).hint = "Write the kind's file: every NPC of this kind that sets nothing itself follows it";
@@ -805,7 +807,7 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
 void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     constexpr int kWidth = 232;
     const Rect anchor = npcPanel_->bounds;
-    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 104});
+    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 134});
     npcTrade_->visible = npcPanel_->visible;
     const Rect box = npcTrade_->bounds;
     const int left = box.x + 4;
@@ -816,6 +818,51 @@ void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     title.hint = "In all (class, kind and own): stock " + sim::rules::tradeFieldText(resolved.extras.trade, "stock") + "; wants " + sim::rules::tradeFieldText(resolved.extras.trade, "wants");
     y += 13;
     addTradeRows(*npcTrade_, left, width, y, shown.extras.trade, [this](const std::string& field, const std::string& text) { return setSelectedTrade(field, text); });
+    addScheduleRows(*npcTrade_, left, width, y, shown.extras.schedule, [this](const std::string& field, const std::string& text) { return setSelectedSchedule(field, text); });
+}
+
+// The two lines of the schedule form: Day and Night, "06:00 work market; 21:00 sleep home".
+void Editor::addScheduleRows(Panel& panel, int left, int width, int& y, const sim::rules::Schedule& shown, const std::function<bool(const std::string&, const std::string&)>& set) {
+    static const char* const kLabels[] = {"Day", "Night"};
+    const std::vector<std::string>& fields = sim::rules::scheduleFieldNames();
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const std::string field = fields[i];
+        panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, kLabels[i], sim::rules::scheduleFieldText(shown, field), 150, [set, field](const std::string& text) { set(field, text); });
+        y += 14;
+    }
+}
+
+bool Editor::setSelectedSchedule(const std::string& field, const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    sim::rules::Schedule own = find(*selected_)->extras.schedule;
+    std::string problem;
+    if (!sim::rules::setScheduleField(own, field, text, problem)) {
+        say("schedule " + field + ": " + problem);
+        propertiesStale_ = true;
+        return false;
+    }
+    changeSelectedNpc("schedule " + field, [&](PlacedCharacter& placed) { placed.extras.schedule = own; });
+    return true;
+}
+
+bool Editor::setClassSchedule(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setScheduleField(classDraft_.extras.schedule, field, text, problem)) {
+        say("schedule " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindSchedule(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setScheduleField(kindDraft_.layer.extras.schedule, field, text, problem)) {
+        say("schedule " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
 }
 
 // One text field for each of the six trade fields; `set` is told the field and the text the owner typed.
@@ -1116,20 +1163,36 @@ bool Editor::setEconomyCurrencies(const std::string& text) { return changeEconom
 bool Editor::setEconomyPrices(const std::string& text) { return changeEconomy("prices", text, 1, sim::RegionEconomy::kMaxValue, &sim::RegionEconomy::prices); }
 bool Editor::setEconomyResources(const std::string& text) { return changeEconomy("resources", text, 1, 1000, &sim::RegionEconomy::resources); }
 
+bool Editor::setPlaces(const std::string& text) {
+    std::string problem;
+    const std::optional<std::vector<PlacedPlace>> parsed = parsePlacesText(text, level_, problem);
+    if (!parsed) {
+        say("places: " + problem);
+        economyStale_ = true; // show the values again
+        return false;
+    }
+    if (level_.places == *parsed) return true;
+    Level after = level_;
+    after.places = *parsed;
+    changeLevel("places: " + (parsed->empty() ? std::string("none") : placesText(*parsed)), std::move(after));
+    return true;
+}
+
 void Editor::buildEconomy() {
     economyStale_ = false;
-    economy_ = std::make_unique<Panel>(Rect{viewWidth_ - 152 - 262, kToolbarHeight + 4, 260, 88});
+    economy_ = std::make_unique<Panel>(Rect{viewWidth_ - 152 - 262, kToolbarHeight + 4, 260, 104});
     economy_->visible = economyShown_;
     const Rect box = economy_->bounds;
     const int left = box.x + 4;
     const int width = box.width - 8;
-    economy_->add<Button>(Rect{left, box.y + 4, width, 11}, "Economy of this region (item=number ...)", [] {});
+    economy_->add<Button>(Rect{left, box.y + 4, width, 11}, "Region: economy (item=number) and places", [] {});
     luna::engine::TextField& currencies = economy_->add<luna::engine::TextField>(Rect{left, box.y + 18, width, 11}, "Money", sim::formatPairs(level_.economy.currencies), 90,
                                                                                  [this](const std::string& text) { setEconomyCurrencies(text); });
     currencies.label = "Money";
     economy_->add<luna::engine::TextField>(Rect{left, box.y + 32, width, 11}, "Prices", sim::formatPairs(level_.economy.prices), 90, [this](const std::string& text) { setEconomyPrices(text); });
     economy_->add<luna::engine::TextField>(Rect{left, box.y + 46, width, 11}, "Goods", sim::formatPairs(level_.economy.resources), 90, [this](const std::string& text) { setEconomyResources(text); });
-    economy_->add<Button>(Rect{left, box.y + 62, 52, 14}, "Close", [this] { showEconomy(false); });
+    economy_->add<luna::engine::TextField>(Rect{left, box.y + 60, width, 11}, "Places", placesText(level_.places), 120, [this](const std::string& text) { setPlaces(text); });
+    economy_->add<Button>(Rect{left, box.y + 78, 52, 14}, "Close", [this] { showEconomy(false); });
 }
 
 std::vector<std::filesystem::path> Editor::levelFiles() const {

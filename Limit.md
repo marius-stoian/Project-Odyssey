@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-290):** S-US-290 DONE (Milestone-110.md, AP-111), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-291 (action sources: class, custom, event actions; no quest hook, D-54 Q11), US-292, US-293, US-294, then X-M9bc.
+
 **Resume update (2026-10-05, US-284):** S-US-284 DONE (Milestone-109.md, AP-110), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: K-M9c (kickoff notes already in D-54), then US-290 (schedules), US-291 (action sources), US-292 (NPCs act on each other), US-293 (partner defaults), US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.
 
 **Resume update (2026-10-05, US-283):** S-US-283 DONE (Milestone-108.md, AP-109), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-284 (Editor trade panel, the test level trader and wary hunter, the walk-through), then K-M9c and US-290..US-294, then the one full verify X-M9bc.

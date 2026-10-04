@@ -4,6 +4,19 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-290: day and night schedules (Mraw) - 2026-10-05
+
+**State:** On `story/US-290`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
+
+- Simulation: `src/sim/npc_schedule.h/.cpp` (blocks of time, day and night variants, the Editor text, problems, `ScheduleConfig` and its loader); `src/sim/npc_director.h/.cpp` (`NpcDirector`: places, schedules, homes, modes; the persons near the hero follow their schedule on the hour and are interrupted by hunger and danger, the far ones are visited in slices of the day; run-length coded save `npc-life.json`); `NpcExtras` carries the `schedule` block (highest layer wins) and its Editor text fields; `NpcPopulation` gets `nearFocus`, `neighbour`, `setNeed`, hour and day accessors, a cheaper `move` and a grid whose cells are kept sorted.
+- Level format version 5: `places` (`PlacedPlace`, `placesText`, `parsePlacesText`); the NPC `schedule` block.
+- Editor: the Places line of the Economy panel, the Day and Night lines of the Schedule form in the NPC panel, the Class panel and the Kinds tab.
+- Game: the director runs with the placed people, the figures walk to where it sends them (with collision), danger from hostiles, F5 refresh, `npc-life.json` saved and loaded; the menu of a person is where its figure stands.
+- Data: `assets/data/sim/schedule.json`.
+- Docs: guide (places, schedules, interruptions, the form), `docs/plans/US-290.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_schedule_test.cpp` (13 cases), `tests/game/schedule_editor_test.cpp` (5 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-284: Editor trade panel (Mraw) - 2026-10-05
 
 **State:** On `story/US-284`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc, which now ends M9b and M9c together.

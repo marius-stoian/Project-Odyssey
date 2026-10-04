@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "nightFromHour": 21,
+  "nightToHour": 6,
+  "eat": { "below": 20, "restore": 40, "place": "home" },
+  "dangerPlace": "home",
+  "scatterPixels": 48,
+  "activities": {
+    "sleep": { "energy": 12 },
+    "rest": { "energy": 4 },
+    "eat": { "hunger": 25 },
+    "work": {},
+    "idle": {},
+    "go": {},
+    "patrol": {}
+  }
+}

@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <format>
 #include <fstream>
+#include <stdexcept>
 #include <system_error>
 
 namespace odysseus::game {
@@ -290,8 +291,85 @@ Level resized(const Level& level, int width, int height) {
     std::erase_if(out.plants, [&](const PlacedPlant& p) { return !inside(p.feet); });
     std::erase_if(out.effects, [&](const PlacedEffect& p) { return !inside(p.at); });
     std::erase_if(out.lights, [&](const PlacedLight& p) { return !inside(p.at); });
+    std::erase_if(out.places, [&](const PlacedPlace& p) { return !inside(p.at); });
     out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
     return out;
+}
+
+std::string placesText(const std::vector<PlacedPlace>& places) {
+    std::string out;
+    for (const PlacedPlace& place : places) {
+        out += std::format("{}{}={},{}", out.empty() ? "" : " ", place.name, place.at.x / kTileSize, place.at.y / kTileSize);
+        for (const std::string& tag : place.tags) out += "/" + tag;
+    }
+    return out;
+}
+
+std::optional<std::vector<PlacedPlace>> parsePlacesText(std::string_view text, const Level& level, std::string& problem) {
+    std::vector<PlacedPlace> places;
+    std::size_t at = 0;
+    while (at < text.size()) {
+        while (at < text.size() && (text[at] == ' ' || text[at] == ';')) ++at;
+        std::size_t end = at;
+        while (end < text.size() && text[end] != ' ' && text[end] != ';') ++end;
+        if (end == at) break;
+        const std::string token(text.substr(at, end - at));
+        at = end;
+        const std::size_t equals = token.find('=');
+        const std::size_t comma = token.find(',', equals == std::string::npos ? 0 : equals);
+        if (equals == std::string::npos || comma == std::string::npos) {
+            problem = "\"" + token + "\" must be name=x,y with tile numbers, for example market=20,10";
+            return std::nullopt;
+        }
+        PlacedPlace place;
+        place.name = token.substr(0, equals);
+        if (!sim::validItemId(place.name) || place.name == "home") {
+            problem = "\"" + place.name + "\" is not a place name (lower-case letters, digits and -; \"home\" is built in)";
+            return std::nullopt;
+        }
+        for (const PlacedPlace& earlier : places) {
+            if (earlier.name == place.name) {
+                problem = "\"" + place.name + "\" is used twice";
+                return std::nullopt;
+            }
+        }
+        // x,y then optional /tag/tag
+        const std::size_t slash = token.find('/', comma);
+        const std::string xs = token.substr(equals + 1, comma - equals - 1);
+        const std::string ys = token.substr(comma + 1, slash == std::string::npos ? std::string::npos : slash - comma - 1);
+        int x = -1;
+        int y = -1;
+        try {
+            std::size_t used = 0;
+            x = std::stoi(xs, &used);
+            if (used != xs.size()) throw std::invalid_argument("x");
+            y = std::stoi(ys, &used);
+            if (used != ys.size()) throw std::invalid_argument("y");
+        } catch (const std::exception&) {
+            problem = "\"" + token + "\": the spot must be two whole tile numbers, like 20,10";
+            return std::nullopt;
+        }
+        if (x < 0 || y < 0 || x >= level.width || y >= level.height) {
+            problem = "\"" + token + "\" is outside the level (" + std::to_string(level.width) + " x " + std::to_string(level.height) + " tiles)";
+            return std::nullopt;
+        }
+        place.at = {x * kTileSize + kTileSize / 2, y * kTileSize + kTileSize / 2};
+        std::size_t t = slash;
+        while (t != std::string::npos && t < token.size()) {
+            const std::size_t next = token.find('/', t + 1);
+            const std::string tag = token.substr(t + 1, next == std::string::npos ? std::string::npos : next - t - 1);
+            if (!tag.empty()) {
+                if (!sim::validItemId(tag)) {
+                    problem = "\"" + tag + "\" is not a tag (lower-case letters, digits and -)";
+                    return std::nullopt;
+                }
+                place.tags.push_back(tag);
+            }
+            t = next;
+        }
+        places.push_back(place);
+    }
+    return places;
 }
 
 luna::engine::TileMap buildTileMap(const Level& level, const Definitions& definitions) {
@@ -494,6 +572,22 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
         }
     }
     if (data.contains("economy")) level.economy = sim::economyFromJson(data.at("economy"), file, "economy"); // level version 5 (US-280)
+    if (data.contains("places")) { // level version 5 (US-290)
+        if (!data.at("places").is_array()) throw DataError(file, "places", "must be a list");
+        for (std::size_t i = 0; i < data.at("places").size(); ++i) {
+            const json& entry = data.at("places").at(i);
+            const std::string where = std::format("places[{}]", i);
+            PlacedPlace place;
+            place.name = text(entry, file, "name");
+            if (!sim::validItemId(place.name) || place.name == "home") throw DataError(file, where + ".name", "must be a word of lower-case letters, digits and - (and not \"home\", which is built in)");
+            for (const PlacedPlace& earlier : level.places) {
+                if (earlier.name == place.name) throw DataError(file, where + ".name", "\"" + place.name + "\" is used twice");
+            }
+            place.at = point(json::array({entry.value("x", -1), entry.value("y", -1)}), file, where + ".x/y", level);
+            place.tags = nameList(entry, file, where, "tags");
+            level.places.push_back(place);
+        }
+    }
     return level;
 }
 
@@ -581,6 +675,15 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"ground", ground}};
     if (level.clan) data["clan"] = true;
     if (!level.economy.empty()) data["economy"] = sim::economyToJson(level.economy); // only when the owner set something, so older levels save as they were
+    if (!level.places.empty()) {
+        json places = json::array();
+        for (const PlacedPlace& p : level.places) {
+            json entry{{"name", p.name}, {"x", p.at.x}, {"y", p.at.y}};
+            if (!p.tags.empty()) entry["tags"] = p.tags;
+            places.push_back(entry);
+        }
+        data["places"] = places;
+    }
     fs::create_directories(file.parent_path());
     const fs::path temporary = fs::path(file.string() + ".tmp");
     {

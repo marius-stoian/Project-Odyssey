@@ -3,13 +3,18 @@
 
 #include "core/log.h"
 #include "game/game_rules.h"
+#include "game/npc_life.h"
+#include "game/weapons.h"
+#include "luna/engine/collision.h"
 #include "sim/npc_population.h"
 #include "sim/save.h"
 
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <fstream>
 #include <iterator>
+#include <set>
 
 namespace odysseus::game {
 
@@ -129,7 +134,9 @@ void OdysseyGame::npcKey(const luna::engine::Pointer& pointer, bool confront) {
                 chosen = std::move(subject);
             }
         };
-        for (const int index : npcPopulation_.near(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY()), static_cast<int>(kReach))) consider(npcSubject(*this, npcPopulation_.id(index)));
+        for (const PlacedCharacter& figure : bystanders_) {
+            if (npcPopulation_.indexOf(figure.id) >= 0) consider(npcSubject(*this, figure.id)); // the placed people, where their figures stand now
+        }
         for (std::size_t i = 0; i < enemies_.size(); ++i) {
             if (enemies_[i].isAlive()) consider(animalSubject(*this, i));
         }
@@ -158,6 +165,91 @@ void OdysseyGame::buildNpcPopulation() {
     tradeMarket_ = sim::TradeMarket(tradeConfig_, weatherSeed_ ^ 0x54524144ULL); // the world seed of the level, its own stream for trade
     tradeDay_ = npcPopulation_.day();
     refreshTraders();
+    // The life of the people (US-290): the places of the level, every person's home where it was placed, and the schedules.
+    npcDirector_ = sim::NpcDirector(scheduleConfig_);
+    std::vector<sim::Place> places;
+    for (const PlacedPlace& place : level_.places) places.push_back({place.name, place.at.x, place.at.y, place.tags});
+    npcDirector_.setPlaces(std::move(places));
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (const int index = npcPopulation_.indexOf(placed.id); index >= 0) npcDirector_.setHome(index, placed.feet.x, placed.feet.y);
+    }
+    npcStuck_.clear();
+    refreshLife();
+}
+
+PixelPoint OdysseyGame::npcPosition(int placedId) const {
+    for (const PlacedCharacter& figure : bystanders_) {
+        if (figure.id == placedId) return figure.feet;
+    }
+    const PlacedCharacter* placed = placedCharacter(placedId);
+    return placed != nullptr ? placed->feet : PixelPoint{};
+}
+
+// Every placed person gets the schedule of its classes, its kind and its own fields (the highest layer that has one). What a schedule names that is not there (a place
+// the level does not have, an activity nobody knows) is logged with the person's name, and the person stays at home for it.
+void OdysseyGame::refreshLife() {
+    std::set<std::string> places;
+    for (const PlacedPlace& place : level_.places) places.insert(place.name);
+    std::set<std::string> activities;
+    for (const auto& [word, effect] : scheduleConfig_.activities) activities.insert(word);
+    std::set<std::string> interactions;
+    for (const sim::rules::Interaction& interaction : interactions_.all()) interactions.insert(interaction.id);
+    for (const PlacedCharacter& placed : level_.characters) {
+        const int index = npcPopulation_.indexOf(placed.id);
+        if (index < 0) continue;
+        const sim::rules::ResolvedNpc resolved = npcClasses_.resolve(placed);
+        npcDirector_.setSchedule(index, resolved.extras.schedule);
+        for (const std::string& problem : sim::rules::scheduleProblems(resolved.extras.schedule, places, activities, interactions)) core::logWarning(std::format("Schedule of {}: {}", placed.name, problem));
+    }
+}
+
+// The figures of the placed people walk toward where the director has sent them, 2 pixels a tick, round what is in the way; one that makes no progress for ten seconds is put at
+// its goal (the simulation does not know where the walls are).
+void OdysseyGame::walkNpcPeople() {
+    for (PlacedCharacter& figure : bystanders_) {
+        const int index = npcPopulation_.indexOf(figure.id);
+        if (index < 0) continue;
+        const double toX = npcPopulation_.x(index) - figure.feet.x;
+        const double toY = npcPopulation_.y(index) - figure.feet.y;
+        const double distance = std::hypot(toX, toY);
+        if (distance < 1.0) {
+            npcStuck_.erase(figure.id);
+            continue;
+        }
+        const double step = std::min(NpcLife::kWalkPixelsPerTick, distance);
+        const luna::engine::Box box{figure.feet.x - 10.0, figure.feet.y - 10.0, 20.0, 10.0};
+        const luna::engine::Box moved = luna::engine::moveAndCollide(map_, box, toX / distance * step, toY / distance * step);
+        const PixelPoint next{static_cast<int>(std::lround(moved.x + 10.0)), static_cast<int>(std::lround(moved.y + 10.0))};
+        if (next == figure.feet) {
+            if (++npcStuck_[figure.id] >= 200) {
+                figure.feet = {npcPopulation_.x(index), npcPopulation_.y(index)};
+                npcStuck_.erase(figure.id);
+            }
+            continue;
+        }
+        npcStuck_.erase(figure.id);
+        figure.facing = facingToward(toX, toY);
+        figure.feet = next;
+    }
+}
+
+// A hostile creature within 6 m of a person sends them home; when it is gone they take up their schedule again (D-54 Q10).
+void OdysseyGame::updateNpcDanger() {
+    for (const PlacedCharacter& figure : bystanders_) {
+        const int index = npcPopulation_.indexOf(figure.id);
+        if (index < 0) continue;
+        bool danger = false;
+        for (const Enemy& enemy : enemies_) {
+            if (!enemy.isAlive()) continue;
+            const CharacterKindDef* kind = definitions_.character(enemy.kindName);
+            if (kind == nullptr || std::find(kind->tags.begin(), kind->tags.end(), "hostile") == kind->tags.end()) continue;
+            if (std::hypot(enemy.feetX() - figure.feet.x, enemy.feetY() - figure.feet.y) <= NpcLife::kDangerMetres * kTileSize) {
+                danger = true;
+                break;
+            }
+        }
+        npcDirector_.setDanger(index, danger);
+    }
 }
 
 sim::ItemCounts OdysseyGame::itemValues() const {
@@ -186,6 +278,9 @@ void OdysseyGame::tickNpcPopulation() {
         tradeDay_ = today;
         tradeMarket_.dailyUpdate(today, level_.economy); // a new day: every trader, near or far, gets its delivery (US-281)
     }
+    if (ticks_ % 20 == 0) updateNpcDanger();
+    npcDirector_.tick(npcPopulation_); // schedules, interruptions (US-290)
+    walkNpcPeople();
     if (ticks_ % 20 != 0) return;
     const std::int64_t today = npcPopulation_.day();
     for (const int index : npcPopulation_.near(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY()), static_cast<int>(kMeetingDistance))) {
@@ -201,6 +296,7 @@ bool OdysseyGame::saveNpcPopulation() const {
     try {
         sim::writeSaveText(saveDirectory_ / "npcs.json", npcPopulation_.toText());
         sim::writeSaveText(saveDirectory_ / "trade.json", tradeMarket_.toText());
+        sim::writeSaveText(saveDirectory_ / "npc-life.json", npcDirector_.toText());
     } catch (const std::exception& error) {
         core::logWarning(std::string("NPC save failed: ") + error.what());
         return false;
@@ -231,6 +327,13 @@ std::string OdysseyGame::loadNpcPopulation() {
         if (std::ifstream tradeIn(saveDirectory_ / "trade.json", std::ios::binary); tradeIn) {
             const std::string tradeText((std::istreambuf_iterator<char>(tradeIn)), std::istreambuf_iterator<char>());
             tradeMarket_.restoreState(tradeText);
+        }
+        if (std::ifstream lifeIn(saveDirectory_ / "npc-life.json", std::ios::binary); lifeIn) {
+            const std::string lifeText((std::istreambuf_iterator<char>(lifeIn)), std::istreambuf_iterator<char>());
+            std::vector<sim::Place> places = npcDirector_.places(); // the places of the level, not of the save
+            npcDirector_ = sim::NpcDirector::fromText(lifeText, scheduleConfig_);
+            npcDirector_.setPlaces(std::move(places));
+            refreshLife(); // the data of now wins over the schedules of the save; the homes and the modes stay
         }
         return {};
     } catch (const std::exception& error) {
