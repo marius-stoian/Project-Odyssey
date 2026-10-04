@@ -176,6 +176,13 @@ public:
     void setSelectedDialogue(const std::string& partner, const std::string& file);
     void setSelectedActionDenied(const std::string& id, bool denied);
     void resetSelectedNpc();
+    // The Trade section (US-284, D-54 Q6): six text fields, stock, restock (per day), picks (weighted deliveries a day), weights, wants and rare, each "item=number ..." or a
+    // list. For the selected NPC they edit its own trade values (the class and the kind add theirs; a layer can add and change but not remove what a lower one gives, so set a
+    // stock or a restock to 0 instead); each change is one step of Undo. For a class draft and a kind draft they edit the draft that Save writes. A mistake is said in the
+    // status line, changes nothing and returns false.
+    bool setSelectedTrade(const std::string& field, const std::string& text);
+    bool setClassTrade(const std::string& field, const std::string& text);
+    bool setKindTrade(const std::string& field, const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
@@ -247,6 +254,8 @@ private:
     void buildKindForm(const luna::engine::Rect& box, int y);
     const luna::engine::Texture& markerTexture(luna::engine::Renderer& renderer, const NpcMarker& marker) const;
     void buildNpcPanel(const PlacedCharacter& shown);
+    void buildNpcTradePanel(const PlacedCharacter& shown);
+    void addTradeRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set);
     void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();
@@ -328,6 +337,7 @@ private:
 
     std::vector<std::string> actionIds_;           // every interaction of the registry (US-268): the action checkboxes
     std::unique_ptr<luna::engine::Panel> npcPanel_;
+    std::unique_ptr<luna::engine::Panel> npcTrade_; // the Trade section of the NPC panel (US-284), beside it
     int partnerIndex_ = 0;                          // which partner type the dialogue row shows
     NpcClassBook* classBook_ = nullptr;
     bool classesShown_ = false;

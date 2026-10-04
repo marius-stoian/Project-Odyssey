@@ -55,7 +55,7 @@ TradeProfile readTrade(const JsonValue& block, const ExtrasError& error) {
     }
     out.stock = readTable(block.find("stock"), "trade.stock", 0, 9999, error);
     out.restockPerDay = readTable(block.find("restockPerDay"), "trade.restockPerDay", 0, 999, error);
-    out.weights = readTable(block.find("weights"), "trade.weights", 1, 1000, error);
+    out.weights = readTable(block.find("weights"), "trade.weights", 0, 1000, error);
     if (const JsonValue* deliveries = block.find("deliveries")) {
         int number = 0;
         if (!wholeNumber(*deliveries, 0, 20, number)) error(deliveries->line, "trade.deliveries must be a whole number from 0 to 20");
@@ -127,6 +127,92 @@ std::string tradeText(const TradeProfile& trade) {
 }
 
 } // namespace
+
+const std::vector<std::string>& tradeFieldNames() {
+    static const std::vector<std::string> names = {"stock", "restock", "picks", "weights", "wants", "rare"};
+    return names;
+}
+
+std::string tradeFieldText(const TradeProfile& trade, const std::string& field) {
+    if (field == "stock") return formatPairs(trade.stock);
+    if (field == "restock") return formatPairs(trade.restockPerDay);
+    if (field == "picks") return trade.deliveries < 0 ? std::string() : std::to_string(trade.deliveries);
+    if (field == "weights") return formatPairs(trade.weights);
+    std::string out;
+    if (field == "wants") {
+        for (const std::string& item : trade.wants) out += (out.empty() ? "" : " ") + item;
+    } else if (field == "rare") {
+        for (const auto& [item, word] : trade.rare) out += std::format("{}{}={}", out.empty() ? "" : " ", item, word);
+    }
+    return out;
+}
+
+bool setTradeField(TradeProfile& trade, const std::string& field, std::string_view text, std::string& problem) {
+    if (field == "stock" || field == "restock" || field == "weights") {
+        const int maximum = field == "stock" ? 9999 : (field == "restock" ? 999 : 1000);
+        const std::optional<ItemCounts> parsed = parsePairs(text, 0, maximum, &problem);
+        if (!parsed) return false;
+        (field == "stock" ? trade.stock : (field == "restock" ? trade.restockPerDay : trade.weights)) = *parsed;
+        return true;
+    }
+    if (field == "picks") {
+        if (text.find_first_not_of(' ') == std::string_view::npos) {
+            trade.deliveries = -1; // an empty field: not set
+            return true;
+        }
+        int number = 0;
+        std::size_t first = text.find_first_not_of(' ');
+        std::size_t last = text.find_last_not_of(' ');
+        const std::string_view digits = text.substr(first, last - first + 1);
+        const auto [stop, error] = std::from_chars(digits.data(), digits.data() + digits.size(), number);
+        if (error != std::errc() || stop != digits.data() + digits.size() || number < 0 || number > 20) {
+            problem = "the number of picks a day must be a whole number from 0 to 20";
+            return false;
+        }
+        trade.deliveries = number;
+        return true;
+    }
+    // wants and rare are lists of words separated by spaces, commas or semicolons.
+    std::vector<std::string> words;
+    std::size_t at = 0;
+    while (at < text.size()) {
+        while (at < text.size() && (text[at] == ' ' || text[at] == ',' || text[at] == ';')) ++at;
+        std::size_t end = at;
+        while (end < text.size() && text[end] != ' ' && text[end] != ',' && text[end] != ';') ++end;
+        if (end > at) words.emplace_back(text.substr(at, end - at));
+        at = end;
+    }
+    if (field == "wants") {
+        std::vector<std::string> wants;
+        for (const std::string& word : words) {
+            if (!validItemId(word)) {
+                problem = std::format("\"{}\" is not an item id (lower-case letters, digits and -)", word);
+                return false;
+            }
+            if (std::find(wants.begin(), wants.end(), word) == wants.end()) wants.push_back(word);
+        }
+        trade.wants = wants;
+        return true;
+    }
+    if (field == "rare") {
+        std::map<std::string, std::string> rare;
+        const std::vector<std::string>& bands = rareBandWords();
+        for (const std::string& word : words) {
+            const std::size_t equals = word.find('=');
+            const std::string item = word.substr(0, equals);
+            const std::string band = equals == std::string::npos ? std::string() : word.substr(equals + 1);
+            if (equals == std::string::npos || !validItemId(item) || std::find(bands.begin(), bands.end(), band) == bands.end()) {
+                problem = std::format("\"{}\" must be item=band, for example obsidian=friendly (bands: hostile, wary, suspicious, neutral, friendly, enchanted, lovingly)", word);
+                return false;
+            }
+            rare[item] = band;
+        }
+        trade.rare = rare;
+        return true;
+    }
+    problem = std::format("\"{}\" is not a trade field", field);
+    return false;
+}
 
 const std::vector<std::string>& rareBandWords() {
     static const std::vector<std::string> words = {"hostile", "wary", "suspicious", "neutral", "friendly", "enchanted", "lovingly"};

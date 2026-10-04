@@ -8,6 +8,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -44,6 +45,12 @@ struct NpcExtras {
 
 // A mistake in a file: the line and the message (the caller adds the file name).
 using ExtrasError = std::function<void(int line, const std::string& message)>;
+
+// The Editor's text fields of a trade profile (US-284): the six fields stock, restock, picks, weights, wants and rare as the text the owner types, and back. A mistake
+// changes nothing and says what is wrong.
+const std::vector<std::string>& tradeFieldNames();
+std::string tradeFieldText(const TradeProfile& trade, const std::string& field);
+bool setTradeField(TradeProfile& trade, const std::string& field, std::string_view text, std::string& problem);
 
 // The names of the object fields that belong to the extras ("trade", ...), for the unknown-field check of the parsers that know them.
 const std::vector<std::string>& extrasFieldNames();

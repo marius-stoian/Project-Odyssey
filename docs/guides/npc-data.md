@@ -260,7 +260,7 @@ Any NPC with a trade profile is a trader (D-54 Q7); the **Trader** class is only
 | `stock` | `{ item: count }`, 0 to 9999 | the stock at the start, and the **target** the price curve measures against (US-282); `0` = the shelf starts empty |
 | `restockPerDay` | `{ item: count }`, 0 to 999 | pieces delivered every day, as written |
 | `deliveries` | 0 to 20 | weighted random picks a day; each pick adds `deliveryAmount` (1) piece |
-| `weights` | `{ item: weight }`, 1 to 1000 | the picks are drawn from these weights plus the region's `economy.resources` |
+| `weights` | `{ item: weight }`, 0 to 1000 | the picks are drawn from these weights plus the region's `economy.resources` (0 switches an inherited weight off) |
 | `wants` | list of item ids | bought at full value; any other good at half (D-52 Q-17) |
 | `rare` | `{ item: band word }` | goods offered only at an opinion at least as high as the word (US-282): hostile, wary, suspicious, neutral, friendly, enchanted, lovingly |
 
@@ -315,3 +315,35 @@ The screen, top to bottom:
 **Money.** When the screen opens, every coin item of the region's currencies in your bag becomes your balance; when it closes (Close, or the menu key) the balance goes back as coin, highest value first; a remainder that no coin can make waits in the balance for the next visit (`trade.json` keeps it). Any currency item is worth its value anywhere and is never repriced. In a currency region, what you gave beyond what you took is paid back to your balance from the trader's purse, up to what the purse holds (30 at the start, +5 a day, at most 60: `purse` in `trade.json`); where there is no currency nothing is paid back, so ask for goods.
 
 **After a deal** the goods move between your bag and the trader's stock, the prices drift (ADR-023), and the trader's opinion of you rises by the `trade` event of `opinions.json` (+5).
+
+## Editor: the Trade section (US-284)
+
+An NPC panel (select a placed NPC with the Select tool) has a **Trade** section beside it, and the **Class** panel and the **Kinds** tab have the same six lines under **Deny**. Each line is plain text:
+
+| Line | Type | Example | Meaning |
+|---|---|---|---|
+| **Stock** | `item=number ...` | `flint=6 fur=2` | the stock at the start and the target of the price curve; `flint=0` is an empty shelf |
+| **Restock/day** | `item=number ...` | `flint=1` | pieces delivered every day |
+| **Picks/day** | a number 0 to 20, or empty | `2` | weighted random deliveries a day |
+| **Weights** | `item=number ...` | `fur=3` | how likely each good is in the random deliveries (0 to 1000; the region's **Goods** from the Economy panel add theirs) |
+| **Wants** | items separated by spaces or commas | `berries fur` | goods the trader buys at full value (the rest at half) |
+| **Rare** | `item=band ...` | `obsidian=friendly` | goods kept for people it likes: hostile, wary, suspicious, neutral, friendly, enchanted, lovingly |
+
+A line is read when you press Enter or click elsewhere. A mistake is said in the status line and changes nothing (`trade stock: "fur": the number after = must be whole`).
+
+- **NPC panel**: the section shows and edits the NPC's **own** values; the class and the kind add theirs (the title says what the NPC trades in all, in its hint). A layer can add or change an entry but not remove one a lower layer gives: set a stock or a restock to `0`, or a weight to `0`, to switch an inherited one off. Every line is one step of **Undo**; typing the same text again is none.
+- **Class panel and Kinds tab**: the lines edit the draft; **Save** writes the file (`"trade": {...}` in the order of the table of US-281) and every NPC of the class or kind that does not set the value itself follows it, in the Editor and in play (F1).
+
+## The test level: the trader and the wary hunter (US-284)
+
+`assets/levels/npc-test.json` is now a small market: the region has `shells` for money (value 1) and delivers berries (weight 3) and flint (weight 2) to its traders. **Tala** (trader, neutral) has flint 6, fur 2 and berries 4, restocks a flint a day, makes one random delivery a day (fur, or the region's berries and flint) and wants berries. **Harn** (hunter, **wary**) has fur 4 and a spearhead, restocks a fur a day, wants flint and keeps the spearhead for people who are friendly. Walk-through of the trade steps (added to the table of the US-270 walk-through):
+
+| Step | Do | Expect |
+|---|---|---|
+| 1 | Right-click Tala: **Trade** | the screen: your bag, her stock with prices, the balance bar; `Money here: Shells = 1` |
+| 2 | Give berries (she wants them: full value), take flint | the bar fills, **Deal** works, the goods move |
+| 3 | Pick up some shells, trade again, pay from the balance, **Close** | the change comes back as shells |
+| 4 | Press **X** next to Harn | **Ask about rare goods** is greyed out: `Rare goods are kept for people they like better` |
+| 5 | Trade with Harn: **Haggle** once | a chance and a roll; a second try today is greyed out |
+| 6 | Talk kindly to Harn until he is friendly, press **X** again | **Ask about rare goods** is offered; its message names the spearhead; the trade screen lists it |
+| 7 | Wait one in-game day, trade with Tala again | one more flint than yesterday (plus the random delivery) |

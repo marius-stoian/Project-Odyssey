@@ -435,6 +435,7 @@ add_executable(odysseus_game_tests
     tests/game/trade_stock_test.cpp
     tests/game/trade_gate_test.cpp
     tests/game/trade_screen_test.cpp
+    tests/game/trade_editor_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
