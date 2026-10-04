@@ -275,3 +275,22 @@ Any NPC with a trade profile is a trader (D-54 Q7); the **Trader** class is only
 **Saved.** The stock, the price drift and the haggle day of every trader are in `trade.json` next to `npcs.json` (versioned JSON). The profiles are data and are read again at every start; the saved stock is then put back. F5 reads class and kind files again and gives every trader its new profile without touching its stock.
 
 A trader of a class whose file has a mistake in `trade` is skipped like any class file with a mistake (`npc-classes/trader.json:7: trade.stock.Flint ...`). A level with a mistake in a placed NPC's `trade` is refused with the file, the character (`characters[0]`) and the problem.
+
+## Trade: prices and reputation (US-282, ADR-023)
+
+A price is the region's base price for the good, times the **stock curve**, times the **drift**, with the trader's **attitude** to the hero applied last. All whole numbers, in thousandths of a value unit; the formula and the reasons are in `docs/adr/ADR-023-trade-prices.md`. Every number is in `assets/data/sim/trade.json`:
+
+| Section | Fields | Meaning |
+|---|---|---|
+| `stock` | `minimumCap`, `capFactor`, `defaultTarget`, `deliveryAmount`, `catchUpDays` | restock caps and the target of a good the trader does not stock (US-281) |
+| `curve` | `minPercent`, `maxPercent` | the stock curve is `100 x target / stock`, clamped to these (50 and 200) |
+| `drift` | `percentPerTrade`, `maxPercent`, `decayPercentPerDay` | each piece bought or sold nudges the price (3), up to a cap (40); it decays back daily (a quarter of itself) |
+| `reputation` | `percent` (by attitude word), `refuse` (list of words) | the percent added to what the hero pays: friendly -10, neutral 0, wary and suspicious +25, enchanted and lovingly -20; a word in `refuse` (hostile) will not trade |
+| `wants` | `wantPercent`, `otherPercent` | what the trader pays for the hero's goods: its wants at 100%, any other good at 50% |
+| `haggle` | `baseChance`, `opinionDivisor`, `perPersuasion`, `minChance`, `maxChance`, `discountPercent`, `failureOpinion` | the Haggle button of the trade screen (US-283) |
+
+**Reputation bands** use the same attitude word the title of the NPC menu shows (opinion bands of `opinions.json`): a friendly trader is cheaper than a suspicious one; a devoted one (`enchanted`, `lovingly`) unlocks rare stock.
+
+**Rare goods.** A trade profile's `rare` table names goods and the lowest band word that unlocks each (for example `"obsidian": "friendly"`, opinion 10 or more). Below it the good is not offered. The action **Ask about rare goods** (`assets/data/interactions/rare-goods.json`) appears for a trader with a `rare` table; when the hero does not stand high enough for everything it keeps back, the Actions pop-up (key **X**) lists it greyed out with the reason `Rare goods are kept for people they like better`. Its tags are given by the game: `has-rare-goods` (a rare table) and `rare-open` (nothing is kept back from this hero).
+
+Currency items are never repriced: shells worth 1 cost 1 from a friendly trader and from a suspicious one.

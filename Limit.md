@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-282):** S-US-282 DONE (Milestone-107.md, AP-108), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-283 (the trade screen for any trader, barter and currency, Haggle), US-284 (Editor trade panel), then K-M9c and US-290..US-294, then X-M9bc.
+
 **Resume update (2026-10-05, US-281):** S-US-281 DONE (Milestone-106.md, AP-107), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-282 (prices from base x stock curve x drift, reputation, gates), US-283 (the trade screen), US-284 (Editor trade panel), then K-M9c and US-290..US-294, then X-M9bc.
 
 **Resume update (2026-10-05, US-280):** S-US-280 DONE (Milestone-105.md, AP-106), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: S-US-281 (trader stock, restock, wants), then US-282..US-284, K-M9c, US-290..US-294 and X-M9bc.

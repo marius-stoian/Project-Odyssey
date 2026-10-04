@@ -433,6 +433,7 @@ add_executable(odysseus_game_tests
     tests/game/npc_test_level_test.cpp
     tests/game/economy_editor_test.cpp
     tests/game/trade_stock_test.cpp
+    tests/game/trade_gate_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -491,6 +492,7 @@ add_executable(odysseus_sim_tests
     tests/sim/opinion_test.cpp
     tests/sim/economy_test.cpp
     tests/sim/trade_market_test.cpp
+    tests/sim/trade_price_test.cpp
     tests/sim/npc_kind_test.cpp
     tests/sim/npc_population_test.cpp
     tests/sim/npc_scale_test.cpp

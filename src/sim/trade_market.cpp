@@ -7,7 +7,10 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <format>
+#include <iterator>
+#include <optional>
 
 namespace odysseus::sim {
 
@@ -209,8 +212,107 @@ void TradeMarket::dailyUpdate(std::int64_t today, const RegionEconomy& economy) 
         if (today <= trader.restockDay) continue;
         const std::int64_t first = std::max(trader.restockDay + 1, today - config_.catchUpDays + 1);
         for (std::int64_t day = first; day <= today; ++day) deliver(id, trader, day, economy);
+        // Every day the drift falls back toward 0 by a share of itself, at least one point (US-282); a long absence counts as at most a month of it.
+        const std::int64_t days = std::min<std::int64_t>(today - trader.restockDay, 30);
+        for (std::int64_t day = 0; day < days; ++day) {
+            for (auto it = trader.drift.begin(); it != trader.drift.end();) {
+                const int step = std::max(1, std::abs(it->second) * config_.driftDecayPercent / 100);
+                it->second = it->second > 0 ? std::max(0, it->second - step) : std::min(0, it->second + step);
+                it = it->second == 0 ? trader.drift.erase(it) : std::next(it);
+            }
+        }
         trader.restockDay = today;
     }
+}
+
+int TradeMarket::basePrice(const RegionEconomy& economy, const ItemCounts& itemValues, const std::string& item) {
+    if (const auto set = economy.prices.find(item); set != economy.prices.end()) return std::max(1, set->second);
+    if (const auto value = itemValues.find(item); value != itemValues.end()) return std::max(1, value->second);
+    return 1;
+}
+
+int TradeMarket::stockRatioPercent(int id, const std::string& item) const {
+    const long long ratio = 100LL * target(id, item) / std::max(1, stock(id, item));
+    return static_cast<int>(std::clamp<long long>(ratio, config_.curveMinPercent, config_.curveMaxPercent));
+}
+
+int TradeMarket::drift(int id, const std::string& item) const {
+    const Trader* trader = find(id);
+    if (trader == nullptr) return 0;
+    const auto found = trader->drift.find(item);
+    return found == trader->drift.end() ? 0 : found->second;
+}
+
+void TradeMarket::nudge(int id, const std::string& item, int pieces, bool heroBuys) {
+    const auto found = traders_.find(id);
+    if (found == traders_.end() || pieces <= 0) return;
+    int& value = found->second.drift[item];
+    value = std::clamp(value + (heroBuys ? 1 : -1) * pieces * config_.driftPerTrade, -config_.driftMaxPercent, config_.driftMaxPercent);
+    if (value == 0) found->second.drift.erase(item);
+}
+
+// market = base x ratio% x (100 + drift)%, in thousandths, rounded half up once at the end.
+long long TradeMarket::marketMilli(int id, const std::string& item, const RegionEconomy& economy, const ItemCounts& itemValues) const {
+    if (economy.isCurrency(item)) return static_cast<long long>(economy.currencyValue(item)) * 1000;
+    const long long numerator = 1000LL * basePrice(economy, itemValues, item) * stockRatioPercent(id, item) * (100 + drift(id, item));
+    return std::max<long long>(1, (numerator + 5000) / 10000);
+}
+
+// The attitude is applied last, to the exact figure, so that the rounding happens once: market x (100 + percent)%.
+long long TradeMarket::heroPaysMilli(int id, const std::string& item, Attitude attitude, const RegionEconomy& economy, const ItemCounts& itemValues) const {
+    if (!isTrader(id)) return 0;
+    if (economy.isCurrency(item)) return marketMilli(id, item, economy, itemValues);
+    const long long numerator = 1000LL * basePrice(economy, itemValues, item) * stockRatioPercent(id, item) * (100 + drift(id, item)) * (100 + reputationPercent(attitude));
+    return std::max<long long>(1, (numerator + 500000) / 1000000);
+}
+
+long long TradeMarket::traderPaysMilli(int id, const std::string& item, Attitude attitude, const RegionEconomy& economy, const ItemCounts& itemValues) const {
+    if (!isTrader(id)) return 0;
+    if (economy.isCurrency(item)) return marketMilli(id, item, economy, itemValues);
+    const long long numerator = 1000LL * basePrice(economy, itemValues, item) * stockRatioPercent(id, item) * (100 + drift(id, item)) * std::max(0, 100 - reputationPercent(attitude)) * wantPercent(id, item);
+    return std::max<long long>(1, (numerator + 50000000) / 100000000);
+}
+
+bool TradeMarket::isRare(int id, const std::string& item) const {
+    const Trader* trader = find(id);
+    return trader != nullptr && trader->profile.rare.count(item) != 0;
+}
+
+std::string TradeMarket::rareWord(int id, const std::string& item) const {
+    const Trader* trader = find(id);
+    if (trader == nullptr) return {};
+    const auto found = trader->profile.rare.find(item);
+    return found == trader->profile.rare.end() ? std::string() : found->second;
+}
+
+bool TradeMarket::rareUnlocked(int id, const std::string& item, int opinion, const OpinionConfig& opinions) const {
+    const std::string word = rareWord(id, item);
+    if (word.empty()) return true; // not a rare good
+    const std::optional<Attitude> band = attitudeFromName(word);
+    for (const OpinionConfig::Band& entry : opinions.bands) {
+        if (band && entry.word == *band) return opinion >= entry.from;
+    }
+    return false; // a word that is no band of the scale unlocks nothing
+}
+
+std::vector<std::string> TradeMarket::offeredGoods(int id, int opinion, const OpinionConfig& opinions) const {
+    std::vector<std::string> out;
+    const Trader* trader = find(id);
+    if (trader == nullptr) return out;
+    for (const auto& entry : trader->stock) {
+        if (entry.second > 0 && rareUnlocked(id, entry.first, opinion, opinions)) out.push_back(entry.first);
+    }
+    return out;
+}
+
+std::vector<std::string> TradeMarket::lockedGoods(int id, int opinion, const OpinionConfig& opinions) const {
+    std::vector<std::string> out;
+    const Trader* trader = find(id);
+    if (trader == nullptr) return out;
+    for (const auto& entry : trader->stock) {
+        if (entry.second > 0 && !rareUnlocked(id, entry.first, opinion, opinions)) out.push_back(entry.first);
+    }
+    return out;
 }
 
 int TradeMarket::addStock(int id, const std::string& item, int count) {
