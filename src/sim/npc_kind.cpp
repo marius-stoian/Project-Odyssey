@@ -22,10 +22,15 @@ public:
             error(root_.line, "the file must hold one {...} object");
             return std::nullopt;
         }
-        static const std::set<std::string> known = {"kind", "classes", "attitude", "tags", "dialogues", "actions"};
+        std::set<std::string> known = {"kind", "classes", "attitude", "tags", "dialogues", "actions"};
+        std::string knownText = "kind, classes, attitude, tags, dialogues, actions";
+        for (const std::string& extra : extrasFieldNames()) {
+            known.insert(extra);
+            knownText += ", " + extra;
+        }
         for (std::size_t i = 0; i < root_.keys.size(); ++i) {
             if (known.count(root_.keys[i]) == 0) {
-                error(root_.keyLines[i], std::format("unknown field \"{}\" (known: kind, classes, attitude, tags, dialogues, actions)", root_.keys[i]));
+                error(root_.keyLines[i], std::format("unknown field \"{}\" (known: {})", root_.keys[i], knownText));
             }
         }
         if (const JsonValue* kind = root_.find("kind"); kind != nullptr && kind->isString() && !kind->text.empty()) {
@@ -70,6 +75,7 @@ public:
                 out.layer.deny = list(actions->find("deny"), "actions.deny");
             }
         }
+        out.layer.extras = parseExtras(root_, [this](int at, const std::string& message) { error(at, message); });
         if (report_.errors.size() != before) return std::nullopt;
         return out;
     }
@@ -172,6 +178,7 @@ std::string toJson(const NpcKind& k) {
         out += " }";
     }
     if (!k.layer.allow.empty() || !k.layer.deny.empty()) out += std::format(",\n  \"actions\": {{ \"allow\": {}, \"deny\": {} }}", strings(k.layer.allow), strings(k.layer.deny));
+    for (const auto& [name, text] : extrasFieldTexts(k.layer.extras)) out += std::format(",\n  \"{}\": {}", name, text);
     out += "\n}\n";
     return out;
 }
@@ -199,6 +206,7 @@ ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, con
         addTags(npcClass->tags);
         for (const auto& [partner, file] : npcClass->dialogues) out.dialogues[partner] = file;
         applyActions(out.actions, npcClass->allow, npcClass->deny);
+        mergeExtras(out.extras, npcClass->extras);
     }
     // Then the kind, then the placed NPC.
     for (const NpcLayer* layer : {kind, &placed}) {
@@ -206,7 +214,9 @@ ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, con
         addTags(layer->tags);
         for (const auto& [partner, file] : layer->dialogues) out.dialogues[partner] = file;
         applyActions(out.actions, layer->allow, layer->deny);
+        mergeExtras(out.extras, layer->extras);
     }
+    if (!out.extras.trade.empty()) tags.insert("trader"); // any NPC with a trade profile can trade; the Trader class is only a default profile (D-54 Q7)
     out.tags.assign(tags.begin(), tags.end());
     return out;
 }

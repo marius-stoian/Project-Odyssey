@@ -155,12 +155,29 @@ void OdysseyGame::buildNpcPopulation() {
         npcPopulation_.add(placed.id, placed.kind, age, placed.family, placed.feet.x, placed.feet.y, start);
     }
     registerCreatures();
+    tradeMarket_ = sim::TradeMarket(tradeConfig_, weatherSeed_ ^ 0x54524144ULL); // the world seed of the level, its own stream for trade
+    tradeDay_ = npcPopulation_.day();
+    refreshTraders();
+}
+
+// Every placed person whose classes, kind and own fields give a trade profile is a trader (D-54 Q7: the Trader class is only a default profile). A trader that is
+// already registered keeps its stock and takes the new profile.
+void OdysseyGame::refreshTraders() {
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (!isPersonKind(placed)) continue;
+        const sim::rules::ResolvedNpc resolved = npcClasses_.resolve(placed);
+        if (!resolved.extras.trade.empty()) tradeMarket_.addTrader(placed.id, resolved.extras.trade, tradeDay_);
+    }
 }
 
 // One game tick of the placed people: the clock of their days, and meeting the hero (found through the grid, so a crowd costs nothing here).
 void OdysseyGame::tickNpcPopulation() {
     npcPopulation_.setFocus(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY())); // the hero is the centre of the detail (ADR-022)
     npcPopulation_.tick();
+    if (const std::int64_t today = npcPopulation_.day(); today > tradeDay_) {
+        tradeDay_ = today;
+        tradeMarket_.dailyUpdate(today, level_.economy); // a new day: every trader, near or far, gets its delivery (US-281)
+    }
     if (ticks_ % 20 != 0) return;
     const std::int64_t today = npcPopulation_.day();
     for (const int index : npcPopulation_.near(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY()), static_cast<int>(kMeetingDistance))) {
@@ -175,6 +192,7 @@ void OdysseyGame::tickNpcPopulation() {
 bool OdysseyGame::saveNpcPopulation() const {
     try {
         sim::writeSaveText(saveDirectory_ / "npcs.json", npcPopulation_.toText());
+        sim::writeSaveText(saveDirectory_ / "trade.json", tradeMarket_.toText());
     } catch (const std::exception& error) {
         core::logWarning(std::string("NPC save failed: ") + error.what());
         return false;
@@ -201,6 +219,11 @@ std::string OdysseyGame::loadNpcPopulation() {
             }
         }
         registerCreatures(); // creatures the save did not know (the level gained them)
+        tradeDay_ = npcPopulation_.day();
+        if (std::ifstream tradeIn(saveDirectory_ / "trade.json", std::ios::binary); tradeIn) {
+            const std::string tradeText((std::istreambuf_iterator<char>(tradeIn)), std::istreambuf_iterator<char>());
+            tradeMarket_.restoreState(tradeText);
+        }
         return {};
     } catch (const std::exception& error) {
         return std::string("The saved people could not be read: ") + error.what();

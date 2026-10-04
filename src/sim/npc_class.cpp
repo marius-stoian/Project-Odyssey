@@ -28,10 +28,15 @@ public:
             error(root_.line, "the file must hold one {...} object");
             return std::nullopt;
         }
-        static const std::set<std::string> known = {"id", "label", "colour", "icon", "tags", "dialogues", "actions"};
+        std::set<std::string> known = {"id", "label", "colour", "icon", "tags", "dialogues", "actions"};
+        std::string knownText = "id, label, colour, icon, tags, dialogues, actions";
+        for (const std::string& extra : extrasFieldNames()) {
+            known.insert(extra);
+            knownText += ", " + extra;
+        }
         for (std::size_t i = 0; i < root_.keys.size(); ++i) {
             if (known.count(root_.keys[i]) == 0) {
-                error(root_.keyLines[i], std::format("unknown field \"{}\" (known: id, label, colour, icon, tags, dialogues, actions)", root_.keys[i]));
+                error(root_.keyLines[i], std::format("unknown field \"{}\" (known: {})", root_.keys[i], knownText));
             }
         }
         out.id = text("id", true);
@@ -80,6 +85,7 @@ public:
                 out.deny = list(actions->find("deny"), "actions.deny");
             }
         }
+        out.extras = parseExtras(root_, [this](int at, const std::string& message) { error(at, message); });
         if (report_.errors.size() != before) return std::nullopt;
         return out;
     }
@@ -207,7 +213,9 @@ std::string toJson(const NpcClass& c) {
     out += "  \"dialogues\": {";
     for (std::size_t i = 0; i < c.dialogues.size(); ++i) out += std::format("{} {}: {}", i != 0 ? "," : "", quoteJson(c.dialogues[i].first), quoteJson(c.dialogues[i].second));
     out += std::string(c.dialogues.empty() ? "" : " ") + "},\n";
-    out += std::format("  \"actions\": {{ \"allow\": {}, \"deny\": {} }}\n}}\n", strings(c.allow), strings(c.deny));
+    out += std::format("  \"actions\": {{ \"allow\": {}, \"deny\": {} }}", strings(c.allow), strings(c.deny));
+    for (const auto& [name, text] : extrasFieldTexts(c.extras)) out += std::format(",\n  \"{}\": {}", name, text);
+    out += "\n}\n";
     return out;
 }
 

@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-281: trader stock (Mraw) - 2026-10-05
+
+**State:** On `story/US-281`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Simulation: `src/sim/npc_extras.h/.cpp` (the `trade` block: `TradeProfile`, reading with line-numbered mistakes, writing, merging; `NpcExtras` is the one place later stories add schedules and actions); `src/sim/trade_market.h/.cpp` (`TradeMarket`: limited stock, the daily restock with fixed pieces and seeded weighted picks, wants, saved state; `PriceConfig` and its loader).
+- Classes, kinds, placed NPCs: `extras` in `NpcClass`, `NpcLayer`, `ResolvedNpc` and `PlacedCharacter`; a resolved NPC with a profile carries the tag `trader` (D-54 Q7); the level reader and writer carry the block.
+- Game: the traders are registered from the placed people, restocked once a day, saved as `trade.json`, refreshed by F5.
+- Data: `assets/data/sim/trade.json` (all trade numbers).
+- Docs: guide, `docs/plans/US-281.md`, learning journal.
+- Tests (not yet run): `tests/sim/trade_market_test.cpp` (8 cases), `tests/game/trade_stock_test.cpp` (5 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-280: currencies per region (Mraw) - 2026-10-05
 
 **State:** On `story/US-280`, merged into `qa`. Written without running anything (owner rule, 2026-10-05: no tests or builds until M9b and M9c are both fully implemented); the one full verify is X-M9bc.

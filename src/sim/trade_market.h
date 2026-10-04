@@ -1,0 +1,121 @@
+#pragma once
+
+#include "boundary.h"
+
+#include "sim/economy.h"
+#include "sim/npc_extras.h"
+#include "sim/opinion.h"
+
+#include <array>
+#include <cstdint>
+#include <filesystem>
+#include <map>
+#include <string>
+#include <string_view>
+
+namespace odysseus::sim {
+
+// Every number of the trade rules, from assets/data/sim/trade.json (D-54 Q3, ADR-023). Whole numbers only; percents are whole percents.
+struct PriceConfig {
+    // Stock (US-281).
+    int minimumCap = 10;     // a trader never restocks a good beyond max(its starting stock * capFactor, this)
+    int capFactor = 2;
+    int defaultTarget = 6;   // the target of a good the trader's profile does not stock
+    int deliveryAmount = 1;  // pieces one weighted pick delivers
+    int catchUpDays = 7;     // after a long absence at most this many days of deliveries arrive at once
+    // The stock-ratio curve (US-282): the price follows target / stock, clamped.
+    int curveMinPercent = 50;
+    int curveMaxPercent = 200;
+    // The drift (US-282): each trade nudges the price of that good, and it decays back every day.
+    int driftPerTrade = 3;
+    int driftMaxPercent = 40;
+    int driftDecayPercent = 25;
+    // Reputation (US-282): the percent added to what the hero pays, by the trader's attitude to the hero; some attitudes refuse to trade at all.
+    std::array<int, kAttitudeCount> reputation{-10, 0, 25, 0, 10, 25, -20, -20, 10}; // in the order of the Attitude enum
+    std::array<bool, kAttitudeCount> refuses{false, false, false, true, false, false, false, false, false};
+    // What a trader pays for the hero's goods (D-52 Q-17): its wants at full value, any other good at half.
+    int wantPercent = 100;
+    int otherPercent = 50;
+    // Haggle (US-283): chance = clamp(base + opinion / opinionDivisor + persuasion * perPersuasion, min, max) percent.
+    int haggleBase = 20;
+    int haggleOpinionDivisor = 4;
+    int hagglePerPersuasion = 3;
+    int haggleMin = 5;
+    int haggleMax = 85;
+    int haggleDiscountPercent = 10;
+    int haggleFailureOpinion = 5;
+};
+
+PriceConfig loadPriceConfig(const std::filesystem::path& file);
+
+// The stock of the traders (US-281): placed NPCs with a trade profile (and, from US-283, the hero's balance). Limited stock, a delivery every day (fixed pieces and
+// weighted random picks from the trader's goods and the region's), what each trader wants, saved with the game. Deterministic: ordered maps, integers, and a random stream
+// per (seed, day, trader) so the same days always bring the same goods (Charter rule 6). Far traders restock here too, in the one daily pass, whatever their distance
+// from the hero (US-263): the cost is the number of traders, not of persons.
+class TradeMarket {
+public:
+    struct Trader {
+        rules::TradeProfile profile; // data: read again at every start, not saved
+        ItemCounts stock;
+        ItemCounts drift;            // US-282: item -> percent, signed
+        std::int64_t restockDay = 0; // the last day whose delivery has arrived
+        std::int64_t haggleDay = -1; // US-283: the day of the last try, -1 never
+        bool haggleWon = false;      // that try succeeded: its discount holds for that day
+    };
+
+    explicit TradeMarket(PriceConfig config = {}, std::uint64_t seed = 0) : config_(config), seed_(seed) {}
+
+    const PriceConfig& config() const { return config_; }
+    void setConfig(const PriceConfig& config) { config_ = config; }
+    void setSeed(std::uint64_t seed) { seed_ = seed; }
+    std::uint64_t seed() const { return seed_; }
+
+    // Registers a trader: a placed NPC with a trade profile. It starts with the profile's stock unless a saved state for the id was restored; `today` is the day it
+    // joins (its first delivery is tomorrow). False when the id is already a trader (its profile is replaced, its stock kept).
+    bool addTrader(int id, const rules::TradeProfile& profile, std::int64_t today);
+    bool isTrader(int id) const { return traders_.count(id) != 0; }
+    const Trader* find(int id) const;
+    std::size_t traderCount() const { return traders_.size(); }
+
+    int stock(int id, const std::string& item) const;
+    // What the trader aims to keep of a good: its starting stock, or `defaultTarget` for a good it does not stock.
+    int target(int id, const std::string& item) const;
+    // The most a restock brings a good up to.
+    int cap(int id, const std::string& item) const;
+    bool wants(int id, const std::string& item) const;
+    // What the trader pays for the hero's good, in percent of its price: wantPercent for a want, otherPercent for the rest.
+    int wantPercent(int id, const std::string& item) const;
+
+    // A new day has begun: every trader gets the deliveries of the days since its last one (at most `catchUpDays`). Calling it twice for the same day changes nothing.
+    void dailyUpdate(std::int64_t today, const RegionEconomy& economy);
+
+    // Stock moves with trades (US-283). Both return what really moved.
+    int addStock(int id, const std::string& item, int count);
+    int removeStock(int id, const std::string& item, int count);
+
+    // The saved state (versioned JSON; the data of the profiles is read again at every start) and its reader: `restoreState` keeps the states until the traders are
+    // registered with addTrader. A damaged text is a DataError.
+    std::string toText() const;
+    void restoreState(std::string_view text);
+    std::uint64_t hash() const;
+
+    static constexpr int kSaveVersion = 1;
+
+private:
+    struct SavedState {
+        ItemCounts stock;
+        ItemCounts drift;
+        std::int64_t restockDay = 0;
+        std::int64_t haggleDay = -1;
+        bool haggleWon = false;
+    };
+    void deliver(int id, Trader& trader, std::int64_t day, const RegionEconomy& economy);
+    int addUpToCap(int id, Trader& trader, const std::string& item, int count);
+
+    PriceConfig config_;
+    std::uint64_t seed_;
+    std::map<int, Trader> traders_;
+    std::map<int, SavedState> pending_; // restored states of traders that are not registered (yet): they are kept in the next save
+};
+
+} // namespace odysseus::sim

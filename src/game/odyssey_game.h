@@ -47,6 +47,7 @@
 #include "sim/smalltalk.h"
 #include "game/npc_class_book.h"
 #include "sim/npc_population.h"
+#include "sim/trade_market.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -125,6 +126,9 @@ public:
     std::string attitudeWordOf(int placedId) const;
     const sim::OpinionConfig& npcOpinions() const { return npcOpinions_; }
     bool saveNpcPopulation() const;
+    // The stock of the traders (US-281): placed NPCs with a trade profile. Restocked once a day, saved with the placed people (trade.json).
+    const sim::TradeMarket& tradeMarket() const { return tradeMarket_; }
+    sim::TradeMarket& tradeMarketMutable() { return tradeMarket_; }
     NpcClassBook& npcClasses() { return npcClasses_; }
     const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
@@ -285,6 +289,7 @@ public:
     std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
     void buildNpcPopulation();
+    void refreshTraders(); // registers the traders of the level again with their data of now (F5, a new class file), keeping the stock they have
     void syncEditorActions();
     void registerCreatures();
     void tickNpcPopulation();
@@ -394,6 +399,9 @@ private:
     sim::NeedsConfig npcNeeds_;
     sim::OpinionConfig npcOpinions_;   // US-264
     sim::NpcPopulation npcPopulation_; // US-262
+    sim::PriceConfig tradeConfig_;     // assets/data/sim/trade.json (US-281)
+    sim::TradeMarket tradeMarket_;     // the stock of the traders (US-281)
+    std::int64_t tradeDay_ = 0;        // the day the traders were last restocked
     std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;

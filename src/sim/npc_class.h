@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "sim/interaction.h"
+#include "sim/npc_extras.h"
 
 #include <filesystem>
 #include <optional>
@@ -24,6 +25,7 @@ struct NpcClass {
     std::vector<std::pair<std::string, std::string>> dialogues;
     std::vector<std::string> allow; // interaction ids this class may do
     std::vector<std::string> deny;  // interaction ids this class may never do (a deny always wins)
+    NpcExtras extras;               // what the class trades, and later its schedule and actions (M9b, M9c): the defaults of every NPC of this class
     std::string file;               // "npc-classes/trader.json"
     friend bool operator==(const NpcClass&, const NpcClass&) = default;
 };

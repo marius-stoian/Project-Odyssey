@@ -250,3 +250,28 @@ Item ids are lower-case letters, digits and `-`. Money is a whole number everywh
 | **Goods** | `resources`, for example `berries=5 flint=3` |
 
 A line is read when you press Enter or click elsewhere. A mistake (a name that is not an item id, a number out of range, a missing `=`) is said in the status line and changes nothing. Every table is one step of **Undo**; an empty line clears the table (no money: barter only); typing the same table again is no step.
+
+## Trade: the `trade` block and the daily restock (US-281, level version 5)
+
+Any NPC with a trade profile is a trader (D-54 Q7); the **Trader** class is only a default profile. The `trade` block can be written in a class file, in a kind file and on a placed NPC. The layers merge: class, then kind, then the placed NPC; the tables merge per key (the later layer wins), `wants` is the union, `deliveries` is the last one set. Every field is optional; fields are written in this order.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `stock` | `{ item: count }`, 0 to 9999 | the stock at the start, and the **target** the price curve measures against (US-282); `0` = the shelf starts empty |
+| `restockPerDay` | `{ item: count }`, 0 to 999 | pieces delivered every day, as written |
+| `deliveries` | 0 to 20 | weighted random picks a day; each pick adds `deliveryAmount` (1) piece |
+| `weights` | `{ item: weight }`, 1 to 1000 | the picks are drawn from these weights plus the region's `economy.resources` |
+| `wants` | list of item ids | bought at full value; any other good at half (D-52 Q-17) |
+| `rare` | `{ item: band word }` | goods offered only at an opinion at least as high as the word (US-282): hostile, wary, suspicious, neutral, friendly, enchanted, lovingly |
+
+```json
+"trade": { "stock": { "flint": 6, "fur": 2 }, "restockPerDay": { "flint": 2 }, "deliveries": 1, "weights": { "fur": 3 }, "wants": ["berries"], "rare": { "obsidian": "friendly" } }
+```
+
+**Limited stock.** A restock never brings a good above its cap: `max(starting stock x capFactor, minimumCap)` (2 and 10 in `assets/data/sim/trade.json`). A good the trader does not stock has a cap of 10. A trade may leave a trader with more than its cap (it keeps what you sell it); only deliveries stop at the cap.
+
+**Daily restock.** When a new in-game day begins, every trader gets its fixed `restockPerDay` pieces and then `deliveries` weighted random picks. The random stream depends only on the world seed (the level name, or `--seed`), the day and the trader, so the same day always brings the same goods. A trader far from the hero is restocked in the same one pass (the cost is the number of traders); after a long absence at most 7 days of deliveries arrive at once (`catchUpDays`).
+
+**Saved.** The stock, the price drift and the haggle day of every trader are in `trade.json` next to `npcs.json` (versioned JSON). The profiles are data and are read again at every start; the saved stock is then put back. F5 reads class and kind files again and gives every trader its new profile without touching its stock.
+
+A trader of a class whose file has a mistake in `trade` is skipped like any class file with a mistake (`npc-classes/trader.json:7: trade.stock.Flint ...`). A level with a mistake in a placed NPC's `trade` is refused with the file, the character (`characters[0]`) and the problem.

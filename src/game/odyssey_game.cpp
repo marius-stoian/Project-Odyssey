@@ -88,6 +88,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
+    tradeConfig_ = sim::loadPriceConfig(dataDirectory / "sim" / "trade.json");
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -1771,7 +1772,10 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (intents.pressed(luna::engine::Intent::Reload)) {
         reloadInteractions();
-        if (npcClasses_.reload()) editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
+        if (npcClasses_.reload()) {
+            editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
+            refreshTraders();         // and the trade profiles that came with them (US-281)
+        }
     }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
