@@ -2142,23 +2142,9 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     luna::engine::ScaledRenderer world(output, settings_.cameraZoom);
     luna::engine::Renderer& renderer = world;
     // The world is lit (US-240): the ambient colour tints everything drawn until the lighting is cleared below; the interface is never dimmed.
-    luna::engine::LightFrame lightFrame = lighting_.ambientFrame();
-    const SkyState skyNow = sky(); // the time of day tints the ambient light (US-242)
-    lightFrame.ambientR *= skyNow.ambientR;
-    lightFrame.ambientG *= skyNow.ambientG;
-    lightFrame.ambientB *= skyNow.ambientB;
-    // An eclipse takes light from the world too: the ambient light of its body dims by what the eclipse leaves (US-248).
-    if (const CelestialLight celestial = celestialLight(alpha); celestial.valid && celestial.dimming < 1.0) {
-        lightFrame.ambientR *= static_cast<float>(celestial.dimming);
-        lightFrame.ambientG *= static_cast<float>(celestial.dimming);
-        lightFrame.ambientB *= static_cast<float>(celestial.dimming);
-    }
+    luna::engine::LightFrame lightFrame = ambientLightFrame(alpha); // the time of day (US-242) and an eclipse (US-248) tint the ambient light
     // Fires and torches light the dark (US-243): the darker the ambient light, the stronger they shine; in full daylight they add nothing.
-    {
-        const double ambient = (lightFrame.ambientR + lightFrame.ambientG + lightFrame.ambientB) / 3.0;
-        const double darkness = std::clamp((1.0 - ambient) / 0.45, 0.0, 1.0); // 0.45 is how far the darkest night goes (D-49)
-        if (darkness > 0.0) lightFrame.lights = worldLights(camera_.view(alpha), alpha, darkness);
-    }
+    if (const double darkness = darknessOf(lightFrame); darkness > 0.0) lightFrame.lights = worldLights(camera_.view(alpha), alpha, darkness);
     renderer.setLighting(&lightFrame);
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);

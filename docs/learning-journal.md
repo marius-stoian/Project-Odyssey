@@ -1350,3 +1350,22 @@ We walk down the ground rows instead of up the picture rows so that every ground
 **Try it (15 minutes).** Change the `height` of the `olive tree` in `plants.json` from 4.0 to 8.0 and take the 09:00 screenshot from `docs/plans/US-244.md`: the shadow doubles in length.
 
 **Check yourself.** Why does `drawShadow` give a shadow that points exactly sideways a minimum depth (`kMinShadowDepth`)?
+
+## US-245 Shadows from fires: choosing the nearest lights per object within a budget
+
+**What we built.** At night a person, an animal or a plant standing near a camp fire throws a faint shadow away from it. Between two fires there are two shadows. Only the nearest few fires count, and the Low lighting preset turns them off.
+
+**The C++ idea: `std::partial_sort`.** For every thing we list the fires that reach it and want only the nearest N. Sorting the whole list wastes work; `partial_sort` puts just the first N in order:
+
+```cpp
+const std::size_t count = std::min(reaching.size(), static_cast<std::size_t>(lighting_.shadowLightsPerObject));
+std::partial_sort(reaching.begin(), reaching.begin() + static_cast<std::ptrdiff_t>(count), reaching.end(), byDistanceThenId);
+```
+
+The comparison breaks ties by the light's id, so two fires that are equally near are always chosen in the same order and the picture does not flicker between frames.
+
+**Where to look.** `OdysseyGame::castShadow` in `src/game/shadows.cpp`; `lightSources` in `src/game/world_lights.cpp`; `fireShadows` in `assets/data/light/lights.json`.
+
+**Try it (15 minutes).** In `lights.json` set `fireShadows.maxPerObject` to 1, take a night screenshot between two fires (`docs/plans/US-245.md`): one of the two shadows is gone.
+
+**Check yourself.** Why does `castShadow` skip a light that is less than 12 pixels from the thing's feet?

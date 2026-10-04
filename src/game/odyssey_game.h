@@ -242,6 +242,16 @@ public:
     // The point lights of the world now (US-243), in the pixels of the picture they light: placed effects, burning objects and the held weapon that
     // have a `light`, and the torches clan members carry at night. They shine in proportion to how dark it is (`darkness` 0 to 1).
     std::vector<luna::engine::PointLight> worldLights(const luna::engine::Rect& view, double alpha, double darkness) const;
+    // The same lights in world pixels, with the kind they are and the spot on the ground below them (US-245 casts shadows away from them).
+    struct LightSource {
+        const LightKindDef* kind = nullptr;
+        double x = 0.0, y = 0.0;   // where the light hangs
+        double groundY = 0.0;      // the ground point below it, at the same x
+        std::uint64_t id = 0;
+    };
+    std::vector<LightSource> lightSources(double alpha) const;
+    luna::engine::LightFrame ambientLightFrame(double alpha) const; // the ambient colour of the world now (no point lights)
+    static double darknessOf(const luna::engine::LightFrame& frame);
     void updateZoom(const luna::engine::Intents& intents);
     int cameraZoom() const { return settings_.cameraZoom; }
     int uiScale() const { return settings_.uiScale; }
@@ -440,8 +450,14 @@ private:
     };
     std::map<int, luna::engine::Texture> silhouettes_;
     ShadowCast shadowCast(double alpha) const;
+    // Shadows of fires (US-245): the lights that cast them and how dark the night is, gathered once per frame by drawShadows.
+    struct FireShadows {
+        std::vector<LightSource> lights; // only kinds with `shadows`, in world pixels
+        double darkness = 0.0;
+    } fireShadows_;
+    // The sun or moon shadow of one thing, then a faint one away from each of the nearest fires (the thing's feet are at world (worldX, worldY)).
     void castShadow(luna::engine::Renderer& renderer, const ShadowCast& cast, const luna::engine::Texture& texture, const luna::engine::Rect& source,
-                    int feetX, int feetY, double heightMetres) const;
+                    int feetX, int feetY, double heightMetres, double worldX, double worldY) const;
     void drawShadows(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha); // before the lit things are drawn
     luna::engine::Texture lookTexture(luna::engine::Renderer& renderer, const LookSpec& look);        // the composed sheet of a look, with its shadow
     std::optional<WindowChange> pendingWindow_;
