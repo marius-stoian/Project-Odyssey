@@ -1604,3 +1604,23 @@ The JSON stays stable (same fields, same order every time) because `toJson` writ
 **Try it (15 minutes).** Change the icon bitmap of `star` in `npc_marker.cpp` and see it in the ring of an elder.
 
 **Check yourself.** Why does saving a kind change a placed goblin that has no attitude of its own but not one that has?
+
+## US-270 NPC test level: a smoke test that loads every shipped file
+
+**What we built.** `assets/levels/npc-test.json`, a small level with seven NPCs (trader, talker, wary hunter, elder, guard, goblin, deer) and five written dialogues, plus a walk-through checklist in the guide.
+
+**The C++ idea: a smoke test.** A smoke test does not check one clever thing; it loads *everything we ship* and checks that nothing complains. Here: the level loads, the logs report zero errors, every class and dialogue the level names exists, and saving what we loaded gives byte-identical text:
+
+```cpp
+game::saveLevel(first, definitions, again);
+CHECK(game::loadLevel(again, definitions).level == first);
+CHECK(readText(again) == readText(shippedLevel()));
+```
+
+The level file itself was written by the game's own `saveLevel` (not by hand), which is why the text round-trips: the same code writes and reads it.
+
+**Where to look.** `tests/game/npc_test_level_test.cpp`; the table in `docs/guides/npc-data.md`.
+
+**Try it (15 minutes).** Misspell a class in `npc-test.json` (`"traderr"`) and run the first test: the message names the NPC and the class.
+
+**Check yourself.** Why is the byte-for-byte round trip a stronger check than loading the file and looking at a few fields?

@@ -206,3 +206,19 @@ The **Class** panel has a second tab, **Kinds**. It lists every character and an
 **Markers.** In the Editor (never in play) every placed NPC that has at least one class with a file shows a marker just under its feet: a ring in the class `colour` and the class `icon` inside it. With several classes the ring is split in equal arcs, one per class in the NPC's order, starting at the top and going clockwise; the icon is the first class's. A kind or an NPC with no class has no marker.
 
 Example: a goblin with `"classes": ["monster"]` shows a red ring and a skull; a trader who is also an elder shows a ring half gold, half blue, and a coin.
+
+## The test level and its walk-through (US-270)
+
+`odysseus.exe --level assets/levels/npc-test.json` opens a 40 x 24 level with the seven NPCs of the D-52 cast, in a row along a path, and a stone wall at the east end. Each talking NPC has a script of its own in `assets/data/dialogue/` (`npc-<name>.dlg`, `@who npc-<name>`, so no clan member is ever given it). The hero starts at the west end. Walk east along the path.
+
+| NPC | Kind, classes, attitude | Script | What to try |
+|---|---|---|---|
+| Tala | wanderer, `trader`, neutral | `npc-tala.dlg` | Right-click: the menu title says `Tala (neutral)`. Talk: praise her wares, her opinion goes up; press **X** to see the Actions pop-up explain what is greyed out. |
+| Ossa | wanderer, `talker` (from the kind), neutral | `npc-ossa.dlg` | A plain wanderer: Talk and little else. |
+| Harn | wanderer, `hunter`, **wary** | `npc-harn.dlg` | Actions that need friendly are greyed out with the reason. Talk kindly (+10), then mock him (-10); watch the attitude word in the title. |
+| Vell | wanderer, `elder`, **friendly** | `npc-vell.dlg` | The written dialogue: her first lines change with what she thinks of you (below 10 she is guarded). |
+| Gur | wanderer, `guard`, neutral | `npc-gur.dlg` | Press **C** next to him to confront; his opinion of you falls and nearby friends hear it. |
+| Deer | kind `deer`, `animal`, neutral | none | No Talk (no dialogue for the player); it only grazes. |
+| Goblin | kind `goblin`, `monster`, **hostile** | none | It attacks you. Set the `goblin` kind to neutral in the Editor (**Class**, **Kinds**) and press F1: it does not. |
+
+In the Editor (F2) every NPC with a class has its ring and icon under its feet, and a click on one opens its NPC panel. Every shipped file of this level is checked by `tests/game/npc_test_level_test.cpp`: it loads with no mistake, and loading, saving and loading again gives the same text.

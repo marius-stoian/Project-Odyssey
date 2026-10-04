@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-270):** S-US-270 DONE (Milestone-103.md, AP-104). Next: X-M9a (the one full verify for M9a).
+
 **Resume update (2026-10-04, US-269):** S-US-269 DONE (Milestone-102.md, AP-103). Next: S-US-270 (test level npc-test.json), then X-M9a.
 
 **Resume update (2026-10-04, US-268):** S-US-268 DONE (Milestone-101.md, AP-102). Next: S-US-269 (kinds tab, map markers), then US-270 (test level npc-test.json) and X-M9a.

@@ -1,0 +1,11 @@
+# Ossa the talker (US-270): a plain wanderer with a few words, to try Talk on an NPC with no job.
+@who npc-ossa
+
+=== start
+Ossa: Well met, {hero}. I have nowhere to be.
+-> Ask what she does => idle
+-> Leave => END
+
+=== idle
+Ossa: I walk and I talk. Somebody has to.
+-> Back => start
