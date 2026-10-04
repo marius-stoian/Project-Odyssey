@@ -427,6 +427,7 @@ add_executable(odysseus_game_tests
     tests/game/npc_actions_test.cpp
     tests/game/npc_editor_test.cpp
     tests/game/npc_kinds_tab_test.cpp
+    tests/game/npc_test_level_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp

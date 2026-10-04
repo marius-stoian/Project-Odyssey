@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-270: NPC test level (Mraw) - 2026-10-04
+
+**State:** On `story/US-270`, merged into `qa`. Debug builds with zero warnings; the three `US-270 ...` cases (`tests/game/npc_test_level_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-270.md`).
+
+- Data: `assets/levels/npc-test.json` (40 x 24, the D-52 cast: Tala trader, Ossa talker, Harn wary hunter, Vell friendly elder, Gur guard, a goblin, a deer; written by `saveLevel`) and five scripts `assets/data/dialogue/npc-{tala,ossa,harn,vell,gur}.dlg`. `valley.json` untouched.
+- Guide: the walk-through checklist table in `docs/guides/npc-data.md`.
+- Tests: loads clean (no class, kind, interaction or dialogue error; every named class and script exists), load-save-load gives the same text, each NPC's classes, attitude and who fights the hero.
+
+
 ## US-269: Editor kinds tab and map markers (Mraw) - 2026-10-04
 
 **State:** On `story/US-269`, merged into `qa`. Debug builds with zero warnings; the four `US-269 ...` cases (`tests/game/npc_kinds_tab_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-269.md`).

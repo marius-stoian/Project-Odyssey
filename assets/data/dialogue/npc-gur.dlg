@@ -1,0 +1,11 @@
+# Gur the guard (US-270): short and stern, to try Confront and Talk on the same NPC.
+@who npc-gur
+
+=== start
+Gur: Move along, {hero}. Nothing to see.
+-> Ask who he guards => guard
+-> Leave => END
+
+=== guard
+Gur: The elder and the traders. Not you.
+-> Back => start

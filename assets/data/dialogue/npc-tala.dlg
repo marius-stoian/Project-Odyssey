@@ -1,0 +1,16 @@
+# Tala the trader, a placed NPC of the test level (US-270). Her own script: nobody else is given it, because no clan member is called npc-tala.
+@who npc-tala
+
+=== start
+Tala: Good wares for good people, {hero}.
+-> Ask about the road => road
+-> Praise her wares {opinion npc hero 5; remember npc "{hero} praised my wares" 20} => thanks
+-> Leave => END
+
+=== road
+Tala: The road north is quiet. The goblin by the stones is not.
+-> Back => start
+
+=== thanks
+Tala: Kind of you. I will remember it.
+-> Back => start
