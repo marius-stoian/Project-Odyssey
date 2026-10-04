@@ -1,0 +1,9 @@
+{
+  "id": "animal",
+  "label": "Animal",
+  "colour": "#a0856b",
+  "icon": "paw",
+  "tags": ["animal"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}

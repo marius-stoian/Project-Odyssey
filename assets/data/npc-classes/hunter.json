@@ -1,0 +1,9 @@
+{
+  "id": "hunter",
+  "label": "Hunter",
+  "colour": "#7a9a4a",
+  "icon": "bow",
+  "tags": ["hunter"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}
