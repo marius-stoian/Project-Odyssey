@@ -1566,3 +1566,22 @@ Allow and deny lists are applied first, inside `offered()`: a denied id is skipp
 **Try it (15 minutes).** Add `"actions": { "deny": ["talk"] }` to a class file, press F5 and see Talk vanish for that class.
 
 **Check yourself.** Why does an action that is only too far away stay in the menu while one that needs a friendly attitude does not?
+
+## US-268 Editor NPC panel: forms bound to data, saving only the differences
+
+**What we built.** Select a placed NPC in the Editor and a panel lets you set its classes, attitude, family, dialogues and allowed actions. The level file only records what differs from the NPC's classes and kind.
+
+**The C++ idea: a form bound to data, and a normalising setter.** The panel shows what the NPC *is* (resolved from all layers) but each change goes through a setter that stores only the difference:
+
+```cpp
+const std::string inherited = kind != nullptr && kind->layer.attitude ? *kind->layer.attitude : std::string("neutral");
+placed.attitude = word == inherited ? std::string() : word;
+```
+
+Every setter goes through `changeCharacters`, which makes one `Command` that remembers the list before and after: that is why every change is exactly one step of Undo.
+
+**Where to look.** `Editor::buildNpcPanel` and the `setSelected...` functions in `src/game/editor.cpp`; `tests/game/npc_editor_test.cpp`.
+
+**Try it (15 minutes).** Change the attitude of a goblin to friendly and press F1: the menu title shows it. Then edit `goblin.json` and see that a goblin with no override follows the file.
+
+**Check yourself.** Why does choosing the attitude the kind already has remove the field from the level instead of writing it?
