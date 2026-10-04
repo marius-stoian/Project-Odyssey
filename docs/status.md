@@ -143,7 +143,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-246 | US-246 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
 | S-US-247 | US-247 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
 | X-M8c | - | M8c | Done | Verified 2026-10-04, tag m8c-done |
-| K-M9a | - | M9a | To do |  |
+| K-M9a | - | M9a | Done | Owner answers 2026-10-04, docs/plans/M9-npc-design.md |
 | S-US-260 | US-260 | M9a | To do |  |
 | S-US-261 | US-261 | M9a | To do |  |
 | S-US-262 | US-262 | M9a | To do |  |
