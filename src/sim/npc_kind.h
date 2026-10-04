@@ -4,6 +4,7 @@
 
 #include "sim/interaction.h"
 #include "sim/npc_class.h"
+#include "sim/opinion.h"
 
 #include <filesystem>
 #include <map>

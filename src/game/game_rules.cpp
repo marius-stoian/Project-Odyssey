@@ -124,6 +124,8 @@ Subject animalSubject(const OdysseyGame& game, std::size_t enemyIndex) {
     subject.kind = Subject::Kind::Animal;
     subject.index = static_cast<int>(enemyIndex);
     subject.title = enemy.name;
+    // An NPC with a kind file shows its attitude to the hero in its menu title (US-264): "Grub (hostile)".
+    if (game.npcClasses().kinds().find(enemy.kindName) != nullptr) subject.title = enemy.name + " (" + game.attitudeWordOf(enemy.id) + ")";
     subject.name = enemy.name;
     subject.x = enemy.feetX();
     subject.y = enemy.feetY();

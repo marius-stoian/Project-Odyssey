@@ -109,3 +109,41 @@ A game day is the `ticksPerDay` of `calendar.json` (2400 ticks, two minutes). Pe
 ## Crowds: the store, the grid and detail by distance (US-263, ADR-022)
 
 Up to 100,000 persons fit. Nothing in the game loops over all of them in a frame: the persons near the hero (within 800 pixels, 25 tiles) are simulated hour by hour, found through a grid of 256-pixel cells; everyone else is brought up to date when the game day ends. A person is the same at the end of a day whether they were near all day, far all day, or walked across the border. `NpcPopulation::near(x, y, radius)` answers "who is near" without walking the store. The numbers and the budgets are in ADR-022.
+
+## Attitudes and opinions (US-264): `assets/data/sim/opinions.json`
+
+Every person has an **opinion**, a whole number from -100 to 100, of the hero and of every person they have met. The **attitude word** follows from it. There are no factions: each pair has its own number. Only pairs that have **met** are stored: an entry appears the first time something happens between two (a gift, a talk, a trade); until then the opinion is what it would be by itself (the starting attitude for the hero, the same-family opinion for a person of the same family, else 0). Reading an opinion never creates an entry.
+
+| Word | Opinion | Notes |
+|---|---|---|
+| hostile | -100 to -60 | fights the hero when it has a kind file (below) |
+| wary | -59 to -30 | |
+| suspicious | -29 to -10 | |
+| neutral | -9 to 9 | |
+| friendly | 10 to 39 | |
+| enchanted | 40 to 69 | |
+| lovingly | 70 to 100 | |
+| scared, enviously | any | a **mood**: fear and envy win over the number until something clears them |
+
+`opinions.json` (every part is optional and has a default; a mistake names file and field):
+
+| Field | Meaning |
+|---|---|
+| `bands` | where each band begins (`hostile` must be -100, each next one higher) |
+| `start` | the opinion of the hero a given starting attitude means (`wary`: -45, `friendly`: 25...); `scared` and `enviously` also start the mood |
+| `events` | what each event is worth, by name: `gift`, `trade`, `help`, `marriage-in-family`, `insult`, `theft`; add your own names |
+| `sameFamily` | the opinion two persons of the same family start with of each other |
+| `talk` | the worth of a conversation by quality (`awful`, `bad`, `plain`, `good`, `great`) and `frequencyBonus` / `frequencyDays`: talking again within the days adds the bonus |
+
+```json
+{ "version": 1,
+  "events": { "gift": 15, "trade": 5, "help": 20, "marriage-in-family": 10, "insult": -20, "theft": -30 },
+  "sameFamily": 20,
+  "talk": { "awful": -8, "bad": -4, "plain": 0, "good": 3, "great": 6, "frequencyBonus": 1, "frequencyDays": 3 } }
+```
+
+**Starting attitude.** The `attitude` of the kind file, or the one a placed NPC sets, is how the NPC starts to think of the hero. **Family.** A placed NPC may set `"family": 4`; persons with the same non-zero family id start with the same-family opinion of each other. Both are saved in the level only when set.
+
+**Who fights.** An NPC whose kind has a kind file fights the hero when its attitude is `hostile`: the old `enemy` switch of `characters.json` and `animals.json` only decides for kinds without a kind file. So a goblin set to `friendly` stands by, and a wanderer set to `hostile` fights. **Menu title.** The right-click menu of such an NPC shows the word: `Grub (hostile)`.
+
+The save (`npcs.json`, version 3) holds the starting attitude of each person and the opinions of the pairs that met.

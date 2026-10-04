@@ -27,15 +27,32 @@ bool OdysseyGame::isPersonKind(const PlacedCharacter& placed) const {
     return !(kind->enemy && resolved.classes.empty()); // an enemy kind with no class at all keeps fighting as before
 }
 
+bool OdysseyGame::fightsHero(const PlacedCharacter& placed) const {
+    const CharacterKindDef* kind = definitions_.character(placed.kind);
+    if (kind == nullptr) return false;
+    if (npcClasses_.kinds().find(placed.kind) == nullptr) return kind->enemy; // no kind file: the switch of characters.json
+    return npcClasses_.resolve(placed).attitude == "hostile";
+}
+
+std::string OdysseyGame::attitudeWordOf(int placedId) const {
+    if (const int index = npcPopulation_.indexOf(placedId); index >= 0) return sim::attitudeName(npcPopulation_.attitude(placedId, sim::NpcPopulation::kHero));
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (placed.id == placedId) return npcClasses_.resolve(placed).attitude;
+    }
+    return "neutral";
+}
+
 void OdysseyGame::buildNpcPopulation() {
     npcPopulation_ = sim::NpcPopulation(npcCalendar_, npcNeeds_);
+    npcPopulation_.setOpinionConfig(npcOpinions_);
     npcMetDay_.clear();
     const int daysPerYear = sim::Calendar(npcCalendar_).daysPerYear();
     for (const PlacedCharacter& placed : level_.characters) {
         if (!isPersonKind(placed)) continue;
         // Varied but fixed ages: the same level always starts the same people.
         const int age = kStartAgeYears * daysPerYear + (placed.id * 37) % (10 * daysPerYear);
-        npcPopulation_.add(placed.id, placed.kind, age, 0, placed.feet.x, placed.feet.y);
+        const sim::Attitude start = sim::attitudeFromName(npcClasses_.resolve(placed).attitude).value_or(sim::Attitude::Neutral);
+        npcPopulation_.add(placed.id, placed.kind, age, placed.family, placed.feet.x, placed.feet.y, start);
     }
 }
 
@@ -72,12 +89,14 @@ std::string OdysseyGame::loadNpcPopulation() {
     const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
     try {
         sim::NpcPopulation saved = sim::NpcPopulation::fromText(text, npcCalendar_, npcNeeds_);
+        saved.setOpinionConfig(npcOpinions_);
         npcPopulation_ = std::move(saved);
         // A person the level gained since the save joins as new; one the level lost stays in the save (the owner may bring them back).
         const int daysPerYear = sim::Calendar(npcCalendar_).daysPerYear();
         for (const PlacedCharacter& placed : level_.characters) {
             if (isPersonKind(placed) && npcPopulation_.indexOf(placed.id) < 0) {
-                npcPopulation_.add(placed.id, placed.kind, kStartAgeYears * daysPerYear, 0, placed.feet.x, placed.feet.y);
+                const sim::Attitude start = sim::attitudeFromName(npcClasses_.resolve(placed).attitude).value_or(sim::Attitude::Neutral);
+                npcPopulation_.add(placed.id, placed.kind, kStartAgeYears * daysPerYear, placed.family, placed.feet.x, placed.feet.y, start);
             }
         }
         return {};

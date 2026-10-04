@@ -368,6 +368,7 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             placed.attitude = word.get<std::string>();
         }
         placed.tags = nameList(entry, file, where, "tags");
+        if (entry.contains("family")) placed.family = whole(entry, file, "family", 0, 1'000'000);
         if (entry.contains("dialogues")) {
             if (!entry.at("dialogues").is_object()) throw DataError(file, where + ".dialogues", "must be {\"player\": \"file.dlg\", ...}");
             for (const auto& [partner, value] : entry.at("dialogues").items()) {
@@ -519,6 +520,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
         if (!c.classes.empty()) entry["classes"] = c.classes;
         if (!c.attitude.empty()) entry["attitude"] = c.attitude;
         if (!c.tags.empty()) entry["tags"] = c.tags;
+        if (c.family != 0) entry["family"] = c.family;
         if (!c.dialogues.empty()) {
             json dialogues = json::object();
             for (const auto& [partner, dlg] : c.dialogues) dialogues[partner] = dlg;

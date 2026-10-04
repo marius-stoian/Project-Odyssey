@@ -102,6 +102,12 @@ public:
     const sim::NpcPopulation& npcPopulation() const { return npcPopulation_; }
     sim::NpcPopulation& npcPopulationMutable() { return npcPopulation_; }
     bool isPersonKind(const PlacedCharacter& placed) const;
+    // Whether a placed character fights the hero (US-264): with a kind file it is its attitude being hostile, without one the old enemy switch of its kind.
+    bool fightsHero(const PlacedCharacter& placed) const;
+    // The attitude word of a placed character to the hero: the person's own opinion when they are a person of the population, else the attitude of its
+    // kind file and its own fields.
+    std::string attitudeWordOf(int placedId) const;
+    const sim::OpinionConfig& npcOpinions() const { return npcOpinions_; }
     bool saveNpcPopulation() const;
     NpcClassBook& npcClasses() { return npcClasses_; }
     const NpcClassBook& npcClasses() const { return npcClasses_; }
@@ -368,6 +374,7 @@ private:
     NpcClassBook npcClasses_; // US-260
     sim::CalendarConfig npcCalendar_;
     sim::NeedsConfig npcNeeds_;
+    sim::OpinionConfig npcOpinions_;   // US-264
     sim::NpcPopulation npcPopulation_; // US-262
     std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;

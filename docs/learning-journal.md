@@ -1485,3 +1485,23 @@ A loop over one field reads memory in a straight line, which the CPU cache loves
 **Try it (15 minutes).** In `tests/sim/npc_scale_test.cpp` change the 100,000 to 1,000,000 and run the Load case in Release: what grows, the day, the save or the load?
 
 **Check yourself.** Why must `near()` sort its result before returning it?
+
+## US-264 Attitudes and opinions: sparse maps keyed by pairs, words from numbers
+
+**What we built.** Every NPC has its own opinion of the hero and of each person it has met, and a word for it (friendly, wary, hostile...). A gift raises the number; crossing a threshold changes the word.
+
+**The C++ idea: a sparse map keyed by a pair, and thresholds.** With 100,000 persons a table of everyone-to-everyone would have 10 billion cells. We keep only the pairs that met, in a hash map whose key packs both ids into one 64-bit number:
+
+```cpp
+static std::uint64_t pairKey(int holderId, int targetId) {
+    return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(holderId)) << 32) | static_cast<std::uint32_t>(targetId);
+}
+```
+
+Reading an opinion looks the key up and, if there is no entry, computes the default without storing it. The word is derived from the number by walking the bands and keeping the last one whose start is not above the opinion.
+
+**Where to look.** `NpcPopulation::opinion`, `adjust`, `pairFor` in `src/sim/npc_population.cpp`; `attitudeFor` in `src/sim/opinion.cpp`; `assets/data/sim/opinions.json`.
+
+**Try it (15 minutes).** In `opinions.json` set `friendly` to 5 and run the opinion test: which checks notice?
+
+**Check yourself.** Why is the family opinion a default rather than a stored entry?

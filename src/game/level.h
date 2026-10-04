@@ -80,6 +80,7 @@ struct PlacedCharacter {
     std::vector<std::pair<std::string, std::string>> dialogues; // partner type -> .dlg file
     std::vector<std::string> allow;    // interaction ids
     std::vector<std::string> deny;
+    int family = 0;                    // a family id (0 = none); persons of the same family start with the same-family opinion of each other (US-264)
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 

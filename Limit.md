@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-264):** S-US-264 DONE (Milestone-97.md, AP-98). Next: S-US-265 (talk with placed NPCs), then US-266 (confront) .. US-270 and X-M9a.
+
 **Resume update (2026-10-04, US-263):** S-US-263 DONE (Milestone-96.md, AP-97). Next: S-US-264 (attitudes and opinions), then US-265 (talk with placed NPCs) .. US-270 and X-M9a.
 
 **Resume update (2026-10-04, US-262):** S-US-262 DONE (Milestone-95.md, AP-96). Next: S-US-263 (spatial grid, detail by distance, ADR-022, 100,000-person load test), then US-264..US-270 and X-M9a.

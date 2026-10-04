@@ -103,14 +103,15 @@ void applyActions(std::map<std::string, ActionState>& actions, const std::vector
 } // namespace
 
 const std::vector<std::string>& attitudeNames() {
-    static const std::vector<std::string> names = {"friendly", "neutral", "wary", "hostile", "scared", "suspicious", "enchanted", "lovingly", "enviously"};
+    static const std::vector<std::string> names = [] {
+        std::vector<std::string> all;
+        for (std::size_t i = 0; i < kAttitudeCount; ++i) all.push_back(attitudeName(static_cast<Attitude>(i)));
+        return all;
+    }();
     return names;
 }
 
-bool validAttitude(const std::string& word) {
-    const auto& names = attitudeNames();
-    return std::find(names.begin(), names.end(), word) != names.end();
-}
+bool validAttitude(const std::string& word) { return attitudeFromName(word).has_value(); }
 
 std::optional<NpcKind> NpcKindCatalog::parse(std::string_view text, const std::string& name, LoadReport& report, const std::string& expectedKind) {
     const JsonParseResult parsed = parseJson(text);
