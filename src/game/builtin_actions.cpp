@@ -292,7 +292,7 @@ private:
 
 const std::vector<std::string>& builtInActionNames() {
     static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
-                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "open-trade", "rare-goods", "restore", "warm-nearby", "graze", "flee"};
+                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "open-trade", "rare-goods", "walk-to", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }
 

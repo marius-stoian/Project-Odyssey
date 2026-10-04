@@ -196,6 +196,32 @@ std::string tradeText(const TradeProfile& trade) {
 
 } // namespace
 
+std::string doesText(const std::vector<std::string>& does) {
+    std::string out;
+    for (const std::string& id : does) out += (out.empty() ? "" : " ") + id;
+    return out;
+}
+
+bool setDoes(std::vector<std::string>& does, std::string_view text, std::string& problem) {
+    std::vector<std::string> ids;
+    std::size_t at = 0;
+    while (at < text.size()) {
+        while (at < text.size() && (text[at] == ' ' || text[at] == ',' || text[at] == ';')) ++at;
+        std::size_t end = at;
+        while (end < text.size() && text[end] != ' ' && text[end] != ',' && text[end] != ';') ++end;
+        if (end == at) break;
+        const std::string id(text.substr(at, end - at));
+        at = end;
+        if (!validItemId(id)) {
+            problem = std::format("\"{}\" is not an interaction id (lower-case letters, digits and -)", id);
+            return false;
+        }
+        if (std::find(ids.begin(), ids.end(), id) == ids.end()) ids.push_back(id);
+    }
+    does = ids;
+    return true;
+}
+
 const std::vector<std::string>& scheduleFieldNames() {
     static const std::vector<std::string> names = {"day", "night"};
     return names;
@@ -322,11 +348,14 @@ void mergeTrade(TradeProfile& base, const TradeProfile& over) {
 
 void mergeExtras(NpcExtras& base, const NpcExtras& over) {
     mergeTrade(base.trade, over.trade);
+    for (const std::string& id : over.does) {
+        if (std::find(base.does.begin(), base.does.end(), id) == base.does.end()) base.does.push_back(id);
+    }
     if (!over.schedule.empty()) base.schedule = over.schedule; // the schedule of the highest layer that has one
 }
 
 const std::vector<std::string>& extrasFieldNames() {
-    static const std::vector<std::string> names = {"trade", "schedule"};
+    static const std::vector<std::string> names = {"trade", "schedule", "does"};
     return names;
 }
 
@@ -334,6 +363,16 @@ NpcExtras parseExtras(const JsonValue& root, const ExtrasError& error) {
     NpcExtras out;
     if (const JsonValue* trade = root.find("trade")) out.trade = readTrade(*trade, error);
     if (const JsonValue* schedule = root.find("schedule")) out.schedule = readSchedule(*schedule, error);
+    if (const JsonValue* does = root.find("does")) {
+        if (!does->isArray()) {
+            error(does->line, "does must be a list of interaction ids, like [\"patrol\"]");
+        } else {
+            for (const JsonValue& item : does->items) {
+                if (!item.isString() || !validItemId(item.text)) error(item.line, "does must hold interaction ids in quotes");
+                else if (std::find(out.does.begin(), out.does.end(), item.text) == out.does.end()) out.does.push_back(item.text);
+            }
+        }
+    }
     return out;
 }
 
@@ -341,6 +380,11 @@ std::vector<std::pair<std::string, std::string>> extrasFieldTexts(const NpcExtra
     std::vector<std::pair<std::string, std::string>> out;
     if (!extras.trade.empty()) out.emplace_back("trade", tradeText(extras.trade));
     if (!extras.schedule.empty()) out.emplace_back("schedule", scheduleJsonText(extras.schedule));
+    if (!extras.does.empty()) {
+        std::string list = "[";
+        for (std::size_t i = 0; i < extras.does.size(); ++i) list += (i != 0 ? ", " : "") + quoteJson(extras.does[i]);
+        out.emplace_back("does", list + "]");
+    }
     return out;
 }
 

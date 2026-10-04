@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-291: action sources (Mraw) - 2026-10-05
+
+**State:** On `story/US-291`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c. D-54 Q11: no quest-action source in M9c (Codex v2.12).
+
+- Simulation: `src/sim/npc_actions.h/.cpp` (`ActionSource` strategy objects: class, custom and event sources; `NpcProfile`; `ActionSources::standard()`); `src/sim/npc_events.h/.cpp` (event catalog from `events.json`, the board of events on offer); `src/sim/npc_context.h/.cpp` (the rule language for NPC actors); `NpcDirector` chooses an action for a free person each hour (score of the `npc` block, cooldowns, budget `maxPerHour` that goes round) and answers events at once (`postEvent`); `does` in `NpcExtras`, `ResolvedNpc::classActions` and `customActions`.
+- Game: the profile of every person, the registry and the events given to the director, the fire (a pit set to `burning`) posts the event `fire`; problems with `does` are logged.
+- Data: `assets/data/sim/events.json`, interactions `patrol.json` and `help-with-fire.json`, `does: ["patrol"]` in the guard class; `walk-to` among the built-in words; the tags `place`, `post`, `event`; `free` and `maxPerHour` in `schedule.json`.
+- Editor: the Does line (NPC panel, Class panel, Kinds tab).
+- Docs: guide (action sources, events.json), `docs/plans/US-291.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_actions_test.cpp` (9 cases), `tests/game/npc_life_game_test.cpp` (4 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-290: day and night schedules (Mraw) - 2026-10-05
 
 **State:** On `story/US-290`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.

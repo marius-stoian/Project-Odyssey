@@ -275,7 +275,7 @@ bool Editor::deleteClass() {
 // The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
 void Editor::buildClassPanel() {
     classesStale_ = false;
-    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 344 : 312});
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 358 : 326});
     classes_->visible = classesShown_;
     const Rect box = classes_->bounds;
     const int left = box.x + 4;
@@ -342,6 +342,7 @@ void Editor::buildClassPanel() {
     y += 14;
     addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
     addScheduleRows(*classes_, left, width, y, classDraft_.extras.schedule, [this](const std::string& field, const std::string& text) { return setClassSchedule(field, text); });
+    addDoesRow(*classes_, left, width, y, classDraft_.extras.does, [this](const std::string& text) { return setClassDoes(text); });
     y += 4;
     classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
     classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
@@ -455,6 +456,7 @@ void Editor::buildKindForm(const Rect& box, int y) {
         y += 14;
         addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
         addScheduleRows(*classes_, left, width, y, kindDraft_.layer.extras.schedule, [this](const std::string& field, const std::string& text) { return setKindSchedule(field, text); });
+        addDoesRow(*classes_, left, width, y, kindDraft_.layer.extras.does, [this](const std::string& text) { return setKindDoes(text); });
     }
     const int bottom = box.y + box.height - 18;
     classes_->add<Button>(Rect{left, bottom, 80, 14}, "Save", [this] { saveKind(); }).hint = "Write the kind's file: every NPC of this kind that sets nothing itself follows it";
@@ -807,7 +809,7 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
 void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     constexpr int kWidth = 232;
     const Rect anchor = npcPanel_->bounds;
-    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 134});
+    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 148});
     npcTrade_->visible = npcPanel_->visible;
     const Rect box = npcTrade_->bounds;
     const int left = box.x + 4;
@@ -819,6 +821,46 @@ void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     y += 13;
     addTradeRows(*npcTrade_, left, width, y, shown.extras.trade, [this](const std::string& field, const std::string& text) { return setSelectedTrade(field, text); });
     addScheduleRows(*npcTrade_, left, width, y, shown.extras.schedule, [this](const std::string& field, const std::string& text) { return setSelectedSchedule(field, text); });
+    addDoesRow(*npcTrade_, left, width, y, shown.extras.does, [this](const std::string& text) { return setSelectedDoes(text); });
+}
+
+// The Does line: the actions an NPC does on its own, interaction ids separated by spaces.
+void Editor::addDoesRow(Panel& panel, int left, int width, int& y, const std::vector<std::string>& shown, const std::function<bool(const std::string&)>& set) {
+    panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, "Does", sim::rules::doesText(shown), 90, [set](const std::string& text) { set(text); });
+    y += 14;
+}
+
+bool Editor::setSelectedDoes(const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    std::vector<std::string> own = find(*selected_)->extras.does;
+    std::string problem;
+    if (!sim::rules::setDoes(own, text, problem)) {
+        say("does: " + problem);
+        propertiesStale_ = true;
+        return false;
+    }
+    changeSelectedNpc("does", [&](PlacedCharacter& placed) { placed.extras.does = own; });
+    return true;
+}
+
+bool Editor::setClassDoes(const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setDoes(classDraft_.extras.does, text, problem)) {
+        say("does: " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindDoes(const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setDoes(kindDraft_.layer.extras.does, text, problem)) {
+        say("does: " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
 }
 
 // The two lines of the schedule form: Day and Night, "06:00 work market; 21:00 sleep home".

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "id": "fire-help",
+      "label": "Help put out the fire",
+      "trigger": "fire",
+      "action": "help-with-fire",
+      "classes": ["talker", "elder", "trader", "hunter"],
+      "withinMetres": 12,
+      "forMinutes": 30,
+      "bonus": 30
+    }
+  ]
+}

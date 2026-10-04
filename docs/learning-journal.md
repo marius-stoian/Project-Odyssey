@@ -1739,3 +1739,28 @@ The other idea is cost. Looking at 100,000 people every tick would be far too sl
 **Try it (15 minutes).** In `npc_schedule_test.cpp` change the hunger set in the Interrupt test from 5 to 35 and predict whether the NPC still goes home to eat; then run the test.
 
 **Check yourself.** Why is it safe that a person who is hungry at 10:00 and a person who is not both read the same schedule at 11:00?
+
+## US-291 Action sources: strategy objects as extension points
+
+**What we built.** An NPC that is free (idle, or on duty at work) now picks something to do from three places: the actions of its class, its own custom actions, and the events of the world (a fire starts: go and help). It scores each option with the same interaction files the hero uses, and does the best one.
+
+**The C++ idea: strategy objects.** The chooser must not know *where* options come from, or adding the quests of M10 would mean editing it. So each source is a small class with one function, and the chooser only walks a list of them:
+
+```cpp
+class ActionSource {
+public:
+    virtual ~ActionSource() = default;
+    virtual void collect(const SourceContext& context, std::vector<ActionCandidate>& out) const = 0;
+};
+
+ActionSources sources = ActionSources::standard();   // class, custom, event
+auto candidates = sources.collect(context);
+```
+
+`= 0` makes `collect` *pure virtual*: `ActionSource` cannot be built on its own, only its children can, and each child (`ClassActionSource`, `CustomActionSource`, `EventActionSource`) says what it offers. The list holds `std::unique_ptr<ActionSource>`, so the list owns them and they are destroyed with it. A quest source is one new class and one `add(...)` line: that is what *extension point* means. The test `US-291 Sources` pins the list at three, so a quest source cannot appear by accident before M10 decides its schema.
+
+**Where to look.** `src/sim/npc_actions.h` (the sources), `NpcDirector::chooseAction` in `src/sim/npc_director.cpp`, `tests/sim/npc_actions_test.cpp`.
+
+**Try it (15 minutes).** Write a fourth source `class WeatherActionSource` that offers `"shelter"` when it rains, add it with `sources.add(...)` in a test, and see the candidate appear without touching any other file.
+
+**Check yourself.** Why does `ActionSources` hold `unique_ptr<ActionSource>` rather than `ActionSource` objects directly?

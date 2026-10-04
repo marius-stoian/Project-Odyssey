@@ -167,6 +167,9 @@ void OdysseyGame::buildNpcPopulation() {
     refreshTraders();
     // The life of the people (US-290): the places of the level, every person's home where it was placed, and the schedules.
     npcDirector_ = sim::NpcDirector(scheduleConfig_);
+    npcDirector_.setInteractions(&interactions_);
+    npcDirector_.setEvents(eventCatalog_);
+    npcDirector_.setSeed(weatherSeed_ ^ 0x4C494645ULL);
     std::vector<sim::Place> places;
     for (const PlacedPlace& place : level_.places) places.push_back({place.name, place.at.x, place.at.y, place.tags});
     npcDirector_.setPlaces(std::move(places));
@@ -199,6 +202,25 @@ void OdysseyGame::refreshLife() {
         if (index < 0) continue;
         const sim::rules::ResolvedNpc resolved = npcClasses_.resolve(placed);
         npcDirector_.setSchedule(index, resolved.extras.schedule);
+        // What the person is: its classes and tags, the actions of its classes and its own, the lists of what it may and may not do (US-291).
+        sim::NpcProfile profile;
+        profile.classes = resolved.classes;
+        profile.tags = resolved.tags;
+        if (std::find(profile.tags.begin(), profile.tags.end(), "npc") == profile.tags.end()) profile.tags.push_back("npc");
+        profile.classActions = resolved.classActions;
+        profile.customActions = resolved.customActions;
+        for (const auto& [id, state] : resolved.actions) {
+            if (state == sim::rules::ActionState::Denied) profile.deny.push_back(id);
+            else if (state == sim::rules::ActionState::Allowed) profile.allow.push_back(id);
+        }
+        npcDirector_.setProfile(index, profile);
+        for (const std::vector<std::string>* actions : {&resolved.classActions, &resolved.customActions}) {
+            for (const std::string& id : *actions) {
+                const sim::rules::Interaction* known = interactions_.find(id);
+                if (known == nullptr) core::logWarning(std::format("Actions of {}: \"{}\" is not an interaction", placed.name, id));
+                else if (!known->npc) core::logWarning(std::format("Actions of {}: \"{}\" has no npc block, so an NPC never chooses it", placed.name, id));
+            }
+        }
         for (const std::string& problem : sim::rules::scheduleProblems(resolved.extras.schedule, places, activities, interactions)) core::logWarning(std::format("Schedule of {}: {}", placed.name, problem));
     }
 }
@@ -232,6 +254,8 @@ void OdysseyGame::walkNpcPeople() {
         figure.feet = next;
     }
 }
+
+void OdysseyGame::postWorldEvent(const std::string& trigger, int x, int y) { npcDirector_.postEvent(npcPopulation_, trigger, x, y); }
 
 // A hostile creature within 6 m of a person sends them home; when it is gone they take up their schedule again (D-54 Q10).
 void OdysseyGame::updateNpcDanger() {

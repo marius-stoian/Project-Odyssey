@@ -1,0 +1,12 @@
+// A guard walks its rounds (US-291): it goes to a post of the level, a place tagged post. It is the class action of the guard class (`does` in npc-classes/guard.json). The
+// `actors` word npc means a placed person acting on its own (the hero never does this); the target tags are the tags of the place.
+{
+  "id": "patrol",
+  "label": "Patrol",
+  "actors": ["npc"],
+  "target": { "tags": ["place", "post"] },
+  "range": 2,
+  "order": 500,
+  "effects": [ "do walk-to" ],
+  "npc": { "score": "60", "cooldown": 0 }
+}

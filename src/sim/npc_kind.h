@@ -68,6 +68,8 @@ struct ResolvedNpc {
     std::map<std::string, std::string> dialogues; // partner type -> .dlg
     std::map<std::string, ActionState> actions;   // only ids some layer mentioned
     NpcExtras extras;                             // the merge of every layer: classes, then the kind, then the placed NPC
+    std::vector<std::string> classActions;        // `does` of its classes (US-291)
+    std::vector<std::string> customActions;       // `does` of its kind and of itself
 
     ActionState action(const std::string& id) const;
     bool denied(const std::string& id) const { return action(id) == ActionState::Denied; }

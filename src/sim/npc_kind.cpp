@@ -207,6 +207,9 @@ ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, con
         for (const auto& [partner, file] : npcClass->dialogues) out.dialogues[partner] = file;
         applyActions(out.actions, npcClass->allow, npcClass->deny);
         mergeExtras(out.extras, npcClass->extras);
+        for (const std::string& id : npcClass->extras.does) {
+            if (std::find(out.classActions.begin(), out.classActions.end(), id) == out.classActions.end()) out.classActions.push_back(id);
+        }
     }
     // Then the kind, then the placed NPC.
     for (const NpcLayer* layer : {kind, &placed}) {
@@ -215,6 +218,9 @@ ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, con
         for (const auto& [partner, file] : layer->dialogues) out.dialogues[partner] = file;
         applyActions(out.actions, layer->allow, layer->deny);
         mergeExtras(out.extras, layer->extras);
+        for (const std::string& id : layer->extras.does) {
+            if (std::find(out.customActions.begin(), out.customActions.end(), id) == out.customActions.end()) out.customActions.push_back(id);
+        }
     }
     if (!out.extras.trade.empty()) tags.insert("trader"); // any NPC with a trade profile can trade; the Trader class is only a default profile (D-54 Q7)
     out.tags.assign(tags.begin(), tags.end());

@@ -5,5 +5,6 @@
   "icon": "shield",
   "tags": ["guard"],
   "dialogues": {},
-  "actions": { "allow": [], "deny": [] }
+  "actions": { "allow": [], "deny": [] },
+  "does": ["patrol"]
 }

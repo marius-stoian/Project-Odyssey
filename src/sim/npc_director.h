@@ -2,6 +2,11 @@
 
 #include "boundary.h"
 
+#include "sim/interaction.h"
+#include "sim/npc_actions.h"
+#include "sim/npc_chooser.h"
+#include "sim/npc_context.h"
+#include "sim/npc_events.h"
 #include "sim/npc_population.h"
 #include "sim/npc_schedule.h"
 
@@ -57,6 +62,21 @@ public:
     // The activity a person is doing now: the word of the block, "eat" or "flee" while interrupted, "fight" in a fight, "dead".
     std::string activity(const NpcPopulation& population, int index) const;
 
+    // ---- What a person does on their own (US-291, D-54 Q11): when a person near the hero is free (idle, or on a block of work) they choose among the actions of their class, their
+    // own custom actions and the events on offer, by the `npc` score of the interaction files, and carry the best out. The interactions are the registry's (the same files the hero
+    // uses); the registry belongs to the game and must outlive the director.
+    void setInteractions(const rules::InteractionRegistry* registry) { interactions_ = registry; }
+    void setEvents(EventCatalog catalog) { events_ = std::move(catalog); }
+    const EventCatalog& events() const { return events_; }
+    void setSeed(std::uint64_t seed) { seed_ = seed; } // the world seed: every choice of a tie is a roll of (seed, tick, person)
+    void setProfile(int index, const NpcProfile& profile);
+    const NpcProfile* profile(int index) const; // null: nothing known about the person
+    // A world event happens at (x, y) (a fire starts): it is on offer for as long as its definitions say, and the persons it concerns, within reach, answer at once.
+    void postEvent(NpcPopulation& population, const std::string& trigger, int x, int y);
+    const EventBoard& board() const { return board_; }
+    // The interaction a person last chose for themselves ("" when none yet).
+    std::string lastAction(int index) const;
+
     // One game tick, after NpcPopulation::tick(): on the hour the persons near the focus take up their schedule (or are interrupted); every tick a slice of the far ones does.
     void tick(NpcPopulation& population);
 
@@ -77,6 +97,14 @@ private:
     void stepFar(NpcPopulation& population, int index, int hour);
     void followSchedule(NpcPopulation& population, int index, int hour, bool restoreNeeds);
     void farSlice(NpcPopulation& population);
+    int internProfile(const NpcProfile& profile);
+    // The person is free to do something of their own now: nothing in their schedule holds them (a person with no schedule is always free).
+    bool isFree(const NpcPopulation& population, int index, int hour) const;
+    // The person chooses what to do among their candidates (events only when `eventsOnly`); true when they chose something and did it. Bounded by maxPerHour.
+    bool chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly);
+    void carryOut(NpcPopulation& population, int index, const rules::Interaction& interaction, const ActionTarget& target);
+    // A spot near a point, different for each person (so a crowd answering one event does not stand on one pixel).
+    std::pair<int, int> pointNear(const NpcPopulation& population, int index, int x, int y) const;
 
     rules::ScheduleConfig config_;
     std::vector<Place> places_;
@@ -87,6 +115,19 @@ private:
     std::vector<std::int32_t> homeX_;
     std::vector<std::int32_t> homeY_;
     std::size_t adopted_ = 0; // the persons below this index have been given a home
+
+    // US-291.
+    std::vector<NpcProfile> profiles_; // [0] is "nothing known"
+    std::vector<std::uint16_t> profileOf_;
+    std::vector<std::int16_t> lastAction_; // an index into actionNames_, -1: none yet
+    std::vector<std::string> actionNames_;
+    EventCatalog events_;
+    EventBoard board_;
+    ActionSources sources_ = ActionSources::standard();
+    rules::CooldownTable cooldowns_;
+    const rules::InteractionRegistry* interactions_ = nullptr;
+    std::uint64_t seed_ = 0;
+    int chosenThisHour_ = 0;
 };
 
 } // namespace odysseus::sim

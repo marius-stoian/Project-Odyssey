@@ -40,8 +40,11 @@ void mergeTrade(TradeProfile& base, const TradeProfile& over);
 struct NpcExtras {
     TradeProfile trade;
     Schedule schedule; // the day of the NPC (US-290); the whole schedule of the highest layer that has one wins
+    // The actions the NPC does on its own when it is idle on duty (US-291, D-54 Q11): interaction ids. In a class file they are the actions of that class, in a kind file and on a
+    // placed NPC its custom actions. Layers add up.
+    std::vector<std::string> does;
 
-    bool empty() const { return trade.empty() && schedule.empty(); }
+    bool empty() const { return trade.empty() && schedule.empty() && does.empty(); }
     friend bool operator==(const NpcExtras&, const NpcExtras&) = default;
 };
 
@@ -58,6 +61,10 @@ bool setTradeField(TradeProfile& trade, const std::string& field, std::string_vi
 const std::vector<std::string>& scheduleFieldNames();
 std::string scheduleFieldText(const Schedule& schedule, const std::string& field);
 bool setScheduleField(Schedule& schedule, const std::string& field, std::string_view text, std::string& problem);
+
+// The Editor's line of actions (US-291): interaction ids separated by spaces or commas. Empty text clears the list. A mistake changes nothing.
+std::string doesText(const std::vector<std::string>& does);
+bool setDoes(std::vector<std::string>& does, std::string_view text, std::string& problem);
 
 // The names of the object fields that belong to the extras ("trade", ...), for the unknown-field check of the parsers that know them.
 const std::vector<std::string>& extrasFieldNames();
