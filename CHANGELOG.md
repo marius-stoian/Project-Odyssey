@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-284: Editor trade panel (Mraw) - 2026-10-05
+
+**State:** On `story/US-284`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc, which now ends M9b and M9c together.
+
+- Simulation: `tradeFieldNames`, `tradeFieldText`, `setTradeField` in `src/sim/npc_extras.h/.cpp` (the six text fields of a profile and their mistakes); `trade.weights` may be 0 (switches an inherited weight off).
+- Editor: a Trade section beside the NPC panel (own values, one step of Undo per line), and the same six lines in the Class panel and the Kinds tab (`Editor::setSelectedTrade`, `setClassTrade`, `setKindTrade`, `addTradeRows`); the Class panel is taller.
+- Data: `assets/levels/npc-test.json` (written in the game's own format): shells as money, the region's berries and flint, Tala's stock and wants, Harn's furs and his rare spearhead.
+- Docs: the guide (Trade section and the extended walk-through), `docs/plans/US-284.md`, learning journal.
+- Tests (not yet run): `tests/game/trade_editor_test.cpp` (5 cases), `tests/sim/trade_market_test.cpp` (one more case).
+- Unfinished checks: build and tests at X-M9bc; screenshots are manual.
+
 ## US-283: trade screen for any trader (Mraw) - 2026-10-05
 
 **State:** On `story/US-283`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.

@@ -275,7 +275,7 @@ bool Editor::deleteClass() {
 // The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
 void Editor::buildClassPanel() {
     classesStale_ = false;
-    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 232 : 200});
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 316 : 284});
     classes_->visible = classesShown_;
     const Rect box = classes_->bounds;
     const int left = box.x + 4;
@@ -339,7 +339,9 @@ void Editor::buildClassPanel() {
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(classDraft_.allow), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
     y += 14;
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
-    y += 18;
+    y += 14;
+    addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
+    y += 4;
     classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
     classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
     classes_->add<Button>(Rect{left + 112, y, 56, 14}, "Delete", [this] { deleteClass(); }).hint = "Delete the class (refused while NPCs use it)";
@@ -449,6 +451,8 @@ void Editor::buildKindForm(const Rect& box, int y) {
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(kindDraft_.layer.allow), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
         y += 14;
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(kindDraft_.layer.deny), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
+        y += 14;
+        addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
     }
     const int bottom = box.y + box.height - 18;
     classes_->add<Button>(Rect{left, bottom, 80, 14}, "Save", [this] { saveKind(); }).hint = "Write the kind's file: every NPC of this kind that sets nothing itself follows it";
@@ -715,6 +719,8 @@ void Editor::buildProperties() {
     properties_->visible = false;
     npcPanel_ = std::make_unique<Panel>(Rect{0, 0, 0, 0}); // replaced when an NPC is selected
     npcPanel_->visible = false;
+    npcTrade_ = std::make_unique<Panel>(Rect{0, 0, 0, 0});
+    npcTrade_->visible = false;
     propertiesFor_ = -1;
     propertiesStale_ = false;
     const PlacedCharacter* shown = selected_ ? find(*selected_) : nullptr;
@@ -792,6 +798,69 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
     y += listHeight + 3;
     Button& reset = npcPanel_->add<Button>(Rect{left, y, width, 11}, "Reset to defaults", [this] { resetSelectedNpc(); });
     reset.hint = "Forget everything this NPC sets itself: it is what its kind says again";
+    buildNpcTradePanel(shown);
+}
+
+// The Trade section (US-284) of the NPC panel: what this NPC sells, beside the NPC panel. It shows the NPC's own values; the hint of the title says what it has in all.
+void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
+    constexpr int kWidth = 232;
+    const Rect anchor = npcPanel_->bounds;
+    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 104});
+    npcTrade_->visible = npcPanel_->visible;
+    const Rect box = npcTrade_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    int y = box.y + 4;
+    const sim::rules::ResolvedNpc resolved = classBook_->resolve(shown);
+    Button& title = npcTrade_->add<Button>(Rect{left, y, width, 11}, resolved.extras.trade.empty() ? "Trade: none (type stock to start)" : "Trade: this NPC trades", [] {});
+    title.hint = "In all (class, kind and own): stock " + sim::rules::tradeFieldText(resolved.extras.trade, "stock") + "; wants " + sim::rules::tradeFieldText(resolved.extras.trade, "wants");
+    y += 13;
+    addTradeRows(*npcTrade_, left, width, y, shown.extras.trade, [this](const std::string& field, const std::string& text) { return setSelectedTrade(field, text); });
+}
+
+// One text field for each of the six trade fields; `set` is told the field and the text the owner typed.
+void Editor::addTradeRows(Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set) {
+    // The labels say what each line is: stock and restock are item=number (flint=6), picks a number, weights item=number, wants a list of items, rare item=band (obsidian=friendly).
+    static const char* const kLabels[] = {"Stock", "Restock/day", "Picks/day", "Weights", "Wants", "Rare"};
+    const std::vector<std::string>& fields = sim::rules::tradeFieldNames();
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const std::string field = fields[i];
+        panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, kLabels[i], sim::rules::tradeFieldText(shown, field), 90, [set, field](const std::string& text) { set(field, text); });
+        y += 14;
+    }
+}
+
+bool Editor::setSelectedTrade(const std::string& field, const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    sim::rules::TradeProfile own = find(*selected_)->extras.trade;
+    std::string problem;
+    if (!sim::rules::setTradeField(own, field, text, problem)) {
+        say("trade " + field + ": " + problem);
+        propertiesStale_ = true; // show the values again
+        return false;
+    }
+    changeSelectedNpc("trade " + field, [&](PlacedCharacter& placed) { placed.extras.trade = own; });
+    return true;
+}
+
+bool Editor::setClassTrade(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setTradeField(classDraft_.extras.trade, field, text, problem)) {
+        say("trade " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindTrade(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setTradeField(kindDraft_.layer.extras.trade, field, text, problem)) {
+        say("trade " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
 }
 
 PlacedCharacter* Editor::find(int id) {
@@ -1321,7 +1390,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     effectPalette_->visible = tool_ == EditorTool::Effect;
     lightPalette_->visible = tool_ == EditorTool::Light;
     characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect && tool_ != EditorTool::Light;
-    if (propertiesStale_ && !properties_->typing() && !npcPanel_->typing()) {
+    if (propertiesStale_ && !properties_->typing() && !npcPanel_->typing() && !npcTrade_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
     // A question about unsaved changes, or the list of levels, takes all input until answered.
@@ -1344,6 +1413,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     npcPanel_->visible = npcPanel_->visible && properties_->visible && !classesShown_;
+    npcTrade_->visible = npcPanel_->visible;
     // The time-of-day slider (US-247): press on it and drag; the hour follows the pointer until the button is let go.
     bool onSlider = false;
     if (previewHour_) {
@@ -1357,7 +1427,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     }
     const bool onToolbar = toolbar_->handle(input) || onSlider;
     const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input) || lightPalette_->handle(input);
-    const bool onProperties = properties_->handle(input) || npcPanel_->handle(input);
+    const bool onProperties = properties_->handle(input) || npcPanel_->handle(input) || npcTrade_->handle(input);
     const bool onSettings = settings_->handle(input);
     const bool onClasses = classes_->handle(input);
     const bool onEconomy = economy_->handle(input);
@@ -1645,7 +1715,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || npcTrade_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
@@ -1878,6 +1948,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     }
     properties_->draw(painter);
     npcPanel_->draw(painter);
+    npcTrade_->draw(painter);
     settings_->draw(painter);
     economy_->draw(painter);
     classes_->draw(painter);
@@ -1928,6 +1999,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         lightPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         npcPanel_->drawOverlay(painter);
+        npcTrade_->drawOverlay(painter);
         settings_->drawOverlay(painter);
         economy_->drawOverlay(painter);
         classes_->drawOverlay(painter);

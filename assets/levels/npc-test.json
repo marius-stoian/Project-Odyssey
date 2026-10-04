@@ -13,6 +13,23 @@
    "kind": "wanderer",
    "name": "Tala",
    "swordDamage": 5,
+   "trade": {
+    "deliveries": 1,
+    "restockPerDay": {
+     "flint": 1
+    },
+    "stock": {
+     "berries": 4,
+     "flint": 6,
+     "fur": 2
+    },
+    "wants": [
+     "berries"
+    ],
+    "weights": {
+     "fur": 3
+    }
+   },
    "x": 200,
    "y": 330
   },
@@ -43,6 +60,21 @@
    "kind": "wanderer",
    "name": "Harn",
    "swordDamage": 5,
+   "trade": {
+    "rare": {
+     "spearhead": "friendly"
+    },
+    "restockPerDay": {
+     "fur": 1
+    },
+    "stock": {
+     "fur": 4,
+     "spearhead": 1
+    },
+    "wants": [
+     "flint"
+    ]
+   },
    "x": 360,
    "y": 330
   },
@@ -101,6 +133,15 @@
   }
  ],
  "defaultGround": "grass",
+ "economy": {
+  "currencies": {
+   "shells": 1
+  },
+  "resources": {
+   "berries": 3,
+   "flint": 2
+  }
+ },
  "effects": [],
  "ground": [
   [

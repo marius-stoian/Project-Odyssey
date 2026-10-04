@@ -1700,3 +1700,22 @@ The screen asks which one it has with `std::holds_alternative<NpcTrader>(trader_
 **Try it (15 minutes).** Add a third struct, `struct CaravanTrader { int id; };`, to the variant and read the compiler's errors: each place that handles the kinds is listed for you.
 
 **Check yourself.** Why does `execute` call `quote` first instead of checking the pieces again by itself?
+
+## US-284 Editor trade panel: text fields bound to maps
+
+**What we built.** The Editor can now set a trader's stock, daily restock, weighted deliveries, wants and rare goods in the NPC panel, the Class panel and the Kinds tab, and the test level has a trader (Tala) and a wary hunter (Harn) set up with it.
+
+**The C++ idea: a table widget bound to a map.** A trader's stock is a `std::map<std::string, int>`: item name to count. The Editor shows it as one line of text, `fur=3 flint=0`, and reads it back. Two small functions do all the work, and the test checks they are inverses (what you write is what you read):
+
+```cpp
+std::string formatPairs(const ItemCounts& pairs);                  // map  -> "flint=0 fur=3"
+std::optional<ItemCounts> parsePairs(std::string_view text, ...);  // text -> map, or nothing
+```
+
+`std::optional` says "a value, or nothing" without exceptions: a mistake in the text gives *nothing*, the Editor says why, and the map is untouched, so a typo can never half-change a trader. Because a `std::map` keeps its keys sorted, the written text is the same whatever order you typed: `fur=3 flint=0` is saved and shown as `flint=0 fur=3`. And every edit goes through the same `changeSelectedNpc` that makes one step of Undo, so the Editor never has a second way to change the level.
+
+**Where to look.** `Editor::setSelectedTrade` and `addTradeRows` in `src/game/editor.cpp`, `setTradeField` in `src/sim/npc_extras.cpp`, `tests/game/trade_editor_test.cpp`.
+
+**Try it (15 minutes).** In the Editor select Tala, type `fur=3 flint=` into **Stock** and read the status line; then type `flint=0 fur=3` and press Ctrl+Z.
+
+**Check yourself.** Why does the Trade section of the NPC panel show only the NPC's own values, and not what it inherits from its class?

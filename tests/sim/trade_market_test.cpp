@@ -233,3 +233,36 @@ TEST_CASE("US-281 Settings: the shipped trade.json loads and holds the numbers o
     CHECK(config.wantPercent == 100);
     CHECK(config.otherPercent == 50);
 }
+
+TEST_CASE("US-284 Fields: the six trade fields of the Editor read and write the same text, and a mistake changes nothing") {
+    rules::TradeProfile profile;
+    std::string problem;
+    CHECK(rules::setTradeField(profile, "stock", "fur=3 flint=0", problem));
+    CHECK(rules::setTradeField(profile, "restock", "flint=1", problem));
+    CHECK(rules::setTradeField(profile, "picks", " 2 ", problem));
+    CHECK(rules::setTradeField(profile, "weights", "fur=3, berries=0", problem));
+    CHECK(rules::setTradeField(profile, "wants", "berries, fur berries", problem));
+    CHECK(rules::setTradeField(profile, "rare", "obsidian=friendly spearhead=enchanted", problem));
+    CHECK(profile.stock == sim::ItemCounts{{"flint", 0}, {"fur", 3}});
+    CHECK(profile.deliveries == 2);
+    CHECK(profile.weights.at("berries") == 0); // 0 switches an inherited weight off
+    CHECK(profile.wants == std::vector<std::string>{"berries", "fur"});
+    for (const std::string& field : rules::tradeFieldNames()) {
+        rules::TradeProfile again;
+        CHECK_MESSAGE(rules::setTradeField(again, field, rules::tradeFieldText(profile, field), problem), field);
+        CHECK(rules::tradeFieldText(again, field) == rules::tradeFieldText(profile, field));
+    }
+    CHECK(rules::setTradeField(profile, "picks", "", problem)); // empty: not set
+    CHECK(profile.deliveries == -1);
+
+    const rules::TradeProfile before = profile;
+    CHECK_FALSE(rules::setTradeField(profile, "stock", "fur", problem));
+    CHECK_FALSE(rules::setTradeField(profile, "picks", "21", problem));
+    CHECK_FALSE(rules::setTradeField(profile, "picks", "two", problem));
+    CHECK_FALSE(rules::setTradeField(profile, "wants", "Fur", problem));
+    CHECK_FALSE(rules::setTradeField(profile, "rare", "obsidian", problem));
+    CHECK_FALSE(rules::setTradeField(profile, "rare", "obsidian=kind", problem));
+    CHECK_FALSE(rules::setTradeField(profile, "colour", "red", problem));
+    CHECK(problem.find("not a trade field") != std::string::npos);
+    CHECK(profile == before);
+}
