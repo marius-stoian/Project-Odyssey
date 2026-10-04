@@ -195,7 +195,8 @@ TEST_CASE("US-268 Partner types: the dialogue row offers the player, animals, th
     healer.label = "Healer";
     healer.icon = "cross";
     REQUIRE_FALSE(studio.odyssey->npcClasses().save(healer).has_value());
-    CHECK(std::find(studio.editor().partnerTypes().begin(), studio.editor().partnerTypes().end(), "class:healer") != studio.editor().partnerTypes().end());
+    const std::vector<std::string> after = studio.editor().partnerTypes(); // one vector: begin() and end() of two temporaries are not a range
+    CHECK(std::find(after.begin(), after.end(), "class:healer") != after.end());
     // A dialogue for another NPC class is kept per partner type.
     studio.editor().setSelectedDialogue("class:guard", "npc-ossa.dlg");
     CHECK(studio.placed().dialogues == std::vector<std::pair<std::string, std::string>>{{"class:guard", "npc-ossa.dlg"}});

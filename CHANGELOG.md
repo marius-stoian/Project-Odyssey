@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M9a: exit review of M9a NPC foundation (Mraw) - 2026-10-05
+
+**State:** On `qa`, merged into `main`. `tools/verify.ps1 -Story X-M9a -Config Both`: zero warnings, 27/27 test groups in Debug and in Release.
+
+- Fix: `OdysseyGame` builds the placed people into the simulation in its constructor, not only after a restart (`src/game/odyssey_game.cpp`).
+- Test fixes: US-268 partner-types test (one vector instead of the begin/end of two temporaries), US-266 insult test level (a character was placed outside the map).
+- Gate: `docs/gates/M9a.md`; evidence `docs/evidence/X-M9a/`.
+
+
 ## US-270: NPC test level (Mraw) - 2026-10-04
 
 **State:** On `story/US-270`, merged into `qa`. Debug builds with zero warnings; the three `US-270 ...` cases (`tests/game/npc_test_level_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-270.md`).

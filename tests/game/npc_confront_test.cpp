@@ -101,7 +101,7 @@ TEST_CASE("US-266 Insult: the opinion of the target and of its friends who hear 
         game::PlacedCharacter friendA = placed(level, "wanderer", "Brek", 100);
         game::PlacedCharacter friendB = placed(level, "wanderer", "Cori", 140);
         game::PlacedCharacter stranger = placed(level, "wanderer", "Dax", 180);
-        game::PlacedCharacter farFriend = placed(level, "wanderer", "Eno", 60, 32 * 40); // 40 m away: out of hearing
+        game::PlacedCharacter farFriend = placed(level, "wanderer", "Eno", 60, -32 * 30); // 30 m north: out of hearing (the hero starts at y 1048, so 40 m south would leave the level)
         target.family = friendA.family = friendB.family = farFriend.family = 4;
         level.characters = {target, friendA, friendB, stranger, farFriend};
     });

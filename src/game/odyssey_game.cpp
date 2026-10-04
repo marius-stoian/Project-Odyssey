@@ -161,6 +161,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editor_.setWeaponPalette(std::move(palette));
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
+    buildNpcPopulation(); // the placed people are persons from the first frame, not only after a restart (X-M9a)
     if (clanEnabled_) startClan();
 }
 
