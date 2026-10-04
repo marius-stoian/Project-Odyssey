@@ -1,4 +1,4 @@
-# Project Odyssey Codex v2.10
+# Project Odyssey Codex v2.11
 
 Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.10 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
@@ -25,7 +25,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.10)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.11)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -263,7 +263,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.10 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.11 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -491,18 +491,18 @@ M8 is under way. The owner added four milestones built right after M8 and before
 </prompt>
 ```
 
-### P-012 Adopt Codex v2.10 (NPC foundation, trade economy, NPC life)
+### P-012 Adopt Codex v2.11 (NPC foundation, trade economy, NPC life)
 ```xml
-<prompt id="P-012" codex="2.10" name="Adopt Codex v2.10">
+<prompt id="P-012" codex="2.11" name="Adopt Codex v2.11">
 <context>
-The owner asked on 2026-10-04 to talk, confront and trade with every NPC, to set every NPC by hand in the Editor with owner-defined NPC Classes, and to make placed NPCs full persons of a world of up to 100,000 (D-52, Decided in six chat rounds). Three new milestones M9a, M9b, M9c come right after M8c and before M8d. Mraw's brief: docs/plans/M9a-npc-roles-brief.md. Run this prompt as soon as the Codex sync reports v2.10; a story in progress (for example US-248) is finished first.
+The owner asked on 2026-10-04 to talk, confront and trade with every NPC, to set every NPC by hand in the Editor with owner-defined NPC Classes, and to make placed NPCs full persons of a world of up to 100,000 (D-52, Decided in six chat rounds). Three new milestones M9a, M9b, M9c come right after M8c and before M8d. Mraw's brief: docs/plans/M9a-npc-roles-brief.md. Run this prompt as soon as the Codex sync reports v2.11; a story in progress (for example US-248) is finished first.
 </context>
 <instructions>
-1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.10.
+1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.11.
 2. docs/decisions.md: add D-52 as in section 5 (Decided, owner, 2026-10-04); D-15 reads "... > M8c > M9a > M9b > M9c > M8d > ...". If a story already used D-52, renumber that story's decision to the next free ID and update its references. Commit docs/decision-requests/D-52.md.
 3. docs/status.md: add P-012 after P-011; add K-M9a..X-M9a, K-M9b..X-M9b, K-M9c..X-M9c (To do) in the execution order of section 7, between X-M8c and K-M8d.
 4. Requirements v2.10 and the backlog (epics E26-E28, Round 23) are on Drive; mirror them with tools/sync-workspace.ps1 if the session hook has not, and commit them with "Docs: sync workspace files from Drive". The brief and D-52.md are already committed (6c9d395).
-5. Update Limit.md (next prompt in Codex order) and commit on qa "P-012: adopt Codex v2.10 (NPC foundation, trade economy, NPC life)" (explicit paths only), push.
+5. Update Limit.md (next prompt in Codex order) and commit on qa "P-012: adopt Codex v2.11 (NPC foundation, trade economy, NPC life)" (explicit paths only), push.
 </instructions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -7937,7 +7937,7 @@ Why this milestone exists: every data file becomes editable in the Editor throug
 <prompt id="K-M11" codex="2.1" name="Kick off M11 Data editors">
 <instructions>
 1. Confirm that M10 (docs/gates/M10.md) and its stories are done (for M10: X-M9 also ran its full verification and CI), and that D-40 and D-41 are Decided in docs/decisions.md.
-2. Architect: write docs/plans/M11-data-editors-design.md (schema subset and validator, form widgets, reference index, catalog reload by id (CI-007), quick check, Game Rules loading, routines in the utility AI) before the first story. Every design question it meets, Dominus decides (D-41) and records as delegated.
+2. Architect: write docs/plans/M11-data-editors-design.md (schema subset and validator, form widgets, reference index, catalog reload by id (CI-007), quick check, Game Rules loading, routines as role-level weights on the M9c schedules of US-290) before the first story. Every design question it meets, Dominus decides (D-41) and records as delegated.
 3. Set this milestone's stories to To do in docs/status.md in this order: US-190, US-191, US-193, US-194, US-195, US-196, US-192.
 4. Continue with the first story prompt.
 </instructions>
@@ -8187,20 +8187,21 @@ Manual checks in docs/plans/US-195.md listed, to be run at X-M11.
 
 #### S-US-196 Daily routines as data
 ```xml
-<prompt id="S-US-196" codex="2.1" milestone="M11" story="US-196" priority="Must" size="M">
+<prompt id="S-US-196" codex="2.11" milestone="M11" story="US-196" priority="Must" size="M">
 <context>
 Story US-196: Daily routines as data.
 As the owner, I want daily routines per role and per person (sleep, work, meals, gatherings at the fire), so that clan life has a rhythm I can shape.
 Epic E18 Data editors: Every data file (entities, mechanics, story tuning, game rules, daily routines) is edited in the Editor through forms built from schemas.
-Traces to: SDC-07, INT-05.
+Traces to: SDC-07, SDC-12, INT-05.
+Since v2.11: M9c already built day and night schedules (US-290, SDC-12) in one format with the precedence class, kind, NPC, an Editor schedule form, interruption by needs and danger, and a daily summary for far persons. This story reuses them; it never adds a second schedule format or a second scheduler.
 </context>
 <dependencies>
-Stories that must be Done: US-154, US-191.
-Owner decisions that must be Decided: D-40, D-41.
+Stories that must be Done: US-154, US-191, US-290, US-291.
+Owner decisions that must be Decided: D-40, D-41, D-52.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only (with the M10-M14 exceptions, D-41).
-Where the work belongs: Simulation: assets/data/sim/routines.json (per role; per person in the world from M12); the M7 utility scoring multiplies an interaction's score by the active block's weight for matching tags; needs below their danger level ignore routines. Game: a Routines editor with a 24-hour timeline of blocks.
+Where the work belongs: Simulation: a routine is the US-290 schedule format given per role (a profession or an NPC Class) and per person, stored where US-290 stores schedules (no assets/data/sim/routines.json; if the M11 design document wants one file per role, it holds US-290 schedule entries). What this story adds: each block may carry weights for interaction tags, and the M7 utility scoring multiplies an interaction's score by the active block's weight for matching tags, so a block guides choices instead of only naming one activity; clan members (who had no schedule in M9c) get their profession's routine; needs below their danger level still win (US-290 interruption rule). Game: a 24-hour timeline view (drag blocks) added to the US-290 schedule form, and the schema of the schedule format added to the M11 schema set so the Data editors open it; the timeline and the form edit the same data.
 Follow the formats in the brief docs/plans/M10-M13-authoring-brief.md and the milestone design document; Dominus decides any open design detail and records it as delegated.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete when its code and tests are written, the Debug build has zero warnings, the Definition of Done holds as the Charter's M10-M14 exception states, and it is merged into qa; a progress summary is not completion.
@@ -8212,9 +8213,14 @@ When a day passes
 Then hunters choose work interactions in that block more often than at other times
 </scenario>
 <scenario name="Edit">
-Given the Routines editor
-When the owner drags a block on the day timeline
-Then the routine file is saved and used
+Given the day timeline of the hunters' routine
+When the owner drags a block
+Then the schedule data is saved in the US-290 format, the schedule form shows the same change, and play uses it
+</scenario>
+<scenario name="One format">
+Given an NPC Class schedule made in M9c and a profession routine made in this story
+When both files are loaded
+Then both are read by the same loader and validator, and no routines-only format exists
 </scenario>
 <scenario name="Needs win">
 Given a starving hunter in a work block
@@ -8227,7 +8233,7 @@ Then they eat first
 The Debug build with zero warnings (CI builds Release after the merge, D-46); build log in docs/evidence/US-196/. The "US-196 ..." tests exist and compile; they run at X-M11.
 Manual checks in docs/plans/US-196.md listed, to be run at X-M11.
 </verification>
-<teach_back>C++ concept for the owner: Time blocks and weighting a utility AI.</teach_back>
+<teach_back>C++ concept for the owner: Time blocks and weighting a utility AI; extending one data format instead of adding a second.</teach_back>
 <stop_conditions>Build loop L-01 stop conditions; a scope change this Codex does not cover (codex issue).</stop_conditions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -9664,3 +9670,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.8 | 2026-10-04 | NPC roles, talk and trade: first draft of milestone M9a (K-M9a, S-US-260..S-US-267, X-M9a) between X-M8e and K-M9, with the owner's 24 questions open (D-52). Superseded the same day by v2.9 before any prompt ran. |
 | 2.9 | 2026-10-04 | NPC foundation, trade economy and NPC life (owner answers D-52, six chat rounds; Mraw's brief docs/plans/M9a-npc-roles-brief.md, revised). The owner's answers tripled the v2.8 scope, so M9a is split into three milestones built right after M8c and before M8d (D-52 Q-01, S-01): M9a NPC foundation (K-M9a, S-US-260..S-US-270: NPC Classes in the Editor, kind files and overrides, placed NPCs as full persons, the person store with detail by distance for 100,000 persons and ADR-022, nine attitudes per pair, talk, Confront, hidden actions and the Actions pop-up, Editor NPC panel, kinds tab and markers, test level), M9b Trade economy (K-M9b, S-US-280..S-US-284: owner-defined currencies, limited daily stock, supply and demand with reputation, one trade screen, Editor trade panel), M9c NPC life (K-M9c, S-US-290..S-US-294: schedules, class, custom and event actions with a quest hook for M10, NPC-to-NPC interactions, partner-type defaults, living test level and soak), each with an exit review; shared design notes. The v2.8 prompts S-US-260..S-US-267 are replaced (none had run). P-012 adopts v2.9; K-M8d also checks that M9c is done; D-52 Decided in the decision table; D-15 chain and execution order updated. Source of truth: epics E17-E19 and their stories must be added to the requirements and the backlog before K-M9a (Mraw to reconcile; Anima issue CI-012). |
 | 2.10 | 2026-10-04 | Requirements reconciled (source of truth v2.10, Round 23): Mraw added the M9a-M9c work to Project Odyssey.docx and the backlog. Epic ids E17-E19 were already taken (M10-M12), so the NPC epics are E26 NPC foundation, E27 Trade economy and E28 NPC life; every M9a-M9c story prompt now traces to the new requirements SDC-08..SDC-12, INT-09..INT-12, EDT-08 and NFR-08 instead of placeholders; K-M9a step 2 checks the mirrored requirements version; P-012 adopts v2.10 and mirrors the requirements. CI-012 resolved before it was raised. Open for a later version: SDC-12 builds the schedules early, so S-US-196 (M11 routines) should reuse them; Anima amends S-US-196 when M11 comes closer. |
+| 2.11 | 2026-10-04 | S-US-196 (M11 Daily routines as data) reuses the M9c schedules (US-290, SDC-12; owner request): routines are the US-290 schedule format per role and per person, the story adds tag weights per block for the utility scoring, routines for clan members by profession, a 24-hour timeline view in the US-290 schedule form and the schedule schema for the M11 editors; no routines.json and no second scheduler. New dependencies US-290, US-291 and D-52; traces add SDC-12; new scenario "One format". K-M11's design document covers routines on the M9c schedules. P-012 adopts v2.11. |
