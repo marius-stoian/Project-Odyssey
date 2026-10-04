@@ -347,3 +347,53 @@ A line is read when you press Enter or click elsewhere. A mistake is said in the
 | 5 | Trade with Harn: **Haggle** once | a chance and a roll; a second try today is greyed out |
 | 6 | Talk kindly to Harn until he is friendly, press **X** again | **Ask about rare goods** is offered; its message names the spearhead; the trade screen lists it |
 | 7 | Wait one in-game day, trade with Tala again | one more flint than yesterday (plus the random delivery) |
+
+## Places and schedules (US-290, level version 5)
+
+### Places: the `places` of a level
+
+A level may name spots of its map (written only when there are some). Schedules send people to them, and the environment interactions of M9c use their tags.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `name` | lower-case letters, digits, `-`; not `home` | what schedules say in `at` |
+| `x`, `y` | world pixels, inside the level | where it is |
+| `tags` | list of words | what is there: `forage`, `shelter`, `water`, `shrine`, anything you want to target |
+
+```json
+"places": [ { "name": "market", "x": 656, "y": 336 }, { "name": "grove", "x": 976, "y": 400, "tags": ["forage", "shelter"] } ]
+```
+
+`home` is built in: the spot where the NPC was placed. In the Editor the **Places** line of the Economy panel (**Level**, **Economy...**) is `market=20,10 grove=30,12/forage/shelter`: tile numbers (the place is the middle of the tile) and tags after slashes. A mistake (no `=`, `home`, a name twice, a spot outside the level) is said and changes nothing; the line is one step of Undo.
+
+### Schedules: the `schedule` block
+
+A `schedule` can be written in a class file, a kind file and on a placed NPC. The layers do **not** merge: the schedule of the highest layer that has one wins (the NPC, else its kind, else its classes in order), as a whole.
+
+```json
+"schedule": [ { "from": "06:00", "do": "work", "at": "market" }, { "from": "21:00", "do": "sleep", "at": "home" } ]
+```
+
+or, when the night differs, `"schedule": { "day": [ ... ], "night": [ ... ] }`.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `from` | `"HH:MM"` | when the block begins; blocks are sorted by it, two cannot begin together |
+| `do` | an activity word, or the id of an interaction | what the person does |
+| `at` | a place name or `home` (default) | where |
+
+A block lasts until the next block begins and the day wraps round midnight, so the last block of the day holds until the first one. The night variant is used between `nightFromHour` and `nightToHour` of `assets/data/sim/schedule.json` (21 and 6); with no night blocks the day blocks hold at night too.
+
+**Activity words** are the keys of `activities` in `schedule.json`: `sleep` (+12 Energy an hour), `rest` (+4 Energy), `eat` (+25 Hunger), `work`, `idle`, `go`, `patrol` (nothing back). Add your own word with the needs it restores. An interaction id is also an activity. A place or activity that is not known is logged with the name of the NPC when the level loads (`Schedule of Tala: 12:00: "square" is not a place of this level`) and the person stays at home for it.
+
+### How it runs
+
+The schedule is looked at **on the hour** (every 100 ticks): persons near the hero (the near radius of ADR-022) go to the place of the block and get back what the activity restores; persons far from the hero follow it in their daily summary: each one is visited once a day, at the tick of the day that is their index, so no tick visits the whole crowd (ADR-022 addendum). In play the figure of a person walks 2 pixels a tick to where its schedule sends it, round what is in the way (after ten seconds without progress it is put at its goal); its menu is where it stands.
+
+**Interruptions** (D-54 Q10): a person near the hero whose Hunger is below `eat.below` (20) goes to `eat.place` (home) and eats (`eat.restore`, +40 an hour) until it is no longer hungry; danger (a hostile creature within 6 m) sends it to `dangerPlace` (home) until it is gone; a fight (US-292) keeps it fighting. The next hour after an interruption the person simply follows its schedule again: it goes back to the market.
+
+`npc-life.json` next to `npcs.json` keeps the schedules, homes and modes (run-length coded, so a crowd with one schedule saves in a few hundred bytes plus two numbers of home per person).
+
+### Editor: the Schedule form
+
+The Trade section beside the NPC panel has two more lines, **Day** and **Night**, and the Class panel and the Kinds tab have them under the trade lines. Type `06:00 work market; 21:00 sleep home` (time, activity, place; the place is optional and then `home`; separate blocks with `;`). Press Enter: the status line says `schedule day`; a mistake (`6am`, a missing activity, two blocks at one time) is said and changes nothing. For an NPC each line is one step of Undo and edits its **own** schedule (which replaces its kind's and its classes' whole); for a class or kind **Save** writes it. An empty **Night** means the day blocks hold at night.

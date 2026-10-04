@@ -46,6 +46,7 @@
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
 #include "game/npc_class_book.h"
+#include "sim/npc_director.h"
 #include "sim/npc_population.h"
 #include "sim/trade_market.h"
 #include "sim/interaction.h"
@@ -131,6 +132,11 @@ public:
     sim::TradeMarket& tradeMarketMutable() { return tradeMarket_; }
     // The base value of every item of the hero's data (the price book of the traders, in value units).
     sim::ItemCounts itemValues() const;
+    // The life of the placed people (US-290): schedules, homes, interruptions (the places of the level are its places).
+    const sim::NpcDirector& npcDirector() const { return npcDirector_; }
+    sim::NpcDirector& npcDirectorMutable() { return npcDirector_; }
+    // Where a placed person stands now, world pixels: its figure walks to where its schedule sends it; a person without a figure stands where it was placed.
+    PixelPoint npcPosition(int placedId) const;
     NpcClassBook& npcClasses() { return npcClasses_; }
     const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
@@ -292,6 +298,9 @@ public:
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
     void buildNpcPopulation();
     void refreshTraders(); // registers the traders of the level again with their data of now (F5, a new class file), keeping the stock they have
+    void refreshLife();    // gives every placed person the schedule its classes, kind and own fields say now (F5, the Editor), and logs what it names that is not there
+    void walkNpcPeople();  // the figures of the placed people walk to where the director sent them (US-290)
+    void updateNpcDanger(); // a hostile within reach of a person sends them home (D-54 Q10)
     void syncEditorActions();
     void registerCreatures();
     void tickNpcPopulation();
@@ -404,6 +413,9 @@ private:
     sim::PriceConfig tradeConfig_;     // assets/data/sim/trade.json (US-281)
     sim::TradeMarket tradeMarket_;     // the stock of the traders (US-281)
     std::int64_t tradeDay_ = 0;        // the day the traders were last restocked
+    sim::rules::ScheduleConfig scheduleConfig_; // assets/data/sim/schedule.json (US-290)
+    sim::NpcDirector npcDirector_;     // the life of the placed people (US-290)
+    std::unordered_map<int, int> npcStuck_; // placed id -> ticks a walking figure has made no progress (it is put at its goal after a while)
     std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;

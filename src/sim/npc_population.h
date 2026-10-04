@@ -6,6 +6,7 @@
 #include "sim/needs.h"
 #include "sim/opinion.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <string>
@@ -41,8 +42,11 @@ public:
     // file to the save. Adding an id twice returns the index of the first.
     // `attitude` is the starting attitude of the person to the hero (US-264).
     int add(int id, std::string_view kind, int ageDays, int family, int x, int y, Attitude attitude = Attitude::Neutral);
-    // A person moves (schedules, M9c): the grid follows.
+    // A person moves (schedules, M9c): the grid follows (it is only touched when the person changes cell).
     void move(int index, int x, int y);
+    // A person close to this one, picked by `salt` among those in the same grid cell of the grid, within `radius` pixels: -1 when there is nobody. It looks at a few
+    // places of the cell and never walks a crowded one, so it costs the same in a crowd of 100,000 (US-292). The answer depends only on who stands where.
+    int neighbour(int index, int salt, int radius) const;
 
     // Where "near" is measured from: the hero. Until it is set every person is far.
     void setFocus(int x, int y) {
@@ -52,6 +56,9 @@ public:
     }
     // Whether a person is within the near radius of the focus now.
     bool isNear(int index) const;
+    // The persons within the near radius of the focus, in ascending order (empty until the focus is set).
+    std::vector<int> nearFocus() const;
+    bool hasFocus() const { return focusSet_; }
     // The indices of every person within `radius` pixels of a point, in ascending order. Costs the cells it touches, not the size of the store.
     std::vector<int> near(int x, int y, int radius) const;
     std::size_t nearCount() const { return nearNow_; } // how many persons had their hour simulated at the last hour mark
@@ -67,6 +74,11 @@ public:
     // The index of the person with this id, or -1.
     int indexOf(int id) const;
     std::uint64_t ticks() const { return ticks_; }
+    int ticksPerHour() const { return calendar_.ticksPerHour(); }
+    int ticksPerDay() const { return calendar_.ticksPerDay(); }
+    // The hour of the day (0 to 23) at the tick that has just run.
+    int hourOfDay() const { return static_cast<int>((ticks_ / static_cast<std::uint64_t>(calendar_.ticksPerHour())) % kHoursPerDay); }
+    const NeedsConfig& needsConfig() const { return needsConfig_; }
     std::int64_t day() const { return static_cast<std::int64_t>(ticks_ / static_cast<std::uint64_t>(calendar_.ticksPerDay())); }
     const DailyConfig& daily() const { return daily_; }
 
@@ -78,6 +90,8 @@ public:
     int x(int index) const { return xs_[at(index)]; }
     int y(int index) const { return ys_[at(index)]; }
     int need(int index, Need which) const { return needs_[at(index) * kNeedCount + static_cast<std::size_t>(which)]; }
+    // A need changes (eating, sleeping, and the tests of schedules): clamped from 0 to the maximum of the needs.
+    void setNeed(int index, Need which, int value) { needs_[at(index) * kNeedCount + static_cast<std::size_t>(which)] = static_cast<std::int16_t>(std::clamp(value, 0, needsConfig_.maximum)); }
     // How many hours of today are already in this person's needs (0 to 24).
     int hoursApplied(int index) const { return hours_[at(index)]; }
 

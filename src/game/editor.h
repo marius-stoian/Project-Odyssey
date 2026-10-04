@@ -138,6 +138,8 @@ public:
     bool setEconomyCurrencies(const std::string& text);
     bool setEconomyPrices(const std::string& text);
     bool setEconomyResources(const std::string& text);
+    // The named places of the level (US-290): "market=20,10 grove=30,12/forage/shelter" (tile numbers, tags after slashes), the Places line of the Economy panel; one step of Undo.
+    bool setPlaces(const std::string& text);
     // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
     // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
     void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
@@ -183,6 +185,12 @@ public:
     bool setSelectedTrade(const std::string& field, const std::string& text);
     bool setClassTrade(const std::string& field, const std::string& text);
     bool setKindTrade(const std::string& field, const std::string& text);
+    // The Schedule form (US-290, D-54 Q9): two text lines, Day and Night, each "06:00 work market; 21:00 sleep home" (time, activity, place; the place is a place of the level or
+    // home). An empty Night means the day blocks hold at night too. For the selected NPC it edits its own schedule (one step of Undo per line; the schedule of the highest layer
+    // that has one wins, so an NPC's own replaces its kind's and its classes'); for a class or kind draft Save writes it. A mistake is said and changes nothing.
+    bool setSelectedSchedule(const std::string& field, const std::string& text);
+    bool setClassSchedule(const std::string& field, const std::string& text);
+    bool setKindSchedule(const std::string& field, const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
@@ -256,6 +264,7 @@ private:
     void buildNpcPanel(const PlacedCharacter& shown);
     void buildNpcTradePanel(const PlacedCharacter& shown);
     void addTradeRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set);
+    void addScheduleRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::Schedule& shown, const std::function<bool(const std::string&, const std::string&)>& set);
     void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();

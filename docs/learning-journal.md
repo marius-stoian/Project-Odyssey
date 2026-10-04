@@ -1719,3 +1719,23 @@ std::optional<ItemCounts> parsePairs(std::string_view text, ...);  // text -> ma
 **Try it (15 minutes).** In the Editor select Tala, type `fur=3 flint=` into **Stock** and read the status line; then type `flint=0 fur=3` and press Ctrl+Z.
 
 **Check yourself.** Why does the Trade section of the NPC panel show only the NPC's own values, and not what it inherits from its class?
+
+## US-290 Day and night schedules: a state machine over time, with interruptions
+
+**What we built.** Every NPC can have a daily schedule (`06:00 work at the market, 21:00 sleep at home`), with a night variant. Near the hero people follow it hour by hour; far away they follow it once a day. Hunger and danger interrupt it, and afterwards the person simply goes back to what the schedule says.
+
+**The C++ idea: a time-based state machine.** A person is always in exactly one *mode*: `Scheduled`, `Eating`, `Fleeing`, `Fighting` or `Dead`. An `enum class` names them, and the director moves each person between modes once an hour:
+
+```cpp
+enum class Mode : std::uint8_t { Scheduled, Eating, Fleeing, Fighting, Dead };
+```
+
+The trick that makes *resuming* easy is that the schedule is **not remembered**: nobody stores "I was going to the market". Each hour the person asks "what does my schedule say for this hour?" (`activeBlock(schedule, minute, night)`) and goes there. When the interruption (hunger, danger) is over, the mode is simply `Scheduled` again and the next hour's question gives the right answer. State that can be *recomputed* never goes out of date; that is why interruptions cost a few lines.
+
+The other idea is cost. Looking at 100,000 people every tick would be far too slow, so the persons far from the hero are visited in *slices*: person *i* only at the tick of the day that is *i modulo the length of the day*. Every person is visited exactly once a day, and a tick touches about 100,000 / 2,400 = 42 of them.
+
+**Where to look.** `src/sim/npc_director.cpp` (`stepNear`, `stepFar`, `farSlice`), `src/sim/npc_schedule.cpp` (`activeBlock`), `tests/sim/npc_schedule_test.cpp` (Follow, Interrupt, Danger, Far).
+
+**Try it (15 minutes).** In `npc_schedule_test.cpp` change the hunger set in the Interrupt test from 5 to 35 and predict whether the NPC still goes home to eat; then run the test.
+
+**Check yourself.** Why is it safe that a person who is hungry at 10:00 and a person who is not both read the same schedule at 11:00?

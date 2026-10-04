@@ -186,6 +186,8 @@ add_library(odysseus_sim STATIC
     src/sim/economy.cpp
     src/sim/npc_extras.cpp
     src/sim/trade_market.cpp
+    src/sim/npc_schedule.cpp
+    src/sim/npc_director.cpp
     src/sim/npc_kind.cpp
     src/sim/npc_population.cpp
     src/sim/action_runner.cpp
@@ -436,6 +438,7 @@ add_executable(odysseus_game_tests
     tests/game/trade_gate_test.cpp
     tests/game/trade_screen_test.cpp
     tests/game/trade_editor_test.cpp
+    tests/game/schedule_editor_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -496,6 +499,7 @@ add_executable(odysseus_sim_tests
     tests/sim/trade_market_test.cpp
     tests/sim/trade_price_test.cpp
     tests/sim/trade_deal_test.cpp
+    tests/sim/npc_schedule_test.cpp
     tests/sim/npc_kind_test.cpp
     tests/sim/npc_population_test.cpp
     tests/sim/npc_scale_test.cpp

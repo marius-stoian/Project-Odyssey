@@ -49,8 +49,9 @@ std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
     subject.index = placedId;
     subject.name = placed->name;
     subject.title = placed->name + " (" + game.attitudeWordOf(placedId) + ")"; // the attitude word shows in the menu title (US-264)
-    subject.x = placed->feet.x;
-    subject.y = placed->feet.y;
+    const PixelPoint feet = game.npcPosition(placedId); // where its figure stands now: it walks where its schedule sends it
+    subject.x = feet.x;
+    subject.y = feet.y;
     subject.info.kind = placed->kind;
     subject.info.tags = resolved.tags;
     subject.info.tags.push_back("npc");
@@ -138,18 +139,19 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) 
     {
         int best = -1;
         double bestDistance = 1e9;
-        for (const int index : game.npcPopulation().near(static_cast<int>(wx), static_cast<int>(wy), 60)) {
-            const double px = game.npcPopulation().x(index);
-            const double py = game.npcPopulation().y(index);
+        for (const PlacedCharacter& figure : game.bystanders()) {
+            if (game.npcPopulation().indexOf(figure.id) < 0) continue; // only the placed people (their figures are where they walk to)
+            const double px = figure.feet.x;
+            const double py = figure.feet.y;
             if (std::abs(wx - px) > 14.0 || wy < py - 46.0 || wy > py + 6.0) continue;
             const double distance = std::hypot(wx - px, wy - py);
             if (distance < bestDistance) {
                 bestDistance = distance;
-                best = index;
+                best = figure.id;
             }
         }
         if (best >= 0) {
-            if (auto npc = npcSubject(game, game.npcPopulation().id(best))) return npc;
+            if (auto npc = npcSubject(game, best)) return npc;
         }
     }
     // A creature that is an NPC (an enemy or an animal with a kind file): it can be confronted (US-266).

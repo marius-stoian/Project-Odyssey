@@ -91,6 +91,74 @@ TradeProfile readTrade(const JsonValue& block, const ExtrasError& error) {
     return out;
 }
 
+std::vector<ScheduleBlock> readBlocks(const JsonValue& list, const std::string& where, const ExtrasError& error) {
+    std::vector<ScheduleBlock> out;
+    if (!list.isArray()) {
+        error(list.line, where + " must be a list of blocks like { \"from\": \"06:00\", \"do\": \"work\", \"at\": \"market\" }");
+        return out;
+    }
+    for (const JsonValue& entry : list.items) {
+        if (!entry.isObject()) {
+            error(entry.line, where + " must hold blocks like { \"from\": \"06:00\", \"do\": \"work\", \"at\": \"market\" }");
+            continue;
+        }
+        for (std::size_t i = 0; i < entry.keys.size(); ++i) {
+            if (entry.keys[i] != "from" && entry.keys[i] != "do" && entry.keys[i] != "at") error(entry.keyLines[i], std::format("unknown field \"{}\" in a schedule block (from, do, at)", entry.keys[i]));
+        }
+        const JsonValue* from = entry.find("from");
+        const JsonValue* doing = entry.find("do");
+        const JsonValue* at = entry.find("at");
+        const std::optional<int> minute = from != nullptr && from->isString() ? parseClock(from->text) : std::nullopt;
+        if (!minute) {
+            error(from != nullptr ? from->line : entry.line, "a schedule block needs \"from\": \"HH:MM\", for example \"06:00\"");
+            continue;
+        }
+        if (doing == nullptr || !doing->isString() || !validItemId(doing->text)) {
+            error(doing != nullptr ? doing->line : entry.line, "a schedule block needs \"do\": an activity word (work, eat, sleep, ...) or an interaction id");
+            continue;
+        }
+        if (at != nullptr && (!at->isString() || !validItemId(at->text))) {
+            error(at->line, "\"at\" must be the name of a place of the level, or home");
+            continue;
+        }
+        out.push_back({*minute, doing->text, at != nullptr ? at->text : std::string("home")});
+    }
+    std::stable_sort(out.begin(), out.end(), [](const ScheduleBlock& a, const ScheduleBlock& b) { return a.minute < b.minute; });
+    for (std::size_t i = 1; i < out.size(); ++i) {
+        if (out[i].minute == out[i - 1].minute) error(list.line, std::format("{}: two blocks begin at {}", where, formatClock(out[i].minute)));
+    }
+    return out;
+}
+
+Schedule readSchedule(const JsonValue& block, const ExtrasError& error) {
+    Schedule out;
+    if (block.isArray()) {
+        out.day = readBlocks(block, "schedule", error);
+    } else if (block.isObject()) {
+        for (std::size_t i = 0; i < block.keys.size(); ++i) {
+            if (block.keys[i] != "day" && block.keys[i] != "night") error(block.keyLines[i], std::format("unknown field \"{}\" in schedule (day, night)", block.keys[i]));
+        }
+        if (const JsonValue* day = block.find("day")) out.day = readBlocks(*day, "schedule.day", error);
+        if (const JsonValue* night = block.find("night")) out.night = readBlocks(*night, "schedule.night", error);
+    } else {
+        error(block.line, "schedule must be a list of blocks, or { \"day\": [...], \"night\": [...] }");
+    }
+    return out;
+}
+
+std::string blocksText(const std::vector<ScheduleBlock>& blocks) {
+    std::string out = "[";
+    for (std::size_t i = 0; i < blocks.size(); ++i) {
+        out += std::format("{}{{ \"from\": \"{}\", \"do\": {}, \"at\": {} }}", i != 0 ? ", " : "", formatClock(blocks[i].minute), quoteJson(blocks[i].activity), quoteJson(blocks[i].place));
+    }
+    return out + "]";
+}
+
+std::string scheduleJsonText(const Schedule& schedule) {
+    if (schedule.night.empty()) return blocksText(schedule.day);
+    return "{ \"day\": " + blocksText(schedule.day) + ", \"night\": " + blocksText(schedule.night) + " }";
+}
+
 std::string tableText(const ItemCounts& table) {
     std::string out = "{";
     bool first = true;
@@ -127,6 +195,28 @@ std::string tradeText(const TradeProfile& trade) {
 }
 
 } // namespace
+
+const std::vector<std::string>& scheduleFieldNames() {
+    static const std::vector<std::string> names = {"day", "night"};
+    return names;
+}
+
+std::string scheduleFieldText(const Schedule& schedule, const std::string& field) {
+    if (field == "day") return scheduleText(schedule.day);
+    if (field == "night") return scheduleText(schedule.night);
+    return {};
+}
+
+bool setScheduleField(Schedule& schedule, const std::string& field, std::string_view text, std::string& problem) {
+    if (field != "day" && field != "night") {
+        problem = std::format("\"{}\" is not a schedule field (day, night)", field);
+        return false;
+    }
+    const std::optional<std::vector<ScheduleBlock>> blocks = parseScheduleText(text, problem);
+    if (!blocks) return false;
+    (field == "day" ? schedule.day : schedule.night) = *blocks;
+    return true;
+}
 
 const std::vector<std::string>& tradeFieldNames() {
     static const std::vector<std::string> names = {"stock", "restock", "picks", "weights", "wants", "rare"};
@@ -230,22 +320,27 @@ void mergeTrade(TradeProfile& base, const TradeProfile& over) {
     for (const auto& [item, word] : over.rare) base.rare[item] = word;
 }
 
-void mergeExtras(NpcExtras& base, const NpcExtras& over) { mergeTrade(base.trade, over.trade); }
+void mergeExtras(NpcExtras& base, const NpcExtras& over) {
+    mergeTrade(base.trade, over.trade);
+    if (!over.schedule.empty()) base.schedule = over.schedule; // the schedule of the highest layer that has one
+}
 
 const std::vector<std::string>& extrasFieldNames() {
-    static const std::vector<std::string> names = {"trade"};
+    static const std::vector<std::string> names = {"trade", "schedule"};
     return names;
 }
 
 NpcExtras parseExtras(const JsonValue& root, const ExtrasError& error) {
     NpcExtras out;
     if (const JsonValue* trade = root.find("trade")) out.trade = readTrade(*trade, error);
+    if (const JsonValue* schedule = root.find("schedule")) out.schedule = readSchedule(*schedule, error);
     return out;
 }
 
 std::vector<std::pair<std::string, std::string>> extrasFieldTexts(const NpcExtras& extras) {
     std::vector<std::pair<std::string, std::string>> out;
     if (!extras.trade.empty()) out.emplace_back("trade", tradeText(extras.trade));
+    if (!extras.schedule.empty()) out.emplace_back("schedule", scheduleJsonText(extras.schedule));
     return out;
 }
 

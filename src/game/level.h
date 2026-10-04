@@ -8,6 +8,8 @@
 #include "luna/engine/tile_map.h"
 
 #include <filesystem>
+#include <optional>
+#include <string_view>
 #include <utility>
 #include <string>
 #include <vector>
@@ -129,6 +131,15 @@ struct PlacedLight {
     friend bool operator==(const PlacedLight&, const PlacedLight&) = default;
 };
 
+// A named spot of the level (US-290): where a schedule sends people ("market", "well"), and what the environment interactions use (tags: forage, shelter, water, shrine).
+// The name "home" is built in (where an NPC was placed). Level version 5.
+struct PlacedPlace {
+    std::string name;
+    PixelPoint at;                  // world pixels
+    std::vector<std::string> tags;
+    friend bool operator==(const PlacedPlace&, const PlacedPlace&) = default;
+};
+
 // A level: the ground, who stands where, and where the hero begins. Plain data.
 struct Level {
     std::string name = "Untitled";
@@ -142,6 +153,7 @@ struct Level {
     std::vector<PlacedEffect> effects;
     std::vector<PlacedLight> lights;     // level version 3 (US-247)
     sim::RegionEconomy economy;          // level version 5 (US-280): the currencies, market prices and resources of this region; written only when set
+    std::vector<PlacedPlace> places;     // level version 5 (US-290): the named spots schedules refer to; written only when there are some
     bool clan = false;                   // the simulated clan lives here (US-032); written only when true
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
@@ -152,6 +164,11 @@ struct Level {
     bool inside(int x, int y) const { return x >= 0 && y >= 0 && x < width && y < height; }
     friend bool operator==(const Level&, const Level&) = default;
 };
+
+// The Editor's text of the places of a level (US-290): "market=20,10 grove=30,12/forage/shelter", tile coordinates (the middle of the tile), tags after slashes; and back.
+// A mistake (not name=x,y, a name that is no word or is "home" or is used twice, a spot outside the level) comes back as nothing with the reason.
+std::string placesText(const std::vector<PlacedPlace>& places);
+std::optional<std::vector<PlacedPlace>> parsePlacesText(std::string_view text, const Level& level, std::string& problem);
 
 // A new level filled with one ground.
 Level makeLevel(std::string name, int width, int height, int ground);

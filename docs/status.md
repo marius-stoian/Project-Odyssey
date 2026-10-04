@@ -164,7 +164,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-284 | US-284 | M9b | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | X-M9b | - | M9b | To do |  |
 | K-M9c | - | M9c | Done | Owner answers 2026-10-05 (D-54), docs/plans/M9-npc-design.md |
-| S-US-290 | US-290 | M9c | To do |  |
+| S-US-290 | US-290 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-291 | US-291 | M9c | To do |  |
 | S-US-292 | US-292 | M9c | To do |  |
 | S-US-293 | US-293 | M9c | To do |  |

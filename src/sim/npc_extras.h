@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "sim/economy.h"
+#include "sim/npc_schedule.h"
 #include "sim/rule_json.h"
 
 #include <functional>
@@ -38,8 +39,9 @@ void mergeTrade(TradeProfile& base, const TradeProfile& over);
 // all read, write and merge them the same way.
 struct NpcExtras {
     TradeProfile trade;
+    Schedule schedule; // the day of the NPC (US-290); the whole schedule of the highest layer that has one wins
 
-    bool empty() const { return trade.empty(); }
+    bool empty() const { return trade.empty() && schedule.empty(); }
     friend bool operator==(const NpcExtras&, const NpcExtras&) = default;
 };
 
@@ -51,6 +53,11 @@ using ExtrasError = std::function<void(int line, const std::string& message)>;
 const std::vector<std::string>& tradeFieldNames();
 std::string tradeFieldText(const TradeProfile& trade, const std::string& field);
 bool setTradeField(TradeProfile& trade, const std::string& field, std::string_view text, std::string& problem);
+
+// The Editor's text fields of a schedule (US-290): "day" and "night", each "06:00 work market; 21:00 sleep home". Empty text clears the list. A mistake changes nothing.
+const std::vector<std::string>& scheduleFieldNames();
+std::string scheduleFieldText(const Schedule& schedule, const std::string& field);
+bool setScheduleField(Schedule& schedule, const std::string& field, std::string_view text, std::string& problem);
 
 // The names of the object fields that belong to the extras ("trade", ...), for the unknown-field check of the parsers that know them.
 const std::vector<std::string>& extrasFieldNames();
