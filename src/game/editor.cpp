@@ -275,7 +275,7 @@ bool Editor::deleteClass() {
 // The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
 void Editor::buildClassPanel() {
     classesStale_ = false;
-    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 358 : 326});
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 386 : 354});
     classes_->visible = classesShown_;
     const Rect box = classes_->bounds;
     const int left = box.x + 4;
@@ -343,6 +343,7 @@ void Editor::buildClassPanel() {
     addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
     addScheduleRows(*classes_, left, width, y, classDraft_.extras.schedule, [this](const std::string& field, const std::string& text) { return setClassSchedule(field, text); });
     addDoesRow(*classes_, left, width, y, classDraft_.extras.does, [this](const std::string& text) { return setClassDoes(text); });
+    addPartnerRows(*classes_, left, width, y, classDraft_.extras, [this](const std::string& type, const std::string& text) { return setClassPartnerActions(type, text); }, [this] { classesStale_ = true; });
     y += 4;
     classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
     classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
@@ -457,6 +458,7 @@ void Editor::buildKindForm(const Rect& box, int y) {
         addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
         addScheduleRows(*classes_, left, width, y, kindDraft_.layer.extras.schedule, [this](const std::string& field, const std::string& text) { return setKindSchedule(field, text); });
         addDoesRow(*classes_, left, width, y, kindDraft_.layer.extras.does, [this](const std::string& text) { return setKindDoes(text); });
+        addPartnerRows(*classes_, left, width, y, kindDraft_.layer.extras, [this](const std::string& type, const std::string& text) { return setKindPartnerActions(type, text); }, [this] { classesStale_ = true; });
     }
     const int bottom = box.y + box.height - 18;
     classes_->add<Button>(Rect{left, bottom, 80, 14}, "Save", [this] { saveKind(); }).hint = "Write the kind's file: every NPC of this kind that sets nothing itself follows it";
@@ -809,7 +811,7 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
 void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     constexpr int kWidth = 232;
     const Rect anchor = npcPanel_->bounds;
-    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 148});
+    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 176});
     npcTrade_->visible = npcPanel_->visible;
     const Rect box = npcTrade_->bounds;
     const int left = box.x + 4;
@@ -822,6 +824,56 @@ void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     addTradeRows(*npcTrade_, left, width, y, shown.extras.trade, [this](const std::string& field, const std::string& text) { return setSelectedTrade(field, text); });
     addScheduleRows(*npcTrade_, left, width, y, shown.extras.schedule, [this](const std::string& field, const std::string& text) { return setSelectedSchedule(field, text); });
     addDoesRow(*npcTrade_, left, width, y, shown.extras.does, [this](const std::string& text) { return setSelectedDoes(text); });
+    addPartnerRows(*npcTrade_, left, width, y, shown.extras, [this](const std::string& type, const std::string& text) { return setSelectedPartnerActions(type, text); }, [this] { propertiesStale_ = true; });
+}
+
+void Editor::addPartnerRows(Panel& panel, int left, int width, int& y, const sim::rules::NpcExtras& shown, const std::function<bool(const std::string&, const std::string&)>& set,
+                            const std::function<void()>& refresh) {
+    std::vector<std::string> types = partnerTypes();
+    types.push_back("class"); // the default for every NPC class (defaults-class.json)
+    defaultsIndex_ = std::clamp(defaultsIndex_, 0, static_cast<int>(types.size()) - 1);
+    const std::string type = types[static_cast<std::size_t>(defaultsIndex_)];
+    Button& button = panel.add<Button>(Rect{left, y, width, 11}, "Defaults with: " + type, [this, count = types.size(), refresh] {
+        defaultsIndex_ = (defaultsIndex_ + 1) % static_cast<int>(count);
+        refresh();
+    });
+    button.hint = "Click: the next partner type (the player, animals, the environment, an NPC class, or a type you added to partner-types.json)";
+    y += 13;
+    panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, "  Does", sim::rules::partnerActionsText(shown, type), 90, [set, type](const std::string& text) { set(type, text); });
+    y += 14;
+}
+
+bool Editor::setSelectedPartnerActions(const std::string& partnerType, const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    sim::rules::NpcExtras own = find(*selected_)->extras;
+    std::string problem;
+    if (!sim::rules::setPartnerActions(own, partnerType, text, problem)) {
+        say("defaults with " + partnerType + ": " + problem);
+        propertiesStale_ = true;
+        return false;
+    }
+    changeSelectedNpc("defaults with " + partnerType, [&](PlacedCharacter& placed) { placed.extras.partnerActions = own.partnerActions; });
+    return true;
+}
+
+bool Editor::setClassPartnerActions(const std::string& partnerType, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setPartnerActions(classDraft_.extras, partnerType, text, problem)) {
+        say("defaults with " + partnerType + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindPartnerActions(const std::string& partnerType, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setPartnerActions(kindDraft_.layer.extras, partnerType, text, problem)) {
+        say("defaults with " + partnerType + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
 }
 
 // The Does line: the actions an NPC does on its own, interaction ids separated by spaces.
@@ -1010,7 +1062,7 @@ void Editor::changeSelectedNpc(const std::string& what, const std::function<void
 }
 
 std::vector<std::string> Editor::partnerTypes() const {
-    std::vector<std::string> types = {"player", "animal", "environment"};
+    std::vector<std::string> types = sim::rules::partnerTypeNames(); // player, animal, environment and the types the owner added to partner-types.json (US-293)
     if (classBook_ != nullptr) {
         for (const std::string& id : classBook_->catalog().ids()) types.push_back("class:" + id);
     }

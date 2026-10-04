@@ -388,7 +388,8 @@ InteractionRegistry InteractionRegistry::load(const std::filesystem::path& folde
     }
     std::vector<std::filesystem::path> files;
     for (const auto& entry : std::filesystem::directory_iterator(folder, ec)) {
-        if (entry.is_regular_file() && entry.path().extension() == ".json") files.push_back(entry.path());
+        // defaults-<type>.json are not interactions: they list the default actions of a partner type (US-293, partner_types.h).
+        if (entry.is_regular_file() && entry.path().extension() == ".json" && entry.path().filename().string().rfind("defaults-", 0) != 0) files.push_back(entry.path());
     }
     std::sort(files.begin(), files.end());
 

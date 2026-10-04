@@ -1,0 +1,11 @@
+// An NPC fishes at a place tagged water (US-293, D-54 Q16, hunt and fish): it goes there and gets some Hunger back.
+{
+  "id": "fish",
+  "label": "Fish",
+  "actors": ["npc"],
+  "target": { "tags": ["place", "water"] },
+  "range": 2,
+  "order": 730,
+  "effects": [ "do walk-to", "do restore hunger 20" ],
+  "npc": { "score": "35 + need(hunger)", "cooldown": 40 }
+}

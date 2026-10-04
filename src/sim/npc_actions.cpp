@@ -20,11 +20,20 @@ void EventActionSource::collect(const SourceContext& context, std::vector<Action
     }
 }
 
+void DefaultActionSource::collect(const SourceContext& context, std::vector<ActionCandidate>& out) const {
+    for (const char* type : {"environment", "animal"}) {
+        const auto found = context.profile.partnerActions.find(type);
+        if (found == context.profile.partnerActions.end()) continue;
+        for (const std::string& id : found->second) out.push_back({id, ActionOrigin::Default, 0, false, 0, 0, {}});
+    }
+}
+
 ActionSources ActionSources::standard() {
     ActionSources sources;
     sources.add(std::make_unique<ClassActionSource>());
     sources.add(std::make_unique<CustomActionSource>());
     sources.add(std::make_unique<EventActionSource>());
+    sources.add(std::make_unique<DefaultActionSource>());
     return sources;
 }
 

@@ -1,5 +1,7 @@
 #include "sim/npc_extras.h"
 
+#include "sim/partner_types.h"
+
 #include <algorithm>
 #include <charconv>
 #include <format>
@@ -196,6 +198,25 @@ std::string tradeText(const TradeProfile& trade) {
 
 } // namespace
 
+bool validPartnerKey(const std::string& key) { return key == "class" || validPartnerType(key); }
+
+std::string partnerActionsText(const NpcExtras& extras, const std::string& partnerType) {
+    const auto found = extras.partnerActions.find(partnerType);
+    return found == extras.partnerActions.end() ? std::string() : doesText(found->second);
+}
+
+bool setPartnerActions(NpcExtras& extras, const std::string& partnerType, std::string_view text, std::string& problem) {
+    if (!validPartnerKey(partnerType)) {
+        problem = std::format("\"{}\" is not a partner type", partnerType);
+        return false;
+    }
+    std::vector<std::string> ids;
+    if (!setDoes(ids, text, problem)) return false;
+    if (ids.empty()) extras.partnerActions.erase(partnerType);
+    else extras.partnerActions[partnerType] = ids;
+    return true;
+}
+
 std::string doesText(const std::vector<std::string>& does) {
     std::string out;
     for (const std::string& id : does) out += (out.empty() ? "" : " ") + id;
@@ -351,11 +372,12 @@ void mergeExtras(NpcExtras& base, const NpcExtras& over) {
     for (const std::string& id : over.does) {
         if (std::find(base.does.begin(), base.does.end(), id) == base.does.end()) base.does.push_back(id);
     }
+    for (const auto& [type, ids] : over.partnerActions) base.partnerActions[type] = ids; // the list of the highest layer for a partner type wins
     if (!over.schedule.empty()) base.schedule = over.schedule; // the schedule of the highest layer that has one
 }
 
 const std::vector<std::string>& extrasFieldNames() {
-    static const std::vector<std::string> names = {"trade", "schedule", "does"};
+    static const std::vector<std::string> names = {"trade", "schedule", "does", "partnerActions"};
     return names;
 }
 
@@ -363,6 +385,27 @@ NpcExtras parseExtras(const JsonValue& root, const ExtrasError& error) {
     NpcExtras out;
     if (const JsonValue* trade = root.find("trade")) out.trade = readTrade(*trade, error);
     if (const JsonValue* schedule = root.find("schedule")) out.schedule = readSchedule(*schedule, error);
+    if (const JsonValue* partner = root.find("partnerActions")) {
+        if (!partner->isObject()) {
+            error(partner->line, "partnerActions must be { \"animal\": [\"hunt\"], ... }");
+        } else {
+            for (std::size_t i = 0; i < partner->keys.size(); ++i) {
+                const JsonValue& list = partner->items[i];
+                if (!validPartnerKey(partner->keys[i])) {
+                    error(partner->keyLines[i], std::format("unknown partner type \"{}\" (player, animal, environment, class, class:<id> or a type of partner-types.json)", partner->keys[i]));
+                } else if (!list.isArray()) {
+                    error(list.line, std::format("partnerActions.{} must be a list of interaction ids", partner->keys[i]));
+                } else {
+                    std::vector<std::string> ids;
+                    for (const JsonValue& item : list.items) {
+                        if (!item.isString() || !validItemId(item.text)) error(item.line, "partnerActions must hold interaction ids in quotes");
+                        else if (std::find(ids.begin(), ids.end(), item.text) == ids.end()) ids.push_back(item.text);
+                    }
+                    out.partnerActions[partner->keys[i]] = ids;
+                }
+            }
+        }
+    }
     if (const JsonValue* does = root.find("does")) {
         if (!does->isArray()) {
             error(does->line, "does must be a list of interaction ids, like [\"patrol\"]");
@@ -380,6 +423,17 @@ std::vector<std::pair<std::string, std::string>> extrasFieldTexts(const NpcExtra
     std::vector<std::pair<std::string, std::string>> out;
     if (!extras.trade.empty()) out.emplace_back("trade", tradeText(extras.trade));
     if (!extras.schedule.empty()) out.emplace_back("schedule", scheduleJsonText(extras.schedule));
+    if (!extras.partnerActions.empty()) {
+        std::string object = "{";
+        bool first = true;
+        for (const auto& [type, ids] : extras.partnerActions) {
+            std::string list = "[";
+            for (std::size_t i = 0; i < ids.size(); ++i) list += (i != 0 ? ", " : "") + quoteJson(ids[i]);
+            object += std::format("{} {}: {}]", first ? "" : ",", quoteJson(type), list);
+            first = false;
+        }
+        out.emplace_back("partnerActions", object + " }");
+    }
     if (!extras.does.empty()) {
         std::string list = "[";
         for (std::size_t i = 0; i < extras.does.size(); ++i) list += (i != 0 ? ", " : "") + quoteJson(extras.does[i]);

@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-293):** S-US-293 DONE (Milestone-113.md, AP-114), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.
+
 **Resume update (2026-10-05, US-292):** S-US-292 DONE (Milestone-112.md, AP-113), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-293 (default interactions by partner type: defaults files, animals, environment), US-294 (living test level and the 100,000-person 30-day soak), then the one full verify X-M9bc.
 
 **Resume update (2026-10-05, US-291):** S-US-291 DONE (Milestone-111.md, AP-112), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-292 (NPCs act on each other: talk, trade, gift, fight, confront; far persons by a daily roll), US-293 (partner defaults), US-294 (living test level and the 100,000-person 30-day soak), then the one full verify X-M9bc.

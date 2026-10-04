@@ -215,6 +215,7 @@ void OdysseyGame::refreshLife() {
             if (state == sim::rules::ActionState::Denied) profile.deny.push_back(id);
             else if (state == sim::rules::ActionState::Allowed) profile.allow.push_back(id);
         }
+        profile.partnerActions = resolved.extras.partnerActions; // the defaults of the partner types under the NPC's own lists (US-293)
         npcDirector_.setProfile(index, profile);
         npcDirector_.setCombat(index, placed.hp, placed.swordDamage); // the numbers of the hero's own fights (US-292)
         for (const std::vector<std::string>* actions : {&resolved.classActions, &resolved.customActions}) {
@@ -260,6 +261,31 @@ void OdysseyGame::walkNpcPeople() {
 
 void OdysseyGame::postWorldEvent(const std::string& trigger, int x, int y) { npcDirector_.postEvent(npcPopulation_, trigger, x, y); }
 
+void OdysseyGame::reloadPartnerDefaults() {
+    sim::rules::LoadReport report;
+    npcClasses_.setPartnerDefaults(sim::rules::loadPartnerDefaults(dataDirectory_ / "interactions", report));
+    for (const sim::rules::Diagnostic& error : report.errors) core::logWarning("Partner defaults: " + error.text());
+}
+
+// The animals near the persons (placed animals, quiet or hostile) as the director needs them: an id, a kind, a place and the tags of the kind.
+void OdysseyGame::feedNpcAnimals() {
+    std::vector<sim::AnimalThing> animals;
+    for (const PlacedCharacter& placed : bystanders_) {
+        const CharacterKindDef* kind = definitions_.character(placed.kind);
+        if (kind != nullptr && kind->animal) animals.push_back({placed.id, placed.kind, placed.feet.x, placed.feet.y, kind->tags});
+    }
+    for (const Enemy& enemy : enemies_) {
+        const CharacterKindDef* kind = definitions_.character(enemy.kindName);
+        if (enemy.isAlive() && kind != nullptr && kind->animal) animals.push_back({enemy.id, enemy.kindName, static_cast<int>(enemy.feetX()), static_cast<int>(enemy.feetY()), kind->tags});
+    }
+    npcDirector_.setAnimals(std::move(animals));
+}
+
+void OdysseyGame::removeAnimal(int id) {
+    std::erase_if(bystanders_, [id](const PlacedCharacter& figure) { return figure.id == id; });
+    std::erase_if(enemies_, [id](const Enemy& enemy) { return enemy.id == id; });
+}
+
 // What the persons did that is worth showing (US-292): a few words in a bubble over the speaker, and the log for the rest; a death takes the figure out of the world.
 void OdysseyGame::drainNpcEvents() {
     for (const sim::NpcEvent& event : npcDirector_.takeEvents()) {
@@ -273,6 +299,10 @@ void OdysseyGame::drainNpcEvents() {
         case sim::NpcEvent::Kind::Fight: core::logInfo(std::format("NPCs: {} and {} fought", event.actor, event.target)); break;
         case sim::NpcEvent::Kind::Death:
             core::logInfo(std::format("NPCs: {} was killed by {}", event.actor, event.target));
+            break;
+        case sim::NpcEvent::Kind::Hunted:
+            core::logInfo(std::format("NPCs: {} hunted the {}", event.actor, event.text));
+            removeAnimal(event.target); // the animal leaves the world
             break;
         }
     }
@@ -337,7 +367,10 @@ void OdysseyGame::tickNpcPopulation() {
         tradeDay_ = today;
         tradeMarket_.dailyUpdate(today, level_.economy); // a new day: every trader, near or far, gets its delivery (US-281)
     }
-    if (ticks_ % 20 == 0) updateNpcDanger();
+    if (ticks_ % 20 == 0) {
+        updateNpcDanger();
+        feedNpcAnimals(); // the director sees the animals that are near (US-293)
+    }
     npcDirector_.tick(npcPopulation_); // schedules, interruptions, their own actions and their dealings with each other (US-290..US-292)
     drainNpcEvents();
     walkNpcPeople();

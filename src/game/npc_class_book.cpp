@@ -23,7 +23,7 @@ sim::rules::NpcLayer placedLayer(const PlacedCharacter& placed) {
 
 sim::rules::ResolvedNpc NpcClassBook::resolve(const PlacedCharacter& placed) const {
     const sim::rules::NpcKind* kind = kinds_.find(placed.kind);
-    return sim::rules::resolveNpc(catalog_, kind != nullptr ? &kind->layer : nullptr, placedLayer(placed));
+    return sim::rules::resolveNpc(catalog_, kind != nullptr ? &kind->layer : nullptr, placedLayer(placed), &partnerDefaults_);
 }
 
 NpcClassBook::NpcClassBook(std::filesystem::path folder, std::filesystem::path kindsFolder) : folder_(std::move(folder)), kindsFolder_(std::move(kindsFolder)) {

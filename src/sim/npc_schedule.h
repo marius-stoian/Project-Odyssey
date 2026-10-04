@@ -79,6 +79,8 @@ struct ScheduleConfig {
     int defaultHp = 100;
     int defaultDamage = 5;
     int chatSocial = 10;         // the Social need a conversation gives back to both
+    int lookRadius = 384;        // pixels (12 m): how far an NPC looks for an animal to deal with (US-293)
+    int huntPercent = 50;        // the chance in a hundred that a hunt kills the animal
     std::vector<std::string> chatter{"Fine day.", "Have you eaten?", "The nights are getting cold.", "Mind the wolves.", "Did you see the smoke?"};
 
     bool isNight(int hour) const { return nightFromHour > nightToHour ? (hour >= nightFromHour || hour < nightToHour) : (hour >= nightFromHour && hour < nightToHour); }

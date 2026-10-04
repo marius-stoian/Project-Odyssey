@@ -78,6 +78,7 @@ struct ResolvedNpc {
 // Layers, lowest first: the default classes (the NpcClass of every class of the NPC, in order), the kind, the placed NPC. Per layer the allow list is
 // read first, then the deny list, and a later layer overrides an earlier one: so a placed NPC that denies what its class allows is denied, and a deny
 // inside one layer wins over an allow in the same layer. `kind` may be null (a kind without a file).
-ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, const NpcLayer& placed);
+// `defaults` (US-293) are the lowest layer of the default actions with each partner type: the defaults-<type>.json files; any layer's own list for a type replaces them.
+ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, const NpcLayer& placed, const PartnerDefaults* defaults = nullptr);
 
 } // namespace odysseus::sim::rules

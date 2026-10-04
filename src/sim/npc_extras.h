@@ -43,8 +43,11 @@ struct NpcExtras {
     // The actions the NPC does on its own when it is idle on duty (US-291, D-54 Q11): interaction ids. In a class file they are the actions of that class, in a kind file and on a
     // placed NPC its custom actions. Layers add up.
     std::vector<std::string> does;
+    // What the NPC prefers to do with each kind of partner it meets (US-293, D-54 Q14): partner type (player, animal, environment, class:<id>, a type of partner-types.json, or `class`
+    // for every NPC class) to interaction ids. The chooser gives these a bonus; a layer's list for a type replaces the lower layers' list for it.
+    std::map<std::string, std::vector<std::string>> partnerActions;
 
-    bool empty() const { return trade.empty() && schedule.empty() && does.empty(); }
+    bool empty() const { return trade.empty() && schedule.empty() && does.empty() && partnerActions.empty(); }
     friend bool operator==(const NpcExtras&, const NpcExtras&) = default;
 };
 
@@ -61,6 +64,12 @@ bool setTradeField(TradeProfile& trade, const std::string& field, std::string_vi
 const std::vector<std::string>& scheduleFieldNames();
 std::string scheduleFieldText(const Schedule& schedule, const std::string& field);
 bool setScheduleField(Schedule& schedule, const std::string& field, std::string_view text, std::string& problem);
+
+// The Editor's line of the default actions with one partner type (US-293): interaction ids separated by spaces or commas; empty text removes the type. A mistake changes nothing.
+std::string partnerActionsText(const NpcExtras& extras, const std::string& partnerType);
+bool setPartnerActions(NpcExtras& extras, const std::string& partnerType, std::string_view text, std::string& problem);
+// A partner type a `partnerActions` key may name: a registered type, class:<id>, or `class`.
+bool validPartnerKey(const std::string& key);
 
 // The Editor's line of actions (US-291): interaction ids separated by spaces or commas. Empty text clears the list. A mistake changes nothing.
 std::string doesText(const std::vector<std::string>& does);

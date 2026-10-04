@@ -196,6 +196,12 @@ public:
     bool setSelectedDoes(const std::string& text);
     bool setClassDoes(const std::string& text);
     bool setKindDoes(const std::string& text);
+    // The default actions with each partner type (US-293, D-54 Q14): "Defaults with: animal" and the line "Does" under it name the interaction ids the NPC prefers when it meets that kind
+    // of partner (a hunter's animals: hunt). The partner types come from assets/data/sim/partner-types.json plus one class:<id> for every NPC class, so a type added to the file shows
+    // here. An empty line removes the type. For an NPC one step of Undo; for a class or kind Save writes it.
+    bool setSelectedPartnerActions(const std::string& partnerType, const std::string& text);
+    bool setClassPartnerActions(const std::string& partnerType, const std::string& text);
+    bool setKindPartnerActions(const std::string& partnerType, const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
@@ -271,6 +277,9 @@ private:
     void addTradeRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set);
     void addScheduleRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::Schedule& shown, const std::function<bool(const std::string&, const std::string&)>& set);
     void addDoesRow(luna::engine::Panel& panel, int left, int width, int& y, const std::vector<std::string>& shown, const std::function<bool(const std::string&)>& set);
+    // The two rows of the defaults with a partner type: the type (a click goes to the next) and its actions. `refresh` makes the owner's panel be built again.
+    void addPartnerRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::NpcExtras& shown, const std::function<bool(const std::string&, const std::string&)>& set,
+                        const std::function<void()>& refresh);
     void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();
@@ -354,6 +363,7 @@ private:
     std::unique_ptr<luna::engine::Panel> npcPanel_;
     std::unique_ptr<luna::engine::Panel> npcTrade_; // the Trade section of the NPC panel (US-284), beside it
     int partnerIndex_ = 0;                          // which partner type the dialogue row shows
+    int defaultsIndex_ = 0;                         // which partner type the defaults row shows (US-293)
     NpcClassBook* classBook_ = nullptr;
     bool classesShown_ = false;
     bool classesStale_ = true;

@@ -326,6 +326,16 @@ void NpcDirector::collectPlaceOptions(const NpcPopulation& population, int index
                 target.tags.push_back("place");
                 targets.push_back(std::move(target));
             }
+            // The animals it can see (US-293).
+            const std::int64_t reach = static_cast<std::int64_t>(config_.lookRadius) * config_.lookRadius;
+            for (const AnimalThing& animal : animals_) {
+                const std::int64_t dx = animal.x - population.x(index);
+                const std::int64_t dy = animal.y - population.y(index);
+                if (dx * dx + dy * dy > reach) continue;
+                ActionTarget target{ActionTarget::Kind::Animal, animal.id, animal.kind, animal.kind, animal.x, animal.y, animal.tags};
+                target.tags.push_back("animal");
+                targets.push_back(std::move(target));
+            }
         }
         for (const ActionTarget& target : targets) {
             rules::ThingInfo thing;
@@ -334,7 +344,7 @@ void NpcDirector::collectPlaceOptions(const NpcPopulation& population, int index
             const NpcRuleContext rule(population, index, actor.tags, target, hour);
             for (const rules::Offer& offer : interactions_->offered(actor, thing, 0, rule)) {
                 if (offer.interaction != interaction || !offer.enabled) continue;
-                const long long score = rules::evaluate(*interaction->npc->score, rule).number + candidate.bonus;
+                const long long score = rules::evaluate(*interaction->npc->score, rule).number + candidate.bonus + (candidate.origin == ActionOrigin::Default ? config_.preferBonus : 0);
                 options.push_back({interaction, target});
                 scores.push_back(static_cast<int>(std::clamp<long long>(score, 0, 100000)));
                 break;
@@ -381,7 +391,9 @@ void NpcDirector::collectPartnerOptions(const NpcPopulation& population, int ind
         long long score = rules::evaluate(*interaction.npc->score, rule).number;
         // The actions this NPC prefers for the kind of partner it meets (US-293).
         for (const std::string& partnerClass : theirs.classes) {
-            const auto preferred = own.partnerActions.find("class:" + partnerClass);
+            // The list for this class of partner, else the default for every class (the defaults-class.json file or the `class` key).
+            auto preferred = own.partnerActions.find("class:" + partnerClass);
+            if (preferred == own.partnerActions.end()) preferred = own.partnerActions.find("class");
             if (preferred != own.partnerActions.end() && std::find(preferred->second.begin(), preferred->second.end(), interaction.id) != preferred->second.end()) {
                 score += config_.preferBonus;
                 break;
@@ -449,6 +461,8 @@ void NpcDirector::applyEffect(NpcPopulation& population, int actor, int partner,
         }
     } else if (name == "spread-opinion" && effect.args.size() == 2 && partner >= 0) {
         spreadOpinion(population, actor, partner, static_cast<int>(std::clamp(rules::evaluate(*effect.args[1], rule).number, -200LL, 200LL)));
+    } else if (name == "hunt" && target.kind == ActionTarget::Kind::Animal) {
+        doHunt(population, actor, target);
     } else if (partner >= 0 && name == "chat") {
         doChat(population, actor, partner, abstract);
     } else if (partner >= 0 && name == "swap") {
@@ -458,6 +472,15 @@ void NpcDirector::applyEffect(NpcPopulation& population, int actor, int partner,
     } else if (partner >= 0 && name == "fight") {
         doFight(population, actor, partner, abstract);
     }
+}
+
+// A hunt: the hunter is at the animal, and the chance of the config decides whether it is killed (a roll of the world seed, the tick and the hunter); the game takes the animal out
+// of the world when it hears it.
+void NpcDirector::doHunt(NpcPopulation& population, int actor, const ActionTarget& target) {
+    core::Pcg32 random(seed_ ^ 0x48554E54ULL ^ (population.ticks() * 0x9E3779B97F4A7C15ULL), (static_cast<std::uint64_t>(static_cast<std::uint32_t>(population.id(actor))) << 32) ^ static_cast<std::uint32_t>(target.id));
+    if (random.below(100) >= static_cast<std::uint32_t>(config_.huntPercent)) return; // it got away
+    std::erase_if(animals_, [&](const AnimalThing& animal) { return animal.id == target.id; });
+    note({NpcEvent::Kind::Hunted, population.id(actor), target.id, target.name, 1});
 }
 
 bool NpcDirector::hasGoods(const NpcPopulation& population, int index) const {
