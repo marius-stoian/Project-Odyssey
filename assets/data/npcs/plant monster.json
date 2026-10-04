@@ -1,0 +1,5 @@
+{
+  "kind": "plant monster",
+  "classes": ["monster"],
+  "attitude": "hostile"
+}

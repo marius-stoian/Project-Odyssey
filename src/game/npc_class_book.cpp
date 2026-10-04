@@ -9,8 +9,25 @@
 
 namespace odysseus::game {
 
-NpcClassBook::NpcClassBook(std::filesystem::path folder) : folder_(std::move(folder)) {
+sim::rules::NpcLayer placedLayer(const PlacedCharacter& placed) {
+    sim::rules::NpcLayer layer;
+    if (!placed.classes.empty()) layer.classes = placed.classes;
+    if (!placed.attitude.empty()) layer.attitude = placed.attitude;
+    layer.tags = placed.tags;
+    layer.dialogues = placed.dialogues;
+    layer.allow = placed.allow;
+    layer.deny = placed.deny;
+    return layer;
+}
+
+sim::rules::ResolvedNpc NpcClassBook::resolve(const PlacedCharacter& placed) const {
+    const sim::rules::NpcKind* kind = kinds_.find(placed.kind);
+    return sim::rules::resolveNpc(catalog_, kind != nullptr ? &kind->layer : nullptr, placedLayer(placed));
+}
+
+NpcClassBook::NpcClassBook(std::filesystem::path folder, std::filesystem::path kindsFolder) : folder_(std::move(folder)), kindsFolder_(std::move(kindsFolder)) {
     catalog_ = sim::rules::NpcClassCatalog::load(folder_, report_);
+    if (!kindsFolder_.empty()) kinds_ = sim::rules::NpcKindCatalog::load(kindsFolder_, report_);
     for (const sim::rules::Diagnostic& d : report_.errors) core::logWarning("NPC classes: " + d.text());
     core::logInfo(std::format("NPC classes: {} loaded from {} file(s), {} error(s)", report_.loaded, report_.filesRead, report_.errors.size()));
 }
@@ -18,6 +35,8 @@ NpcClassBook::NpcClassBook(std::filesystem::path folder) : folder_(std::move(fol
 bool NpcClassBook::reload() {
     sim::rules::LoadReport report;
     sim::rules::NpcClassCatalog fresh = sim::rules::NpcClassCatalog::load(folder_, report);
+    sim::rules::NpcKindCatalog freshKinds;
+    if (!kindsFolder_.empty()) freshKinds = sim::rules::NpcKindCatalog::load(kindsFolder_, report);
     report_ = report; // the latest result is always the one shown
     for (const sim::rules::Diagnostic& d : report.errors) core::logWarning("NPC classes: " + d.text());
     if (!report.errors.empty()) {
@@ -25,6 +44,7 @@ bool NpcClassBook::reload() {
         return false;
     }
     catalog_ = std::move(fresh);
+    kinds_ = std::move(freshKinds);
     return true;
 }
 

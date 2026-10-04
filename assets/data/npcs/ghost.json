@@ -1,0 +1,5 @@
+{
+  "kind": "ghost",
+  "classes": ["monster"],
+  "attitude": "hostile"
+}

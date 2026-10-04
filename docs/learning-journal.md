@@ -1427,3 +1427,23 @@ A reference (a placed NPC naming a class) must never point at nothing, so the re
 **Try it (15 minutes).** Copy `trader.json` to `smith.json`, change `id` and `label`, press F5 in the game: the new class loads. Change the icon to `banana`: the log names file and line.
 
 **Check yourself.** Why does the file name have to equal the `id` inside the file?
+
+## US-261 Kind defaults and overrides: layered defaults
+
+**What we built.** Every kind of NPC has a file of defaults (`assets/data/npcs/goblin.json`), and each placed NPC may change only what it wants. The game combines classes, kind and the NPC itself into one answer.
+
+**The C++ idea: `std::optional` for "not set", and layering.** A layer that says nothing about attitude must not erase the layer below it, so "not set" needs its own value:
+
+```cpp
+std::optional<std::string> attitude; // empty: leave the layer below alone
+if (placed.attitude) out.attitude = *placed.attitude;
+else if (kind != nullptr && kind->attitude) out.attitude = *kind->attitude;
+```
+
+Allow and deny lists merge layer by layer in a `std::map<std::string, ActionState>`: the last layer that mentions an action decides it.
+
+**Where to look.** `resolveNpc` in `src/sim/npc_kind.cpp`; `placedLayer` in `src/game/npc_class_book.cpp`; `assets/data/npcs/`.
+
+**Try it (15 minutes).** In `tests/sim/npc_kind_test.cpp` read the precedence cases, then change `wanderer.json` to `wary` and press F5.
+
+**Check yourself.** Why is an empty `std::vector` a fine "not set" for tags but `std::optional` is needed for classes?

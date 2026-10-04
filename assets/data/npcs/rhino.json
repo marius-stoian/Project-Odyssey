@@ -1,0 +1,5 @@
+{
+  "kind": "rhino",
+  "classes": ["animal"],
+  "attitude": "hostile"
+}

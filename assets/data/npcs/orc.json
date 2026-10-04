@@ -1,0 +1,5 @@
+{
+  "kind": "orc",
+  "classes": ["monster"],
+  "attitude": "hostile"
+}

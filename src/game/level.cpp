@@ -2,6 +2,7 @@
 
 #include "game/lighting.h"
 #include "game/tags.h"
+#include "sim/npc_kind.h"
 #include "sim/data.h"
 #include "sim/json_data.h"
 
@@ -20,6 +21,19 @@ using sim::DataError;
 namespace {
 
 constexpr const char* kFacingCodes[] = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+
+// An optional list of names in quotes ("classes": ["trader"]); empty when the field is absent.
+std::vector<std::string> nameList(const json& object, const std::filesystem::path& file, const std::string& where, const std::string& field) {
+    std::vector<std::string> names;
+    if (!object.contains(field)) return names;
+    if (!object.at(field).is_array()) throw DataError(file, where + "." + field, "must be a list of names");
+    for (std::size_t i = 0; i < object.at(field).size(); ++i) {
+        const json& name = object.at(field).at(i);
+        if (!name.is_string() || name.get<std::string>().empty()) throw DataError(file, std::format("{}.{}[{}]", where, field, i), "must be a name in quotes");
+        names.push_back(name.get<std::string>());
+    }
+    return names;
+}
 
 std::string text(const json& object, const std::filesystem::path& file, const std::string& field) {
     if (!object.contains(field) || !object.at(field).is_string() || object.at(field).get<std::string>().empty()) {
@@ -343,13 +357,31 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
         placed.name = text(entry, file, "name");
         placed.hp = whole(entry, file, "hp", 1, 9999);
         placed.swordDamage = whole(entry, file, "swordDamage", 0, 999);
-        if (entry.contains("classes")) { // level version 4 (US-260); older files have none
-            if (!entry.at("classes").is_array()) throw DataError(file, where + ".classes", "must be a list of class names");
-            for (std::size_t c = 0; c < entry.at("classes").size(); ++c) {
-                const json& name = entry.at("classes").at(c);
-                if (!name.is_string() || name.get<std::string>().empty()) throw DataError(file, std::format("{}.classes[{}]", where, c), "must be a class name in quotes");
-                placed.classes.push_back(name.get<std::string>());
+        // Level version 4 (US-260, US-261): what the NPC sets itself; older files have none of it.
+        placed.classes = nameList(entry, file, where, "classes");
+        if (entry.contains("attitude")) {
+            const json& word = entry.at("attitude");
+            const auto& words = sim::rules::attitudeNames();
+            if (!word.is_string() || std::find(words.begin(), words.end(), word.get<std::string>()) == words.end()) {
+                throw DataError(file, where + ".attitude", "must be friendly, neutral, wary, hostile, scared, suspicious, enchanted, lovingly or enviously");
             }
+            placed.attitude = word.get<std::string>();
+        }
+        placed.tags = nameList(entry, file, where, "tags");
+        if (entry.contains("dialogues")) {
+            if (!entry.at("dialogues").is_object()) throw DataError(file, where + ".dialogues", "must be {\"player\": \"file.dlg\", ...}");
+            for (const auto& [partner, value] : entry.at("dialogues").items()) {
+                if (!sim::rules::validPartnerType(partner)) throw DataError(file, where + ".dialogues." + partner, "unknown partner type (player, animal, environment or class:<id>)");
+                if (!value.is_string() || value.get<std::string>().size() < 5 || value.get<std::string>().substr(value.get<std::string>().size() - 4) != ".dlg") {
+                    throw DataError(file, where + ".dialogues." + partner, "must be the name of a .dlg file");
+                }
+                placed.dialogues.emplace_back(partner, value.get<std::string>());
+            }
+        }
+        if (entry.contains("actions")) {
+            if (!entry.at("actions").is_object()) throw DataError(file, where + ".actions", "must be {\"allow\": [...], \"deny\": [...]}");
+            placed.allow = nameList(entry.at("actions"), file, where + ".actions", "allow");
+            placed.deny = nameList(entry.at("actions"), file, where + ".actions", "deny");
         }
         level.characters.push_back(placed);
     }
@@ -483,7 +515,21 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     for (const PlacedCharacter& c : level.characters) {
         json entry{{"id", c.id}, {"kind", c.kind}, {"x", c.feet.x}, {"y", c.feet.y}, {"facing", facingCode(c.facing)},
                    {"name", c.name}, {"hp", c.hp}, {"swordDamage", c.swordDamage}};
-        if (!c.classes.empty()) entry["classes"] = c.classes; // written only when there are some, so older levels stay as they were
+        // Only what the NPC sets itself is written, so a level made before US-260 and US-261 is saved exactly as it was.
+        if (!c.classes.empty()) entry["classes"] = c.classes;
+        if (!c.attitude.empty()) entry["attitude"] = c.attitude;
+        if (!c.tags.empty()) entry["tags"] = c.tags;
+        if (!c.dialogues.empty()) {
+            json dialogues = json::object();
+            for (const auto& [partner, dlg] : c.dialogues) dialogues[partner] = dlg;
+            entry["dialogues"] = dialogues;
+        }
+        if (!c.allow.empty() || !c.deny.empty()) {
+            json actions = json::object();
+            if (!c.allow.empty()) actions["allow"] = c.allow;
+            if (!c.deny.empty()) actions["deny"] = c.deny;
+            entry["actions"] = actions;
+        }
         characters.push_back(entry);
     }
     json pickups = json::array();

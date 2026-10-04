@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-261: kind defaults and placed-NPC overrides (Mraw) - 2026-10-04
+
+**State:** On `story/US-261`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_kind_test.cpp`, `tests/game/npc_kind_test.cpp`), run once at X-M9a.
+
+- Simulation: `src/sim/npc_kind.*`: `NpcLayer`, `NpcKind`/`NpcKindCatalog` (`assets/data/npcs/<kind>.json`, 61 shipped files), the nine attitude words, `resolveNpc` (classes, then kind, then placed NPC; allow and deny merge, later layer wins, deny wins inside a layer), `ResolvedNpc`.
+- Game: placed characters gain `attitude`, `tags`, `dialogues`, `allow`, `deny` (written only when set; level version stays 4, so older levels save unchanged); `NpcClassBook` loads the kind files, `resolve(placed)`, F5 reloads classes and kinds together. Guide `docs/guides/npc-data.md` extended.
+
 ## US-260: NPC Classes (Mraw) - 2026-10-04
 
 **State:** On `story/US-260`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_class_test.cpp`, `tests/game/npc_class_editor_test.cpp`) and run once at the milestone exit X-M9a (owner, 2026-10-04); screenshots manual (`docs/plans/US-260.md`).
