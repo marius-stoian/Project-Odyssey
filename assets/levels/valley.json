@@ -9,9 +9,93 @@
    "swordDamage": 4,
    "x": 1104,
    "y": 1048
+  },
+  {
+   "facing": "S",
+   "hp": 70,
+   "id": 2,
+   "kind": "skeleton",
+   "name": "Skeleton",
+   "swordDamage": 8,
+   "x": 944,
+   "y": 976
+  },
+  {
+   "facing": "S",
+   "hp": 100,
+   "id": 3,
+   "kind": "wanderer",
+   "name": "Wanderer",
+   "swordDamage": 5,
+   "x": 1067,
+   "y": 973
+  },
+  {
+   "facing": "S",
+   "hp": 100,
+   "id": 4,
+   "kind": "wanderer",
+   "name": "Wanderer",
+   "swordDamage": 5,
+   "x": 1120,
+   "y": 972
+  },
+  {
+   "facing": "S",
+   "hp": 150,
+   "id": 9,
+   "kind": "tiger",
+   "name": "Tiger",
+   "swordDamage": 18,
+   "x": 838,
+   "y": 982
   }
  ],
- "defaultGround": "grass",
+ "defaultGround": "stone",
+ "effects": [
+  {
+   "id": 5,
+   "name": "butterfly swarm",
+   "x": 996,
+   "y": 1048
+  },
+  {
+   "id": 6,
+   "name": "butterfly swarm",
+   "x": 1038,
+   "y": 1036
+  },
+  {
+   "id": 7,
+   "name": "butterfly swarm",
+   "x": 1045,
+   "y": 1052
+  },
+  {
+   "id": 8,
+   "name": "butterfly swarm",
+   "x": 1114,
+   "y": 1113
+  },
+  {
+   "id": 13,
+   "name": "big fire",
+   "x": 821,
+   "y": 1088
+  },
+  {
+   "id": 14,
+   "name": "big fire",
+   "x": 817,
+   "y": 1071
+  },
+  {
+   "id": 15,
+   "name": "big fire",
+   "x": 813,
+   "y": 1032
+  }
+ ],
  "ground": [
   [
    [
@@ -744,7 +828,11 @@
   [
    [
     "path",
-    29
+    24
+   ],
+   [
+    "planks",
+    5
    ],
    [
     "cobblestone",
@@ -762,19 +850,11 @@
   [
    [
     "path",
-    26
+    24
    ],
    [
-    "stone",
-    1
-   ],
-   [
-    "path",
-    2
-   ],
-   [
-    "cobblestone",
-    1
+    "planks",
+    6
    ],
    [
     "path",
@@ -800,15 +880,15 @@
   [
    [
     "path",
-    28
+    26
    ],
    [
-    "cobblestone",
-    1
+    "planks",
+    4
    ],
    [
     "path",
-    3
+    2
    ],
    [
     "grass",
@@ -838,11 +918,11 @@
    ],
    [
     "path",
-    25
+    23
    ],
    [
-    "cobblestone",
-    2
+    "planks",
+    4
    ],
    [
     "path",
@@ -850,15 +930,7 @@
    ],
    [
     "grass",
-    1
-   ],
-   [
-    "path",
-    2
-   ],
-   [
-    "grass",
-    3
+    6
    ],
    [
     "cobblestone",
@@ -904,11 +976,15 @@
    ],
    [
     "path",
-    8
+    6
+   ],
+   [
+    "planks",
+    4
    ],
    [
     "cobblestone",
-    3
+    1
    ],
    [
     "path",
@@ -930,7 +1006,15 @@
   [
    [
     "path",
-    31
+    28
+   ],
+   [
+    "dirt",
+    1
+   ],
+   [
+    "path",
+    2
    ],
    [
     "cobblestone",
@@ -1663,9 +1747,31 @@
   1040,
   1048
  ],
- "levelVersion": 1,
+ "levelVersion": 2,
  "name": "The Valley",
- "nextId": 2,
+ "nextId": 16,
+ "pickups": [
+  {
+   "id": 10,
+   "weapon": "frost axe",
+   "x": 915,
+   "y": 1040
+  },
+  {
+   "id": 11,
+   "weapon": "flame sword",
+   "x": 925,
+   "y": 1019
+  }
+ ],
+ "plants": [
+  {
+   "id": 12,
+   "kind": "peony",
+   "x": 912,
+   "y": 988
+  }
+ ],
  "targets": [
   [
    784,
