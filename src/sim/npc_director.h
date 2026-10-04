@@ -30,8 +30,17 @@ struct Place {
 };
 
 // Something the persons did that the game shows (US-292): a few words in a bubble, a trade, a gift, a quarrel, a fight, a death.
+// An animal near the persons, as the game tells the director (US-293): something an NPC may hunt or watch. Plain data, set by the game as the animals move.
+struct AnimalThing {
+    int id = 0; // the animal's id in the level
+    std::string kind;
+    int x = 0;
+    int y = 0;
+    std::vector<std::string> tags;
+};
+
 struct NpcEvent {
-    enum class Kind { Talk, Trade, Gift, Confront, Fight, Death };
+    enum class Kind { Talk, Trade, Gift, Confront, Fight, Death, Hunted };
     Kind kind = Kind::Talk;
     int actor = 0;  // person ids
     int target = 0;
@@ -94,6 +103,9 @@ public:
     // The stocks of the traders are the market's (it belongs to the game and must outlive the director).
     void setMarket(TradeMarket* market) { market_ = market; }
     void setCombat(int index, int hp, int damage);
+    // The animals near the persons now (US-293): set by the game as they move; an NPC whose default action with animals is hunt goes for one it can see.
+    void setAnimals(std::vector<AnimalThing> animals) { animals_ = std::move(animals); }
+    const std::vector<AnimalThing>& animals() const { return animals_; }
     int hp(int index) const; // the hit points left (the default of schedule.json for a person nobody set)
     // What happened near the hero since the last call (talk, trades, fights) and every death anywhere: for the game to show and to act on (a figure that has died leaves the world).
     std::vector<NpcEvent> takeEvents();
@@ -135,6 +147,7 @@ private:
     bool doSwap(NpcPopulation& population, int a, int b, bool abstract);
     bool doGift(NpcPopulation& population, int a, int b, bool abstract);
     void doChat(NpcPopulation& population, int a, int b, bool abstract);
+    void doHunt(NpcPopulation& population, int actor, const ActionTarget& target);
     void doFight(NpcPopulation& population, int a, int b, bool abstract);
     void kill(NpcPopulation& population, int victim, int killer);
     void spreadOpinion(NpcPopulation& population, int actor, int target, int amount);
@@ -170,6 +183,7 @@ private:
     std::vector<std::int16_t> damage_; // -1: the default of the config
     std::vector<NpcEvent> eventsOut_;
     TradeMarket* market_ = nullptr;
+    std::vector<AnimalThing> animals_;
 };
 
 } // namespace odysseus::sim

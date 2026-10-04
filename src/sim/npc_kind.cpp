@@ -188,8 +188,9 @@ ActionState ResolvedNpc::action(const std::string& id) const {
     return found == actions.end() ? ActionState::Unset : found->second;
 }
 
-ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, const NpcLayer& placed) {
+ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, const NpcLayer& placed, const PartnerDefaults* defaults) {
     ResolvedNpc out;
+    if (defaults != nullptr) out.extras.partnerActions = defaults->actions;
     // Which classes the NPC has: the placed NPC says, else the kind, else none.
     if (placed.classes) out.classes = *placed.classes;
     else if (kind != nullptr && kind->classes) out.classes = *kind->classes;

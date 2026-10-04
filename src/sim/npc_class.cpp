@@ -135,10 +135,6 @@ const std::vector<std::string>& npcIconNames() {
     return names;
 }
 
-bool validPartnerType(const std::string& type) {
-    if (type == "player" || type == "animal" || type == "environment") return true;
-    return type.size() > 6 && type.compare(0, 6, "class:") == 0 && validId(type.substr(6));
-}
 
 std::optional<int> parseColour(const std::string& text) {
     if (text.size() != 7 || text[0] != '#') return std::nullopt;

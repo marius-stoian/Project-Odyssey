@@ -65,6 +65,12 @@ std::filesystem::path chosenLevel(const std::filesystem::path& dataDirectory, co
     return levelFile.empty() ? dataDirectory.parent_path() / "levels" / "valley.json" : levelFile;
 }
 
+// The partner types of assets/data/sim/partner-types.json (US-293) are told to the data readers before anything that names one is read (the NPC classes, the kinds, the level).
+Definitions loadDefinitionsAndPartnerTypes(const std::filesystem::path& dataDirectory) {
+    sim::rules::setPartnerTypes(sim::rules::loadPartnerTypes(dataDirectory / "sim" / "partner-types.json"));
+    return loadDefinitions(dataDirectory);
+}
+
 Level loadAndReport(const std::filesystem::path& file, const Definitions& definitions) {
     LoadedLevel loaded = loadLevel(file, definitions);
     for (const std::string& note : loaded.notes) {
@@ -78,7 +84,7 @@ Level loadAndReport(const std::filesystem::path& file, const Definitions& defini
 } // namespace
 
 OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::filesystem::path& levelFile)
-    : definitions_(loadDefinitions(dataDirectory)), levelFile_(chosenLevel(dataDirectory, levelFile)),
+    : definitions_(loadDefinitionsAndPartnerTypes(dataDirectory)), levelFile_(chosenLevel(dataDirectory, levelFile)),
       level_(loadAndReport(levelFile_, definitions_)), map_(buildTileMap(level_, definitions_)),
       camera_(kVirtualWidth / GameSettings{}.cameraZoom, kVirtualHeight / GameSettings{}.cameraZoom, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
@@ -91,6 +97,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     tradeConfig_ = sim::loadPriceConfig(dataDirectory / "sim" / "trade.json");
     scheduleConfig_ = sim::rules::loadScheduleConfig(dataDirectory / "sim" / "schedule.json");
     eventCatalog_ = sim::loadEventCatalog(dataDirectory / "sim" / "events.json");
+    dataDirectory_ = dataDirectory; // (set again below; the defaults of the partner types need it now)
+    reloadPartnerDefaults();
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -1779,6 +1787,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         if (npcClasses_.reload()) {
             editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
             refreshTraders();         // and the trade profiles that came with them (US-281)
+            reloadPartnerDefaults();  // and the default actions of the partner types (US-293)
             refreshLife();            // and the schedules (US-290)
         }
     }

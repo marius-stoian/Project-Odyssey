@@ -301,6 +301,9 @@ public:
     void buildNpcPopulation();
     void refreshTraders(); // registers the traders of the level again with their data of now (F5, a new class file), keeping the stock they have
     void refreshLife();    // gives every placed person the schedule its classes, kind and own fields say now (F5, the Editor), and logs what it names that is not there
+    void reloadPartnerDefaults(); // reads assets/data/interactions/defaults-<type>.json again (US-293)
+    void feedNpcAnimals();        // tells the director which animals are near the persons (US-293)
+    void removeAnimal(int id);    // a hunted animal leaves the world
     void walkNpcPeople();  // the figures of the placed people walk to where the director sent them (US-290)
     void updateNpcDanger(); // a hostile within reach of a person sends them home (D-54 Q10)
     void drainNpcEvents();  // what the persons did to each other near the hero: words in bubbles, a death takes the figure out of the world (US-292)

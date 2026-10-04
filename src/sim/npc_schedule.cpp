@@ -141,6 +141,8 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
         read("defaultHp", config.defaultHp, 1, 10000);
         read("defaultDamage", config.defaultDamage, 0, 1000);
         read("chatSocial", config.chatSocial, 0, 100);
+        read("lookRadius", config.lookRadius, 32, 2048);
+        read("huntPercent", config.huntPercent, 0, 100);
         if (dealings.contains("chatter")) {
             if (!dealings.at("chatter").is_array() || dealings.at("chatter").empty()) throw DataError(file, "dealings.chatter", "must be a list of short sentences");
             config.chatter.clear();

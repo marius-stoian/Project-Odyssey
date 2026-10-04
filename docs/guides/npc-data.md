@@ -455,3 +455,43 @@ A person who is free (see US-291) looks at the neighbour who stands close and ma
 **Effects an NPC carries out** in the files: `opinion who whom n`, `remember who "text" feeling` (with `{actor.name}` and `{target.name}`), `give who item n` and `take who item n` (the stock of a trader), and `do` with `walk-to`, `restore <need> <amount>`, `chat`, `swap`, `gift`, `fight` and `spread-opinion n`. `who` is `actor`, `target` or `hero`.
 
 **`dealings` in `schedule.json`** holds every number: `meetRadius` (96 pixels), `fightRoundsPerHour`, `farFightRounds`, `witnessOpinion`, `griefOpinion`, `farPercent`, `preferBonus` (US-293), `defaultHp`, `defaultDamage`, `chatSocial` and the `chatter` sentences.
+
+## Default interactions by partner type (US-293, D-54 Q14, Q16)
+
+An NPC meets different kinds of partner: the player, other NPCs (by class), animals, the environment (places), and any kind you add. For each kind it can have default **dialogues** (US-265) and default **actions**: the interactions it prefers when that partner is the target.
+
+### Partner types: `assets/data/sim/partner-types.json`
+
+```json
+{ "version": 1, "types": ["player", "animal", "environment", "buildings"] }
+```
+
+`player`, `animal` and `environment` are always there; add your own words to the list and they are valid everywhere a partner type is named (the dialogues of classes, kinds and NPCs, `partnerActions`) and appear in the Editor. `class:<id>` is always a type, one for every NPC class. A file that lists `class` is refused (`class` is the key for "every NPC class", below).
+
+### Defaults: `assets/data/interactions/defaults-<type>.json`
+
+One file per type: `defaults-class.json`, `defaults-animal.json`, `defaults-environment.json`. The file name says the type.
+
+```json
+{ "partnerType": "environment", "actions": ["forage", "rest-at-shelter", "fish", "pray"] }
+```
+
+`class` is the default for meeting any NPC class (shipped: `npc-chat`); `animal` is empty (an NPC does nothing special with animals unless its class says so); `environment` lists the four environment actions below. A file with a mistake is left out and named in the log (`interactions/defaults-animal.json:2: partnerType "x" must match the file name "animal"`). The registry of interactions skips these files. **F5** reads them again.
+
+### `partnerActions`: a class, a kind or an NPC overrides
+
+```json
+"partnerActions": { "animal": ["hunt"], "class:guard": ["npc-chat"] }
+```
+
+In a class file, a kind file or on a placed NPC. Keys are partner types (`class` means every NPC class, `class:<id>` one class). The **list of the highest layer that has the type replaces** the lower layers' list for that type as a whole: defaults, then the classes, then the kind, then the NPC. An empty list (`"environment": []`) means "nothing special with that partner". The shipped hunter class has `"animal": ["hunt"]`.
+
+### What the chooser does with them
+
+- **Environment and animals.** The actions of the `environment` and `animal` lists are extra candidates of a free NPC, aimed at the places of the level (and the animals it can see within `dealings.lookRadius`, 12 m) and given the bonus `dealings.preferBonus` (40). Which place fits is the file's target tags: `forage.json` needs a place tagged `forage` (+25 Hunger, score `40 + need(hunger)`), `rest-at-shelter.json` a `shelter` (+20 Energy), `fish.json` `water` (+20 Hunger), `pray.json` a `shrine` (+15 Social). A hungry person goes foraging at a grove, a tired one rests in the hut. `hunt.json` needs an animal tagged `prey`: the hunter goes to it and `dealings.huntPercent` (50) decides whether it is killed; the game removes the animal from the world; the hunt gives Hunger back.
+- **Partners that are persons.** When the neighbour is a person of a class that the NPC has a `partnerActions` list for, an interaction in that list gets the bonus; so an NPC that prefers `npc-chat` with talkers chats even when a swap would score higher.
+- The places are the `places` of the level (US-290); the animals are told to the director by the game as they move.
+
+### Editor
+
+Under the **Does** line (Trade section beside the NPC panel, Class panel, Kinds tab) there is **Defaults with: animal** (a click goes to the next partner type, ending with `class`) and a **Does** line for that type: interaction ids separated by spaces. A type you added to `partner-types.json` is in the list the next time the game starts. An empty line removes the type from the NPC's own lists (the layer below shows again). For an NPC one step of Undo; **Save** writes the class or kind.

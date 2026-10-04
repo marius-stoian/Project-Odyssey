@@ -167,7 +167,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-290 | US-290 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-291 | US-291 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-292 | US-292 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
-| S-US-293 | US-293 | M9c | To do |  |
+| S-US-293 | US-293 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-294 | US-294 | M9c | To do |  |
 | X-M9c | - | M9c | To do |  |
 | K-M8d | - | M8d | To do |  |

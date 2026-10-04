@@ -4,6 +4,7 @@
 
 #include "sim/interaction.h"
 #include "sim/npc_extras.h"
+#include "sim/partner_types.h"
 
 #include <filesystem>
 #include <optional>
@@ -33,8 +34,6 @@ struct NpcClass {
 // The built-in icon set a class picks from.
 const std::vector<std::string>& npcIconNames();
 
-// "player", "animal", "environment" or "class:<id>".
-bool validPartnerType(const std::string& type);
 
 // "#d9a441" -> 0xD9A441; nullopt when it is not # and six hex digits. And back.
 std::optional<int> parseColour(const std::string& text);

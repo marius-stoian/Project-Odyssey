@@ -187,6 +187,7 @@ add_library(odysseus_sim STATIC
     src/sim/npc_extras.cpp
     src/sim/trade_market.cpp
     src/sim/npc_schedule.cpp
+    src/sim/partner_types.cpp
     src/sim/npc_events.cpp
     src/sim/npc_context.cpp
     src/sim/npc_actions.cpp
@@ -444,6 +445,7 @@ add_executable(odysseus_game_tests
     tests/game/schedule_editor_test.cpp
     tests/game/npc_life_game_test.cpp
     tests/game/npc_dealings_game_test.cpp
+    tests/game/npc_defaults_game_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -507,6 +509,7 @@ add_executable(odysseus_sim_tests
     tests/sim/npc_schedule_test.cpp
     tests/sim/npc_actions_test.cpp
     tests/sim/npc_interact_test.cpp
+    tests/sim/npc_defaults_test.cpp
     tests/sim/npc_kind_test.cpp
     tests/sim/npc_population_test.cpp
     tests/sim/npc_scale_test.cpp

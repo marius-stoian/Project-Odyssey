@@ -92,9 +92,9 @@ bool atPost(const sim::NpcPopulation& population, int index) {
 
 } // namespace
 
-TEST_CASE("US-291 Sources: the standard sources are the class, custom and event sources, and there is no quest source") {
+TEST_CASE("US-291 Sources: the standard sources are the class, custom, event and default sources, and there is no quest source") {
     const sim::ActionSources sources = sim::ActionSources::standard();
-    CHECK(sources.count() == 3);
+    CHECK(sources.count() == 4); // class, custom, event and default: no quest source
     sim::EventBoard board;
     const sim::EventCatalog catalog = villagerEvents();
     board.post("fire", 120, 100, 1000);

@@ -1788,3 +1788,22 @@ The second idea is the **budget per tick**. 100,000 persons cannot all look for 
 **Try it (15 minutes).** In `npc_interact_test.cpp` make Brek stronger (`setCombat(b, 200, 10)` in the Fight test) and predict who dies.
 
 **Check yourself.** Why does a far fight use `farFightRounds` in one go, but a near fight only `fightRoundsPerHour` a visit?
+
+## US-293 Default interactions by partner type: data-driven enumerations
+
+**What we built.** Every kind of partner an NPC can meet (the player, animals, the environment, each NPC class) now has default actions that come from data, and the *list of kinds itself* is data: add the word `buildings` to a JSON file and the Editor offers defaults for buildings.
+
+**The C++ idea: a data-driven enumeration.** An `enum class` (like `Attitude` or `Mode`) is fixed when the program is compiled: adding a value means editing code and rebuilding. That is right for things the program must switch on. But the owner wants to *extend* the list of partner types without a programmer, so it cannot be an `enum`. It is a list of words read from a file, with one function that says whether a word is valid:
+
+```cpp
+void setPartnerTypes(const std::vector<std::string>& types);   // the file's list, plus the three built-in ones
+bool validPartnerType(const std::string& type);                // registered, or class:<id>
+```
+
+The price of leaving the compiler's safety net is that *we* must check: every reader of a data file calls `validPartnerType` and names the file and field when a word is wrong (`unknown partner type "robot"`), and the tests pin each case. The rule of thumb: use an `enum class` when code branches on the value, a list from data when only the owner gives it meaning. The same file also shows layering: the defaults are the lowest layer, and each layer above it replaces the list for a type with `partnerActions[type] = ids`: a `std::map` makes "replace this key" one line.
+
+**Where to look.** `src/sim/partner_types.cpp`, `NpcExtras::partnerActions` in `src/sim/npc_extras.cpp`, `DefaultActionSource` in `src/sim/npc_actions.cpp`, `tests/sim/npc_defaults_test.cpp`.
+
+**Try it (15 minutes).** Copy `assets/data/sim/partner-types.json`, add `"ghosts"`, start the game with that data folder and look for `Defaults with: ghosts` in the NPC panel.
+
+**Check yourself.** Why is `class` refused as a partner type while `class:guard` is always allowed?

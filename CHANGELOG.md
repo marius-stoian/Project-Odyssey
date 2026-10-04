@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-293: default interactions by partner type (Mraw) - 2026-10-05
+
+**State:** On `story/US-293`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
+
+- Simulation: `src/sim/partner_types.h/.cpp` (the partner types from `partner-types.json`, `validPartnerType` over them, the `defaults-<type>.json` loader); `NpcExtras::partnerActions` (read, written, merged: the highest layer's list for a type wins) with the Editor line; `resolveNpc` takes the defaults as the lowest layer; `DefaultActionSource` (a fourth action source) and the preference bonus; the director sees animals (`setAnimals`, `AnimalThing`), hunts them (`do hunt`, `dealings.huntPercent`, the `Hunted` event) and prefers the actions of the partner type it meets; `InteractionRegistry::load` skips `defaults-*.json`.
+- Game: partner types registered before anything is read, defaults loaded and reloaded with F5, the profile carries `partnerActions`, animals fed to the director, a hunted animal leaves the world.
+- Editor: **Defaults with: <type>** and its Does line in the NPC panel, the Class panel and the Kinds tab; the partner types of the data file are offered.
+- Data: `assets/data/sim/partner-types.json`, `interactions/defaults-{class,animal,environment}.json`, `hunt.json`, `forage.json`, `rest-at-shelter.json`, `fish.json`, `pray.json`; the hunter class hunts animals; `lookRadius` and `huntPercent` in `schedule.json`.
+- Docs: guide, `docs/plans/US-293.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_defaults_test.cpp` (7 cases), `tests/game/npc_defaults_game_test.cpp` (4 cases); the `sources.count()` checks of US-291 say 4.
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-292: NPCs act on each other (Mraw) - 2026-10-05
 
 **State:** On `story/US-292`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.

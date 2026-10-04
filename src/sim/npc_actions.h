@@ -73,7 +73,14 @@ public:
     void collect(const SourceContext& context, std::vector<ActionCandidate>& out) const override;
 };
 
-// The sources in the order they are asked. The standard set is the class, custom and event sources.
+// The default actions of the partner types an NPC meets outside other persons (US-293, D-54 Q14, Q16): what the environment offers (forage, rest, fish, pray) and what an NPC does
+// with animals (a hunter hunts), from the `partnerActions` of its layers and the defaults-<type>.json files. The chooser adds the preference bonus of the config to these.
+class DefaultActionSource final : public ActionSource {
+public:
+    void collect(const SourceContext& context, std::vector<ActionCandidate>& out) const override;
+};
+
+// The sources in the order they are asked. The standard set is the class, custom, event and default sources.
 class ActionSources {
 public:
     static ActionSources standard();

@@ -135,7 +135,7 @@ TEST_CASE("US-291 Event: a fire lit within 12 m of a talker sends her to help; a
 
 TEST_CASE("US-291 No quests: the actions of an NPC come from its class, custom and event sources only") {
     const sim::ActionSources sources = sim::ActionSources::standard();
-    CHECK(sources.count() == 3);
+    CHECK(sources.count() == 4); // class, custom, event and default: no quest source
     Studio studio("life-sources", {"guard"});
     const sim::rules::ResolvedNpc resolved = studio.odyssey->npcClasses().resolve(studio.odyssey->level().characters[0]);
     CHECK(resolved.classActions == std::vector<std::string>{"patrol"});
