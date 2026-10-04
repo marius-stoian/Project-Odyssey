@@ -98,7 +98,7 @@ double OdysseyGame::darknessOf(const luna::engine::LightFrame& frame) {
 }
 
 // The ambient colour of the world now: the lights.json colour, tinted by the time of day (US-242) and dimmed by an eclipse (US-248).
-luna::engine::LightFrame OdysseyGame::ambientLightFrame(double alpha) const {
+luna::engine::LightFrame OdysseyGame::ambientLightFrame(double alpha, bool withWeather) const {
     luna::engine::LightFrame frame = lighting_.ambientFrame();
     const SkyState skyNow = sky();
     frame.ambientR *= skyNow.ambientR;
@@ -109,6 +109,7 @@ luna::engine::LightFrame OdysseyGame::ambientLightFrame(double alpha) const {
         frame.ambientG *= static_cast<float>(celestial.dimming);
         frame.ambientB *= static_cast<float>(celestial.dimming);
     }
+    if (!withWeather) return frame; // fire shadows follow the sky only: dim weather by day still casts none (US-245)
     // Weather (US-246): rain dims and cools, fog greys, over the same 3 s the weather fades in; a storm's lightning flashes the whole scene.
     const WeatherLight weatherNow = weatherLight(catalogs_.weather, weather_.previous(), weather_.current(), weather_.fade());
     frame.ambientR *= weatherNow.red;

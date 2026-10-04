@@ -127,13 +127,14 @@ TEST_CASE("US-247 Place: a light placed with the Light tool is saved in the leve
     editor.setTool(game::EditorTool::Light);
     editor.setLight(campfire);
     const auto view = editor.camera().view();
-    clickAt(*studio.odyssey, 300 - view.x, 300 - view.y);
+    const int lx = view.x + 400, ly = view.y + 300; // a spot on the screen, in the world
+    clickAt(*studio.odyssey, 400, 300);
     REQUIRE(editor.level().lights.size() == 1);
     const int id = editor.level().lights[0].id;
     CHECK(editor.level().lights[0].kind == "campfire");
-    CHECK(editor.level().lights[0].at == game::PixelPoint{300, 300});
+    CHECK(editor.level().lights[0].at == game::PixelPoint{lx, ly});
     CHECK(editor.selected() == id);
-    CHECK(editor.lightAt(300 - view.x, 300 - view.y) == id);
+    CHECK(editor.lightAt(lx - view.x, ly - view.y) == id);
 
     // Undo and redo, and move it with Select.
     CHECK(editor.undo());
@@ -142,12 +143,12 @@ TEST_CASE("US-247 Place: a light placed with the Light tool is saved in the leve
     REQUIRE(editor.level().lights.size() == 1);
     editor.setTool(game::EditorTool::Select);
     editor.select(std::nullopt);
-    studio.odyssey->update(mouse(300 - view.x, 300 - view.y, true, true, false));
-    studio.odyssey->update(mouse(340 - view.x, 300 - view.y, false, true, false));
-    studio.odyssey->update(mouse(340 - view.x, 300 - view.y, false, false, true));
-    CHECK(editor.level().lights[0].at == game::PixelPoint{340, 300});
+    studio.odyssey->update(mouse(lx - view.x, ly - view.y, true, true, false));
+    studio.odyssey->update(mouse(lx + 40 - view.x, ly - view.y, false, true, false));
+    studio.odyssey->update(mouse(lx + 40 - view.x, ly - view.y, false, false, true));
+    CHECK(editor.level().lights[0].at == game::PixelPoint{lx + 40, ly});
     CHECK(editor.undo());
-    CHECK(editor.level().lights[0].at == game::PixelPoint{300, 300});
+    CHECK(editor.level().lights[0].at == game::PixelPoint{lx, ly});
 
     // Saved as level version 3 and read back the same.
     CHECK(editor.save());

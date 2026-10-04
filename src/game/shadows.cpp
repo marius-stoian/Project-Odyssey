@@ -86,7 +86,7 @@ void OdysseyGame::drawShadows(luna::engine::Renderer& renderer, const luna::engi
     const ShadowCast cast = shadowCast(alpha);
     // The fires that may shade things tonight; the Low lighting preset turns fire shadows off (US-245). Fires too far off the picture to reach into it are left out.
     fireShadows_.lights.clear();
-    fireShadows_.darkness = darknessOf(ambientLightFrame(alpha));
+    fireShadows_.darkness = darknessOf(ambientLightFrame(alpha, false));
     if (settings_.lighting != "Low" && lighting_.shadowLightsPerObject > 0 && fireShadows_.darkness > 0.0) {
         for (const LightSource& light : lightSources(alpha)) {
             if (!light.kind->shadows) continue;
