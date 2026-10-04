@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-264: attitudes and opinions (Mraw) - 2026-10-04
+
+**State:** On `story/US-264`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/opinion_test.cpp`, `tests/game/npc_attitude_test.cpp`), run once at X-M9a.
+
+- `src/sim/opinion.*`: the nine `Attitude` words, `Mood` (scared, enviously), `OpinionConfig` read from the new `assets/data/sim/opinions.json` (bands, starting opinions, event amounts, same-family, dialogue worth and frequency), `attitudeFor`.
+- `NpcPopulation`: opinions of the pairs that met (a sparse map, created on the first event; reading never creates), `opinion`, `attitude`, `adjust`, `event`, `talked`, `setMood`, the same-family default, the starting attitude per person; hash and save (version 3) include them.
+- Game: kind-file NPCs fight when their attitude is hostile (`fightsHero`), the starting attitude and the new `family` field of a placed NPC feed the population, the menu title of such an NPC shows the word. Guide extended.
+
 ## US-263: the NPC store and detail by distance (Mraw) - 2026-10-04
 
 **State:** On `story/US-263`, merged into `qa`. Builds with zero warnings in Debug and Release; tests written (`tests/sim/npc_scale_test.cpp`, `US-263 Frame` in `tests/game/npc_people_test.cpp`), run once at X-M9a; the four sim cases were run once in Release to take the ADR-022 measurements (all passed).

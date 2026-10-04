@@ -4,6 +4,7 @@
 
 #include "sim/calendar.h"
 #include "sim/needs.h"
+#include "sim/opinion.h"
 
 #include <array>
 #include <cstdint>
@@ -38,7 +39,8 @@ public:
 
     // Adds a person and returns their index. `id` is the id of the placed character in the level and the same in the save: one identity from the level
     // file to the save. Adding an id twice returns the index of the first.
-    int add(int id, std::string_view kind, int ageDays, int family, int x, int y);
+    // `attitude` is the starting attitude of the person to the hero (US-264).
+    int add(int id, std::string_view kind, int ageDays, int family, int x, int y, Attitude attitude = Attitude::Neutral);
     // A person moves (schedules, M9c): the grid follows.
     void move(int index, int x, int y);
 
@@ -92,6 +94,26 @@ public:
     // The hero was near: the person remembers meeting them (once is enough for a day; the caller decides when).
     void meetHero(int index) { remember(index, "met the hero", 10); }
 
+    // Opinions (US-264, D-52 Q-04, Q-05): every person has an opinion, a whole number from -100 to 100, of the hero and of every person they have met, and
+    // the attitude word follows from it. Only pairs that have met are stored (an entry appears the first time something happens between two); until then
+    // the opinion is what it would be by itself: the starting attitude for the hero, the family bonus for a person of the same family, else 0. `target` is a
+    // person id, or kHero.
+    static constexpr int kHero = 0;
+    void setOpinionConfig(const OpinionConfig& config) { opinionConfig_ = config; }
+    const OpinionConfig& opinionConfig() const { return opinionConfig_; }
+    Attitude startAttitude(int holderId) const; // the attitude the person was given at the start
+    int opinion(int holderId, int targetId) const;
+    Mood mood(int holderId, int targetId) const;
+    Attitude attitude(int holderId, int targetId) const; // the word: fear and envy, else the band of the opinion
+    bool met(int holderId, int targetId) const;          // an entry exists
+    int adjust(int holderId, int targetId, int delta);  // the opinion changes (clamped); the pair now counts as met; returns the new opinion
+    void setMood(int holderId, int targetId, Mood mood);
+    // An event of opinions.json by name ("gift", "trade", "help", "marriage-in-family"...): the opinion changes by its amount. False for an unknown name.
+    bool event(int holderId, int targetId, std::string_view name);
+    // A conversation of quality -2 (awful) to 2 (great): its amount, plus the bonus when the pair talked within the last days.
+    void talked(int holderId, int targetId, int quality);
+    std::size_t opinionEntries() const { return pairs_.size(); }
+
     // One number summarising every person; equal populations have equal hashes (ADR-011).
     std::uint64_t hash() const;
 
@@ -99,7 +121,7 @@ public:
     std::string toText() const;
     static NpcPopulation fromText(std::string_view text, CalendarConfig calendar, NeedsConfig needs, DailyConfig daily = {});
 
-    static constexpr int kSaveVersion = 2;
+    static constexpr int kSaveVersion = 3;
 
 private:
     struct StoredNote {
@@ -137,11 +159,24 @@ private:
     std::vector<std::int32_t> xs_;
     std::vector<std::int32_t> ys_;
     std::vector<std::int16_t> needs_;       // kNeedCount per person
+    std::vector<std::uint8_t> attitudes_;   // the starting attitude of each person to the hero (an Attitude)
     std::vector<std::uint8_t> hours_;       // hours of today already applied to the needs
     std::vector<std::uint8_t> noteCounts_;
     std::vector<std::uint8_t> noteHeads_;   // where the next note is written
     std::vector<StoredNote> notes_;         // kNotesPerPerson per person, a ring
     std::unordered_map<int, int> indexById_; // only looked up, never walked: the order of the arrays is the order of adding
+
+    // The opinions of the pairs that met (US-264), keyed by holder id and target id.
+    struct Pair {
+        std::int16_t opinion = 0;
+        std::uint8_t mood = 0; // a Mood
+        std::int32_t lastTalkDay = -1000000;
+    };
+    static std::uint64_t pairKey(int holderId, int targetId) { return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(holderId)) << 32) | static_cast<std::uint32_t>(targetId); }
+    Pair defaultPair(int holderIndex, int targetId) const;
+    Pair& pairFor(int holderIndex, int holderId, int targetId); // creates the entry from the default when the pair has not met
+    OpinionConfig opinionConfig_;
+    std::unordered_map<std::uint64_t, Pair> pairs_;
 
     // The spatial grid: cells of kCellSize pixels, each the indices of the persons in it, in the order they came.
     static constexpr int kCellSize = 256;

@@ -87,6 +87,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editor_.setNpcClasses(&npcClasses_);
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
+    npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -243,10 +244,11 @@ void OdysseyGame::populate() {
     // Every placed character the sword can hit stands in the world (M2c: they stand still, D-19).
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
-        if (kind != nullptr && !kind->enemy) {
+        const bool fights = kind != nullptr && fightsHero(placed); // a kind file's attitude decides (US-264), else the old enemy switch
+        if (kind != nullptr && !fights) {
             bystanders_.push_back(placed);
         }
-        if (kind == nullptr || !kind->enemy) {
+        if (kind == nullptr || !fights) {
             continue;
         }
         Enemy enemy(placed.feet.x, placed.feet.y, placed.hp);

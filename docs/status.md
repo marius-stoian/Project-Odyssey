@@ -148,7 +148,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-261 | US-261 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
 | S-US-262 | US-262 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
 | S-US-263 | US-263 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
-| S-US-264 | US-264 | M9a | To do |  |
+| S-US-264 | US-264 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
 | S-US-265 | US-265 | M9a | To do |  |
 | S-US-266 | US-266 | M9a | To do |  |
 | S-US-267 | US-267 | M9a | To do |  |
