@@ -16,6 +16,7 @@
 #include "luna/engine/ui.h"
 
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <set>
@@ -40,7 +41,7 @@ struct EditorTextures {
 };
 
 // What a left click on the map does.
-enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant, Effect };
+enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant, Effect, Light };
 
 const char* toolName(EditorTool tool);
 
@@ -93,6 +94,17 @@ public:
     int effect() const { return effect_; }
     void setEffect(int effect) { effect_ = effect; }
     std::optional<int> effectAt(int screenX, int screenY) const;
+    // Lights (US-247): the Light tool places the chosen kind of Definitions::lightKinds where the pointer clicks; it shines in the game after dark.
+    int light() const { return light_; }
+    void setLight(int light) { light_ = light; }
+    std::optional<int> lightAt(int screenX, int screenY) const;
+    // Time-of-day preview (US-247): the level is drawn lit as at this hour (0 to 24). A view only: never saved, never an Undo step. Off by default.
+    // The game gives the editor the function that lights a view at an hour; without it there is no preview.
+    using LightPreview = std::function<luna::engine::LightFrame(double hour, const luna::engine::Rect& view)>;
+    void setLightPreview(LightPreview preview) { lightPreview_ = std::move(preview); }
+    std::optional<double> previewHour() const { return previewHour_; }
+    luna::engine::Rect timeSliderRect() const; // where the time-of-day slider is, while the preview is on
+    void setPreviewHour(std::optional<double> hour);
     int plant() const { return plant_; }
     void setPlant(int plant) { plant_ = plant; }
     int plantPage() const { return plantPage_; }
@@ -165,6 +177,9 @@ private:
     int plantPageFirst(int page) const; // index in plantKinds() of the first kind on a page
     int plantPageSize(int page) const;
     bool onObjectPage(int page) const { return !definitions_.objects.empty() && page == plantPageCount() - 1; }
+    const PlacedLight* findLight(int id) const;
+    void changeLights(const std::string& what, std::vector<PlacedLight> after, int nextIdAfter);
+
     const PlacedEffect* findEffect(int id) const;
     void changeEffects(const std::string& what, std::vector<PlacedEffect> after, int nextIdAfter);
     void buildCharacterPalette();
@@ -220,6 +235,13 @@ private:
     int plant_ = 0;
     int effect_ = 0;
     std::unique_ptr<luna::engine::Panel> effectPalette_;
+    int light_ = 0;
+    std::unique_ptr<luna::engine::Panel> lightPalette_;
+    bool movingLight_ = false;
+    std::vector<PlacedLight> movingLightsBefore_;
+    std::optional<double> previewHour_;
+    bool sliderDragging_ = false;
+    LightPreview lightPreview_;
     bool movingEffect_ = false;
     std::vector<PlacedEffect> movingEffectsBefore_;
     int kindPage_ = 0;

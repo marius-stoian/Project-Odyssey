@@ -16,6 +16,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | P-009 | - | - | Done | 2026-10-01 |
 | P-010 | - | - | Done | 2026-10-01 |
 | P-011 | - | - | Done | 2026-10-01 |
+| P-012 | - | - | Done | 2026-10-04 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -132,15 +133,43 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-234 | US-234 | M8b | Done | 2026-10-01 |
 | X-M8b | - | M8b | To do |  |
 | K-M8c | - | M8c | To do |  |
-| S-US-240 | US-240 | M8c | To do |  |
-| S-US-241 | US-241 | M8c | To do |  |
-| S-US-242 | US-242 | M8c | To do |  |
-| S-US-243 | US-243 | M8c | To do |  |
-| S-US-244 | US-244 | M8c | To do |  |
-| S-US-245 | US-245 | M8c | To do |  |
-| S-US-246 | US-246 | M8c | To do |  |
-| S-US-247 | US-247 | M8c | To do |  |
+| S-US-240 | US-240 | M8c | Done | 2026-10-02 |
+| S-US-241 | US-241 | M8c | Done | 2026-10-02 |
+| S-US-242 | US-242 | M8c | Done | 2026-10-02 |
+| S-US-243 | US-243 | M8c | Done |  |
+| S-US-248 | US-248 | M8c | Done | Debug verified 2026-10-04 |
+| S-US-244 | US-244 | M8c | Done | Debug verified 2026-10-04 |
+| S-US-245 | US-245 | M8c | Done | Debug verified 2026-10-04 |
+| S-US-246 | US-246 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
+| S-US-247 | US-247 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
 | X-M8c | - | M8c | To do |  |
+| K-M9a | - | M9a | To do |  |
+| S-US-260 | US-260 | M9a | To do |  |
+| S-US-261 | US-261 | M9a | To do |  |
+| S-US-262 | US-262 | M9a | To do |  |
+| S-US-263 | US-263 | M9a | To do |  |
+| S-US-264 | US-264 | M9a | To do |  |
+| S-US-265 | US-265 | M9a | To do |  |
+| S-US-266 | US-266 | M9a | To do |  |
+| S-US-267 | US-267 | M9a | To do |  |
+| S-US-268 | US-268 | M9a | To do |  |
+| S-US-269 | US-269 | M9a | To do |  |
+| S-US-270 | US-270 | M9a | To do |  |
+| X-M9a | - | M9a | To do |  |
+| K-M9b | - | M9b | To do |  |
+| S-US-280 | US-280 | M9b | To do |  |
+| S-US-281 | US-281 | M9b | To do |  |
+| S-US-282 | US-282 | M9b | To do |  |
+| S-US-283 | US-283 | M9b | To do |  |
+| S-US-284 | US-284 | M9b | To do |  |
+| X-M9b | - | M9b | To do |  |
+| K-M9c | - | M9c | To do |  |
+| S-US-290 | US-290 | M9c | To do |  |
+| S-US-291 | US-291 | M9c | To do |  |
+| S-US-292 | US-292 | M9c | To do |  |
+| S-US-293 | US-293 | M9c | To do |  |
+| S-US-294 | US-294 | M9c | To do |  |
+| X-M9c | - | M9c | To do |  |
 | K-M8d | - | M8d | To do |  |
 | S-US-250 | US-250 | M8d | To do |  |
 | S-US-251 | US-251 | M8d | To do |  |

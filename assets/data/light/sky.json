@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "enabled": true,
+  "keyframes": [
+    { "anchor": "sunrise", "offset": -1.0, "color": [191, 209, 255], "strength": 0.55, "shadow": 0.35 },
+    { "anchor": "sunrise", "offset": 0.0, "color": [255, 184, 128], "strength": 0.85, "shadow": 0.5 },
+    { "anchor": "sunrise", "offset": 1.0, "color": [255, 255, 255], "strength": 1.0, "shadow": 0.6 },
+    { "anchor": "sunset", "offset": -1.0, "color": [255, 255, 255], "strength": 1.0, "shadow": 0.6 },
+    { "anchor": "sunset", "offset": 0.0, "color": [255, 184, 128], "strength": 0.85, "shadow": 0.5 },
+    { "anchor": "sunset", "offset": 1.0, "color": [191, 209, 255], "strength": 0.55, "shadow": 0.35 }
+  ],
+  "sunPeakDegrees": { "Spring": 50, "Summer": 65, "Autumn": 45, "Winter": 28 },
+  "moonPeakDegrees": 45
+}

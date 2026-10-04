@@ -26,7 +26,10 @@
 #include "game/plants.h"
 #include "game/run_flow.h"
 #include "game/session_stats.h"
+#include "game/lighting.h"
 #include "game/settings.h"
+#include "game/celestial.h"
+#include "game/sky.h"
 #include "game/tutorial.h"
 #include "game/weather.h"
 #include "game/level.h"
@@ -83,6 +86,7 @@ public:
     const Hero& hero() const { return hero_; }
     const SpearRange& range() const { return range_; }
     const Level& level() const { return level_; }
+    const luna::engine::Camera& camera() const { return camera_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
     // Effects playing now (US-132): hit sparks, smoke, trails.
@@ -223,6 +227,34 @@ public:
     // Camera zoom and UI scale (US-232). Zoom 2x is the world as it always looked (15 x 8.4 tiles); 1x shows 30 x 17.
     // `setViewScales` only changes what is drawn (tests use it); `applySettings` also saves them.
     void setViewScales(int cameraZoom, int uiScale);
+    // The sky now (US-242): the light follows the clan's game clock (a level without a clan has no clock and stays at noon).
+    SkyState sky() const;
+    // The clock the sky and the celestial bodies follow (a level without a clan has no clock and stays at noon of day 0).
+    GameClock gameClock() const;
+    // The sun and moon of this level (US-248): the ones placed in the Editor, and the default pair for any kind it places none of.
+    std::vector<CelestialBody> celestialBodies() const;
+    // The light the scene has now, from the sun by day and the moon by night, seen from the hero: the direction shadows fall (US-244 draws them).
+    CelestialLight celestialLight(double alpha = 1.0) const;
+    // Whether a texture is a black copy that shadows are cut from (US-244; tests tell shadow draws from the rest by it).
+    bool isShadowTexture(int textureId) const {
+        return std::any_of(silhouettes_.begin(), silhouettes_.end(), [textureId](const auto& entry) { return entry.second.id == textureId; });
+    }
+    // The point lights of the world now (US-243), in the pixels of the picture they light: placed effects, burning objects and the held weapon that
+    // have a `light`, and the torches clan members carry at night. They shine in proportion to how dark it is (`darkness` 0 to 1).
+    std::vector<luna::engine::PointLight> worldLights(const luna::engine::Rect& view, double alpha, double darkness) const;
+    // The same lights in world pixels, with the kind they are and the spot on the ground below them (US-245 casts shadows away from them).
+    struct LightSource {
+        const LightKindDef* kind = nullptr;
+        double x = 0.0, y = 0.0;   // where the light hangs
+        double groundY = 0.0;      // the ground point below it, at the same x
+        std::uint64_t id = 0;
+    };
+    std::vector<LightSource> lightSources(double alpha) const;
+    std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
+    std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
+    luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)
+    luna::engine::LightFrame ambientLightFrame(double alpha, bool withWeather = true) const; // the ambient colour of the world now (no point lights)
+    static double darknessOf(const luna::engine::LightFrame& frame);
     void updateZoom(const luna::engine::Intents& intents);
     int cameraZoom() const { return settings_.cameraZoom; }
     int uiScale() const { return settings_.uiScale; }
@@ -407,6 +439,30 @@ private:
     std::chrono::steady_clock::time_point lastRender_{};
     void drawOverlay(luna::engine::Renderer& renderer) const;
     GameSettings settings_;
+    SkyData sky_;           // assets/data/light/sky.json and the daylight of calendar.json (US-242)
+    LightingData lighting_; // assets/data/light/lights.json (US-240): the ambient colour and the kinds of light
+    CelestialEvents celestialEvents_; // assets/data/light/celestial-events.json (US-248): scripted eclipses
+    std::vector<const PlantDef*> defaultBodies_; // the sun and moon of objects.json that follow the clock: used when a level places none
+    void drawSkyBodies(luna::engine::Renderer& renderer, double alpha) const;
+    // Shadows (US-244): black copies of the sprite textures to cut shadows from (by texture number), and what a shadow is like now.
+    struct ShadowCast {
+        bool on = false;
+        double dirX = 0.0, dirY = 0.0;  // the way a shadow falls on the picture
+        double lengthPerHeight = 0.0;   // shadow length divided by the height of the thing
+        std::uint8_t alpha = 0;         // how dark
+    };
+    std::map<int, luna::engine::Texture> silhouettes_;
+    ShadowCast shadowCast(double alpha) const;
+    // Shadows of fires (US-245): the lights that cast them and how dark the night is, gathered once per frame by drawShadows.
+    struct FireShadows {
+        std::vector<LightSource> lights; // only kinds with `shadows`, in world pixels
+        double darkness = 0.0;
+    } fireShadows_;
+    // The sun or moon shadow of one thing, then a faint one away from each of the nearest fires (the thing's feet are at world (worldX, worldY)).
+    void castShadow(luna::engine::Renderer& renderer, const ShadowCast& cast, const luna::engine::Texture& texture, const luna::engine::Rect& source,
+                    int feetX, int feetY, double heightMetres, double worldX, double worldY) const;
+    void drawShadows(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha); // before the lit things are drawn
+    luna::engine::Texture lookTexture(luna::engine::Renderer& renderer, const LookSpec& look);        // the composed sheet of a look, with its shadow
     std::optional<WindowChange> pendingWindow_;
     void drawRunHud(luna::engine::Renderer& renderer) const;
     void drawRunWorld(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;

@@ -59,4 +59,18 @@ private:
     std::vector<int> history_;
 };
 
+// The light the weather lays over the world (US-246): a colour to multiply the ambient light by. While the weather fades (3 s) it is the blend of the
+// old and the new weather's light, so rain dims and cools over the same 3 s as its drops arrive. Presentation only: the simulation never reads it.
+struct WeatherLight {
+    float red = 1.0F, green = 1.0F, blue = 1.0F;
+    friend bool operator==(const WeatherLight&, const WeatherLight&) = default;
+};
+WeatherLight weatherLight(const std::vector<WeatherDef>& weathers, int previous, int current, double fade);
+
+// Lightning (US-246): how much of a flash the whole scene has at `seconds` of game time, 0 (none) to 1 (the first instant of a strike), falling to 0 over
+// 0.2 s. Strikes come at random, about `perMinute` of them a minute, from a hash of (seed, 0.2 s slot): the same seed strikes at the same times, and
+// the simulation's random streams are never touched. While the weather fades, the rate blends the same way as the light.
+double lightningFlash(std::uint64_t seed, double seconds, double perMinute);
+double weatherFlashRate(const std::vector<WeatherDef>& weathers, int previous, int current, double fade);
+
 } // namespace odysseus::game

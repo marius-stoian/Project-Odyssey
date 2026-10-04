@@ -68,6 +68,7 @@ struct ContentFrame {
 struct ContentAtlas {
     std::vector<ContentPage> pages;
     std::map<std::string, luna::engine::Image> pictures;  // page name -> its picture
+    std::map<std::string, luna::engine::Image> normals;   // page name -> its normal map (US-241); a page without one is lit flat
     std::map<std::string, ContentFrame> frames;            // "iron sword", "spark.0", ...
     std::map<std::string, int> frameCounts;                // item name -> 1, or its animation's length
 

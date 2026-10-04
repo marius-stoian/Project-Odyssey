@@ -104,9 +104,9 @@ TEST_CASE("US-134 Place") {
     CHECK(editor.level().pickups[0].id == firstFree);
     CHECK(editor.selected() == firstFree);
 
-    // Saved as version 2, and read back the same.
+    // Saved as version 3, and read back the same.
     CHECK(editor.save());
-    CHECK(fileText(file).find("\"levelVersion\": 2") != std::string::npos);
+    CHECK(fileText(file).find("\"levelVersion\": 3") != std::string::npos);
     const game::Definitions definitions = game::loadDefinitions(ODYSSEUS_DATA_DIR);
     CHECK(game::loadLevel(file, definitions).level.pickups == editor.level().pickups);
 
@@ -162,9 +162,9 @@ TEST_CASE("US-134 Level versions") {
     const game::Level old = game::readLevelFile(folder / "v1.json", definitions);
     CHECK(old.pickups.empty());
     CHECK(old.characters.size() == 1);
-    // Saving it writes version 2 and keeps everything else.
+    // Saving it writes version 3 and keeps everything else.
     game::saveLevel(old, definitions, folder / "upgraded.json");
-    CHECK(fileText(folder / "upgraded.json").find("\"levelVersion\": 2") != std::string::npos);
+    CHECK(fileText(folder / "upgraded.json").find("\"levelVersion\": 3") != std::string::npos);
     CHECK(game::readLevelFile(folder / "upgraded.json", definitions) == old);
     // A pickup naming a weapon that does not exist says where.
     std::string bad = fileText(ODYSSEUS_DEMO_LEVEL);

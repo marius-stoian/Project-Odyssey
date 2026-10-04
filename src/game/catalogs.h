@@ -25,10 +25,22 @@ struct WeaponDef {
     Element element = Element::None;
     bool future = false;   // era "future": guns and energy weapons, for later Ages
     bool starter = false;  // playable in M2d (D-21)
+    std::string light;     // US-243: a kind of light of lights.json the weapon gives while it is held ("" = none)
     int damage = 5;
     double speed = 1.0;    // attacks per second
     double range = 1.5;    // metres
     std::vector<std::string> tags; // US-151: "item", "weapon", its class, its element, "starter"; "tags" in weapons.json replaces them
+};
+
+// US-248: a sun or a moon, a `celestial` world object of objects.json. It gives the light direction and the shadows (US-244) and is drawn in the sky.
+struct CelestialDef {
+    std::string body;           // "sun" or "moon"
+    std::string lightKind;      // a kind of lights.json: how strong this body's light is
+    bool followsClock = true;   // true: travels its orbit by the game clock; false: stays where it is placed
+    double orbitRadius = 400.0; // metres: how far away a clock body is
+    double tilt = 0.0;          // degrees: turns the whole orbit around the vertical, so the sun can rise a little north or south of east
+    double height = 50.0;       // metres above the ground (1 tile = 1 m): the height of a placed body; a clock body takes its height from its orbit
+    friend bool operator==(const CelestialDef&, const CelestialDef&) = default;
 };
 
 struct PlantDef {
@@ -40,6 +52,12 @@ struct PlantDef {
     std::string inspect;   // shown on Interact
     std::vector<std::string> tags;   // US-151: "plant" always, then "edible", "solid", "tree"...; "tags" in plants.json replaces them
     std::vector<std::string> states; // US-151: the first is where it starts ("ripe", "picked"); none for a plant that never changes
+    std::string light;     // US-243: a kind of light of lights.json the thing gives ("" = none) ...
+    std::string lightState; // ... only while it is in this state (a fire pit: "burning"); empty: always
+    double height = 0.0;    // US-244: metres; the length of its shadow is this times the light's factor. 0: casts no shadow (small plants)
+    bool shadow = true;     // false: casts no shadow whatever its height
+    bool celestial = false; // US-248: a sun or a moon; `sky` says which
+    CelestialDef sky;
     bool object = false;   // US-155: a world object from objects.json (fire pit, shelter...), placed like a plant but drawn by the game
 };
 
@@ -49,12 +67,15 @@ struct AnimalDef {
     int hp = 80;
     bool enemy = false;    // can be hit and strikes back (D-21: predators and boars)
     int strikeDamage = 0;
+    double height = 1.0;   // US-244: metres, for its shadow
+    bool shadow = true;
     double reach = 1.5;    // metres
     std::vector<std::string> tags; // US-151: "animal" and "hostile" or "prey"; "tags" in animals.json replaces them
 };
 
 struct EffectDef {
     std::string name;
+    std::string light;      // US-243: a kind of light of lights.json the effect gives while it plays ("" = none)
     int frames = 1;
     int ticksPerFrame = 3;
     bool loop = false;
@@ -66,6 +87,10 @@ struct WeatherDef {
     int ticksPerFrame = 4;
     int weight = 1;        // how often it is picked, against the others
     bool additive = true;  // light weather adds light; fog and clouds are drawn see-through
+    double shadowFade = 0.0; // US-244: how much of the shadows this weather takes away (fog and heavy cloud: 1)
+    double lightDim = 1.0;   // US-246: the ambient light is multiplied by this (1 = unchanged, 0.6 = a dark storm)
+    int tintRed = 255, tintGreen = 255, tintBlue = 255; // US-246: ... and by this colour (a cool blue for rain)
+    double flashPerMinute = 0.0; // US-246: lightning flashes of the whole scene per minute (0 = none)
 };
 
 // What an element does (US-135), from weapons.json under "elements". Only the fields an element uses are
@@ -95,6 +120,7 @@ struct Catalogs {
     std::vector<WeatherDef> weather;
     std::array<ClassDef, 8> classes{};    // by WeaponClass
     std::array<ElementDef, 6> elements{}; // by Element; "none" does nothing
+    std::vector<std::string> notes;       // problems that did not stop the load (US-248: a bad sun or moon is left out); each names file and field
 
     const WeaponDef* weapon(const std::string& name) const;
     const PlantDef* plant(const std::string& name) const;

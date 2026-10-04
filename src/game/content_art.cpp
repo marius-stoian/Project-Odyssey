@@ -1,5 +1,7 @@
 #include "game/content_art.h"
 
+#include "game/normal_art.h"
+
 #include "luna/engine/image_io.h"
 #include "luna/engine/image_ops.h"
 #include "luna/engine/ui.h"
@@ -250,6 +252,7 @@ std::optional<ContentAtlas> loadContent(const std::filesystem::path& folder, std
                 problem = (folder / entry.at("file").get<std::string>()).string() + " " + error;
                 return std::nullopt;
             }
+            if (auto normals = loadNormalAtlas(folder, "content-" + name, *picture)) atlas.normals.emplace(name, std::move(*normals));
             atlas.pictures.emplace(name, std::move(*picture));
             atlas.pages.push_back(page);
         }

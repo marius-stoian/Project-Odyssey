@@ -4,6 +4,69 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-247: lighting in the Editor and quality settings (Mraw) - 2026-10-04
+
+**State:** On `story/US-247`, merged into `qa`. Built with zero warnings in Debug; tests written (`tests/game/lighting_editor_test.cpp`) and run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots and frame times are manual (`docs/plans/US-247.md`).
+
+- Level version 3 (`kLevelVersion`): `lights` (`PlacedLight`: id, kind of `lights.json`, x, y); versions 1 and 2 load without them and are written as 3 on save. `Definitions::lightKinds` from `lights.json`. Tests that read "levelVersion": 2 after a save now expect 3.
+- Editor: Light tool and palette (place, select, move, delete, undo; `LightsCommand`), Sky button and time-of-day slider (`previewHour`, view only), lit preview through `OdysseyGame::editorLightFrame`. `levelLightSources()` gives the level's lights to the game and the preview; `pointLights()` shares the conversion.
+- Quality: `LightFrame::normalMaps` / `LightingState::normalMaps`: Low lights sprites flat (the GPU backend binds the flat normal), fire shadows stay off on Low (US-245). Medium and High are the same today (Milestone-91.md). Guides: lighting, editor, settings.
+
+## US-246: weather and light (Mraw) - 2026-10-04
+
+**State:** On `story/US-246`, merged into `qa`. Tests written (`tests/game/weather_light_test.cpp`); run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots are manual (`docs/plans/US-246.md`).
+
+- `weather.json` entries gain `light` (`dim`, `tint`) and `flash` (lightning per minute). `weatherLight`, `weatherFlashRate` and `lightningFlash` (`src/game/weather.*`); `OdysseyGame::ambientLightFrame` multiplies the ambient light by the weather's light, blended over the 3 s fade, and lifts it toward white for a strike. Shipped values for rain, storms, snow, fog and dust; guide `docs/guides/lighting.md`.
+
+## US-245: shadows from fires (Mraw) - 2026-10-04
+
+**State:** On `story/US-245`, merged into `qa` after verification in Debug (zero warnings); GPU screenshots are manual (`docs/plans/US-245.md`).
+
+- At night things near a fire throw faint shadows away from it: `OdysseyGame::castShadow` (`src/game/shadows.cpp`) shades each thing from the nearest `fireShadows.maxPerObject` shadow-casting lights that reach it (nearer is longer and darker, none in daylight, none on the Low lighting preset, none from a thing's own torch).
+- `world_lights.cpp` now builds world-space `lightSources()` shared by the lights and the shadows, and `ambientLightFrame()` / `darknessOf()` replace the inline ambient code in `render`.
+- New data in `assets/data/light/lights.json`: `fireShadows` (`maxPerObject`, `strength`) and `shadows` on a kind of light; guide `docs/guides/lighting.md`. Tests: five `US-245` cases in `tests/game/shadow_test.cpp` (one fire, two fires, budget, Low, daylight, data round trip).
+
+## US-244: sun and moon shadows (Mraw) - 2026-10-04
+
+**State:** On `story/US-244`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-244/`.
+
+- Shadows of the hero, clan, placed characters, enemies, animals, plants and objects, cut from black copies of their sprite textures (`silhouette` in `image_ops`) and laid along the light by `drawShadow` (`src/luna/engine/shadow_draw.*`, one ground row at a time); `OdysseyGame::drawShadows` (`src/game/shadows.cpp`) draws them after the ground and before everything that stands. Direction, length and strength come from `celestialLight()` (US-248), the hour's `shadow` of `sky.json`, eclipses and weather.
+- New optional data: `height` and `shadow` in plants, objects, animals and characters; `shadowFade` in `weather.json` (fog, mist, cloud, overcast and whiteout 1.0, haze, smog and gloom 0.5). Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/US-244.md`. Tests: `tests/game/shadow_test.cpp`; US-155 and sky object counts untouched.
+
+## US-248: celestial bodies (Mraw) - 2026-10-04
+
+**State:** On `story/US-248`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-248/`.
+
+- Sun and moon as `celestial` world objects of `objects.json` (`body`, `light`, `follows` clock or fixed, `orbitRadius`, `tilt`, `height`); placed ones are in the Editor's object palette; the default pair follows the clock. `src/game/celestial.*`: `currentLight` (direction away from the body, clamped elevation, strongest body wins, eclipse dimming, shadow length factor with the D-49 caps), `skySprites`, `loadCelestialEvents`; `OdysseyGame::celestialLight()` is the one function US-244 uses. Sprites drawn in the sky band; an eclipse dims the world's ambient light.
+- `assets/data/light/celestial-events.json` (two sample eclipses); `sun` and `moon` kinds in `lights.json`. A mistake in an entry or the events file is a message naming file and field; the default pair stays (built-in fallback). Celestial objects are never drawn, hit or inspected as plants.
+- Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/US-248.md`. Tests: `tests/game/celestial_test.cpp`.
+
+## US-243: fires, torches and glowing effects (Mraw) - 2026-10-04
+
+**State:** Merged into `qa`; verified in Debug (zero warnings); evidence in `docs/evidence/US-243/`.
+
+- `light` on effects, weapons and objects (`lightState` for objects), `clanTorch` and `flicker` in `lights.json`; `OdysseyGame::worldLights` in `src/game/world_lights.cpp`; seeded value-noise flicker (Game only); shader height term. Guide `docs/guides/lighting.md` extended. Tests: `tests/game/world_lights_test.cpp`; US-240 ambient test fixed for the new kinds.
+
+## US-242: day, night and seasons (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-242/`.
+
+- `assets/data/light/sky.json` (keyframes relative to sunrise and sunset, D-49 values, sun and moon peaks) and `daylight` in `assets/data/sim/calendar.json` (summer 15 h, winter 8 h); the simulation ignores the new part. `skyAt` blends the light from the clan's clock; the world's ambient follows it; the moon is the dim blue light of the night and gives the shadow direction.
+- Guide `docs/guides/lighting.md` extended. Tests: `tests/game/sky_test.cpp`. The GPU-against-SDL picture test runs with the sky off.
+## US-241: generated normal maps (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-241/`.
+
+- `odysseus_atlas --normals` (Tools) makes a normal atlas for every atlas picture (nine, committed in `assets/sprites/atlas/*_n.png`); height from the distance to the edge and the brightness, Sobel slopes; a hand-made `<frame>_n.png` next to `cuts.json` wins; a wrong-sized one is refused by name.
+- The game gives the renderer the normal maps of the hero, characters, ground and the plant, tree and animal pages (mirrored animals get mirrored normals); sprites without a map, or with a map that does not fit, are lit flat with no error.
+- `Luna` image ops `normalAtlas` and `mirroredNormals`; guide `docs/guides/lighting.md` extended. Tests: `tests/luna/normals_test.cpp`, `tests/game/normals_test.cpp` (generate, committed maps, missing, own map, the shaded hero on the GPU).
+## US-240: the lighting pipeline (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-240/`.
+
+- Lit sprite shader (ambient plus up to 64 point lights, normal-map facing), `setLighting` and `setNormalMap` through Window, backends and Renderer; the SDL fallback tints by the ambient colour only; additive draws are not lit.
+- `assets/data/light/lights.json` (ambient, light kinds; D-49 values), `LightingData`, guide `docs/guides/lighting.md`; the world is drawn lit, the interface not; default is neutral, so the picture is unchanged.
+- Tests: window tests for ambient, point light and a 64-light budget (0.28 ms on the card); game tests for the data, the round trip, errors and lit-world drawing.
 ## US-234: frame budget at the new size (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); 10-minute run in `docs/evidence/US-234/`.

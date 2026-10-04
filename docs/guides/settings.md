@@ -14,7 +14,7 @@ On first launch, the game creates the file with a 1280x720 window, Whole scaling
 | `resolution.scaling` | `Whole`, `Fill` | Whole enlarges the 960x540 picture by the largest whole multiple that fits, with black bars around it. Fill fits the picture to the available area. |
 | `cameraZoom` | `1`, `2` | Camera zoom: `2` shows 15 x 8.4 tiles around the hero (the world as it always looked), `1` shows 30 x 17. Settings screen, the keys + and -, or the mouse wheel. |
 | `uiScale` | `1`, `2` | Interface scale: `2` draws panels, the font and the hotbar twice as large. Settings screen only. |
-| `lighting` | `Low`, `Medium`, `High` | Saved lighting preference. |
+| `lighting` | `Low`, `Medium`, `High` | Lighting quality (US-247). `Low`: sprites are lit flat (no normal maps) and fires cast no shadows; sun and moon shadows, fire glow and the day's colour stay. `Medium` and `High`: normal maps and fire shadows on. `High` is the setting the 60 FPS target of the mid-range PC (D-06) is measured on. |
 | `volume` | `0` through `100` | Saved volume preference. |
 | `statistics` | `0`, `1`, `2` | Local statistics choice: undecided, agreed, or declined. |
 

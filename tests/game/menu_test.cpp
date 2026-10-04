@@ -174,7 +174,11 @@ TEST_CASE("US-153 Gather takes three seconds under a ring, then gives berries an
     // The ring is on screen while it fills.
     camp.renderer.clear();
     camp.odyssey.render(camp.renderer, 0.0);
-    const std::size_t withRing = camp.renderer.draws().size();
+    // Shadows (US-244) move with the people, so the draws are counted without them.
+    const auto drawsWithoutShadows = [&camp] {
+        return static_cast<std::size_t>(std::count_if(camp.renderer.draws().begin(), camp.renderer.draws().end(), [&camp](const auto& draw) { return !camp.odyssey.isShadowTexture(draw.texture); }));
+    };
+    const std::size_t withRing = drawsWithoutShadows();
 
     camp.play(30); // 1.5 s
     CHECK(camp.odyssey.actions().progress(0, camp.odyssey.actionClock()) == 50);
@@ -190,7 +194,7 @@ TEST_CASE("US-153 Gather takes three seconds under a ring, then gives berries an
 
     camp.renderer.clear();
     camp.odyssey.render(camp.renderer, 0.0);
-    CHECK(camp.renderer.draws().size() < withRing); // the ring and the plant are gone
+    CHECK(drawsWithoutShadows() < withRing); // the ring and the plant are gone
 
     // Greyed out while it waits, even though it cannot be clicked: asked directly.
     const auto offers = camp.odyssey.plantOffers(0);
@@ -296,7 +300,7 @@ TEST_CASE("US-155 objects.json has the seven objects with tags and states") {
     const game::Catalogs catalogs = game::loadCatalogs(ODYSSEUS_DATA_DIR);
     std::vector<std::string> objects;
     for (const game::PlantDef& plant : catalogs.plants) {
-        if (plant.object) objects.push_back(plant.name);
+        if (plant.object && !plant.celestial) objects.push_back(plant.name);
     }
     CHECK(objects == std::vector<std::string>{"fire pit", "knapping stone", "food store", "shelter", "flint nodule", "water source", "sleeping furs"});
     const auto tagged = [&](const std::string& name, const std::string& tag) {
@@ -318,7 +322,7 @@ TEST_CASE("US-155 objects.json has the seven objects with tags and states") {
     CHECK(std::count_if(catalogs.plants.begin(), catalogs.plants.end(), [](const game::PlantDef& p) { return !p.object; }) == 153);
     // Objects are in the Editor's list of what may be placed.
     const game::Definitions definitions = game::loadDefinitions(ODYSSEUS_DATA_DIR);
-    CHECK(definitions.objects.size() == 7);
+    CHECK(definitions.objects.size() == 9); // the seven, then the two bodies that may be placed (US-248)
     CHECK(definitions.hasPlant("fire pit"));
 }
 
@@ -334,7 +338,7 @@ TEST_CASE("US-155 A new object kind added to objects.json shows up with its tags
     CHECK(cairn->object);
     CHECK(cairn->tags == std::vector<std::string>{"object", "landmark"});
     CHECK(catalogs.knownTags().count("landmark") == 1);
-    CHECK(game::loadDefinitions(data).objects.size() == 8);
+    CHECK(game::loadDefinitions(data).objects.size() == 10);
     // An object with no tags written is still tagged "object", so Inspect works on it.
     text = readText(data / "objects.json");
     text.insert(text.find(marker) + marker.size(), "\n    { \"name\": \"plain\", \"frame\": \"x\", \"blocks\": false, \"inspect\": \"Plain.\" },");

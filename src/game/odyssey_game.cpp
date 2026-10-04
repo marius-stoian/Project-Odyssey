@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "sim/data.h"
+
 #include "luna/engine/scaled_renderer.h"
 
 #include "game/game_rules.h"
@@ -10,6 +12,7 @@
 #include "core/version.h"
 #include "game/art.h"
 #include "game/object_art.h"
+#include "luna/engine/image_ops.h"
 #include "game/placeholder_art.h"
 #include "game/region_level.h"
 #include "luna/engine/physics_view.h"
@@ -81,7 +84,51 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+    editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
+    sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
+    lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
+    // Every `light` of the catalogs must name a kind of light of lights.json (US-243).
+    {
+        const auto check = [&](const std::string& light, const std::string& file, const std::string& where) {
+            if (!light.empty() && lighting_.kind(light) == nullptr) {
+                throw sim::DataError(dataDirectory / file, where + ".light", "\"" + light + "\" is not a kind of light in light/lights.json");
+            }
+        };
+        for (const EffectDef& def : catalogs_.effects) check(def.light, "effects.json", "effect \"" + def.name + "\"");
+        for (const WeaponDef& def : catalogs_.weapons) check(def.light, "weapons.json", "weapon \"" + def.name + "\"");
+        for (const PlantDef& def : catalogs_.plants) check(def.light, def.object ? "objects.json" : "plants.json", "object \"" + def.name + "\"");
+    }
+    // The sun and moon (US-248): each names a kind of light of lights.json. A mistake in one of them, or in the eclipse file, does not stop the game:
+    // the bad entry is left out, the level keeps its default pair, and the problem (file and field) is shown as a message.
+    std::vector<std::string> celestialNotes = catalogs_.notes;
+    std::erase_if(catalogs_.plants, [&](const PlantDef& def) {
+        if (!def.celestial || lighting_.kind(def.sky.lightKind) != nullptr) return false;
+        celestialNotes.push_back(sim::DataError(dataDirectory / "objects.json", "object \"" + def.name + "\".celestial.light",
+                                                "\"" + def.sky.lightKind + "\" is not a kind of light in light/lights.json").what());
+        return true;
+    });
+    for (const char* body : {"sun", "moon"}) {
+        const bool has = std::any_of(catalogs_.plants.begin(), catalogs_.plants.end(), [&](const PlantDef& def) { return def.celestial && def.sky.followsClock && def.sky.body == body; });
+        if (has) continue;
+        PlantDef fallback; // the built-in default: a plain sun or moon on the usual orbit
+        fallback.name = body;
+        fallback.frame = body;
+        fallback.object = true;
+        fallback.celestial = true;
+        fallback.tags = {"object", "celestial"};
+        fallback.sky.body = body;
+        catalogs_.plants.push_back(fallback);
+    }
+    for (const PlantDef& def : catalogs_.plants) {
+        if (def.celestial && def.sky.followsClock) defaultBodies_.push_back(&def);
+    }
+    try {
+        celestialEvents_ = loadCelestialEvents(dataDirectory / "light" / "celestial-events.json");
+    } catch (const sim::DataError& problem) {
+        celestialNotes.push_back(problem.what()); // no eclipses, the sky goes on
+    }
+    if (!celestialNotes.empty()) message_ = celestialNotes.front();
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
@@ -417,15 +464,14 @@ void OdysseyGame::drawClan(luna::engine::Renderer& renderer, const luna::engine:
     }
     std::sort(order.begin(), order.end(), [alpha](const Figure* a, const Figure* b) { return a->feetY(alpha) < b->feetY(alpha); });
     for (const Figure* figure : order) {
-        auto found = lookTextures_.find(figure->look);
-        if (found == lookTextures_.end()) found = lookTextures_.emplace(figure->look, renderer.createTexture(composeLook(*layerSheets_, figure->look))).first;
+        const luna::engine::Texture lookSheet = lookTexture(renderer, figure->look);
         const int width = figure->child ? kCharacterWidth * 3 / 4 : kCharacterWidth;
         const int height = figure->child ? kCharacterHeight * 3 / 4 : kCharacterHeight;
         const int shiver = figure->emote == Emote::Cold ? ((ticks_ / 2) % 2 == 0 ? -1 : 1) : 0; // the cold makes them shake
         const int feetX = static_cast<int>(std::lround(figure->feetX(alpha))) - view.x + shiver;
         const int feetY = static_cast<int>(std::lround(figure->feetY(alpha))) - view.y;
         const luna::engine::Rect source{figure->animationFrame() * kCharacterWidth, static_cast<int>(figure->facing) * kCharacterHeight, kCharacterWidth, kCharacterHeight};
-        renderer.drawStyled(found->second, source, {feetX - width / 2, feetY - height, width, height}, {});
+        renderer.drawStyled(lookSheet, source, {feetX - width / 2, feetY - height, width, height}, {});
         if (figure->emote != Emote::None) drawEmote(renderer, figure->emote, feetX, feetY - height - 14);
         if (const Bubble* said = bubbles_.of(static_cast<int>(figure - clanView_.figures().data()))) {
             // Words over the head, above the face of a need if there is one.
@@ -843,6 +889,45 @@ void OdysseyGame::applySettings(const GameSettings& settings) {
     saveSettings(settings_, saveDirectory_ / "settings.json");
     pendingWindow_ = WindowChange{settings_.resolution};
     setViewScales(settings_.cameraZoom, settings_.uiScale);
+}
+
+GameClock OdysseyGame::gameClock() const {
+    GameClock clock; // no clan, no clock: noon of a spring day
+    if (!clan_) return clock;
+    const std::uint64_t ticks = clan_->ticks();
+    const auto perDay = static_cast<std::uint64_t>(clan_->calendar().ticksPerDay());
+    clock.hour = static_cast<double>(ticks % perDay) * 24.0 / static_cast<double>(perDay);
+    clock.day = static_cast<int>(ticks / perDay);
+    clock.season = static_cast<int>(clan_->calendar().dateAt(ticks).season);
+    return clock;
+}
+
+SkyState OdysseyGame::sky() const {
+    const GameClock clock = gameClock();
+    return skyAt(sky_, clock.hour, clock.season);
+}
+
+std::vector<CelestialBody> OdysseyGame::celestialBodies() const {
+    std::vector<CelestialBody> placed;
+    for (const WorldPlant& plant : plants_) {
+        if (plant.alive && plant.def != nullptr && plant.def->celestial) placed.push_back({plant.def, static_cast<double>(plant.feet.x), static_cast<double>(plant.feet.y)});
+    }
+    return bodiesOf(defaultBodies_, placed);
+}
+
+CelestialLight OdysseyGame::celestialLight(double alpha) const {
+    return currentLight(celestialBodies(), sky_, lighting_, celestialEvents_, gameClock(), hero_.feetX(alpha), hero_.feetY(alpha));
+}
+
+// The sun and the moon in the sky band at the top of the picture, moving with the clock (US-248). Drawn unlit: they are the light.
+void OdysseyGame::drawSkyBodies(luna::engine::Renderer& renderer, double alpha) const {
+    const int width = viewWidth();
+    const int band = viewHeight() / 4;
+    for (const SkySprite& sprite : skySprites(celestialBodies(), sky_, celestialEvents_, gameClock(), hero_.feetX(alpha), hero_.feetY(alpha))) {
+        const int x = 20 + static_cast<int>(sprite.x * (width - 40));
+        const int y = 8 + kObjectPictureSize + static_cast<int>(sprite.y * (band - kObjectPictureSize));
+        drawPlant(renderer, plantArt_, sprite.name, x, y);
+    }
 }
 
 void OdysseyGame::setViewScales(int cameraZoom, int uiScale) {
@@ -1939,11 +2024,25 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     } else {
         core::logWarning("Art: programmer art, because " + art_.problem);
     }
-    characters_ = renderer.createTexture(art_.heroSheet);
-    tiles_ = renderer.createTexture(art_.tileStrip);
+    // A texture and, when its atlas has a normal map, that map (US-241): lights then shade the sprite; without one it is lit flat.
+    // The normal textures are made last, so the numbers of all the other textures stay as they were (tests find props by number).
+    std::vector<std::pair<luna::engine::Texture, const luna::engine::Image*>> pendingNormals;
+    static const luna::engine::Image kNone(0, 0); // "no normal map": the conditionals below must give lvalues, the pointers outlive them
+    std::vector<luna::engine::Image> mirroredNormalPictures;
+    mirroredNormalPictures.reserve(1);
+    // Black copies of the sprite pages shadows are cut from (US-244); like the normal maps they are uploaded last.
+    std::vector<std::pair<luna::engine::Texture, luna::engine::Image>> pendingShadows;
+    const auto withNormals = [&renderer, &pendingNormals, &pendingShadows](const luna::engine::Image& picture, const luna::engine::Image& normals) {
+        const luna::engine::Texture texture = renderer.createTexture(picture);
+        pendingShadows.emplace_back(texture, luna::engine::silhouette(picture));
+        if (normals.width() > 0) pendingNormals.emplace_back(texture, &normals);
+        return texture;
+    };
+    characters_ = withNormals(art_.heroSheet, art_.heroNormals);
+    tiles_ = withNormals(art_.tileStrip, art_.tileNormals);
     props_ = renderer.createTexture(makePropSheet()); // texture 2: tests find props by this number
-    charactersAtlas_ = renderer.createTexture(art_.characters);
-    charactersHitAtlas_ = renderer.createTexture(art_.charactersHit);
+    charactersAtlas_ = withNormals(art_.characters, art_.charactersNormals);
+    charactersHitAtlas_ = withNormals(art_.charactersHit, art_.charactersNormals);
     uiSheet_ = renderer.createTexture(luna::engine::makeUiSheet());
     editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_});
     // The M2d content atlas (US-130); without it the game plays on, just without effects.
@@ -1968,11 +2067,17 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             if (const auto rect = content_.rect(content_.frameName(def.name, 0))) effectArt_.firstFrame[def.name] = *rect;
         }
         for (const char* page : {"plants-small", "plants-tall", "trees"}) {
-            if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) plantArt_.pages[page] = renderer.createTexture(found->second);
+            if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) {
+                const auto normals = content_.normals.find(page);
+                plantArt_.pages[page] = withNormals(found->second, normals == content_.normals.end() ? kNone : normals->second);
+            }
         }
         if (const auto animals = content_.pictures.find("animals"); animals != content_.pictures.end()) {
-            animalArt_.page = renderer.createTexture(animals->second);
-            animalArt_.mirrored = renderer.createTexture(luna::engine::mirrored(animals->second));
+            const auto animalNormals = content_.normals.find("animals");
+            const bool hasNormals = animalNormals != content_.normals.end();
+            animalArt_.page = withNormals(animals->second, hasNormals ? animalNormals->second : kNone);
+            if (hasNormals) mirroredNormalPictures.push_back(luna::engine::mirroredNormals(animalNormals->second));
+            animalArt_.mirrored = withNormals(luna::engine::mirrored(animals->second), hasNormals ? mirroredNormalPictures.back() : kNone);
             animalArt_.pageWidth = animals->second.width();
             for (const AnimalDef& animal : catalogs_.animals) {
                 if (const auto rect = content_.rect(animal.frame)) animalArt_.sources[animal.name] = *rect;
@@ -1991,7 +2096,9 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             }
             if (!objects.empty()) {
                 std::map<std::string, core::Rect> rects;
-                plantArt_.pages["objects"] = renderer.createTexture(makeObjectPage(objects, rects));
+                const luna::engine::Image objectPage = makeObjectPage(objects, rects);
+                plantArt_.pages["objects"] = renderer.createTexture(objectPage);
+                pendingShadows.emplace_back(plantArt_.pages["objects"], luna::engine::silhouette(objectPage));
                 for (const auto& [name, rect] : rects) plantArt_.sources[name] = {"objects", rect};
             }
         }
@@ -2003,6 +2110,8 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
     }
+    for (const auto& [texture, normals] : pendingNormals) renderer.setNormalMap(texture, renderer.createTexture(*normals));
+    for (const auto& [texture, black] : pendingShadows) silhouettes_[texture.id] = renderer.createTexture(black);
 }
 
 void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
@@ -2033,8 +2142,15 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     }
     luna::engine::ScaledRenderer world(output, settings_.cameraZoom);
     luna::engine::Renderer& renderer = world;
+    // The world is lit (US-240): the ambient colour tints everything drawn until the lighting is cleared below; the interface is never dimmed.
+    luna::engine::LightFrame lightFrame = ambientLightFrame(alpha); // the time of day (US-242) and an eclipse (US-248) tint the ambient light
+    lightFrame.normalMaps = settings_.lighting != "Low"; // the Low lighting quality shades sprites flat (US-247)
+    // Fires and torches light the dark (US-243): the darker the ambient light, the stronger they shine; in full daylight they add nothing.
+    if (const double darkness = darknessOf(lightFrame); darkness > 0.0) lightFrame.lights = worldLights(camera_.view(alpha), alpha, darkness);
+    renderer.setLighting(&lightFrame);
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);
+    drawShadows(renderer, view, alpha); // on the ground, under everything that stands or flies
     auto screen = [&view](double worldX, double worldY) {
         return luna::engine::Point{static_cast<int>(std::lround(worldX)) - view.x, static_cast<int>(std::lround(worldY)) - view.y};
     };
@@ -2136,6 +2252,8 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawHeld(renderer, view, alpha);
     drawAim(renderer, view, alpha);
     effects_.draw(renderer, view);
+    renderer.setLighting(nullptr);
+    drawSkyBodies(renderer, alpha);
     drawWeather(ui);
     drawInspection(renderer, view);
     drawRivals(renderer, view);

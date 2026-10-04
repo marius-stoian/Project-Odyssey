@@ -46,6 +46,22 @@ class RenderBackend;
 
 // The game window and its drawing surface (an SDL_Window and a RenderBackend: SDL_GPU or SDL_Renderer). RAII: both are
 // destroyed with the Window. Needs a live System.
+// What lights a frame (US-240): an ambient colour (already times its strength) and up to kMaxLights point lights.
+struct LightingState {
+    static constexpr int kMaxLights = 64;
+    struct Light {
+        float x = 0.0F, y = 0.0F;     // virtual pixels
+        float radius = 0.0F;          // virtual pixels
+        float strength = 0.0F;
+        float r = 1.0F, g = 1.0F, b = 1.0F;
+        float height = 24.0F;         // how far above the ground, in pixels: the higher, the flatter the light on a surface
+    };
+    float ambient[3] = {1.0F, 1.0F, 1.0F};
+    bool normalMaps = true; // false: every sprite is lit as a flat surface (Low lighting quality)
+    int count = 0;
+    Light lights[kMaxLights];
+};
+
 class Window {
 public:
     explicit Window(const WindowSettings& settings);
@@ -78,6 +94,11 @@ public:
     // The same with see-through `alpha` (0-255) and, with `additive`, its colours added to what
     // is below (glows, light rain), used by effects and weather (M2d).
     void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive);
+
+    // Light (US-240): while a lighting state is set, normal-blend draws are lit: tinted by the ambient colour and brightened by the point lights,
+    // using the normal map given to the texture. `nullptr` ends it (the interface is drawn unlit). Positions and radii are virtual pixels.
+    void setLighting(const LightingState* state);
+    void setNormalMap(int texture, int normals);
 
     // Where the virtual screen lands in the window, in real pixels (the scaled picture
     // without the black bars).

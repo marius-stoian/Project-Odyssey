@@ -1257,3 +1257,154 @@ No matter which `return` is taken, the time is recorded. The GPU is harder: the 
 **Try it (15 minutes).** Run the game with `--perf --people 500`, watch the F3 overlay, then try `--people 20`: which number changes, CPU or GPU?
 
 **Check yourself.** Why did our first GPU numbers read about 16 ms for a frame that really takes 0.2 ms?
+
+## US-240 The lighting pipeline: shader inputs and lighting maths
+
+**What we built.** The graphics card can now light the world: an ambient colour tints every sprite, and point lights brighten the side of a sprite that faces them.
+
+**The C++ idea: data crossing from the CPU to the GPU.** A shader is a tiny program that runs once per pixel on the card. It cannot see our C++ variables; we pack the numbers it needs into a flat array of floats (a *uniform buffer*) and push it before drawing:
+
+```cpp
+std::vector<float> data(4 + 8 * 64);       // ambient + count, then 8 floats per light
+data[3] = static_cast<float>(count);
+SDL_PushGPUFragmentUniformData(commands, 0, data.data(), bytes);
+```
+
+The shader declares the same layout (`float4 lights[128]`) and reads it back. The maths per pixel: how close is the light (`reach`) times how squarely the surface faces it (`dot(normal, directionToLight)`).
+
+**Where to look.** `src/luna/platform/shaders/sprite_lit.frag.hlsl`; `pack()` in `src/luna/platform/gpu_backend.cpp`; `src/game/lighting.cpp`.
+
+**Try it (15 minutes).** In `assets/data/light/lights.json` set `ambient.strength` to 0.5 and start the game: the world dims, the HUD does not. Set it back to 1.0.
+
+**Check yourself.** Why does a sprite with no normal map still brighten near a light, and why only a little at the edge of the light's radius?
+## US-241 Generated normal maps: height and slopes from pixels
+
+**What we built.** A tool makes a "normal map" for every sprite sheet: a second picture that says which way each pixel of a sprite faces, so lights can shade the art without anyone painting a second image.
+
+**The C++ idea: image processing is loops over pixels.** First a height per pixel (higher in the middle of a body, from the distance to the edge, plus brightness). Then the slope: how fast the height changes to the right and downward, measured with the Sobel filter, a weighted difference of the neighbours:
+
+```cpp
+const double dx = (s(x+1,y-1) + 2*s(x+1,y) + s(x+1,y+1)) - (s(x-1,y-1) + 2*s(x-1,y) + s(x-1,y+1));
+const double nx = -dx * strength / 4.0;   // the surface leans toward lower ground
+```
+
+The direction (nx, ny, 1) is shortened to length 1 and stored in the colour channels: red is x, green is y, blue is z.
+
+**Where to look.** `normalAtlas` in `src/luna/engine/image_ops.cpp`; `writeNormalAtlases` in `src/game/normal_art.cpp`; the tool flag in `apps/atlas/main.cpp`.
+
+**Try it (15 minutes).** Open `assets/sprites/atlas/characters_n.png` in an image viewer: the purple-blue picture is the hero's surface directions. Then change `kBodyStrength` in `normal_art.cpp` to 4.0, run `odysseus_atlas --normals` and look again.
+
+**Check yourself.** Why is the colour of a flat surface (128, 128, 255), a light purple-blue, and not black?
+## US-242 Day, night and seasons: interpolating curves over time
+
+**What we built.** The light now follows the game clock: night, orange dawn, bright day, orange dusk. Summer days are long, winter days short.
+
+**The C++ idea: interpolation (lerp).** Between two known moments, the value in between is a straight blend. With `t` from 0 to 1:
+
+```cpp
+const auto mix = [t](double x, double y) { return x + (y - x) * t; };
+ambientR = mix(a.red / 255.0 * a.strength, b.red / 255.0 * b.strength);
+```
+
+`t` is how far the clock has gone from one keyframe to the next: `(now - from) / (to - from)`. The sun uses a sine: `elevation = peak * sin(pi * f)`, where `f` is how far through the day it is; the sine rises, peaks at noon and falls back, which is exactly the shape of a sun's path.
+
+**Where to look.** `skyAt` in `src/game/sky.cpp`; `OdysseyGame::sky()` in `src/game/odyssey_game.cpp`.
+
+**Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan --clan-speed 20` and watch a day pass. Then edit the `Winter` sunset in `calendar.json` to 12.0 and see how early the evening comes.
+
+**Check yourself.** Why is the first keyframe of the day not at hour 0, and how does the code make the last keyframe join it over midnight?
+## US-248 Celestial bodies: from a position to a direction with atan2
+
+**What we built.** The sun and the moon are now objects of the world. Where a body is decides where the light comes from, so which way a shadow will fall. The game has a default pair that travels by the clock, and you can place your own in the Editor. Eclipses are lines in a data file.
+
+**The C++ idea: `atan2`.** To know in which compass direction a body lies, we take its offset from the hero, `dx` east and `dy` south in metres, and ask for the angle:
+
+```cpp
+const double azimuth = std::atan2(dx, -dy) * kRadiansToDegrees; // 0 = north, 90 = east
+const double elevation = std::atan2(height, std::hypot(dx, dy)) * kRadiansToDegrees;
+```
+
+`atan2(a, b)` gives the angle of the point (b, a) in all four quadrants. Plain `atan(a / b)` cannot tell north from south, because the division throws the signs away, and it breaks when `b` is 0. The shadow falls the opposite way, so its direction is the negative of the way toward the body: `(-sin(azimuth), cos(azimuth))` on the picture, where north is up and y grows downward.
+
+**Where to look.** `viewOf` and `currentLight` in `src/game/celestial.cpp`; `OdysseyGame::celestialLight()`.
+
+**Try it (15 minutes).** In `objects.json` change the `height` of `sun (placed)` from 40 to 5, place it in the Editor east of the hero and read `elevation` in a test: the sun is now nearly on the horizon and the shadow factor hits its cap of 2.5.
+
+**Check yourself.** Why does the code clamp the elevation to at least 8 degrees before it computes `1 / tan(elevation)`?
+
+## US-244 Sun and moon shadows: projecting silhouettes with a shear transform
+
+**What we built.** Everything that stands in the world now throws a shadow along the light of the sun or the moon, longer when the light is low, fainter in fog.
+
+**The C++ idea: a shear.** A shadow is the sprite's own picture painted black and slid sideways, more the higher the pixel is above the feet. That is a shear: each row `z` is shifted by `direction * z * length`:
+
+```cpp
+const int shift = static_cast<int>(std::lround(dirX * middle * groundPerHeight));
+renderer.drawStyled(silhouette, stripOfPicture, {feet.x - width / 2 + shift, top, width, rowsPerDraw}, style);
+```
+
+We walk down the ground rows instead of up the picture rows so that every ground pixel is drawn once; drawing every picture row on top of the others would stack the translucency into dark bands.
+
+**Where to look.** `drawShadow` in `src/luna/engine/shadow_draw.cpp`; `OdysseyGame::drawShadows` in `src/game/shadows.cpp`.
+
+**Try it (15 minutes).** Change the `height` of the `olive tree` in `plants.json` from 4.0 to 8.0 and take the 09:00 screenshot from `docs/plans/US-244.md`: the shadow doubles in length.
+
+**Check yourself.** Why does `drawShadow` give a shadow that points exactly sideways a minimum depth (`kMinShadowDepth`)?
+
+## US-245 Shadows from fires: choosing the nearest lights per object within a budget
+
+**What we built.** At night a person, an animal or a plant standing near a camp fire throws a faint shadow away from it. Between two fires there are two shadows. Only the nearest few fires count, and the Low lighting preset turns them off.
+
+**The C++ idea: `std::partial_sort`.** For every thing we list the fires that reach it and want only the nearest N. Sorting the whole list wastes work; `partial_sort` puts just the first N in order:
+
+```cpp
+const std::size_t count = std::min(reaching.size(), static_cast<std::size_t>(lighting_.shadowLightsPerObject));
+std::partial_sort(reaching.begin(), reaching.begin() + static_cast<std::ptrdiff_t>(count), reaching.end(), byDistanceThenId);
+```
+
+The comparison breaks ties by the light's id, so two fires that are equally near are always chosen in the same order and the picture does not flicker between frames.
+
+**Where to look.** `OdysseyGame::castShadow` in `src/game/shadows.cpp`; `lightSources` in `src/game/world_lights.cpp`; `fireShadows` in `assets/data/light/lights.json`.
+
+**Try it (15 minutes).** In `lights.json` set `fireShadows.maxPerObject` to 1, take a night screenshot between two fires (`docs/plans/US-245.md`): one of the two shadows is gone.
+
+**Check yourself.** Why does `castShadow` skip a light that is less than 12 pixels from the thing's feet?
+
+## US-246 Weather and light: blending settings
+
+**What we built.** Rain, snow, fog and storms now dim and tint the whole scene, and a storm flashes it with lightning. Each weather in `weather.json` says its `light` (a dim and a tint) and how often it `flash`es.
+
+**The C++ idea: blending (linear interpolation).** While one weather fades into the next we do not jump between two light settings; we walk in a straight line from the old to the new:
+
+```cpp
+const auto mix = [t](float a, float b) { return static_cast<float>(a + (b - a) * t); };
+light.red = mix(tintOf(from->tintRed, from->lightDim), tintOf(to->tintRed, to->lightDim));
+```
+
+`t` is the weather's own fade (0 to 1 over 3 s), so the light and the raindrops arrive together. The lightning uses no random generator at all: a hash of the seed and a 0.2 s slot number decides if a strike starts, so the same seed always strikes at the same moments.
+
+**Where to look.** `weatherLight` and `lightningFlash` in `src/game/weather.cpp`; `ambientLightFrame` in `src/game/world_lights.cpp`; `assets/data/weather.json`.
+
+**Try it (15 minutes).** Give "steady rain" `"light":{"dim":0.3,"tint":[255,255,255]}`, run with `--weather "steady rain"`: the rain is nearly night.
+
+**Check yourself.** Why does the lightning use a hash of the slot and not the simulation's random numbers?
+
+## US-247 Lighting in the Editor and quality settings: a setting that changes a pipeline
+
+**What we built.** The Editor can show the level at any hour (the Sky button and a slider), the owner can place lights with a new Light tool (saved in the level), and the lighting quality Low, Medium, High now changes what is drawn.
+
+**The C++ idea: one flag travels down the layers.** The Low quality has to reach the graphics card code without the Game knowing about the card. We add a plain `bool normalMaps` to the light data the Game hands to the renderer, and the renderer copies it down to the platform layer:
+
+```cpp
+lightFrame.normalMaps = settings_.lighting != "Low";   // Game
+state.normalMaps = frame->normalMaps;                  // Engine copies it to Platform
+const bool useNormals = lightSets_[batch.light].normalMaps; // GPU backend picks the flat normal
+```
+
+Each layer only knows its own neighbour, so the rule that Game never touches SDL still holds. The level file gets a version number bump (2 to 3): an old file has no `lights` list and loads as "no lights"; saving writes version 3.
+
+**Where to look.** `Editor::render` and `Editor::handlePanels` in `src/game/editor.cpp`; `OdysseyGame::editorLightFrame` in `src/game/world_lights.cpp`; `gpu_backend.cpp` (`useNormals`); `assets/levels/*.json` (`lights`).
+
+**Try it (15 minutes).** Click Sky in the Editor, drag the slider to midnight, place a campfire with the Light tool: it glows. Then set Lighting to Low in the Settings and look at a sprite near a fire: it is lit flat.
+
+**Check yourself.** Why does a level made by a newer game stop with an error instead of loading what it can?

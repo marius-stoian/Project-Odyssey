@@ -124,6 +124,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         checkFrame(weaponsFile, where, def.frame);
         def.weaponClass = static_cast<WeaponClass>(f.choice("class", kClassNames));
         def.element = static_cast<Element>(f.choice("element", kElementNames));
+        def.light = entry.value("light", std::string());
         def.future = f.choice("era", std::array<const char*, 2>{"fantasy", "future"}) == 1;
         def.starter = f.flag("starter");
         def.damage = f.whole("damage", 0, 1000);
@@ -144,6 +145,9 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         checkFrame(plantsFile, where, def.frame);
         constexpr std::array<const char*, 3> kSizes{"small", "tall", "tree"};
         def.size = kSizes[static_cast<std::size_t>(f.choice("size", kSizes))];
+        def.height = def.size == "tree" ? 4.0 : (def.size == "tall" ? 1.5 : 0.0); // small plants cast no shadow unless they say so
+        if (entry.contains("height")) def.height = f.number("height", 0.0, 100.0);
+        if (entry.contains("shadow")) def.shadow = f.flag("shadow");
         def.blocks = f.flag("blocks");
         def.edible = f.flag("edible");
         def.inspect = f.text("inspect");
@@ -162,6 +166,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
     // needed ("frame" names the picture the game draws). Tags and states are written in the file (an object with none has only "object").
     const auto objectsFile = dataDirectory / "objects.json";
     if (std::filesystem::exists(objectsFile)) {
+        std::set<std::string> skippedCelestials;
         const std::vector<PlantDef> objects = readList<PlantDef>(objectsFile, "objects", [&](const json& entry, const std::string& where) {
             const Fields f{objectsFile, entry, where};
             PlantDef def;
@@ -173,9 +178,38 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
             def.inspect = f.text("inspect");
             def.tags = readTags(entry, objectsFile, where, {"object"});
             def.states = readStates(entry, objectsFile, where, {});
+            def.light = entry.value("light", std::string());
+            def.lightState = entry.value("lightState", std::string());
+            def.height = 0.8;
+            if (entry.contains("height")) def.height = f.number("height", 0.0, 100.0);
+            if (entry.contains("shadow")) def.shadow = f.flag("shadow");
+            if (entry.contains("celestial")) {
+              try {
+                const json& sky = entry.at("celestial");
+                const std::string at = where + ".celestial";
+                if (!sky.is_object()) throw sim::DataError(objectsFile, at, "must be an object with body, light, follows, orbitRadius, tilt and height");
+                const Fields g{objectsFile, sky, at};
+                def.celestial = true;
+                def.sky.body = g.text("body");
+                if (def.sky.body != "sun" && def.sky.body != "moon") throw sim::DataError(objectsFile, at + ".body", "must be \"sun\" or \"moon\"");
+                def.sky.lightKind = g.text("light");
+                const std::string follows = g.text("follows");
+                if (follows != "clock" && follows != "fixed") throw sim::DataError(objectsFile, at + ".follows", "must be \"clock\" or \"fixed\"");
+                def.sky.followsClock = follows == "clock";
+                def.sky.orbitRadius = g.number("orbitRadius", 10.0, 100000.0);
+                def.sky.tilt = g.number("tilt", -90.0, 90.0);
+                def.sky.height = g.number("height", 1.0, 100000.0);
+                def.tags.push_back("celestial");
+              } catch (const sim::DataError& problem) {
+                // A mistake in one sun or moon must not stop the game: it is left out (the level keeps its default pair) and the problem is reported.
+                catalogs.notes.push_back(problem.what());
+                skippedCelestials.insert(entry.at("name").get<std::string>());
+              }
+            }
             return def;
         });
         for (const PlantDef& object : objects) {
+            if (skippedCelestials.contains(object.name)) continue;
             if (catalogs.plant(object.name) != nullptr) throw sim::DataError(objectsFile, "objects", "\"" + object.name + "\" is already a plant in plants.json");
             catalogs.plants.push_back(object);
         }
@@ -191,6 +225,8 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.enemy = f.flag("enemy");
         def.strikeDamage = f.whole("strikeDamage", 0, 1000);
         def.reach = f.number("reach", 0.5, 10.0);
+        if (entry.contains("height")) def.height = f.number("height", 0.1, 100.0);
+        if (entry.contains("shadow")) def.shadow = f.flag("shadow");
         def.tags = readTags(entry, animalsFile, where, {"animal", def.enemy ? "hostile" : "prey"});
         return def;
     });
@@ -202,6 +238,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.frames = f.whole("frames", 1, 16);
         def.ticksPerFrame = f.whole("ticksPerFrame", 1, 60);
         def.loop = f.flag("loop");
+        def.light = entry.value("light", std::string());
         return def;
     });
     if (atlas != nullptr) {
@@ -274,6 +311,25 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.ticksPerFrame = f.whole("ticksPerFrame", 1, 60);
         def.weight = f.whole("weight", 0, 1000);
         def.additive = f.choice("blend", std::array<const char*, 2>{"alpha", "add"}) == 1;
+        if (entry.contains("shadowFade")) def.shadowFade = f.number("shadowFade", 0.0, 1.0);
+        if (entry.contains("light")) {
+            const std::string lightWhere = where + ".light";
+            if (!entry.at("light").is_object()) throw sim::DataError(weatherFile, lightWhere, "must be {\"dim\": 0.8, \"tint\": [r, g, b]}");
+            const Fields light{weatherFile, entry.at("light"), lightWhere};
+            if (entry.at("light").contains("dim")) def.lightDim = light.number("dim", 0.1, 1.0);
+            if (entry.at("light").contains("tint")) {
+                const json& tint = entry.at("light").at("tint");
+                if (!tint.is_array() || tint.size() != 3) throw sim::DataError(weatherFile, lightWhere + ".tint", "must be three numbers: [red, green, blue], each 0 to 255");
+                int* parts[3] = {&def.tintRed, &def.tintGreen, &def.tintBlue};
+                for (std::size_t i = 0; i < 3; ++i) {
+                    if (!tint[i].is_number_integer() || tint[i].get<int>() < 0 || tint[i].get<int>() > 255) {
+                        throw sim::DataError(weatherFile, std::format("{}.tint[{}]", lightWhere, i), "must be a whole number from 0 to 255");
+                    }
+                    *parts[i] = tint[i].get<int>();
+                }
+            }
+        }
+        if (entry.contains("flash")) def.flashPerMinute = f.number("flash", 0.0, 60.0);
         return def;
     });
     return catalogs;

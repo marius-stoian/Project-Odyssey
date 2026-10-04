@@ -1,6 +1,7 @@
 #include "luna/engine/image_ops.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <utility>
 
@@ -76,6 +77,96 @@ Image mirrored(const Image& source) {
     for (int y = 0; y < source.height(); ++y) {
         for (int x = 0; x < source.width(); ++x) {
             out.set(source.width() - 1 - x, y, source.get(x, y));
+        }
+    }
+    return out;
+}
+
+Image silhouette(const Image& source) {
+    Image out(source.width(), source.height());
+    for (int y = 0; y < source.height(); ++y) {
+        for (int x = 0; x < source.width(); ++x) out.set(x, y, Color{0, 0, 0, source.get(x, y).alpha});
+    }
+    return out;
+}
+
+Image normalAtlas(const Image& atlas, int cellWidth, int cellHeight, double strength) {
+    Image out(atlas.width(), atlas.height());
+    out.fillRect(0, 0, atlas.width(), atlas.height(), Color{128, 128, 255, 255});
+    constexpr double kEdgeReach = 6.0; // pixels from the edge over which the body rises
+    for (int top = 0; top + cellHeight <= atlas.height(); top += cellHeight) {
+        for (int left = 0; left + cellWidth <= atlas.width(); left += cellWidth) {
+            const auto at = [&](int x, int y) { return static_cast<std::size_t>(y) * static_cast<std::size_t>(cellWidth) + static_cast<std::size_t>(x); };
+            const std::size_t count = static_cast<std::size_t>(cellWidth) * static_cast<std::size_t>(cellHeight);
+            std::vector<double> distance(count, 0.0);
+            // Distance to the nearest see-through pixel (two sweeps of a 3 x 3 chamfer), capped.
+            for (int y = 0; y < cellHeight; ++y) {
+                for (int x = 0; x < cellWidth; ++x) {
+                    distance[at(x, y)] = atlas.get(left + x, top + y).alpha < 128 ? 0.0 : kEdgeReach;
+                }
+            }
+            const auto relax = [&](int x, int y, int dx, int dy, double step) {
+                const int nx = x + dx;
+                const int ny = y + dy;
+                const double beyond = (nx < 0 || ny < 0 || nx >= cellWidth || ny >= cellHeight) ? 0.0 : distance[at(nx, ny)];
+                distance[at(x, y)] = std::min(distance[at(x, y)], beyond + step);
+            };
+            for (int y = 0; y < cellHeight; ++y) {
+                for (int x = 0; x < cellWidth; ++x) {
+                    relax(x, y, -1, 0, 1.0); relax(x, y, 0, -1, 1.0); relax(x, y, -1, -1, 1.4142); relax(x, y, 1, -1, 1.4142);
+                }
+            }
+            for (int y = cellHeight - 1; y >= 0; --y) {
+                for (int x = cellWidth - 1; x >= 0; --x) {
+                    relax(x, y, 1, 0, 1.0); relax(x, y, 0, 1, 1.0); relax(x, y, 1, 1, 1.4142); relax(x, y, -1, 1, 1.4142);
+                }
+            }
+            std::vector<double> height(count, 0.0);
+            for (int y = 0; y < cellHeight; ++y) {
+                for (int x = 0; x < cellWidth; ++x) {
+                    const Color c = atlas.get(left + x, top + y);
+                    if (c.alpha < 128) continue;
+                    const double brightness = (0.299 * c.red + 0.587 * c.green + 0.114 * c.blue) / 255.0;
+                    height[at(x, y)] = 0.65 * (distance[at(x, y)] / kEdgeReach) + 0.35 * brightness;
+                }
+            }
+            // A light blur, so single bright pixels do not turn into spikes.
+            std::vector<double> smooth(count, 0.0);
+            const auto heightAt = [&](int x, int y) { return height[at(std::clamp(x, 0, cellWidth - 1), std::clamp(y, 0, cellHeight - 1))]; };
+            for (int y = 0; y < cellHeight; ++y) {
+                for (int x = 0; x < cellWidth; ++x) {
+                    smooth[at(x, y)] = (4.0 * heightAt(x, y) + 2.0 * (heightAt(x - 1, y) + heightAt(x + 1, y) + heightAt(x, y - 1) + heightAt(x, y + 1)) +
+                                        heightAt(x - 1, y - 1) + heightAt(x + 1, y - 1) + heightAt(x - 1, y + 1) + heightAt(x + 1, y + 1)) / 16.0;
+                }
+            }
+            const auto s = [&](int x, int y) { return smooth[at(std::clamp(x, 0, cellWidth - 1), std::clamp(y, 0, cellHeight - 1))]; };
+            for (int y = 0; y < cellHeight; ++y) {
+                for (int x = 0; x < cellWidth; ++x) {
+                    if (atlas.get(left + x, top + y).alpha < 128) continue;
+                    const double dx = (s(x + 1, y - 1) + 2.0 * s(x + 1, y) + s(x + 1, y + 1)) - (s(x - 1, y - 1) + 2.0 * s(x - 1, y) + s(x - 1, y + 1));
+                    const double dy = (s(x - 1, y + 1) + 2.0 * s(x, y + 1) + s(x + 1, y + 1)) - (s(x - 1, y - 1) + 2.0 * s(x, y - 1) + s(x + 1, y - 1));
+                    // The surface leans toward lower ground: the direction is minus the slope.
+                    double nx = -dx * strength / 4.0;
+                    double ny = -dy * strength / 4.0;
+                    double nz = 1.0;
+                    const double length = std::sqrt(nx * nx + ny * ny + nz * nz);
+                    nx /= length; ny /= length; nz /= length;
+                    const auto encode = [](double v) { return static_cast<std::uint8_t>(std::lround(std::clamp(v, -1.0, 1.0) * 127.5 + 127.5)); };
+                    out.set(left + x, top + y, Color{encode(nx), encode(ny), encode(nz), 255});
+                }
+            }
+        }
+    }
+    return out;
+}
+
+Image mirroredNormals(const Image& normals) {
+    Image out = mirrored(normals);
+    for (int y = 0; y < out.height(); ++y) {
+        for (int x = 0; x < out.width(); ++x) {
+            Color c = out.get(x, y);
+            c.red = static_cast<std::uint8_t>(255 - c.red);
+            out.set(x, y, c);
         }
     }
     return out;

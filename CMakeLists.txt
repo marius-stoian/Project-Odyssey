@@ -92,7 +92,7 @@ elseif(NOT LUNA_DXC)
 endif()
 if(LUNA_GPU AND LUNA_DXC)
     message(STATUS "GPU renderer: shaders are compiled with ${LUNA_DXC}")
-    foreach(_shader sprite.vert sprite.frag blit.vert blit.frag)
+    foreach(_shader sprite.vert sprite.frag sprite_lit.frag blit.vert blit.frag)
         if(_shader MATCHES "[.]vert$")
             set(_profile vs_6_0)
         else()
@@ -160,6 +160,7 @@ add_library(luna_engine STATIC
     src/luna/engine/collision.cpp
     src/luna/engine/physics_view.cpp
     src/luna/engine/image_ops.cpp
+    src/luna/engine/shadow_draw.cpp
     src/luna/engine/sprite_layers.cpp
     src/luna/engine/chunk_streamer.cpp
     src/luna/engine/image_io.cpp
@@ -240,6 +241,12 @@ add_library(odysseus_game STATIC
     src/game/plants.cpp
     src/game/animals.cpp
     src/game/weather.cpp
+    src/game/lighting.cpp
+    src/game/world_lights.cpp
+    src/game/shadows.cpp
+    src/game/sky.cpp
+    src/game/celestial.cpp
+    src/game/normal_art.cpp
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
@@ -335,7 +342,8 @@ add_executable(luna_tests
     tests/luna/collision_test.cpp
     tests/luna/ui_test.cpp
     tests/luna/effects_test.cpp
-    tests/luna/zoom_test.cpp)
+    tests/luna/zoom_test.cpp
+    tests/luna/normals_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_tests)
@@ -364,7 +372,8 @@ add_test(NAME "US-021 Game reads only intents"
 # --- Luna window tests: a real hidden window, reading back pixels (US-022) ---
 add_executable(luna_window_tests
     tests/main.cpp
-    tests/luna/pixels_window_test.cpp)
+    tests/luna/pixels_window_test.cpp
+    tests/luna/lighting_window_test.cpp)
 target_link_libraries(luna_window_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_window_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
 odysseus_apply_settings(luna_window_tests)
@@ -378,6 +387,12 @@ add_executable(odysseus_game_tests
     tests/game/m6_test.cpp
     tests/game/spear_test.cpp
     tests/game/art_test.cpp
+    tests/game/lighting_test.cpp
+    tests/game/normals_test.cpp
+    tests/game/sky_test.cpp
+    tests/game/celestial_test.cpp
+    tests/game/shadow_test.cpp
+    tests/game/world_lights_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
     tests/game/paint_test.cpp
@@ -394,6 +409,8 @@ add_executable(odysseus_game_tests
     tests/game/plants_test.cpp
     tests/game/animals_test.cpp
     tests/game/weather_test.cpp
+    tests/game/weather_light_test.cpp
+    tests/game/lighting_editor_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
