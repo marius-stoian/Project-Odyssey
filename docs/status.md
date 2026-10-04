@@ -152,7 +152,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-265 | US-265 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
 | S-US-266 | US-266 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
 | S-US-267 | US-267 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
-| S-US-268 | US-268 | M9a | To do |  |
+| S-US-268 | US-268 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
 | S-US-269 | US-269 | M9a | To do |  |
 | S-US-270 | US-270 | M9a | To do |  |
 | X-M9a | - | M9a | To do |  |

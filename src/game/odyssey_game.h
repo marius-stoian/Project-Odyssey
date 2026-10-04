@@ -285,6 +285,7 @@ public:
     std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
     void buildNpcPopulation();
+    void syncEditorActions();
     void registerCreatures();
     void tickNpcPopulation();
     std::string loadNpcPopulation(); // the problem, or empty

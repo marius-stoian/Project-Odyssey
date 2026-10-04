@@ -698,6 +698,14 @@ sim::rules::SmallTalk OdysseyGame::loadSmalltalk(sim::rules::LoadReport& report)
     return {};
 }
 
+// The Editor's action checkboxes are the interactions of the registry (US-268).
+void OdysseyGame::syncEditorActions() {
+    std::vector<std::string> ids;
+    for (const sim::rules::Interaction& interaction : interactions_.all()) ids.push_back(interaction.id);
+    std::sort(ids.begin(), ids.end());
+    editor_.setActionIds(std::move(ids));
+}
+
 void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
@@ -708,6 +716,7 @@ void OdysseyGame::loadInteractions() {
     sim::rules::LoadReport dialogueReport;
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     smalltalk_ = loadSmalltalk(dialogueReport);
+    syncEditorActions();
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
@@ -741,6 +750,7 @@ bool OdysseyGame::reloadInteractions() {
         return false;
     }
     interactions_ = std::move(fresh);
+    syncEditorActions();
     dialogues_ = std::move(freshDialogue);
     smalltalk_ = std::move(freshSmalltalk);
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));

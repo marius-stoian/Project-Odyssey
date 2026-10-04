@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-268: Editor NPC panel (Mraw) - 2026-10-04
+
+**State:** On `story/US-268`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_editor_test.cpp`), run once at X-M9a; screenshots manual.
+
+- Editor: the NPC panel under the properties of a selected NPC (`Editor::buildNpcPanel`): classes list, attitude, family, dialogue per partner type (`partnerTypes()`, from the class catalog), action ticks (the interactions of the registry, kept in step by `OdysseyGame::syncEditorActions`), Reset to defaults. Model: `setSelectedClasses`, `toggleSelectedClass`, `setSelectedAttitude`, `setSelectedFamily`, `setSelectedDialogue`, `setSelectedActionDenied`, `resetSelectedNpc`: only differences from the classes and the kind are kept, each change is one Undo step, a no-op makes none. Guide extended.
+
 ## US-267: actions and the Actions pop-up (Mraw) - 2026-10-04
 
 **State:** On `story/US-267`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_actions_test.cpp`), run once at X-M9a.

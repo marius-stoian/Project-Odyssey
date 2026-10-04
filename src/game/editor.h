@@ -140,6 +140,22 @@ public:
     bool classDraftIsNew() const { return classNew_; }
     bool saveClass();                         // checks and writes the draft; says why when it cannot
     bool deleteClass();                       // refused, naming the NPCs, while placed NPCs use the class
+    // The NPC panel (US-268): a placed character with a kind file is an NPC. Everything below changes the selected one, each as one step of Undo, and keeps only
+    // the differences from its classes and its kind (a value equal to what it would inherit is not kept). An empty value means "the default".
+    void setActionIds(std::vector<std::string> ids) {
+        actionIds_ = std::move(ids);
+        propertiesStale_ = true;
+    }
+    bool selectedIsNpc() const;
+    void setSelectedClasses(std::vector<std::string> classes);
+    void toggleSelectedClass(const std::string& id);
+    void setSelectedAttitude(const std::string& word);
+    void setSelectedFamily(int family);
+    void setSelectedDialogue(const std::string& partner, const std::string& file);
+    void setSelectedActionDenied(const std::string& id, bool denied);
+    void resetSelectedNpc();
+    // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
+    std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
     void showSettings(bool shown);
 
@@ -204,6 +220,8 @@ private:
     void changeLevel(const std::string& what, Level after);
     void buildSettings();
     void buildClassPanel();
+    void buildNpcPanel(const PlacedCharacter& shown);
+    void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();
     void replaceLevel(Level level, std::filesystem::path file, const std::string& what);
@@ -282,6 +300,9 @@ private:
     bool movingStart_ = false; // the hero start marker is being dragged
     PixelPoint startBefore_;
 
+    std::vector<std::string> actionIds_;           // every interaction of the registry (US-268): the action checkboxes
+    std::unique_ptr<luna::engine::Panel> npcPanel_;
+    int partnerIndex_ = 0;                          // which partner type the dialogue row shows
     NpcClassBook* classBook_ = nullptr;
     bool classesShown_ = false;
     bool classesStale_ = true;

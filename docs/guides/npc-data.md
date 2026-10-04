@@ -183,3 +183,18 @@ Which actions an NPC has is worked out in layers (D-52 Q-08): the **tags** give 
 ```
 
 Write `opinion(npc, hero)` against the bands of the table above (friendly is 10, enchanted 40, lovingly 70, suspicious from -29, wary from -59). Denied actions are not the NPC's actions, so they are not in the pop-up.
+
+## Editor: the NPC panel (US-268)
+
+Select a placed character that has a kind file (the **Select** tool, a click on it): below the properties panel (name, HP, sword) the **NPC panel** opens:
+
+| Part | What it does |
+|---|---|
+| **Classes** | a list of every class with `[x]` for the ones the NPC has; a click ticks or unticks one. Several are allowed. |
+| **Attitude** | a click goes to the next of the nine words; a star means it differs from the kind. |
+| **Family** | a number; persons with the same non-zero family start with the same-family opinion of each other. 0 = none. |
+| **Talks with** / **Script** | one dialogue per partner type: a click on the button goes to the next partner type (the player, animals, the environment, and one `class:<id>` for every NPC class, from data so the list grows with your classes); the field names the `.dlg` script. An empty field is the default. |
+| **Actions** | a tick for every interaction of the registry; click to deny or allow it for this NPC (a denied action is not offered). |
+| **Reset to defaults** | forgets everything this NPC sets itself: it is what its kind says again. |
+
+**Only differences are saved.** A value equal to what the NPC would inherit from its classes and its kind is not written to the level, so changing the kind file later still changes this NPC. Every change is one step of **Undo** (Ctrl+Z); a change that changes nothing is none. An NPC cannot be given *no* class at all: with an empty list it inherits the classes of its kind again (give it a class that does nothing, such as a new empty one, if you need that).
