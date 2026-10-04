@@ -101,6 +101,14 @@ public:
     static constexpr int kHero = 0;
     void setOpinionConfig(const OpinionConfig& config) { opinionConfig_ = config; }
     const OpinionConfig& opinionConfig() const { return opinionConfig_; }
+    // A creature (an animal or a monster, US-262) is not a person but has an attitude to the hero like one: it is registered by the id of its placed
+    // character with its starting attitude, and then holds opinions of the hero like a person does (US-266). It has no needs, memories or age.
+    void addCreature(int id, Attitude attitude) { creatures_[id] = static_cast<std::uint8_t>(attitude); }
+    std::size_t creatureCount() const { return creatures_.size(); }
+    // Whether the id is a person or a creature, so it has an opinion of the hero.
+    bool hasOpinions(int holderId) const { return indexOf(holderId) >= 0 || creatures_.count(holderId) != 0; }
+    // Whether the holder knows the target: they have met, or they are of the same family.
+    bool knows(int holderId, int targetId) const;
     Attitude startAttitude(int holderId) const; // the attitude the person was given at the start
     int opinion(int holderId, int targetId) const;
     Mood mood(int holderId, int targetId) const;
@@ -173,8 +181,10 @@ private:
         std::int32_t lastTalkDay = -1000000;
     };
     static std::uint64_t pairKey(int holderId, int targetId) { return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(holderId)) << 32) | static_cast<std::uint32_t>(targetId); }
-    Pair defaultPair(int holderIndex, int targetId) const;
-    Pair& pairFor(int holderIndex, int holderId, int targetId); // creates the entry from the default when the pair has not met
+    bool holderInfo(int holderId, Attitude& attitude, int& family) const; // a person or a creature; false for anyone else
+    Pair defaultPair(int holderId, int targetId) const;
+    Pair* pairFor(int holderId, int targetId); // creates the entry from the default when the pair has not met; nullptr when the holder is nobody
+    std::unordered_map<int, std::uint8_t> creatures_; // placed id -> starting Attitude
     OpinionConfig opinionConfig_;
     std::unordered_map<std::uint64_t, Pair> pairs_;
 

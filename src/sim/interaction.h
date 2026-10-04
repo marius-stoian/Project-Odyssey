@@ -40,6 +40,7 @@ struct Interaction {
     int rangeMilli = 1500;
     int durationMilli = 0;
     int order = 100; // in a menu, lower comes first
+    std::string menu; // "" for the ordinary menu of a thing, "confront" for the Confront menu of an NPC (US-266)
     std::vector<Requirement> requires_;
     std::vector<Effect> effects;
     std::optional<NpcRule> npc;

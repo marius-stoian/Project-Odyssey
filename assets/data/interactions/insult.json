@@ -1,0 +1,15 @@
+// Confront (US-266): an insult. The target thinks much worse of the hero, and so do the friends who hear it.
+{
+  "id": "insult",
+  "label": "Insult",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 20,
+  "menu": "confront",
+  "effects": [
+    "opinion npc hero -20",
+    "do spread-opinion -5",
+    "remember npc \"{hero} insulted me\" -40"
+  ]
+}

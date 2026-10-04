@@ -2,9 +2,11 @@
 #include "game/odyssey_game.h"
 
 #include "core/log.h"
+#include "game/game_rules.h"
 #include "sim/npc_population.h"
 #include "sim/save.h"
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iterator>
@@ -51,11 +53,88 @@ bool OdysseyGame::fightsHero(const PlacedCharacter& placed) const {
 }
 
 std::string OdysseyGame::attitudeWordOf(int placedId) const {
-    if (const int index = npcPopulation_.indexOf(placedId); index >= 0) return sim::attitudeName(npcPopulation_.attitude(placedId, sim::NpcPopulation::kHero));
+    if (npcPopulation_.hasOpinions(placedId)) return sim::attitudeName(npcPopulation_.attitude(placedId, sim::NpcPopulation::kHero)); // a person or a creature
     for (const PlacedCharacter& placed : level_.characters) {
         if (placed.id == placedId) return npcClasses_.resolve(placed).attitude;
     }
     return "neutral";
+}
+
+// Creatures with a kind file (animals and monsters) hold an opinion of the hero like persons do, from their attitude (US-266).
+void OdysseyGame::registerCreatures() {
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (isPersonKind(placed) || npcClasses_.kinds().find(placed.kind) == nullptr) continue;
+        npcPopulation_.addCreature(placed.id, sim::attitudeFromName(npcClasses_.resolve(placed).attitude).value_or(sim::Attitude::Neutral));
+    }
+}
+
+bool OdysseyGame::startFight(int placedId) {
+    for (Enemy& enemy : enemies_) {
+        if (enemy.id == placedId && enemy.isAlive()) {
+            enemy.provoke();
+            return true;
+        }
+    }
+    for (auto it = bystanders_.begin(); it != bystanders_.end(); ++it) {
+        if (it->id != placedId) continue;
+        const CharacterKindDef* kind = definitions_.character(it->kind);
+        if (kind == nullptr) return false;
+        Enemy enemy(it->feet.x, it->feet.y, it->hp);
+        enemy.id = it->id;
+        enemy.name = it->name;
+        enemy.frames = kind->frames;
+        enemy.directions = kind->directions;
+        enemy.animal = kind->animal;
+        enemy.kindName = kind->name;
+        enemy.facing = it->facing;
+        enemy.swordDamage = it->swordDamage;
+        enemy.reachMetres = kind->reach;
+        enemy.provoke();
+        enemies_.push_back(enemy);
+        bystanders_.erase(it);
+        return true;
+    }
+    return false;
+}
+
+bool OdysseyGame::calmFight(int placedId) {
+    for (Enemy& enemy : enemies_) {
+        if (enemy.id == placedId && enemy.isAlive()) {
+            enemy.calm();
+            return true;
+        }
+    }
+    return false;
+}
+
+void OdysseyGame::confrontKey(const luna::engine::Pointer& pointer) {
+    constexpr double kReach = 6.0 * kTileSize;
+    std::optional<Subject> chosen;
+    const auto isNpc = [](const Subject& subject) { return std::find(subject.info.tags.begin(), subject.info.tags.end(), "npc") != subject.info.tags.end(); };
+    if (pointer.inside()) {
+        const luna::engine::Rect view = camera_.view();
+        if (auto under = subjectAt(*this, view.x + pointer.x, view.y + pointer.y); under && isNpc(*under)) chosen = std::move(under);
+    }
+    if (!chosen) {
+        double best = kReach + 1.0;
+        const auto consider = [&](std::optional<Subject> subject) {
+            if (!subject || !isNpc(*subject)) return;
+            const double distance = std::hypot(subject->x - hero_.feetX(), subject->y - hero_.feetY());
+            if (distance < best) {
+                best = distance;
+                chosen = std::move(subject);
+            }
+        };
+        for (const int index : npcPopulation_.near(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY()), static_cast<int>(kReach))) consider(npcSubject(*this, npcPopulation_.id(index)));
+        for (std::size_t i = 0; i < enemies_.size(); ++i) {
+            if (enemies_[i].isAlive()) consider(animalSubject(*this, i));
+        }
+    }
+    if (!chosen) {
+        say("There is no one to confront here.");
+        return;
+    }
+    runFlow_.openConfront(*this, *chosen);
 }
 
 void OdysseyGame::buildNpcPopulation() {
@@ -70,6 +149,7 @@ void OdysseyGame::buildNpcPopulation() {
         const sim::Attitude start = sim::attitudeFromName(npcClasses_.resolve(placed).attitude).value_or(sim::Attitude::Neutral);
         npcPopulation_.add(placed.id, placed.kind, age, placed.family, placed.feet.x, placed.feet.y, start);
     }
+    registerCreatures();
 }
 
 // One game tick of the placed people: the clock of their days, and meeting the hero (found through the grid, so a crowd costs nothing here).
@@ -115,6 +195,7 @@ std::string OdysseyGame::loadNpcPopulation() {
                 npcPopulation_.add(placed.id, placed.kind, kStartAgeYears * daysPerYear, placed.family, placed.feet.x, placed.feet.y, start);
             }
         }
+        registerCreatures(); // creatures the save did not know (the level gained them)
         return {};
     } catch (const std::exception& error) {
         return std::string("The saved people could not be read: ") + error.what();

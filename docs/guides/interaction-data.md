@@ -118,6 +118,10 @@ A `do` that names anything the game does not have is an error at load (`do names
 | `open-barter` | opens the barter screen with a rival camp |
 | `restore <need> <amount>` | raises the hero's need (hunger, energy, warmth or social): `do restore energy 40` |
 | `warm-nearby <tiles> <amount>` | warmth for everyone within that many tiles of the thing, the hero too: `do warm-nearby 6 25` |
+| `confront` | opens the Confront menu of the NPC (US-266); `do confront` is the "Confront..." entry of the right-click menu |
+| `spread-opinion <amount>` | the persons within the hearing range (`hearingTiles` of opinions.json) who know the target (they have met it, or are of its family) think `amount` more of the hero (negative: less): `do spread-opinion -5` |
+| `calm <gain> <percent>` | a roll against `percent` in 100: on success the NPC stops winding up to strike and thinks `gain` better of the hero; else it will not listen: `do calm 15 70` |
+| `provoke` | the NPC picks a fight: an enemy winds up to strike, a peaceful person becomes an enemy |
 | `graze` | for animals: stay at the grass for the length of the action, nothing else |
 | `flee` | for animals: run about 8 m directly away from the thing |
 
@@ -185,6 +189,7 @@ You may write `//` and `/* ... */` comments anywhere. The in-game Editor (M9) ke
 | `npc` | no | How clan members and animals choose it on their own: `score` (an expression; higher wins) and `cooldown` (seconds before they do it again). |
 | `chronicle` | no | A line for the clan's chronicle, or `null`. Tokens like `{actor.name}` are allowed. |
 | `order` | no | Menu position, 0 to 1000, lower first. Default 100. |
+| `menu` | no | `"confront"` puts the interaction in the Confront menu of an NPC (US-266) instead of the ordinary right-click menu. Leave it out for an ordinary action. |
 | `note` | no | Your own words. Kept when the Editor saves. |
 
 Any other field is an error (`unknown field "efects"`), which catches typos.

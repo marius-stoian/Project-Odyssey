@@ -1,0 +1,10 @@
+// The way into the Confront menu from the right-click menu of an NPC (US-266). The key C opens the same menu.
+{
+  "id": "confront",
+  "label": "Confront...",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 90,
+  "effects": [ "do confront" ]
+}

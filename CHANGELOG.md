@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-266: confront (Mraw) - 2026-10-04
+
+**State:** On `story/US-266`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_confront_test.cpp`), run once at X-M9a.
+
+- New interaction field `menu: "confront"` (`src/sim/interaction.*`); five confront files and `confront.json` in `assets/data/interactions/`; built-ins `confront`, `spread-opinion`, `calm`, `provoke`. `RunFlow::openConfront` lists only the confront actions; the ordinary menu skips them. New intents `Confront` (key C) and `Actions` (key X, used by US-267); `OdysseyGame::confrontKey`.
+- Creatures with a kind file are NPCs too: they appear in `subjectAt` (tag `npc`), keep an opinion of the hero (`NpcPopulation::addCreature`), can be calmed (`Enemy::calm`) or provoked; a peaceful person can become an enemy (`startFight`). `hearingTiles` in `opinions.json`; `NpcPopulation::knows`. Guides extended.
+
 ## US-265: talk with placed NPCs (Mraw) - 2026-10-04
 
 **State:** On `story/US-265`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_talk_test.cpp`), run once at X-M9a.

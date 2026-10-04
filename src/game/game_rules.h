@@ -53,6 +53,8 @@ Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex);
 // A placed person of the level (US-265): tags are the resolved tags of its classes, kind and own fields, plus "npc" and, when it has a dialogue for the
 // player, "speaks". Empty when the id is not a placed person.
 std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId);
+// The id of the placed character a subject is (a placed person or a creature), or -1 for anything else (US-266).
+int placedIdOf(const OdysseyGame& game, const Subject& subject);
 Subject animalSubject(const OdysseyGame& game, std::size_t enemyIndex); // a placed animal or character (tags: animal, prey or hostile)
 Subject heroSubject(const OdysseyGame& game);                           // tags: hero, person, and armed and/or moving (D-36: prey flee those)
 

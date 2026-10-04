@@ -92,6 +92,14 @@ public:
     const luna::engine::Camera& camera() const { return camera_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
+    std::vector<Enemy>& enemiesMutable() { return enemies_; } // for tests and the confrontations of NPCs (US-266)
+    // A fight (US-266): the placed character with this id strikes back (an enemy winds up; a person who stood by becomes an enemy). False when there is no
+    // such character.
+    bool startFight(int placedId);
+    // The fight ends for now: an enemy stops winding up. False when the id is no enemy.
+    bool calmFight(int placedId);
+    // The Confront key (US-266): the NPC under the pointer, else the nearest within 6 m, gets the menu of its confront actions.
+    void confrontKey(const luna::engine::Pointer& pointer);
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }
@@ -274,6 +282,7 @@ public:
     std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
     void buildNpcPopulation();
+    void registerCreatures();
     void tickNpcPopulation();
     std::string loadNpcPopulation(); // the problem, or empty
     luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)

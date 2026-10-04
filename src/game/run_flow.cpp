@@ -450,13 +450,22 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
     // for it (US-152). The menu is made entirely from data: labels, disabled reasons and order come from the files.
     const std::optional<Subject> subject = subjectAt(game, wx, wy);
     if (!subject) return false;
-    if (!inRun && subject->kind != Subject::Kind::Npc) return false; // outside a run only the placed people of a level have a menu (US-265)
-    contextTitle_ = subject->title;
-    const GameRuleContext context(game, *subject);
-    for (const sim::rules::Offer& offer : game.offersFor(*subject)) {
+    const bool placed = subject->kind == Subject::Kind::Npc || (subject->kind == Subject::Kind::Animal && placedIdOf(game, *subject) >= 0);
+    if (!inRun && !placed) return false; // outside a run only the placed people and creatures of a level have a menu (US-265)
+    return openMenuFor(game, *subject, false);
+}
+
+bool RunFlow::openConfront(OdysseyGame& game, const Subject& subject) { return openMenuFor(game, subject, true); }
+
+bool RunFlow::openMenuFor(OdysseyGame& game, const Subject& subject, bool confront) {
+    actions_.clear();
+    contextTitle_ = confront ? "Confront " + subject.title : subject.title;
+    const GameRuleContext context(game, subject);
+    for (const sim::rules::Offer& offer : game.offersFor(subject)) {
+        if ((offer.interaction->menu == "confront") != confront) continue; // the confront actions have their own menu, and Talk is not in it
         const std::string id = offer.interaction->id; // by id: the data may be reloaded (F5) while the menu is open
         actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), offer.enabled ? std::string() : offer.reason,
-                            [id, subject = *subject](OdysseyGame& g) {
+                            [id, subject](OdysseyGame& g) {
                                 if (!startInteraction(g, id, subject)) g.run().setMessage("That action is no longer in the data.");
                             }});
     }

@@ -80,6 +80,7 @@ OpinionConfig loadOpinionConfig(const std::filesystem::path& file) {
         }
     }
     if (data.contains("sameFamily")) config.sameFamily = requireInt(data, file, "sameFamily", -200, 200);
+    if (data.contains("hearingTiles")) config.hearingTiles = requireInt(data, file, "hearingTiles", 1, 60);
     if (data.contains("talk")) {
         const nlohmann::json& talk = data.at("talk");
         if (!talk.is_object()) throw DataError(file, "talk", "must be an object");

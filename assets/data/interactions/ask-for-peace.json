@@ -1,0 +1,15 @@
+// Confront (US-266): an offer of peace; it warms the target a little and those who hear it a very little.
+{
+  "id": "ask-for-peace",
+  "label": "Ask for peace",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 30,
+  "menu": "confront",
+  "effects": [
+    "opinion npc hero 5",
+    "do spread-opinion 1",
+    "remember npc \"{hero} asked for peace\" 10"
+  ]
+}

@@ -155,3 +155,17 @@ Right-click a placed person (a person of the level, not a creature): the menu ti
 A placed NPC carries the tags of its classes, its kind and itself, plus `npc` and, when it has a dialogue for the player, `speaks`. `talk.json` targets the tag `speaks`, which clan members carry too. Give a script an `@who` that nobody has (`@who npc-trader`) so no clan member is ever given it.
 
 In the script of a placed NPC: `opinion(npc, hero)` is what it thinks of the hero (-100 to 100), `mood(npc)` is its attitude word, `{opinion npc hero 5}` changes it and `{remember npc "{hero} was kind" 20}` gives it a memory (see the dialogue format guide). Other `opinion` pairs read 0 for a placed person.
+
+## Confront (US-266)
+
+**Confront** is its own menu for every NPC, hostile ones included: the key **C** (the NPC under the pointer, else the nearest within 6 m) or **Confront...** in the right-click menu. It lists the interactions with `"menu": "confront"`, and only those; the ordinary menu (Talk and the rest) never lists them. Five ship, in `assets/data/interactions/`:
+
+| Action | Effects of its file | Notes |
+|---|---|---|
+| `taunt` | opinion of the hero -10, friends who hear it -2, a memory | a jeer |
+| `insult` | -20, friends -5, a memory | |
+| `ask-for-peace` | +5, friends +1, a memory | |
+| `antagonise` | -30, friends -8, a memory, `do provoke` | starts a fight |
+| `de-escalate` | `do calm 15 70`, friends +2 | 70 in 100: stops an attack, +15 |
+
+Every amount is in the file: change it and press **F5**. `opinion npc hero -20` changes what the target thinks of the hero; `do spread-opinion -5` makes everyone within `hearingTiles` (12, in `opinions.json`) who **knows** the target (they have met it or are of its family) think `-5` of the hero too. A creature with a kind file (a goblin, a deer) is an NPC too and keeps an opinion of the hero from its starting attitude. Add your own confront action with a new file that says `"menu": "confront"` and targets `npc`. NPCs may confront each other later (US-292).

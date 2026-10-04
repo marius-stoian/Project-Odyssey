@@ -1523,3 +1523,27 @@ A clan member and a placed trader both carry `speaks`, so the same `talk.json` s
 **Try it (15 minutes).** Give the `elder` class `"dialogues": { "player": "greet-elder.dlg" }` and talk to a placed elder.
 
 **Check yourself.** Why do placed NPCs not carry the tag `person`?
+
+## US-266 Confront: intents mapped from keys, and effects that spread to bystanders
+
+**What we built.** A separate Confront menu (key C, or an entry in the right-click menu) with five ways to deal with an NPC by words: taunt, insult, ask for peace, antagonise, de-escalate. They change what the target and its friends think of the hero, and can start or stop a fight.
+
+**The C++ idea: intents and spreading effects.** The game never asks "was the C key pressed?". The platform layer turns a key into an *intent*, and the game reacts to the intent:
+
+```cpp
+case Key::C: return KeyBinding{Intent::Confront, kKeyboardA};
+...
+if (intents.pressed(luna::engine::Intent::Confront)) confrontKey(worldIntents.pointer());
+```
+
+So a gamepad button or a touch can later be bound to the same intent without touching the game. An effect that spreads (`do spread-opinion -5`) asks the grid for the persons near the target and changes only those who know it:
+
+```cpp
+for (const int index : people.near(x, y, range)) if (people.knows(id, placedId)) people.adjust(id, kHero, amount);
+```
+
+**Where to look.** `confrontKey` in `src/game/npc_people.cpp`; the `do` built-ins in `src/game/builtin_actions.cpp`; `assets/data/interactions/insult.json`.
+
+**Try it (15 minutes).** Copy `insult.json` to `shout.json`, change the id, label and amounts, press F5 and see it in the Confront menu.
+
+**Check yourself.** Why does the hearing range use the grid instead of looping over every person?

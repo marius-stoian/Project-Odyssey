@@ -196,42 +196,66 @@ NpcPopulation::Note NpcPopulation::note(int index, int which) const {
     return {stored.day, texts_[static_cast<std::size_t>(stored.text)], stored.feeling};
 }
 
-NpcPopulation::Pair NpcPopulation::defaultPair(int holderIndex, int targetId) const {
+bool NpcPopulation::holderInfo(int holderId, Attitude& attitude, int& family) const {
+    if (const int index = indexOf(holderId); index >= 0) {
+        attitude = static_cast<Attitude>(attitudes_[at(index)]);
+        family = families_[at(index)];
+        return true;
+    }
+    if (const auto creature = creatures_.find(holderId); creature != creatures_.end()) {
+        attitude = static_cast<Attitude>(creature->second);
+        family = 0;
+        return true;
+    }
+    return false;
+}
+
+NpcPopulation::Pair NpcPopulation::defaultPair(int holderId, int targetId) const {
     Pair pair;
+    Attitude start = Attitude::Neutral;
+    int family = 0;
+    if (!holderInfo(holderId, start, family)) return pair;
     if (targetId == kHero) {
-        const Attitude start = static_cast<Attitude>(attitudes_[at(holderIndex)]);
         pair.opinion = static_cast<std::int16_t>(startOpinion(opinionConfig_, start));
         pair.mood = static_cast<std::uint8_t>(startMood(start));
         return pair;
     }
     const int other = indexOf(targetId);
-    if (other >= 0 && families_[at(holderIndex)] != 0 && families_[at(holderIndex)] == families_[at(other)]) pair.opinion = static_cast<std::int16_t>(opinionConfig_.sameFamily);
+    if (other >= 0 && family != 0 && family == families_[at(other)]) pair.opinion = static_cast<std::int16_t>(opinionConfig_.sameFamily);
     return pair;
 }
 
-NpcPopulation::Pair& NpcPopulation::pairFor(int holderIndex, int holderId, int targetId) {
+NpcPopulation::Pair* NpcPopulation::pairFor(int holderId, int targetId) {
     const auto found = pairs_.find(pairKey(holderId, targetId));
-    if (found != pairs_.end()) return found->second;
-    return pairs_.emplace(pairKey(holderId, targetId), defaultPair(holderIndex, targetId)).first->second;
+    if (found != pairs_.end()) return &found->second;
+    Attitude start = Attitude::Neutral;
+    int family = 0;
+    if (!holderInfo(holderId, start, family)) return nullptr;
+    return &pairs_.emplace(pairKey(holderId, targetId), defaultPair(holderId, targetId)).first->second;
+}
+
+bool NpcPopulation::knows(int holderId, int targetId) const {
+    if (met(holderId, targetId)) return true;
+    const int holder = indexOf(holderId);
+    const int target = indexOf(targetId);
+    return holder >= 0 && target >= 0 && families_[at(holder)] != 0 && families_[at(holder)] == families_[at(target)];
 }
 
 Attitude NpcPopulation::startAttitude(int holderId) const {
-    const int index = indexOf(holderId);
-    return index < 0 ? Attitude::Neutral : static_cast<Attitude>(attitudes_[at(index)]);
+    Attitude start = Attitude::Neutral;
+    int family = 0;
+    holderInfo(holderId, start, family);
+    return start;
 }
 
 int NpcPopulation::opinion(int holderId, int targetId) const {
-    const int index = indexOf(holderId);
-    if (index < 0) return 0;
     const auto found = pairs_.find(pairKey(holderId, targetId));
-    return found != pairs_.end() ? found->second.opinion : defaultPair(index, targetId).opinion;
+    return found != pairs_.end() ? found->second.opinion : defaultPair(holderId, targetId).opinion;
 }
 
 Mood NpcPopulation::mood(int holderId, int targetId) const {
-    const int index = indexOf(holderId);
-    if (index < 0) return Mood::None;
     const auto found = pairs_.find(pairKey(holderId, targetId));
-    return static_cast<Mood>(found != pairs_.end() ? found->second.mood : defaultPair(index, targetId).mood);
+    return static_cast<Mood>(found != pairs_.end() ? found->second.mood : defaultPair(holderId, targetId).mood);
 }
 
 Attitude NpcPopulation::attitude(int holderId, int targetId) const { return attitudeFor(opinionConfig_, opinion(holderId, targetId), mood(holderId, targetId)); }
@@ -239,35 +263,31 @@ Attitude NpcPopulation::attitude(int holderId, int targetId) const { return atti
 bool NpcPopulation::met(int holderId, int targetId) const { return pairs_.find(pairKey(holderId, targetId)) != pairs_.end(); }
 
 int NpcPopulation::adjust(int holderId, int targetId, int delta) {
-    const int index = indexOf(holderId);
-    if (index < 0) return 0;
-    Pair& pair = pairFor(index, holderId, targetId);
-    pair.opinion = static_cast<std::int16_t>(std::clamp(pair.opinion + delta, OpinionConfig::kMin, OpinionConfig::kMax));
-    return pair.opinion;
+    Pair* pair = pairFor(holderId, targetId);
+    if (pair == nullptr) return 0;
+    pair->opinion = static_cast<std::int16_t>(std::clamp(pair->opinion + delta, OpinionConfig::kMin, OpinionConfig::kMax));
+    return pair->opinion;
 }
 
 void NpcPopulation::setMood(int holderId, int targetId, Mood mood) {
-    const int index = indexOf(holderId);
-    if (index < 0) return;
-    pairFor(index, holderId, targetId).mood = static_cast<std::uint8_t>(mood);
+    if (Pair* pair = pairFor(holderId, targetId)) pair->mood = static_cast<std::uint8_t>(mood);
 }
 
 bool NpcPopulation::event(int holderId, int targetId, std::string_view name) {
     const auto found = opinionConfig_.events.find(std::string(name));
-    if (found == opinionConfig_.events.end() || indexOf(holderId) < 0) return false;
+    if (found == opinionConfig_.events.end() || !hasOpinions(holderId)) return false;
     adjust(holderId, targetId, found->second);
     return true;
 }
 
 void NpcPopulation::talked(int holderId, int targetId, int quality) {
-    const int index = indexOf(holderId);
-    if (index < 0) return;
-    Pair& pair = pairFor(index, holderId, targetId);
+    Pair* pair = pairFor(holderId, targetId);
+    if (pair == nullptr) return;
     int amount = opinionConfig_.talk[static_cast<std::size_t>(std::clamp(quality, -2, 2) + 2)];
     const std::int32_t today = static_cast<std::int32_t>(day());
-    if (today - pair.lastTalkDay <= opinionConfig_.talkFrequencyDays) amount += opinionConfig_.talkFrequencyBonus; // talking often counts for something
-    pair.lastTalkDay = today;
-    pair.opinion = static_cast<std::int16_t>(std::clamp(pair.opinion + amount, OpinionConfig::kMin, OpinionConfig::kMax));
+    if (today - pair->lastTalkDay <= opinionConfig_.talkFrequencyDays) amount += opinionConfig_.talkFrequencyBonus; // talking often counts for something
+    pair->lastTalkDay = today;
+    pair->opinion = static_cast<std::int16_t>(std::clamp(pair->opinion + amount, OpinionConfig::kMin, OpinionConfig::kMax));
 }
 
 std::uint64_t NpcPopulation::hash() const {
@@ -295,7 +315,13 @@ std::uint64_t NpcPopulation::hash() const {
     for (const std::string& kind : kindNames_) {
         for (const char c : kind) mix(h, static_cast<unsigned char>(c));
     }
-    // The opinions, in key order (the map has none of its own that matters).
+    // The creatures and the opinions, in key order (the maps have none of their own that matters).
+    std::vector<std::pair<int, std::uint8_t>> creatures(creatures_.begin(), creatures_.end());
+    std::sort(creatures.begin(), creatures.end());
+    for (const auto& [id, attitude] : creatures) {
+        mix(h, static_cast<std::uint64_t>(id));
+        mix(h, attitude);
+    }
     std::vector<std::pair<std::uint64_t, Pair>> sorted(pairs_.begin(), pairs_.end());
     std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
     for (const auto& [key, pair] : sorted) {
@@ -337,6 +363,16 @@ std::string NpcPopulation::toText() const {
             out += ',';
             append(out, stored.feeling);
         }
+        out += ']';
+    }
+    out += "],\"creatures\":[";
+    std::vector<std::pair<int, std::uint8_t>> creatures(creatures_.begin(), creatures_.end());
+    std::sort(creatures.begin(), creatures.end());
+    for (std::size_t i = 0; i < creatures.size(); ++i) {
+        out += i == 0 ? "[" : ",[";
+        append(out, creatures[i].first);
+        out += ',';
+        append(out, creatures[i].second);
         out += ']';
     }
     out += "],\"opinions\":[";
@@ -398,6 +434,12 @@ NpcPopulation NpcPopulation::fromText(std::string_view text, CalendarConfig cale
             }
             population.noteCounts_[person] = static_cast<std::uint8_t>(count);
             population.noteHeads_[person] = static_cast<std::uint8_t>(count % kNotesPerPerson);
+        }
+        if (data.contains("creatures")) {
+            for (const json& entry : data.at("creatures")) {
+                if (entry.size() != 2) throw DataError(file, "creatures", "a creature needs two numbers");
+                population.addCreature(entry.at(0).get<int>(), static_cast<Attitude>(std::clamp(entry.at(1).get<int>(), 0, static_cast<int>(kAttitudeCount) - 1)));
+            }
         }
         if (data.contains("opinions")) {
             for (const json& entry : data.at("opinions")) {
