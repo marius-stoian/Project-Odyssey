@@ -1585,3 +1585,22 @@ Every setter goes through `changeCharacters`, which makes one `Command` that rem
 **Try it (15 minutes).** Change the attitude of a goblin to friendly and press F1: the menu title shows it. Then edit `goblin.json` and see that a goblin with no override follows the file.
 
 **Check yourself.** Why does choosing the attitude the kind already has remove the field from the level instead of writing it?
+
+## US-269 Editor kinds tab and markers: one form for two data sources, and pictures made on demand
+
+**What we built.** The Class panel got a second tab, Kinds, that edits the defaults of a whole kind (`assets/data/npcs/goblin.json`); and under every placed NPC the Editor now draws a ring in its class colour with the class icon.
+
+**The C++ idea: the same widgets over a different draft.** The class tab edits a `NpcClass` draft, the kind tab edits a `NpcKind` draft, and both fill their text fields through the same two small helpers, so a mistake in the Talk line is handled in one place:
+
+```cpp
+if (const auto parsed = parseDialogues(v)) kindDraft_.layer.dialogues = *parsed;
+else say("talk is partner=file.dlg, for example player=greet.dlg");
+```
+
+The JSON stays stable (same fields, same order every time) because `toJson` writes the fields in a fixed order instead of looping over a map: saving twice gives byte-identical files and a clean diff. The marker pictures are made the first time they are drawn and kept in a `std::map` keyed by icon and colours, so ten goblins cost one texture.
+
+**Where to look.** `Editor::buildKindForm`, `Editor::markerTexture` in `src/game/editor.cpp`; `src/game/npc_marker.cpp` (the 24 icons are 8 strings of 8 characters); `tests/game/npc_kinds_tab_test.cpp`.
+
+**Try it (15 minutes).** Change the icon bitmap of `star` in `npc_marker.cpp` and see it in the ring of an elder.
+
+**Check yourself.** Why does saving a kind change a placed goblin that has no attitude of its own but not one that has?

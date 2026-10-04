@@ -262,6 +262,7 @@ add_library(odysseus_game STATIC
     src/game/level.cpp
     src/game/editor.cpp
     src/game/npc_class_book.cpp
+    src/game/npc_marker.cpp
     src/game/npc_people.cpp
     src/game/editor_history.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
@@ -425,6 +426,7 @@ add_executable(odysseus_game_tests
     tests/game/npc_confront_test.cpp
     tests/game/npc_actions_test.cpp
     tests/game/npc_editor_test.cpp
+    tests/game/npc_kinds_tab_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp

@@ -36,6 +36,9 @@ public:
     // Writes the class to <folder>/<id>.json and reads the folder again. Returns the problem, or nullopt when it is saved.
     std::optional<std::string> save(const sim::rules::NpcClass& npcClass);
 
+    // Writes the kind file <kindsFolder>/<kind>.json (US-269) and reads the kind files again. Returns the problem, or nullopt when it is saved.
+    std::optional<std::string> saveKind(const sim::rules::NpcKind& kind);
+
     // Names of the placed NPCs of the level that have this class.
     static std::vector<std::string> usersOf(const std::string& id, const Level& level);
     // Deletes the file of the class. Refused (returns the reason, naming every NPC that uses it) while placed NPCs have it.

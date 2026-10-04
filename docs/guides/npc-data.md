@@ -198,3 +198,11 @@ Select a placed character that has a kind file (the **Select** tool, a click on 
 | **Reset to defaults** | forgets everything this NPC sets itself: it is what its kind says again. |
 
 **Only differences are saved.** A value equal to what the NPC would inherit from its classes and its kind is not written to the level, so changing the kind file later still changes this NPC. Every change is one step of **Undo** (Ctrl+Z); a change that changes nothing is none. An NPC cannot be given *no* class at all: with an empty list it inherits the classes of its kind again (give it a class that does nothing, such as a new empty one, if you need that).
+
+## Editor: the Kinds tab and the markers (US-269)
+
+The **Class** panel has a second tab, **Kinds**. It lists every character and animal kind (not the hero) and edits `assets/data/npcs/<kind>.json` with the same rows as the NPC panel of one NPC: **classes** (click to tick), **Attitude** (click for the next word, after the last one comes `(none)`), **Tags**, **Talk** (`player=greet.dlg, class:guard=x.dlg`), **Allow**, **Deny**. **Save** checks the kind, writes its file at once and makes every placed NPC of that kind follow it, in the Editor and in play (F1), unless that NPC sets the value itself (a placed NPC always wins, see Precedence). A kind with no file shows `(no file)` and gets one when saved. A kind with no class ticked has no `classes` field. Fields are written in the order of the table above, so saving the same kind twice gives the same file; an unknown attitude, a bad Talk line or an unknown field is refused with the reason and the file is not touched.
+
+**Markers.** In the Editor (never in play) every placed NPC that has at least one class with a file shows a marker just under its feet: a ring in the class `colour` and the class `icon` inside it. With several classes the ring is split in equal arcs, one per class in the NPC's order, starting at the top and going clockwise; the icon is the first class's. A kind or an NPC with no class has no marker.
+
+Example: a goblin with `"classes": ["monster"]` shows a red ring and a skull; a trader who is also an elder shows a ring half gold, half blue, and a coin.

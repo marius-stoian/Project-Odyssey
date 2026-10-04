@@ -74,6 +74,31 @@ std::optional<std::string> NpcClassBook::save(const sim::rules::NpcClass& npcCla
     return std::nullopt;
 }
 
+std::optional<std::string> NpcClassBook::saveKind(const sim::rules::NpcKind& kind) {
+    if (kindsFolder_.empty()) return std::string("there is no folder for kind files");
+    sim::rules::LoadReport check;
+    const std::string text = sim::rules::toJson(kind);
+    if (!sim::rules::NpcKindCatalog::parse(text, "npcs/" + kind.kind + ".json", check, kind.kind)) {
+        return check.errors.empty() ? std::string("the kind is not valid") : check.errors.front().text();
+    }
+    std::error_code ec;
+    std::filesystem::create_directories(kindsFolder_, ec);
+    const std::filesystem::path file = kindsFolder_ / (kind.kind + ".json");
+    const std::filesystem::path temporary = std::filesystem::path(file.string() + ".tmp");
+    {
+        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
+        if (!out) return std::format("{} cannot be written", file.generic_string());
+        out << text;
+        out.flush();
+        if (!out) return std::format("{} could not be written completely (is the disk full?)", file.generic_string());
+    }
+    std::filesystem::rename(temporary, file, ec);
+    if (ec) return std::format("{} cannot be replaced: {}", file.generic_string(), ec.message());
+    sim::rules::LoadReport report;
+    kinds_ = sim::rules::NpcKindCatalog::load(kindsFolder_, report);
+    return std::nullopt;
+}
+
 std::vector<std::string> NpcClassBook::usersOf(const std::string& id, const Level& level) {
     std::vector<std::string> names;
     for (const PlacedCharacter& placed : level.characters) {
