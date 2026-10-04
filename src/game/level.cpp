@@ -343,6 +343,14 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
         placed.name = text(entry, file, "name");
         placed.hp = whole(entry, file, "hp", 1, 9999);
         placed.swordDamage = whole(entry, file, "swordDamage", 0, 999);
+        if (entry.contains("classes")) { // level version 4 (US-260); older files have none
+            if (!entry.at("classes").is_array()) throw DataError(file, where + ".classes", "must be a list of class names");
+            for (std::size_t c = 0; c < entry.at("classes").size(); ++c) {
+                const json& name = entry.at("classes").at(c);
+                if (!name.is_string() || name.get<std::string>().empty()) throw DataError(file, std::format("{}.classes[{}]", where, c), "must be a class name in quotes");
+                placed.classes.push_back(name.get<std::string>());
+            }
+        }
         level.characters.push_back(placed);
     }
     if (data.contains("pickups")) { // level version 2 (US-134); a version 1 file has none
@@ -473,8 +481,10 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     }
     json characters = json::array();
     for (const PlacedCharacter& c : level.characters) {
-        characters.push_back({{"id", c.id}, {"kind", c.kind}, {"x", c.feet.x}, {"y", c.feet.y}, {"facing", facingCode(c.facing)},
-                              {"name", c.name}, {"hp", c.hp}, {"swordDamage", c.swordDamage}});
+        json entry{{"id", c.id}, {"kind", c.kind}, {"x", c.feet.x}, {"y", c.feet.y}, {"facing", facingCode(c.facing)},
+                   {"name", c.name}, {"hp", c.hp}, {"swordDamage", c.swordDamage}};
+        if (!c.classes.empty()) entry["classes"] = c.classes; // written only when there are some, so older levels stay as they were
+        characters.push_back(entry);
     }
     json pickups = json::array();
     for (const PlacedPickup& p : level.pickups) pickups.push_back({{"id", p.id}, {"weapon", p.weapon}, {"x", p.at.x}, {"y", p.at.y}});

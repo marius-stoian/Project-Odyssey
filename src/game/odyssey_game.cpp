@@ -83,7 +83,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       camera_(kVirtualWidth / GameSettings{}.cameraZoom, kVirtualHeight / GameSettings{}.cameraZoom, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
-      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes") {
+    editor_.setNpcClasses(&npcClasses_);
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -1750,7 +1751,10 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
-    if (intents.pressed(luna::engine::Intent::Reload)) reloadInteractions();
+    if (intents.pressed(luna::engine::Intent::Reload)) {
+        reloadInteractions();
+        if (npcClasses_.reload()) editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
+    }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
     } else if (intents.pressed(luna::engine::Intent::ModeGame)) {

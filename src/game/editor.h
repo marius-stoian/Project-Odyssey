@@ -15,6 +15,8 @@
 #include "luna/engine/tile_map.h"
 #include "luna/engine/ui.h"
 
+#include "game/npc_class_book.h"
+
 #include <filesystem>
 #include <functional>
 #include <memory>
@@ -126,6 +128,18 @@ public:
     void setLevelSize(int width, int height);  // keeps painted cells; drops characters outside
     void setDefaultGround(int tile);
     void moveHeroStart(PixelPoint feet);
+    // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
+    // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
+    void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
+    void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
+    bool classesShown() const { return classesShown_; }
+    void showClasses(bool shown);
+    void newClass();                          // a blank draft; Save writes it
+    void selectClass(const std::string& id);  // the draft is a copy of this class
+    sim::rules::NpcClass& classDraft() { return classDraft_; }
+    bool classDraftIsNew() const { return classNew_; }
+    bool saveClass();                         // checks and writes the draft; says why when it cannot
+    bool deleteClass();                       // refused, naming the NPCs, while placed NPCs use the class
     bool settingsShown() const { return settingsShown_; }
     void showSettings(bool shown);
 
@@ -189,6 +203,7 @@ private:
     std::pair<int, int> toWorld(int screenX, int screenY) const;
     void changeLevel(const std::string& what, Level after);
     void buildSettings();
+    void buildClassPanel();
     void buildOpenList();
     void buildQuestion();
     void replaceLevel(Level level, std::filesystem::path file, const std::string& what);
@@ -267,6 +282,13 @@ private:
     bool movingStart_ = false; // the hero start marker is being dragged
     PixelPoint startBefore_;
 
+    NpcClassBook* classBook_ = nullptr;
+    bool classesShown_ = false;
+    bool classesStale_ = true;
+    bool classNew_ = false;
+    sim::rules::NpcClass classDraft_;
+    std::string classSelected_;
+    std::unique_ptr<luna::engine::Panel> classes_;
     bool settingsShown_ = false;
     bool settingsStale_ = false;
     std::unique_ptr<luna::engine::Panel> settings_;

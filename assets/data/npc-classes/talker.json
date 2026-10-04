@@ -1,0 +1,9 @@
+{
+  "id": "talker",
+  "label": "Talker",
+  "colour": "#5fa8d3",
+  "icon": "book",
+  "tags": ["talker"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}

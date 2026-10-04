@@ -181,6 +181,7 @@ add_library(odysseus_sim STATIC
     src/sim/rule_expr.cpp
     src/sim/rule_effect.cpp
     src/sim/interaction.cpp
+    src/sim/npc_class.cpp
     src/sim/action_runner.cpp
     src/sim/npc_chooser.cpp
     src/sim/dialogue_script.cpp
@@ -257,6 +258,7 @@ add_library(odysseus_game STATIC
     src/game/session_stats.cpp
     src/game/level.cpp
     src/game/editor.cpp
+    src/game/npc_class_book.cpp
     src/game/editor_history.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
@@ -411,6 +413,7 @@ add_executable(odysseus_game_tests
     tests/game/weather_test.cpp
     tests/game/weather_light_test.cpp
     tests/game/lighting_editor_test.cpp
+    tests/game/npc_class_editor_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -465,6 +468,7 @@ add_executable(odysseus_sim_tests
     tests/sim/region_test.cpp
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
+    tests/sim/npc_class_test.cpp
     tests/sim/runner_test.cpp
     tests/sim/dialogue_test.cpp
     tests/sim/conversation_test.cpp

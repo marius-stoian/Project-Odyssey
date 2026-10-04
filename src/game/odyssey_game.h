@@ -45,6 +45,7 @@
 #include "sim/flag_store.h"
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
+#include "game/npc_class_book.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -95,6 +96,8 @@ public:
     // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
     const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
     const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    NpcClassBook& npcClasses() { return npcClasses_; }
+    const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
     // same report and panel (as "dialogue/<name>.dlg:<line>: message").
     const sim::rules::DialogueLibrary& dialogues() const { return dialogues_; }
@@ -352,6 +355,7 @@ private:
     std::vector<Enemy> enemies_;
     std::vector<PlacedCharacter> bystanders_; // placed characters the sword does not fight: they stand and are seen
     Editor editor_;
+    NpcClassBook npcClasses_; // US-260
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;
 

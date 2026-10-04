@@ -94,6 +94,7 @@ void Editor::buildPanels() {
     button("Select", "Select a character, pickup, plant, effect or light: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
+    button("Class", "NPC Classes: create, edit and delete the kinds of people of your world", [this] { showClasses(!classesShown_); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -163,8 +164,161 @@ void Editor::buildPanels() {
     }
     buildProperties();
     buildSettings();
+    buildClassPanel();
     buildOpenList();
     buildQuestion();
+}
+
+namespace {
+
+std::string joinNames(const std::vector<std::string>& names) {
+    std::string out;
+    for (const std::string& name : names) out += (out.empty() ? "" : ", ") + name;
+    return out;
+}
+
+std::vector<std::string> splitNames(const std::string& text) {
+    std::vector<std::string> out;
+    std::size_t start = 0;
+    while (start <= text.size()) {
+        std::size_t end = text.find(',', start);
+        if (end == std::string::npos) end = text.size();
+        std::string part = text.substr(start, end - start);
+        const auto first = part.find_first_not_of(' ');
+        const auto last = part.find_last_not_of(' ');
+        if (first != std::string::npos) out.push_back(part.substr(first, last - first + 1));
+        start = end + 1;
+    }
+    return out;
+}
+
+} // namespace
+
+void Editor::showClasses(bool shown) {
+    classesShown_ = shown;
+    if (shown) {
+        classesStale_ = true;
+        showSettings(false);
+    }
+}
+
+void Editor::newClass() {
+    classDraft_ = sim::rules::NpcClass{};
+    classDraft_.id = "new-class";
+    classDraft_.label = "New class";
+    classDraft_.colour = 0x808080;
+    classDraft_.icon = sim::rules::npcIconNames().front();
+    classNew_ = true;
+    classSelected_.clear();
+    classesStale_ = true;
+}
+
+void Editor::selectClass(const std::string& id) {
+    if (classBook_ == nullptr) return;
+    if (const sim::rules::NpcClass* found = classBook_->catalog().find(id)) {
+        classDraft_ = *found;
+        classNew_ = false;
+        classSelected_ = id;
+        classesStale_ = true;
+    }
+}
+
+bool Editor::saveClass() {
+    if (classBook_ == nullptr) return false;
+    if (classNew_ && classBook_->catalog().find(classDraft_.id) != nullptr) {
+        say(std::format("a class named {} already exists", classDraft_.id));
+        return false;
+    }
+    if (const auto problem = classBook_->save(classDraft_)) {
+        say(*problem);
+        return false;
+    }
+    classNew_ = false;
+    classSelected_ = classDraft_.id;
+    classesStale_ = true;
+    say(std::format("saved class {}", classDraft_.id));
+    return true;
+}
+
+bool Editor::deleteClass() {
+    if (classBook_ == nullptr || classNew_ || classSelected_.empty()) return false;
+    if (const auto refusal = classBook_->remove(classSelected_, level_)) {
+        say(*refusal);
+        return false;
+    }
+    say(std::format("deleted class {}", classSelected_));
+    classSelected_.clear();
+    classDraft_ = sim::rules::NpcClass{};
+    classesStale_ = true;
+    return true;
+}
+
+// The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
+void Editor::buildClassPanel() {
+    classesStale_ = false;
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, 200});
+    classes_->visible = classesShown_;
+    const Rect box = classes_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    int y = box.y + 4;
+    classes_->add<Button>(Rect{left, y, width, 11}, "NPC Classes", [] {});
+    y += 14;
+    std::vector<std::string> ids = classBook_ != nullptr ? classBook_->catalog().ids() : std::vector<std::string>{};
+    auto& list = classes_->add<luna::engine::ListBox>(Rect{left, y, width, 45}, ids, [this, ids](int row) { selectClass(ids[static_cast<std::size_t>(row)]); });
+    for (std::size_t i = 0; i < ids.size(); ++i) {
+        if (ids[i] == classSelected_) {
+            list.selected = static_cast<int>(i);
+            list.first = std::clamp(static_cast<int>(i) - 2, 0, std::max(0, static_cast<int>(ids.size()) - list.rows()));
+        }
+    }
+    y += 48;
+    if (classNew_) {
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Id", classDraft_.id, 32, [this](const std::string& v) { classDraft_.id = v; });
+    } else {
+        classes_->add<Button>(Rect{left, y, width, 11}, "Id: " + classDraft_.id, [] {});
+    }
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Label", classDraft_.label, 24, [this](const std::string& v) { classDraft_.label = v; });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Colour", sim::rules::formatColour(classDraft_.colour), 7, [this](const std::string& v) {
+        if (const auto colour = sim::rules::parseColour(v)) classDraft_.colour = *colour;
+        else say("colour must be # and six hex digits, like #d9a441");
+    });
+    y += 14;
+    Button& icon = classes_->add<Button>(Rect{left, y, width, 11}, "Icon: " + classDraft_.icon, [this] {
+        const auto& icons = sim::rules::npcIconNames();
+        const auto at = std::find(icons.begin(), icons.end(), classDraft_.icon);
+        classDraft_.icon = icons[(static_cast<std::size_t>(at - icons.begin()) + 1) % icons.size()];
+        classesStale_ = true;
+    });
+    icon.hint = "Click: the next icon of the built-in set";
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(classDraft_.tags), 60, [this](const std::string& v) { classDraft_.tags = splitNames(v); });
+    y += 14;
+    std::string dialogues;
+    for (const auto& [type, file] : classDraft_.dialogues) dialogues += (dialogues.empty() ? "" : ", ") + type + "=" + file;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", dialogues, 90, [this](const std::string& v) {
+        std::vector<std::pair<std::string, std::string>> parsed;
+        for (const std::string& part : splitNames(v)) {
+            const auto equals = part.find('=');
+            if (equals == std::string::npos) {
+                say("talk is partner=file.dlg, for example player=greet.dlg");
+                return;
+            }
+            parsed.emplace_back(part.substr(0, equals), part.substr(equals + 1));
+        }
+        classDraft_.dialogues = parsed;
+    });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(classDraft_.allow), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
+    y += 18;
+    classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
+    classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
+    classes_->add<Button>(Rect{left + 112, y, 56, 14}, "Delete", [this] { deleteClass(); }).hint = "Delete the class (refused while NPCs use it)";
+    classes_->add<Button>(Rect{left + 172, y, 52, 14}, "Close", [this] { showClasses(false); });
 }
 
 void Editor::setPreviewHour(std::optional<double> hour) {
@@ -769,7 +923,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         if (b == nullptr) continue;
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
-                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) ||
+                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) || (b->label == "Class" && classesShown_) ||
                       (b->label == "#" && grid_) || (b->label == "Fx" && tool_ == EditorTool::Effect) || (b->label == "Light" && tool_ == EditorTool::Light) ||
                       (b->label == "Sky" && previewHour_.has_value());
     }
@@ -814,6 +968,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     if (settingsStale_ && !settings_->typing()) {
         buildSettings(); // show the level's values again (after an undo, a resize, another level)
     }
+    if (classesStale_ && !classes_->typing()) buildClassPanel();
+    classes_->visible = classesShown_;
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     // The time-of-day slider (US-247): press on it and drag; the hour follows the pointer until the button is let go.
@@ -831,7 +987,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input) || lightPalette_->handle(input);
     const bool onProperties = properties_->handle(input);
     const bool onSettings = settings_->handle(input);
-    return onToolbar || onPalette || onProperties || onSettings;
+    const bool onClasses = classes_->handle(input);
+    return onToolbar || onPalette || onProperties || onSettings || onClasses;
 }
 
 void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
@@ -1115,7 +1272,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || settings_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || settings_->typing() || classes_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
@@ -1337,6 +1494,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     }
     properties_->draw(painter);
     settings_->draw(painter);
+    classes_->draw(painter);
     // The status line: tool, what it uses, cell, and the last thing done.
     std::string what;
     if (tool_ == EditorTool::Eraser) {
@@ -1384,6 +1542,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         lightPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         settings_->drawOverlay(painter);
+        classes_->drawOverlay(painter);
     }
     // Dialogs last, over everything, with the world dimmed behind them.
     if (dialog) {

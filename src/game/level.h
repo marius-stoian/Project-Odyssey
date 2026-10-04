@@ -72,12 +72,13 @@ struct PlacedCharacter {
     std::string name;
     int hp = 100;
     int swordDamage = 5;
+    std::vector<std::string> classes; // NPC Classes (US-260): ids of assets/data/npc-classes; level version 4
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 
-// Version 2 (US-134, US-136, US-138) adds weapon pickups, plants and effects; version 3 (US-247) adds placed lights. Older files still load,
-// without them, and are written as version 3 the next time they are saved.
-inline constexpr int kLevelVersion = 3;
+// Version 2 (US-134, US-136, US-138) adds weapon pickups, plants and effects; version 3 (US-247) adds placed lights; version 4 (US-260) adds the
+// NPC Classes of placed characters. Older files still load, without them, and are written as version 4 the next time they are saved.
+inline constexpr int kLevelVersion = 4;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;

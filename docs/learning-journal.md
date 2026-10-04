@@ -1408,3 +1408,22 @@ Each layer only knows its own neighbour, so the rule that Game never touches SDL
 **Try it (15 minutes).** Click Sky in the Editor, drag the slider to midnight, place a campfire with the Light tool: it glows. Then set Lighting to Low in the Settings and look at a sprite near a fire: it is lit flat.
 
 **Check yourself.** Why does a level made by a newer game stop with an error instead of loading what it can?
+
+## US-260 NPC Classes: a catalog keyed by id
+
+**What we built.** The owner can create, edit and delete NPC Classes (trader, healer, guard...) in the Editor. Each class is one JSON file named after its id.
+
+**The C++ idea: a catalog keyed by id, and refusing a delete that would leave a dangling reference.** The loader reads every file into a `std::vector<NpcClass>` sorted by id and offers `find(id)`. A file with a mistake is skipped and reported as `file:line: message`, so one typo never stops the other classes. Deleting asks first who still uses the class:
+
+```cpp
+const std::vector<std::string> users = usersOf(id, level);
+if (!users.empty()) return std::format("{} is still used by {}", id, names);
+```
+
+A reference (a placed NPC naming a class) must never point at nothing, so the refusal names the NPCs.
+
+**Where to look.** `src/sim/npc_class.cpp`, `src/game/npc_class_book.cpp`, `Editor::buildClassPanel` in `src/game/editor.cpp`, `assets/data/npc-classes/`.
+
+**Try it (15 minutes).** Copy `trader.json` to `smith.json`, change `id` and `label`, press F5 in the game: the new class loads. Change the icon to `banana`: the log names file and line.
+
+**Check yourself.** Why does the file name have to equal the `id` inside the file?

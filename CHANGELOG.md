@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-260: NPC Classes (Mraw) - 2026-10-04
+
+**State:** On `story/US-260`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_class_test.cpp`, `tests/game/npc_class_editor_test.cpp`) and run once at the milestone exit X-M9a (owner, 2026-10-04); screenshots manual (`docs/plans/US-260.md`).
+
+- Simulation: `src/sim/npc_class.*`: `NpcClass`, `NpcClassCatalog::load/parse` (errors `file:line: message`, a bad file is skipped), `toJson` (canonical, guide field order), the 24-icon set, partner types, colour helpers. Shipped classes in `assets/data/npc-classes/`: trader, talker, hunter, elder, guard, monster, animal.
+- Game: `NpcClassBook` (`src/game/npc_class_book.*`): save (checked, temp file then rename), delete (refused naming the NPCs that use it), F5 reload (all or nothing). Editor: **Class** panel (list, form, New, Save, Delete). Level version 4: `classes` on placed characters. Tests that expected "levelVersion": 3 now expect 4.
+- Guide `docs/guides/npc-data.md` (new).
+
 ## US-247: lighting in the Editor and quality settings (Mraw) - 2026-10-04
 
 **State:** On `story/US-247`, merged into `qa`. Built with zero warnings in Debug; tests written (`tests/game/lighting_editor_test.cpp`) and run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots and frame times are manual (`docs/plans/US-247.md`).
