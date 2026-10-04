@@ -130,6 +130,14 @@ public:
     void setLevelSize(int width, int height);  // keeps painted cells; drops characters outside
     void setDefaultGround(int tile);
     void moveHeroStart(PixelPoint feet);
+    // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
+    // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
+    // line and changes nothing (the function returns false).
+    bool economyShown() const { return economyShown_; }
+    void showEconomy(bool shown);
+    bool setEconomyCurrencies(const std::string& text);
+    bool setEconomyPrices(const std::string& text);
+    bool setEconomyResources(const std::string& text);
     // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
     // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
     void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
@@ -233,6 +241,8 @@ private:
     std::pair<int, int> toWorld(int screenX, int screenY) const;
     void changeLevel(const std::string& what, Level after);
     void buildSettings();
+    void buildEconomy();
+    bool changeEconomy(const std::string& what, const std::string& text, int minimum, int maximum, sim::ItemCounts sim::RegionEconomy::*table);
     void buildClassPanel();
     void buildKindForm(const luna::engine::Rect& box, int y);
     const luna::engine::Texture& markerTexture(luna::engine::Renderer& renderer, const NpcMarker& marker) const;
@@ -333,6 +343,9 @@ private:
     bool settingsShown_ = false;
     bool settingsStale_ = false;
     std::unique_ptr<luna::engine::Panel> settings_;
+    bool economyShown_ = false;
+    bool economyStale_ = true;
+    std::unique_ptr<luna::engine::Panel> economy_;
     std::unique_ptr<luna::engine::Panel> openList_;
     std::unique_ptr<luna::engine::Panel> question_;
     // What waits for an answer about unsaved changes: open this file (or, when empty, a new level).

@@ -379,7 +379,7 @@ void RunFlow::buildBarter(OdysseyGame& game) {
     column = 0;
     index = 0;
     for (const sim::Item& item : data.items) {
-        if (item.kind == "material" && item.id != "flint") {
+        if ((item.kind == "material" && item.id != "flint") || item.kind == "currency") {
             ++index;
             continue; // they trade goods, tools, food and flint
         }

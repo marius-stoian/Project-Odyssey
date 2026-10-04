@@ -222,3 +222,31 @@ Example: a goblin with `"classes": ["monster"]` shows a red ring and a skull; a 
 | Goblin | kind `goblin`, `monster`, **hostile** | none | It attacks you. Set the `goblin` kind to neutral in the Editor (**Class**, **Kinds**) and press F1: it does not. |
 
 In the Editor (F2) every NPC with a class has its ring and icon under its feet, and a click on one opens its NPC panel. Every shipped file of this level is checked by `tests/game/npc_test_level_test.cpp`: it loads with no mistake, and loading, saving and loading again gives the same text.
+
+## Region economy: currencies, prices and goods (US-280, level version 5)
+
+A level may carry an `economy` object. It is written only when something is set, so a level made before US-280 loads and saves unchanged apart from its version number (5). A level with no currency trades by **barter only** (US-283).
+
+| Field | Values | Meaning |
+|---|---|---|
+| `currencies` | `{ item id: value }`, value 1 to 100000 | the items that are money in this region, each worth its value (in value units); any currency item is worth its value anywhere |
+| `prices` | `{ item id: price }`, 1 to 100000 | the market's base price of a good; without an entry the item's own `value` (`assets/data/hero/items.json`) is the base |
+| `resources` | `{ item id: weight }`, 1 to 1000 | goods the region delivers: added to every trader's own weights at the daily restock (US-281) |
+
+```json
+"economy": { "currencies": { "shells": 1 }, "prices": { "flint": 4 }, "resources": { "berries": 5, "flint": 3 } }
+```
+
+Item ids are lower-case letters, digits and `-`. Money is a whole number everywhere: there is no cent. The shipped item `shells` (kind `currency`, value 1) is the example currency; any item of `items.json` can be marked as money.
+
+### Editor: the Economy panel
+
+**Level** opens the level settings; its **Economy...** button opens the Economy panel with three lines, each `item=number item=number`:
+
+| Line | Edits |
+|---|---|
+| **Money** | `currencies`, for example `shells=1 gold=10` |
+| **Prices** | `prices`, for example `flint=4` |
+| **Goods** | `resources`, for example `berries=5 flint=3` |
+
+A line is read when you press Enter or click elsewhere. A mistake (a name that is not an item id, a number out of range, a missing `=`) is said in the status line and changes nothing. Every table is one step of **Undo**; an empty line clears the table (no money: barter only); typing the same table again is no step.

@@ -165,6 +165,7 @@ void Editor::buildPanels() {
     }
     buildProperties();
     buildSettings();
+    buildEconomy();
     buildClassPanel();
     buildOpenList();
     buildQuestion();
@@ -951,6 +952,7 @@ std::pair<int, int> Editor::toWorld(int screenX, int screenY) const {
 void Editor::changeLevel(const std::string& what, Level after) {
     run(std::make_unique<LevelCommand>(what, level_, std::move(after)));
     settingsStale_ = true;
+    economyStale_ = true;
     select(selected_); // the selected character may be gone after a resize
 }
 
@@ -990,7 +992,7 @@ void Editor::showSettings(bool shown) {
 
 void Editor::buildSettings() {
     settingsStale_ = false;
-    settings_ = std::make_unique<Panel>(Rect{viewWidth_ - 152, kToolbarHeight + 4, 150, 138});
+    settings_ = std::make_unique<Panel>(Rect{viewWidth_ - 152, kToolbarHeight + 4, 150, 154});
     settings_->visible = settingsShown_;
     const Rect box = settings_->bounds;
     const int left = box.x + 4;
@@ -1015,6 +1017,50 @@ void Editor::buildSettings() {
     });
     open.hint = "Open another level of this folder";
     settings_->add<Button>(Rect{left + 96, box.y + 112, 42, 14}, "Close", [this] { showSettings(false); });
+    Button& economy = settings_->add<Button>(Rect{left, box.y + 130, width, 14}, economyShown_ ? "Economy: shown" : "Economy...", [this] { showEconomy(!economyShown_); });
+    economy.hint = "Currencies, market prices and delivery weights of this region";
+}
+
+void Editor::showEconomy(bool shown) {
+    economyShown_ = shown;
+    economyStale_ = true;
+    settingsStale_ = true; // the button of the Level panel shows whether the Economy panel is open
+}
+
+// One table of the economy from the text of its field. A mistake is said and nothing changes.
+bool Editor::changeEconomy(const std::string& what, const std::string& text, int minimum, int maximum, sim::ItemCounts sim::RegionEconomy::*table) {
+    std::string problem;
+    const std::optional<sim::ItemCounts> parsed = sim::parsePairs(text, minimum, maximum, &problem);
+    if (!parsed) {
+        say(what + ": " + problem);
+        economyStale_ = true; // show the values again
+        return false;
+    }
+    if (level_.economy.*table == *parsed) return true; // no change: no step of Undo
+    Level after = level_;
+    after.economy.*table = *parsed;
+    changeLevel(what + ": " + (parsed->empty() ? std::string("none") : sim::formatPairs(*parsed)), std::move(after));
+    return true;
+}
+
+bool Editor::setEconomyCurrencies(const std::string& text) { return changeEconomy("currencies", text, 1, sim::RegionEconomy::kMaxValue, &sim::RegionEconomy::currencies); }
+bool Editor::setEconomyPrices(const std::string& text) { return changeEconomy("prices", text, 1, sim::RegionEconomy::kMaxValue, &sim::RegionEconomy::prices); }
+bool Editor::setEconomyResources(const std::string& text) { return changeEconomy("resources", text, 1, 1000, &sim::RegionEconomy::resources); }
+
+void Editor::buildEconomy() {
+    economyStale_ = false;
+    economy_ = std::make_unique<Panel>(Rect{viewWidth_ - 152 - 262, kToolbarHeight + 4, 260, 88});
+    economy_->visible = economyShown_;
+    const Rect box = economy_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    economy_->add<Button>(Rect{left, box.y + 4, width, 11}, "Economy of this region (item=number ...)", [] {});
+    luna::engine::TextField& currencies = economy_->add<luna::engine::TextField>(Rect{left, box.y + 18, width, 11}, "Money", sim::formatPairs(level_.economy.currencies), 90,
+                                                                                 [this](const std::string& text) { setEconomyCurrencies(text); });
+    currencies.label = "Money";
+    economy_->add<luna::engine::TextField>(Rect{left, box.y + 32, width, 11}, "Prices", sim::formatPairs(level_.economy.prices), 90, [this](const std::string& text) { setEconomyPrices(text); });
+    economy_->add<luna::engine::TextField>(Rect{left, box.y + 46, width, 11}, "Goods", sim::formatPairs(level_.economy.resources), 90, [this](const std::string& text) { setEconomyResources(text); });
+    economy_->add<Button>(Rect{left, box.y + 62, 52, 14}, "Close", [this] { showEconomy(false); });
 }
 
 std::vector<std::filesystem::path> Editor::levelFiles() const {
@@ -1104,6 +1150,7 @@ void Editor::replaceLevel(Level level, std::filesystem::path file, const std::st
     selected_.reset();
     buildProperties();
     settingsStale_ = true;
+    economyStale_ = true;
     centreX_ = level_.heroStart.x;
     centreY_ = level_.heroStart.y;
     levelChanged();
@@ -1290,6 +1337,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     if (settingsStale_ && !settings_->typing()) {
         buildSettings(); // show the level's values again (after an undo, a resize, another level)
     }
+    if (economyStale_ && !economy_->typing()) buildEconomy();
+    economy_->visible = economyShown_;
     if (classesStale_ && !classes_->typing()) buildClassPanel();
     classes_->visible = classesShown_;
     settings_->visible = settingsShown_;
@@ -1311,7 +1360,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     const bool onProperties = properties_->handle(input) || npcPanel_->handle(input);
     const bool onSettings = settings_->handle(input);
     const bool onClasses = classes_->handle(input);
-    return onToolbar || onPalette || onProperties || onSettings || onClasses;
+    const bool onEconomy = economy_->handle(input);
+    return onToolbar || onPalette || onProperties || onSettings || onClasses || onEconomy;
 }
 
 void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
@@ -1595,7 +1645,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || settings_->typing() || classes_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
@@ -1829,6 +1879,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     properties_->draw(painter);
     npcPanel_->draw(painter);
     settings_->draw(painter);
+    economy_->draw(painter);
     classes_->draw(painter);
     // The status line: tool, what it uses, cell, and the last thing done.
     std::string what;
@@ -1878,6 +1929,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         properties_->drawOverlay(painter);
         npcPanel_->drawOverlay(painter);
         settings_->drawOverlay(painter);
+        economy_->drawOverlay(painter);
         classes_->drawOverlay(painter);
     }
     // Dialogs last, over everything, with the world dimmed behind them.

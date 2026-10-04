@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/placeholder_art.h"
+#include "sim/economy.h"
 #include "luna/engine/tile_map.h"
 
 #include <filesystem>
@@ -85,8 +86,8 @@ struct PlacedCharacter {
 };
 
 // Version 2 (US-134, US-136, US-138) adds weapon pickups, plants and effects; version 3 (US-247) adds placed lights; version 4 (US-260) adds the
-// NPC Classes of placed characters. Older files still load, without them, and are written as version 4 the next time they are saved.
-inline constexpr int kLevelVersion = 4;
+// NPC Classes of placed characters; version 5 (US-280, M9b and M9c) adds the region economy (currencies, prices, resources), the NPC trade, schedule and action fields and the places. Older files still load, without them, and are written as version 5 the next time they are saved.
+inline constexpr int kLevelVersion = 5;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;
@@ -138,6 +139,7 @@ struct Level {
     std::vector<PlacedPlant> plants;
     std::vector<PlacedEffect> effects;
     std::vector<PlacedLight> lights;     // level version 3 (US-247)
+    sim::RegionEconomy economy;          // level version 5 (US-280): the currencies, market prices and resources of this region; written only when set
     bool clan = false;                   // the simulated clan lives here (US-032); written only when true
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)

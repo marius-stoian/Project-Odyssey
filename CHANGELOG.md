@@ -4,6 +4,18 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-280: currencies per region (Mraw) - 2026-10-05
+
+**State:** On `story/US-280`, merged into `qa`. Written without running anything (owner rule, 2026-10-05: no tests or builds until M9b and M9c are both fully implemented); the one full verify is X-M9bc.
+
+- Simulation: `src/sim/economy.h/.cpp` (`RegionEconomy` with currencies, prices, resources; `parsePairs`/`formatPairs` for the Editor text; `coinValue`, `takeCoins`, `makeChange`), `src/sim/economy_json.h` (level JSON).
+- Level format version 5: an optional `economy` object (`src/game/level.h/.cpp`); the shipped `npc-test.json` is rewritten as version 5; tests that look for the version number say 5.
+- Editor: Economy panel (Level, Economy...) with Money, Prices, Goods; each table one step of Undo (`Editor::setEconomyCurrencies/Prices/Resources`).
+- Data: item `shells` (kind `currency`, value 1) in `assets/data/hero/items.json`; the rival barter screen does not list it.
+- Docs: `docs/guides/npc-data.md`, `docs/plans/US-280.md`, `docs/learning-journal.md`, D-54 and the M9b/M9c design notes (kickoff).
+- Tests (not yet run): `tests/sim/economy_test.cpp` (4 cases), `tests/game/economy_editor_test.cpp` (5 cases).
+- Unfinished checks: build and tests at X-M9bc; screenshots are manual (`docs/plans/US-280.md`).
+
 ## X-M9a: exit review of M9a NPC foundation (Mraw) - 2026-10-05
 
 **State:** On `qa`, merged into `main`. `tools/verify.ps1 -Story X-M9a -Config Both`: zero warnings, 27/27 test groups in Debug and in Release.

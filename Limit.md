@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-280):** S-US-280 DONE (Milestone-105.md, AP-106), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: S-US-281 (trader stock, restock, wants), then US-282..US-284, K-M9c, US-290..US-294 and X-M9bc.
+
 **Resume update (2026-10-05, X-M9a):** X-M9a DONE (Milestone-104.md, AP-105), main tagged m9a-done. Owner still to do: GPU screenshots (docs/gates/M9a.md row 7). Next: K-M9b, which asks the owner the open M9b questions in one chat round, then US-280..284.
 
 **Resume update (2026-10-04, US-270):** S-US-270 DONE (Milestone-103.md, AP-104). Next: X-M9a (the one full verify for M9a).

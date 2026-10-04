@@ -183,6 +183,7 @@ add_library(odysseus_sim STATIC
     src/sim/interaction.cpp
     src/sim/npc_class.cpp
     src/sim/opinion.cpp
+    src/sim/economy.cpp
     src/sim/npc_kind.cpp
     src/sim/npc_population.cpp
     src/sim/action_runner.cpp
@@ -428,6 +429,7 @@ add_executable(odysseus_game_tests
     tests/game/npc_editor_test.cpp
     tests/game/npc_kinds_tab_test.cpp
     tests/game/npc_test_level_test.cpp
+    tests/game/economy_editor_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -484,6 +486,7 @@ add_executable(odysseus_sim_tests
     tests/sim/rules_test.cpp
     tests/sim/npc_class_test.cpp
     tests/sim/opinion_test.cpp
+    tests/sim/economy_test.cpp
     tests/sim/npc_kind_test.cpp
     tests/sim/npc_population_test.cpp
     tests/sim/npc_scale_test.cpp
