@@ -63,6 +63,9 @@ struct ScheduleConfig {
     int scatterPixels = 48; // persons at the same named place stand within this many pixels of it, not on one spot
     // Per activity word, what an hour of it restores of each need (a person near the hero; the daily rules restore the far ones).
     std::map<std::string, std::array<int, kNeedCount>> activities;
+    // The activities during which a person is free to do something of their own (US-291): its class, custom and event actions. A person asleep or eating is not.
+    std::set<std::string> freeActivities{"idle", "work", "go", "patrol"};
+    int maxPerHour = 64; // at most this many persons choose an action on one hour mark (the budget of ADR-022)
 
     bool isNight(int hour) const { return nightFromHour > nightToHour ? (hour >= nightFromHour || hour < nightToHour) : (hour >= nightFromHour && hour < nightToHour); }
     bool knownActivity(const std::string& word) const { return activities.count(word) != 0; }

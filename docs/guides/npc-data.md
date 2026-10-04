@@ -397,3 +397,39 @@ The schedule is looked at **on the hour** (every 100 ticks): persons near the he
 ### Editor: the Schedule form
 
 The Trade section beside the NPC panel has two more lines, **Day** and **Night**, and the Class panel and the Kinds tab have them under the trade lines. Type `06:00 work market; 21:00 sleep home` (time, activity, place; the place is optional and then `home`; separate blocks with `;`). Press Enter: the status line says `schedule day`; a mistake (`6am`, a missing activity, two blocks at one time) is said and changes nothing. For an NPC each line is one step of Undo and edits its **own** schedule (which replaces its kind's and its classes' whole); for a class or kind **Save** writes it. An empty **Night** means the day blocks hold at night.
+
+## Action sources: class, custom and event actions (US-291)
+
+An NPC that is **free** (idle, or on a block of `work`, `go`, `patrol`; the list is `free` in `schedule.json`) chooses something to do on its own, once an hour (and at once when an event concerns it). It takes its candidates from three sources (D-54 Q11; there is **no quest source** in M9c: M10 adds one and changes this schema):
+
+| Source | Where it is set | Meaning |
+|---|---|---|
+| **Class actions** | `"does": ["patrol"]` in a class file | what every NPC of the class does when free |
+| **Custom actions** | `"does"` in a kind file or on a placed NPC | the NPC's own list; layers add up (a class's, then the kind's, then the NPC's) |
+| **Event actions** | `assets/data/sim/events.json` | an event of the world offers an action to the NPCs it concerns |
+
+`does` is a list of interaction ids; an id that is no interaction, or has no `npc` block, is logged with the NPC's name when the level loads and never chosen. An NPC's own `deny` list (US-267) also keeps it from doing an action itself.
+
+**The choice** uses the same interaction files as the hero: the `npc` block of a file gives its `score` (the rule language; `need(hunger)`, `opinion(actor, target)`, `tag(target, post)`...) and its `cooldown` in seconds. Every candidate is scored against everything it could be done to (the places of the level, or the spot of an event); the best score wins, a tie by a roll of the world seed; below 30 nobody gets up for it. An event candidate gets the `bonus` of its event added. At most `maxPerHour` (64, `schedule.json`) persons choose on one hour mark, and the turn goes round so nobody is left out. The files an NPC acts with have `"actors": ["npc"]`: `patrol.json` (target: a place tagged `post`, effect `do walk-to`) and `help-with-fire.json` (target: the event). The word `walk-to` takes the person to the thing.
+
+### events.json
+
+```json
+{ "version": 1, "events": [ { "id": "fire-help", "label": "Help put out the fire", "trigger": "fire", "action": "help-with-fire",
+    "classes": ["talker", "elder", "trader", "hunter"], "withinMetres": 12, "forMinutes": 30, "bonus": 30 } ] }
+```
+
+| Field | Meaning |
+|---|---|
+| `trigger` | the event of the world: `fire` is posted when a fire pit is lit |
+| `action` | the interaction it offers |
+| `classes` | the classes it concerns (none listed: every NPC) |
+| `withinMetres` | how near the NPC must be (1 to 200) |
+| `forMinutes` | how long it is on offer, in game minutes |
+| `bonus` | added to the score of the action |
+
+A fire lit within 12 m of a talker sends her to it **at once**; a fire that went out more than 30 game minutes ago is no longer on offer at the next hour mark.
+
+### Editor
+
+The **Does** line (under the Schedule lines of the Trade section beside the NPC panel, the Class panel and the Kinds tab) takes interaction ids separated by spaces: `patrol sing`. For an NPC it is its custom actions (one step of Undo); for a class its class actions, for a kind its custom actions (Save writes the file). A mistake (an id that is not lower-case words) is said and changes nothing.

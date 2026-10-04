@@ -135,6 +135,8 @@ public:
     // The life of the placed people (US-290): schedules, homes, interruptions (the places of the level are its places).
     const sim::NpcDirector& npcDirector() const { return npcDirector_; }
     sim::NpcDirector& npcDirectorMutable() { return npcDirector_; }
+    // A world event happens at (x, y), world pixels (a fire starts): the people it concerns near it answer (US-291).
+    void postWorldEvent(const std::string& trigger, int x, int y);
     // Where a placed person stands now, world pixels: its figure walks to where its schedule sends it; a person without a figure stands where it was placed.
     PixelPoint npcPosition(int placedId) const;
     NpcClassBook& npcClasses() { return npcClasses_; }
@@ -414,6 +416,7 @@ private:
     sim::TradeMarket tradeMarket_;     // the stock of the traders (US-281)
     std::int64_t tradeDay_ = 0;        // the day the traders were last restocked
     sim::rules::ScheduleConfig scheduleConfig_; // assets/data/sim/schedule.json (US-290)
+    sim::EventCatalog eventCatalog_;   // assets/data/sim/events.json (US-291)
     sim::NpcDirector npcDirector_;     // the life of the placed people (US-290)
     std::unordered_map<int, int> npcStuck_; // placed id -> ticks a walking figure has made no progress (it is put at its goal after a while)
     std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero

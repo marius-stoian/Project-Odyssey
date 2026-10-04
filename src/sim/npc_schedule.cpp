@@ -124,6 +124,15 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
         config.dangerPlace = data.at("dangerPlace").get<std::string>();
     }
     if (data.contains("scatterPixels")) config.scatterPixels = requireInt(data, file, "scatterPixels", 0, 512);
+    if (data.contains("maxPerHour")) config.maxPerHour = requireInt(data, file, "maxPerHour", 1, 100000);
+    if (data.contains("free")) {
+        if (!data.at("free").is_array()) throw DataError(file, "free", "must be a list of activity words");
+        config.freeActivities.clear();
+        for (const json& word : data.at("free")) {
+            if (!word.is_string() || !validItemId(word.get<std::string>())) throw DataError(file, "free", "must hold activity words in quotes");
+            config.freeActivities.insert(word.get<std::string>());
+        }
+    }
     if (data.contains("activities")) {
         if (!data.at("activities").is_object()) throw DataError(file, "activities", "must be an object of activity: {need: amount}");
         for (const auto& [word, effects] : data.at("activities").items()) {

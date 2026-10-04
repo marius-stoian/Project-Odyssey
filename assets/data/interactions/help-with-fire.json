@@ -1,0 +1,12 @@
+// Help put out a fire (US-291): the answer of the people near a fire. It is offered by the event `fire-help` of assets/data/sim/events.json to the classes named there, within 12 m
+// of a fire that has just been lit; they walk to it.
+{
+  "id": "help-with-fire",
+  "label": "Help put out the fire",
+  "actors": ["npc"],
+  "target": { "tags": ["event", "fire"] },
+  "range": 2,
+  "order": 500,
+  "effects": [ "do walk-to" ],
+  "npc": { "score": "50", "cooldown": 60 }
+}

@@ -90,6 +90,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
     tradeConfig_ = sim::loadPriceConfig(dataDirectory / "sim" / "trade.json");
     scheduleConfig_ = sim::rules::loadScheduleConfig(dataDirectory / "sim" / "schedule.json");
+    eventCatalog_ = sim::loadEventCatalog(dataDirectory / "sim" / "events.json");
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -807,7 +808,9 @@ std::vector<sim::rules::Offer> OdysseyGame::offersFor(const Subject& subject) co
 }
 
 void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {
-    if (index < plants_.size()) plants_[index].state = state;
+    if (index >= plants_.size()) return;
+    plants_[index].state = state;
+    if (state == "burning") postWorldEvent("fire", plants_[index].feet.x, plants_[index].feet.y); // a fire has started: the people near it may go to help (US-291)
 }
 
 bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {

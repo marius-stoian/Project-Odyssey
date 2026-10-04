@@ -191,6 +191,11 @@ public:
     bool setSelectedSchedule(const std::string& field, const std::string& text);
     bool setClassSchedule(const std::string& field, const std::string& text);
     bool setKindSchedule(const std::string& field, const std::string& text);
+    // The Does line (US-291, D-54 Q11): interaction ids separated by spaces, "patrol sing". For a class they are its class actions, for a kind or an NPC its custom actions; an NPC
+    // that is idle on duty chooses among them (and the events on offer) by the `npc` score of their files. One step of Undo for an NPC; Save for a class or kind.
+    bool setSelectedDoes(const std::string& text);
+    bool setClassDoes(const std::string& text);
+    bool setKindDoes(const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
@@ -265,6 +270,7 @@ private:
     void buildNpcTradePanel(const PlacedCharacter& shown);
     void addTradeRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set);
     void addScheduleRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::Schedule& shown, const std::function<bool(const std::string&, const std::string&)>& set);
+    void addDoesRow(luna::engine::Panel& panel, int left, int width, int& y, const std::vector<std::string>& shown, const std::function<bool(const std::string&)>& set);
     void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();

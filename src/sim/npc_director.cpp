@@ -1,5 +1,6 @@
 #include "sim/npc_director.h"
 
+#include "core/random.h"
 #include "sim/data.h"
 
 #include <nlohmann/json.hpp>
@@ -7,6 +8,7 @@
 #include <algorithm>
 #include <format>
 #include <limits>
+#include <optional>
 
 namespace odysseus::sim {
 
@@ -15,6 +17,7 @@ namespace {
 using nlohmann::json;
 
 constexpr std::int32_t kUnset = std::numeric_limits<std::int32_t>::min(); // a home that has not been given: the person's place when the director first sees them
+constexpr int kMinScore = 30; // a score below this is not worth getting up for (as for the clan members and animals of M7)
 
 void mix(std::uint64_t& hash, std::uint64_t value) {
     for (int i = 0; i < 8; ++i) {
@@ -51,6 +54,25 @@ std::vector<T> unrun(const json& value, const char* field) {
     return out;
 }
 
+json profileJson(const NpcProfile& profile) {
+    json partner = json::object();
+    for (const auto& [type, ids] : profile.partnerActions) partner[type] = ids;
+    return json{{"classes", profile.classes}, {"tags", profile.tags}, {"classActions", profile.classActions}, {"customActions", profile.customActions},
+                {"allow", profile.allow}, {"deny", profile.deny}, {"partner", partner}};
+}
+
+NpcProfile profileFrom(const json& value) {
+    NpcProfile profile;
+    profile.classes = value.at("classes").get<std::vector<std::string>>();
+    profile.tags = value.at("tags").get<std::vector<std::string>>();
+    profile.classActions = value.at("classActions").get<std::vector<std::string>>();
+    profile.customActions = value.at("customActions").get<std::vector<std::string>>();
+    profile.allow = value.at("allow").get<std::vector<std::string>>();
+    profile.deny = value.at("deny").get<std::vector<std::string>>();
+    for (const auto& [type, ids] : value.at("partner").items()) profile.partnerActions[type] = ids.get<std::vector<std::string>>();
+    return profile;
+}
+
 json blocksJson(const std::vector<rules::ScheduleBlock>& blocks) {
     json out = json::array();
     for (const rules::ScheduleBlock& block : blocks) out.push_back(json::array({block.minute, block.activity, block.place}));
@@ -71,7 +93,10 @@ std::vector<rules::ScheduleBlock> blocksFrom(const json& value) {
 
 } // namespace
 
-NpcDirector::NpcDirector(rules::ScheduleConfig config) : config_(std::move(config)) { schedules_.emplace_back(); }
+NpcDirector::NpcDirector(rules::ScheduleConfig config) : config_(std::move(config)) {
+    schedules_.emplace_back();
+    profiles_.emplace_back();
+}
 
 void NpcDirector::ensure(std::size_t size) {
     if (modes_.size() >= size) return;
@@ -80,6 +105,8 @@ void NpcDirector::ensure(std::size_t size) {
     dangers_.resize(size, 0);
     homeX_.resize(size, kUnset);
     homeY_.resize(size, kUnset);
+    profileOf_.resize(size, 0);
+    lastAction_.resize(size, -1);
 }
 
 void NpcDirector::setPlaces(std::vector<Place> places) { places_ = std::move(places); }
@@ -118,6 +145,30 @@ void NpcDirector::setHome(int index, int x, int y) {
 
 int NpcDirector::homeX(int index) const { return static_cast<std::size_t>(index) < homeX_.size() ? homeX_[static_cast<std::size_t>(index)] : kUnset; }
 int NpcDirector::homeY(int index) const { return static_cast<std::size_t>(index) < homeY_.size() ? homeY_[static_cast<std::size_t>(index)] : kUnset; }
+
+int NpcDirector::internProfile(const NpcProfile& profile) {
+    if (profile.empty() && profile.tags.empty() && profile.allow.empty() && profile.deny.empty()) return 0;
+    for (std::size_t i = 1; i < profiles_.size(); ++i) {
+        if (profiles_[i] == profile) return static_cast<int>(i);
+    }
+    profiles_.push_back(profile);
+    return static_cast<int>(profiles_.size() - 1);
+}
+
+void NpcDirector::setProfile(int index, const NpcProfile& profile) {
+    ensure(static_cast<std::size_t>(index) + 1);
+    profileOf_[static_cast<std::size_t>(index)] = static_cast<std::uint16_t>(internProfile(profile));
+}
+
+const NpcProfile* NpcDirector::profile(int index) const {
+    if (index < 0 || static_cast<std::size_t>(index) >= profileOf_.size() || profileOf_[static_cast<std::size_t>(index)] == 0) return nullptr;
+    return &profiles_[profileOf_[static_cast<std::size_t>(index)]];
+}
+
+std::string NpcDirector::lastAction(int index) const {
+    if (index < 0 || static_cast<std::size_t>(index) >= lastAction_.size() || lastAction_[static_cast<std::size_t>(index)] < 0) return {};
+    return actionNames_[static_cast<std::size_t>(lastAction_[static_cast<std::size_t>(index)])];
+}
 
 void NpcDirector::setDanger(int index, bool danger) {
     ensure(static_cast<std::size_t>(index) + 1);
@@ -204,6 +255,114 @@ void NpcDirector::stepNear(NpcPopulation& population, int index, int hour) {
     }
     modes_[at] = static_cast<std::uint8_t>(Mode::Scheduled);
     followSchedule(population, index, hour, true);
+    if (isFree(population, index, hour)) chooseAction(population, index, hour, false); // idle on duty: do something of one's own
+}
+
+std::pair<int, int> NpcDirector::pointNear(const NpcPopulation& population, int index, int x, int y) const {
+    if (config_.scatterPixels <= 0) return {x, y};
+    const std::uint32_t id = static_cast<std::uint32_t>(population.id(index));
+    const std::uint32_t h = id * 2654435761U + 0x9E3779B9U;
+    const int span = 2 * config_.scatterPixels + 1;
+    return {x + static_cast<int>(h % static_cast<std::uint32_t>(span)) - config_.scatterPixels, y + static_cast<int>((h >> 16) % static_cast<std::uint32_t>(span)) - config_.scatterPixels};
+}
+
+bool NpcDirector::isFree(const NpcPopulation& population, int index, int hour) const {
+    (void)population;
+    const rules::Schedule* own = schedule(index);
+    if (own == nullptr) return true;
+    const rules::ScheduleBlock* block = rules::activeBlock(*own, hour * 60, config_.isNight(hour));
+    return block == nullptr || config_.freeActivities.count(block->activity) != 0;
+}
+
+// The choice: every candidate interaction (class, custom and event actions) is scored against each thing it could be done to (a place, or the spot of an event) with the `npc`
+// block of its file and the rule language, and the best score wins (a tie by a roll of the world seed, the tick and the person); below kMinScore nobody gets up for it.
+bool NpcDirector::chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly) {
+    if (interactions_ == nullptr || chosenThisHour_ >= config_.maxPerHour) return false;
+    const std::size_t at = static_cast<std::size_t>(index);
+    if (modes_[at] == static_cast<std::uint8_t>(Mode::Dead) || modes_[at] == static_cast<std::uint8_t>(Mode::Fighting)) return false;
+    const NpcProfile& own = profiles_[profileOf_[at]];
+    if (own.classActions.empty() && own.customActions.empty() && board_.posted().empty()) return false;
+    const SourceContext context{own, population.x(index), population.y(index), population.ticks(), &board_, &events_};
+    std::vector<ActionCandidate> candidates = sources_.collect(context);
+    if (eventsOnly) std::erase_if(candidates, [](const ActionCandidate& candidate) { return candidate.origin != ActionOrigin::Event; });
+    if (candidates.empty()) return false;
+
+    rules::ThingInfo actor;
+    actor.kind = population.kind(index);
+    actor.tags = own.tags;
+    if (std::find(actor.tags.begin(), actor.tags.end(), "npc") == actor.tags.end()) actor.tags.push_back("npc");
+    const std::int64_t now = static_cast<std::int64_t>(population.ticks());
+    struct Option {
+        const rules::Interaction* interaction;
+        ActionTarget target;
+    };
+    std::vector<Option> options;
+    std::vector<int> scores;
+    for (const ActionCandidate& candidate : candidates) {
+        const rules::Interaction* interaction = interactions_->find(candidate.interaction);
+        if (interaction == nullptr || !interaction->npc || !cooldowns_.ready(population.id(index), interaction->id, now)) continue;
+        if (std::find(own.deny.begin(), own.deny.end(), interaction->id) != own.deny.end()) continue; // an action the NPC may never do
+        std::vector<ActionTarget> targets;
+        if (candidate.atEvent) {
+            targets.push_back({ActionTarget::Kind::Event, -1, candidate.eventTrigger, "event", candidate.eventX, candidate.eventY, {"event", candidate.eventTrigger}});
+        } else {
+            for (const Place& place : places_) {
+                ActionTarget target{ActionTarget::Kind::Place, -1, place.name, "place", place.x, place.y, place.tags};
+                target.tags.push_back("place");
+                targets.push_back(std::move(target));
+            }
+        }
+        for (const ActionTarget& target : targets) {
+            rules::ThingInfo thing;
+            thing.kind = target.kindName;
+            thing.tags = target.tags;
+            const NpcRuleContext rule(population, index, actor.tags, target, hour);
+            for (const rules::Offer& offer : interactions_->offered(actor, thing, 0, rule)) {
+                if (offer.interaction != interaction || !offer.enabled) continue;
+                const long long score = rules::evaluate(*interaction->npc->score, rule).number + candidate.bonus;
+                options.push_back({interaction, target});
+                scores.push_back(static_cast<int>(std::clamp<long long>(score, 0, 100000)));
+                break;
+            }
+        }
+    }
+    if (options.empty()) return false;
+    core::Pcg32 random(seed_ + population.ticks() * 0x9E3779B97F4A7C15ULL, static_cast<std::uint64_t>(index) * 2ULL + 1ULL);
+    const std::optional<std::size_t> pick = rules::pickBest(scores, kMinScore, random);
+    if (!pick) return false;
+    carryOut(population, index, *options[*pick].interaction, options[*pick].target);
+    ++chosenThisHour_;
+    return true;
+}
+
+// What an interaction does when an NPC does it: the words the simulation can carry out. `walk-to` takes the person to the thing.
+void NpcDirector::carryOut(NpcPopulation& population, int index, const rules::Interaction& interaction, const ActionTarget& target) {
+    for (const rules::Effect& effect : interaction.effects) {
+        if (effect.verb == "do" && !effect.args.empty() && effect.args[0]->text == "walk-to") {
+            const auto [x, y] = pointNear(population, index, target.x, target.y);
+            if (x != population.x(index) || y != population.y(index)) population.move(index, x, y);
+        }
+    }
+    const std::int64_t now = static_cast<std::int64_t>(population.ticks());
+    cooldowns_.start(population.id(index), interaction.id, now + static_cast<std::int64_t>(interaction.npc->cooldownSeconds) * 20);
+    const auto known = std::find(actionNames_.begin(), actionNames_.end(), interaction.id);
+    if (known == actionNames_.end()) actionNames_.push_back(interaction.id);
+    lastAction_[static_cast<std::size_t>(index)] = static_cast<std::int16_t>(std::find(actionNames_.begin(), actionNames_.end(), interaction.id) - actionNames_.begin());
+}
+
+void NpcDirector::postEvent(NpcPopulation& population, const std::string& trigger, int x, int y) {
+    int minutes = 0;
+    int reach = 0;
+    for (const EventDef& def : events_.events) {
+        if (def.trigger != trigger) continue;
+        minutes = std::max(minutes, def.forMinutes);
+        reach = std::max(reach, def.withinMetres * 32);
+    }
+    if (minutes == 0) return; // nobody listens for this event
+    ensure(population.size());
+    board_.post(trigger, x, y, population.ticks() + static_cast<std::uint64_t>(minutes) * static_cast<std::uint64_t>(population.ticksPerHour()) / 60U);
+    const int hour = population.hourOfDay();
+    for (const int index : population.near(x, y, reach)) chooseAction(population, index, hour, true); // the persons it concerns answer at once
 }
 
 void NpcDirector::stepFar(NpcPopulation& population, int index, int hour) {
@@ -239,7 +398,12 @@ void NpcDirector::tick(NpcPopulation& population) {
     const std::uint64_t perHour = static_cast<std::uint64_t>(population.ticksPerHour());
     if (population.ticks() % perHour == 0) {
         const int hour = population.hourOfDay();
-        for (const int index : population.nearFocus()) stepNear(population, index, hour);
+        board_.expire(population.ticks());
+        chosenThisHour_ = 0;
+        // Everybody near follows their schedule; the budget of choices (maxPerHour) goes round: the hour decides who is first, so nobody is left out hour after hour.
+        const std::vector<int> nearby = population.nearFocus();
+        const std::size_t start = nearby.empty() ? 0 : static_cast<std::size_t>((population.ticks() / perHour) % nearby.size());
+        for (std::size_t k = 0; k < nearby.size(); ++k) stepNear(population, nearby[(start + k) % nearby.size()], hour);
     }
     farSlice(population);
 }
@@ -256,7 +420,12 @@ std::string NpcDirector::toText() const {
     for (std::size_t i = 0; i < dangers_.size(); ++i) {
         if (dangers_[i] != 0) danger.push_back(i);
     }
-    json data{{"version", kSaveVersion}, {"schedules", schedules}, {"schedule", runs(scheduleOf_)}, {"mode", runs(modes_)}, {"homes", homes}, {"danger", danger}};
+    json profiles = json::array();
+    for (std::size_t i = 1; i < profiles_.size(); ++i) profiles.push_back(profileJson(profiles_[i]));
+    json events = json::array();
+    for (const PostedEvent& event : board_.posted()) events.push_back(json::array({event.trigger, event.x, event.y, event.untilTick}));
+    json data{{"version", kSaveVersion}, {"schedules", schedules}, {"schedule", runs(scheduleOf_)}, {"mode", runs(modes_)}, {"homes", homes}, {"danger", danger},
+              {"profiles", profiles}, {"profile", runs(profileOf_)}, {"events", events}};
     return data.dump() + "\n";
 }
 
@@ -292,6 +461,17 @@ NpcDirector NpcDirector::fromText(std::string_view text, rules::ScheduleConfig c
             const std::size_t at = index.get<std::size_t>();
             if (at < director.dangers_.size()) director.dangers_[at] = 1;
         }
+        for (const json& entry : data.at("profiles")) director.profiles_.push_back(profileFrom(entry));
+        director.profileOf_ = unrun<std::uint16_t>(data.at("profile"), "profile");
+        director.lastAction_.assign(director.modes_.size(), -1);
+        if (director.profileOf_.size() != director.modes_.size()) throw DataError("npc-life.json", "profile", "does not fit the persons");
+        for (const std::uint16_t id : director.profileOf_) {
+            if (id >= director.profiles_.size()) throw DataError("npc-life.json", "profile", "names a profile that is not there");
+        }
+        for (const json& entry : data.at("events")) {
+            if (!entry.is_array() || entry.size() != 4) throw DataError("npc-life.json", "events", "an event is [trigger, x, y, until]");
+            director.board_.post(entry.at(0).get<std::string>(), entry.at(1).get<int>(), entry.at(2).get<int>(), entry.at(3).get<std::uint64_t>());
+        }
         return director;
     } catch (const json::exception& error) {
         throw DataError("npc-life.json", "(content)", error.what());
@@ -311,8 +491,30 @@ std::uint64_t NpcDirector::hash() const {
             }
         }
     }
+    mix(h, profiles_.size());
+    for (const NpcProfile& profile : profiles_) {
+        for (const std::vector<std::string>* names : {&profile.classes, &profile.tags, &profile.classActions, &profile.customActions, &profile.allow, &profile.deny}) {
+            mix(h, names->size());
+            for (const std::string& name : *names) {
+                for (const char c : name) mix(h, static_cast<unsigned char>(c));
+            }
+        }
+        for (const auto& [type, ids] : profile.partnerActions) {
+            for (const char c : type) mix(h, static_cast<unsigned char>(c));
+            for (const std::string& id : ids) {
+                for (const char c : id) mix(h, static_cast<unsigned char>(c));
+            }
+        }
+    }
+    for (const PostedEvent& event : board_.posted()) {
+        for (const char c : event.trigger) mix(h, static_cast<unsigned char>(c));
+        mix(h, static_cast<std::uint64_t>(event.x));
+        mix(h, static_cast<std::uint64_t>(event.y));
+        mix(h, event.untilTick);
+    }
     mix(h, modes_.size());
     for (std::size_t i = 0; i < modes_.size(); ++i) {
+        mix(h, profileOf_[i]);
         mix(h, scheduleOf_[i]);
         mix(h, modes_[i]);
         mix(h, dangers_[i]);

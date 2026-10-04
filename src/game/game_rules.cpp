@@ -334,7 +334,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
+    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);
     }
