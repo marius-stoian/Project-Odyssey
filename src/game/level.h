@@ -40,12 +40,14 @@ struct Definitions {
     std::vector<std::string> plants;    // names of plants.json (US-136): what a placed plant may be
     std::vector<std::string> objects;   // names of objects.json (US-155): world objects, placed in the Editor like plants
     std::vector<std::string> weapons;   // names a pickup may carry (US-134): the weapons of weapons.json, then the built-in demo weapons
+    std::vector<std::string> lightKinds; // names of the kinds of light of lights.json (US-247): what the Editor's Light tool may place
 
     int tileNumber(const std::string& name) const;                     // -1 when unknown
     const CharacterKindDef* character(const std::string& name) const;  // nullptr when unknown
     bool hasWeapon(const std::string& name) const;
     bool hasPlant(const std::string& name) const;
     bool hasLoopingEffect(const std::string& name) const;
+    bool hasLightKind(const std::string& name) const;
 };
 
 // The demo weapons of M1b and US-029 (the physics spear throw, the plain sword slash) are not in
@@ -73,8 +75,9 @@ struct PlacedCharacter {
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 
-// Version 2 (US-134, US-136) adds weapon pickups and plants; version 1 files still load, without any.
-inline constexpr int kLevelVersion = 2;
+// Version 2 (US-134, US-136, US-138) adds weapon pickups, plants and effects; version 3 (US-247) adds placed lights. Older files still load,
+// without them, and are written as version 3 the next time they are saved.
+inline constexpr int kLevelVersion = 3;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;
@@ -105,6 +108,15 @@ struct PlacedEffect {
     friend bool operator==(const PlacedEffect&, const PlacedEffect&) = default;
 };
 
+// A point of light placed in the level with the Editor's Light tool (US-247): a kind of lights.json (colour, reach, strength) that shines in
+// the game after dark. Same ids as the rest.
+struct PlacedLight {
+    int id = 0;
+    std::string kind;     // a kind of light of lights.json
+    PixelPoint at;        // world pixels: where the light hangs
+    friend bool operator==(const PlacedLight&, const PlacedLight&) = default;
+};
+
 // A level: the ground, who stands where, and where the hero begins. Plain data.
 struct Level {
     std::string name = "Untitled";
@@ -116,6 +128,7 @@ struct Level {
     std::vector<PlacedPickup> pickups;
     std::vector<PlacedPlant> plants;
     std::vector<PlacedEffect> effects;
+    std::vector<PlacedLight> lights;     // level version 3 (US-247)
     bool clan = false;                   // the simulated clan lives here (US-032); written only when true
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)

@@ -11,18 +11,32 @@ namespace {
 constexpr double kLightningLift = 0.85; // how far a strike lifts the ambient light toward white
 } // namespace
 
-std::vector<OdysseyGame::LightSource> OdysseyGame::lightSources(double alpha) const {
+// The lights the level itself holds (they shine whether or not the game is running, so the Editor can preview them): effects with a light, and the
+// lights placed with the Editor's Light tool (US-247).
+std::vector<OdysseyGame::LightSource> OdysseyGame::levelLightSources() const {
     std::vector<LightSource> sources;
     const auto add = [&](const LightKindDef& kind, double worldX, double worldY, double heightAboveGround, std::uint64_t id) {
         sources.push_back({&kind, worldX, worldY, worldY + heightAboveGround, id});
     };
-
     // Effects placed in the level that have a light: a camp fire.
     for (const PlacedEffect& placed : level_.effects) {
         const EffectDef* def = catalogs_.effect(placed.name);
         if (def == nullptr || def->light.empty()) continue;
         if (const LightKindDef* kind = lighting_.kind(def->light)) add(*kind, placed.at.x, placed.at.y - 8.0, 8.0, static_cast<std::uint64_t>(placed.id));
     }
+    // Lights placed with the Light tool.
+    for (const PlacedLight& placed : level_.lights) {
+        if (const LightKindDef* kind = lighting_.kind(placed.kind)) add(*kind, placed.at.x, placed.at.y - 8.0, 8.0, 30000U + static_cast<std::uint64_t>(placed.id));
+    }
+    return sources;
+}
+
+std::vector<OdysseyGame::LightSource> OdysseyGame::lightSources(double alpha) const {
+    std::vector<LightSource> sources = levelLightSources();
+    const auto add = [&](const LightKindDef& kind, double worldX, double worldY, double heightAboveGround, std::uint64_t id) {
+        sources.push_back({&kind, worldX, worldY, worldY + heightAboveGround, id});
+    };
+
     // World objects that have a light, while they are in the state that shines (a burning fire pit).
     for (const WorldPlant& plant : plants_) {
         if (!plant.present() || plant.def == nullptr || plant.def->light.empty()) continue;
@@ -50,9 +64,14 @@ std::vector<OdysseyGame::LightSource> OdysseyGame::lightSources(double alpha) co
 }
 
 std::vector<luna::engine::PointLight> OdysseyGame::worldLights(const luna::engine::Rect& view, double alpha, double darkness) const {
-    std::vector<luna::engine::PointLight> lights;
     const double seconds = (static_cast<double>(ticks_) + alpha) / 20.0; // the flicker follows the game's own time, not the simulation's randomness
-    for (const LightSource& source : lightSources(alpha)) {
+    return pointLights(lightSources(alpha), view, seconds, darkness);
+}
+
+std::vector<luna::engine::PointLight> OdysseyGame::pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds,
+                                                                double darkness) const {
+    std::vector<luna::engine::PointLight> lights;
+    for (const LightSource& source : sources) {
         if (static_cast<int>(lights.size()) >= luna::engine::LightFrame::kMaxLights) break;
         const LightKindDef& kind = *source.kind;
         luna::engine::PointLight light;
@@ -103,6 +122,19 @@ luna::engine::LightFrame OdysseyGame::ambientLightFrame(double alpha) const {
         frame.ambientG = lift(frame.ambientG);
         frame.ambientB = lift(frame.ambientB);
     }
+    return frame;
+}
+
+// What the Editor lights the level with when the owner previews an hour (US-247): the sky of that hour (in the clan's season, or spring) and the level's
+// own lights. Nothing here is saved or played; weather and eclipses are left out.
+luna::engine::LightFrame OdysseyGame::editorLightFrame(double hour, const luna::engine::Rect& view) const {
+    luna::engine::LightFrame frame = lighting_.ambientFrame();
+    const SkyState skyThen = skyAt(sky_, hour, gameClock().season);
+    frame.ambientR *= skyThen.ambientR;
+    frame.ambientG *= skyThen.ambientG;
+    frame.ambientB *= skyThen.ambientB;
+    frame.normalMaps = settings_.lighting != "Low";
+    if (const double darkness = darknessOf(frame); darkness > 0.0) frame.lights = pointLights(levelLightSources(), view, 0.0, darkness);
     return frame;
 }
 

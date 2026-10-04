@@ -39,6 +39,7 @@ struct PointLight {
 struct LightFrame {
     static constexpr int kMaxLights = 64;
     float ambientR = 1.0F, ambientG = 1.0F, ambientB = 1.0F;
+    bool normalMaps = true; // false: sprites are lit flat even when they have a normal map (the Low lighting quality, US-247)
     std::vector<PointLight> lights;
 };
 

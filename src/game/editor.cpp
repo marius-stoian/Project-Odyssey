@@ -36,6 +36,7 @@ const char* toolName(EditorTool tool) {
     case EditorTool::Weapon: return "Weapon";
     case EditorTool::Plant: return "Plant";
     case EditorTool::Effect: return "Effect";
+    case EditorTool::Light: return "Light";
     }
     return "?";
 }
@@ -89,10 +90,12 @@ void Editor::buildPanels() {
     button("Arms", "Place a weapon pickup: choose one, click the map", [this] { tool_ = EditorTool::Weapon; });
     button("Plant", "Place a plant: choose one (pages with the arrows), click the map", [this] { tool_ = EditorTool::Plant; });
     button("Fx", "Place a looping effect (fireflies, campfire, portal): choose one, click the map", [this] { tool_ = EditorTool::Effect; });
-    button("Select", "Select a character, pickup, plant or effect: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
+    button("Light", "Place a light (campfire, torch): choose a kind, click the map; it shines in the game after dark", [this] { tool_ = EditorTool::Light; });
+    button("Select", "Select a character, pickup, plant, effect or light: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
+    button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
     button("Redo", "Redo (Ctrl+Y)", [this] { redo(); });
     button("Save", "Save the level (Ctrl+S)", [this] { save(); });
@@ -142,10 +145,36 @@ void Editor::buildPanels() {
             effectButton.hint = definitions_.loopingEffects[static_cast<std::size_t>(i)];
         }
     }
+    // Lights (US-247): the kinds of lights.json by name.
+    {
+        const int kinds = static_cast<int>(definitions_.lightKinds.size());
+        int widest = 0;
+        for (const std::string& name : definitions_.lightKinds) widest = std::max(widest, UiPainter::textWidth(name));
+        constexpr int kRow = 14;
+        lightPalette_ = std::make_unique<Panel>(Rect{2, kToolbarHeight + 4, widest + 16, std::max(1, kinds) * kRow + 4});
+        for (int i = 0; i < kinds; ++i) {
+            const Rect row{4, kToolbarHeight + 6 + i * kRow, widest + 12, kRow - 2};
+            Button& lightButton = lightPalette_->add<Button>(row, definitions_.lightKinds[static_cast<std::size_t>(i)], [this, i] {
+                light_ = i;
+                tool_ = EditorTool::Light; // choosing a kind of light means placing it
+            });
+            lightButton.hint = definitions_.lightKinds[static_cast<std::size_t>(i)];
+        }
+    }
     buildProperties();
     buildSettings();
     buildOpenList();
     buildQuestion();
+}
+
+void Editor::setPreviewHour(std::optional<double> hour) {
+    previewHour_ = hour ? std::optional<double>(std::clamp(*hour, 0.0, 24.0)) : std::nullopt;
+    sliderDragging_ = false;
+}
+
+// The slider sits right of the tool bar while the preview is on: left end midnight, right end the next midnight.
+luna::engine::Rect Editor::timeSliderRect() const {
+    return {toolbar_->bounds.x + toolbar_->bounds.width + 6, 4, 144, kToolbarHeight - 4};
 }
 
 // One page of the character palette (US-137): 12 kinds, two to a row, then the page arrows. The first page holds
@@ -228,6 +257,27 @@ void Editor::buildPlantPalette() {
         });
         button.hint = kinds[static_cast<std::size_t>(index)];
     }
+}
+
+const PlacedLight* Editor::findLight(int id) const {
+    for (const PlacedLight& light : level_.lights) {
+        if (light.id == id) return &light;
+    }
+    return nullptr;
+}
+
+void Editor::changeLights(const std::string& what, std::vector<PlacedLight> after, int nextIdAfter) {
+    run(std::make_unique<LightsCommand>(what, level_.lights, std::move(after), level_.nextId, nextIdAfter));
+}
+
+// A placed light is picked by a box of 16 x 16 around its spot.
+std::optional<int> Editor::lightAt(int screenX, int screenY) const {
+    if (screenX < 0 || screenY < 0) return std::nullopt;
+    const auto [wx, wy] = toWorld(screenX, screenY);
+    for (auto it = level_.lights.rbegin(); it != level_.lights.rend(); ++it) {
+        if (wx >= it->at.x - 8 && wx < it->at.x + 8 && wy >= it->at.y - 8 && wy < it->at.y + 8) return it->id;
+    }
+    return std::nullopt;
 }
 
 const PlacedEffect* Editor::findEffect(int id) const {
@@ -316,6 +366,14 @@ void Editor::removeSelected() {
         select(std::nullopt);
         return;
     }
+    if (const PlacedLight* gone = findLight(*selected_)) {
+        const std::string what = "remove " + gone->kind + " light";
+        auto after = level_.lights;
+        std::erase_if(after, [this](const PlacedLight& l) { return l.id == *selected_; });
+        changeLights(what, std::move(after), level_.nextId);
+        select(std::nullopt);
+        return;
+    }
     if (const PlacedEffect* gone = findEffect(*selected_)) {
         const std::string what = "remove " + gone->name;
         auto after = level_.effects;
@@ -369,7 +427,7 @@ PlacedCharacter* Editor::find(int id) {
 }
 
 void Editor::select(std::optional<int> id) {
-    if (id && find(*id) == nullptr && findPickup(*id) == nullptr && findPlant(*id) == nullptr && findEffect(*id) == nullptr) id.reset();
+    if (id && find(*id) == nullptr && findPickup(*id) == nullptr && findPlant(*id) == nullptr && findEffect(*id) == nullptr && findLight(*id) == nullptr) id.reset();
     if (id == selected_ && !propertiesStale_) return;
     selected_ = id;
     buildProperties();
@@ -712,7 +770,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
                       (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) ||
-                      (b->label == "#" && grid_) || (b->label == "Fx" && tool_ == EditorTool::Effect);
+                      (b->label == "#" && grid_) || (b->label == "Fx" && tool_ == EditorTool::Effect) || (b->label == "Light" && tool_ == EditorTool::Light) ||
+                      (b->label == "Sky" && previewHour_.has_value());
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(palette_->children()[i].get())) b->selected = static_cast<int>(i) == tile_;
@@ -726,6 +785,9 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     for (std::size_t i = 0; i < effectPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(effectPalette_->children()[i].get())) b->selected = static_cast<int>(i) == effect_;
     }
+    for (std::size_t i = 0; i < lightPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(lightPalette_->children()[i].get())) b->selected = static_cast<int>(i) == light_;
+    }
     for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(plantPalette_->children()[i].get())) b->selected = plantPageFirst(plantPage_) + static_cast<int>(i) - 2 == plant_;
     }
@@ -734,7 +796,8 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     weaponPalette_->visible = tool_ == EditorTool::Weapon;
     plantPalette_->visible = tool_ == EditorTool::Plant;
     effectPalette_->visible = tool_ == EditorTool::Effect;
-    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect;
+    lightPalette_->visible = tool_ == EditorTool::Light;
+    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect && tool_ != EditorTool::Light;
     if (propertiesStale_ && !properties_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
@@ -753,8 +816,19 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     }
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
-    const bool onToolbar = toolbar_->handle(input);
-    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input);
+    // The time-of-day slider (US-247): press on it and drag; the hour follows the pointer until the button is let go.
+    bool onSlider = false;
+    if (previewHour_) {
+        const Rect slider = timeSliderRect();
+        const auto& pointer = input.pointer;
+        const bool inside = pointer.x >= slider.x && pointer.x < slider.x + slider.width && pointer.y >= slider.y && pointer.y < slider.y + slider.height;
+        if (pointer.wasPressed(PointerButton::Left) && inside) sliderDragging_ = true;
+        if (!pointer.isHeld(PointerButton::Left)) sliderDragging_ = false;
+        if (sliderDragging_) previewHour_ = std::clamp(24.0 * (pointer.x - slider.x) / (slider.width - 1), 0.0, 24.0);
+        onSlider = inside || sliderDragging_;
+    }
+    const bool onToolbar = toolbar_->handle(input) || onSlider;
+    const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input) || lightPalette_->handle(input);
     const bool onProperties = properties_->handle(input);
     const bool onSettings = settings_->handle(input);
     return onToolbar || onPalette || onProperties || onSettings;
@@ -797,6 +871,18 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
             const int id = level_.nextId;
             after.push_back({id, name, {x, y}});
             changeEffects(std::format("place {} #{}", name, id), std::move(after), level_.nextId + 1);
+            select(id);
+        }
+        return;
+    }
+    if (tool_ == EditorTool::Light) {
+        if (pressed && hover_ && !definitions_.lightKinds.empty()) {
+            const std::string& kind = definitions_.lightKinds[static_cast<std::size_t>(light_)];
+            const auto [x, y] = insideLevel(wx, wy);
+            auto after = level_.lights;
+            const int id = level_.nextId;
+            after.push_back({id, kind, {x, y}});
+            changeLights(std::format("place {} light #{}", kind, id), std::move(after), level_.nextId + 1);
             select(id);
         }
         return;
@@ -849,10 +935,19 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         const bool character = hit.has_value();
         if (!hit) hit = pickupAt(pointer.x, pointer.y); // pickups lie on the ground, under the characters
         const bool pickup = hit.has_value() && !character;
+        if (!hit) hit = lightAt(pointer.x, pointer.y);   // light markers hang above everything but characters and pickups
+        const bool light = hit.has_value() && !character && !pickup;
         if (!hit) hit = effectAt(pointer.x, pointer.y);  // effects float above the plants
-        const bool effect = hit.has_value() && !character && !pickup;
+        const bool effect = hit.has_value() && !character && !pickup && !light;
         if (!hit) hit = plantAt(pointer.x, pointer.y);   // plants stand under everything
         select(hit);
+        if (hit && light) {
+            const PlacedLight& grabbed = *findLight(*hit);
+            movingLight_ = true;
+            movingLightsBefore_ = level_.lights;
+            grabX_ = grabbed.at.x - wx;
+            grabY_ = grabbed.at.y - wy;
+        }
         if (hit && effect) {
             const PlacedEffect& grabbed = *findEffect(*hit);
             movingEffect_ = true;
@@ -860,7 +955,7 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
             grabX_ = grabbed.at.x - wx;
             grabY_ = grabbed.at.y - wy;
         }
-        if (hit && !character && !pickup && !effect) {
+        if (hit && !character && !pickup && !effect && !light) {
             const PlacedPlant& grabbed = *findPlant(*hit);
             movingPlant_ = true;
             movingPlantsBefore_ = level_.plants;
@@ -886,6 +981,24 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         if (PlacedCharacter* dragged = find(*selected_)) {
             const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
             dragged->feet = {x, y}; // moved at once, so the owner sees it follow the pointer
+        }
+    }
+    if (movingLight_ && held && pointer.inside() && selected_) {
+        for (PlacedLight& light : level_.lights) {
+            if (light.id == *selected_) {
+                const auto [x, y] = insideLevel(wx + grabX_, wy + grabY_);
+                light.at = {x, y};
+            }
+        }
+    }
+    if (movingLight_ && (released || !held)) {
+        movingLight_ = false;
+        if (level_.lights != movingLightsBefore_) {
+            const PlacedLight* moved = selected_ ? findLight(*selected_) : nullptr;
+            const std::string what = moved == nullptr ? "move" : std::format("move {} light to ({}, {})", moved->kind, moved->at.x, moved->at.y);
+            history_.record(std::make_unique<LightsCommand>(what, movingLightsBefore_, level_.lights, level_.nextId, level_.nextId));
+            unsaved_ = true;
+            say(what);
         }
     }
     if (movingEffect_ && held && pointer.inside() && selected_) {
@@ -1039,6 +1152,13 @@ void Editor::update(const Intents& intents) {
 }
 
 void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
+    // The time-of-day preview (US-247): the ground and everything standing on it are lit as at that hour; the marks, panels and text are not.
+    luna::engine::LightFrame preview;
+    const bool previewing = previewHour_.has_value() && static_cast<bool>(lightPreview_);
+    if (previewing) {
+        preview = lightPreview_(*previewHour_, camera_.view(alpha));
+        renderer.setLighting(&preview);
+    }
     map_.draw(renderer, textures_.tiles, camera_, alpha);
     const Rect view = camera_.view(alpha);
     auto screen = [&view](int worldX, int worldY) { return luna::engine::Point{worldX - view.x, worldY - view.y}; };
@@ -1084,6 +1204,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         renderer.draw(textures_.characters, textures_.art->frame(kind->frames, kind->directions, placed.facing, 0),
                       screen(placed.feet.x - kCharacterWidth / 2, placed.feet.y - kCharacterHeight));
     }
+    if (previewing) renderer.setLighting(nullptr);
     // Where the hero will begin: the hero, framed in gold, with a label.
     const auto start = screen(level_.heroStart.x - kCharacterWidth / 2, level_.heroStart.y - kCharacterHeight);
     renderer.draw(textures_.heroSheet, {0, 0, kCharacterWidth, kCharacterHeight}, start);
@@ -1134,6 +1255,16 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
             }
         }
     }
+    // Placed lights (US-247): a small gold sun with the reach of the light as a frame (the kind's radius, from lights.json when the game gave it).
+    for (const PlacedLight& placed : level_.lights) {
+        const auto spot = screen(placed.at.x, placed.at.y);
+        painter.fill({spot.x - 3, spot.y - 3, 7, 7}, UiColor::Gold);
+        painter.outline({spot.x - 4, spot.y - 4, 9, 9}, UiColor::Dark);
+        if (selected_ && *selected_ == placed.id) {
+            painter.outline({spot.x - 9, spot.y - 9, 19, 19}, UiColor::Gold);
+            painter.text(spot.x - UiPainter::textWidth(placed.kind) / 2, spot.y - 20, placed.kind, UiColor::Gold);
+        }
+    }
     if (selected_ && textures_.plants != nullptr) {
         if (const PlacedPlant* plant = findPlant(*selected_)) {
             const Rect extent = plantExtent(*textures_.plants, plant->kind);
@@ -1144,6 +1275,15 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     }
 
     toolbar_->draw(painter);
+    if (previewHour_) { // the time-of-day slider: a track, a gold marker at the hour, and the time of day
+        const Rect slider = timeSliderRect();
+        painter.fill(slider, UiColor::Panel);
+        painter.outline(slider, UiColor::Border);
+        const int marker = slider.x + static_cast<int>(std::lround(*previewHour_ / 24.0 * (slider.width - 3)));
+        painter.fill({marker, slider.y + 1, 3, slider.height - 2}, UiColor::Gold);
+        const int minutes = static_cast<int>(std::lround(*previewHour_ * 60.0)) % (24 * 60);
+        painter.text(slider.x + slider.width + 4, slider.y + 2, std::format("{:02}:{:02}", minutes / 60, minutes % 60), UiColor::Text);
+    }
     palette_->draw(painter);
     characterPalette_->draw(painter);
     if (characterPalette_->visible) {
@@ -1176,6 +1316,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         for (std::size_t i = 0; i < effectPalette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(effectPalette_->children()[i].get())) b->selected = static_cast<int>(i) == effect_;
     }
+    for (std::size_t i = 0; i < lightPalette_->children().size(); ++i) {
+        if (auto* b = dynamic_cast<Button*>(lightPalette_->children()[i].get())) b->selected = static_cast<int>(i) == light_;
+    }
     for (std::size_t i = 2; i < plantPalette_->children().size(); ++i) {
             const Rect& cell = plantPalette_->children()[i]->bounds;
             const std::size_t index = static_cast<std::size_t>(plantPageFirst(plantPage_)) + i - 2;
@@ -1184,6 +1327,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
             }
         }
     }
+    lightPalette_->draw(painter);
     weaponPalette_->draw(painter);
     if (weaponPalette_->visible && textures_.weapons != nullptr) {
         for (std::size_t i = 0; i < weaponPalette_->children().size() && i < weaponNames_.size(); ++i) {
@@ -1205,6 +1349,10 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         what = weaponNames_.empty() ? "no weapons" : weaponNames_[static_cast<std::size_t>(weapon_)];
     } else if (tool_ == EditorTool::Effect) {
         what = definitions_.loopingEffects.empty() ? "no effects" : definitions_.loopingEffects[static_cast<std::size_t>(effect_)];
+    } else if (tool_ == EditorTool::Light) {
+        what = definitions_.lightKinds.empty() ? "no lights" : definitions_.lightKinds[static_cast<std::size_t>(light_)];
+    } else if (selected_ && findLight(*selected_) != nullptr) {
+        what = findLight(*selected_)->kind + " light";
     } else if (selected_ && findEffect(*selected_) != nullptr) {
         what = findEffect(*selected_)->name;
     } else if (tool_ == EditorTool::Plant) {
@@ -1233,6 +1381,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         weaponPalette_->drawOverlay(painter);
         plantPalette_->drawOverlay(painter);
         effectPalette_->drawOverlay(painter);
+        lightPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         settings_->drawOverlay(painter);
     }

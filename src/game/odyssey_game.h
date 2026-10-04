@@ -250,6 +250,9 @@ public:
         std::uint64_t id = 0;
     };
     std::vector<LightSource> lightSources(double alpha) const;
+    std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
+    std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
+    luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)
     luna::engine::LightFrame ambientLightFrame(double alpha) const; // the ambient colour of the world now (no point lights)
     static double darknessOf(const luna::engine::LightFrame& frame);
     void updateZoom(const luna::engine::Intents& intents);

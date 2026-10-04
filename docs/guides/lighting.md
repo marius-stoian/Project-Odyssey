@@ -185,3 +185,23 @@ Weather changes the mood of the world: rain dims and cools the ambient light, sn
 - **Lightning.** Time is cut into 0.2 s slots. A hash of the weather seed and the slot decides whether a strike starts in it, with the chance `flash` x 0.2 / 60; a strike lifts the ambient light 85% of the way to white at its first instant and falls back to nothing within the slot (a few frames). The same seed strikes at the same moments; the simulation's random streams are never used. While one weather fades into another the flash rate blends the same way as the light.
 - Shipped values: drizzle and light rain 0.85, steady and heavy rain 0.75, dark storm clouds 0.6, thunderstorm, close and chain lightning, storm rain and the electric storms 0.55 with 10 flashes a minute (chain lightning 18), distant lightning 0.8 with 5, snow 0.92, blizzard and whiteout 0.8, fog and cloud 0.85, dust, sand and ash 0.75 warm. Every other weather leaves the light as it is.
 - A mistake stops the game naming file and field (for example `weather.json: weather[3].light.dim: must be a number from 0.1 to 1`).
+
+# Lighting quality, placed lights and the Editor preview (US-247)
+
+**Quality.** `settings.json` `lighting` is `Low`, `Medium` or `High` (the Settings screen). `Low` switches off what costs the most and shows the least: the normal maps (every sprite is lit as a flat surface, the ambient colour and the fire glow stay) and the fire shadows (US-245). `Medium` and `High` keep both; `High` is the quality the D-06 target (60 FPS at 1080p on the mid-range PC) is held on. The fallback renderer (`--renderer sdl`) never had normal maps.
+
+**Placed lights.** The Editor's Light tool puts a point of light of a kind of `lights.json` into the level (`lights` in the level file, level version 3):
+
+```json
+"lights": [ { "id": 12, "kind": "campfire", "x": 300, "y": 300 } ]
+```
+
+| Field | Values | Meaning |
+|---|---|---|
+| `id` | whole number, unique in the level | same counter as every other thing in the level |
+| `kind` | a `name` of `lights.json` | colour, reach, strength and height of the light |
+| `x`, `y` | world pixels inside the level | where the light is on the ground; it hangs 8 pixels above |
+
+A wrong `kind` stops loading with `lights[0].kind: "lava lamp" is not a kind of light in lights.json`. Placed lights shine after dark exactly like the lights of effects and objects (US-243).
+
+**Editor preview.** The Sky button in the Editor lights the level as at any hour with the sky of `sky.json` and the clan's season (spring without a clan), and the level's own lights, effects and placed lights. Weather and eclipses are not previewed. Nothing of it is saved.

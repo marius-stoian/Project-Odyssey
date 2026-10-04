@@ -110,6 +110,23 @@ private:
     int nextIdAfter_;
 };
 
+// Placed lights placed, moved or removed (US-247): the whole list before and after.
+class LightsCommand final : public Command {
+public:
+    LightsCommand(std::string what, std::vector<PlacedLight> before, std::vector<PlacedLight> after, int nextIdBefore, int nextIdAfter)
+        : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)), nextIdBefore_(nextIdBefore), nextIdAfter_(nextIdAfter) {}
+    void apply(Level& level) const override;
+    void undo(Level& level) const override;
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    std::vector<PlacedLight> before_;
+    std::vector<PlacedLight> after_;
+    int nextIdBefore_;
+    int nextIdAfter_;
+};
+
 // A whole-level change: a resize, a new name, another default ground, a moved hero start. It
 // keeps the level before and after (a resize changes everything, and is rare).
 class LevelCommand final : public Command {

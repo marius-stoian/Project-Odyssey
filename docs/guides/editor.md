@@ -30,10 +30,12 @@ Rest the pointer on any button to see what it does.
 | **Place** | Put a character on the map (see Characters). |
 | **Arms** | Put a weapon pickup on the map (see Weapon pickups). |
 | **Plant** | Put a plant on the map (see Plants). |
-| **Select** | Pick a character, pickup, plant or the hero's start, to move or change it. |
+| **Light** | Put a light on the map (see Lights and the time of day). |
+| **Select** | Pick a character, pickup, plant, effect, light or the hero's start, to move or change it. |
 | **Level** | Open the level settings (see Level settings). |
 | **#** | The Grid button: show or hide the cell lines (also **G**). |
 | **Fx** | Put a looping effect on the map (see Effects and weather). |
+| **Sky** | Switch the time-of-day preview on or off (see Lights and the time of day). |
 | **Undo** | Take back the last change (also **Ctrl+Z**). Up to 100 steps. |
 | **Redo** | Do it again (also **Ctrl+Y**). |
 | **Save** | Save the level (also **Ctrl+S**). The last three saves are kept as backups (`.bak1` to `.bak3`), so a mistake is never final. |
@@ -58,7 +60,7 @@ In the game, pick up the sword (see Weapon pickups below), hold it (**Shift** or
 1. Click **Arms**. The palette shows the 16 starter weapons by their icons, then **Sp** (the old spear throw) and **Sw** (the old plain sword slash).
 2. Click one, then click the map. The weapon lies there on the ground, with a shadow, and is selected at once.
 3. With **Select** you can click a pickup, drag it to move it, and press **Delete** to remove it. **Ctrl+Z** and **Ctrl+Y** undo and redo every one of these, like characters.
-4. Save with **Ctrl+S**. The level file is now version 2 and lists the pickups; older (version 1) files still open, with no pickups.
+4. Save with **Ctrl+S**. The level file is now version 3 and lists the pickups (and plants, effects and lights); older (version 1 and 2) files still open, with none of what they lack.
 
 In the game the hero starts with empty hands. Walk over a pickup and its weapon goes into the first free slot of the **hotbar** (nine boxes, bottom centre) and the pickup is gone until the level restarts (F2, then F1). Keys **1** to **9** hold that slot; **Shift** holds the next filled one. With all nine slots full a pickup stays where it is and "Hotbar full" flashes. **E**, **Space** or **Enter** attack with the held weapon. Your valley has no pickups until you place some; `demo.json` has the old spear and sword by the hero.
 
@@ -76,6 +78,12 @@ In the game these 20 animals are **enemies**: grey wolf, fox, bear, boar, wild p
 ## Effects and weather
 1. Click **Fx**. The palette shows the 17 looping effects (fireflies, a flame, a portal, a magic circle, a whirlpool, dark mist, ...) by their first picture. Click one, then click the map: it is placed where you click. **Select** moves it (drag) or removes it (**Delete**); **Ctrl+Z** and **Ctrl+Y** undo and redo. In the game it plays in a loop.
 2. The weather is not edited: in the game a random weather fades in over 3 seconds every 60 to 120 seconds, and the sky is clear about one time in three. The weather is only for the eyes. The same level plays under the same weathers every time. To try a weather: `odysseus.exe --weather "steady rain"`; to choose another sequence: `--seed 7`. The Editor shows no weather.
+## Lights and the time of day
+1. Click **Light**. The palette lists the kinds of light of `assets/data/light/lights.json` (`campfire`, `torch`, and any you add). Click a kind, then click the map: a small gold sun marks the light where you clicked. **Select** moves it (drag) or removes it (**Delete**); **Ctrl+Z** and **Ctrl+Y** undo and redo. The kind decides the colour, the reach and the strength; to change them edit `lights.json` (see the lighting guide).
+2. Placed lights are saved in the level (level version 3: a `lights` list of `{id, kind, x, y}`). Older levels (versions 1 and 2) open without lights and are written as version 3 the next time you save.
+3. In the game a placed light shines after dark like a camp fire, and adds nothing in daylight.
+4. **Sky** switches the **time-of-day preview** on: a slider appears right of the tool bar with the time beside it. Press on the slider and drag: the level is lit as at that hour (left end midnight, middle noon, right end midnight), with its lights glowing at night. It is a view only: it is not saved and not an Undo step. Click **Sky** again to switch it off.
+
 ## The hero's start
 The hero begins where the gold **START** marker stands. With **Select**, drag the marker to move it. Press **F1** and the hero starts there.
 

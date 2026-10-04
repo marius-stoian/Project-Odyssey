@@ -1388,3 +1388,23 @@ light.red = mix(tintOf(from->tintRed, from->lightDim), tintOf(to->tintRed, to->l
 **Try it (15 minutes).** Give "steady rain" `"light":{"dim":0.3,"tint":[255,255,255]}`, run with `--weather "steady rain"`: the rain is nearly night.
 
 **Check yourself.** Why does the lightning use a hash of the slot and not the simulation's random numbers?
+
+## US-247 Lighting in the Editor and quality settings: a setting that changes a pipeline
+
+**What we built.** The Editor can show the level at any hour (the Sky button and a slider), the owner can place lights with a new Light tool (saved in the level), and the lighting quality Low, Medium, High now changes what is drawn.
+
+**The C++ idea: one flag travels down the layers.** The Low quality has to reach the graphics card code without the Game knowing about the card. We add a plain `bool normalMaps` to the light data the Game hands to the renderer, and the renderer copies it down to the platform layer:
+
+```cpp
+lightFrame.normalMaps = settings_.lighting != "Low";   // Game
+state.normalMaps = frame->normalMaps;                  // Engine copies it to Platform
+const bool useNormals = lightSets_[batch.light].normalMaps; // GPU backend picks the flat normal
+```
+
+Each layer only knows its own neighbour, so the rule that Game never touches SDL still holds. The level file gets a version number bump (2 to 3): an old file has no `lights` list and loads as "no lights"; saving writes version 3.
+
+**Where to look.** `Editor::render` and `Editor::handlePanels` in `src/game/editor.cpp`; `OdysseyGame::editorLightFrame` in `src/game/world_lights.cpp`; `gpu_backend.cpp` (`useNormals`); `assets/levels/*.json` (`lights`).
+
+**Try it (15 minutes).** Click Sky in the Editor, drag the slider to midnight, place a campfire with the Light tool: it glows. Then set Lighting to Low in the Settings and look at a sprite near a fire: it is lit flat.
+
+**Check yourself.** Why does a level made by a newer game stop with an error instead of loading what it can?
