@@ -452,19 +452,28 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
     if (!subject) return false;
     const bool placed = subject->kind == Subject::Kind::Npc || (subject->kind == Subject::Kind::Animal && placedIdOf(game, *subject) >= 0);
     if (!inRun && !placed) return false; // outside a run only the placed people and creatures of a level have a menu (US-265)
-    return openMenuFor(game, *subject, false);
+    return openMenuFor(game, *subject, MenuMode::Ordinary);
 }
 
-bool RunFlow::openConfront(OdysseyGame& game, const Subject& subject) { return openMenuFor(game, subject, true); }
+bool RunFlow::openConfront(OdysseyGame& game, const Subject& subject) { return openMenuFor(game, subject, MenuMode::Confront); }
+bool RunFlow::openActions(OdysseyGame& game, const Subject& subject) { return openMenuFor(game, subject, MenuMode::All); }
 
-bool RunFlow::openMenuFor(OdysseyGame& game, const Subject& subject, bool confront) {
+bool RunFlow::openMenuFor(OdysseyGame& game, const Subject& subject, MenuMode mode) {
     actions_.clear();
-    contextTitle_ = confront ? "Confront " + subject.title : subject.title;
+    contextTitle_ = mode == MenuMode::Confront ? "Confront " + subject.title : (mode == MenuMode::All ? "Actions of " + subject.title : subject.title);
+    const bool placed = placedIdOf(game, subject) >= 0;
     const GameRuleContext context(game, subject);
     for (const sim::rules::Offer& offer : game.offersFor(subject)) {
-        if ((offer.interaction->menu == "confront") != confront) continue; // the confront actions have their own menu, and Talk is not in it
+        const bool confrontAction = offer.interaction->menu == "confront";
+        if (mode == MenuMode::Ordinary && confrontAction) continue;  // the confront actions have their own menu, and Talk is not in it
+        if (mode == MenuMode::Confront && !confrontAction) continue;
+        // What an NPC's menu shows (D-52 Q-09): actions it cannot do now for a reason of its own (an attitude, an item) are hidden; a hero who is only too
+        // far away still sees them greyed out. The Actions pop-up lists them all with what they need.
+        if (placed && mode != MenuMode::All && !offer.enabled && !offer.tooFar) continue;
         const std::string id = offer.interaction->id; // by id: the data may be reloaded (F5) while the menu is open
-        actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), offer.enabled ? std::string() : offer.reason,
+        std::string reason = offer.enabled ? std::string() : offer.reason;
+        if (!offer.enabled && reason.empty()) reason = "needs: more than you have now";
+        actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), reason,
                             [id, subject](OdysseyGame& g) {
                                 if (!startInteraction(g, id, subject)) g.run().setMessage("That action is no longer in the data.");
                             }});

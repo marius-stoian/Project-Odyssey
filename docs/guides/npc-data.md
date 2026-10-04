@@ -169,3 +169,17 @@ In the script of a placed NPC: `opinion(npc, hero)` is what it thinks of the her
 | `de-escalate` | `do calm 15 70`, friends +2 | 70 in 100: stops an attack, +15 |
 
 Every amount is in the file: change it and press **F5**. `opinion npc hero -20` changes what the target thinks of the hero; `do spread-opinion -5` makes everyone within `hearingTiles` (12, in `opinions.json`) who **knows** the target (they have met it or are of its family) think `-5` of the hero too. A creature with a kind file (a goblin, a deer) is an NPC too and keeps an opinion of the hero from its starting attitude. Add your own confront action with a new file that says `"menu": "confront"` and targets `npc`. NPCs may confront each other later (US-292).
+
+## Actions and the Actions pop-up (US-267)
+
+Which actions an NPC has is worked out in layers (D-52 Q-08): the **tags** give the defaults (an interaction file targets tags: `"target": { "tags": ["trader"] }`), and the **allow and deny lists** (class, kind and the NPC itself, resolved as in "Precedence" above) fine-tune. An interaction in the resolved `deny` list is never offered for that NPC (a later deny wins). One in `allow` is offered although the target tags of its file do not match (the hero, the range and the `requires` still count): a plain wanderer that allows `trade` can trade.
+
+**The right-click menu** of an NPC shows what the hero can do now. An action that cannot be done for a reason of the NPC's own (a `requires` that fails: the attitude, an item) is **hidden**; one that is only out of range stays, greyed out with "Too far away". The menu always ends with **Confront...** and **Actions...**.
+
+**The Actions pop-up** (the key **X** for the NPC under the pointer or the nearest within 6 m, or **Actions...** in the right-click menu) lists every action the NPC has, the confront actions too. The ones that can be done now can be chosen; the others are greyed out with what they need, in plain words, which are the `else` text of their `requires`:
+
+```json
+"requires": [ { "if": "opinion(npc, hero) >= 10", "else": "needs: friendly or better" } ]
+```
+
+Write `opinion(npc, hero)` against the bands of the table above (friendly is 10, enchanted 40, lovingly 70, suspicious from -29, wary from -59). Denied actions are not the NPC's actions, so they are not in the pop-up.

@@ -31,6 +31,15 @@ bool hasTag(const std::vector<std::string>& tags, const std::string& tag) { retu
 
 // ---- what the hero can act on
 
+// The allow and deny lists a placed character resolves to (classes, kind, itself) go into what the rules see of it.
+static void applyActionLists(const OdysseyGame& game, const PlacedCharacter& placed, sim::rules::ThingInfo& info) {
+    const sim::rules::ResolvedNpc resolved = game.npcClasses().resolve(placed);
+    for (const auto& [id, state] : resolved.actions) {
+        if (state == sim::rules::ActionState::Allowed) info.allow.push_back(id);
+        else if (state == sim::rules::ActionState::Denied) info.deny.push_back(id);
+    }
+}
+
 std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
     const PlacedCharacter* placed = game.placedCharacter(placedId);
     if (placed == nullptr || game.npcPopulation().indexOf(placedId) < 0) return std::nullopt;
@@ -46,6 +55,7 @@ std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
     subject.info.tags = resolved.tags;
     subject.info.tags.push_back("npc");
     if (game.npcDialogueFor(placedId) != nullptr) subject.info.tags.push_back("speaks"); // no dialogue for the player, no Talk (D-52 Q-11)
+    applyActionLists(game, *placed, subject.info);
     return subject;
 }
 
@@ -183,7 +193,10 @@ Subject animalSubject(const OdysseyGame& game, std::size_t enemyIndex) {
     subject.y = enemy.feetY();
     subject.info.kind = enemy.kindName;
     if (const CharacterKindDef* kind = game.definitions().character(enemy.kindName)) subject.info.tags = kind->tags;
-    if (game.npcClasses().kinds().find(enemy.kindName) != nullptr) subject.info.tags.push_back("npc"); // an NPC with a kind file can be confronted (US-266)
+    if (game.npcClasses().kinds().find(enemy.kindName) != nullptr) {
+        subject.info.tags.push_back("npc"); // an NPC with a kind file can be confronted (US-266)
+        if (const PlacedCharacter* placed = game.placedCharacter(enemy.id)) applyActionLists(game, *placed, subject.info);
+    }
     return subject;
 }
 
