@@ -6,6 +6,8 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
 #include <format>
 #include <limits>
 #include <optional>
@@ -107,6 +109,8 @@ void NpcDirector::ensure(std::size_t size) {
     homeY_.resize(size, kUnset);
     profileOf_.resize(size, 0);
     lastAction_.resize(size, -1);
+    hp_.resize(size, -1);
+    damage_.resize(size, -1);
 }
 
 void NpcDirector::setPlaces(std::vector<Place> places) { places_ = std::move(places); }
@@ -255,7 +259,7 @@ void NpcDirector::stepNear(NpcPopulation& population, int index, int hour) {
     }
     modes_[at] = static_cast<std::uint8_t>(Mode::Scheduled);
     followSchedule(population, index, hour, true);
-    if (isFree(population, index, hour)) chooseAction(population, index, hour, false); // idle on duty: do something of one's own
+    if (isFree(population, index, hour)) chooseAction(population, index, hour, false, false); // idle on duty: do something of one's own
 }
 
 std::pair<int, int> NpcDirector::pointNear(const NpcPopulation& population, int index, int x, int y) const {
@@ -274,30 +278,41 @@ bool NpcDirector::isFree(const NpcPopulation& population, int index, int hour) c
     return block == nullptr || config_.freeActivities.count(block->activity) != 0;
 }
 
-// The choice: every candidate interaction (class, custom and event actions) is scored against each thing it could be done to (a place, or the spot of an event) with the `npc`
-// block of its file and the rule language, and the best score wins (a tie by a roll of the world seed, the tick and the person); below kMinScore nobody gets up for it.
-bool NpcDirector::chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly) {
-    if (interactions_ == nullptr || chosenThisHour_ >= config_.maxPerHour) return false;
+// The choice (US-291, US-292): every thing the person could do something to is scored with the `npc` block of the interaction files and the rule language, and the best score
+// wins (a tie by a roll of the world seed, the tick and the person); below kMinScore nobody gets up for it. The things are the places of the level and the spots of events (for
+// the candidates of the class, custom and event sources), and the neighbour who stands close (for every interaction whose `actors` fit the person and whose target is a person).
+bool NpcDirector::chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly, bool abstract) {
+    if (interactions_ == nullptr) return false;
+    if (!abstract && chosenThisHour_ >= config_.maxPerHour) return false;
     const std::size_t at = static_cast<std::size_t>(index);
     if (modes_[at] == static_cast<std::uint8_t>(Mode::Dead) || modes_[at] == static_cast<std::uint8_t>(Mode::Fighting)) return false;
     const NpcProfile& own = profiles_[profileOf_[at]];
-    if (own.classActions.empty() && own.customActions.empty() && board_.posted().empty()) return false;
-    const SourceContext context{own, population.x(index), population.y(index), population.ticks(), &board_, &events_};
-    std::vector<ActionCandidate> candidates = sources_.collect(context);
-    if (eventsOnly) std::erase_if(candidates, [](const ActionCandidate& candidate) { return candidate.origin != ActionOrigin::Event; });
-    if (candidates.empty()) return false;
-
     rules::ThingInfo actor;
     actor.kind = population.kind(index);
     actor.tags = own.tags;
     if (std::find(actor.tags.begin(), actor.tags.end(), "npc") == actor.tags.end()) actor.tags.push_back("npc");
-    const std::int64_t now = static_cast<std::int64_t>(population.ticks());
-    struct Option {
-        const rules::Interaction* interaction;
-        ActionTarget target;
-    };
+    if (hasGoods(population, index)) actor.tags.push_back("has-goods"); // something in its stock to give away
     std::vector<Option> options;
     std::vector<int> scores;
+    if (!abstract) collectPlaceOptions(population, index, hour, own, actor, eventsOnly, options, scores);
+    if (!eventsOnly) collectPartnerOptions(population, index, hour, own, actor, abstract, options, scores);
+    if (options.empty()) return false;
+    core::Pcg32 random(seed_ + population.ticks() * 0x9E3779B97F4A7C15ULL, static_cast<std::uint64_t>(index) * 2ULL + 1ULL);
+    const std::optional<std::size_t> pick = rules::pickBest(scores, kMinScore, random);
+    if (!pick) return false;
+    carryOut(population, index, hour, *options[*pick].interaction, options[*pick].target, actor.tags, abstract);
+    if (!abstract) ++chosenThisHour_;
+    return true;
+}
+
+// The candidates of the sources against the places of the level, or the spot of their event.
+void NpcDirector::collectPlaceOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool eventsOnly, std::vector<Option>& options,
+                                      std::vector<int>& scores) const {
+    if (own.classActions.empty() && own.customActions.empty() && board_.posted().empty()) return;
+    const SourceContext context{own, population.x(index), population.y(index), population.ticks(), &board_, &events_};
+    std::vector<ActionCandidate> candidates = sources_.collect(context);
+    if (eventsOnly) std::erase_if(candidates, [](const ActionCandidate& candidate) { return candidate.origin != ActionOrigin::Event; });
+    const std::int64_t now = static_cast<std::int64_t>(population.ticks());
     for (const ActionCandidate& candidate : candidates) {
         const rules::Interaction* interaction = interactions_->find(candidate.interaction);
         if (interaction == nullptr || !interaction->npc || !cooldowns_.ready(population.id(index), interaction->id, now)) continue;
@@ -326,30 +341,276 @@ bool NpcDirector::chooseAction(NpcPopulation& population, int index, int hour, b
             }
         }
     }
-    if (options.empty()) return false;
-    core::Pcg32 random(seed_ + population.ticks() * 0x9E3779B97F4A7C15ULL, static_cast<std::uint64_t>(index) * 2ULL + 1ULL);
-    const std::optional<std::size_t> pick = rules::pickBest(scores, kMinScore, random);
-    if (!pick) return false;
-    carryOut(population, index, *options[*pick].interaction, options[*pick].target);
-    ++chosenThisHour_;
-    return true;
 }
 
-// What an interaction does when an NPC does it: the words the simulation can carry out. `walk-to` takes the person to the thing.
-void NpcDirector::carryOut(NpcPopulation& population, int index, const rules::Interaction& interaction, const ActionTarget& target) {
-    for (const rules::Effect& effect : interaction.effects) {
-        if (effect.verb == "do" && !effect.args.empty() && effect.args[0]->text == "walk-to") {
-            const auto [x, y] = pointNear(population, index, target.x, target.y);
-            if (x != population.x(index) || y != population.y(index)) population.move(index, x, y);
+// Every interaction a person may do to the neighbour (US-292): the files are the same as for the hero, with the actor word npc. Which the neighbour is depends only on who stands
+// where (`neighbour` looks at a few places of the grid cell, never walks the crowd). A far person only deals with a neighbour who is far too.
+void NpcDirector::collectPartnerOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool abstract, std::vector<Option>& options,
+                                        std::vector<int>& scores) const {
+    const int salt = static_cast<int>(population.ticks() / static_cast<std::uint64_t>(population.ticksPerHour())) * 31 + index;
+    const int partner = population.neighbour(index, salt, config_.meetRadius);
+    if (partner < 0) return;
+    const std::size_t pat = static_cast<std::size_t>(partner);
+    if (modes_[pat] == static_cast<std::uint8_t>(Mode::Dead) || modes_[pat] == static_cast<std::uint8_t>(Mode::Fighting)) return;
+    if (abstract && population.isNear(partner)) return;
+    const NpcProfile& theirs = profiles_[profileOf_[pat]];
+    ActionTarget target;
+    target.kind = ActionTarget::Kind::Person;
+    target.id = population.id(partner);
+    target.name = population.kind(partner);
+    target.kindName = target.name;
+    target.x = population.x(partner);
+    target.y = population.y(partner);
+    target.tags = theirs.tags;
+    if (std::find(target.tags.begin(), target.tags.end(), "npc") == target.tags.end()) target.tags.push_back("npc");
+    if (canSwap(population, index, partner)) target.tags.push_back("can-swap"); // each has what the other wants
+    rules::ThingInfo thing;
+    thing.kind = target.kindName;
+    thing.tags = target.tags;
+    thing.allow = theirs.allow;
+    thing.deny = theirs.deny;
+    const double dx = target.x - population.x(index);
+    const double dy = target.y - population.y(index);
+    const long long distanceMilli = static_cast<long long>(std::llround(std::hypot(dx, dy) / 32.0 * 1000.0));
+    const NpcRuleContext rule(population, index, actor.tags, target, hour);
+    const std::int64_t now = static_cast<std::int64_t>(population.ticks());
+    for (const rules::Offer& offer : interactions_->offered(actor, thing, distanceMilli, rule)) {
+        const rules::Interaction& interaction = *offer.interaction;
+        if (!offer.enabled || !interaction.npc || !cooldowns_.ready(population.id(index), interaction.id, now)) continue;
+        if (std::find(own.deny.begin(), own.deny.end(), interaction.id) != own.deny.end()) continue;
+        long long score = rules::evaluate(*interaction.npc->score, rule).number;
+        // The actions this NPC prefers for the kind of partner it meets (US-293).
+        for (const std::string& partnerClass : theirs.classes) {
+            const auto preferred = own.partnerActions.find("class:" + partnerClass);
+            if (preferred != own.partnerActions.end() && std::find(preferred->second.begin(), preferred->second.end(), interaction.id) != preferred->second.end()) {
+                score += config_.preferBonus;
+                break;
+            }
         }
+        options.push_back({&interaction, target});
+        scores.push_back(static_cast<int>(std::clamp<long long>(score, 0, 100000)));
     }
+}
+
+// What an interaction does when an NPC does it: the effects of its file, in order, the words the simulation can carry out.
+void NpcDirector::carryOut(NpcPopulation& population, int index, int hour, const rules::Interaction& interaction, const ActionTarget& target, const std::vector<std::string>& actorTags, bool abstract) {
+    const int partner = target.kind == ActionTarget::Kind::Person ? population.indexOf(target.id) : -1;
+    const NpcRuleContext rule(population, index, actorTags, target, hour);
+    for (const rules::Effect& effect : interaction.effects) applyEffect(population, index, partner, target, rule, effect, abstract);
     const std::int64_t now = static_cast<std::int64_t>(population.ticks());
     cooldowns_.start(population.id(index), interaction.id, now + static_cast<std::int64_t>(interaction.npc->cooldownSeconds) * 20);
-    const auto known = std::find(actionNames_.begin(), actionNames_.end(), interaction.id);
-    if (known == actionNames_.end()) actionNames_.push_back(interaction.id);
+    if (std::find(actionNames_.begin(), actionNames_.end(), interaction.id) == actionNames_.end()) actionNames_.push_back(interaction.id);
     lastAction_[static_cast<std::size_t>(index)] = static_cast<std::int16_t>(std::find(actionNames_.begin(), actionNames_.end(), interaction.id) - actionNames_.begin());
 }
 
+void NpcDirector::applyEffect(NpcPopulation& population, int actor, int partner, const ActionTarget& target, const NpcRuleContext& rule, const rules::Effect& effect, bool abstract) {
+    const auto idOf = [&](const std::string& word) -> int {
+        if (word == "hero") return NpcPopulation::kHero;
+        if (word == "actor") return population.id(actor);
+        if ((word == "target" || word == "npc") && partner >= 0) return population.id(partner);
+        return -1;
+    };
+    if (effect.verb == "opinion" && effect.args.size() == 3) {
+        const int who = idOf(effect.args[0]->text);
+        const int about = idOf(effect.args[1]->text);
+        if (who < 0 || about < 0 || !population.hasOpinions(who)) return;
+        const long long delta = rules::evaluate(*effect.args[2], rule).number;
+        population.adjust(who, about, static_cast<int>(std::clamp(delta, -200LL, 200LL)));
+        return;
+    }
+    if (effect.verb == "remember" && effect.args.size() >= 2) {
+        const int who = population.indexOf(idOf(effect.args[0]->text));
+        if (who < 0) return;
+        const long long feeling = effect.args.size() == 3 ? rules::evaluate(*effect.args[2], rule).number : 10;
+        population.remember(who, rules::fillTokens(effect.args[1]->text, rule), static_cast<int>(std::clamp(feeling, -100LL, 100LL)));
+        return;
+    }
+    if ((effect.verb == "give" || effect.verb == "take") && effect.args.size() == 3 && market_ != nullptr) {
+        const int who = idOf(effect.args[0]->text);
+        const int count = static_cast<int>(std::clamp(rules::evaluate(*effect.args[2], rule).number, 0LL, 1000LL));
+        if (who < 0) return;
+        if (effect.verb == "give") market_->addStock(who, effect.args[1]->text, count);
+        else market_->removeStock(who, effect.args[1]->text, count);
+        return;
+    }
+    if (effect.verb != "do" || effect.args.empty()) return;
+    const std::string& name = effect.args[0]->text;
+    if (name == "walk-to") {
+        const auto [x, y] = pointNear(population, actor, target.x, target.y);
+        if (x != population.x(actor) || y != population.y(actor)) population.move(actor, x, y);
+    } else if (name == "restore" && effect.args.size() == 3) {
+        for (std::size_t n = 0; n < kNeedCount; ++n) {
+            std::string lower = needName(static_cast<Need>(n));
+            std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            if (lower == effect.args[1]->text) {
+                const int amount = static_cast<int>(std::clamp(rules::evaluate(*effect.args[2], rule).number, 0LL, 100LL));
+                population.setNeed(actor, static_cast<Need>(n), population.need(actor, static_cast<Need>(n)) + amount);
+            }
+        }
+    } else if (name == "spread-opinion" && effect.args.size() == 2 && partner >= 0) {
+        spreadOpinion(population, actor, partner, static_cast<int>(std::clamp(rules::evaluate(*effect.args[1], rule).number, -200LL, 200LL)));
+    } else if (partner >= 0 && name == "chat") {
+        doChat(population, actor, partner, abstract);
+    } else if (partner >= 0 && name == "swap") {
+        doSwap(population, actor, partner, abstract);
+    } else if (partner >= 0 && name == "gift") {
+        doGift(population, actor, partner, abstract);
+    } else if (partner >= 0 && name == "fight") {
+        doFight(population, actor, partner, abstract);
+    }
+}
+
+bool NpcDirector::hasGoods(const NpcPopulation& population, int index) const {
+    if (market_ == nullptr) return false;
+    const TradeMarket::Trader* trader = market_->find(population.id(index));
+    return trader != nullptr && !trader->stock.empty();
+}
+
+// Each has a piece of what the other wants: one for one.
+bool NpcDirector::canSwap(const NpcPopulation& population, int a, int b) const {
+    if (market_ == nullptr) return false;
+    const TradeMarket::Trader* first = market_->find(population.id(a));
+    const TradeMarket::Trader* second = market_->find(population.id(b));
+    if (first == nullptr || second == nullptr) return false;
+    const auto wantsFrom = [&](int buyerId, const TradeMarket::Trader& seller) {
+        for (const auto& entry : seller.stock) {
+            if (entry.second > 0 && market_->wants(buyerId, entry.first)) return true;
+        }
+        return false;
+    };
+    return wantsFrom(population.id(a), *second) && wantsFrom(population.id(b), *first);
+}
+
+bool NpcDirector::doSwap(NpcPopulation& population, int a, int b, bool abstract) {
+    if (!canSwap(population, a, b)) return false;
+    const int idA = population.id(a);
+    const int idB = population.id(b);
+    const auto pickFor = [&](int buyerId, int sellerId) {
+        for (const auto& entry : market_->find(sellerId)->stock) {
+            if (entry.second > 0 && market_->wants(buyerId, entry.first)) return entry.first;
+        }
+        return std::string();
+    };
+    const std::string forA = pickFor(idA, idB); // what A takes from B
+    const std::string forB = pickFor(idB, idA);
+    market_->removeStock(idB, forA, 1);
+    market_->addStock(idA, forA, 1);
+    market_->removeStock(idA, forB, 1);
+    market_->addStock(idB, forB, 1);
+    population.event(idA, idB, "trade");
+    population.event(idB, idA, "trade");
+    if (!abstract) note({NpcEvent::Kind::Trade, idA, idB, forA + " for " + forB, 1});
+    return true;
+}
+
+bool NpcDirector::doGift(NpcPopulation& population, int a, int b, bool abstract) {
+    if (market_ == nullptr) return false;
+    const int idA = population.id(a);
+    const int idB = population.id(b);
+    const TradeMarket::Trader* giver = market_->find(idA);
+    if (giver == nullptr || market_->find(idB) == nullptr) return false;
+    for (const auto& entry : giver->stock) {
+        if (entry.second <= 0) continue;
+        const std::string item = entry.first;
+        market_->removeStock(idA, item, 1);
+        market_->addStock(idB, item, 1);
+        population.event(idB, idA, "gift"); // a gift is remembered kindly
+        if (!abstract) note({NpcEvent::Kind::Gift, idA, idB, item, 1});
+        return true;
+    }
+    return false;
+}
+
+// A conversation: how it went is a roll (quality -2 to 2, mostly plain or good), both are better for it in the way of the opinion rules, and both have a little Social back.
+void NpcDirector::doChat(NpcPopulation& population, int a, int b, bool abstract) {
+    const int idA = population.id(a);
+    const int idB = population.id(b);
+    core::Pcg32 random(seed_ ^ 0x43484154ULL ^ (population.ticks() * 0x9E3779B97F4A7C15ULL), (static_cast<std::uint64_t>(static_cast<std::uint32_t>(idA)) << 32) ^ static_cast<std::uint32_t>(idB));
+    const std::uint32_t roll = random.below(100);
+    const int quality = roll < 5 ? -2 : (roll < 15 ? -1 : (roll < 55 ? 0 : (roll < 90 ? 1 : 2)));
+    population.talked(idA, idB, quality);
+    population.talked(idB, idA, quality);
+    for (const int person : {a, b}) population.setNeed(person, Need::Social, population.need(person, Need::Social) + config_.chatSocial);
+    if (!abstract && !config_.chatter.empty()) note({NpcEvent::Kind::Talk, idA, idB, config_.chatter[random.below(static_cast<std::uint32_t>(config_.chatter.size()))], quality});
+}
+
+// Those who can hear and know the target think differently of the actor (a confrontation, a fight).
+void NpcDirector::spreadOpinion(NpcPopulation& population, int actor, int target, int amount) {
+    const int hearing = population.opinionConfig().hearingTiles * 32;
+    const int targetId = population.id(target);
+    const int actorId = population.id(actor);
+    for (const int witness : population.near(population.x(target), population.y(target), hearing)) {
+        const int id = population.id(witness);
+        if (witness == actor || witness == target || modes_[static_cast<std::size_t>(witness)] == static_cast<std::uint8_t>(Mode::Dead)) continue;
+        if (population.knows(id, targetId)) population.adjust(id, actorId, amount);
+    }
+}
+
+// A fight with the rules of the hero's: the actor strikes, the other strikes back, for a number of rounds an hour (settled in one go when it is far away). A death is final.
+void NpcDirector::doFight(NpcPopulation& population, int a, int b, bool abstract) {
+    const auto at = [](int index) { return static_cast<std::size_t>(index); };
+    spreadOpinion(population, a, b, -config_.witnessOpinion); // those who know the victim think less of the attacker
+    modes_[at(a)] = static_cast<std::uint8_t>(Mode::Fighting);
+    modes_[at(b)] = static_cast<std::uint8_t>(Mode::Fighting);
+    const int rounds = abstract ? config_.farFightRounds : config_.fightRoundsPerHour;
+    const auto hit = [&](int striker, int struck) {
+        const int damage = damage_[at(striker)] < 0 ? config_.defaultDamage : damage_[at(striker)];
+        const int left = (hp_[at(struck)] < 0 ? config_.defaultHp : hp_[at(struck)]) - damage;
+        hp_[at(struck)] = static_cast<std::int16_t>(std::max(0, left));
+        return left > 0;
+    };
+    bool someoneDied = false;
+    for (int round = 0; round < rounds && !someoneDied; ++round) {
+        if (!hit(a, b)) {
+            kill(population, b, a);
+            someoneDied = true;
+        } else if (!hit(b, a)) {
+            kill(population, a, b);
+            someoneDied = true;
+        }
+    }
+    for (const int person : {a, b}) {
+        if (modes_[at(person)] == static_cast<std::uint8_t>(Mode::Fighting)) modes_[at(person)] = static_cast<std::uint8_t>(Mode::Scheduled); // they break off
+    }
+    if (!someoneDied) {
+        population.adjust(population.id(a), population.id(b), -3); // neither has won; neither likes the other more for it
+        population.adjust(population.id(b), population.id(a), -3);
+    }
+    if (!abstract) note({NpcEvent::Kind::Fight, population.id(a), population.id(b), {}, rounds});
+}
+
+void NpcDirector::kill(NpcPopulation& population, int victim, int killer) {
+    modes_[static_cast<std::size_t>(victim)] = static_cast<std::uint8_t>(Mode::Dead);
+    note({NpcEvent::Kind::Death, population.id(victim), population.id(killer), {}, 0});
+    // The family of the dead near the place think badly of the killer.
+    const int family = population.family(victim);
+    if (family == 0) return;
+    for (const int relative : population.near(population.x(victim), population.y(victim), population.opinionConfig().hearingTiles * 32)) {
+        if (relative != victim && relative != killer && population.family(relative) == family) population.adjust(population.id(relative), population.id(killer), -config_.griefOpinion);
+    }
+}
+
+void NpcDirector::note(NpcEvent event) {
+    if (eventsOut_.size() >= 4096) eventsOut_.erase(eventsOut_.begin()); // nobody is listening: the oldest are dropped
+    eventsOut_.push_back(std::move(event));
+}
+
+std::vector<NpcEvent> NpcDirector::takeEvents() {
+    std::vector<NpcEvent> out;
+    out.swap(eventsOut_);
+    return out;
+}
+
+void NpcDirector::setCombat(int index, int hp, int damage) {
+    ensure(static_cast<std::size_t>(index) + 1);
+    hp_[static_cast<std::size_t>(index)] = static_cast<std::int16_t>(std::clamp(hp, 1, 30000));
+    damage_[static_cast<std::size_t>(index)] = static_cast<std::int16_t>(std::clamp(damage, 0, 30000));
+}
+
+int NpcDirector::hp(int index) const {
+    if (index < 0 || static_cast<std::size_t>(index) >= hp_.size() || hp_[static_cast<std::size_t>(index)] < 0) return config_.defaultHp;
+    return hp_[static_cast<std::size_t>(index)];
+}
 void NpcDirector::postEvent(NpcPopulation& population, const std::string& trigger, int x, int y) {
     int minutes = 0;
     int reach = 0;
@@ -362,7 +623,7 @@ void NpcDirector::postEvent(NpcPopulation& population, const std::string& trigge
     ensure(population.size());
     board_.post(trigger, x, y, population.ticks() + static_cast<std::uint64_t>(minutes) * static_cast<std::uint64_t>(population.ticksPerHour()) / 60U);
     const int hour = population.hourOfDay();
-    for (const int index : population.near(x, y, reach)) chooseAction(population, index, hour, true); // the persons it concerns answer at once
+    for (const int index : population.near(x, y, reach)) chooseAction(population, index, hour, true, false); // the persons it concerns answer at once
 }
 
 void NpcDirector::stepFar(NpcPopulation& population, int index, int hour) {
@@ -371,6 +632,12 @@ void NpcDirector::stepFar(NpcPopulation& population, int index, int hour) {
     if (current == Mode::Dead || current == Mode::Fighting) return;
     modes_[at] = static_cast<std::uint8_t>(Mode::Scheduled); // far away, nobody is eating or running: the day's needs are settled at its end
     followSchedule(population, index, hour, false);
+    // Once a day, a few of the far persons have a dealing with a neighbour who is far too, settled at once with the same effects and nothing to show (D-54 Q13): a roll of the
+    // world seed, the day and the person decides whether it happens.
+    if (config_.farPercent > 0 && interactions_ != nullptr) {
+        core::Pcg32 random(seed_ + static_cast<std::uint64_t>(population.day()) * 0xD1B54A32D192ED03ULL + 0xFA12ULL, static_cast<std::uint64_t>(index) * 2ULL + 1ULL);
+        if (random.below(100) < static_cast<std::uint32_t>(config_.farPercent)) chooseAction(population, index, hour, false, true);
+    }
 }
 
 // Every person is visited once a day, at the tick of the day that is their index modulo the length of the day: at most population / ticksPerDay persons a tick.
@@ -380,7 +647,7 @@ void NpcDirector::farSlice(NpcPopulation& population) {
     const int hour = static_cast<int>(slot / static_cast<std::uint64_t>(population.ticksPerHour()));
     for (std::uint64_t i = slot; i < population.size(); i += perDay) {
         const int index = static_cast<int>(i);
-        if (scheduleOf_[i] == 0 || population.isNear(index)) continue; // the near ones are looked at every hour
+        if (population.isNear(index)) continue; // the near ones are looked at every hour
         stepFar(population, index, hour);
     }
 }
@@ -425,7 +692,7 @@ std::string NpcDirector::toText() const {
     json events = json::array();
     for (const PostedEvent& event : board_.posted()) events.push_back(json::array({event.trigger, event.x, event.y, event.untilTick}));
     json data{{"version", kSaveVersion}, {"schedules", schedules}, {"schedule", runs(scheduleOf_)}, {"mode", runs(modes_)}, {"homes", homes}, {"danger", danger},
-              {"profiles", profiles}, {"profile", runs(profileOf_)}, {"events", events}};
+              {"profiles", profiles}, {"profile", runs(profileOf_)}, {"events", events}, {"hp", runs(hp_)}, {"damage", runs(damage_)}};
     return data.dump() + "\n";
 }
 
@@ -464,6 +731,9 @@ NpcDirector NpcDirector::fromText(std::string_view text, rules::ScheduleConfig c
         for (const json& entry : data.at("profiles")) director.profiles_.push_back(profileFrom(entry));
         director.profileOf_ = unrun<std::uint16_t>(data.at("profile"), "profile");
         director.lastAction_.assign(director.modes_.size(), -1);
+        director.hp_ = unrun<std::int16_t>(data.at("hp"), "hp");
+        director.damage_ = unrun<std::int16_t>(data.at("damage"), "damage");
+        if (director.hp_.size() != director.modes_.size() || director.damage_.size() != director.modes_.size()) throw DataError("npc-life.json", "hp", "does not fit the persons");
         if (director.profileOf_.size() != director.modes_.size()) throw DataError("npc-life.json", "profile", "does not fit the persons");
         for (const std::uint16_t id : director.profileOf_) {
             if (id >= director.profiles_.size()) throw DataError("npc-life.json", "profile", "names a profile that is not there");
@@ -515,6 +785,8 @@ std::uint64_t NpcDirector::hash() const {
     mix(h, modes_.size());
     for (std::size_t i = 0; i < modes_.size(); ++i) {
         mix(h, profileOf_[i]);
+        mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(hp_[i])));
+        mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(damage_[i])));
         mix(h, scheduleOf_[i]);
         mix(h, modes_[i]);
         mix(h, dangers_[i]);

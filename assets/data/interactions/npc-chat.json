@@ -1,0 +1,12 @@
+// Two persons talk (US-292): the same kind of file as the hero's, with the actor word npc and a person as the target. They chat when they stand within 3 m, the more eagerly the
+// lonelier they are. `do chat` rolls how it went (quality -2 to 2, as in opinions.json) and gives both a little Social back; near the hero the words show in a bubble.
+{
+  "id": "npc-chat",
+  "label": "Chat",
+  "actors": ["npc"],
+  "target": { "tags": ["npc"] },
+  "range": 3,
+  "order": 600,
+  "effects": [ "do chat" ],
+  "npc": { "score": "30 + need(social)", "cooldown": 20 }
+}

@@ -125,6 +125,31 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
     }
     if (data.contains("scatterPixels")) config.scatterPixels = requireInt(data, file, "scatterPixels", 0, 512);
     if (data.contains("maxPerHour")) config.maxPerHour = requireInt(data, file, "maxPerHour", 1, 100000);
+    if (data.contains("dealings")) {
+        const json& dealings = data.at("dealings");
+        if (!dealings.is_object()) throw DataError(file, "dealings", "must be an object");
+        const auto read = [&](const char* field, int& into, int low, int high) {
+            if (dealings.contains(field)) into = requireInt(dealings, file, "dealings", field, low, high);
+        };
+        read("meetRadius", config.meetRadius, 8, 1024);
+        read("fightRoundsPerHour", config.fightRoundsPerHour, 1, 100);
+        read("farFightRounds", config.farFightRounds, 1, 1000);
+        read("witnessOpinion", config.witnessOpinion, 0, 100);
+        read("griefOpinion", config.griefOpinion, 0, 100);
+        read("farPercent", config.farPercent, 0, 100);
+        read("preferBonus", config.preferBonus, 0, 1000);
+        read("defaultHp", config.defaultHp, 1, 10000);
+        read("defaultDamage", config.defaultDamage, 0, 1000);
+        read("chatSocial", config.chatSocial, 0, 100);
+        if (dealings.contains("chatter")) {
+            if (!dealings.at("chatter").is_array() || dealings.at("chatter").empty()) throw DataError(file, "dealings.chatter", "must be a list of short sentences");
+            config.chatter.clear();
+            for (const json& line : dealings.at("chatter")) {
+                if (!line.is_string() || line.get<std::string>().empty()) throw DataError(file, "dealings.chatter", "must hold sentences in quotes");
+                config.chatter.push_back(line.get<std::string>());
+            }
+        }
+    }
     if (data.contains("free")) {
         if (!data.at("free").is_array()) throw DataError(file, "free", "must be a list of activity words");
         config.freeActivities.clear();

@@ -1,0 +1,21 @@
+// A person who dislikes another (but is not yet hostile) confronts them (US-292): the same numbers as the hero's taunt, from one person to another; those who can hear and know the
+// target think less of the actor.
+{
+  "id": "npc-confront",
+  "label": "Confront",
+  "actors": ["npc"],
+  "target": { "tags": ["npc"] },
+  "range": 8,
+  "order": 630,
+  "requires": [
+    { "if": "opinion(actor, target) < -20", "else": "no quarrel" },
+    { "if": "mood(actor) != hostile", "else": "past words" }
+  ],
+  "effects": [
+    "opinion target actor -10",
+    "opinion actor target -2",
+    "remember target \"{actor.name} taunted me\" -20",
+    "do spread-opinion -2"
+  ],
+  "npc": { "score": "45", "cooldown": 25 }
+}

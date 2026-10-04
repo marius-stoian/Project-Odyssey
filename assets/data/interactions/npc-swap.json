@@ -1,0 +1,12 @@
+// Two traders swap goods (US-292): each has a piece of what the other wants. The game gives the target the tag can-swap when that is so; `do swap` moves one piece each way
+// between their stocks and both think better of the other (the trade event of opinions.json).
+{
+  "id": "npc-swap",
+  "label": "Swap goods",
+  "actors": ["npc"],
+  "target": { "tags": ["npc", "can-swap"] },
+  "range": 3,
+  "order": 610,
+  "effects": [ "do swap" ],
+  "npc": { "score": "60", "cooldown": 120 }
+}

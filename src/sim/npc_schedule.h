@@ -7,6 +7,7 @@
 
 #include <array>
 #include <filesystem>
+#include <vector>
 #include <map>
 #include <optional>
 #include <set>
@@ -66,6 +67,19 @@ struct ScheduleConfig {
     // The activities during which a person is free to do something of their own (US-291): its class, custom and event actions. A person asleep or eating is not.
     std::set<std::string> freeActivities{"idle", "work", "go", "patrol"};
     int maxPerHour = 64; // at most this many persons choose an action on one hour mark (the budget of ADR-022)
+    // Persons act on each other (US-292, D-54 Q12, Q13): how close two persons must be to meet, how a fight runs, what the witnesses and the family of the dead feel, how often a far
+    // person has a dealing in its daily visit, how much a partner type an NPC prefers adds to the score (US-293), and the combat numbers of a person nobody gave any.
+    int meetRadius = 96;         // pixels (3 m)
+    int fightRoundsPerHour = 6;  // a fight near the hero: rounds of strike and strike back an hour
+    int farFightRounds = 12;     // a far fight is settled at once, in this many rounds at most
+    int witnessOpinion = 6;      // witnesses who know the victim think this much less of the attacker
+    int griefOpinion = 30;       // the family of the dead think this much less of the killer
+    int farPercent = 5;          // the chance in a hundred that a far person has a dealing when it is visited (once a day)
+    int preferBonus = 40;        // added to the score of an action the NPC prefers for the kind of partner it meets
+    int defaultHp = 100;
+    int defaultDamage = 5;
+    int chatSocial = 10;         // the Social need a conversation gives back to both
+    std::vector<std::string> chatter{"Fine day.", "Have you eaten?", "The nights are getting cold.", "Mind the wolves.", "Did you see the smoke?"};
 
     bool isNight(int hour) const { return nightFromHour > nightToHour ? (hour >= nightFromHour || hour < nightToHour) : (hour >= nightFromHour && hour < nightToHour); }
     bool knownActivity(const std::string& word) const { return activities.count(word) != 0; }

@@ -1,0 +1,15 @@
+// Two persons who are hostile to each other fight when they meet (US-292): the rules of the hero's fights (strike, strike back) with the hit points and the sword damage of the two,
+// a few rounds an hour near the hero and settled at once far away. Those who know the victim think less of the attacker; a death is final and the dead one's family never forgive.
+{
+  "id": "npc-fight",
+  "label": "Fight",
+  "actors": ["npc"],
+  "target": { "tags": ["npc"] },
+  "range": 3,
+  "order": 640,
+  "requires": [
+    { "if": "mood(actor) == hostile", "else": "not hostile" }
+  ],
+  "effects": [ "do fight" ],
+  "npc": { "score": "95", "cooldown": 5 }
+}

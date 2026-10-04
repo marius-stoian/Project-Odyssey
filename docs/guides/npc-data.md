@@ -433,3 +433,25 @@ A fire lit within 12 m of a talker sends her to it **at once**; a fire that went
 ### Editor
 
 The **Does** line (under the Schedule lines of the Trade section beside the NPC panel, the Class panel and the Kinds tab) takes interaction ids separated by spaces: `patrol sing`. For an NPC it is its custom actions (one step of Undo); for a class its class actions, for a kind its custom actions (Save writes the file). A mistake (an id that is not lower-case words) is said and changes nothing.
+
+## NPCs act on each other (US-292, D-54 Q12, Q13)
+
+A person who is free (see US-291) looks at the neighbour who stands close and may do to them what the interaction files allow. The files are the same kind as the hero's: the `actors` word is `npc`, the target is a person (`"target": { "tags": ["npc"] }`), and the `npc` block gives the score and the cooldown. The shipped ones:
+
+| File | When | What it does |
+|---|---|---|
+| `npc-chat.json` | always (score `30 + need(social)`, so lonelier persons chat more) | `do chat`: a roll of the quality of the talk (-2 to 2) changes both opinions as `opinions.json` says, both get a little Social back, and near the hero the words show in a bubble |
+| `npc-swap.json` | each has a piece of what the other wants (the game gives the target the tag `can-swap`) | `do swap`: one piece each way between their stocks (US-281), both think better of the other (the `trade` event) |
+| `npc-gift.json` | the actor has goods (tag `has-goods`) and likes the target (opinion over 25) | `do gift`: one piece of its stock to the other, who thinks better of it (the `gift` event) |
+| `npc-confront.json` | the actor dislikes the target (opinion under -20) but is not hostile | the numbers of the hero's taunt: the target thinks 10 less of the actor, the actor 2 less of the target, the target remembers it, those who can hear and know the target think 2 less of the actor |
+| `npc-fight.json` | the actor is hostile to the target (`mood(actor) == hostile`) | `do fight`: strike and strike back with the hit points and sword damage of the two (the placed character's `hp` and `swordDamage`; `dealings.defaultHp` and `defaultDamage` for any other person), `dealings.fightRoundsPerHour` rounds an hour near the hero |
+
+**Consequences.** When a fight begins, the persons who can hear it (the `hearingTiles` of `opinions.json`) and know the victim think `dealings.witnessOpinion` (6) less of the attacker. A **death is final**: the person is dead for the simulation, their figure leaves the world, nobody can talk to them or trade with them, and their family near the place think `dealings.griefOpinion` (30) less of the killer. If neither falls, they break off, each thinking 3 less of the other, and the fight goes on the next hour while they are hostile.
+
+**The same rules, far away (D-54 Q13).** A person far from the hero is visited once a day (US-290); with the chance `dealings.farPercent` (5) a day it has a dealing with a neighbour who is far too, chosen by the same scores and carried out with the same effects, settled at once (a far fight runs `farFightRounds` rounds), with no animation and no bubble. A seeded roll of the world seed, the day and the person decides, so the same world always lives the same way. Deaths anywhere are reported to the game.
+
+**Bounded work.** At most `maxPerHour` persons begin a dealing or an action on one hour mark, and the turn goes round so nobody is left out; the neighbour is found through the grid cell of the person (a few places of the cell are looked at, never the crowd). The 100,000-person soak of US-294 measures the cost.
+
+**Effects an NPC carries out** in the files: `opinion who whom n`, `remember who "text" feeling` (with `{actor.name}` and `{target.name}`), `give who item n` and `take who item n` (the stock of a trader), and `do` with `walk-to`, `restore <need> <amount>`, `chat`, `swap`, `gift`, `fight` and `spread-opinion n`. `who` is `actor`, `target` or `hero`.
+
+**`dealings` in `schedule.json`** holds every number: `meetRadius` (96 pixels), `fightRoundsPerHour`, `farFightRounds`, `witnessOpinion`, `griefOpinion`, `farPercent`, `preferBonus` (US-293), `defaultHp`, `defaultDamage`, `chatSocial` and the `chatter` sentences.

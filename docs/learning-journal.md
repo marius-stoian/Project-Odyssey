@@ -1764,3 +1764,27 @@ auto candidates = sources.collect(context);
 **Try it (15 minutes).** Write a fourth source `class WeatherActionSource` that offers `"shelter"` when it rains, add it with `sources.add(...)` in a test, and see the candidate appear without touching any other file.
 
 **Check yourself.** Why does `ActionSources` hold `unique_ptr<ActionSource>` rather than `ActionSource` objects directly?
+
+## US-292 NPCs act on each other: symmetric actor and target, and a budget per tick
+
+**What we built.** The same interaction files the hero uses now also work with a person as the actor and another person as the target: two traders swap goods, friends give gifts, two enemies fight and one can die. Far from the hero it all happens once a day by a seeded roll, with the same effects and nothing to draw.
+
+**The C++ idea: a symmetric actor and target.** The hero's interaction only ever had `actor = hero`. The trick of this story is that nothing in the *files* changed shape: `"actors": ["npc"]` and a target tagged `npc` are enough, because the matching code (`InteractionRegistry::offered`) only compares tags, and the rule language reaches the two sides through one interface:
+
+```cpp
+class RuleContext {                       // sim/rule_expr.h
+    virtual Value path(const std::string& dotted) const = 0;
+    virtual Value call(const std::string& name, const std::vector<Value>& args) const = 0;
+};
+class NpcRuleContext final : public rules::RuleContext { ... };   // facts about two persons
+```
+
+The game answers `opinion(npc, hero)` over the hero, `NpcRuleContext` answers `opinion(actor, target)` over two persons; the expression evaluator cannot tell the difference. Changing *who acts* meant adding one class, not rewriting the rules.
+
+The second idea is the **budget per tick**. 100,000 persons cannot all look for a partner on every tick. Three rules keep the cost flat: only persons near the hero act each hour, and at most `maxPerHour` of them (the turn goes round, so nobody starves); a far person is visited once a day in a slice of the day fixed by its index; and the partner is found by looking at a few places of one grid cell (`NpcPopulation::neighbour`), never by scanning everybody. Work per tick is a constant, whatever the size of the crowd.
+
+**Where to look.** `NpcDirector::chooseAction`, `collectPartnerOptions`, `doFight` in `src/sim/npc_director.cpp`; `src/sim/npc_context.cpp`; `tests/sim/npc_interact_test.cpp`.
+
+**Try it (15 minutes).** In `npc_interact_test.cpp` make Brek stronger (`setCombat(b, 200, 10)` in the Fight test) and predict who dies.
+
+**Check yourself.** Why does a far fight use `farFightRounds` in one go, but a near fight only `fightRoundsPerHour` a visit?
