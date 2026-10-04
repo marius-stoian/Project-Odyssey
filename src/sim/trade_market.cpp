@@ -113,6 +113,14 @@ PriceConfig loadPriceConfig(const std::filesystem::path& file) {
         read("failureOpinion", config.haggleFailureOpinion, 0, 100);
         if (config.haggleMin > config.haggleMax) throw DataError(file, "haggle.minChance", "must not be higher than maxChance");
     }
+    if (const json* purse = section("purse")) {
+        const auto read = [&](const char* field, int& into, int low, int high) {
+            if (purse->contains(field)) into = requireInt(*purse, file, "purse", field, low, high);
+        };
+        read("start", config.startPurse, 0, 100000);
+        read("restockPerDay", config.purseRestock, 0, 100000);
+        read("cap", config.purseCap, 0, 1000000);
+    }
     if (config.curveMinPercent > config.curveMaxPercent) throw DataError(file, "curve.minPercent", "must not be higher than maxPercent");
     return config;
 }
@@ -125,9 +133,12 @@ bool TradeMarket::addTrader(int id, const rules::TradeProfile& profile, std::int
     Trader trader;
     trader.profile = profile;
     trader.restockDay = today;
+    trader.purse = config_.startPurse;
+    today_ = std::max(today_, today);
     if (const auto saved = pending_.find(id); saved != pending_.end()) {
         trader.stock = saved->second.stock;
         trader.drift = saved->second.drift;
+        trader.purse = saved->second.purse;
         trader.restockDay = saved->second.restockDay;
         trader.haggleDay = saved->second.haggleDay;
         trader.haggleWon = saved->second.haggleWon;
@@ -208,10 +219,12 @@ void TradeMarket::deliver(int id, Trader& trader, std::int64_t day, const Region
 }
 
 void TradeMarket::dailyUpdate(std::int64_t today, const RegionEconomy& economy) {
+    today_ = std::max(today_, today);
     for (auto& [id, trader] : traders_) {
         if (today <= trader.restockDay) continue;
         const std::int64_t first = std::max(trader.restockDay + 1, today - config_.catchUpDays + 1);
         for (std::int64_t day = first; day <= today; ++day) deliver(id, trader, day, economy);
+        trader.purse = static_cast<int>(std::min<std::int64_t>(std::max(trader.purse, config_.purseCap), static_cast<std::int64_t>(trader.purse) + (today - first + 1) * config_.purseRestock));
         // Every day the drift falls back toward 0 by a share of itself, at least one point (US-282); a long absence counts as at most a month of it.
         const std::int64_t days = std::min<std::int64_t>(today - trader.restockDay, 30);
         for (std::int64_t day = 0; day < days; ++day) {
@@ -263,14 +276,20 @@ long long TradeMarket::heroPaysMilli(int id, const std::string& item, Attitude a
     if (!isTrader(id)) return 0;
     if (economy.isCurrency(item)) return marketMilli(id, item, economy, itemValues);
     const long long numerator = 1000LL * basePrice(economy, itemValues, item) * stockRatioPercent(id, item) * (100 + drift(id, item)) * (100 + reputationPercent(attitude));
-    return std::max<long long>(1, (numerator + 500000) / 1000000);
+    long long milli = std::max<long long>(1, (numerator + 500000) / 1000000);
+    if (const int discount = discountPercent(id); discount > 0) milli = std::max<long long>(1, (milli * (100 - discount) + 50) / 100); // a won haggle: the hero pays less today
+    return milli;
 }
 
 long long TradeMarket::traderPaysMilli(int id, const std::string& item, Attitude attitude, const RegionEconomy& economy, const ItemCounts& itemValues) const {
     if (!isTrader(id)) return 0;
     if (economy.isCurrency(item)) return marketMilli(id, item, economy, itemValues);
-    const long long numerator = 1000LL * basePrice(economy, itemValues, item) * stockRatioPercent(id, item) * (100 + drift(id, item)) * std::max(0, 100 - reputationPercent(attitude)) * wantPercent(id, item);
-    return std::max<long long>(1, (numerator + 50000000) / 100000000);
+    // The trader never pays a premium for scarcity (the curve is capped at 100 on this side): otherwise selling to an empty shelf and buying the goods back from the full
+    // one would make money from nothing. A full shelf still pays less.
+    const long long numerator = 1000LL * basePrice(economy, itemValues, item) * std::min(100, stockRatioPercent(id, item)) * (100 + drift(id, item)) * std::max(0, 100 - reputationPercent(attitude)) * wantPercent(id, item);
+    long long milli = std::max<long long>(1, (numerator + 50000000) / 100000000);
+    if (const int discount = discountPercent(id); discount > 0) milli = (milli * (100 + discount) + 50) / 100; // a won haggle: the trader pays more today
+    return milli;
 }
 
 bool TradeMarket::isRare(int id, const std::string& item) const {
@@ -315,6 +334,125 @@ std::vector<std::string> TradeMarket::lockedGoods(int id, int opinion, const Opi
     return out;
 }
 
+int TradeMarket::purse(int id) const {
+    const Trader* trader = find(id);
+    return trader == nullptr ? 0 : trader->purse;
+}
+
+int TradeMarket::discountPercent(int id) const {
+    const Trader* trader = find(id);
+    return trader != nullptr && trader->haggleWon && trader->haggleDay == today_ ? config_.haggleDiscountPercent : 0;
+}
+
+bool TradeMarket::canHaggle(int id) const {
+    const Trader* trader = find(id);
+    return trader != nullptr && trader->haggleDay != today_;
+}
+
+int TradeMarket::haggleChance(int opinion, int persuasion) const {
+    const long long chance = static_cast<long long>(config_.haggleBase) + opinion / config_.haggleOpinionDivisor + static_cast<long long>(persuasion) * config_.hagglePerPersuasion;
+    return static_cast<int>(std::clamp<long long>(chance, config_.haggleMin, config_.haggleMax));
+}
+
+// A seeded roll: the same world, trader and day always give the same number, however many other rolls came before.
+TradeMarket::Haggle TradeMarket::haggle(int id, int opinion, int persuasion) {
+    Haggle result;
+    const auto found = traders_.find(id);
+    if (found == traders_.end()) {
+        result.message = "There is nobody to haggle with.";
+        return result;
+    }
+    if (found->second.haggleDay == today_) {
+        result.message = "You have already haggled today: try again tomorrow.";
+        return result;
+    }
+    result.tried = true;
+    result.chance = haggleChance(opinion, persuasion);
+    core::Pcg32 random(seed_ ^ 0x484147474C45ULL, (static_cast<std::uint64_t>(static_cast<std::uint32_t>(id)) << 32) ^ static_cast<std::uint64_t>(today_));
+    result.roll = static_cast<int>(random.below(100));
+    result.won = result.roll < result.chance;
+    found->second.haggleDay = today_;
+    found->second.haggleWon = result.won;
+    if (result.won) {
+        result.message = std::format("You haggle well: {}% off today.", config_.haggleDiscountPercent);
+    } else {
+        result.opinionChange = -config_.haggleFailureOpinion;
+        result.message = "They are not amused: they think a little less of you.";
+    }
+    return result;
+}
+
+TradeMarket::Quote TradeMarket::quote(int id, const Deal& deal, Attitude attitude, int opinion, const OpinionConfig& opinions, const RegionEconomy& economy, const ItemCounts& itemValues) const {
+    Quote out;
+    const Trader* trader = find(id);
+    if (trader == nullptr) {
+        out.problem = "There is nobody to trade with.";
+        return out;
+    }
+    if (refuses(attitude)) {
+        out.refused = true;
+        out.problem = "They will not trade with you.";
+        return out;
+    }
+    const auto fail = [&](std::string problem) {
+        if (out.problem.empty()) out.problem = std::move(problem);
+    };
+    for (const auto& [item, count] : deal.heroGets) {
+        if (count <= 0) continue;
+        if (!rareUnlocked(id, item, opinion, opinions)) fail(std::format("{} is kept for people they like better.", item));
+        else if (count > stock(id, item)) fail(std::format("They have only {} of {}.", stock(id, item), item));
+        out.givesMilli += count * heroPaysMilli(id, item, attitude, economy, itemValues);
+    }
+    for (const auto& [item, count] : deal.heroGives) {
+        if (count <= 0) continue;
+        if (economy.isCurrency(item)) fail("Coins are in your balance: pay from it.");
+        out.receivesMilli += count * traderPaysMilli(id, item, attitude, economy, itemValues);
+    }
+    if (deal.balancePays < 0 || deal.balancePays > heroBalance_) fail(std::format("You have only {} in your balance.", heroBalance_));
+    out.receivesMilli += static_cast<long long>(std::max(0, deal.balancePays)) * 1000;
+    if (out.problem.empty() && out.receivesMilli == 0 && out.givesMilli == 0) fail("Offer something, and ask for something.");
+    if (out.problem.empty() && deal.heroGets.empty() && deal.balancePays > 0 && deal.heroGives.empty()) fail("Ask for something in return for your money.");
+    if (out.problem.empty() && out.receivesMilli < out.givesMilli) fail(std::format("They want {} more in value.", rules::formatMilli(out.givesMilli - out.receivesMilli)));
+    if (out.problem.empty() && out.receivesMilli > out.givesMilli) {
+        const long long surplus = (out.receivesMilli - out.givesMilli) / 1000;
+        if (economy.hasCurrency()) out.surplusUnits = static_cast<int>(std::min<long long>(surplus, trader->purse));
+        if (deal.heroGets.empty() && out.surplusUnits == 0) fail("They cannot pay you now: ask for goods, or come back tomorrow.");
+    }
+    out.acceptable = out.problem.empty();
+    return out;
+}
+
+TradeMarket::Outcome TradeMarket::execute(int id, const Deal& deal, Attitude attitude, int opinion, const OpinionConfig& opinions, const RegionEconomy& economy, const ItemCounts& itemValues) {
+    Outcome out;
+    const Quote priced = quote(id, deal, attitude, opinion, opinions, economy, itemValues);
+    if (!priced.acceptable) {
+        out.message = priced.problem;
+        return out;
+    }
+    Trader& trader = traders_.at(id);
+    for (const auto& [item, count] : deal.heroGets) {
+        if (count <= 0) continue;
+        removeStock(id, item, count);
+        nudge(id, item, count, true);
+        out.heroGot[item] += count;
+    }
+    for (const auto& [item, count] : deal.heroGives) {
+        if (count <= 0) continue;
+        addStock(id, item, count);
+        nudge(id, item, count, false);
+        out.heroGave[item] += count;
+    }
+    heroBalance_ -= deal.balancePays;
+    trader.purse += deal.balancePays;
+    trader.purse -= priced.surplusUnits;
+    heroBalance_ += priced.surplusUnits;
+    out.balancePaid = deal.balancePays;
+    out.balanceGained = priced.surplusUnits;
+    out.done = true;
+    out.message = "It is a deal.";
+    return out;
+}
+
 int TradeMarket::addStock(int id, const std::string& item, int count) {
     const auto found = traders_.find(id);
     if (found == traders_.end() || count <= 0) return 0;
@@ -335,8 +473,8 @@ int TradeMarket::removeStock(int id, const std::string& item, int count) {
 
 std::string TradeMarket::toText() const {
     json traders = json::array();
-    const auto describe = [&](int id, const ItemCounts& stock, const ItemCounts& drift, std::int64_t restockDay, std::int64_t haggleDay, bool won) {
-        json entry{{"id", id}, {"stock", tableJson(stock)}, {"restock", restockDay}};
+    const auto describe = [&](int id, const ItemCounts& stock, const ItemCounts& drift, int purse, std::int64_t restockDay, std::int64_t haggleDay, bool won) {
+        json entry{{"id", id}, {"stock", tableJson(stock)}, {"restock", restockDay}, {"purse", purse}};
         if (!drift.empty()) entry["drift"] = tableJson(drift);
         if (haggleDay >= 0) {
             entry["haggle"] = haggleDay;
@@ -349,14 +487,14 @@ std::string TradeMarket::toText() const {
     auto saved = pending_.begin();
     while (live != traders_.end() || saved != pending_.end()) {
         if (saved == pending_.end() || (live != traders_.end() && live->first < saved->first)) {
-            describe(live->first, live->second.stock, live->second.drift, live->second.restockDay, live->second.haggleDay, live->second.haggleWon);
+            describe(live->first, live->second.stock, live->second.drift, live->second.purse, live->second.restockDay, live->second.haggleDay, live->second.haggleWon);
             ++live;
         } else {
-            describe(saved->first, saved->second.stock, saved->second.drift, saved->second.restockDay, saved->second.haggleDay, saved->second.haggleWon);
+            describe(saved->first, saved->second.stock, saved->second.drift, saved->second.purse, saved->second.restockDay, saved->second.haggleDay, saved->second.haggleWon);
             ++saved;
         }
     }
-    json data{{"version", kSaveVersion}, {"traders", traders}};
+    json data{{"version", kSaveVersion}, {"balance", heroBalance_}, {"traders", traders}};
     return data.dump();
 }
 
@@ -370,6 +508,7 @@ void TradeMarket::restoreState(std::string_view text) {
     if (!data.is_object() || !data.contains("version") || !data.at("version").is_number_integer()) throw DataError("trade.json", "version", "is missing");
     if (data.at("version").get<int>() > kSaveVersion) throw DataError("trade.json", "version", "was saved by a newer version of the game");
     if (!data.contains("traders") || !data.at("traders").is_array()) throw DataError("trade.json", "traders", "must be a list");
+    if (data.contains("balance") && data.at("balance").is_number_integer()) heroBalance_ = std::max(0, data.at("balance").get<int>());
     for (const json& entry : data.at("traders")) {
         if (!entry.is_object() || !entry.contains("id") || !entry.at("id").is_number_integer() || !entry.contains("stock") || !entry.contains("restock")) {
             throw DataError("trade.json", "traders", "an entry needs id, stock and restock");
@@ -378,6 +517,7 @@ void TradeMarket::restoreState(std::string_view text) {
         state.stock = tableFrom(entry.at("stock"), "stock");
         if (entry.contains("drift")) state.drift = tableFrom(entry.at("drift"), "drift");
         state.restockDay = entry.at("restock").get<std::int64_t>();
+        state.purse = entry.value("purse", config_.startPurse);
         if (entry.contains("haggle")) {
             state.haggleDay = entry.at("haggle").get<std::int64_t>();
             state.haggleWon = entry.value("won", false);
@@ -386,6 +526,7 @@ void TradeMarket::restoreState(std::string_view text) {
         if (const auto live = traders_.find(id); live != traders_.end()) {
             live->second.stock = state.stock; // already registered: the saved state is applied at once
             live->second.drift = state.drift;
+            live->second.purse = state.purse;
             live->second.restockDay = state.restockDay;
             live->second.haggleDay = state.haggleDay;
             live->second.haggleWon = state.haggleWon;
@@ -398,6 +539,7 @@ void TradeMarket::restoreState(std::string_view text) {
 std::uint64_t TradeMarket::hash() const {
     std::uint64_t h = 0xCBF29CE484222325ULL;
     mix(h, seed_);
+    mix(h, static_cast<std::uint64_t>(heroBalance_));
     mix(h, traders_.size());
     for (const auto& [id, trader] : traders_) {
         mix(h, static_cast<std::uint64_t>(id));
@@ -409,6 +551,7 @@ std::uint64_t TradeMarket::hash() const {
             mixText(h, item);
             mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(percent)));
         }
+        mix(h, static_cast<std::uint64_t>(trader.purse));
         mix(h, static_cast<std::uint64_t>(trader.restockDay));
         mix(h, static_cast<std::uint64_t>(trader.haggleDay));
         mix(h, trader.haggleWon ? 1ULL : 0ULL);

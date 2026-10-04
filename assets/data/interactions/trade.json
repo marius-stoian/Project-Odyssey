@@ -1,0 +1,16 @@
+// Trade with a placed NPC that has goods (US-283, D-54): the one trade screen with barter and the region's money. Rival camps keep their own Barter (barter.json).
+// A hostile trader will not trade at all; the other attitudes only change the prices (assets/data/sim/trade.json). The tag `trades` is given by the game to an NPC with a
+// trade profile and a stock.
+{
+  "id": "trade",
+  "label": "Trade",
+  "actors": ["hero"],
+  "target": { "tags": ["trader"] },
+  "range": 3,
+  "order": 15,
+  "requires": [
+    { "if": "tag(target, trades)", "else": "They have nothing to trade" },
+    { "if": "mood(npc) != hostile", "else": "They will not trade with you: they are hostile" }
+  ],
+  "effects": [ "do open-trade" ]
+}

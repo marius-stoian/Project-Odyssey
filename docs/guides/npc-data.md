@@ -288,9 +288,30 @@ A price is the region's base price for the good, times the **stock curve**, time
 | `reputation` | `percent` (by attitude word), `refuse` (list of words) | the percent added to what the hero pays: friendly -10, neutral 0, wary and suspicious +25, enchanted and lovingly -20; a word in `refuse` (hostile) will not trade |
 | `wants` | `wantPercent`, `otherPercent` | what the trader pays for the hero's goods: its wants at 100%, any other good at 50% |
 | `haggle` | `baseChance`, `opinionDivisor`, `perPersuasion`, `minChance`, `maxChance`, `discountPercent`, `failureOpinion` | the Haggle button of the trade screen (US-283) |
+| `purse` | `start`, `restockPerDay`, `cap` | the money a trader can pay out in a currency region, in value units (US-283) |
 
 **Reputation bands** use the same attitude word the title of the NPC menu shows (opinion bands of `opinions.json`): a friendly trader is cheaper than a suspicious one; a devoted one (`enchanted`, `lovingly`) unlocks rare stock.
 
 **Rare goods.** A trade profile's `rare` table names goods and the lowest band word that unlocks each (for example `"obsidian": "friendly"`, opinion 10 or more). Below it the good is not offered. The action **Ask about rare goods** (`assets/data/interactions/rare-goods.json`) appears for a trader with a `rare` table; when the hero does not stand high enough for everything it keeps back, the Actions pop-up (key **X**) lists it greyed out with the reason `Rare goods are kept for people they like better`. Its tags are given by the game: `has-rare-goods` (a rare table) and `rare-open` (nothing is kept back from this hero).
 
 Currency items are never repriced: shells worth 1 cost 1 from a friendly trader and from a suspicious one.
+
+## Trade: the trade screen (US-283)
+
+**Trade** (`assets/data/interactions/trade.json`, tag `trader`, range 3 m) opens the trade screen of a placed NPC that has a trade profile; a rival camp keeps its own **Barter** with its counter-offer and pay-later. The action is hidden for a trader that has nothing to trade and for a hostile one; the Actions pop-up (**X**) lists it with the reason (`They have nothing to trade`, `They will not trade with you: they are hostile`).
+
+The screen, top to bottom:
+
+| Part | What it shows |
+|---|---|
+| Title | `TRADE with Tala (friendly)`: the attitude word decides the prices (ADR-023) |
+| Money line | in a currency region your **balance**, the trader's **purse** and the money here (`Shells = 1`); in a region with no currency `This region has no money: barter only.` |
+| **You give** | your bag (coins are in the balance) with, on each button, how many you put on the table of how many you have, and `@` what the trader pays for one piece (a `-` button takes one back) |
+| **You take** | the trader's stock with how many you take of how many it has and `@` what you pay for one piece; a `*` marks a good the trader wants; rare goods you do not stand high enough for are not listed (`They keep back: ... (needs friendly)`) |
+| Pay from balance | `-5 -1 +1 +5`: units of your balance paid into the deal (currency regions only) |
+| Balance bar | `They receive X   They give Y   [####....]`, live: received is your goods at what the trader pays plus the balance you pay; given is its goods at what you pay. **Deal** is available when received is at least given; otherwise the line says what is missing (`They want 0.45 more in value.`) |
+| **Haggle (n%)** | one try per trader per in-game day: the chance from opinion and persuasion (your Trade affinity / 10), a seeded roll; a win is 10% off for the rest of the day, a loss costs 5 opinion; the roll and the chance are shown |
+
+**Money.** When the screen opens, every coin item of the region's currencies in your bag becomes your balance; when it closes (Close, or the menu key) the balance goes back as coin, highest value first; a remainder that no coin can make waits in the balance for the next visit (`trade.json` keeps it). Any currency item is worth its value anywhere and is never repriced. In a currency region, what you gave beyond what you took is paid back to your balance from the trader's purse, up to what the purse holds (30 at the start, +5 a day, at most 60: `purse` in `trade.json`); where there is no currency nothing is paid back, so ask for goods.
+
+**After a deal** the goods move between your bag and the trader's stock, the prices drift (ADR-023), and the trader's opinion of you rises by the `trade` event of `opinions.json` (+5).

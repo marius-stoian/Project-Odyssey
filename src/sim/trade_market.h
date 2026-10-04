@@ -6,6 +6,7 @@
 #include "sim/npc_extras.h"
 #include "sim/opinion.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -45,6 +46,11 @@ struct PriceConfig {
     int haggleMax = 85;
     int haggleDiscountPercent = 10;
     int haggleFailureOpinion = 5;
+    // The purse (US-283): the money a trader can pay out in a currency region, in value units. It starts at startPurse, grows by purseRestock a day up to purseCap, takes
+    // in what the hero pays from his balance and pays out the surplus of a deal.
+    int startPurse = 30;
+    int purseRestock = 5;
+    int purseCap = 60;
 };
 
 PriceConfig loadPriceConfig(const std::filesystem::path& file);
@@ -59,6 +65,7 @@ public:
         rules::TradeProfile profile; // data: read again at every start, not saved
         ItemCounts stock;
         ItemCounts drift;            // US-282: item -> percent, signed
+        int purse = 0;               // US-283: what it can pay out in a currency region, in value units
         std::int64_t restockDay = 0; // the last day whose delivery has arrived
         std::int64_t haggleDay = -1; // US-283: the day of the last try, -1 never
         bool haggleWon = false;      // that try succeeded: its discount holds for that day
@@ -114,6 +121,53 @@ public:
     // The band word a rare good needs ("friendly"), or empty.
     std::string rareWord(int id, const std::string& item) const;
 
+    // ---- Trading (US-283, D-54 Q1-Q5): a deal is what the hero hands over, what he takes, and how much of his balance he pays. The market checks it against the stock,
+    // the prices and the attitude, and moves the stock, the drift and the money; the caller moves the hero's bag.
+    struct Deal {
+        ItemCounts heroGives; // goods the hero hands over (never coins: coins are in the balance)
+        ItemCounts heroGets;  // goods the hero takes from the stock of the trader
+        int balancePays = 0;  // units of the hero's balance paid into the deal
+    };
+    struct Quote {
+        bool refused = false;        // the trader will not trade with this hero at all (hostile)
+        long long receivesMilli = 0; // what the trader receives: the hero's goods at what it pays, plus the balance
+        long long givesMilli = 0;    // what the trader gives: its goods at what the hero pays
+        int surplusUnits = 0;        // the balance the hero gets back for what he gave beyond what he took (a currency region and a purse that can pay)
+        bool acceptable = false;
+        std::string problem;         // the first thing wrong, in plain words; empty when acceptable
+    };
+    struct Outcome {
+        bool done = false;
+        std::string message;
+        ItemCounts heroGave; // what left the hero's bag
+        ItemCounts heroGot;  // what came into it
+        int balancePaid = 0;
+        int balanceGained = 0;
+    };
+    // The live balance bar: received minus given. execute() does the deal when the quote is acceptable (received at least given).
+    Quote quote(int id, const Deal& deal, Attitude attitude, int opinion, const OpinionConfig& opinions, const RegionEconomy& economy, const ItemCounts& itemValues) const;
+    Outcome execute(int id, const Deal& deal, Attitude attitude, int opinion, const OpinionConfig& opinions, const RegionEconomy& economy, const ItemCounts& itemValues);
+    // The hero's balance: the value of the coins he brought to the trade screen, kept here so that it survives a save (US-283).
+    int heroBalance() const { return heroBalance_; }
+    void setHeroBalance(int units) { heroBalance_ = std::max(0, units); }
+    int purse(int id) const;
+    std::int64_t today() const { return today_; }
+
+    // Haggle (D-54 Q5): one try per trader per in-game day, a seeded roll of the world seed, the trader and the day; a win is a discount for the rest of the day, a loss costs
+    // opinion. `persuasion` is the hero's Trade affinity divided by 10.
+    struct Haggle {
+        bool tried = false;     // false: nothing was rolled (already tried today, or not a trader)
+        bool won = false;
+        int chance = 0;         // percent
+        int roll = 0;           // 0..99; a win is a roll below the chance
+        int opinionChange = 0;  // what the caller adds to the opinion of the trader of the hero (negative after a loss)
+        std::string message;
+    };
+    int haggleChance(int opinion, int persuasion) const;
+    bool canHaggle(int id) const;
+    Haggle haggle(int id, int opinion, int persuasion);
+    int discountPercent(int id) const; // the percent a won haggle takes off today, else 0
+
     // A new day has begun: every trader gets the deliveries of the days since its last one (at most `catchUpDays`). Calling it twice for the same day changes nothing.
     void dailyUpdate(std::int64_t today, const RegionEconomy& economy);
 
@@ -133,6 +187,7 @@ private:
     struct SavedState {
         ItemCounts stock;
         ItemCounts drift;
+        int purse = 0;
         std::int64_t restockDay = 0;
         std::int64_t haggleDay = -1;
         bool haggleWon = false;
@@ -144,6 +199,8 @@ private:
     std::uint64_t seed_;
     std::map<int, Trader> traders_;
     std::map<int, SavedState> pending_; // restored states of traders that are not registered (yet): they are kept in the next save
+    int heroBalance_ = 0;
+    std::int64_t today_ = 0;
 };
 
 } // namespace odysseus::sim

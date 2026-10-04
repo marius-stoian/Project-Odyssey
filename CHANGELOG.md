@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-283: trade screen for any trader (Mraw) - 2026-10-05
+
+**State:** On `story/US-283`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Simulation: `TradeMarket` gains the deal rules (`Deal`, `quote`, `execute`: stock, prices, rare goods, balance, purse, surplus), the hero's balance and the traders' purses, Haggle (one seeded try a day, discount, opinion cost), all saved (`src/sim/trade_market.h/.cpp`); `purse` section in `assets/data/sim/trade.json`. On the paying side the stock curve is capped at 100 (ADR-023).
+- Game: `TraderRef` (`std::variant<RivalTrader, NpcTrader>`) and `RunFlow::openBarter(TraderRef)` (the old `openBarter(int)` stays); `Screen::Barter` shows the rival barter unchanged or the new NPC trade screen (`buildTrade`, `actTrade`, coins in and out of the balance); the action `trade` (`assets/data/interactions/trade.json`, `do open-trade`) and the tag `trades`.
+- Test fixes: the M9a Actions tests removed the shipped `trade.json` from their data copy (their stand-in `trade-test` action is about gating by attitude).
+- Docs: guide, ADR-023, `docs/plans/US-283.md`, learning journal.
+- Tests (not yet run): `tests/sim/trade_deal_test.cpp` (9 cases), `tests/game/trade_screen_test.cpp` (7 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-282: supply and demand, and reputation (Mraw) - 2026-10-05
 
 **State:** On `story/US-282`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
