@@ -2,6 +2,7 @@
 
 #include "game/lighting.h"
 #include "game/tags.h"
+#include "sim/economy_json.h"
 #include "sim/npc_kind.h"
 #include "sim/data.h"
 #include "sim/json_data.h"
@@ -474,6 +475,7 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.targets.push_back(point(data.at("targets").at(i), file, std::format("targets[{}]", i), level));
         }
     }
+    if (data.contains("economy")) level.economy = sim::economyFromJson(data.at("economy"), file, "economy"); // level version 5 (US-280)
     return level;
 }
 
@@ -559,6 +561,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"targets", targets},
                     {"ground", ground}};
     if (level.clan) data["clan"] = true;
+    if (!level.economy.empty()) data["economy"] = sim::economyToJson(level.economy); // only when the owner set something, so older levels save as they were
     fs::create_directories(file.parent_path());
     const fs::path temporary = fs::path(file.string() + ".tmp");
     {

@@ -11,6 +11,7 @@
     { "id": "medicine-bag", "name": "Medicine bag", "kind": "tool", "value": 6 },
     { "id": "flint-tool", "name": "Flint tool", "kind": "good", "value": 7 },
     { "id": "berries", "name": "Berries", "kind": "food", "value": 1 },
-    { "id": "fur", "name": "Fur", "kind": "good", "value": 5 }
+    { "id": "fur", "name": "Fur", "kind": "good", "value": 5 },
+    { "id": "shells", "name": "Shells", "kind": "currency", "value": 1 }
   ]
 }

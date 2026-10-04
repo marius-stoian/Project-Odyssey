@@ -1624,3 +1624,21 @@ The level file itself was written by the game's own `saveLevel` (not by hand), w
 **Try it (15 minutes).** Misspell a class in `npc-test.json` (`"traderr"`) and run the first test: the message names the NPC and the class.
 
 **Check yourself.** Why is the byte-for-byte round trip a stronger check than loading the file and looking at a few fields?
+
+## US-280 Currencies per region: why money is an integer
+
+**What we built.** A region can say which items are money (`shells=1`), what the market asks for goods and which goods it delivers. The owner edits it in the Editor's Economy panel; the level file keeps it.
+
+**The C++ idea: value types and whole-number money.** `RegionEconomy` is a *value type*: a plain struct you can copy, compare and store with no pointers and no owners to worry about. `friend bool operator==(const RegionEconomy&, const RegionEconomy&) = default;` asks the compiler to write the comparison for us, which is how the test checks that a level written and read back is the same:
+
+```cpp
+CHECK(reread.economy == editor.level().economy);
+```
+
+Money is an `int` of value units, never a `double`. Computers store 0.1 in binary as a number that is very slightly wrong, and when thousands of trades add up (and when two computers must agree on the same save file, the determinism rule) those tiny errors show. With whole numbers, `3 + 4` is always exactly `7`. The one place where whole numbers need care is division: `makeChange(13)` with a 5-value coin gives two coins and a *remainder* of 3, and the code keeps that remainder instead of rounding it away, so nothing is ever lost.
+
+**Where to look.** `src/sim/economy.h`, `src/sim/economy.cpp`, `tests/sim/economy_test.cpp`, `tests/game/economy_editor_test.cpp`, and the Economy panel in `src/game/editor.cpp` (`buildEconomy`).
+
+**Try it (15 minutes).** In `economy_test.cpp` change the coarse coin to value 4 and the amount to 13: predict the coins and the remainder before you run the test.
+
+**Check yourself.** Why does `parsePairs` sort its output (a `std::map`) instead of keeping the order you typed?
