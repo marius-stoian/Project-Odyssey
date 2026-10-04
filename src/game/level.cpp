@@ -3,6 +3,7 @@
 #include "game/lighting.h"
 #include "game/tags.h"
 #include "sim/economy_json.h"
+#include "sim/rule_json.h"
 #include "sim/npc_kind.h"
 #include "sim/data.h"
 #include "sim/json_data.h"
@@ -52,6 +53,22 @@ int whole(const json& object, const std::filesystem::path& file, const std::stri
         throw DataError(file, field, std::format("must be between {} and {} (is {})", minimum, maximum, value));
     }
     return static_cast<int>(value);
+}
+
+// The trade (and later schedule and action) fields of a placed character, read by the same reader as the class and kind files, so a mistake says what is wrong in the
+// same words. Only the fields of the extras are looked at; the other fields of the entry are read by the caller.
+sim::rules::NpcExtras readExtras(const json& entry, const std::filesystem::path& file, const std::string& where) {
+    bool any = false;
+    for (const std::string& name : sim::rules::extrasFieldNames()) any = any || entry.contains(name);
+    if (!any) return {};
+    const auto parsed = sim::rules::parseJson(entry.dump());
+    if (!parsed.value) throw DataError(file, where, parsed.error);
+    std::string problem;
+    const sim::rules::NpcExtras extras = sim::rules::parseExtras(*parsed.value, [&](int, const std::string& message) {
+        if (problem.empty()) problem = message; // the first mistake is enough: the file and the field name where to look
+    });
+    if (!problem.empty()) throw DataError(file, where, problem);
+    return extras;
 }
 
 PixelPoint point(const json& value, const std::filesystem::path& file, const std::string& field, const Level& level) {
@@ -385,6 +402,7 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             placed.allow = nameList(entry.at("actions"), file, where + ".actions", "allow");
             placed.deny = nameList(entry.at("actions"), file, where + ".actions", "deny");
         }
+        placed.extras = readExtras(entry, file, where); // level version 5
         level.characters.push_back(placed);
     }
     if (data.contains("pickups")) { // level version 2 (US-134); a version 1 file has none
@@ -534,6 +552,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
             if (!c.deny.empty()) actions["deny"] = c.deny;
             entry["actions"] = actions;
         }
+        for (const auto& [name, fieldText] : sim::rules::extrasFieldTexts(c.extras)) entry[name] = json::parse(fieldText);
         characters.push_back(entry);
     }
     json pickups = json::array();

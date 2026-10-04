@@ -4,6 +4,7 @@
 
 #include "game/placeholder_art.h"
 #include "sim/economy.h"
+#include "sim/npc_extras.h"
 #include "luna/engine/tile_map.h"
 
 #include <filesystem>
@@ -82,6 +83,7 @@ struct PlacedCharacter {
     std::vector<std::string> allow;    // interaction ids
     std::vector<std::string> deny;
     int family = 0;                    // a family id (0 = none); persons of the same family start with the same-family opinion of each other (US-264)
+    sim::rules::NpcExtras extras;      // level version 5: what this NPC trades (US-281), later its schedule and actions; only what it sets itself
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 

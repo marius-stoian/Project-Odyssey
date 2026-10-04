@@ -17,6 +17,7 @@ sim::rules::NpcLayer placedLayer(const PlacedCharacter& placed) {
     layer.dialogues = placed.dialogues;
     layer.allow = placed.allow;
     layer.deny = placed.deny;
+    layer.extras = placed.extras;
     return layer;
 }
 

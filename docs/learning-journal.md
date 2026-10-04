@@ -1642,3 +1642,22 @@ Money is an `int` of value units, never a `double`. Computers store 0.1 in binar
 **Try it (15 minutes).** In `economy_test.cpp` change the coarse coin to value 4 and the amount to 13: predict the coins and the remainder before you run the test.
 
 **Check yourself.** Why does `parsePairs` sort its output (a `std::map`) instead of keeping the order you typed?
+
+## US-281 Trader stock: integer arithmetic and the rules written down
+
+**What we built.** A trader (any NPC with a `trade` profile) has a limited stock, gets a delivery every day, wants some goods more than others, and the stock is saved.
+
+**The C++ idea: integer arithmetic with rounding rules written down.** Computers divide whole numbers by throwing the remainder away: `7 / 2` is `3`. That is fine as long as you decide it on purpose and write it down. Here, the cap of a good is `max(start * capFactor, minimumCap)`, and a restock adds `clamp(count, 0, room)` where `room = cap - stock`; `std::clamp` keeps a number inside two limits, so a delivery can never push the shelf past the cap:
+
+```cpp
+const int room = cap(id, item) - stock(id, item);
+const int added = std::clamp(count, 0, std::max(0, room));
+```
+
+The random picks use a *seeded* generator. `core::Pcg32 random(seed + day * K, id * 2 + 1)` is created fresh for each (world seed, day, trader), so a day always brings the same goods whenever and wherever it is computed: the far trader and the near one, today or after loading a save. There is no global random state to get out of step.
+
+**Where to look.** `src/sim/trade_market.cpp` (`deliver`, `dailyUpdate`), `src/sim/npc_extras.cpp` (reading and merging the profile), `tests/sim/trade_market_test.cpp`, `tests/game/trade_stock_test.cpp`.
+
+**Try it (15 minutes).** In `trade_market_test.cpp` change `catchUpDays` expectations: set `PriceConfig::catchUpDays` to 3 and predict how much fur a trader has after `dailyUpdate(100)`.
+
+**Check yourself.** Why does `addTrader` for an id that already exists keep its stock but take the new profile?

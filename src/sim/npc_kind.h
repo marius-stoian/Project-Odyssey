@@ -4,6 +4,7 @@
 
 #include "sim/interaction.h"
 #include "sim/npc_class.h"
+#include "sim/npc_extras.h"
 #include "sim/opinion.h"
 
 #include <filesystem>
@@ -28,6 +29,7 @@ struct NpcLayer {
     std::vector<std::pair<std::string, std::string>> dialogues; // partner type -> .dlg; replaces that partner type of the layers below
     std::vector<std::string> allow;
     std::vector<std::string> deny;
+    NpcExtras extras;                                // trade now; schedule, actions and partner defaults later (M9b, M9c)
     friend bool operator==(const NpcLayer&, const NpcLayer&) = default;
 };
 
@@ -65,6 +67,7 @@ struct ResolvedNpc {
     std::vector<std::string> tags;              // sorted, no duplicates
     std::map<std::string, std::string> dialogues; // partner type -> .dlg
     std::map<std::string, ActionState> actions;   // only ids some layer mentioned
+    NpcExtras extras;                             // the merge of every layer: classes, then the kind, then the placed NPC
 
     ActionState action(const std::string& id) const;
     bool denied(const std::string& id) const { return action(id) == ActionState::Denied; }
