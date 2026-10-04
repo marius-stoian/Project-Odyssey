@@ -82,6 +82,14 @@ Image mirrored(const Image& source) {
     return out;
 }
 
+Image silhouette(const Image& source) {
+    Image out(source.width(), source.height());
+    for (int y = 0; y < source.height(); ++y) {
+        for (int x = 0; x < source.width(); ++x) out.set(x, y, Color{0, 0, 0, source.get(x, y).alpha});
+    }
+    return out;
+}
+
 Image normalAtlas(const Image& atlas, int cellWidth, int cellHeight, double strength) {
     Image out(atlas.width(), atlas.height());
     out.fillRect(0, 0, atlas.width(), atlas.height(), Color{128, 128, 255, 255});

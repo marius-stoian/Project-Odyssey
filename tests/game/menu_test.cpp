@@ -174,7 +174,11 @@ TEST_CASE("US-153 Gather takes three seconds under a ring, then gives berries an
     // The ring is on screen while it fills.
     camp.renderer.clear();
     camp.odyssey.render(camp.renderer, 0.0);
-    const std::size_t withRing = camp.renderer.draws().size();
+    // Shadows (US-244) move with the people, so the draws are counted without them.
+    const auto drawsWithoutShadows = [&camp] {
+        return static_cast<std::size_t>(std::count_if(camp.renderer.draws().begin(), camp.renderer.draws().end(), [&camp](const auto& draw) { return !camp.odyssey.isShadowTexture(draw.texture); }));
+    };
+    const std::size_t withRing = drawsWithoutShadows();
 
     camp.play(30); // 1.5 s
     CHECK(camp.odyssey.actions().progress(0, camp.odyssey.actionClock()) == 50);
@@ -190,7 +194,7 @@ TEST_CASE("US-153 Gather takes three seconds under a ring, then gives berries an
 
     camp.renderer.clear();
     camp.odyssey.render(camp.renderer, 0.0);
-    CHECK(camp.renderer.draws().size() < withRing); // the ring and the plant are gone
+    CHECK(drawsWithoutShadows() < withRing); // the ring and the plant are gone
 
     // Greyed out while it waits, even though it cannot be clicked: asked directly.
     const auto offers = camp.odyssey.plantOffers(0);

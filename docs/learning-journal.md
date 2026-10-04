@@ -1331,3 +1331,22 @@ const double elevation = std::atan2(height, std::hypot(dx, dy)) * kRadiansToDegr
 **Try it (15 minutes).** In `objects.json` change the `height` of `sun (placed)` from 40 to 5, place it in the Editor east of the hero and read `elevation` in a test: the sun is now nearly on the horizon and the shadow factor hits its cap of 2.5.
 
 **Check yourself.** Why does the code clamp the elevation to at least 8 degrees before it computes `1 / tan(elevation)`?
+
+## US-244 Sun and moon shadows: projecting silhouettes with a shear transform
+
+**What we built.** Everything that stands in the world now throws a shadow along the light of the sun or the moon, longer when the light is low, fainter in fog.
+
+**The C++ idea: a shear.** A shadow is the sprite's own picture painted black and slid sideways, more the higher the pixel is above the feet. That is a shear: each row `z` is shifted by `direction * z * length`:
+
+```cpp
+const int shift = static_cast<int>(std::lround(dirX * middle * groundPerHeight));
+renderer.drawStyled(silhouette, stripOfPicture, {feet.x - width / 2 + shift, top, width, rowsPerDraw}, style);
+```
+
+We walk down the ground rows instead of up the picture rows so that every ground pixel is drawn once; drawing every picture row on top of the others would stack the translucency into dark bands.
+
+**Where to look.** `drawShadow` in `src/luna/engine/shadow_draw.cpp`; `OdysseyGame::drawShadows` in `src/game/shadows.cpp`.
+
+**Try it (15 minutes).** Change the `height` of the `olive tree` in `plants.json` from 4.0 to 8.0 and take the 09:00 screenshot from `docs/plans/US-244.md`: the shadow doubles in length.
+
+**Check yourself.** Why does `drawShadow` give a shadow that points exactly sideways a minimum depth (`kMinShadowDepth`)?

@@ -138,7 +138,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-242 | US-242 | M8c | Done | 2026-10-02 |
 | S-US-243 | US-243 | M8c | Done |  |
 | S-US-248 | US-248 | M8c | Done | Debug verified 2026-10-04 |
-| S-US-244 | US-244 | M8c | To do |  |
+| S-US-244 | US-244 | M8c | Done | Debug verified 2026-10-04 |
 | S-US-245 | US-245 | M8c | To do |  |
 | S-US-246 | US-246 | M8c | To do |  |
 | S-US-247 | US-247 | M8c | To do |  |

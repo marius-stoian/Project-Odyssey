@@ -120,3 +120,27 @@ The sun and the moon are objects of the world. Where they are decides where the 
 The dimming eases in over the first fifth of the event, holds its full depth in the middle and eases out over the last fifth. While it lasts the light of that body is multiplied by what is left (`dimming`), and the whole world's ambient light with it. Overlapping events: the darkest counts. A missing file means no events.
 
 **Mistakes.** A mistake in the events file or in a `celestial` entry does not stop the game: the problem is shown as a message with the file and the field (for example `celestial-events.json: events[0].depth: must be a number from 0 to 1`), the bad entry is left out and the level keeps the default pair (a built-in sun and moon if the catalog has none left).
+
+# Shadows (US-244)
+
+Characters, plants and objects cast shadows on the ground that turn and stretch with the light of the sun or the moon (see "Celestial bodies" above). Presentation only: the simulation never reads them and the determinism hash is unchanged.
+
+**How a shadow is made.** Each sprite's picture is painted black (a *silhouette* copy of its texture, made at start-up and, for the clan, the first time a look is seen) and laid down on the ground along the light, one ground row at a time (`drawShadow` in `src/luna/engine/shadow_draw.cpp`). A point of the sprite `z` pixels above its feet lands `z * length` pixels from the feet in the direction away from the light, so the upright picture is sheared and flattened. The length is the thing's catalog `height` times the light's `lengthPerHeight` (1 / tan of the elevation, at most 2.5 for the sun and 1.5 for the moon, D-49): at noon in spring a 4 m tree throws a shadow of about 3.4 m, in the morning a longer one. A shadow that points exactly sideways on the picture is given a little depth so it stays a shape.
+
+**How dark.** `sky.json` `shadow` of the hour (0.35 at night, 0.5 at dawn and dusk, 0.6 by day) times the light's strength (an eclipse takes it away) times what the weather leaves. Moon shadows are shorter (cap 1.5) and, because of the sky's night value, softer.
+
+| Field | Where | Values | Meaning |
+|---|---|---|---|
+| `height` | `plants.json`, `objects.json`, `animals.json`, `characters.json` | metres, 0 to 100 (characters and animals 0.1 to 100) | how tall the thing is; its shadow is this times the light's factor |
+| `shadow` | the same files | true / false | `false`: casts no shadow whatever its height |
+| `shadowFade` | `weather.json` | 0 to 1 | how much of the shadows this weather takes away |
+
+Defaults when a field is left out: a tree 4 m, a tall plant (bush) 1.5 m, a small plant 0 (grass casts nothing, give it a `height` to change that), an object 0.8 m, a person 1.7 m (a clan child three quarters of that), an animal 1.0 m. Weather: fog, mist, cloud, overcast and whiteout take all (1.0), haze, smog and gloom half (0.5); every other weather 0.
+
+```json
+{"name":"olive tree","frame":"olive tree","size":"tree","height":5.0, "...":"..."}
+{"name":"fire pit", "...":"...", "shadow": false}
+{"name":"fog","frames":4,"ticksPerFrame":4,"weight":1,"blend":"alpha","shadowFade":1.0}
+```
+
+A mistake names the file and the field, for example `plants.json: plants[2].height: must be a number from 0 to 100`. Sun and moon objects (US-248) are in the sky and cast nothing. Shadows from fires are US-245; shadows of buildings come with M8d.

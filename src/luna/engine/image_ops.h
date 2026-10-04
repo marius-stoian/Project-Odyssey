@@ -24,6 +24,9 @@ Image fitInto(const Image& source, int width, int height, bool bottom);
 // Left and right swapped: a west-facing frame from an east-facing one.
 Image mirrored(const Image& source);
 
+// The same picture painted black, keeping its transparency: what a shadow is cut from (US-244).
+Image silhouette(const Image& source);
+
 // A normal map for an atlas of cells (US-241): per cell, a height is made from how far each opaque pixel is from the figure's edge (the middle
 // stands higher, like a rounded body) and from its brightness (folds and highlights stand out), smoothed a little, and the slopes of that height
 // (Sobel) become the surface direction: red is x (right), green is y (down), blue is z (toward the viewer), each 0..255 for -1..1. Transparent
