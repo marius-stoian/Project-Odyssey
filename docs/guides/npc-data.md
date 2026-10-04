@@ -89,3 +89,19 @@ Layers, lowest first: the classes the NPC has (in order), its kind file, the pla
 - **Tags:** all layers added together.
 - **Dialogues:** per partner type; a higher layer replaces the lower one for that partner type.
 - **Allow and deny:** layer by layer, allow first and then deny; a later layer overrides an earlier one, and inside one layer a deny beats an allow. So a trader class that allows `barter` and a placed NPC that denies it: barter is denied for that NPC only. An action no layer mentions is left to the interaction's own rules.
+
+## Placed NPCs are persons (US-262)
+
+When a level starts, every placed character becomes a **person** of the simulation (`sim::NpcPopulation`), except animals and monsters: a character is a creature when its kind is an animal, when its classes include `monster` or `animal`, or when it is an enemy kind with no class at all. Creatures keep fighting and grazing as before. The hero's own kind is never a person.
+
+A person is kept in a compact store (one array per field; see ADR-022 in US-263) and has:
+
+| What | How |
+|---|---|
+| `id` | the id of the placed character in the level, the same in the save |
+| age | starts at 20 years plus a fixed spread by id (so the same level always starts the same people); +1 every game day |
+| needs | hunger, energy, warmth, social, 0 to 100; each day they fall by the daily rate of `needs.json` (warmth faster in winter); a need that ends the day under 50 is restored (hunger 40, energy 40, warmth 30, social 20): the land, the fire and the neighbours provide, so nobody starves in the test level |
+| family | a family id (0 = none); the Editor sets it in US-268 |
+| memories | the last six: "an ordinary day", "a good day" or "a hard day" every night by how the needs are, and "met the hero" when the hero stands within 48 pixels (once a day) |
+
+A game day is the `ticksPerDay` of `calendar.json` (2400 ticks, two minutes). Persons do not move yet (schedules come in M9c). They are saved with the autosave in `npcs.json` (versioned JSON, written to a temporary file and renamed, three backups) and read back with it; the same ticks always give the same persons (the population has its own hash).

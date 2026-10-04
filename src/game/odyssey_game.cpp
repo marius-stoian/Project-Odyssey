@@ -85,6 +85,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
+    npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
+    npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -195,6 +197,7 @@ void OdysseyGame::resetPlay() {
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
+    buildNpcPopulation(); // the placed people are persons of the simulation (US-262)
 }
 
 void OdysseyGame::switchMode(Mode mode) {
@@ -1102,6 +1105,7 @@ bool OdysseyGame::autosave() {
         if (region_) sim::saveRegion(*region_, saveDirectory_ / "region.json");
         if (life_) life_->save(saveDirectory_ / "hero.json");
         sim::writeSaveText(saveDirectory_ / "things.json", thingsText());
+        if (!saveNpcPopulation()) say("The placed people could not be saved");
     } catch (const std::exception& error) {
         say(std::string("Autosave failed: ") + error.what());
         return false;
@@ -1160,6 +1164,7 @@ bool OdysseyGame::loadAutosave() {
             const std::string text((std::istreambuf_iterator<char>(things)), std::istreambuf_iterator<char>());
             for (const std::string& note : restoreThings(text)) notes += (notes.empty() ? "" : "; ") + note;
         }
+        if (const std::string problem = loadNpcPopulation(); !problem.empty()) notes += (notes.empty() ? "" : "; ") + problem;
         say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
         return true;
     } catch (const std::exception& error) {
@@ -1789,6 +1794,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
+    tickNpcPopulation();
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
         clanView_.update(*clan_, map_);

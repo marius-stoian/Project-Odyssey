@@ -1447,3 +1447,22 @@ Allow and deny lists merge layer by layer in a `std::map<std::string, ActionStat
 **Try it (15 minutes).** In `tests/sim/npc_kind_test.cpp` read the precedence cases, then change `wanderer.json` to `wary` and press F5.
 
 **Check yourself.** Why is an empty `std::vector` a fine "not set" for tags but `std::optional` is needed for classes?
+
+## US-262 Placed NPCs are persons: one id from the level file to the save
+
+**What we built.** A placed wanderer is now a real person of the simulation: it ages, its needs move, it remembers the days and meeting the hero, and it is saved with the game. Goblins (monsters) and deer (animals) stay creatures.
+
+**The C++ idea: identity and lifetime.** The person keeps the id of the placed character in the level file. The same number appears in the level, in the store and in the save, so nothing has to be matched by name or by position in a list:
+
+```cpp
+int NpcPopulation::add(int id, std::string_view kind, int ageDays, int family, int x, int y) {
+    if (const int existing = indexOf(id); existing >= 0) return existing; // adding twice is the same person
+```
+
+The store keeps each field in its own `std::vector` (a struct of arrays); the index of a person is only a position, the `id` is who they are.
+
+**Where to look.** `src/sim/npc_population.cpp`, `OdysseyGame::buildNpcPopulation` in `src/game/npc_people.cpp`.
+
+**Try it (15 minutes).** Read `tests/sim/npc_population_test.cpp`, then change `restoreBelow` in `DailyConfig` and see which test notices.
+
+**Check yourself.** Why is the index of a person not safe to save, while the id is?

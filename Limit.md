@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-262):** S-US-262 DONE (Milestone-95.md, AP-96). Next: S-US-263 (spatial grid, detail by distance, ADR-022, 100,000-person load test), then US-264..US-270 and X-M9a.
+
 **Resume update (2026-10-04, US-261):** S-US-261 DONE (Milestone-94.md, AP-95). Next: S-US-262 (placed NPCs become full persons of the simulation), then US-263 (store, detail by distance, 100,000 load test, ADR-022) .. US-270, X-M9a.
 
 **Resume update (2026-10-04, US-260):** S-US-260 DONE (Milestone-93.md, AP-94). Next: S-US-261 (kind files assets/data/npcs/<kind>.json, placed-NPC overrides, precedence, F5), then US-262..US-270 and X-M9a (the one full verify for M9a, owner 2026-10-04).
