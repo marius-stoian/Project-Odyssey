@@ -54,6 +54,8 @@ struct PlantDef {
     std::vector<std::string> states; // US-151: the first is where it starts ("ripe", "picked"); none for a plant that never changes
     std::string light;     // US-243: a kind of light of lights.json the thing gives ("" = none) ...
     std::string lightState; // ... only while it is in this state (a fire pit: "burning"); empty: always
+    double height = 0.0;    // US-244: metres; the length of its shadow is this times the light's factor. 0: casts no shadow (small plants)
+    bool shadow = true;     // false: casts no shadow whatever its height
     bool celestial = false; // US-248: a sun or a moon; `sky` says which
     CelestialDef sky;
     bool object = false;   // US-155: a world object from objects.json (fire pit, shelter...), placed like a plant but drawn by the game
@@ -65,6 +67,8 @@ struct AnimalDef {
     int hp = 80;
     bool enemy = false;    // can be hit and strikes back (D-21: predators and boars)
     int strikeDamage = 0;
+    double height = 1.0;   // US-244: metres, for its shadow
+    bool shadow = true;
     double reach = 1.5;    // metres
     std::vector<std::string> tags; // US-151: "animal" and "hostile" or "prey"; "tags" in animals.json replaces them
 };
@@ -83,6 +87,7 @@ struct WeatherDef {
     int ticksPerFrame = 4;
     int weight = 1;        // how often it is picked, against the others
     bool additive = true;  // light weather adds light; fog and clouds are drawn see-through
+    double shadowFade = 0.0; // US-244: how much of the shadows this weather takes away (fog and heavy cloud: 1)
 };
 
 // What an element does (US-135), from weapons.json under "elements". Only the fields an element uses are

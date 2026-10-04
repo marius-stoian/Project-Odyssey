@@ -123,6 +123,16 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             }
             kind.reach = entry.at("reach").get<double>();
         }
+        if (entry.contains("height")) {
+            if (!entry.at("height").is_number() || entry.at("height").get<double>() < 0.1 || entry.at("height").get<double>() > 100.0) {
+                throw DataError(charactersFile, where + ".height", "must be a number of metres from 0.1 to 100");
+            }
+            kind.height = entry.at("height").get<double>();
+        }
+        if (entry.contains("shadow")) {
+            if (!entry.at("shadow").is_boolean()) throw DataError(charactersFile, where + ".shadow", "must be true or false");
+            kind.shadow = entry.at("shadow").get<bool>();
+        }
         if (definitions.character(kind.name) != nullptr) {
             throw DataError(charactersFile, where + ".name", "\"" + kind.name + "\" is listed twice");
         }
@@ -152,6 +162,8 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
             kind.enemy = entry.value("enemy", false);
             kind.reach = entry.value("reach", 1.5);
             kind.animal = true;
+            kind.height = entry.value("height", 1.0);
+            kind.shadow = entry.value("shadow", true);
             kind.tags = readTags(entry, animalsFile, where, {"animal", kind.enemy ? "hostile" : "prey"});
             if (definitions.character(kind.name) != nullptr) {
                 throw DataError(animalsFile, where + ".name", "\"" + kind.name + "\" is already a character kind");

@@ -145,6 +145,9 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         checkFrame(plantsFile, where, def.frame);
         constexpr std::array<const char*, 3> kSizes{"small", "tall", "tree"};
         def.size = kSizes[static_cast<std::size_t>(f.choice("size", kSizes))];
+        def.height = def.size == "tree" ? 4.0 : (def.size == "tall" ? 1.5 : 0.0); // small plants cast no shadow unless they say so
+        if (entry.contains("height")) def.height = f.number("height", 0.0, 100.0);
+        if (entry.contains("shadow")) def.shadow = f.flag("shadow");
         def.blocks = f.flag("blocks");
         def.edible = f.flag("edible");
         def.inspect = f.text("inspect");
@@ -177,6 +180,9 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
             def.states = readStates(entry, objectsFile, where, {});
             def.light = entry.value("light", std::string());
             def.lightState = entry.value("lightState", std::string());
+            def.height = 0.8;
+            if (entry.contains("height")) def.height = f.number("height", 0.0, 100.0);
+            if (entry.contains("shadow")) def.shadow = f.flag("shadow");
             if (entry.contains("celestial")) {
               try {
                 const json& sky = entry.at("celestial");
@@ -219,6 +225,8 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.enemy = f.flag("enemy");
         def.strikeDamage = f.whole("strikeDamage", 0, 1000);
         def.reach = f.number("reach", 0.5, 10.0);
+        if (entry.contains("height")) def.height = f.number("height", 0.1, 100.0);
+        if (entry.contains("shadow")) def.shadow = f.flag("shadow");
         def.tags = readTags(entry, animalsFile, where, {"animal", def.enemy ? "hostile" : "prey"});
         return def;
     });
@@ -303,6 +311,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.ticksPerFrame = f.whole("ticksPerFrame", 1, 60);
         def.weight = f.whole("weight", 0, 1000);
         def.additive = f.choice("blend", std::array<const char*, 2>{"alpha", "add"}) == 1;
+        if (entry.contains("shadowFade")) def.shadowFade = f.number("shadowFade", 0.0, 1.0);
         return def;
     });
     return catalogs;

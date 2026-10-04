@@ -12,6 +12,7 @@
 #include "core/version.h"
 #include "game/art.h"
 #include "game/object_art.h"
+#include "luna/engine/image_ops.h"
 #include "game/placeholder_art.h"
 #include "game/region_level.h"
 #include "luna/engine/physics_view.h"
@@ -462,15 +463,14 @@ void OdysseyGame::drawClan(luna::engine::Renderer& renderer, const luna::engine:
     }
     std::sort(order.begin(), order.end(), [alpha](const Figure* a, const Figure* b) { return a->feetY(alpha) < b->feetY(alpha); });
     for (const Figure* figure : order) {
-        auto found = lookTextures_.find(figure->look);
-        if (found == lookTextures_.end()) found = lookTextures_.emplace(figure->look, renderer.createTexture(composeLook(*layerSheets_, figure->look))).first;
+        const luna::engine::Texture lookSheet = lookTexture(renderer, figure->look);
         const int width = figure->child ? kCharacterWidth * 3 / 4 : kCharacterWidth;
         const int height = figure->child ? kCharacterHeight * 3 / 4 : kCharacterHeight;
         const int shiver = figure->emote == Emote::Cold ? ((ticks_ / 2) % 2 == 0 ? -1 : 1) : 0; // the cold makes them shake
         const int feetX = static_cast<int>(std::lround(figure->feetX(alpha))) - view.x + shiver;
         const int feetY = static_cast<int>(std::lround(figure->feetY(alpha))) - view.y;
         const luna::engine::Rect source{figure->animationFrame() * kCharacterWidth, static_cast<int>(figure->facing) * kCharacterHeight, kCharacterWidth, kCharacterHeight};
-        renderer.drawStyled(found->second, source, {feetX - width / 2, feetY - height, width, height}, {});
+        renderer.drawStyled(lookSheet, source, {feetX - width / 2, feetY - height, width, height}, {});
         if (figure->emote != Emote::None) drawEmote(renderer, figure->emote, feetX, feetY - height - 14);
         if (const Bubble* said = bubbles_.of(static_cast<int>(figure - clanView_.figures().data()))) {
             // Words over the head, above the face of a need if there is one.
@@ -2029,8 +2029,11 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     static const luna::engine::Image kNone(0, 0); // "no normal map": the conditionals below must give lvalues, the pointers outlive them
     std::vector<luna::engine::Image> mirroredNormalPictures;
     mirroredNormalPictures.reserve(1);
-    const auto withNormals = [&renderer, &pendingNormals](const luna::engine::Image& picture, const luna::engine::Image& normals) {
+    // Black copies of the sprite pages shadows are cut from (US-244); like the normal maps they are uploaded last.
+    std::vector<std::pair<luna::engine::Texture, luna::engine::Image>> pendingShadows;
+    const auto withNormals = [&renderer, &pendingNormals, &pendingShadows](const luna::engine::Image& picture, const luna::engine::Image& normals) {
         const luna::engine::Texture texture = renderer.createTexture(picture);
+        pendingShadows.emplace_back(texture, luna::engine::silhouette(picture));
         if (normals.width() > 0) pendingNormals.emplace_back(texture, &normals);
         return texture;
     };
@@ -2092,7 +2095,9 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             }
             if (!objects.empty()) {
                 std::map<std::string, core::Rect> rects;
-                plantArt_.pages["objects"] = renderer.createTexture(makeObjectPage(objects, rects));
+                const luna::engine::Image objectPage = makeObjectPage(objects, rects);
+                plantArt_.pages["objects"] = renderer.createTexture(objectPage);
+                pendingShadows.emplace_back(plantArt_.pages["objects"], luna::engine::silhouette(objectPage));
                 for (const auto& [name, rect] : rects) plantArt_.sources[name] = {"objects", rect};
             }
         }
@@ -2105,6 +2110,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         core::logWarning("Content art missing, no effects: " + problem);
     }
     for (const auto& [texture, normals] : pendingNormals) renderer.setNormalMap(texture, renderer.createTexture(*normals));
+    for (const auto& [texture, black] : pendingShadows) silhouettes_[texture.id] = renderer.createTexture(black);
 }
 
 void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
@@ -2156,6 +2162,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     renderer.setLighting(&lightFrame);
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);
+    drawShadows(renderer, view, alpha); // on the ground, under everything that stands or flies
     auto screen = [&view](double worldX, double worldY) {
         return luna::engine::Point{static_cast<int>(std::lround(worldX)) - view.x, static_cast<int>(std::lround(worldY)) - view.y};
     };

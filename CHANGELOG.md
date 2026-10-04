@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-244: sun and moon shadows (Mraw) - 2026-10-04
+
+**State:** On `story/US-244`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-244/`.
+
+- Shadows of the hero, clan, placed characters, enemies, animals, plants and objects, cut from black copies of their sprite textures (`silhouette` in `image_ops`) and laid along the light by `drawShadow` (`src/luna/engine/shadow_draw.*`, one ground row at a time); `OdysseyGame::drawShadows` (`src/game/shadows.cpp`) draws them after the ground and before everything that stands. Direction, length and strength come from `celestialLight()` (US-248), the hour's `shadow` of `sky.json`, eclipses and weather.
+- New optional data: `height` and `shadow` in plants, objects, animals and characters; `shadowFade` in `weather.json` (fog, mist, cloud, overcast and whiteout 1.0, haze, smog and gloom 0.5). Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/US-244.md`. Tests: `tests/game/shadow_test.cpp`; US-155 and sky object counts untouched.
+
 ## US-248: celestial bodies (Mraw) - 2026-10-04
 
 **State:** On `story/US-248`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-248/`.

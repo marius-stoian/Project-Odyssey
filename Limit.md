@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-244):** S-US-244 DONE (Milestone-88.md, AP-089). Next: S-US-245 (shadows from fires), US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
+
 **Resume update (2026-10-04, P-012):** P-012 DONE (Milestone-87.md, AP-088): Codex v2.9 adopted (CLAUDE.md and agents regenerated, D-52 and D-15 in decisions.md, M9a-M9c in status.md, CI-012 raised: requirements lack E17-E19 and US-260..294). Next: S-US-244 (shadows from OdysseyGame::celestialLight()), US-245, US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements are updated.
 
 **Resume update (2026-10-04, US-248):** S-US-248 DONE (Milestone-86.md, AP-087). Next: S-US-244 (shadows drawn from OdysseyGame::celestialLight()), then US-245, US-246, US-247, X-M8c. GPU screenshots for US-248 are manual (docs/plans/US-248.md).

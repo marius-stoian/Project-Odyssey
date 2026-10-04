@@ -1,0 +1,2 @@
+Debug build: zero warnings. Full ctest run: 26 of 27 suites passed; the game tests failed only on one draw count in menu_test (shadows moved the count), fixed by counting draws without shadows. Game tests rerun in full: 211 of 211 passed, including 5 US-244 cases.
+Screenshot: morning.png (09:00, GPU renderer): shadows fall north-west, away from the sun sprite at the left of the sky band.

@@ -160,6 +160,7 @@ add_library(luna_engine STATIC
     src/luna/engine/collision.cpp
     src/luna/engine/physics_view.cpp
     src/luna/engine/image_ops.cpp
+    src/luna/engine/shadow_draw.cpp
     src/luna/engine/sprite_layers.cpp
     src/luna/engine/chunk_streamer.cpp
     src/luna/engine/image_io.cpp
@@ -242,6 +243,7 @@ add_library(odysseus_game STATIC
     src/game/weather.cpp
     src/game/lighting.cpp
     src/game/world_lights.cpp
+    src/game/shadows.cpp
     src/game/sky.cpp
     src/game/celestial.cpp
     src/game/normal_art.cpp
@@ -389,6 +391,7 @@ add_executable(odysseus_game_tests
     tests/game/normals_test.cpp
     tests/game/sky_test.cpp
     tests/game/celestial_test.cpp
+    tests/game/shadow_test.cpp
     tests/game/world_lights_test.cpp
     tests/game/level_test.cpp
     tests/game/modes_test.cpp
