@@ -41,6 +41,18 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         if (!openConversation(game, subject)) game.run().setMessage(subject.name + " has nothing to say.");
         return true;
     }
+    // A trader shows the rare goods it keeps for people it likes (US-282).
+    if (name == "rare-goods" && subject.kind == Subject::Kind::Npc) {
+        const sim::TradeMarket& market = game.tradeMarket();
+        std::string shown;
+        for (const std::string& item : market.offeredGoods(subject.index, game.npcPopulation().opinion(subject.index, sim::NpcPopulation::kHero), game.npcOpinions())) {
+            if (!market.isRare(subject.index, item)) continue;
+            const sim::Item* known = game.heroData() != nullptr ? game.heroData()->item(item) : nullptr;
+            shown += (shown.empty() ? "" : ", ") + (known != nullptr ? known->name : item);
+        }
+        game.run().setMessage(shown.empty() ? subject.name + " has no rare goods now." : subject.name + " shows you rare goods: " + shown + ".");
+        return true;
+    }
     // The confrontations of NPCs (US-266) need no run either.
     if (const int placedId = placedIdOf(game, subject); placedId >= 0) {
         sim::NpcPopulation& people = game.npcPopulationMutable();
@@ -269,7 +281,7 @@ private:
 
 const std::vector<std::string>& builtInActionNames() {
     static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
-                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "restore", "warm-nearby", "graze", "flee"};
+                                                   "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "rare-goods", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }
 

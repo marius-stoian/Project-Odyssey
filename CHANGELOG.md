@@ -4,6 +4,16 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-282: supply and demand, and reputation (Mraw) - 2026-10-05
+
+**State:** On `story/US-282`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Simulation: `TradeMarket` gains the price functions (`basePrice`, `stockRatioPercent`, `marketMilli`, `heroPaysMilli`, `traderPaysMilli`, in thousandths of a unit), the drift (`nudge`, daily decay), reputation (`reputationPercent`, `refuses`) and rare goods (`rareUnlocked`, `offeredGoods`, `lockedGoods`) (`src/sim/trade_market.h/.cpp`).
+- Game: the traders get the tags `has-rare-goods` and `rare-open`; the action `rare-goods` (`assets/data/interactions/rare-goods.json`, `do rare-goods`) and its reason in the Actions pop-up.
+- Docs: ADR-023 (the formula and the reasons), the guide, `docs/plans/US-282.md`, learning journal.
+- Tests (not yet run): `tests/sim/trade_price_test.cpp` (9 cases), `tests/game/trade_gate_test.cpp` (3 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
 ## US-281: trader stock (Mraw) - 2026-10-05
 
 **State:** On `story/US-281`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.

@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace odysseus::sim {
 
@@ -85,6 +86,33 @@ public:
     bool wants(int id, const std::string& item) const;
     // What the trader pays for the hero's good, in percent of its price: wantPercent for a want, otherPercent for the rest.
     int wantPercent(int id, const std::string& item) const;
+
+    // ---- Prices (US-282, ADR-023): whole numbers; a price is in thousandths ("milli") of a value unit, so a bundle is added up exactly and rounded once.
+    // The price the region market asks for a good before the stock, the drift and the attitude: the region prices table, else the item value, at least 1 (value units).
+    static int basePrice(const RegionEconomy& economy, const ItemCounts& itemValues, const std::string& item);
+    // 100 * target / max(stock, 1), clamped to the curve: 100 at the target, 200 for an empty shelf, 50 for a shelf at twice the target.
+    int stockRatioPercent(int id, const std::string& item) const;
+    // The price of one piece after the stock curve and the drift, before the attitude. A currency item is worth its value anywhere: never repriced.
+    long long marketMilli(int id, const std::string& item, const RegionEconomy& economy, const ItemCounts& itemValues) const;
+    // What the hero pays for one piece, and what the trader pays the hero for one piece (a want at wantPercent, any other good at otherPercent), with the attitude of the
+    // trader to the hero applied last. The prices of an id that is not a trader are 0.
+    long long heroPaysMilli(int id, const std::string& item, Attitude attitude, const RegionEconomy& economy, const ItemCounts& itemValues) const;
+    long long traderPaysMilli(int id, const std::string& item, Attitude attitude, const RegionEconomy& economy, const ItemCounts& itemValues) const;
+    static long long toUnits(long long milli) { return (milli + 500) / 1000; } // rounded half up, for showing
+    // Whether this attitude refuses to trade at all (hostile), and the percent it adds to what the hero pays.
+    bool refuses(Attitude attitude) const { return config_.refuses[static_cast<std::size_t>(attitude)]; }
+    int reputationPercent(Attitude attitude) const { return config_.reputation[static_cast<std::size_t>(attitude)]; }
+    // The drift of a good (percent, signed): the hero buying raises it, selling lowers it, each piece by driftPerTrade, never beyond driftMaxPercent either way; it decays daily.
+    int drift(int id, const std::string& item) const;
+    void nudge(int id, const std::string& item, int pieces, bool heroBuys);
+    // Rare goods (D-54 Q4): offered only at an opinion at least as high as the band word of the rare table of the trader.
+    bool isRare(int id, const std::string& item) const;
+    bool rareUnlocked(int id, const std::string& item, int opinion, const OpinionConfig& opinions) const;
+    // The goods the trader offers the hero now (in stock, and rare ones only when unlocked), and the rare goods it has in stock but keeps back, both in item order.
+    std::vector<std::string> offeredGoods(int id, int opinion, const OpinionConfig& opinions) const;
+    std::vector<std::string> lockedGoods(int id, int opinion, const OpinionConfig& opinions) const;
+    // The band word a rare good needs ("friendly"), or empty.
+    std::string rareWord(int id, const std::string& item) const;
 
     // A new day has begun: every trader gets the deliveries of the days since its last one (at most `catchUpDays`). Calling it twice for the same day changes nothing.
     void dailyUpdate(std::int64_t today, const RegionEconomy& economy);

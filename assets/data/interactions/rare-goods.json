@@ -1,0 +1,15 @@
+// Ask a trader about the goods it keeps for people it likes (US-282, D-54 Q4). The trade screen only offers a rare good when the trader thinks enough of the hero; the
+// Actions pop-up (X) lists this action with its reason when it does not. The tags are given by the game: has-rare-goods for a trader with a rare table, rare-open when
+// the hero stands high enough for every rare good it has in stock.
+{
+  "id": "rare-goods",
+  "label": "Ask about rare goods",
+  "actors": ["hero"],
+  "target": { "tags": ["has-rare-goods"] },
+  "range": 3,
+  "order": 12,
+  "requires": [
+    { "if": "tag(target, rare-open)", "else": "Rare goods are kept for people they like better" }
+  ],
+  "effects": [ "do rare-goods" ]
+}

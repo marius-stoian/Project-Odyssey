@@ -1661,3 +1661,22 @@ The random picks use a *seeded* generator. `core::Pcg32 random(seed + day * K, i
 **Try it (15 minutes).** In `trade_market_test.cpp` change `catchUpDays` expectations: set `PriceConfig::catchUpDays` to 3 and predict how much fur a trader has after `dailyUpdate(100)`.
 
 **Check yourself.** Why does `addTrader` for an id that already exists keep its stock but take the new profile?
+
+## US-282 Supply and demand: fixed-point formulas, clamping, tuning through data
+
+**What we built.** The price of a good now follows how much of it the trader has (scarce means dear), each trade nudges it, and the trader's feelings for the hero decide a final discount or surcharge. All the numbers live in `assets/data/sim/trade.json`.
+
+**The C++ idea: fixed-point arithmetic and clamping.** There is no `double` anywhere. A price is kept in *thousandths* of a unit in a `long long`, and every percent is a whole number multiplied in before one division at the end, so the rounding happens once:
+
+```cpp
+const long long numerator = 1000LL * base * ratioPercent * (100 + drift) * (100 + reputation);
+return (numerator + 500000) / 1000000;   // + half the divisor: rounds half up
+```
+
+Adding half of the divisor before dividing turns "throw the rest away" into "round to nearest". `std::clamp(value, low, high)` keeps the stock ratio between 50 and 200 so a nearly empty shelf cannot make a price explode. And because the limits and percents are *data*, the owner can change the feel of the economy by editing a JSON file, with no recompile.
+
+**Where to look.** `src/sim/trade_market.cpp` (`marketMilli`, `heroPaysMilli`, `rareUnlocked`), `docs/adr/ADR-023-trade-prices.md`, `tests/sim/trade_price_test.cpp`.
+
+**Try it (15 minutes).** In `trade.json` set `"maxPercent": 400` under `curve` and, in `trade_price_test.cpp`, predict the new price of flint at stock 2 before running the test.
+
+**Check yourself.** Why do we multiply by 1000 first and divide last, rather than dividing after each percent?
