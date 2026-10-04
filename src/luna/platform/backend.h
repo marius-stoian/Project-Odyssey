@@ -26,6 +26,9 @@ public:
     virtual bool vsyncEnabled() const = 0;
     // GPU time (US-234): SDL_GPU has no timestamp queries, so with timing on, present() waits for the card to finish the frame and
     // measures submit-to-done. It costs a little speed, so it is off unless the overlay (F3) or a performance run asks. -1: not measured.
+    // Light (US-240): see Window::setLighting. The SDL_Renderer fallback only tints by the ambient colour.
+    virtual void setLighting(const LightingState*) {}
+    virtual void setNormalMap(int /*texture*/, int /*normals*/) {}
     virtual void setGpuTiming(bool) {}
     virtual double gpuMilliseconds() const { return -1.0; }
 

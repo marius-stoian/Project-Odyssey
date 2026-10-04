@@ -25,6 +25,7 @@ struct WeaponDef {
     Element element = Element::None;
     bool future = false;   // era "future": guns and energy weapons, for later Ages
     bool starter = false;  // playable in M2d (D-21)
+    std::string light;     // US-243: a kind of light of lights.json the weapon gives while it is held ("" = none)
     int damage = 5;
     double speed = 1.0;    // attacks per second
     double range = 1.5;    // metres
@@ -40,6 +41,8 @@ struct PlantDef {
     std::string inspect;   // shown on Interact
     std::vector<std::string> tags;   // US-151: "plant" always, then "edible", "solid", "tree"...; "tags" in plants.json replaces them
     std::vector<std::string> states; // US-151: the first is where it starts ("ripe", "picked"); none for a plant that never changes
+    std::string light;     // US-243: a kind of light of lights.json the thing gives ("" = none) ...
+    std::string lightState; // ... only while it is in this state (a fire pit: "burning"); empty: always
     bool object = false;   // US-155: a world object from objects.json (fire pit, shelter...), placed like a plant but drawn by the game
 };
 
@@ -55,6 +58,7 @@ struct AnimalDef {
 
 struct EffectDef {
     std::string name;
+    std::string light;      // US-243: a kind of light of lights.json the effect gives while it plays ("" = none)
     int frames = 1;
     int ticksPerFrame = 3;
     bool loop = false;

@@ -1257,3 +1257,59 @@ No matter which `return` is taken, the time is recorded. The GPU is harder: the 
 **Try it (15 minutes).** Run the game with `--perf --people 500`, watch the F3 overlay, then try `--people 20`: which number changes, CPU or GPU?
 
 **Check yourself.** Why did our first GPU numbers read about 16 ms for a frame that really takes 0.2 ms?
+
+## US-240 The lighting pipeline: shader inputs and lighting maths
+
+**What we built.** The graphics card can now light the world: an ambient colour tints every sprite, and point lights brighten the side of a sprite that faces them.
+
+**The C++ idea: data crossing from the CPU to the GPU.** A shader is a tiny program that runs once per pixel on the card. It cannot see our C++ variables; we pack the numbers it needs into a flat array of floats (a *uniform buffer*) and push it before drawing:
+
+```cpp
+std::vector<float> data(4 + 8 * 64);       // ambient + count, then 8 floats per light
+data[3] = static_cast<float>(count);
+SDL_PushGPUFragmentUniformData(commands, 0, data.data(), bytes);
+```
+
+The shader declares the same layout (`float4 lights[128]`) and reads it back. The maths per pixel: how close is the light (`reach`) times how squarely the surface faces it (`dot(normal, directionToLight)`).
+
+**Where to look.** `src/luna/platform/shaders/sprite_lit.frag.hlsl`; `pack()` in `src/luna/platform/gpu_backend.cpp`; `src/game/lighting.cpp`.
+
+**Try it (15 minutes).** In `assets/data/light/lights.json` set `ambient.strength` to 0.5 and start the game: the world dims, the HUD does not. Set it back to 1.0.
+
+**Check yourself.** Why does a sprite with no normal map still brighten near a light, and why only a little at the edge of the light's radius?
+## US-241 Generated normal maps: height and slopes from pixels
+
+**What we built.** A tool makes a "normal map" for every sprite sheet: a second picture that says which way each pixel of a sprite faces, so lights can shade the art without anyone painting a second image.
+
+**The C++ idea: image processing is loops over pixels.** First a height per pixel (higher in the middle of a body, from the distance to the edge, plus brightness). Then the slope: how fast the height changes to the right and downward, measured with the Sobel filter, a weighted difference of the neighbours:
+
+```cpp
+const double dx = (s(x+1,y-1) + 2*s(x+1,y) + s(x+1,y+1)) - (s(x-1,y-1) + 2*s(x-1,y) + s(x-1,y+1));
+const double nx = -dx * strength / 4.0;   // the surface leans toward lower ground
+```
+
+The direction (nx, ny, 1) is shortened to length 1 and stored in the colour channels: red is x, green is y, blue is z.
+
+**Where to look.** `normalAtlas` in `src/luna/engine/image_ops.cpp`; `writeNormalAtlases` in `src/game/normal_art.cpp`; the tool flag in `apps/atlas/main.cpp`.
+
+**Try it (15 minutes).** Open `assets/sprites/atlas/characters_n.png` in an image viewer: the purple-blue picture is the hero's surface directions. Then change `kBodyStrength` in `normal_art.cpp` to 4.0, run `odysseus_atlas --normals` and look again.
+
+**Check yourself.** Why is the colour of a flat surface (128, 128, 255), a light purple-blue, and not black?
+## US-242 Day, night and seasons: interpolating curves over time
+
+**What we built.** The light now follows the game clock: night, orange dawn, bright day, orange dusk. Summer days are long, winter days short.
+
+**The C++ idea: interpolation (lerp).** Between two known moments, the value in between is a straight blend. With `t` from 0 to 1:
+
+```cpp
+const auto mix = [t](double x, double y) { return x + (y - x) * t; };
+ambientR = mix(a.red / 255.0 * a.strength, b.red / 255.0 * b.strength);
+```
+
+`t` is how far the clock has gone from one keyframe to the next: `(now - from) / (to - from)`. The sun uses a sine: `elevation = peak * sin(pi * f)`, where `f` is how far through the day it is; the sine rises, peaks at noon and falls back, which is exactly the shape of a sun's path.
+
+**Where to look.** `skyAt` in `src/game/sky.cpp`; `OdysseyGame::sky()` in `src/game/odyssey_game.cpp`.
+
+**Try it (15 minutes).** Run `odysseus.exe --level assets/levels/camp.json --clan --clan-speed 20` and watch a day pass. Then edit the `Winter` sunset in `calendar.json` to 12.0 and see how early the evening comes.
+
+**Check yourself.** Why is the first keyframe of the day not at hour 0, and how does the code make the last keyframe join it over midnight?

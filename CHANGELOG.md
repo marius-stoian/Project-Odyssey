@@ -4,6 +4,32 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-243: fires, torches and glowing effects (Mraw) - 2026-10-04
+
+**State:** Merged into `qa`; verified in Debug (zero warnings); evidence in `docs/evidence/US-243/`.
+
+- `light` on effects, weapons and objects (`lightState` for objects), `clanTorch` and `flicker` in `lights.json`; `OdysseyGame::worldLights` in `src/game/world_lights.cpp`; seeded value-noise flicker (Game only); shader height term. Guide `docs/guides/lighting.md` extended. Tests: `tests/game/world_lights_test.cpp`; US-240 ambient test fixed for the new kinds.
+
+## US-242: day, night and seasons (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-242/`.
+
+- `assets/data/light/sky.json` (keyframes relative to sunrise and sunset, D-49 values, sun and moon peaks) and `daylight` in `assets/data/sim/calendar.json` (summer 15 h, winter 8 h); the simulation ignores the new part. `skyAt` blends the light from the clan's clock; the world's ambient follows it; the moon is the dim blue light of the night and gives the shadow direction.
+- Guide `docs/guides/lighting.md` extended. Tests: `tests/game/sky_test.cpp`. The GPU-against-SDL picture test runs with the sky off.
+## US-241: generated normal maps (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-241/`.
+
+- `odysseus_atlas --normals` (Tools) makes a normal atlas for every atlas picture (nine, committed in `assets/sprites/atlas/*_n.png`); height from the distance to the edge and the brightness, Sobel slopes; a hand-made `<frame>_n.png` next to `cuts.json` wins; a wrong-sized one is refused by name.
+- The game gives the renderer the normal maps of the hero, characters, ground and the plant, tree and animal pages (mirrored animals get mirrored normals); sprites without a map, or with a map that does not fit, are lit flat with no error.
+- `Luna` image ops `normalAtlas` and `mirroredNormals`; guide `docs/guides/lighting.md` extended. Tests: `tests/luna/normals_test.cpp`, `tests/game/normals_test.cpp` (generate, committed maps, missing, own map, the shaded hero on the GPU).
+## US-240: the lighting pipeline (Mraw) - 2026-10-02
+
+**State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-240/`.
+
+- Lit sprite shader (ambient plus up to 64 point lights, normal-map facing), `setLighting` and `setNormalMap` through Window, backends and Renderer; the SDL fallback tints by the ambient colour only; additive draws are not lit.
+- `assets/data/light/lights.json` (ambient, light kinds; D-49 values), `LightingData`, guide `docs/guides/lighting.md`; the world is drawn lit, the interface not; default is neutral, so the picture is unchanged.
+- Tests: window tests for ambient, point light and a 64-light budget (0.28 ms on the card); game tests for the data, the round trip, errors and lit-world drawing.
 ## US-234: frame budget at the new size (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); 10-minute run in `docs/evidence/US-234/`.

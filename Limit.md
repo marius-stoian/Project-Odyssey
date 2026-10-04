@@ -1,5 +1,12 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-243):** S-US-243 DONE (Milestone-85.md, AP-086). Next: S-US-244 (sun and moon shadows), then US-245, US-246, US-247, X-M8c. Test tip: rerun only a failing case with the doctest filter on the exe (odysseus_game_tests.exe -tc="US-243*"), full verify once at the end.
+**Resume update (2026-10-02, US-242):** S-US-242 DONE (Milestone-84.md, AP-085). Next: S-US-243 (fires, torches and glowing effects: lights placed from lights.json), then US-244 (sun and moon shadows), US-245, US-246, US-247, X-M8c. CI note: the 64-light budget test is judged only off GitHub.
+
+**Resume update (2026-10-02, US-241):** S-US-241 DONE (Milestone-83.md, AP-084). Next: S-US-242 (day, night and seasons: sky.json, calendar day length, D-49 numbers), then US-243..US-247, X-M8c.
+
+**Resume update (2026-10-02, US-240):** S-US-240 DONE (Milestone-82.md, AP-083); K-M8c Done (D-49, docs/plans/M8c-lighting-design.md). Next: S-US-241 (generated normal maps), then US-242 (day, night, seasons), US-243, US-244, US-245, US-246, US-247, X-M8c.
+
 **Resume update (2026-10-01, US-234):** S-US-234 DONE (Milestone-80.md, AP-081). Next: X-M8b (exit review: qa into main, CI green on main, tag m8b-done), then K-M8c. Finding: the daily autosave stalls one frame (25 to 35 ms) with 500 people.
 
 **Resume update (2026-10-01, US-233):** S-US-233 DONE (Milestone-79.md, AP-080). Next: S-US-234 (frame budget at the new size; needs D-06), X-M8b. The owner reviews docs/evidence/US-233/contact-sheet.png.

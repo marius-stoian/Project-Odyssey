@@ -77,6 +77,10 @@ struct ArtSet {
     luna::engine::Image tileStrip{0, 0};      // one column per ground kind, in the order asked for
     luna::engine::Image characters{0, 0};     // every character frame (the atlas)
     luna::engine::Image charactersHit{0, 0};  // the same, tinted red: the flash after a hit
+    // Normal maps in the same layouts (US-241), empty when the atlas has none: those sprites are then lit flat.
+    luna::engine::Image heroNormals{0, 0};
+    luna::engine::Image tileNormals{0, 0};
+    luna::engine::Image charactersNormals{0, 0};
     std::map<std::string, int> cells;         // atlas cell by frame name; empty with programmer art
     bool ownArt = false;
     std::string problem; // why the programmer art is used, when it is

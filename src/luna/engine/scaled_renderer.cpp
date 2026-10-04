@@ -15,6 +15,22 @@ void ScaledRenderer::drawStyled(const Texture& texture, const Rect& source, cons
                       {destination.x * scale_, destination.y * scale_, destination.width * scale_, destination.height * scale_}, style);
 }
 
+void ScaledRenderer::setLighting(const LightFrame* frame) {
+    if (frame == nullptr || scale_ == 1) {
+        inner_.setLighting(frame);
+        return;
+    }
+    LightFrame scaled = *frame;
+    const auto s = static_cast<float>(scale_);
+    for (PointLight& light : scaled.lights) {
+        light.x *= s;
+        light.y *= s;
+        light.radius *= s;
+        light.height *= s;
+    }
+    inner_.setLighting(&scaled);
+}
+
 Pointer scaledPointer(const Pointer& pointer, int scale) {
     Pointer out = pointer;
     if (scale > 1 && pointer.inside()) {

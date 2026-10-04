@@ -26,7 +26,9 @@
 #include "game/plants.h"
 #include "game/run_flow.h"
 #include "game/session_stats.h"
+#include "game/lighting.h"
 #include "game/settings.h"
+#include "game/sky.h"
 #include "game/tutorial.h"
 #include "game/weather.h"
 #include "game/level.h"
@@ -83,6 +85,7 @@ public:
     const Hero& hero() const { return hero_; }
     const SpearRange& range() const { return range_; }
     const Level& level() const { return level_; }
+    const luna::engine::Camera& camera() const { return camera_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
     // Effects playing now (US-132): hit sparks, smoke, trails.
@@ -223,6 +226,11 @@ public:
     // Camera zoom and UI scale (US-232). Zoom 2x is the world as it always looked (15 x 8.4 tiles); 1x shows 30 x 17.
     // `setViewScales` only changes what is drawn (tests use it); `applySettings` also saves them.
     void setViewScales(int cameraZoom, int uiScale);
+    // The sky now (US-242): the light follows the clan's game clock (a level without a clan has no clock and stays at noon).
+    SkyState sky() const;
+    // The point lights of the world now (US-243), in the pixels of the picture they light: placed effects, burning objects and the held weapon that
+    // have a `light`, and the torches clan members carry at night. They shine in proportion to how dark it is (`darkness` 0 to 1).
+    std::vector<luna::engine::PointLight> worldLights(const luna::engine::Rect& view, double alpha, double darkness) const;
     void updateZoom(const luna::engine::Intents& intents);
     int cameraZoom() const { return settings_.cameraZoom; }
     int uiScale() const { return settings_.uiScale; }
@@ -407,6 +415,8 @@ private:
     std::chrono::steady_clock::time_point lastRender_{};
     void drawOverlay(luna::engine::Renderer& renderer) const;
     GameSettings settings_;
+    SkyData sky_;           // assets/data/light/sky.json and the daylight of calendar.json (US-242)
+    LightingData lighting_; // assets/data/light/lights.json (US-240): the ambient colour and the kinds of light
     std::optional<WindowChange> pendingWindow_;
     void drawRunHud(luna::engine::Renderer& renderer) const;
     void drawRunWorld(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
