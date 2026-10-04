@@ -156,7 +156,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-269 | US-269 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04); its four cases run alone and pass |
 | S-US-270 | US-270 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04); its three cases run alone and pass |
 | X-M9a | - | M9a | Done | Verified Debug+Release 27/27; gate docs/gates/M9a.md |
-| K-M9b | - | M9b | To do |  |
+| K-M9b | - | M9b | Done | Owner answers 2026-10-05 (D-54), docs/plans/M9-npc-design.md |
 | S-US-280 | US-280 | M9b | To do |  |
 | S-US-281 | US-281 | M9b | To do |  |
 | S-US-282 | US-282 | M9b | To do |  |

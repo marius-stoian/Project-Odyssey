@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.11
+# Project Odyssey Codex v2.12
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.10 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-05 (v2.12 amended in the repository copy by Mraw at the owner's order, D-54, CI-013) | Source of truth: Project Odyssey.docx v2.10 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -6540,7 +6540,7 @@ Manual checks in docs/plans/US-290.md done, with results and screenshots (`odyss
 <prompt id="S-US-291" codex="2.9" milestone="M9c" story="US-291" priority="Must" size="M">
 <context>
 Story US-291: Action sources.
-As the owner, I want NPCs to act from their classes, from my custom actions and from world events, and later from quests, all set in the Editor, so that I control what people do.
+As the owner, I want NPCs to act from their classes, from my custom actions and from world events, all set in the Editor, so that I control what people do. (v2.12, D-54 Q11: no quest source in M9c; M10 adds the quest hook and changes the action schema.)
 Epic E28 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
 Traces to: SDC-12, EDT-08.
 </context>
@@ -6550,7 +6550,7 @@ Owner decisions that must be Decided: D-34, D-52.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Simulation: the NPC chooser (US-154) takes candidate actions from class actions, custom actions on the NPC, and event actions (an event in data offers actions to NPCs that match it, for example a fire nearby); a quest-action source is an empty hook that M10 fills. Game (Editor): sections for custom and event actions in the NPC and class forms.
+Where the work belongs: Simulation: the NPC chooser (US-154) takes candidate actions from class actions, custom actions on the NPC, and event actions (an event in data offers actions to NPCs that match it, for example a fire nearby); there is no quest-action source in M9c (D-54 Q11, Codex v2.12): M10 adds the quest hook and changes the action schema. Game (Editor): sections for custom and event actions in the NPC and class forms.
 Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -6566,10 +6566,10 @@ Given an event action 'help put out fire' for class villager
 When a fire starts within 12 m of a villager
 Then the villager goes to help
 </scenario>
-<scenario name="Hook">
-Given the quest-action source
-When the game runs
-Then it offers nothing and costs nothing until M10
+<scenario name="Sources">
+Given the NPC chooser
+When it collects the candidate actions of an NPC
+Then they come only from class, custom and event actions, and no quest source exists yet
 </scenario>
 </acceptance_criteria>
 <definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
@@ -6646,7 +6646,7 @@ Owner decisions that must be Decided: D-34, D-52.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Simulation and Editor: the partner types (Player, each NPC Class, Animals, Environment) come from data (assets/data/sim/partner-types.json) so the owner can add more; for each, a class or NPC lists default dialogues and actions; the chooser prefers them when that partner is the target.
+Where the work belongs: Simulation and Editor: the partner types (Player, each NPC Class, Animals, Environment) come from data (assets/data/sim/partner-types.json) so the owner can add more; for each, a class or NPC lists default dialogues and actions; the chooser prefers them when that partner is the target. Defaults per partner type are files assets/data/interactions/defaults-<type>.json (class, animal, environment) that classes and NPCs override; the Environment partner offers gather and forage, shelter and rest, hunt and fish, pray and ritual at a place (D-54 Q14, Q16, v2.12).
 Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -6689,7 +6689,7 @@ Owner decisions that must be Decided: D-34, D-52.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Data: npc-test.json gains schedules, class, custom and event actions and NPC-to-NPC trade and talk for the seven NPCs; the walk-through checklist covers one full day; a headless soak of 100,000 persons for 10 in-game days.
+Where the work belongs: Data: npc-test.json gains schedules, class, custom and event actions and NPC-to-NPC trade and talk for the seven NPCs; the walk-through checklist covers one full day; a headless soak of 100,000 persons for 30 in-game days with the same seed giving the same save hash on two runs (D-54 Q15, v2.12).
 Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -6702,7 +6702,7 @@ Then every NPC follows its schedule and at least one NPC-to-NPC trade and one co
 </scenario>
 <scenario name="Soak">
 Given 100,000 persons
-When 10 in-game days run headless
+When 30 in-game days run headless
 Then the budget of ADR-022 holds and the determinism hash is stable
 </scenario>
 </acceptance_criteria>
@@ -6722,7 +6722,7 @@ Manual checks in docs/plans/US-294.md done, with results and screenshots (`odyss
 <instructions>
 1. Demonstrate the exit criteria: NPCs follow day and night schedules, act from their classes, custom actions and events, and do everything to each other with the same interaction files; the owner edits it all in the Editor; the test level shows a living day and the 100,000-person soak passes.
    Also run `pwsh tools/verify.ps1 -Story X-M9c -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M9c.md.
-2. Collect evidence (test output, CI run, screenshots) into docs/gates/M9c.md, one section per criterion, each marked met or not met. Also: one in-game day of the test level recorded; one NPC-to-NPC trade and one conversation; the 10-day soak result.
+2. Collect evidence (test output, CI run, screenshots) into docs/gates/M9c.md, one section per criterion, each marked met or not met. Also: one in-game day of the test level recorded; one NPC-to-NPC trade and one conversation; the 30-day soak result.
 3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9c-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
 </instructions>
 <output_format>Assembly report with the exit result.</output_format>
@@ -9671,3 +9671,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.9 | 2026-10-04 | NPC foundation, trade economy and NPC life (owner answers D-52, six chat rounds; Mraw's brief docs/plans/M9a-npc-roles-brief.md, revised). The owner's answers tripled the v2.8 scope, so M9a is split into three milestones built right after M8c and before M8d (D-52 Q-01, S-01): M9a NPC foundation (K-M9a, S-US-260..S-US-270: NPC Classes in the Editor, kind files and overrides, placed NPCs as full persons, the person store with detail by distance for 100,000 persons and ADR-022, nine attitudes per pair, talk, Confront, hidden actions and the Actions pop-up, Editor NPC panel, kinds tab and markers, test level), M9b Trade economy (K-M9b, S-US-280..S-US-284: owner-defined currencies, limited daily stock, supply and demand with reputation, one trade screen, Editor trade panel), M9c NPC life (K-M9c, S-US-290..S-US-294: schedules, class, custom and event actions with a quest hook for M10, NPC-to-NPC interactions, partner-type defaults, living test level and soak), each with an exit review; shared design notes. The v2.8 prompts S-US-260..S-US-267 are replaced (none had run). P-012 adopts v2.9; K-M8d also checks that M9c is done; D-52 Decided in the decision table; D-15 chain and execution order updated. Source of truth: epics E17-E19 and their stories must be added to the requirements and the backlog before K-M9a (Mraw to reconcile; Anima issue CI-012). |
 | 2.10 | 2026-10-04 | Requirements reconciled (source of truth v2.10, Round 23): Mraw added the M9a-M9c work to Project Odyssey.docx and the backlog. Epic ids E17-E19 were already taken (M10-M12), so the NPC epics are E26 NPC foundation, E27 Trade economy and E28 NPC life; every M9a-M9c story prompt now traces to the new requirements SDC-08..SDC-12, INT-09..INT-12, EDT-08 and NFR-08 instead of placeholders; K-M9a step 2 checks the mirrored requirements version; P-012 adopts v2.10 and mirrors the requirements. CI-012 resolved before it was raised. Open for a later version: SDC-12 builds the schedules early, so S-US-196 (M11 routines) should reuse them; Anima amends S-US-196 when M11 comes closer. |
 | 2.11 | 2026-10-04 | S-US-196 (M11 Daily routines as data) reuses the M9c schedules (US-290, SDC-12; owner request): routines are the US-290 schedule format per role and per person, the story adds tag weights per block for the utility scoring, routines for clan members by profession, a 24-hour timeline view in the US-290 schedule form and the schedule schema for the M11 editors; no routines.json and no second scheduler. New dependencies US-290, US-291 and D-52; traces add SDC-12; new scenario "One format". K-M11's design document covers routines on the M9c schedules. P-012 adopts v2.11. |
+| 2.12 | 2026-10-05 | M9b and M9c kickoff answers (owner, D-54; amended in the repository copy by Mraw at the owner's order, to be adopted by Anima, CI-013). S-US-291 loses the quest-action hook (action sources are class, custom and event actions; M10 adds the quest hook and changes the action schema); S-US-293 names the defaults files assets/data/interactions/defaults-<type>.json and the four environment interactions; S-US-294 and X-M9c soak 30 in-game days (was 10) with the same save hash on two runs. The M9b trade design (currency items and a balance, item-value currencies, prices from base x stock curve x drift with reputation last, bands, Haggle, weighted daily restock) is in docs/plans/M9-npc-design.md and ADR-023. |
