@@ -1,6 +1,6 @@
 # Project Odyssey Codex v2.7
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.9 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 

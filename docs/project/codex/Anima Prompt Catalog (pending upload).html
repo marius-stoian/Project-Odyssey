@@ -1,66 +1,148 @@
-<html><head><meta charset="utf-8"></head><body style="font-family:Arial">
+<html><body>
 <h1>Anima Prompt Catalog</h1>
-<p>Living catalog kept by Anima (the anima skill and Dominus's Anima hat). IDs are never reused; a revised prompt keeps its ID with a dated note.</p>
+<p>Living catalog kept by Anima (the anima skill and Dominus's Anima hat). IDs are never reused; a revised prompt keeps its ID with a dated note. Placeholders are written in double braces. Last updated 2026-10-01 (Project Odyssey Codex v2.4).</p>
+
 <h2>Style Profile</h2>
 <ul>
 <li>Concise; prefers tables and diagrams over prose.</li>
-<li>Business Analyst background (BABOK, BPMN, BRDs); treats one formal requirements document as the source of truth.</li>
-<li>Wants deliverables as Word and Excel files saved in Google Drive.</li>
-<li>Gives feedback as [square-bracket] comments inside documents, to be resolved in one pass.</li>
+<li>Business Analyst background (BABOK, BPMN, BRDs); treats one formal requirements document as the source of truth and keeps IDs stable.</li>
+<li>Wants deliverables as Word and Excel files saved in Google Drive, mirrored into the repository.</li>
+<li>Gives feedback as [square-bracket] comments inside documents, resolved in one pass.</li>
 <li>Names personas and teams: Dominus (all hats), Mraw / Dominus Avengers (full team), Anima (prompts); builds with the Amek workflow (Brief, Codex, Assemble).</li>
 <li>Prefers XML-tagged prompts for autonomous agents (2026-09-29).</li>
+<li>Takes design and scope decisions himself in short question rounds: up to four questions, two to four options each, the recommended option first, short context; often answers in free text that narrows or widens scope, which is recorded word for word (2026-09-30).</li>
+<li>Wants decisions one by one when there are several, each with succinct context (2026-10-01).</li>
+<li>Wants assembly to run with little of his time, then reviews delegated decisions afterwards; switches between "owner decides" and "Dominus decides" per milestone range (2026-10-01).</li>
+<li>Never wants AI vendor or model names, or co-author lines, in project files, commits or pull requests.</li>
 </ul>
+
 <h2>Best Practices (v2026-09-29)</h2>
-<p>Canonical list: section 8 of the Anima skill. Highlights: clear and direct, with success criteria; explain why; positive, calm wording; XML sections; long inputs first; examples in example tags; say exactly what done means; explicit stop conditions for autonomous work; state files for multi-session work; test every prompt with 2-3 inputs including an edge case.</p>
+<p>Canonical list: section 8 of the Anima skill. Highlights: clear and direct, with success criteria; explain why; positive, calm wording; XML sections; long inputs first; examples in example tags; say exactly what done means; explicit stop conditions for autonomous work; state files for multi-session work; test every prompt with two or three inputs including an edge case.</p>
+<p>Lessons from Project Odyssey (2026-10-01): generate repeated story prompts from one data source shared with the requirements document, so acceptance criteria match word for word; check every generated replacement lands in the intended prompt (CI-009 came from a replacement that hit the first match); give every rule its scope ("from M8b", "for M10-M14") so exceptions stay readable.</p>
+
 <h2>Prompts</h2>
-<table border="1" cellpadding="4" style="border-collapse:collapse;font-size:9pt">
-<tr><th>ID</th><th>Title</th><th>Use case</th><th>Source</th><th>Date</th><th>Tags</th><th>Prompt text</th><th>Notes</th></tr>
-<tr><td>ANM-001</td><td>Codex Charter (CLAUDE.md)</td><td>Phase 2 of the Amek workflow: the rules every build agent loads first</td><td>Anima (Project Odyssey Codex v1.1)</td><td>2026-09-29</td><td>codex, charter, claude-code, CLAUDE.md, agents</td><td><pre style='font-family:Consolas;font-size:8pt;white-space:pre-wrap'># CLAUDE.md: {{PROJECT}} Charter (Codex C-01, v{{CODEX_VERSION}})
+
+<h3>ANM-001 Codex Charter (CLAUDE.md)</h3>
+<p><b>Use:</b> Phase 2 of the Amek workflow, the rules every build agent loads first. <b>Source:</b> Anima, Project Odyssey Codex v1.1, revised to v2.4. <b>Date:</b> 2026-09-29, revised 2026-10-01. <b>Tags:</b> codex, charter, CLAUDE.md, agents.</p>
+<pre># CLAUDE.md: {{PROJECT}} Charter (Codex C-01, v{{CODEX_VERSION}})
 &lt;role&gt;You are a member of Mraw, the Dominus Full Team, assembling {{PROJECT}} by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.&lt;/role&gt;
 &lt;project&gt;{{ONE_PARAGRAPH_PRODUCT_AND_MVP}}
 Source of truth for WHAT: {{REQUIREMENTS_DOC_AND_VERSION}}. Source of truth for HOW and ORDER: docs/Codex.md.&lt;/project&gt;
 &lt;architecture_rules&gt;{{NUMBERED_RULES_EACH_WITH_ITS_REASON}}&lt;/architecture_rules&gt;
 &lt;stack&gt;{{LANGUAGE_BUILD_LIBRARIES}}; any new library needs an ADR in docs/adr/.&lt;/stack&gt;
 &lt;coding_standards&gt;{{STANDARDS_WITH_REASONS}}&lt;/coding_standards&gt;
-&lt;definition_of_done&gt;{{DOD_LINES}}; docs/status.md updated.&lt;/definition_of_done&gt;
-&lt;human_gates&gt;Stop and ask the owner only for: {{GATES}}. To ask: write docs/decision-requests/&lt;ID&gt;.md (question, 2-4 options with a recommendation first, impact, blocked work), mark the work Blocked, continue with the next unblocked prompt. Never create accounts or type credentials.&lt;/human_gates&gt;
-&lt;git&gt;Branch per unit of work; commits &quot;&lt;ID&gt;: &lt;summary&gt;&quot;; merge when Done; tag finished milestones.&lt;/git&gt;
-&lt;report_format&gt;## Assembly report: Codex version | Prompt ID | Result; what changed; acceptance criteria pass/fail with evidence; build and tests; decisions requested; codex issues; next prompt.&lt;/report_format&gt;
-&lt;codex_issues&gt;If a prompt is wrong or cannot be done as written, do not improvise: append to docs/codex-issues.md and continue elsewhere.&lt;/codex_issues&gt;</pre></td><td>Generalised from Project Odyssey; placeholders in double braces.</td></tr><tr><td>ANM-002</td><td>Mraw role subagent (.claude/agents)</td><td>One focused Claude Code subagent per Dominus hat</td><td>Anima (Project Odyssey Codex v1.1)</td><td>2026-09-29</td><td>codex, subagent, roles, claude-code</td><td><pre style='font-family:Consolas;font-size:8pt;white-space:pre-wrap'>---
+&lt;definition_of_done&gt;{{DOD_LINES}}, each saying where it is checked (local check or CI); CHANGELOG, status and a progress snapshot updated.&lt;/definition_of_done&gt;
+&lt;human_gates&gt;Stop only for: {{GATES}}. Design decisions: {{OWNER_OR_DELEGATED_PER_MILESTONE_RANGE}}. Never create accounts or type credentials. Keep work resumable: Limit.md is the resume point.&lt;/human_gates&gt;
+&lt;git&gt;Branch per unit of work from {{INTEGRATION_BRANCH}}; commits "&lt;ID&gt;: &lt;summary&gt;"; merge into {{INTEGRATION_BRANCH}}; milestone exits merge into main and tag.&lt;/git&gt;
+&lt;report_format&gt;Assembly report: Codex version, prompt ID, result; what changed; acceptance criteria with evidence; build and tests; decisions; codex issues; progress snapshot; next prompt.&lt;/report_format&gt;
+&lt;codex_issues&gt;If a prompt is wrong or cannot be done as written, do not improvise: append to docs/codex-issues.md and continue elsewhere.&lt;/codex_issues&gt;</pre>
+<p><b>Notes:</b> 2026-10-01: Definition of Done now says where each check runs (Project Odyssey D-46: Debug locally, Release in CI).</p>
+
+<h3>ANM-002 Mraw role subagent (.claude/agents)</h3>
+<p><b>Use:</b> one focused subagent per Dominus hat. <b>Source:</b> Anima, Project Odyssey Codex v1.1. <b>Date:</b> 2026-09-29. <b>Tags:</b> codex, subagent, roles.</p>
+<pre>---
 name: mraw-{{ROLE}}
 description: {{WHAT_IT_DOES_AND_WHEN_TO_USE_IT}}
 tools: {{TOOLS}}
 ---
+You are the Mraw {{ROLE}} ({{DOMINUS_HATS}}). {{RESPONSIBILITY_IN_2_4_SENTENCES}}. {{WHAT_YOU_NEVER_DO_AND_WHY}}.</pre>
+<p><b>Notes:</b> roles used in Project Odyssey: orchestrator (PM + PO), architect, tester, programmer, acceptor (PO + UX), writer (Tech Writer + Teacher), designer (Game Designer + Novel Writer).</p>
 
-You are the Mraw {{ROLE}} ({{DOMINUS_HATS}}). {{RESPONSIBILITY_IN_2_4_SENTENCES}}. {{WHAT_YOU_NEVER_DO_AND_WHY}}.
-
-Roles used in Project Odyssey: orchestrator (PM + PO), architect, tester, programmer, acceptor (PO + UX), writer (Tech Writer + Teacher), designer (Game Designer + Novel Writer).</pre></td><td>Generalised from Project Odyssey; placeholders in double braces.</td></tr><tr><td>ANM-003</td><td>Mraw build loop L-01</td><td>Standard procedure for every unit of work in a Codex</td><td>Anima (Project Odyssey Codex v1.1)</td><td>2026-09-29</td><td>codex, build-loop, tdd, acceptance</td><td><pre style='font-family:Consolas;font-size:8pt;white-space:pre-wrap'>&lt;prompt id=&quot;L-01&quot; codex=&quot;{{CODEX_VERSION}}&quot; name=&quot;Mraw build loop&quot;&gt;
+<h3>ANM-003 Mraw build loop L-01</h3>
+<p><b>Use:</b> the standard procedure for every unit of work in a Codex. <b>Source:</b> Anima, Project Odyssey Codex v1.1, revised to v2.4. <b>Date:</b> 2026-09-29, revised 2026-10-01. <b>Tags:</b> codex, build-loop, tdd, acceptance.</p>
+<pre>&lt;prompt id="L-01" codex="{{CODEX_VERSION}}" name="Mraw build loop"&gt;
 &lt;instructions&gt;
-1. Readiness: every owner decision in &lt;dependencies&gt; is Decided in docs/decisions.md and every prerequisite is Done in docs/status.md; otherwise write a decision request, mark Blocked, move on.
-2. Branch. 3. Plan (architect) into docs/plans/&lt;ID&gt;.md. 4. Tests first from the acceptance criteria (tester).
+1. Readiness: every owner decision in &lt;dependencies&gt; is Decided in docs/decisions.md and every prerequisite is Done; an undecided design question goes to {{OWNER_OR_DOMINUS}} as the Charter says.
+2. Branch (or continue a paused branch). 3. Plan (architect) into docs/plans/&lt;ID&gt;.md. 4. Tests first from the acceptance criteria (tester).
 5. Content as data if needed (designer). 6. Implement until tests pass with zero warnings (programmer).
-7. Verify: full builds and all tests (tester). 8. Accept against evidence (acceptor); after {{MAX_REJECTIONS}} rejections: Failed + codex issue.
-9. Docs and teach-back (writer). 10. Commit, merge, push; status Done. 11. Assembly report; continue, or end the session cleanly.
+7. Verify with {{LOCAL_CHECK_COMMAND}} ({{WHICH_CONFIGURATION_LOCALLY}}); CI covers {{WHICH_CONFIGURATION_IN_CI}}.
+8. Accept against evidence (acceptor); after {{MAX_REJECTIONS}} rejections: Failed + codex issue.
+9. Docs and teach-back (writer). 10. CHANGELOG, commit, merge, push; Done when {{DONE_SIGNAL}}.
+11. Resume point, progress snapshot and assembly report; continue, or end the session cleanly.
 &lt;/instructions&gt;
 &lt;stop_conditions&gt;Blocked dependency; repeated rejection; codex issue; missing authentication.&lt;/stop_conditions&gt;
 &lt;output_format&gt;Assembly report.&lt;/output_format&gt;
-&lt;/prompt&gt;</pre></td><td>Generalised from Project Odyssey; placeholders in double braces.</td></tr><tr><td>ANM-004</td><td>Codex story prompt (XML)</td><td>One self-contained prompt per user story for autonomous agents</td><td>Anima (Project Odyssey Codex v1.1)</td><td>2026-09-29</td><td>codex, user-story, gherkin, xml, autonomous</td><td><pre style='font-family:Consolas;font-size:8pt;white-space:pre-wrap'>&lt;prompt id=&quot;S-{{STORY_ID}}&quot; codex=&quot;{{CODEX_VERSION}}&quot; milestone=&quot;{{MILESTONE}}&quot; story=&quot;{{STORY_ID}}&quot; priority=&quot;{{PRIORITY}}&quot; size=&quot;{{SIZE}}&quot;&gt;
+&lt;/prompt&gt;</pre>
+
+<h3>ANM-004 Codex story prompt (XML)</h3>
+<p><b>Use:</b> one self-contained prompt per user story for autonomous agents. <b>Source:</b> Anima, Project Odyssey Codex v1.1, revised to v2.4. <b>Date:</b> 2026-09-29, revised 2026-10-01. <b>Tags:</b> codex, user-story, gherkin, xml.</p>
+<pre>&lt;prompt id="S-{{STORY_ID}}" codex="{{CODEX_VERSION}}" milestone="{{MILESTONE}}" story="{{STORY_ID}}" priority="{{PRIORITY}}" size="{{SIZE}}"&gt;
 &lt;context&gt;Story {{STORY_ID}}: {{TITLE}}. As a {{PERSONA}}, I want {{CAPABILITY}}, so that {{BENEFIT}}. Epic: {{EPIC_AND_OUTCOME}}. Traces to: {{REQUIREMENT_IDS}}.&lt;/context&gt;
 &lt;dependencies&gt;Stories that must be Done: {{STORY_DEPS}}. Owner decisions that must be Decided: {{DECISION_DEPS}}.&lt;/dependencies&gt;
-&lt;instructions&gt;Run the build loop L-01 for this story only. Where the work belongs: {{LAYER_AND_FOLDERS}}. Scope is exactly the acceptance criteria. Completion: every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.&lt;/instructions&gt;
+&lt;instructions&gt;Run the build loop L-01 for this story only. Where the work belongs: {{LAYER_FOLDERS_FILES_AND_DATA}}. Follow the brief {{BRIEF_PATH}} and the milestone design document. Scope is exactly the acceptance criteria. Completion: every scenario passes with evidence, the Definition of Done holds, and it is merged; a progress summary is not completion.&lt;/instructions&gt;
 &lt;acceptance_criteria&gt;
-&lt;scenario name=&quot;{{NAME}}&quot;&gt;Given {{CONTEXT}} When {{ACTION}} Then {{OBSERVABLE_RESULT}}&lt;/scenario&gt;
-(2-3 scenarios, including an error case)
+&lt;scenario name="{{NAME}}"&gt;Given {{CONTEXT}} When {{ACTION}} Then {{OBSERVABLE_RESULT}}&lt;/scenario&gt;
+(two or three scenarios, copied word for word from the requirements, including an error case)
 &lt;/acceptance_criteria&gt;
-&lt;definition_of_done&gt;Charter definition_of_done.&lt;/definition_of_done&gt;
-&lt;verification&gt;{{BUILD_AND_TEST_COMMANDS}}; manual checks recorded in docs/plans/{{STORY_ID}}.md.&lt;/verification&gt;
+&lt;definition_of_done&gt;Charter definition_of_done, plus {{STORY_SPECIFIC_ADDITIONS}}.&lt;/definition_of_done&gt;
+&lt;verification&gt;{{LOCAL_CHECK}}; {{CI_CHECK}}; manual checks recorded in docs/plans/{{STORY_ID}}.md.&lt;/verification&gt;
 &lt;teach_back&gt;Concept for the owner: {{CONCEPT}}.&lt;/teach_back&gt;
-&lt;stop_conditions&gt;Build loop stop conditions.&lt;/stop_conditions&gt;
+&lt;stop_conditions&gt;Build loop stop conditions; a design question the Codex does not answer.&lt;/stop_conditions&gt;
 &lt;output_format&gt;Assembly report.&lt;/output_format&gt;
-&lt;/prompt&gt;</pre></td><td>Generalised from Project Odyssey; placeholders in double braces.</td></tr><tr><td>ANM-005</td><td>Milestone kickoff and exit review</td><td>Stage-gate prompts around each milestone</td><td>Anima (Project Odyssey Codex v1.1)</td><td>2026-09-29</td><td>codex, milestone, stage-gate, kill-gate</td><td><pre style='font-family:Consolas;font-size:8pt;white-space:pre-wrap'>&lt;prompt id=&quot;K-{{MILESTONE}}&quot;&gt;&lt;instructions&gt;1. Confirm the previous exit review passed. 2. Write decision requests for every open decision this milestone needs ({{DECISIONS}}), all at once. 3. Set the stories to To do in order: {{STORY_ORDER}}. 4. Start the first story.&lt;/instructions&gt;&lt;/prompt&gt;
-&lt;prompt id=&quot;X-{{MILESTONE}}&quot;&gt;&lt;instructions&gt;1. Demonstrate the exit criteria: {{EXIT_CRITERIA}}. 2. Record evidence per criterion in docs/gates/{{MILESTONE}}.md. 3. If all are met, tag and push; otherwise list the gaps as codex issues and stop. [Kill gates only] 4. Evaluate {{SUCCESS_CRITERIA}}; criteria that need people become an owner decision request.&lt;/instructions&gt;&lt;/prompt&gt;</pre></td><td>Generalised from Project Odyssey; placeholders in double braces.</td></tr><tr><td>ANM-006</td><td>Assembly prompts A-000 / A-001 / A-002</td><td>What the owner pastes to start, continue, or amend a Codex build</td><td>Anima (Project Odyssey Codex v1.1)</td><td>2026-09-29</td><td>codex, assemble, dominus-avengers, amek-workflow</td><td><pre style='font-family:Consolas;font-size:8pt;white-space:pre-wrap'>A-000: Dominus Avengers Assemble. You are Mraw, assembling {{PROJECT}} with Codex v{{CODEX_VERSION}} written by Anima. Read Codex.md completely. Execute P-000, then every prompt strictly in order through the build loop. Stop only at the Charter&#x27;s human gates. End every session with an assembly report.
+&lt;/prompt&gt;</pre>
+<p><b>Notes:</b> generate these from the same story data that writes the requirements document and the backlog, never by hand.</p>
 
-A-001: Mraw, continue assembly. Read CLAUDE.md, docs/Codex.md, docs/status.md and docs/decisions.md; unblock answered decisions; continue with the first To do prompt; end with an assembly report.
+<h3>ANM-005 Milestone kickoff and exit review</h3>
+<p><b>Use:</b> stage-gate prompts around each milestone. <b>Source:</b> Anima, Project Odyssey Codex v1.1, revised to v2.4. <b>Date:</b> 2026-09-29, revised 2026-10-01. <b>Tags:</b> codex, milestone, stage-gate, kill-gate.</p>
+<pre>&lt;prompt id="K-{{MILESTONE}}"&gt;&lt;instructions&gt;
+1. Confirm that {{PREVIOUS_MILESTONE}} is done ({{GATE_FILE_OR_TAG}}) and that {{DECISIONS}} are Decided.
+2. Ask the owner, in one chat round (two to four options each, recommended first), every design question this milestone's stories leave open ({{EXAMPLE_QUESTIONS}}). [Delegated milestones: Dominus decides and records each as delegated.]
+3. Architect: write {{DESIGN_DOC_PATH}} ({{DESIGN_TOPICS}}) before the first story.
+4. Set the stories to To do in order: {{STORY_ORDER}}. 5. Start the first story.
+&lt;/instructions&gt;&lt;/prompt&gt;
+&lt;prompt id="X-{{MILESTONE}}"&gt;&lt;instructions&gt;
+1. [Deferred-test milestones: run the full test suite and CI first and fix every failure.] Demonstrate the exit criteria: {{EXIT_CRITERIA}}. Run {{OWNER_PC_ONLY_CHECKS}} on the owner's PC.
+2. Record evidence per criterion in docs/gates/{{MILESTONE}}.md, plus {{MILESTONE_SPECIFIC_EVIDENCE}}; list delegated decisions for review.
+3. If all are met, merge into main, confirm CI, tag and push; otherwise list the gaps as codex issues and stop.
+[Kill gates only] 4. Evaluate {{SUCCESS_CRITERIA}}; criteria that need people become an owner decision request, and the next milestone waits.
+&lt;/instructions&gt;&lt;/prompt&gt;</pre>
 
-A-002: Anima, amend the Codex. Read docs/Codex.md and docs/codex-issues.md; fix each issue (ask the owner if design changes), bump the minor version, log the change, mark the issues Resolved, hand the Codex back to Mraw.</pre></td><td>Generalised from Project Odyssey; placeholders in double braces.</td></tr>
-</table></body></html>
+<h3>ANM-006 Assembly prompts A-000, A-001, A-002</h3>
+<p><b>Use:</b> what the owner pastes to start, continue or amend a Codex build. <b>Source:</b> Anima, Project Odyssey Codex v1.1. <b>Date:</b> 2026-09-29. <b>Tags:</b> codex, assemble, amek-workflow.</p>
+<pre>A-000: Dominus Avengers Assemble. You are Mraw, assembling {{PROJECT}} with Codex v{{CODEX_VERSION}} written by Anima. Read Codex.md completely. Execute P-000, then every prompt strictly in order through the build loop. Stop only at the Charter's human gates. End every session with an assembly report.
+A-001: Mraw, continue assembly. Read CLAUDE.md, Limit.md, docs/Codex.md, docs/status.md and docs/decisions.md; unblock answered decisions; continue with the first To do prompt; end with an assembly report.
+A-002: Anima, amend the Codex. Read docs/Codex.md and docs/codex-issues.md; fix each issue (ask the owner if design changes), bump the minor version, log the change, mark the issues Resolved, hand the Codex back to Mraw.</pre>
+
+<h3>ANM-007 Adopt a new Codex version (P-0xx)</h3>
+<p><b>Use:</b> the first prompt after Anima publishes a new Codex version into a running workspace. <b>Source:</b> Anima, Project Odyssey P-005..P-011. <b>Date:</b> 2026-10-01. <b>Tags:</b> codex, migration, versioning.</p>
+<pre>&lt;prompt id="P-{{NNN}}" codex="{{CODEX_VERSION}}" name="Adopt Codex v{{CODEX_VERSION}}"&gt;
+&lt;context&gt;{{WHAT_IS_DONE}}. The owner decided {{DECISIONS_AND_WHAT_THEY_ADD}} (requirements v{{REQ_VERSION}}). Brief: {{BRIEF_PATH}}. Run this prompt as soon as the sync reports the new version; a story in progress is finished first.&lt;/context&gt;
+&lt;instructions&gt;
+1. Regenerate CLAUDE.md and the role files from the Charter (the sync script does it).
+2. docs/decisions.md: add {{DECISION_IDS}}; if a story already used one of these IDs, renumber that story's decision and update its references.
+3. docs/status.md: add {{NEW_PROMPTS}} (To do) in Codex order between {{BEFORE}} and {{AFTER}}.
+4. {{CODEX_ISSUES_TO_MARK_RESOLVED}}; mirror the requirements and backlog if the sync has not.
+5. Update the resume point, commit "P-{{NNN}}: adopt Codex v{{CODEX_VERSION}} ({{TOPIC}})", push and wait for green CI.
+&lt;/instructions&gt;
+&lt;output_format&gt;Assembly report.&lt;/output_format&gt;
+&lt;/prompt&gt;</pre>
+
+<h3>ANM-008 Dominus council and milestone planning</h3>
+<p><b>Use:</b> the owner asks Dominus to council and plan a big new feature into milestones. <b>Source:</b> Dominus, Project Odyssey Rounds 13-17. <b>Date:</b> 2026-10-01. <b>Tags:</b> dominus, council, planning, requirements.</p>
+<pre>Dominus, council and plan {{FEATURE_GOAL}} as new milestones in the requirements and the tracker.
+Steps the council follows:
+1. Read the current state (requirements version, Codex version, status, latest progress snapshot, the code that the feature touches) before advising.
+2. Ask the owner the questions that change the shape of the plan, in rounds of up to four (two to four options each, recommended first, one line of context each). Record free-text answers word for word; flag answers that reverse a cut-list item or move a kill gate.
+3. Write the plan: milestones (IDs follow the project's insertion convention), epics, stories with three Gherkin scenarios each, requirement IDs, an ADR when the architecture changes, estimates, risks.
+4. Update the requirements (new version, resolution-log round, dependency row) and the tracker from one data source; write the brief docs/plans/{{BRIEF}}.md for Anima.
+5. Close with the council verdict, what each discipline found, where they collide, and the next step ("Anima, Codex vX.Y").</pre>
+
+<h3>ANM-009 Owner decision round</h3>
+<p><b>Use:</b> any time an agent needs a design or scope decision from the owner. <b>Source:</b> Dominus and Anima, Project Odyssey D-22. <b>Date:</b> 2026-10-01. <b>Tags:</b> decisions, owner, question-round.</p>
+<pre>Ask the owner in chat, one round at a time (up to four questions; when he asks for "one by one", one question per round).
+Each question: one to three sentences of context, two to four options, the recommended option first and labelled "(Recommended)", each option with one sentence on its consequence.
+After the round: record each answer in docs/decisions.md as "Decided (owner, {{DATE}})" with the owner's own words when he wrote free text; update the requirements first if the answer changes them; then continue.</pre>
+
+<h3>ANM-010 Build Brief (Mraw to Anima)</h3>
+<p><b>Use:</b> Phase 1 of the Amek workflow, the input to a new Codex version. <b>Source:</b> Anima skill section 10, as used for Project Odyssey M7-M14 and M8b-M8e. <b>Date:</b> 2026-10-01. <b>Tags:</b> brief, codex, amek-workflow.</p>
+<pre># Build brief: {{MILESTONES}}
+1. Goal (and what exists today, with file paths)
+2. Owner decisions (table: topic, owner answer), with the decision IDs
+3. Requirements added or changed (IDs)
+4. Formats: the data contracts with one example each
+5. Milestones and stories (tables: ID, story, size, priority, depends on)
+6. Architecture rules (layers, determinism, saves, tests)
+7. Assembly rules (who decides, where tests run)
+8. Council notes and risks (risk, mitigation)
+9. Open for Anima (TBD) or answered with Anima</pre>
+</body></html>
