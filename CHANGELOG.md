@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-243: fires, torches and glowing effects (Mraw) - 2026-10-04
+
+**State:** Merged into `qa`; verified in Debug (zero warnings); evidence in `docs/evidence/US-243/`.
+
+- `light` on effects, weapons and objects (`lightState` for objects), `clanTorch` and `flicker` in `lights.json`; `OdysseyGame::worldLights` in `src/game/world_lights.cpp`; seeded value-noise flicker (Game only); shader height term. Guide `docs/guides/lighting.md` extended. Tests: `tests/game/world_lights_test.cpp`; US-240 ambient test fixed for the new kinds.
+
 ## US-242: day, night and seasons (Mraw) - 2026-10-02
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-242/`.

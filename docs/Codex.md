@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.6
+# Project Odyssey Codex v2.7
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-01 | Source of truth: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -24,7 +24,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.6)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.7)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -253,13 +253,15 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-44 | M8b window and scale settings: windowed sizes 1280x720, 1600x900, 1920x1080, 2560x1440; borderless and exclusive full screen; Whole scaling with black bars by default on non-whole sizes, Fill as a Settings option; camera zoom 1x/2x and UI scale 1x/2x in Settings, zoom also on the mouse wheel and keys in play; first start without settings.json uses windowed 1280x720, zoom 2x, UI scale 1x and lighting Medium | M8b | US-231..US-233 | Decided (owner, 2026-10-01) |
 | D-47 | Housekeeping (owner, one chat round, 2026-10-01): D-07, D-09 and D-11 closed by what M4-M6 built under delegated decisions; D-10 superseded by the four pillars; STO-01 and SDC-01 absorbed, OPEN-08, OPEN-10 and OPEN-15 answered; every MVP scope item Decided; on GitHub's GPU-less runners the first-frame limit is 10 s, and every exit review runs the strict 3 s check on the owner's PC (`tools/verify.ps1 -Config Release`); the reading PDFs on Drive are not mirrored | all | X-M8b..X-M14 | Decided (owner, 2026-10-01) |
 | D-48 | Remaining open items, one by one (owner, 2026-10-01): ARC-01..ARC-08 confirmed as built (ARC-01 renamed Six-layer architecture); the kill gate 2 playtest is planned now in docs/plans/M6-playtest-plan.md and recruiting starts at K-M13; the Anima Prompt Catalog becomes a Google Doc on Drive | M13 | K-M13, X-M6 | Decided (owner, 2026-10-01) |
+| D-49 | Lighting design answers (K-M8c; owner, 2026-10-02) | M8c | US-240..US-247 | Decided (owner, 2026-10-02) |
+| D-50 | Celestial bodies: sun and moon as placeable light-source objects (owner, 2026-10-04); shadows by ground-plane projection from the body's position; sprites in the sky; eclipses as data events; new story US-248 before US-244 | M8c | US-248, US-244 | Decided (owner, 2026-10-04) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.6 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.7 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -5168,7 +5170,7 @@ Why this milestone exists: light that follows the day, the seasons and the weath
 1. Confirm that M8b (docs/gates/M8b.md) and its stories are done, and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
 2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8c stories leave open after the brief and D-42/D-43 (for example: how dark nights are, the colour of dawn and dusk, the torch's look, how long shadows may get). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
 3. Architect: write docs/plans/M8c-lighting-design.md (lit pass, light buffer, normal-map generation, sky curves and day length, shadow projection and budgets, weather light, quality presets) before the first story.
-4. Set this milestone's stories to To do in docs/status.md in this order: US-240, US-241, US-242, US-243, US-244, US-245, US-246, US-247.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-240, US-241, US-242, US-243, US-248, US-244, US-245, US-246, US-247.
 5. Continue with the first story prompt.
 </instructions>
 <output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
@@ -5371,6 +5373,67 @@ Manual checks in docs/plans/US-243.md done on the owner's PC with the GPU render
 </prompt>
 ```
 
+#### S-US-248 Celestial bodies: the sun and the moon as objects
+```xml
+<prompt id="S-US-248" codex="2.7" milestone="M8c" story="US-248" priority="Must" size="L">
+<context>
+Story US-248: Celestial bodies.
+As the owner, I want the sun and the moon to be objects I can place in a level, so that the light and the shadows come from where they really are.
+Epic E23 Lighting and shadows: Days and nights, seasons and weather light the world; fires glow; characters, plants and buildings cast shadows that move with the sun, the moon and nearby fires.
+Traces to: ENV-22, ENV-21.
+Decision D-50 (owner, 2026-10-04): sun and moon are light-source objects placed in the Editor; their position decides the light direction and the shadows; every level gets a default pair on an orbit that follows the game clock; both are drawn as sprites in the sky band or at the edge of the picture; eclipses are scripted data events; moon phases, shadow maps and height-map shadows are not part of this milestone. Brief: docs/plans/US-248-celestial-brief.md.
+</context>
+<dependencies>
+Stories that must be Done: US-242, US-243.
+Owner decisions that must be Decided: D-42, D-49, D-50.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Data: a `celestial` kind of world object in the object catalog (sprite, a light kind from `light/lights.json`, orbit radius, tilt and height in metres where 1 tile = 1 m, and `follows`: `"clock"` or a fixed position); `assets/data/light/celestial-events.json` for eclipses (which body, start day and hour, length, depth of the dimming). Game: `src/game/celestial.*` gives, every frame, the current light (direction away from the body, elevation above the ground, strength, source body) for the sun and for the moon; the default pair is used when a level places none; the sky ambient colour and the shadow strength still come from `sky.json` (US-242). Draw the bodies as sprites in the sky band or at the edge of the picture. Editor: place, move and delete the bodies, with the time-of-day preview that already exists. Presentation only: the simulation never reads any of it (ADR-016, determinism hash unchanged).
+Rules: clamp the elevation to a minimum so a body on the horizon gives a long but finite shadow (the D-49 caps of 2.5 x the object's height for the sun and 1.5 x for the moon stay); with several suns the strongest is used and nothing is summed. Hand US-244 one function that returns the current light, so that US-244 only draws shadows.
+Follow the brief docs/plans/US-248-celestial-brief.md, docs/plans/M8c-lighting-design.md and docs/guides/lighting.md; a design question they do not answer goes to the owner (Charter human gate 3).
+Scope is exactly the acceptance criteria below; anything else (moon phases, shadows themselves) is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Default pair">
+Given a level that places no sun or moon
+When the game runs through a day
+Then a default sun and moon travel their orbit by the clock, and the light direction follows the sun by day and the moon by night
+</scenario>
+<scenario name="Placed body">
+Given a sun placed at another position in the Editor
+When the level is played
+Then the light direction and elevation come from that position, not from the default orbit
+</scenario>
+<scenario name="Seen">
+Given the sun or the moon above the horizon
+When the scene is drawn
+Then its sprite appears in the sky band or at the edge of the picture and moves with the clock
+</scenario>
+<scenario name="Eclipse">
+Given an eclipse event for the sun in celestial-events.json
+When its time comes
+Then the sun's light dims by the stated depth for the stated length and then returns
+</scenario>
+<scenario name="Data">
+Given a mistake in a celestial entry or an event
+When the file loads
+Then the problem names the file and the field, and the game keeps the default pair
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/lighting.md with an example; round-trip tests for every new format; GPU screenshots for any visual change saved in docs/evidence/US-248/; the determinism hash test passes unchanged.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-248`: the Debug build with zero warnings and every Debug test passes, including the "US-248 ..." cases and the determinism hash test. After a failure, rerun only the failing cases with the doctest filter on the test exe, then run the full check once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-248.md done on the owner's PC with the GPU renderer, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-248/.
+</verification>
+<teach_back>C++ concept for the owner: Turning a position into a direction with a vector and an angle (atan2).</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
 #### S-US-244 Sun and moon shadows
 ```xml
 <prompt id="S-US-244" codex="2.2" milestone="M8c" story="US-244" priority="Must" size="L">
@@ -5381,12 +5444,12 @@ Epic E23 Lighting and shadows: Days and nights, seasons and weather light the wo
 Traces to: ENV-21.
 </context>
 <dependencies>
-Stories that must be Done: US-242.
-Owner decisions that must be Decided: D-42.
+Stories that must be Done: US-242, US-248.
+Owner decisions that must be Decided: D-42, D-50.
 </dependencies>
 <instructions>
 Run the Mraw build loop L-01 for this story only.
-Where the work belongs: Engine: shadow casters (sprite silhouette, ground point, height from the catalog's `height`) drawn before the lit pass as sheared, darkened silhouettes along the sun or moon direction, length from the elevation, fading with shadow strength; catalogs gain `height` and optional `shadow: false`.
+Where the work belongs: Engine: shadow casters (sprite silhouette, ground point, height from the catalog's `height`) drawn before the lit pass as sheared, darkened silhouettes along the light direction given by the celestial bodies of US-248 (the body's true position), length from the elevation, fading with shadow strength; catalogs gain `height` and optional `shadow: false`.
 Follow the brief docs/plans/M8b-M8d-render-light-build-brief.md and the milestone design document; a design question they do not answer goes to the owner (Charter human gate 3).
 Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
 Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
@@ -5528,7 +5591,7 @@ Epic E23 Lighting and shadows: Days and nights, seasons and weather light the wo
 Traces to: ENV-19, EDT-01.
 </context>
 <dependencies>
-Stories that must be Done: US-243, US-244.
+Stories that must be Done: US-243, US-244, US-248.
 Owner decisions that must be Decided: D-42, D-06.
 </dependencies>
 <instructions>
@@ -8461,7 +8524,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-248 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -8510,3 +8573,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.4 | 2026-10-01 | Completeness review (source of truth v2.6, Round 19, D-47). Codex issue CI-009 resolved: K-M8b now checks that M8 is done and K-M9 that M8e is done (v2.2 had swapped them by a text replacement). Every remaining exit review (X-M8b..X-M14, 10 prompts) runs `tools/verify.ps1 -Config Release` on the owner's PC for the strict 3-second first-frame check, which CI only checks at 10 s. Decision table: D-07, D-09, D-11 closed, D-10 superseded, D-47 added. No scope change. |
 | 2.5 | 2026-10-01 | Remaining open items (source of truth v2.7, Round 20, D-48): K-M13 reminds the owner to start recruiting the eight playtesters (docs/plans/M6-playtest-plan.md, written by Dominus); X-M6 runs the playtest by that plan; D-14 and D-48 in the decision table. No scope change. |
 | 2.6 | 2026-10-01 | Merge (source of truth v2.8). During US-231 Mraw found that S-US-231 contradicted the owner's M8b answers (CI-010, D-44) and aligned S-US-231 and S-US-232 itself on its story branch, labelled 2.4 there, while Anima published 2.4 and 2.5 in parallel. This version contains both: the D-44 alignment (four windowed sizes, Whole scaling with Fill in Settings, first-start defaults, zoom and UI scale controls) and every change of 2.4 and 2.5. CI-010 resolved. From now on Codex changes go through Anima (A-002), so versions stay in one line. |
+| 2.7 | 2026-10-04 | Celestial bodies (Mraw's brief docs/plans/US-248-celestial-brief.md; owner decision D-50). New story prompt S-US-248 (sun and moon as placeable light-source objects with a clock orbit, sprites in the sky, eclipses as data events, Editor placement) before S-US-244; S-US-244 now depends on US-248 and D-50 and casts its shadows along the light direction of the celestial bodies; K-M8c lists the stories in the order US-240..US-243, US-248, US-244..US-247; the execution order line (section 7) gets S-US-248; D-49 and D-50 added to the decision table; L-01 verification lines say to rerun only failing cases after a failure. M8c now has nine stories. Source of truth: ENV-22 Celestial bodies must be added to the requirements (v2.9) and US-248 to the backlog before US-248 starts (Mraw to reconcile; Anima issue CI-011). |

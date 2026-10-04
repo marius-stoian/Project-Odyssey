@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "sim/data.h"
+
 #include "luna/engine/scaled_renderer.h"
 
 #include "game/game_rules.h"
@@ -84,6 +86,17 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
+    // Every `light` of the catalogs must name a kind of light of lights.json (US-243).
+    {
+        const auto check = [&](const std::string& light, const std::string& file, const std::string& where) {
+            if (!light.empty() && lighting_.kind(light) == nullptr) {
+                throw sim::DataError(dataDirectory / file, where + ".light", "\"" + light + "\" is not a kind of light in light/lights.json");
+            }
+        };
+        for (const EffectDef& def : catalogs_.effects) check(def.light, "effects.json", "effect \"" + def.name + "\"");
+        for (const WeaponDef& def : catalogs_.weapons) check(def.light, "weapons.json", "weapon \"" + def.name + "\"");
+        for (const PlantDef& def : catalogs_.plants) check(def.light, def.object ? "objects.json" : "plants.json", "object \"" + def.name + "\"");
+    }
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
@@ -2067,6 +2080,12 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     lightFrame.ambientR *= skyNow.ambientR;
     lightFrame.ambientG *= skyNow.ambientG;
     lightFrame.ambientB *= skyNow.ambientB;
+    // Fires and torches light the dark (US-243): the darker the ambient light, the stronger they shine; in full daylight they add nothing.
+    {
+        const double ambient = (lightFrame.ambientR + lightFrame.ambientG + lightFrame.ambientB) / 3.0;
+        const double darkness = std::clamp((1.0 - ambient) / 0.45, 0.0, 1.0); // 0.45 is how far the darkest night goes (D-49)
+        if (darkness > 0.0) lightFrame.lights = worldLights(camera_.view(alpha), alpha, darkness);
+    }
     renderer.setLighting(&lightFrame);
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);

@@ -4,6 +4,7 @@
 
 #include "luna/engine/renderer.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -18,6 +19,7 @@ struct LightKindDef {
     double radiusTiles = 4.0;
     double strength = 1.0;
     double height = 24.0; // pixels
+    double flicker = 0.0; // 0 steady (D-49), up to 1: how much the strength wavers, by a seeded noise in the Game (never the simulation)
     friend bool operator==(const LightKindDef&, const LightKindDef&) = default;
 };
 
@@ -26,12 +28,17 @@ struct LightingData {
     int ambientRed = 255, ambientGreen = 255, ambientBlue = 255;
     double ambientStrength = 1.0;
     std::vector<LightKindDef> kinds;
+    std::string clanTorch; // the kind of light each clan member carries at night ("" = none)
 
     const LightKindDef* kind(const std::string& name) const;
     // The frame the renderer is given for the world: the ambient colour times its strength, no point lights yet.
     luna::engine::LightFrame ambientFrame() const;
     friend bool operator==(const LightingData&, const LightingData&) = default;
 };
+
+// A smooth natural wobble between 0 and 1 for a flame (US-243): value noise, a new random value every `period` seconds blended smoothly into the next.
+// Made from a hash of (seed, step), so the same light flickers the same way every run, and nothing here touches the simulation's random streams.
+double flickerNoise(std::uint64_t seed, double seconds, double period = 0.15);
 
 // Reads lights.json; a mistake becomes a sim::DataError naming the file and the field. A missing file is not an error: the game is then unlit.
 LightingData loadLighting(const std::filesystem::path& file);

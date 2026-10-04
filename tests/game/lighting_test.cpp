@@ -52,7 +52,7 @@ TEST_CASE("US-240 lights.json: mistakes name the file and the field") {
 
 TEST_CASE("US-240 Ambient: the world is drawn lit, the interface is not") {
     const fs::path data = dataCopy("lighting-ambient");
-    writeText(data / "light" / "lights.json", R"({"version":1,"ambient":{"color":[200,220,255],"strength":0.5},"lights":[]})");
+    writeText(data / "light" / "lights.json", R"({"version":1,"ambient":{"color":[200,220,255],"strength":0.5},"lights":[{"name":"campfire","color":[255,199,115],"radiusTiles":6,"strength":0.9,"height":24},{"name":"torch","color":[255,199,115],"radiusTiles":4,"strength":0.8,"height":24}]})");
     game::OdysseyGame odyssey(data, ODYSSEUS_DEMO_LEVEL);
     luna::engine::RecordingRenderer renderer;
     odyssey.start(renderer);
