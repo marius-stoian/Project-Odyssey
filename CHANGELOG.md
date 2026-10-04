@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-246: weather and light (Mraw) - 2026-10-04
+
+**State:** On `story/US-246`, merged into `qa`. Tests written (`tests/game/weather_light_test.cpp`); run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots are manual (`docs/plans/US-246.md`).
+
+- `weather.json` entries gain `light` (`dim`, `tint`) and `flash` (lightning per minute). `weatherLight`, `weatherFlashRate` and `lightningFlash` (`src/game/weather.*`); `OdysseyGame::ambientLightFrame` multiplies the ambient light by the weather's light, blended over the 3 s fade, and lifts it toward white for a strike. Shipped values for rain, storms, snow, fog and dust; guide `docs/guides/lighting.md`.
+
 ## US-245: shadows from fires (Mraw) - 2026-10-04
 
 **State:** On `story/US-245`, merged into `qa` after verification in Debug (zero warnings); GPU screenshots are manual (`docs/plans/US-245.md`).

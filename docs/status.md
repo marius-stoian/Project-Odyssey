@@ -140,7 +140,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-248 | US-248 | M8c | Done | Debug verified 2026-10-04 |
 | S-US-244 | US-244 | M8c | Done | Debug verified 2026-10-04 |
 | S-US-245 | US-245 | M8c | Done | Debug verified 2026-10-04 |
-| S-US-246 | US-246 | M8c | To do |  |
+| S-US-246 | US-246 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
 | S-US-247 | US-247 | M8c | To do |  |
 | X-M8c | - | M8c | To do |  |
 | K-M9a | - | M9a | To do |  |

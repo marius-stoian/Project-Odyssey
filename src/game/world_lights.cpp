@@ -7,6 +7,10 @@
 
 namespace odysseus::game {
 
+namespace {
+constexpr double kLightningLift = 0.85; // how far a strike lifts the ambient light toward white
+} // namespace
+
 std::vector<OdysseyGame::LightSource> OdysseyGame::lightSources(double alpha) const {
     std::vector<LightSource> sources;
     const auto add = [&](const LightKindDef& kind, double worldX, double worldY, double heightAboveGround, std::uint64_t id) {
@@ -85,6 +89,19 @@ luna::engine::LightFrame OdysseyGame::ambientLightFrame(double alpha) const {
         frame.ambientR *= static_cast<float>(celestial.dimming);
         frame.ambientG *= static_cast<float>(celestial.dimming);
         frame.ambientB *= static_cast<float>(celestial.dimming);
+    }
+    // Weather (US-246): rain dims and cools, fog greys, over the same 3 s the weather fades in; a storm's lightning flashes the whole scene.
+    const WeatherLight weatherNow = weatherLight(catalogs_.weather, weather_.previous(), weather_.current(), weather_.fade());
+    frame.ambientR *= weatherNow.red;
+    frame.ambientG *= weatherNow.green;
+    frame.ambientB *= weatherNow.blue;
+    const double seconds = (static_cast<double>(ticks_) + alpha) / 20.0;
+    const double rate = weatherFlashRate(catalogs_.weather, weather_.previous(), weather_.current(), weather_.fade());
+    if (const double flash = lightningFlash(weatherSeed_, seconds, rate); flash > 0.0) {
+        const auto lift = [flash](float ambient) { return ambient + (1.0F - ambient) * static_cast<float>(flash * kLightningLift); };
+        frame.ambientR = lift(frame.ambientR);
+        frame.ambientG = lift(frame.ambientG);
+        frame.ambientB = lift(frame.ambientB);
     }
     return frame;
 }

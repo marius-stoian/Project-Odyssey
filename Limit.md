@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-04, US-246):** S-US-246 DONE (Milestone-90.md, AP-91). Next: S-US-247 (Editor time-of-day slider, Light tool, lighting quality), then X-M8c (the one full verify for M8c, owner 2026-10-04); then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
+
 **Resume update (2026-10-04, US-245):** S-US-245 DONE (Milestone-89.md, AP-090). Next: S-US-246 (weather and light), US-247, X-M8c; then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
 
 **Resume update (2026-10-04, US-244):** S-US-244 DONE (Milestone-88.md, AP-089). Next: S-US-245 (shadows from fires), US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.

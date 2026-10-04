@@ -166,3 +166,22 @@ At night, things near a fire throw faint extra shadows away from it. The fires a
 ```
 
 A thing is shaded only by fires inside their own radius; the shadow falls straight away from the fire, is longest and darkest right beside it (up to 1.5 times the thing's height) and fades to short and faint at the edge of the light (0.4 times). Darkness follows the night: none in daylight. A light closer than 12 pixels to a thing is its own torch and shades nothing. The Low lighting preset in Settings turns fire shadows off. A mistake names the file and the field, for example `lights.json: fireShadows.maxPerObject: must be a whole number from 0 to 8`.
+
+# Weather light: `light` and `flash` in `assets/data/weather.json` (US-246)
+
+Weather changes the mood of the world: rain dims and cools the ambient light, snow and fog grey it, a storm flashes it. Presentation only: the simulation never reads it and the determinism hash is unchanged.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `light.dim` | 0.1 to 1 | the ambient light is multiplied by this (1 = unchanged); default 1 |
+| `light.tint` | `[r, g, b]`, each 0 to 255 | ... and by this colour (a cool blue for rain); default white |
+| `flash` | 0 to 60 | lightning flashes per minute (0 = none); default 0 |
+
+```json
+{"name":"thunderstorm weather","frames":4,"ticksPerFrame":4,"weight":1,"blend":"add","light":{"dim":0.55,"tint":[170,185,215]},"flash":10}
+```
+
+- **The fade.** The light follows the weather fade (US-138): over the same 3 s as the drops arrive the light moves in a straight line from the old weather's light to the new one's, so rain starting at noon dims and cools smoothly. Fires glow stronger as the weather darkens the scene, like at dusk.
+- **Lightning.** Time is cut into 0.2 s slots. A hash of the weather seed and the slot decides whether a strike starts in it, with the chance `flash` x 0.2 / 60; a strike lifts the ambient light 85% of the way to white at its first instant and falls back to nothing within the slot (a few frames). The same seed strikes at the same moments; the simulation's random streams are never used. While one weather fades into another the flash rate blends the same way as the light.
+- Shipped values: drizzle and light rain 0.85, steady and heavy rain 0.75, dark storm clouds 0.6, thunderstorm, close and chain lightning, storm rain and the electric storms 0.55 with 10 flashes a minute (chain lightning 18), distant lightning 0.8 with 5, snow 0.92, blizzard and whiteout 0.8, fog and cloud 0.85, dust, sand and ash 0.75 warm. Every other weather leaves the light as it is.
+- A mistake stops the game naming file and field (for example `weather.json: weather[3].light.dim: must be a number from 0.1 to 1`).

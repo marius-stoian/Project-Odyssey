@@ -409,6 +409,7 @@ add_executable(odysseus_game_tests
     tests/game/plants_test.cpp
     tests/game/animals_test.cpp
     tests/game/weather_test.cpp
+    tests/game/weather_light_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
