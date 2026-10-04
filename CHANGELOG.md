@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-267: actions and the Actions pop-up (Mraw) - 2026-10-04
+
+**State:** On `story/US-267`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_actions_test.cpp`), run once at X-M9a.
+
+- Simulation: `ThingInfo` carries the resolved `allow` and `deny` lists; `InteractionRegistry::offered` skips denied interactions, accepts allowed ones whose tags do not match, and marks range failures (`Offer::tooFar`).
+- Game: placed NPCs and creatures carry their lists (`applyActionLists`); the right-click menu of an NPC hides what it cannot do for its own reasons; `RunFlow::openActions` (`MenuMode`) lists every action with what it needs; the key X (`OdysseyGame::actionsKey`) and the `actions` interaction (`do actions`) open it. Guide extended.
+
 ## US-266: confront (Mraw) - 2026-10-04
 
 **State:** On `story/US-266`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_confront_test.cpp`), run once at X-M9a.

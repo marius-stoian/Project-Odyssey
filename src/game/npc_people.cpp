@@ -107,7 +107,11 @@ bool OdysseyGame::calmFight(int placedId) {
     return false;
 }
 
-void OdysseyGame::confrontKey(const luna::engine::Pointer& pointer) {
+void OdysseyGame::confrontKey(const luna::engine::Pointer& pointer) { npcKey(pointer, true); }
+void OdysseyGame::actionsKey(const luna::engine::Pointer& pointer) { npcKey(pointer, false); }
+
+// The NPC under the pointer, else the nearest within 6 m, for the Confront key and the Actions key.
+void OdysseyGame::npcKey(const luna::engine::Pointer& pointer, bool confront) {
     constexpr double kReach = 6.0 * kTileSize;
     std::optional<Subject> chosen;
     const auto isNpc = [](const Subject& subject) { return std::find(subject.info.tags.begin(), subject.info.tags.end(), "npc") != subject.info.tags.end(); };
@@ -131,10 +135,11 @@ void OdysseyGame::confrontKey(const luna::engine::Pointer& pointer) {
         }
     }
     if (!chosen) {
-        say("There is no one to confront here.");
+        say(confront ? "There is no one to confront here." : "There is no one here to ask about.");
         return;
     }
-    runFlow_.openConfront(*this, *chosen);
+    if (confront) runFlow_.openConfront(*this, *chosen);
+    else runFlow_.openActions(*this, *chosen);
 }
 
 void OdysseyGame::buildNpcPopulation() {

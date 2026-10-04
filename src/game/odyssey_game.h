@@ -100,6 +100,9 @@ public:
     bool calmFight(int placedId);
     // The Confront key (US-266): the NPC under the pointer, else the nearest within 6 m, gets the menu of its confront actions.
     void confrontKey(const luna::engine::Pointer& pointer);
+    // The Actions key (US-267): the same choice of NPC, and the Actions pop-up.
+    void actionsKey(const luna::engine::Pointer& pointer);
+    void npcKey(const luna::engine::Pointer& pointer, bool confront);
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }

@@ -76,7 +76,7 @@ TEST_CASE("US-266 Separate: the Confront key offers the five confront actions an
     REQUIRE(studio.odyssey->run().openContext(*studio.odyssey, placedOssa->feet.x, placedOssa->feet.y - 20));
     std::vector<std::string> ordinary;
     for (const auto& entry : studio.odyssey->run().contextEntries()) ordinary.push_back(entry.label);
-    CHECK(ordinary == std::vector<std::string>{"Talk", "Confront..."});
+    CHECK(ordinary == std::vector<std::string>{"Talk", "Confront...", "Actions..."});
     studio.odyssey->run().close();
 
     // The key C: the five actions, in the order of their files, and no Talk.

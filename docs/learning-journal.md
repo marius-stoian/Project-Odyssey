@@ -1547,3 +1547,22 @@ for (const int index : people.near(x, y, range)) if (people.knows(id, placedId))
 **Try it (15 minutes).** Copy `insult.json` to `shout.json`, change the id, label and amounts, press F5 and see it in the Confront menu.
 
 **Check yourself.** Why does the hearing range use the grid instead of looping over every person?
+
+## US-267 Actions and the Actions pop-up: filtering, and conditions as words
+
+**What we built.** An NPC's right-click menu shows only what you can do. A separate Actions pop-up (key X) shows everything the NPC could offer and, for what is locked, what it needs, in plain words.
+
+**The C++ idea: filtering a list, and keeping the reason with the answer.** One function builds the list of offers; the menu and the pop-up are two filters over it. Each offer carries *why* it is not available, so the pop-up can print it:
+
+```cpp
+if (placed && mode != MenuMode::All && !offer.enabled && !offer.tooFar) continue; // hidden in the menu
+// the pop-up keeps it, with offer.reason as the words
+```
+
+Allow and deny lists are applied first, inside `offered()`: a denied id is skipped before anything else is looked at.
+
+**Where to look.** `InteractionRegistry::offered` in `src/sim/interaction.cpp`; `RunFlow::openMenuFor` in `src/game/run_flow.cpp`; `docs/guides/npc-data.md`.
+
+**Try it (15 minutes).** Add `"actions": { "deny": ["talk"] }` to a class file, press F5 and see Talk vanish for that class.
+
+**Check yourself.** Why does an action that is only too far away stay in the menu while one that needs a friendly attitude does not?

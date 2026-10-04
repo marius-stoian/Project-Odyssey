@@ -1862,6 +1862,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     // Handle attacks based on the held weapon.
     // Plants (US-136): Interact with empty hands, or the right mouse button, looks at the plant next to the hero.
     if (!fallen && intents.pressed(luna::engine::Intent::Confront)) confrontKey(worldIntents.pointer());
+    if (!fallen && intents.pressed(luna::engine::Intent::Actions)) actionsKey(worldIntents.pointer());
     if (!fallen && intents.pressed(luna::engine::Intent::Inspect)) {
         // A right click on something in the world offers its actions (US-061); on nothing it looks at the nearest plant.
         const luna::engine::Pointer& p = worldIntents.pointer();

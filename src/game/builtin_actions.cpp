@@ -48,6 +48,10 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
             game.run().openConfront(game, subject);
             return true;
         }
+        if (name == "actions") {
+            game.run().openActions(game, subject);
+            return true;
+        }
         if (name == "spread-opinion" && args.size() == 1) {
             // Everyone who can hear it and knows the target now thinks of the hero too: persons within the hearing range of the data.
             const int amount = std::clamp(std::atoi(args[0].c_str()), -200, 200);
@@ -264,7 +268,7 @@ private:
 } // namespace
 
 const std::vector<std::string>& builtInActionNames() {
-    static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
+    static const std::vector<std::string> names = {"gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
                                                    "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }

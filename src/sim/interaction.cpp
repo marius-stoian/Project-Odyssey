@@ -439,11 +439,14 @@ const Interaction* InteractionRegistry::find(std::string_view id) const {
 std::vector<Offer> InteractionRegistry::offered(const ThingInfo& actor, const ThingInfo& target, long long distanceMilli, const RuleContext& context) const {
     std::vector<Offer> offers;
     for (const Interaction& interaction : interactions_) {
-        if (!matchesActor(interaction, actor) || !matchesTarget(interaction, target)) continue;
+        if (std::find(target.deny.begin(), target.deny.end(), interaction.id) != target.deny.end()) continue; // denied for this one (a later deny wins)
+        const bool allowed = std::find(target.allow.begin(), target.allow.end(), interaction.id) != target.allow.end();
+        if (!matchesActor(interaction, actor) || (!allowed && !matchesTarget(interaction, target))) continue;
         Offer offer;
         offer.interaction = &interaction;
         if (distanceMilli > interaction.rangeMilli) {
             offer.enabled = false;
+            offer.tooFar = true;
             offer.reason = "Too far away";
         } else {
             for (const Requirement& r : interaction.requires_) {
