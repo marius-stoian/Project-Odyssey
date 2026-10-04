@@ -2,6 +2,7 @@
 #include "camp.h"
 
 #include "game/level.h"
+#include "game/lighting.h"
 #include "luna/engine/renderer.h"
 #include "luna/engine/shadow_draw.h"
 #include "sim/data.h"
@@ -21,7 +22,24 @@ struct Day {
     std::unique_ptr<game::OdysseyGame> odyssey;
     game::PixelPoint hero;
 
-    explicit Day(const std::string& name) : data(dataCopy(name)) {
+    // `fires` are camp fires placed at (tiles east, tiles south) of the hero. A night with fires has no clan torches, so only the fires light and shade.
+    explicit Day(const std::string& name, const std::vector<std::pair<double, double>>& fires = {}, int fireBudget = 2) : data(dataCopy(name)) {
+        if (!fires.empty()) {
+            std::string lights = readText(data / "light" / "lights.json");
+            const std::string torch = "\"clanTorch\": \"torch\",";
+            REQUIRE(lights.find(torch) != std::string::npos);
+            lights.replace(lights.find(torch), torch.size(), "\"clanTorch\": \"\",");
+            const std::string budget = "\"maxPerObject\": 2";
+            REQUIRE(lights.find(budget) != std::string::npos);
+            lights.replace(lights.find(budget), budget.size(), "\"maxPerObject\": " + std::to_string(fireBudget));
+            writeText(data / "light" / "lights.json", lights);
+            // The hero and the clan (who are drawn as the hero's kind) cast no shadow of their own here, so only the goblin's shadows are counted.
+            std::string characters = readText(data / "characters.json");
+            const std::string heroEntry = "{ \"name\": \"hero\",";
+            REQUIRE(characters.find(heroEntry) != std::string::npos);
+            characters.insert(characters.find(heroEntry) + heroEntry.size(), " \"shadow\": false,");
+            writeText(data / "characters.json", characters);
+        }
         fs::create_directories(data.parent_path() / "sprites" / "atlas");
         fs::copy(fs::path(ODYSSEUS_DATA_DIR).parent_path() / "sprites" / "atlas", data.parent_path() / "sprites" / "atlas", fs::copy_options::recursive);
         const game::Definitions definitions = game::loadDefinitions(data);
@@ -34,6 +52,7 @@ struct Day {
         hero = level.heroStart;
         level.plants.push_back({level.nextId++, "olive tree", {hero.x + 320, hero.y}});
         level.plants.push_back({level.nextId++, "bush", {hero.x - 320, hero.y}});
+        for (const auto& [east, south] : fires) level.effects.push_back({level.nextId++, "flame", {static_cast<int>(hero.x + east * 32.0), static_cast<int>(hero.y + south * 32.0)}});
         game::PlacedCharacter goblin;
         goblin.id = level.nextId++;
         goblin.kind = "goblin";
@@ -221,5 +240,113 @@ TEST_CASE("US-244 Data: height and shadow fields are read, small plants cast not
     } catch (const odysseus::sim::DataError& e) {
         CHECK(std::string(e.what()).find("plants.json") != std::string::npos);
         CHECK(std::string(e.what()).find(".height") != std::string::npos);
+    }
+}
+
+namespace {
+
+// The goblin stands 6 tiles south of the hero. Fog takes the sun and moon shadows away, so the only shadows left at midnight are the fires'.
+struct Fires {
+    Day day;
+    Fires(const std::string& name, const std::vector<std::pair<double, double>>& fires, int budget = 2) : day(name, fires, budget) {
+        REQUIRE(day.odyssey->setWeatherNamed("fog"));
+    }
+    struct Spread {
+        int strips = 0;
+        double west = 0.0, east = 0.0; // the furthest strip centres from the feet, in pixels
+        int darkest = 0;
+    };
+    Spread spreadAt(double eastTiles, double southTiles) {
+        Spread spread;
+        const auto view = day.odyssey->camera().view(1.0);
+        const double feetX = day.hero.x + eastTiles * 32.0 - view.x;
+        for (const auto& strip : day.shadowsAt(eastTiles, southTiles, 160.0)) {
+            const double x = strip.destination.x + strip.destination.width / 2.0 - feetX;
+            ++spread.strips;
+            spread.west = std::min(spread.west, x);
+            spread.east = std::max(spread.east, x);
+            spread.darkest = std::max(spread.darkest, strip.alpha);
+        }
+        return spread;
+    }
+};
+
+} // namespace
+
+TEST_CASE("US-245 Fire shadow: at night a person's shadow points away from the fire") {
+    Fires night("fire-one", {{3.0, 6.0}}); // a fire three tiles east of the goblin
+    const Fires::Spread goblin = night.spreadAt(0.0, 6.0);
+    REQUIRE(goblin.strips > 0);
+    CHECK(goblin.west < -5.0);  // it falls west
+    CHECK(goblin.east < 5.0);   // and nothing of it points toward the fire
+    CHECK(goblin.darkest > 0);
+    CHECK(goblin.darkest < 100); // faint
+    // The fire on the other side turns it round.
+    Fires other("fire-one-west", {{-3.0, 6.0}});
+    const Fires::Spread turned = other.spreadAt(0.0, 6.0);
+    CHECK(turned.east > 5.0);
+    CHECK(turned.west > -5.0);
+}
+
+TEST_CASE("US-245 Two fires: a person between two fires casts two faint shadows") {
+    Fires night("fire-two", {{3.0, 6.0}, {-3.0, 6.0}});
+    const Fires::Spread both = night.spreadAt(0.0, 6.0);
+    CHECK(both.west < -5.0);
+    CHECK(both.east > 5.0);
+    Fires single("fire-two-one", {{3.0, 6.0}});
+    CHECK(both.strips == 2 * single.spreadAt(0.0, 6.0).strips);
+    CHECK(both.darkest < 100);
+}
+
+TEST_CASE("US-245 Budget: only the nearest fires of lights.json shade a person, and Low turns them off") {
+    // Two fires at 3 tiles and a third at 4.5: the third is not among the nearest two.
+    Fires three("fire-three", {{3.0, 6.0}, {-3.0, 6.0}, {0.0, 10.5}});
+    Fires two("fire-three-two", {{3.0, 6.0}, {-3.0, 6.0}});
+    CHECK(three.spreadAt(0.0, 6.0).strips == two.spreadAt(0.0, 6.0).strips);
+    // A fire beyond its own light (6 tiles) shades nothing.
+    Fires far("fire-far", {{7.0, 6.0}});
+    CHECK(far.spreadAt(0.0, 6.0).strips == 0);
+    // The budget is data: lights.json allows one fire per object, and the nearest (the first placed of two that are equally near) is the one.
+    Fires one("fire-three-one", {{3.0, 6.0}, {-3.0, 6.0}, {0.0, 10.5}}, 1);
+    Fires single("fire-one-only", {{3.0, 6.0}});
+    CHECK(one.spreadAt(0.0, 6.0).strips == single.spreadAt(0.0, 6.0).strips);
+    CHECK(one.spreadAt(0.0, 6.0).strips < two.spreadAt(0.0, 6.0).strips);
+    CHECK(one.spreadAt(0.0, 6.0).east < 5.0); // the shadow of the east fire falls west only    // The Low lighting preset: no fire shadows.
+    game::GameSettings low = three.day.odyssey->settings();
+    low.lighting = "Low";
+    three.day.odyssey->applySettings(low);
+    three.day.odyssey->setViewScales(1, 1);
+    CHECK(three.spreadAt(0.0, 6.0).strips == 0);
+}
+
+TEST_CASE("US-245 Daylight: fires cast nothing by day") {
+    Fires day("fire-day", {{3.0, 6.0}});
+    day.day.advanceToHour(12.0);
+    CHECK(day.spreadAt(0.0, 6.0).strips == 0);
+}
+
+TEST_CASE("US-245 Data: fireShadows and shadows round-trip, and a mistake names the file and the field") {
+    const game::LightingData data = game::loadLighting(fs::path(ODYSSEUS_DATA_DIR) / "light" / "lights.json");
+    CHECK(data.shadowLightsPerObject == 2);
+    CHECK(data.fireShadowStrength == doctest::Approx(0.35));
+    CHECK(data.kind("campfire")->shadows);
+    CHECK_FALSE(data.kind("sun")->shadows);
+    const fs::path data2 = dataCopy("fire-data");
+    writeText(data2 / "round.json", game::lightingToText(data));
+    CHECK(game::loadLighting(data2 / "round.json") == data);
+    const std::string text = readText(data2 / "round.json");
+    const std::string field = "\"maxPerObject\": 2";
+    REQUIRE(text.find(field) != std::string::npos);
+    for (const std::string& bad : {std::string("\"maxPerObject\": 2.5"), std::string("\"maxPerObject\": 9")}) {
+        std::string edited = text;
+        edited.replace(edited.find(field), field.size(), bad);
+        writeText(data2 / "round.json", edited);
+        try {
+            game::loadLighting(data2 / "round.json");
+            FAIL("a bad maxPerObject must be refused");
+        } catch (const odysseus::sim::DataError& e) {
+            CHECK(std::string(e.what()).find("round.json") != std::string::npos);
+            CHECK(std::string(e.what()).find("fireShadows.maxPerObject") != std::string::npos);
+        }
     }
 }

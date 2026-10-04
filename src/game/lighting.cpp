@@ -104,7 +104,19 @@ LightingData loadLighting(const std::filesystem::path& file) {
         kind.strength = numberIn(entry, file, where, "strength", 0.0, 4.0);
         kind.height = numberIn(entry, file, where, "height", 1.0, 200.0);
         kind.flicker = root.at("lights").at(i).contains("flicker") ? numberIn(entry, file, where, "flicker", 0.0, 1.0) : 0.0;
+        if (entry.contains("shadows")) {
+            if (!entry.at("shadows").is_boolean()) throw sim::DataError(file, where + ".shadows", "must be true or false");
+            kind.shadows = entry.at("shadows").get<bool>();
+        }
         data.kinds.push_back(std::move(kind));
+    }
+    if (root.contains("fireShadows")) {
+        const json& fire = root.at("fireShadows");
+        if (!fire.is_object()) throw sim::DataError(file, "fireShadows", "must be an object with maxPerObject and strength");
+        const double perObject = numberIn(fire, file, "fireShadows", "maxPerObject", 0.0, 8.0);
+        if (perObject != std::floor(perObject)) throw sim::DataError(file, "fireShadows.maxPerObject", "must be a whole number from 0 to 8");
+        data.shadowLightsPerObject = static_cast<int>(perObject);
+        data.fireShadowStrength = numberIn(fire, file, "fireShadows", "strength", 0.0, 1.0);
     }
     if (root.contains("clanTorch")) {
         if (!root.at("clanTorch").is_string()) throw sim::DataError(file, "clanTorch", "must be the name of a kind of light");
@@ -121,6 +133,7 @@ std::string lightingToText(const LightingData& data) {
     root["version"] = 1;
     root["ambient"] = {{"color", {data.ambientRed, data.ambientGreen, data.ambientBlue}}, {"strength", data.ambientStrength}};
     if (!data.clanTorch.empty()) root["clanTorch"] = data.clanTorch;
+    root["fireShadows"] = {{"maxPerObject", data.shadowLightsPerObject}, {"strength", data.fireShadowStrength}};
     root["lights"] = json::array();
     for (const LightKindDef& kind : data.kinds) {
         root["lights"].push_back({{"name", kind.name},
@@ -128,7 +141,8 @@ std::string lightingToText(const LightingData& data) {
                                   {"radiusTiles", kind.radiusTiles},
                                   {"strength", kind.strength},
                                   {"height", kind.height},
-                                  {"flicker", kind.flicker}});
+                                  {"flicker", kind.flicker},
+                                  {"shadows", kind.shadows}});
     }
     return root.dump(2);
 }

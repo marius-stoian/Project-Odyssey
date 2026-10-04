@@ -143,4 +143,26 @@ Defaults when a field is left out: a tree 4 m, a tall plant (bush) 1.5 m, a smal
 {"name":"fog","frames":4,"ticksPerFrame":4,"weight":1,"blend":"alpha","shadowFade":1.0}
 ```
 
-A mistake names the file and the field, for example `plants.json: plants[2].height: must be a number from 0 to 100`. Sun and moon objects (US-248) are in the sky and cast nothing. Shadows from fires are US-245; shadows of buildings come with M8d.
+A mistake names the file and the field, for example `plants.json: plants[2].height: must be a number from 0 to 100`. Sun and moon objects (US-248) are in the sky and cast nothing. Shadows of buildings come with M8d.
+
+## Shadows from fires (US-245)
+
+At night, things near a fire throw faint extra shadows away from it. The fires are the point lights of US-243 whose kind has `"shadows": true`; the number of fires that shade one thing, and how dark they are, come from `lights.json`.
+
+| Field | Where | Values | Meaning |
+|---|---|---|---|
+| `fireShadows.maxPerObject` | top level of `lights.json` | whole number 0 to 8, default 2 | how many of the nearest fires shade one thing; 0 turns fire shadows off |
+| `fireShadows.strength` | same | 0 to 1, default 0.35 | how dark a shadow is right beside the fire on the darkest night |
+| `lights[].shadows` | a kind of light | true / false, default false | this kind of light throws shadows (the sun and moon kinds do not) |
+
+```json
+{
+  "version": 1,
+  "fireShadows": { "maxPerObject": 2, "strength": 0.35 },
+  "lights": [
+    { "name": "campfire", "color": [255, 199, 115], "radiusTiles": 6.0, "strength": 0.9, "height": 24, "shadows": true }
+  ]
+}
+```
+
+A thing is shaded only by fires inside their own radius; the shadow falls straight away from the fire, is longest and darkest right beside it (up to 1.5 times the thing's height) and fades to short and faint at the edge of the light (0.4 times). Darkness follows the night: none in daylight. A light closer than 12 pixels to a thing is its own torch and shades nothing. The Low lighting preset in Settings turns fire shadows off. A mistake names the file and the field, for example `lights.json: fireShadows.maxPerObject: must be a whole number from 0 to 8`.

@@ -20,6 +20,7 @@ struct LightKindDef {
     double strength = 1.0;
     double height = 24.0; // pixels
     double flicker = 0.0; // 0 steady (D-49), up to 1: how much the strength wavers, by a seeded noise in the Game (never the simulation)
+    bool shadows = false; // US-245: things near this light cast faint shadows away from it at night
     friend bool operator==(const LightKindDef&, const LightKindDef&) = default;
 };
 
@@ -29,6 +30,8 @@ struct LightingData {
     double ambientStrength = 1.0;
     std::vector<LightKindDef> kinds;
     std::string clanTorch; // the kind of light each clan member carries at night ("" = none)
+    int shadowLightsPerObject = 2;    // US-245: how many of the nearest shadow-casting lights shade one thing (0 = no fire shadows)
+    double fireShadowStrength = 0.35; // how dark a fire's shadow is right beside the fire at the darkest night (0..1)
 
     const LightKindDef* kind(const std::string& name) const;
     // The frame the renderer is given for the world: the ambient colour times its strength, no point lights yet.

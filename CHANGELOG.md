@@ -4,6 +4,14 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-245: shadows from fires (Mraw) - 2026-10-04
+
+**State:** On `story/US-245`, merged into `qa` after verification in Debug (zero warnings); GPU screenshots are manual (`docs/plans/US-245.md`).
+
+- At night things near a fire throw faint shadows away from it: `OdysseyGame::castShadow` (`src/game/shadows.cpp`) shades each thing from the nearest `fireShadows.maxPerObject` shadow-casting lights that reach it (nearer is longer and darker, none in daylight, none on the Low lighting preset, none from a thing's own torch).
+- `world_lights.cpp` now builds world-space `lightSources()` shared by the lights and the shadows, and `ambientLightFrame()` / `darknessOf()` replace the inline ambient code in `render`.
+- New data in `assets/data/light/lights.json`: `fireShadows` (`maxPerObject`, `strength`) and `shadows` on a kind of light; guide `docs/guides/lighting.md`. Tests: five `US-245` cases in `tests/game/shadow_test.cpp` (one fire, two fires, budget, Low, daylight, data round trip).
+
 ## US-244: sun and moon shadows (Mraw) - 2026-10-04
 
 **State:** On `story/US-244`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-244/`.
