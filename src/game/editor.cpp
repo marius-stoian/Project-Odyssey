@@ -68,6 +68,7 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
 
 void Editor::setTextures(const EditorTextures& textures) {
     textures_ = textures;
+    markerTextures_.clear(); // the pictures belong to the renderer that made them
     buildPanels(); // the palette's buttons show pieces of the tile texture
 }
 
@@ -94,6 +95,7 @@ void Editor::buildPanels() {
     button("Select", "Select a character, pickup, plant, effect or light: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
+    button("Class", "NPC Classes: create, edit and delete the kinds of people of your world", [this] { showClasses(!classesShown_); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -163,8 +165,317 @@ void Editor::buildPanels() {
     }
     buildProperties();
     buildSettings();
+    buildClassPanel();
     buildOpenList();
     buildQuestion();
+}
+
+namespace {
+
+std::string joinNames(const std::vector<std::string>& names) {
+    std::string out;
+    for (const std::string& name : names) out += (out.empty() ? "" : ", ") + name;
+    return out;
+}
+
+std::vector<std::string> splitNames(const std::string& text) {
+    std::vector<std::string> out;
+    std::size_t start = 0;
+    while (start <= text.size()) {
+        std::size_t end = text.find(',', start);
+        if (end == std::string::npos) end = text.size();
+        std::string part = text.substr(start, end - start);
+        const auto first = part.find_first_not_of(' ');
+        const auto last = part.find_last_not_of(' ');
+        if (first != std::string::npos) out.push_back(part.substr(first, last - first + 1));
+        start = end + 1;
+    }
+    return out;
+}
+
+// "player=greet.dlg, class:guard=x.dlg" and back (the Talk field of a class and of a kind). nullopt when a part has no "=".
+std::string formatDialogues(const std::vector<std::pair<std::string, std::string>>& dialogues) {
+    std::string out;
+    for (const auto& [type, file] : dialogues) out += (out.empty() ? "" : ", ") + type + "=" + file;
+    return out;
+}
+
+std::optional<std::vector<std::pair<std::string, std::string>>> parseDialogues(const std::string& text) {
+    std::vector<std::pair<std::string, std::string>> parsed;
+    for (const std::string& part : splitNames(text)) {
+        const auto equals = part.find('=');
+        if (equals == std::string::npos) return std::nullopt;
+        parsed.emplace_back(part.substr(0, equals), part.substr(equals + 1));
+    }
+    return parsed;
+}
+
+} // namespace
+
+void Editor::showClasses(bool shown) {
+    classesShown_ = shown;
+    if (shown) {
+        classesStale_ = true;
+        showSettings(false);
+    }
+}
+
+void Editor::newClass() {
+    classDraft_ = sim::rules::NpcClass{};
+    classDraft_.id = "new-class";
+    classDraft_.label = "New class";
+    classDraft_.colour = 0x808080;
+    classDraft_.icon = sim::rules::npcIconNames().front();
+    classNew_ = true;
+    classSelected_.clear();
+    classesStale_ = true;
+}
+
+void Editor::selectClass(const std::string& id) {
+    if (classBook_ == nullptr) return;
+    if (const sim::rules::NpcClass* found = classBook_->catalog().find(id)) {
+        classDraft_ = *found;
+        classNew_ = false;
+        classSelected_ = id;
+        classesStale_ = true;
+    }
+}
+
+bool Editor::saveClass() {
+    if (classBook_ == nullptr) return false;
+    if (classNew_ && classBook_->catalog().find(classDraft_.id) != nullptr) {
+        say(std::format("a class named {} already exists", classDraft_.id));
+        return false;
+    }
+    if (const auto problem = classBook_->save(classDraft_)) {
+        say(*problem);
+        return false;
+    }
+    classNew_ = false;
+    classSelected_ = classDraft_.id;
+    classesStale_ = true;
+    say(std::format("saved class {}", classDraft_.id));
+    return true;
+}
+
+bool Editor::deleteClass() {
+    if (classBook_ == nullptr || classNew_ || classSelected_.empty()) return false;
+    if (const auto refusal = classBook_->remove(classSelected_, level_)) {
+        say(*refusal);
+        return false;
+    }
+    say(std::format("deleted class {}", classSelected_));
+    classSelected_.clear();
+    classDraft_ = sim::rules::NpcClass{};
+    classesStale_ = true;
+    return true;
+}
+
+// The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
+void Editor::buildClassPanel() {
+    classesStale_ = false;
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 232 : 200});
+    classes_->visible = classesShown_;
+    const Rect box = classes_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    int y = box.y + 4;
+    // Two tabs: the classes themselves, and the defaults of each kind (US-269).
+    Button& classesTab = classes_->add<Button>(Rect{left, y, width / 2 - 1, 11}, "Classes", [this] {
+        kindsTab_ = false;
+        classesStale_ = true;
+    });
+    classesTab.selected = !kindsTab_;
+    classesTab.hint = "The NPC Classes: create, edit and delete";
+    Button& kindsButton = classes_->add<Button>(Rect{left + width / 2 + 1, y, width / 2 - 1, 11}, "Kinds", [this] {
+        kindsTab_ = true;
+        classesStale_ = true;
+    });
+    kindsButton.selected = kindsTab_;
+    kindsButton.hint = "The defaults of each kind of character: classes, attitude, talk, actions";
+    y += 14;
+    if (kindsTab_) {
+        buildKindForm(box, y);
+        return;
+    }
+    std::vector<std::string> ids = classBook_ != nullptr ? classBook_->catalog().ids() : std::vector<std::string>{};
+    auto& list = classes_->add<luna::engine::ListBox>(Rect{left, y, width, 45}, ids, [this, ids](int row) { selectClass(ids[static_cast<std::size_t>(row)]); });
+    for (std::size_t i = 0; i < ids.size(); ++i) {
+        if (ids[i] == classSelected_) {
+            list.selected = static_cast<int>(i);
+            list.first = std::clamp(static_cast<int>(i) - 2, 0, std::max(0, static_cast<int>(ids.size()) - list.rows()));
+        }
+    }
+    y += 48;
+    if (classNew_) {
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Id", classDraft_.id, 32, [this](const std::string& v) { classDraft_.id = v; });
+    } else {
+        classes_->add<Button>(Rect{left, y, width, 11}, "Id: " + classDraft_.id, [] {});
+    }
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Label", classDraft_.label, 24, [this](const std::string& v) { classDraft_.label = v; });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Colour", sim::rules::formatColour(classDraft_.colour), 7, [this](const std::string& v) {
+        if (const auto colour = sim::rules::parseColour(v)) classDraft_.colour = *colour;
+        else say("colour must be # and six hex digits, like #d9a441");
+    });
+    y += 14;
+    Button& icon = classes_->add<Button>(Rect{left, y, width, 11}, "Icon: " + classDraft_.icon, [this] {
+        const auto& icons = sim::rules::npcIconNames();
+        const auto at = std::find(icons.begin(), icons.end(), classDraft_.icon);
+        classDraft_.icon = icons[(static_cast<std::size_t>(at - icons.begin()) + 1) % icons.size()];
+        classesStale_ = true;
+    });
+    icon.hint = "Click: the next icon of the built-in set";
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(classDraft_.tags), 60, [this](const std::string& v) { classDraft_.tags = splitNames(v); });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", formatDialogues(classDraft_.dialogues), 90, [this](const std::string& v) {
+        if (const auto parsed = parseDialogues(v)) classDraft_.dialogues = *parsed;
+        else say("talk is partner=file.dlg, for example player=greet.dlg");
+    });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(classDraft_.allow), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
+    y += 14;
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
+    y += 18;
+    classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
+    classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
+    classes_->add<Button>(Rect{left + 112, y, 56, 14}, "Delete", [this] { deleteClass(); }).hint = "Delete the class (refused while NPCs use it)";
+    classes_->add<Button>(Rect{left + 172, y, 52, 14}, "Close", [this] { showClasses(false); });
+}
+
+// ---- the Kinds tab (US-269)
+
+void Editor::showKinds(bool shown) {
+    kindsTab_ = shown;
+    showClasses(shown);
+}
+
+std::vector<std::string> Editor::kindNames() const {
+    std::vector<std::string> names;
+    for (const CharacterKindDef& kind : definitions_.characters) {
+        if (std::find(kind.tags.begin(), kind.tags.end(), "hero") == kind.tags.end()) names.push_back(kind.name);
+    }
+    return names;
+}
+
+void Editor::selectKind(const std::string& name) {
+    if (classBook_ == nullptr) return;
+    const std::vector<std::string> names = kindNames();
+    if (std::find(names.begin(), names.end(), name) == names.end()) return;
+    if (const sim::rules::NpcKind* found = classBook_->kinds().find(name)) {
+        kindDraft_ = *found;
+    } else {
+        kindDraft_ = sim::rules::NpcKind{};
+        kindDraft_.kind = name;
+        kindDraft_.file = "npcs/" + name + ".json";
+    }
+    kindSelected_ = name;
+    classesStale_ = true;
+}
+
+void Editor::toggleKindClass(const std::string& id) {
+    if (kindSelected_.empty()) return;
+    std::vector<std::string> classes = kindDraft_.layer.classes.value_or(std::vector<std::string>{});
+    const auto at = std::find(classes.begin(), classes.end(), id);
+    if (at != classes.end()) classes.erase(at);
+    else classes.push_back(id);
+    kindDraft_.layer.classes = classes.empty() ? std::nullopt : std::optional<std::vector<std::string>>(classes);
+    classesStale_ = true;
+}
+
+bool Editor::saveKind() {
+    if (classBook_ == nullptr || kindSelected_.empty()) return false;
+    if (const auto problem = classBook_->saveKind(kindDraft_)) {
+        say(*problem);
+        return false;
+    }
+    propertiesStale_ = true; // the NPC panel shows what the kind says now
+    classesStale_ = true;
+    say(std::format("saved kind {}", kindDraft_.kind));
+    return true;
+}
+
+// The form of the Kinds tab: the same rows as the NPC panel (classes, attitude, tags, talk, allow, deny), but they edit the kind's draft and Save writes its file.
+void Editor::buildKindForm(const Rect& box, int y) {
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    const std::vector<std::string> names = kindNames();
+    std::vector<std::string> rows;
+    for (const std::string& name : names) rows.push_back(name + (classBook_ != nullptr && classBook_->kinds().find(name) == nullptr ? " (no file)" : ""));
+    auto& list = classes_->add<luna::engine::ListBox>(Rect{left, y, width, 4 * luna::engine::kLineHeight}, rows, [this, names](int row) { selectKind(names[static_cast<std::size_t>(row)]); });
+    for (std::size_t i = 0; i < names.size(); ++i) {
+        if (names[i] == kindSelected_) {
+            list.selected = static_cast<int>(i);
+            list.first = std::clamp(static_cast<int>(i) - 1, 0, std::max(0, static_cast<int>(names.size()) - list.rows()));
+        }
+    }
+    y += 4 * luna::engine::kLineHeight + 3;
+    if (kindSelected_.empty()) {
+        classes_->add<Button>(Rect{left, y, width, 11}, "Pick a kind above", [] {});
+    } else {
+        classes_->add<Button>(Rect{left, y, width, 11}, "Kind: " + kindSelected_, [] {});
+        y += 13;
+        const std::vector<std::string> ids = classBook_ != nullptr ? classBook_->catalog().ids() : std::vector<std::string>{};
+        const std::vector<std::string> have = kindDraft_.layer.classes.value_or(std::vector<std::string>{});
+        std::vector<std::string> classRows;
+        for (const std::string& id : ids) classRows.push_back(std::string(std::find(have.begin(), have.end(), id) != have.end() ? "[x] " : "[ ] ") + id);
+        classes_->add<luna::engine::ListBox>(Rect{left, y, width, 5 * luna::engine::kLineHeight}, classRows, [this, ids](int row) { toggleKindClass(ids[static_cast<std::size_t>(row)]); });
+        y += 5 * luna::engine::kLineHeight + 3;
+        // Attitude: a click goes to the next word; after the last comes "none" (the kind says nothing, so NPCs are neutral unless they say otherwise).
+        Button& attitude = classes_->add<Button>(Rect{left, y, width, 11}, "Attitude: " + kindDraft_.layer.attitude.value_or("(none)"), [this] {
+            const auto& words = sim::rules::attitudeNames();
+            if (!kindDraft_.layer.attitude) {
+                kindDraft_.layer.attitude = words.front();
+            } else {
+                const auto at = std::find(words.begin(), words.end(), *kindDraft_.layer.attitude);
+                const std::size_t next = static_cast<std::size_t>(at - words.begin()) + 1;
+                if (next >= words.size()) kindDraft_.layer.attitude.reset();
+                else kindDraft_.layer.attitude = words[next];
+            }
+            classesStale_ = true;
+        });
+        attitude.hint = "Click: the next attitude word, then none. NPCs of this kind start like this unless they set their own";
+        y += 14;
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(kindDraft_.layer.tags), 60, [this](const std::string& v) { kindDraft_.layer.tags = splitNames(v); });
+        y += 14;
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", formatDialogues(kindDraft_.layer.dialogues), 90, [this](const std::string& v) {
+            if (const auto parsed = parseDialogues(v)) kindDraft_.layer.dialogues = *parsed;
+            else say("talk is partner=file.dlg, for example player=greet.dlg");
+        });
+        y += 14;
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(kindDraft_.layer.allow), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
+        y += 14;
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(kindDraft_.layer.deny), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
+    }
+    const int bottom = box.y + box.height - 18;
+    classes_->add<Button>(Rect{left, bottom, 80, 14}, "Save", [this] { saveKind(); }).hint = "Write the kind's file: every NPC of this kind that sets nothing itself follows it";
+    classes_->add<Button>(Rect{left + 84, bottom, 52, 14}, "Close", [this] { showClasses(false); });
+}
+
+// The ring and icon under a placed NPC (US-269): one picture per distinct marker, made the first time it is drawn.
+const luna::engine::Texture& Editor::markerTexture(luna::engine::Renderer& renderer, const NpcMarker& marker) const {
+    std::string key = marker.icon;
+    for (const int colour : marker.colours) key += std::format("/{:06x}", colour);
+    const auto found = markerTextures_.find(key);
+    if (found != markerTextures_.end()) return found->second;
+    return markerTextures_.emplace(key, renderer.createTexture(markerImage(marker))).first->second;
+}
+
+std::vector<int> Editor::markerTextureIds() const {
+    std::vector<int> ids;
+    for (const auto& [key, texture] : markerTextures_) ids.push_back(texture.id);
+    return ids;
+}
+
+int Editor::markerCount() const {
+    if (classBook_ == nullptr) return 0;
+    int count = 0;
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (classBook_->kinds().find(placed.kind) != nullptr && markerFor(classBook_->resolve(placed), classBook_->catalog())) ++count;
+    }
+    return count;
 }
 
 void Editor::setPreviewHour(std::optional<double> hour) {
@@ -401,6 +712,8 @@ void Editor::removeSelected() {
 void Editor::buildProperties() {
     properties_ = std::make_unique<Panel>(Rect{viewWidth_ - kPropertiesWidth - 2, kToolbarHeight + 4, kPropertiesWidth, 62});
     properties_->visible = false;
+    npcPanel_ = std::make_unique<Panel>(Rect{0, 0, 0, 0}); // replaced when an NPC is selected
+    npcPanel_->visible = false;
     propertiesFor_ = -1;
     propertiesStale_ = false;
     const PlacedCharacter* shown = selected_ ? find(*selected_) : nullptr;
@@ -417,6 +730,67 @@ void Editor::buildProperties() {
     properties_->add<luna::engine::NumberField>(Rect{left, box.y + 32, width, 11}, "HP", shown->hp, 1, 9999, [this](int hp) { setSelectedHp(hp); });
     properties_->add<luna::engine::NumberField>(Rect{left, box.y + 46, width, 11}, "Sword", shown->swordDamage, 0, 999,
                                                 [this](int damage) { setSelectedSwordDamage(damage); });
+    buildNpcPanel(*shown);
+}
+
+// The NPC panel under the properties (US-268): classes (a click ticks or unticks), the starting attitude, the family, one dialogue per partner type and a tick for
+// every action of the registry. What it shows is what the NPC is; what it saves is only what differs from its classes and its kind.
+void Editor::buildNpcPanel(const PlacedCharacter& shown) {
+    constexpr int kWidth = 196;
+    constexpr int kRow = 13;
+    npcPanel_ = std::make_unique<Panel>(Rect{viewWidth_ - kWidth - 2, kToolbarHeight + 70, kWidth, 230});
+    npcPanel_->visible = false;
+    if (classBook_ == nullptr || classBook_->kinds().find(shown.kind) == nullptr) return; // a hero or a kind without a kind file has no NPC settings
+    npcPanel_->visible = true;
+    const sim::rules::ResolvedNpc resolved = classBook_->resolve(shown);
+    const Rect box = npcPanel_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    int y = box.y + 4;
+    npcPanel_->add<Button>(Rect{left, y, width, 11}, "NPC: classes, attitude, talk, actions", [] {});
+    y += kRow;
+    // Classes: the ids with [x] for the ones it has.
+    std::vector<std::string> ids = classBook_->catalog().ids();
+    std::vector<std::string> rows;
+    for (const std::string& id : ids) rows.push_back(std::string(std::find(resolved.classes.begin(), resolved.classes.end(), id) != resolved.classes.end() ? "[x] " : "[ ] ") + id);
+    auto& classList = npcPanel_->add<luna::engine::ListBox>(Rect{left, y, width, 5 * luna::engine::kLineHeight}, rows, [this, ids](int row) { toggleSelectedClass(ids[static_cast<std::size_t>(row)]); });
+    (void)classList;
+    y += 5 * luna::engine::kLineHeight + 3;
+    // Attitude: a click goes to the next word.
+    Button& attitude = npcPanel_->add<Button>(Rect{left, y, width, 11}, std::string("Attitude: ") + resolved.attitude + (shown.attitude.empty() ? "" : " *"), [this, current = resolved.attitude] {
+        const auto& words = sim::rules::attitudeNames();
+        const auto at = std::find(words.begin(), words.end(), current);
+        setSelectedAttitude(words[(static_cast<std::size_t>(at - words.begin()) + 1) % words.size()]);
+    });
+    attitude.hint = "Click: the next attitude word. A star means it differs from the kind";
+    y += kRow;
+    npcPanel_->add<luna::engine::NumberField>(Rect{left, y, width, 11}, "Family", shown.family, 0, 1000000, [this](int family) { setSelectedFamily(family); });
+    y += kRow;
+    // Dialogue: the partner type (a click goes to the next) and the file.
+    const std::vector<std::string> partners = partnerTypes();
+    partnerIndex_ = std::clamp(partnerIndex_, 0, static_cast<int>(partners.size()) - 1);
+    const std::string partner = partners[static_cast<std::size_t>(partnerIndex_)];
+    Button& partnerButton = npcPanel_->add<Button>(Rect{left, y, width, 11}, "Talks with: " + partner, [this, count = partners.size()] {
+        partnerIndex_ = (partnerIndex_ + 1) % static_cast<int>(count);
+        propertiesStale_ = true;
+    });
+    partnerButton.hint = "Click: the next partner type (the player, an NPC class, animals, the environment)";
+    y += kRow;
+    const auto file = resolved.dialogues.find(partner);
+    npcPanel_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Script", file == resolved.dialogues.end() ? std::string() : file->second, 40,
+                                            [this, partner](const std::string& value) { setSelectedDialogue(partner, value); });
+    y += kRow;
+    // Actions: a tick for every interaction of the registry; unticked means denied for this NPC.
+    std::vector<std::string> actions;
+    for (const std::string& id : actionIds_) actions.push_back(std::string(resolved.denied(id) ? "[ ] " : "[x] ") + id);
+    const int listHeight = std::max(3 * luna::engine::kLineHeight, box.y + box.height - y - 20);
+    npcPanel_->add<luna::engine::ListBox>(Rect{left, y, width, listHeight}, actions, [this, ids = actionIds_, resolved](int row) {
+        const std::string& id = ids[static_cast<std::size_t>(row)];
+        setSelectedActionDenied(id, !resolved.denied(id));
+    });
+    y += listHeight + 3;
+    Button& reset = npcPanel_->add<Button>(Rect{left, y, width, 11}, "Reset to defaults", [this] { resetSelectedNpc(); });
+    reset.hint = "Forget everything this NPC sets itself: it is what its kind says again";
 }
 
 PlacedCharacter* Editor::find(int id) {
@@ -454,6 +828,108 @@ void Editor::setSelectedHp(int hp) {
         if (placed.id == *selected_) placed.hp = std::clamp(hp, 1, 9999);
     }
     changeCharacters(std::format("HP {}", hp), std::move(after), level_.nextId);
+}
+
+// ---- the NPC panel (US-268)
+
+bool Editor::selectedIsNpc() const {
+    if (classBook_ == nullptr || !selected_) return false;
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (placed.id == *selected_) return classBook_->kinds().find(placed.kind) != nullptr;
+    }
+    return false;
+}
+
+void Editor::changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change) {
+    if (!selected_ || find(*selected_) == nullptr) return;
+    auto after = level_.characters;
+    for (PlacedCharacter& placed : after) {
+        if (placed.id == *selected_) change(placed);
+    }
+    if (after == level_.characters) return; // nothing changed: no step of Undo
+    changeCharacters(what, std::move(after), level_.nextId);
+}
+
+std::vector<std::string> Editor::partnerTypes() const {
+    std::vector<std::string> types = {"player", "animal", "environment"};
+    if (classBook_ != nullptr) {
+        for (const std::string& id : classBook_->catalog().ids()) types.push_back("class:" + id);
+    }
+    return types;
+}
+
+void Editor::setSelectedClasses(std::vector<std::string> classes) {
+    if (classBook_ == nullptr) return;
+    changeSelectedNpc("set classes", [&](PlacedCharacter& placed) {
+        const sim::rules::NpcKind* kind = classBook_->kinds().find(placed.kind);
+        // Equal to what the kind says: not kept (the NPC inherits it, and the kind file can change it later).
+        const std::vector<std::string> inherited = kind != nullptr && kind->layer.classes ? *kind->layer.classes : std::vector<std::string>{};
+        if (classes == inherited) placed.classes.clear();
+        else placed.classes = classes;
+    });
+}
+
+void Editor::toggleSelectedClass(const std::string& id) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return;
+    std::vector<std::string> classes = classBook_->resolve(*find(*selected_)).classes;
+    const auto at = std::find(classes.begin(), classes.end(), id);
+    if (at != classes.end()) classes.erase(at);
+    else classes.push_back(id);
+    setSelectedClasses(std::move(classes));
+}
+
+void Editor::setSelectedAttitude(const std::string& word) {
+    if (classBook_ == nullptr) return;
+    changeSelectedNpc("attitude " + (word.empty() ? std::string("default") : word), [&](PlacedCharacter& placed) {
+        const sim::rules::NpcKind* kind = classBook_->kinds().find(placed.kind);
+        const std::string inherited = kind != nullptr && kind->layer.attitude ? *kind->layer.attitude : std::string("neutral");
+        placed.attitude = word == inherited ? std::string() : word;
+    });
+}
+
+void Editor::setSelectedFamily(int family) {
+    changeSelectedNpc(std::format("family {}", family), [&](PlacedCharacter& placed) { placed.family = std::max(0, family); });
+}
+
+void Editor::setSelectedDialogue(const std::string& partner, const std::string& file) {
+    if (classBook_ == nullptr) return;
+    changeSelectedNpc(std::format("dialogue {} {}", partner, file), [&](PlacedCharacter& placed) {
+        // What the partner type would be without the NPC's own entry: the classes and the kind.
+        PlacedCharacter bare = placed;
+        std::erase_if(bare.dialogues, [&](const auto& entry) { return entry.first == partner; });
+        const auto inherited = classBook_->resolve(bare).dialogues;
+        const auto found = inherited.find(partner);
+        std::erase_if(placed.dialogues, [&](const auto& entry) { return entry.first == partner; });
+        if (file.empty() || (found != inherited.end() && found->second == file)) return; // the default: nothing is kept
+        placed.dialogues.emplace_back(partner, file);
+    });
+}
+
+void Editor::setSelectedActionDenied(const std::string& id, bool denied) {
+    if (classBook_ == nullptr) return;
+    changeSelectedNpc(std::format("{} {}", denied ? "deny" : "allow", id), [&](PlacedCharacter& placed) {
+        std::erase(placed.allow, id);
+        std::erase(placed.deny, id);
+        // What the classes and the kind say about it (with the NPC's own list of classes).
+        PlacedCharacter bare = placed;
+        bare.allow.clear();
+        bare.deny.clear();
+        const sim::rules::ActionState inherited = classBook_->resolve(bare).action(id);
+        if (denied && inherited != sim::rules::ActionState::Denied) placed.deny.push_back(id);
+        if (!denied && inherited == sim::rules::ActionState::Denied) placed.allow.push_back(id);
+    });
+}
+
+void Editor::resetSelectedNpc() {
+    changeSelectedNpc("reset to defaults", [](PlacedCharacter& placed) {
+        placed.classes.clear();
+        placed.attitude.clear();
+        placed.tags.clear();
+        placed.dialogues.clear();
+        placed.allow.clear();
+        placed.deny.clear();
+        placed.family = 0;
+    });
 }
 
 void Editor::setSelectedSwordDamage(int damage) {
@@ -769,7 +1245,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
         if (b == nullptr) continue;
         b->selected = (b->label == "Brush" && tool_ == EditorTool::Brush) || (b->label == "Rect" && tool_ == EditorTool::Rectangle) ||
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
-                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) ||
+                      (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) || (b->label == "Class" && classesShown_) ||
                       (b->label == "#" && grid_) || (b->label == "Fx" && tool_ == EditorTool::Effect) || (b->label == "Light" && tool_ == EditorTool::Light) ||
                       (b->label == "Sky" && previewHour_.has_value());
     }
@@ -798,7 +1274,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     effectPalette_->visible = tool_ == EditorTool::Effect;
     lightPalette_->visible = tool_ == EditorTool::Light;
     characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect && tool_ != EditorTool::Light;
-    if (propertiesStale_ && !properties_->typing()) {
+    if (propertiesStale_ && !properties_->typing() && !npcPanel_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
     // A question about unsaved changes, or the list of levels, takes all input until answered.
@@ -814,8 +1290,11 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     if (settingsStale_ && !settings_->typing()) {
         buildSettings(); // show the level's values again (after an undo, a resize, another level)
     }
+    if (classesStale_ && !classes_->typing()) buildClassPanel();
+    classes_->visible = classesShown_;
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
+    npcPanel_->visible = npcPanel_->visible && properties_->visible && !classesShown_;
     // The time-of-day slider (US-247): press on it and drag; the hour follows the pointer until the button is let go.
     bool onSlider = false;
     if (previewHour_) {
@@ -829,9 +1308,10 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     }
     const bool onToolbar = toolbar_->handle(input) || onSlider;
     const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input) || lightPalette_->handle(input);
-    const bool onProperties = properties_->handle(input);
+    const bool onProperties = properties_->handle(input) || npcPanel_->handle(input);
     const bool onSettings = settings_->handle(input);
-    return onToolbar || onPalette || onProperties || onSettings;
+    const bool onClasses = classes_->handle(input);
+    return onToolbar || onPalette || onProperties || onSettings || onClasses;
 }
 
 void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
@@ -1115,7 +1595,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || settings_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || settings_->typing() || classes_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
@@ -1224,6 +1704,17 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         painter.outline({corner.x, corner.y, kTileSize, kTileSize}, UiColor::Text);
     }
 
+    // NPC markers (US-269): under every placed NPC a ring in its class colour with the class icon. Only here, never in play.
+    if (classBook_ != nullptr) {
+        for (const PlacedCharacter& placed : level_.characters) {
+            if (classBook_->kinds().find(placed.kind) == nullptr) continue;
+            const auto marker = markerFor(classBook_->resolve(placed), classBook_->catalog());
+            if (!marker) continue;
+            const luna::engine::Texture& picture = markerTexture(renderer, *marker);
+            const auto corner = screen(placed.feet.x - kMarkerSize / 2, placed.feet.y + 1);
+            renderer.draw(picture, {0, 0, kMarkerSize, kMarkerSize}, {corner.x, corner.y});
+        }
+    }
     // The selected character: framed in gold, with its name above.
     if (selected_) {
         for (const PlacedCharacter& placed : level_.characters) {
@@ -1336,7 +1827,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         }
     }
     properties_->draw(painter);
+    npcPanel_->draw(painter);
     settings_->draw(painter);
+    classes_->draw(painter);
     // The status line: tool, what it uses, cell, and the last thing done.
     std::string what;
     if (tool_ == EditorTool::Eraser) {
@@ -1383,7 +1876,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         effectPalette_->drawOverlay(painter);
         lightPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
+        npcPanel_->drawOverlay(painter);
         settings_->drawOverlay(painter);
+        classes_->drawOverlay(painter);
     }
     // Dialogs last, over everything, with the world dimmed behind them.
     if (dialog) {

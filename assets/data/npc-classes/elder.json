@@ -1,0 +1,9 @@
+{
+  "id": "elder",
+  "label": "Elder",
+  "colour": "#b08968",
+  "icon": "star",
+  "tags": ["elder"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}

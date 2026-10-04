@@ -1,0 +1,9 @@
+{
+  "id": "trader",
+  "label": "Trader",
+  "colour": "#d9a441",
+  "icon": "coin",
+  "tags": ["trader"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}

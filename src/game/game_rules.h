@@ -18,10 +18,10 @@ class OdysseyGame;
 // What the hero is acting on (US-151, US-152): one thing in the world as the rules see it. Things are named by an index into the
 // game's own lists (a plant, a clan member, a rival camp), never by pointer, so a Subject stays valid while the menu is open.
 struct Subject {
-    enum class Kind { Plant, Person, KnappingStone, CampFire, SacredFire, RivalCamp, Animal, Hero };
+    enum class Kind { Plant, Person, KnappingStone, CampFire, SacredFire, RivalCamp, Animal, Hero, Npc };
 
     Kind kind = Kind::Plant;
-    int index = -1;               // the plant, the clan member, the rival camp or the animal; -1 for the one-of-a-kind things
+    int index = -1;               // the plant, the clan member, the rival camp or the animal; the id of the placed character for an Npc; -1 for the one-of-a-kind things
     std::string title;            // the menu's heading: "Tok", "The clan's fire"
     std::string name;             // what {target.name} says
     double x = 0.0;               // where the hero measures the distance to, world pixels
@@ -50,6 +50,11 @@ bool actorPosition(const OdysseyGame& game, const ActorRef& actor, double& x, do
 // sacred fire, a rival camp, a plant. Nothing there: empty.
 std::optional<Subject> subjectAt(const OdysseyGame& game, double worldX, double worldY);
 Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex);
+// A placed person of the level (US-265): tags are the resolved tags of its classes, kind and own fields, plus "npc" and, when it has a dialogue for the
+// player, "speaks". Empty when the id is not a placed person.
+std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId);
+// The id of the placed character a subject is (a placed person or a creature), or -1 for anything else (US-266).
+int placedIdOf(const OdysseyGame& game, const Subject& subject);
 Subject animalSubject(const OdysseyGame& game, std::size_t enemyIndex); // a placed animal or character (tags: animal, prey or hostile)
 Subject heroSubject(const OdysseyGame& game);                           // tags: hero, person, and armed and/or moving (D-36: prey flee those)
 

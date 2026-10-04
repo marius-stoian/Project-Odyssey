@@ -33,6 +33,9 @@ enum class Intent {
     Reload,
     // Zoom (US-232): the keys + and - (also on the number pad); the mouse wheel zooms too.
     ZoomIn, ZoomOut,
+    // Confront (US-266, D-53): the key C offers the Confront actions for the NPC under the pointer or the nearest one.
+    // Actions (US-267, D-53): the key X opens the Actions pop-up of an NPC: everything it could offer and what each needs.
+    Confront, Actions,
     Count
 };
 

@@ -1,0 +1,16 @@
+# Harn the hunter (US-270): starts wary of you, so what he says depends on how you talk.
+@who npc-harn
+
+=== start
+Harn: What do you want, {hero}?
+-> Offer a kind word {opinion npc hero 10; remember npc "{hero} was civil" 15} => kind
+-> Mock his aim {opinion npc hero -10} => mock
+-> Leave => END
+
+=== kind
+Harn: Hm. Fair enough. The deer by the path are skittish, mind.
+-> Back => start
+
+=== mock
+Harn: Say that again and see what happens.
+-> Back => start

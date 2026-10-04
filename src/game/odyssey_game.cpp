@@ -83,7 +83,11 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       camera_(kVirtualWidth / GameSettings{}.cameraZoom, kVirtualHeight / GameSettings{}.cameraZoom, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
-      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight) {
+      editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
+    editor_.setNpcClasses(&npcClasses_);
+    npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
+    npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
+    npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -157,6 +161,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editor_.setWeaponPalette(std::move(palette));
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
+    buildNpcPopulation(); // the placed people are persons from the first frame, not only after a restart (X-M9a)
     if (clanEnabled_) startClan();
 }
 
@@ -194,6 +199,7 @@ void OdysseyGame::resetPlay() {
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
+    buildNpcPopulation(); // the placed people are persons of the simulation (US-262)
 }
 
 void OdysseyGame::switchMode(Mode mode) {
@@ -239,10 +245,11 @@ void OdysseyGame::populate() {
     // Every placed character the sword can hit stands in the world (M2c: they stand still, D-19).
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
-        if (kind != nullptr && !kind->enemy) {
+        const bool fights = kind != nullptr && fightsHero(placed); // a kind file's attitude decides (US-264), else the old enemy switch
+        if (kind != nullptr && !fights) {
             bystanders_.push_back(placed);
         }
-        if (kind == nullptr || !kind->enemy) {
+        if (kind == nullptr || !fights) {
             continue;
         }
         Enemy enemy(placed.feet.x, placed.feet.y, placed.hp);
@@ -692,6 +699,14 @@ sim::rules::SmallTalk OdysseyGame::loadSmalltalk(sim::rules::LoadReport& report)
     return {};
 }
 
+// The Editor's action checkboxes are the interactions of the registry (US-268).
+void OdysseyGame::syncEditorActions() {
+    std::vector<std::string> ids;
+    for (const sim::rules::Interaction& interaction : interactions_.all()) ids.push_back(interaction.id);
+    std::sort(ids.begin(), ids.end());
+    editor_.setActionIds(std::move(ids));
+}
+
 void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
@@ -702,6 +717,7 @@ void OdysseyGame::loadInteractions() {
     sim::rules::LoadReport dialogueReport;
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     smalltalk_ = loadSmalltalk(dialogueReport);
+    syncEditorActions();
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
@@ -735,6 +751,7 @@ bool OdysseyGame::reloadInteractions() {
         return false;
     }
     interactions_ = std::move(fresh);
+    syncEditorActions();
     dialogues_ = std::move(freshDialogue);
     smalltalk_ = std::move(freshSmalltalk);
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
@@ -1101,6 +1118,7 @@ bool OdysseyGame::autosave() {
         if (region_) sim::saveRegion(*region_, saveDirectory_ / "region.json");
         if (life_) life_->save(saveDirectory_ / "hero.json");
         sim::writeSaveText(saveDirectory_ / "things.json", thingsText());
+        if (!saveNpcPopulation()) say("The placed people could not be saved");
     } catch (const std::exception& error) {
         say(std::string("Autosave failed: ") + error.what());
         return false;
@@ -1159,6 +1177,7 @@ bool OdysseyGame::loadAutosave() {
             const std::string text((std::istreambuf_iterator<char>(things)), std::istreambuf_iterator<char>());
             for (const std::string& note : restoreThings(text)) notes += (notes.empty() ? "" : "; ") + note;
         }
+        if (const std::string problem = loadNpcPopulation(); !problem.empty()) notes += (notes.empty() ? "" : "; ") + problem;
         say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
         return true;
     } catch (const std::exception& error) {
@@ -1750,7 +1769,10 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
-    if (intents.pressed(luna::engine::Intent::Reload)) reloadInteractions();
+    if (intents.pressed(luna::engine::Intent::Reload)) {
+        reloadInteractions();
+        if (npcClasses_.reload()) editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
+    }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
     } else if (intents.pressed(luna::engine::Intent::ModeGame)) {
@@ -1785,6 +1807,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
+    tickNpcPopulation();
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
         clanView_.update(*clan_, map_);
@@ -1849,11 +1872,13 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 
     // Handle attacks based on the held weapon.
     // Plants (US-136): Interact with empty hands, or the right mouse button, looks at the plant next to the hero.
+    if (!fallen && intents.pressed(luna::engine::Intent::Confront)) confrontKey(worldIntents.pointer());
+    if (!fallen && intents.pressed(luna::engine::Intent::Actions)) actionsKey(worldIntents.pointer());
     if (!fallen && intents.pressed(luna::engine::Intent::Inspect)) {
         // A right click on something in the world offers its actions (US-061); on nothing it looks at the nearest plant.
         const luna::engine::Pointer& p = worldIntents.pointer();
         const luna::engine::Rect view = camera_.view();
-        if (!(life_ && p.inside() && runFlow_.openContext(*this, view.x + p.x, view.y + p.y))) inspectNearestPlant();
+        if (!(p.inside() && runFlow_.openContext(*this, view.x + p.x, view.y + p.y))) inspectNearestPlant(); // outside a run only placed people have a menu
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldSlotName.empty()) {
         inspectNearestPlant();
     }

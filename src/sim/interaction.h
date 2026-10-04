@@ -40,6 +40,7 @@ struct Interaction {
     int rangeMilli = 1500;
     int durationMilli = 0;
     int order = 100; // in a menu, lower comes first
+    std::string menu; // "" for the ordinary menu of a thing, "confront" for the Confront menu of an NPC (US-266)
     std::vector<Requirement> requires_;
     std::vector<Effect> effects;
     std::optional<NpcRule> npc;
@@ -51,12 +52,18 @@ struct Interaction {
 struct ThingInfo {
     std::string kind;                // "bush", "person", "deer"
     std::vector<std::string> tags;   // "edible", "plant", "hero", "animal"...
+    // The resolved allow and deny lists of an NPC (US-267, D-52 Q-08): the tags give the defaults, these fine-tune. An interaction in `deny` is never
+    // offered for this thing; one in `allow` is offered although the target tags of its file do not match (the actor, the range and the requirements
+    // still count).
+    std::vector<std::string> allow;
+    std::vector<std::string> deny;
 };
 
 struct Offer {
     const Interaction* interaction = nullptr;
     bool enabled = true;
     std::string reason; // why it is disabled ("Too far away", "Nothing to pick yet")
+    bool tooFar = false; // the reason is the range: the player only has to step closer (an NPC's menu still shows these, but hides the other unmet ones)
 };
 
 struct LoadReport {

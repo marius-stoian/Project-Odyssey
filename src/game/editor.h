@@ -15,8 +15,12 @@
 #include "luna/engine/tile_map.h"
 #include "luna/engine/ui.h"
 
+#include "game/npc_class_book.h"
+#include "game/npc_marker.h"
+
 #include <filesystem>
 #include <functional>
+#include <map>
 #include <memory>
 #include <optional>
 #include <set>
@@ -126,6 +130,46 @@ public:
     void setLevelSize(int width, int height);  // keeps painted cells; drops characters outside
     void setDefaultGround(int tile);
     void moveHeroStart(PixelPoint feet);
+    // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
+    // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
+    void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
+    void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
+    bool classesShown() const { return classesShown_; }
+    void showClasses(bool shown);
+    void newClass();                          // a blank draft; Save writes it
+    void selectClass(const std::string& id);  // the draft is a copy of this class
+    sim::rules::NpcClass& classDraft() { return classDraft_; }
+    bool classDraftIsNew() const { return classNew_; }
+    bool saveClass();                         // checks and writes the draft; says why when it cannot
+    bool deleteClass();                       // refused, naming the NPCs, while placed NPCs use the class
+    // The Kinds tab (US-269): the second tab of the Class panel edits the defaults of one kind (assets/data/npcs/<kind>.json) with the same form as the NPC panel, so a
+    // whole kind changes at once. Save writes the file at once; every placed NPC without its own value then follows it, also in play.
+    bool kindsTab() const { return kindsTab_; }
+    void showKinds(bool shown);                   // opens the Class panel on the Kinds tab (or closes the panel)
+    std::vector<std::string> kindNames() const;   // the kinds the owner can edit: every character and animal except the hero
+    void selectKind(const std::string& name);     // the draft is a copy of the kind's file (a blank one when it has none)
+    sim::rules::NpcKind& kindDraft() { return kindDraft_; }
+    void toggleKindClass(const std::string& id);  // the draft has the class or not (no class at all: the field is left out)
+    bool saveKind();                              // checks and writes the draft; says why when it cannot
+    // The markers (US-269): under every placed NPC that has a class, a ring in its class colour with its icon. Editor only.
+    int markerCount() const;
+    std::vector<int> markerTextureIds() const; // the texture numbers of the marker pictures made so far (tests find the marker draws by them)
+    // The NPC panel (US-268): a placed character with a kind file is an NPC. Everything below changes the selected one, each as one step of Undo, and keeps only
+    // the differences from its classes and its kind (a value equal to what it would inherit is not kept). An empty value means "the default".
+    void setActionIds(std::vector<std::string> ids) {
+        actionIds_ = std::move(ids);
+        propertiesStale_ = true;
+    }
+    bool selectedIsNpc() const;
+    void setSelectedClasses(std::vector<std::string> classes);
+    void toggleSelectedClass(const std::string& id);
+    void setSelectedAttitude(const std::string& word);
+    void setSelectedFamily(int family);
+    void setSelectedDialogue(const std::string& partner, const std::string& file);
+    void setSelectedActionDenied(const std::string& id, bool denied);
+    void resetSelectedNpc();
+    // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
+    std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
     void showSettings(bool shown);
 
@@ -189,6 +233,11 @@ private:
     std::pair<int, int> toWorld(int screenX, int screenY) const;
     void changeLevel(const std::string& what, Level after);
     void buildSettings();
+    void buildClassPanel();
+    void buildKindForm(const luna::engine::Rect& box, int y);
+    const luna::engine::Texture& markerTexture(luna::engine::Renderer& renderer, const NpcMarker& marker) const;
+    void buildNpcPanel(const PlacedCharacter& shown);
+    void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();
     void replaceLevel(Level level, std::filesystem::path file, const std::string& what);
@@ -267,6 +316,20 @@ private:
     bool movingStart_ = false; // the hero start marker is being dragged
     PixelPoint startBefore_;
 
+    std::vector<std::string> actionIds_;           // every interaction of the registry (US-268): the action checkboxes
+    std::unique_ptr<luna::engine::Panel> npcPanel_;
+    int partnerIndex_ = 0;                          // which partner type the dialogue row shows
+    NpcClassBook* classBook_ = nullptr;
+    bool classesShown_ = false;
+    bool classesStale_ = true;
+    bool classNew_ = false;
+    sim::rules::NpcClass classDraft_;
+    std::string classSelected_;
+    std::unique_ptr<luna::engine::Panel> classes_;
+    bool kindsTab_ = false;
+    std::string kindSelected_;
+    sim::rules::NpcKind kindDraft_;
+    mutable std::map<std::string, luna::engine::Texture> markerTextures_; // one picture per distinct marker, made when first drawn
     bool settingsShown_ = false;
     bool settingsStale_ = false;
     std::unique_ptr<luna::engine::Panel> settings_;

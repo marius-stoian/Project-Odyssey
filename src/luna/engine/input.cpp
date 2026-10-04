@@ -58,6 +58,8 @@ std::optional<KeyBinding> keyBinding(Key key) {
     case Key::Delete: return KeyBinding{Intent::Delete, kKeyboardA};
     case Key::Backspace: return KeyBinding{Intent::Erase, kKeyboardA};
     case Key::G: return KeyBinding{Intent::ToggleGrid, kKeyboardA};
+    case Key::C: return KeyBinding{Intent::Confront, kKeyboardA};
+    case Key::X: return KeyBinding{Intent::Actions, kKeyboardA};
     case Key::R: return KeyBinding{Intent::Rotate, kKeyboardA};
     case Key::Num1: return KeyBinding{Intent::Slot1, kKeyboardA};
     case Key::Num2: return KeyBinding{Intent::Slot2, kKeyboardA};

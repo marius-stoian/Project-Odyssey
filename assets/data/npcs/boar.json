@@ -1,0 +1,5 @@
+{
+  "kind": "boar",
+  "classes": ["animal"],
+  "attitude": "hostile"
+}

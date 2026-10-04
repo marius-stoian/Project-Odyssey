@@ -1,0 +1,5 @@
+{
+  "kind": "cheetah",
+  "classes": ["animal"],
+  "attitude": "hostile"
+}

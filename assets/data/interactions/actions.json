@@ -1,0 +1,10 @@
+// The way into the Actions pop-up from the right-click menu of an NPC (US-267). The key X opens the same pop-up.
+{
+  "id": "actions",
+  "label": "Actions...",
+  "actors": ["hero"],
+  "target": { "tags": ["npc"] },
+  "range": 20,
+  "order": 95,
+  "effects": [ "do actions" ]
+}

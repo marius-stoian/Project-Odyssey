@@ -45,6 +45,8 @@
 #include "sim/flag_store.h"
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
+#include "game/npc_class_book.h"
+#include "sim/npc_population.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -61,6 +63,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace odysseus::game {
@@ -89,12 +92,41 @@ public:
     const luna::engine::Camera& camera() const { return camera_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
+    std::vector<Enemy>& enemiesMutable() { return enemies_; } // for tests and the confrontations of NPCs (US-266)
+    // A fight (US-266): the placed character with this id strikes back (an enemy winds up; a person who stood by becomes an enemy). False when there is no
+    // such character.
+    bool startFight(int placedId);
+    // The fight ends for now: an enemy stops winding up. False when the id is no enemy.
+    bool calmFight(int placedId);
+    // The Confront key (US-266): the NPC under the pointer, else the nearest within 6 m, gets the menu of its confront actions.
+    void confrontKey(const luna::engine::Pointer& pointer);
+    // The Actions key (US-267): the same choice of NPC, and the Actions pop-up.
+    void actionsKey(const luna::engine::Pointer& pointer);
+    void npcKey(const luna::engine::Pointer& pointer, bool confront);
     // Effects playing now (US-132): hit sparks, smoke, trails.
     const luna::engine::EffectPlayer& effects() const { return effects_; }
     const Catalogs& catalogs() const { return catalogs_; }
     // Interactions read from assets/data/interactions/ when the game starts (US-150); mistakes are in the report.
     const sim::rules::InteractionRegistry& interactions() const { return interactions_; }
     const sim::rules::LoadReport& interactionReport() const { return interactionReport_; }
+    // The placed people of the level as persons of the simulation (US-262). Animals and monsters are not in it.
+    const sim::NpcPopulation& npcPopulation() const { return npcPopulation_; }
+    sim::NpcPopulation& npcPopulationMutable() { return npcPopulation_; }
+    bool isPersonKind(const PlacedCharacter& placed) const;
+    // The placed character with this id, or nullptr.
+    const PlacedCharacter* placedCharacter(int id) const;
+    // The dialogue a placed person speaks to the player: the "player" dialogue of its classes, kind and own fields, found by name among the loaded scripts.
+    // nullptr when there is none (US-265).
+    const sim::rules::DlgScript* npcDialogueFor(int placedId) const;
+    // Whether a placed character fights the hero (US-264): with a kind file it is its attitude being hostile, without one the old enemy switch of its kind.
+    bool fightsHero(const PlacedCharacter& placed) const;
+    // The attitude word of a placed character to the hero: the person's own opinion when they are a person of the population, else the attitude of its
+    // kind file and its own fields.
+    std::string attitudeWordOf(int placedId) const;
+    const sim::OpinionConfig& npcOpinions() const { return npcOpinions_; }
+    bool saveNpcPopulation() const;
+    NpcClassBook& npcClasses() { return npcClasses_; }
+    const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
     // same report and panel (as "dialogue/<name>.dlg:<line>: message").
     const sim::rules::DialogueLibrary& dialogues() const { return dialogues_; }
@@ -252,6 +284,11 @@ public:
     std::vector<LightSource> lightSources(double alpha) const;
     std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
+    void buildNpcPopulation();
+    void syncEditorActions();
+    void registerCreatures();
+    void tickNpcPopulation();
+    std::string loadNpcPopulation(); // the problem, or empty
     luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)
     luna::engine::LightFrame ambientLightFrame(double alpha, bool withWeather = true) const; // the ambient colour of the world now (no point lights)
     static double darknessOf(const luna::engine::LightFrame& frame);
@@ -352,6 +389,12 @@ private:
     std::vector<Enemy> enemies_;
     std::vector<PlacedCharacter> bystanders_; // placed characters the sword does not fight: they stand and are seen
     Editor editor_;
+    NpcClassBook npcClasses_; // US-260
+    sim::CalendarConfig npcCalendar_;
+    sim::NeedsConfig npcNeeds_;
+    sim::OpinionConfig npcOpinions_;   // US-264
+    sim::NpcPopulation npcPopulation_; // US-262
+    std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;
 

@@ -1,0 +1,5 @@
+{
+  "kind": "zebra",
+  "classes": ["animal"],
+  "attitude": "neutral"
+}

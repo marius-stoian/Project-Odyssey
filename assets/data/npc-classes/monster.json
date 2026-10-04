@@ -1,0 +1,9 @@
+{
+  "id": "monster",
+  "label": "Monster",
+  "colour": "#b5413b",
+  "icon": "skull",
+  "tags": ["hostile"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}

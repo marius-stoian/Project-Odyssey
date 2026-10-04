@@ -444,18 +444,37 @@ void RunFlow::buildEnded(OdysseyGame& game) {
 
 bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
     const sim::HeroLife* hero = game.life();
-    if (hero == nullptr || game.heroData() == nullptr || hero->phase() != sim::Phase::Free) return false;
+    const bool inRun = hero != nullptr && game.heroData() != nullptr && hero->phase() == sim::Phase::Free;
     actions_.clear();
     // The thing under the pointer (a clan member, a fire, the stone, a rival camp, a plant), and what the interaction files offer the hero
     // for it (US-152). The menu is made entirely from data: labels, disabled reasons and order come from the files.
     const std::optional<Subject> subject = subjectAt(game, wx, wy);
     if (!subject) return false;
-    contextTitle_ = subject->title;
-    const GameRuleContext context(game, *subject);
-    for (const sim::rules::Offer& offer : game.offersFor(*subject)) {
+    const bool placed = subject->kind == Subject::Kind::Npc || (subject->kind == Subject::Kind::Animal && placedIdOf(game, *subject) >= 0);
+    if (!inRun && !placed) return false; // outside a run only the placed people and creatures of a level have a menu (US-265)
+    return openMenuFor(game, *subject, MenuMode::Ordinary);
+}
+
+bool RunFlow::openConfront(OdysseyGame& game, const Subject& subject) { return openMenuFor(game, subject, MenuMode::Confront); }
+bool RunFlow::openActions(OdysseyGame& game, const Subject& subject) { return openMenuFor(game, subject, MenuMode::All); }
+
+bool RunFlow::openMenuFor(OdysseyGame& game, const Subject& subject, MenuMode mode) {
+    actions_.clear();
+    contextTitle_ = mode == MenuMode::Confront ? "Confront " + subject.title : (mode == MenuMode::All ? "Actions of " + subject.title : subject.title);
+    const bool placed = placedIdOf(game, subject) >= 0;
+    const GameRuleContext context(game, subject);
+    for (const sim::rules::Offer& offer : game.offersFor(subject)) {
+        const bool confrontAction = offer.interaction->menu == "confront";
+        if (mode == MenuMode::Ordinary && confrontAction) continue;  // the confront actions have their own menu, and Talk is not in it
+        if (mode == MenuMode::Confront && !confrontAction) continue;
+        // What an NPC's menu shows (D-52 Q-09): actions it cannot do now for a reason of its own (an attitude, an item) are hidden; a hero who is only too
+        // far away still sees them greyed out. The Actions pop-up lists them all with what they need.
+        if (placed && mode != MenuMode::All && !offer.enabled && !offer.tooFar) continue;
         const std::string id = offer.interaction->id; // by id: the data may be reloaded (F5) while the menu is open
-        actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), offer.enabled ? std::string() : offer.reason,
-                            [id, subject = *subject](OdysseyGame& g) {
+        std::string reason = offer.enabled ? std::string() : offer.reason;
+        if (!offer.enabled && reason.empty()) reason = "needs: more than you have now";
+        actions_.push_back({sim::rules::fillTokens(offer.interaction->label, context), reason,
+                            [id, subject](OdysseyGame& g) {
                                 if (!startInteraction(g, id, subject)) g.run().setMessage("That action is no longer in the data.");
                             }});
     }
@@ -479,15 +498,17 @@ void RunFlow::openTalk(sim::rules::Conversation conversation, Subject subject) {
 // The panel of a conversation: who, how they feel, what they say, and up to five numbered choices (D-38). Made fresh every tick from the
 // simulation, like every screen, so a choice whose condition changed is never shown stale.
 void RunFlow::buildTalk(OdysseyGame& game) {
-    if (!conversation_ || !talkSubject_ || game.clan() == nullptr || game.life() == nullptr) {
+    const bool placedPerson = talkSubject_.has_value() && talkSubject_->kind == Subject::Kind::Npc;
+    if (!conversation_ || !talkSubject_ || (!placedPerson && (game.clan() == nullptr || game.life() == nullptr))) {
         screen_ = Screen::None;
         return;
     }
     const GameRuleContext context(game, *talkSubject_);
-    const sim::World& world = *game.clan();
     const int person = talkSubject_->index;
     std::string mood = "neutral";
-    if (person >= 0 && static_cast<std::size_t>(person) < world.people().size()) {
+    if (placedPerson) {
+        mood = game.attitudeWordOf(person); // a placed person feels about the hero by the attitude word (US-264)
+    } else if (const sim::World& world = *game.clan(); person >= 0 && static_cast<std::size_t>(person) < world.people().size()) {
         mood = sim::rules::moodWord(world.opinion(person, game.life()->personId()), world.people()[static_cast<std::size_t>(person)].needs);
     }
     title(std::format("{}   ({})", talkSubject_->name, mood));

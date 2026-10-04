@@ -1,5 +1,31 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, X-M9a):** X-M9a DONE (Milestone-104.md, AP-105), main tagged m9a-done. Owner still to do: GPU screenshots (docs/gates/M9a.md row 7). Next: K-M9b, which asks the owner the open M9b questions in one chat round, then US-280..284.
+
+**Resume update (2026-10-04, US-270):** S-US-270 DONE (Milestone-103.md, AP-104). Next: X-M9a (the one full verify for M9a).
+
+**Resume update (2026-10-04, US-269):** S-US-269 DONE (Milestone-102.md, AP-103). Next: S-US-270 (test level npc-test.json), then X-M9a.
+
+**Resume update (2026-10-04, US-268):** S-US-268 DONE (Milestone-101.md, AP-102). Next: S-US-269 (kinds tab, map markers), then US-270 (test level npc-test.json) and X-M9a.
+
+**Resume update (2026-10-04, US-267):** S-US-267 DONE (Milestone-100.md, AP-101). Next: S-US-268 (Editor NPC panel), then US-269 (kinds tab and map markers), US-270 (test level) and X-M9a.
+
+**Resume update (2026-10-04, US-266):** S-US-266 DONE (Milestone-99.md, AP-100). Next: S-US-267 (Actions pop-up on key X), then US-268 (Editor NPC panel), US-269, US-270 and X-M9a.
+
+**Resume update (2026-10-04, US-265):** S-US-265 DONE (Milestone-98.md, AP-99). Next: S-US-266 (Confront, key C), then US-267 (actions and the Actions pop-up, key X), US-268..US-270 and X-M9a.
+
+**Resume update (2026-10-04, US-264):** S-US-264 DONE (Milestone-97.md, AP-98). Next: S-US-265 (talk with placed NPCs), then US-266 (confront) .. US-270 and X-M9a.
+
+**Resume update (2026-10-04, US-263):** S-US-263 DONE (Milestone-96.md, AP-97). Next: S-US-264 (attitudes and opinions), then US-265 (talk with placed NPCs) .. US-270 and X-M9a.
+
+**Resume update (2026-10-04, US-262):** S-US-262 DONE (Milestone-95.md, AP-96). Next: S-US-263 (spatial grid, detail by distance, ADR-022, 100,000-person load test), then US-264..US-270 and X-M9a.
+
+**Resume update (2026-10-04, US-261):** S-US-261 DONE (Milestone-94.md, AP-95). Next: S-US-262 (placed NPCs become full persons of the simulation), then US-263 (store, detail by distance, 100,000 load test, ADR-022) .. US-270, X-M9a.
+
+**Resume update (2026-10-04, US-260):** S-US-260 DONE (Milestone-93.md, AP-94). Next: S-US-261 (kind files assets/data/npcs/<kind>.json, placed-NPC overrides, precedence, F5), then US-262..US-270 and X-M9a (the one full verify for M9a, owner 2026-10-04).
+
+**Resume update (2026-10-04, X-M8c):** X-M8c DONE (Milestone-92.md, AP-093), main tagged m8c-done. Owner still to do: GPU frame times and screenshot sheet (docs/gates/M8c.md rows 7-8). Next: K-M9a, which stops on CI-012 until the requirements contain E17-E19 and US-260..294.
+
 **Resume update (2026-10-04, US-247):** S-US-247 DONE (Milestone-91.md, AP-92). Next: X-M8c (the one full verify for M8c, Debug and Release; owner 2026-10-04: no tests before it), then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
 
 **Resume update (2026-10-04, US-246):** S-US-246 DONE (Milestone-90.md, AP-91). Next: S-US-247 (Editor time-of-day slider, Light tool, lighting quality), then X-M8c (the one full verify for M8c, owner 2026-10-04); then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.

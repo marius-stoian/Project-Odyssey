@@ -152,7 +152,7 @@ TEST_CASE("US-247 Place: a light placed with the Light tool is saved in the leve
 
     // Saved as level version 3 and read back the same.
     CHECK(editor.save());
-    CHECK(readText(studio.file).find("\"levelVersion\": 3") != std::string::npos);
+    CHECK(readText(studio.file).find("\"levelVersion\": 4") != std::string::npos);
     const game::Definitions definitions = game::loadDefinitions(studio.data);
     const game::Level reread = game::loadLevel(studio.file, definitions).level;
     CHECK(reread.lights == editor.level().lights);
@@ -189,12 +189,12 @@ TEST_CASE("US-247 Level version 3: older levels load without lights and are save
     level.lights = {{level.nextId++, "campfire", {100, 100}}, {level.nextId++, "torch", {200, 150}}};
     game::saveLevel(level, definitions, data / "lights-level.json");
     const std::string text = readText(data / "lights-level.json");
-    CHECK(text.find("\"levelVersion\": 3") != std::string::npos);
+    CHECK(text.find("\"levelVersion\": 4") != std::string::npos);
     CHECK(game::readLevelFile(data / "lights-level.json", definitions) == level);
 
     // A version 2 file (no "lights") still loads.
     std::string v2 = text;
-    v2.replace(v2.find("\"levelVersion\": 3"), 17, "\"levelVersion\": 2");
+    v2.replace(v2.find("\"levelVersion\": 4"), 17, "\"levelVersion\": 2");
     const std::size_t lights = v2.find("\"lights\"");
     REQUIRE(lights != std::string::npos);
     v2.erase(lights, v2.find("],", lights) + 3 - lights);
@@ -202,7 +202,7 @@ TEST_CASE("US-247 Level version 3: older levels load without lights and are save
     CHECK(game::readLevelFile(data / "v2.json", definitions).lights.empty());
     // One made by a newer game is refused, never silently read.
     std::string future = text;
-    future.replace(future.find("\"levelVersion\": 3"), 17, "\"levelVersion\": 4");
+    future.replace(future.find("\"levelVersion\": 4"), 17, "\"levelVersion\": 9");
     writeText(data / "future.json", future);
     CHECK_THROWS_WITH_AS(game::readLevelFile(data / "future.json", definitions), doctest::Contains("newer version"), odysseus::sim::DataError);
 

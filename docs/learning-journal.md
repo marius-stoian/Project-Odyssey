@@ -1408,3 +1408,219 @@ Each layer only knows its own neighbour, so the rule that Game never touches SDL
 **Try it (15 minutes).** Click Sky in the Editor, drag the slider to midnight, place a campfire with the Light tool: it glows. Then set Lighting to Low in the Settings and look at a sprite near a fire: it is lit flat.
 
 **Check yourself.** Why does a level made by a newer game stop with an error instead of loading what it can?
+
+## US-260 NPC Classes: a catalog keyed by id
+
+**What we built.** The owner can create, edit and delete NPC Classes (trader, healer, guard...) in the Editor. Each class is one JSON file named after its id.
+
+**The C++ idea: a catalog keyed by id, and refusing a delete that would leave a dangling reference.** The loader reads every file into a `std::vector<NpcClass>` sorted by id and offers `find(id)`. A file with a mistake is skipped and reported as `file:line: message`, so one typo never stops the other classes. Deleting asks first who still uses the class:
+
+```cpp
+const std::vector<std::string> users = usersOf(id, level);
+if (!users.empty()) return std::format("{} is still used by {}", id, names);
+```
+
+A reference (a placed NPC naming a class) must never point at nothing, so the refusal names the NPCs.
+
+**Where to look.** `src/sim/npc_class.cpp`, `src/game/npc_class_book.cpp`, `Editor::buildClassPanel` in `src/game/editor.cpp`, `assets/data/npc-classes/`.
+
+**Try it (15 minutes).** Copy `trader.json` to `smith.json`, change `id` and `label`, press F5 in the game: the new class loads. Change the icon to `banana`: the log names file and line.
+
+**Check yourself.** Why does the file name have to equal the `id` inside the file?
+
+## US-261 Kind defaults and overrides: layered defaults
+
+**What we built.** Every kind of NPC has a file of defaults (`assets/data/npcs/goblin.json`), and each placed NPC may change only what it wants. The game combines classes, kind and the NPC itself into one answer.
+
+**The C++ idea: `std::optional` for "not set", and layering.** A layer that says nothing about attitude must not erase the layer below it, so "not set" needs its own value:
+
+```cpp
+std::optional<std::string> attitude; // empty: leave the layer below alone
+if (placed.attitude) out.attitude = *placed.attitude;
+else if (kind != nullptr && kind->attitude) out.attitude = *kind->attitude;
+```
+
+Allow and deny lists merge layer by layer in a `std::map<std::string, ActionState>`: the last layer that mentions an action decides it.
+
+**Where to look.** `resolveNpc` in `src/sim/npc_kind.cpp`; `placedLayer` in `src/game/npc_class_book.cpp`; `assets/data/npcs/`.
+
+**Try it (15 minutes).** In `tests/sim/npc_kind_test.cpp` read the precedence cases, then change `wanderer.json` to `wary` and press F5.
+
+**Check yourself.** Why is an empty `std::vector` a fine "not set" for tags but `std::optional` is needed for classes?
+
+## US-262 Placed NPCs are persons: one id from the level file to the save
+
+**What we built.** A placed wanderer is now a real person of the simulation: it ages, its needs move, it remembers the days and meeting the hero, and it is saved with the game. Goblins (monsters) and deer (animals) stay creatures.
+
+**The C++ idea: identity and lifetime.** The person keeps the id of the placed character in the level file. The same number appears in the level, in the store and in the save, so nothing has to be matched by name or by position in a list:
+
+```cpp
+int NpcPopulation::add(int id, std::string_view kind, int ageDays, int family, int x, int y) {
+    if (const int existing = indexOf(id); existing >= 0) return existing; // adding twice is the same person
+```
+
+The store keeps each field in its own `std::vector` (a struct of arrays); the index of a person is only a position, the `id` is who they are.
+
+**Where to look.** `src/sim/npc_population.cpp`, `OdysseyGame::buildNpcPopulation` in `src/game/npc_people.cpp`.
+
+**Try it (15 minutes).** Read `tests/sim/npc_population_test.cpp`, then change `restoreBelow` in `DailyConfig` and see which test notices.
+
+**Check yourself.** Why is the index of a person not safe to save, while the id is?
+
+## US-263 The NPC store and detail by distance: struct of arrays, a grid and why O(n^2) breaks
+
+**What we built.** The world can hold 100,000 NPCs. Only the ones near the hero are simulated hour by hour; the rest are brought up to date once a day, and they come out the same.
+
+**The C++ idea: struct of arrays and a spatial grid.** Instead of a `std::vector<Person>` (an array of structs, each person a block with its own vectors), every field has its own array and a person is just an index:
+
+```cpp
+std::vector<std::int32_t> ages_;   // ages_[i] is the age of person i
+std::vector<std::int16_t> needs_;  // 4 numbers per person, side by side
+```
+
+A loop over one field reads memory in a straight line, which the CPU cache loves. To find who is near, a **grid** sorts persons into 256-pixel cells; a query touches a few cells instead of 100,000 persons. Checking every pair would be 100,000 x 100,000 = 10 billion pairs a day: that is what "O(n squared) breaks" means.
+
+**Where to look.** `NpcPopulation::near`, `hourMark`, `dailyUpdate` in `src/sim/npc_population.cpp`; `docs/adr/ADR-022-npc-store-and-detail-by-distance.md`.
+
+**Try it (15 minutes).** In `tests/sim/npc_scale_test.cpp` change the 100,000 to 1,000,000 and run the Load case in Release: what grows, the day, the save or the load?
+
+**Check yourself.** Why must `near()` sort its result before returning it?
+
+## US-264 Attitudes and opinions: sparse maps keyed by pairs, words from numbers
+
+**What we built.** Every NPC has its own opinion of the hero and of each person it has met, and a word for it (friendly, wary, hostile...). A gift raises the number; crossing a threshold changes the word.
+
+**The C++ idea: a sparse map keyed by a pair, and thresholds.** With 100,000 persons a table of everyone-to-everyone would have 10 billion cells. We keep only the pairs that met, in a hash map whose key packs both ids into one 64-bit number:
+
+```cpp
+static std::uint64_t pairKey(int holderId, int targetId) {
+    return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(holderId)) << 32) | static_cast<std::uint32_t>(targetId);
+}
+```
+
+Reading an opinion looks the key up and, if there is no entry, computes the default without storing it. The word is derived from the number by walking the bands and keeping the last one whose start is not above the opinion.
+
+**Where to look.** `NpcPopulation::opinion`, `adjust`, `pairFor` in `src/sim/npc_population.cpp`; `attitudeFor` in `src/sim/opinion.cpp`; `assets/data/sim/opinions.json`.
+
+**Try it (15 minutes).** In `opinions.json` set `friendly` to 5 and run the opinion test: which checks notice?
+
+**Check yourself.** Why is the family opinion a default rather than a stored entry?
+
+## US-265 Talk with placed NPCs: one interface for many kinds of things
+
+**What we built.** Any placed person with something to say can be talked to: right-click, Talk, the conversation panel opens and the game waits. A person with no dialogue has no Talk.
+
+**The C++ idea: one interface, data-driven by tags.** The game does not have a special code path for each kind of thing. Everything the hero can act on is a `Subject` with a kind, a position and a list of tags, and the interaction files say which tags they apply to:
+
+```json
+"target": { "tags": ["speaks"] }
+```
+
+A clan member and a placed trader both carry `speaks`, so the same `talk.json` serves both. To add a new kind of thing we write a function that makes a `Subject` (`npcSubject`) and give it tags; the menu, the range check and the action runner already work.
+
+**Where to look.** `npcSubject` and `subjectAt` in `src/game/game_rules.cpp`; `openConversation` in `src/game/builtin_actions.cpp`; `assets/data/interactions/talk.json`.
+
+**Try it (15 minutes).** Give the `elder` class `"dialogues": { "player": "greet-elder.dlg" }` and talk to a placed elder.
+
+**Check yourself.** Why do placed NPCs not carry the tag `person`?
+
+## US-266 Confront: intents mapped from keys, and effects that spread to bystanders
+
+**What we built.** A separate Confront menu (key C, or an entry in the right-click menu) with five ways to deal with an NPC by words: taunt, insult, ask for peace, antagonise, de-escalate. They change what the target and its friends think of the hero, and can start or stop a fight.
+
+**The C++ idea: intents and spreading effects.** The game never asks "was the C key pressed?". The platform layer turns a key into an *intent*, and the game reacts to the intent:
+
+```cpp
+case Key::C: return KeyBinding{Intent::Confront, kKeyboardA};
+...
+if (intents.pressed(luna::engine::Intent::Confront)) confrontKey(worldIntents.pointer());
+```
+
+So a gamepad button or a touch can later be bound to the same intent without touching the game. An effect that spreads (`do spread-opinion -5`) asks the grid for the persons near the target and changes only those who know it:
+
+```cpp
+for (const int index : people.near(x, y, range)) if (people.knows(id, placedId)) people.adjust(id, kHero, amount);
+```
+
+**Where to look.** `confrontKey` in `src/game/npc_people.cpp`; the `do` built-ins in `src/game/builtin_actions.cpp`; `assets/data/interactions/insult.json`.
+
+**Try it (15 minutes).** Copy `insult.json` to `shout.json`, change the id, label and amounts, press F5 and see it in the Confront menu.
+
+**Check yourself.** Why does the hearing range use the grid instead of looping over every person?
+
+## US-267 Actions and the Actions pop-up: filtering, and conditions as words
+
+**What we built.** An NPC's right-click menu shows only what you can do. A separate Actions pop-up (key X) shows everything the NPC could offer and, for what is locked, what it needs, in plain words.
+
+**The C++ idea: filtering a list, and keeping the reason with the answer.** One function builds the list of offers; the menu and the pop-up are two filters over it. Each offer carries *why* it is not available, so the pop-up can print it:
+
+```cpp
+if (placed && mode != MenuMode::All && !offer.enabled && !offer.tooFar) continue; // hidden in the menu
+// the pop-up keeps it, with offer.reason as the words
+```
+
+Allow and deny lists are applied first, inside `offered()`: a denied id is skipped before anything else is looked at.
+
+**Where to look.** `InteractionRegistry::offered` in `src/sim/interaction.cpp`; `RunFlow::openMenuFor` in `src/game/run_flow.cpp`; `docs/guides/npc-data.md`.
+
+**Try it (15 minutes).** Add `"actions": { "deny": ["talk"] }` to a class file, press F5 and see Talk vanish for that class.
+
+**Check yourself.** Why does an action that is only too far away stay in the menu while one that needs a friendly attitude does not?
+
+## US-268 Editor NPC panel: forms bound to data, saving only the differences
+
+**What we built.** Select a placed NPC in the Editor and a panel lets you set its classes, attitude, family, dialogues and allowed actions. The level file only records what differs from the NPC's classes and kind.
+
+**The C++ idea: a form bound to data, and a normalising setter.** The panel shows what the NPC *is* (resolved from all layers) but each change goes through a setter that stores only the difference:
+
+```cpp
+const std::string inherited = kind != nullptr && kind->layer.attitude ? *kind->layer.attitude : std::string("neutral");
+placed.attitude = word == inherited ? std::string() : word;
+```
+
+Every setter goes through `changeCharacters`, which makes one `Command` that remembers the list before and after: that is why every change is exactly one step of Undo.
+
+**Where to look.** `Editor::buildNpcPanel` and the `setSelected...` functions in `src/game/editor.cpp`; `tests/game/npc_editor_test.cpp`.
+
+**Try it (15 minutes).** Change the attitude of a goblin to friendly and press F1: the menu title shows it. Then edit `goblin.json` and see that a goblin with no override follows the file.
+
+**Check yourself.** Why does choosing the attitude the kind already has remove the field from the level instead of writing it?
+
+## US-269 Editor kinds tab and markers: one form for two data sources, and pictures made on demand
+
+**What we built.** The Class panel got a second tab, Kinds, that edits the defaults of a whole kind (`assets/data/npcs/goblin.json`); and under every placed NPC the Editor now draws a ring in its class colour with the class icon.
+
+**The C++ idea: the same widgets over a different draft.** The class tab edits a `NpcClass` draft, the kind tab edits a `NpcKind` draft, and both fill their text fields through the same two small helpers, so a mistake in the Talk line is handled in one place:
+
+```cpp
+if (const auto parsed = parseDialogues(v)) kindDraft_.layer.dialogues = *parsed;
+else say("talk is partner=file.dlg, for example player=greet.dlg");
+```
+
+The JSON stays stable (same fields, same order every time) because `toJson` writes the fields in a fixed order instead of looping over a map: saving twice gives byte-identical files and a clean diff. The marker pictures are made the first time they are drawn and kept in a `std::map` keyed by icon and colours, so ten goblins cost one texture.
+
+**Where to look.** `Editor::buildKindForm`, `Editor::markerTexture` in `src/game/editor.cpp`; `src/game/npc_marker.cpp` (the 24 icons are 8 strings of 8 characters); `tests/game/npc_kinds_tab_test.cpp`.
+
+**Try it (15 minutes).** Change the icon bitmap of `star` in `npc_marker.cpp` and see it in the ring of an elder.
+
+**Check yourself.** Why does saving a kind change a placed goblin that has no attitude of its own but not one that has?
+
+## US-270 NPC test level: a smoke test that loads every shipped file
+
+**What we built.** `assets/levels/npc-test.json`, a small level with seven NPCs (trader, talker, wary hunter, elder, guard, goblin, deer) and five written dialogues, plus a walk-through checklist in the guide.
+
+**The C++ idea: a smoke test.** A smoke test does not check one clever thing; it loads *everything we ship* and checks that nothing complains. Here: the level loads, the logs report zero errors, every class and dialogue the level names exists, and saving what we loaded gives byte-identical text:
+
+```cpp
+game::saveLevel(first, definitions, again);
+CHECK(game::loadLevel(again, definitions).level == first);
+CHECK(readText(again) == readText(shippedLevel()));
+```
+
+The level file itself was written by the game's own `saveLevel` (not by hand), which is why the text round-trips: the same code writes and reads it.
+
+**Where to look.** `tests/game/npc_test_level_test.cpp`; the table in `docs/guides/npc-data.md`.
+
+**Try it (15 minutes).** Misspell a class in `npc-test.json` (`"traderr"`) and run the first test: the message names the NPC and the class.
+
+**Check yourself.** Why is the byte-for-byte round trip a stronger check than loading the file and looking at a few fields?

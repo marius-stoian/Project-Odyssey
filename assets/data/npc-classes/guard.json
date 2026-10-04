@@ -1,0 +1,9 @@
+{
+  "id": "guard",
+  "label": "Guard",
+  "colour": "#8a8fa3",
+  "icon": "shield",
+  "tags": ["guard"],
+  "dialogues": {},
+  "actions": { "allow": [], "deny": [] }
+}

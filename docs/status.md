@@ -142,20 +142,20 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-245 | US-245 | M8c | Done | Debug verified 2026-10-04 |
 | S-US-246 | US-246 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
 | S-US-247 | US-247 | M8c | Done | Tests deferred to X-M8c (owner, 2026-10-04) |
-| X-M8c | - | M8c | To do |  |
-| K-M9a | - | M9a | To do |  |
-| S-US-260 | US-260 | M9a | To do |  |
-| S-US-261 | US-261 | M9a | To do |  |
-| S-US-262 | US-262 | M9a | To do |  |
-| S-US-263 | US-263 | M9a | To do |  |
-| S-US-264 | US-264 | M9a | To do |  |
-| S-US-265 | US-265 | M9a | To do |  |
-| S-US-266 | US-266 | M9a | To do |  |
-| S-US-267 | US-267 | M9a | To do |  |
-| S-US-268 | US-268 | M9a | To do |  |
-| S-US-269 | US-269 | M9a | To do |  |
-| S-US-270 | US-270 | M9a | To do |  |
-| X-M9a | - | M9a | To do |  |
+| X-M8c | - | M8c | Done | Verified 2026-10-04, tag m8c-done |
+| K-M9a | - | M9a | Done | Owner answers 2026-10-04, docs/plans/M9-npc-design.md |
+| S-US-260 | US-260 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-261 | US-261 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-262 | US-262 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-263 | US-263 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-264 | US-264 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-265 | US-265 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-266 | US-266 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-267 | US-267 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-268 | US-268 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04) |
+| S-US-269 | US-269 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04); its four cases run alone and pass |
+| S-US-270 | US-270 | M9a | Done | Tests deferred to X-M9a (owner, 2026-10-04); its three cases run alone and pass |
+| X-M9a | - | M9a | Done | Verified Debug+Release 27/27; gate docs/gates/M9a.md |
 | K-M9b | - | M9b | To do |  |
 | S-US-280 | US-280 | M9b | To do |  |
 | S-US-281 | US-281 | M9b | To do |  |

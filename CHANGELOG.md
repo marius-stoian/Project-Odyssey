@@ -4,6 +4,96 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M9a: exit review of M9a NPC foundation (Mraw) - 2026-10-05
+
+**State:** On `qa`, merged into `main`. `tools/verify.ps1 -Story X-M9a -Config Both`: zero warnings, 27/27 test groups in Debug and in Release.
+
+- Fix: `OdysseyGame` builds the placed people into the simulation in its constructor, not only after a restart (`src/game/odyssey_game.cpp`).
+- Test fixes: US-268 partner-types test (one vector instead of the begin/end of two temporaries), US-266 insult test level (a character was placed outside the map).
+- Gate: `docs/gates/M9a.md`; evidence `docs/evidence/X-M9a/`.
+
+
+## US-270: NPC test level (Mraw) - 2026-10-04
+
+**State:** On `story/US-270`, merged into `qa`. Debug builds with zero warnings; the three `US-270 ...` cases (`tests/game/npc_test_level_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-270.md`).
+
+- Data: `assets/levels/npc-test.json` (40 x 24, the D-52 cast: Tala trader, Ossa talker, Harn wary hunter, Vell friendly elder, Gur guard, a goblin, a deer; written by `saveLevel`) and five scripts `assets/data/dialogue/npc-{tala,ossa,harn,vell,gur}.dlg`. `valley.json` untouched.
+- Guide: the walk-through checklist table in `docs/guides/npc-data.md`.
+- Tests: loads clean (no class, kind, interaction or dialogue error; every named class and script exists), load-save-load gives the same text, each NPC's classes, attitude and who fights the hero.
+
+
+## US-269: Editor kinds tab and map markers (Mraw) - 2026-10-04
+
+**State:** On `story/US-269`, merged into `qa`. Debug builds with zero warnings; the four `US-269 ...` cases (`tests/game/npc_kinds_tab_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-269.md`).
+
+- Editor: the Class panel has the tabs Classes and Kinds. The Kinds tab edits `assets/data/npcs/<kind>.json` (classes, attitude, tags, talk, allow, deny) and Save writes it at once (`Editor::showKinds`, `selectKind`, `toggleKindClass`, `saveKind`, `kindNames`). `NpcClassBook::saveKind` checks the text with the kind parser before writing (temporary file, then rename).
+- Markers: `src/game/npc_marker.{h,cpp}` (the ring split in equal arcs per class, the first class's icon, 24 8x8 icon bitmaps); drawn only by `Editor::render`, so never in play.
+- Guide extended (`docs/guides/npc-data.md`).
+
+## US-268: Editor NPC panel (Mraw) - 2026-10-04
+
+**State:** On `story/US-268`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_editor_test.cpp`), run once at X-M9a; screenshots manual.
+
+- Editor: the NPC panel under the properties of a selected NPC (`Editor::buildNpcPanel`): classes list, attitude, family, dialogue per partner type (`partnerTypes()`, from the class catalog), action ticks (the interactions of the registry, kept in step by `OdysseyGame::syncEditorActions`), Reset to defaults. Model: `setSelectedClasses`, `toggleSelectedClass`, `setSelectedAttitude`, `setSelectedFamily`, `setSelectedDialogue`, `setSelectedActionDenied`, `resetSelectedNpc`: only differences from the classes and the kind are kept, each change is one Undo step, a no-op makes none. Guide extended.
+
+## US-267: actions and the Actions pop-up (Mraw) - 2026-10-04
+
+**State:** On `story/US-267`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_actions_test.cpp`), run once at X-M9a.
+
+- Simulation: `ThingInfo` carries the resolved `allow` and `deny` lists; `InteractionRegistry::offered` skips denied interactions, accepts allowed ones whose tags do not match, and marks range failures (`Offer::tooFar`).
+- Game: placed NPCs and creatures carry their lists (`applyActionLists`); the right-click menu of an NPC hides what it cannot do for its own reasons; `RunFlow::openActions` (`MenuMode`) lists every action with what it needs; the key X (`OdysseyGame::actionsKey`) and the `actions` interaction (`do actions`) open it. Guide extended.
+
+## US-266: confront (Mraw) - 2026-10-04
+
+**State:** On `story/US-266`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_confront_test.cpp`), run once at X-M9a.
+
+- New interaction field `menu: "confront"` (`src/sim/interaction.*`); five confront files and `confront.json` in `assets/data/interactions/`; built-ins `confront`, `spread-opinion`, `calm`, `provoke`. `RunFlow::openConfront` lists only the confront actions; the ordinary menu skips them. New intents `Confront` (key C) and `Actions` (key X, used by US-267); `OdysseyGame::confrontKey`.
+- Creatures with a kind file are NPCs too: they appear in `subjectAt` (tag `npc`), keep an opinion of the hero (`NpcPopulation::addCreature`), can be calmed (`Enemy::calm`) or provoked; a peaceful person can become an enemy (`startFight`). `hearingTiles` in `opinions.json`; `NpcPopulation::knows`. Guides extended.
+
+## US-265: talk with placed NPCs (Mraw) - 2026-10-04
+
+**State:** On `story/US-265`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_talk_test.cpp`), run once at X-M9a.
+
+- New subject kind `Npc` (`npcSubject`, found through the grid of the population in `subjectAt`); tags = resolved tags + `npc` + `speaks` when it has a dialogue for the player (`OdysseyGame::npcDialogueFor`, `placedCharacter`). `talk.json` now targets `speaks`; clan members carry it too.
+- `runBuiltin("talk")` and `openConversation` open the NPC's player script; `RunFlow::openContext` and `buildTalk` work for placed people without a run of the hero; the title shows the attitude word. Rule context: `opinion(npc, hero)`, `mood(npc)`; effects `opinion` and `remember` for placed people. Guides extended.
+
+## US-264: attitudes and opinions (Mraw) - 2026-10-04
+
+**State:** On `story/US-264`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/opinion_test.cpp`, `tests/game/npc_attitude_test.cpp`), run once at X-M9a.
+
+- `src/sim/opinion.*`: the nine `Attitude` words, `Mood` (scared, enviously), `OpinionConfig` read from the new `assets/data/sim/opinions.json` (bands, starting opinions, event amounts, same-family, dialogue worth and frequency), `attitudeFor`.
+- `NpcPopulation`: opinions of the pairs that met (a sparse map, created on the first event; reading never creates), `opinion`, `attitude`, `adjust`, `event`, `talked`, `setMood`, the same-family default, the starting attitude per person; hash and save (version 3) include them.
+- Game: kind-file NPCs fight when their attitude is hostile (`fightsHero`), the starting attitude and the new `family` field of a placed NPC feed the population, the menu title of such an NPC shows the word. Guide extended.
+
+## US-263: the NPC store and detail by distance (Mraw) - 2026-10-04
+
+**State:** On `story/US-263`, merged into `qa`. Builds with zero warnings in Debug and Release; tests written (`tests/sim/npc_scale_test.cpp`, `US-263 Frame` in `tests/game/npc_people_test.cpp`), run once at X-M9a; the four sim cases were run once in Release to take the ADR-022 measurements (all passed).
+
+- `NpcPopulation`: spatial grid (256-pixel cells, `near`, `move`), focus and near radius (800 px), hourly simulation of near persons and a day-end catch-up of everyone with a state that is the same whichever way the day was split, hash and save include the hours applied, compact save format version 2 (one array per person). The game sets the focus to the hero each tick and finds who meets the hero through the grid (no size limit).
+- ADR-022 written with the measured numbers (100,000 persons: a day in 1.5 ms, worst tick 1.0 ms, save 16 ms). Guide and plan updated.
+
+## US-262: placed NPCs are full persons (Mraw) - 2026-10-04
+
+**State:** On `story/US-262`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_population_test.cpp`, `tests/game/npc_people_test.cpp`), run once at X-M9a.
+
+- Simulation: `src/sim/npc_population.*` `NpcPopulation`: compact store (arrays per field, ring of six notes per person, interned texts), daily rules (age, needs fall and are restored, a memory of the day), `meetHero`, `hash`, versioned JSON save (`toText`/`fromText`).
+- Game: `src/game/npc_people.cpp`: `isPersonKind` (animals, monsters and the hero's kind stay creatures), `buildNpcPopulation` at every play start, `tickNpcPopulation` each tick (days and meeting the hero), save with the autosave (`npcs.json`) and load with it. Guide `docs/guides/npc-data.md` extended.
+
+## US-261: kind defaults and placed-NPC overrides (Mraw) - 2026-10-04
+
+**State:** On `story/US-261`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_kind_test.cpp`, `tests/game/npc_kind_test.cpp`), run once at X-M9a.
+
+- Simulation: `src/sim/npc_kind.*`: `NpcLayer`, `NpcKind`/`NpcKindCatalog` (`assets/data/npcs/<kind>.json`, 61 shipped files), the nine attitude words, `resolveNpc` (classes, then kind, then placed NPC; allow and deny merge, later layer wins, deny wins inside a layer), `ResolvedNpc`.
+- Game: placed characters gain `attitude`, `tags`, `dialogues`, `allow`, `deny` (written only when set; level version stays 4, so older levels save unchanged); `NpcClassBook` loads the kind files, `resolve(placed)`, F5 reloads classes and kinds together. Guide `docs/guides/npc-data.md` extended.
+
+## US-260: NPC Classes (Mraw) - 2026-10-04
+
+**State:** On `story/US-260`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_class_test.cpp`, `tests/game/npc_class_editor_test.cpp`) and run once at the milestone exit X-M9a (owner, 2026-10-04); screenshots manual (`docs/plans/US-260.md`).
+
+- Simulation: `src/sim/npc_class.*`: `NpcClass`, `NpcClassCatalog::load/parse` (errors `file:line: message`, a bad file is skipped), `toJson` (canonical, guide field order), the 24-icon set, partner types, colour helpers. Shipped classes in `assets/data/npc-classes/`: trader, talker, hunter, elder, guard, monster, animal.
+- Game: `NpcClassBook` (`src/game/npc_class_book.*`): save (checked, temp file then rename), delete (refused naming the NPCs that use it), F5 reload (all or nothing). Editor: **Class** panel (list, form, New, Save, Delete). Level version 4: `classes` on placed characters. Tests that expected "levelVersion": 3 now expect 4.
+- Guide `docs/guides/npc-data.md` (new).
+
 ## US-247: lighting in the Editor and quality settings (Mraw) - 2026-10-04
 
 **State:** On `story/US-247`, merged into `qa`. Built with zero warnings in Debug; tests written (`tests/game/lighting_editor_test.cpp`) and run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots and frame times are manual (`docs/plans/US-247.md`).

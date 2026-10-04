@@ -1,0 +1,5 @@
+{
+  "kind": "squirrel",
+  "classes": ["animal"],
+  "attitude": "neutral"
+}

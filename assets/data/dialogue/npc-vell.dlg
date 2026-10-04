@@ -1,0 +1,23 @@
+# Vell the elder (US-270): the written dialogue of the test level. What she says depends on what she thinks of you (opinion of -100 to 100).
+@who npc-vell
+
+=== start
+Vell: The fire keeps you well, {hero}.   [if opinion(npc, hero) >= 10]
+Vell: Sit. Ask what you will.   [if opinion(npc, hero) >= 10]
+Vell: I know your face, {hero}. Not yet your heart.   [if opinion(npc, hero) < 10]
+-> Ask about the clan => clan
+-> Ask about the stones => stones
+-> Speak kindly {opinion npc hero 5; remember npc "{hero} spoke kindly at the fire" 20} => kind
+-> Leave => END
+
+=== clan
+Vell: A clan is people who share a fire, nothing more.
+-> Back => start
+
+=== stones
+Vell: The stones are older than the clan. Leave the goblin to them.
+-> Back => start
+
+=== kind
+Vell: Words cost nothing. That is why I weigh them.
+-> Back => start

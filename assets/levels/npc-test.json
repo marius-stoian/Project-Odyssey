@@ -1,0 +1,304 @@
+{
+ "characters": [
+  {
+   "classes": [
+    "trader"
+   ],
+   "dialogues": {
+    "player": "npc-tala.dlg"
+   },
+   "facing": "S",
+   "hp": 100,
+   "id": 1,
+   "kind": "wanderer",
+   "name": "Tala",
+   "swordDamage": 5,
+   "x": 200,
+   "y": 330
+  },
+  {
+   "dialogues": {
+    "player": "npc-ossa.dlg"
+   },
+   "facing": "S",
+   "hp": 100,
+   "id": 2,
+   "kind": "wanderer",
+   "name": "Ossa",
+   "swordDamage": 5,
+   "x": 280,
+   "y": 450
+  },
+  {
+   "attitude": "wary",
+   "classes": [
+    "hunter"
+   ],
+   "dialogues": {
+    "player": "npc-harn.dlg"
+   },
+   "facing": "S",
+   "hp": 100,
+   "id": 3,
+   "kind": "wanderer",
+   "name": "Harn",
+   "swordDamage": 5,
+   "x": 360,
+   "y": 330
+  },
+  {
+   "attitude": "friendly",
+   "classes": [
+    "elder"
+   ],
+   "dialogues": {
+    "player": "npc-vell.dlg"
+   },
+   "facing": "S",
+   "hp": 100,
+   "id": 4,
+   "kind": "wanderer",
+   "name": "Vell",
+   "swordDamage": 5,
+   "x": 440,
+   "y": 450
+  },
+  {
+   "classes": [
+    "guard"
+   ],
+   "dialogues": {
+    "player": "npc-gur.dlg"
+   },
+   "facing": "S",
+   "hp": 100,
+   "id": 5,
+   "kind": "wanderer",
+   "name": "Gur",
+   "swordDamage": 5,
+   "x": 520,
+   "y": 330
+  },
+  {
+   "facing": "S",
+   "hp": 80,
+   "id": 6,
+   "kind": "deer",
+   "name": "Deer",
+   "swordDamage": 0,
+   "x": 620,
+   "y": 450
+  },
+  {
+   "facing": "S",
+   "hp": 60,
+   "id": 7,
+   "kind": "goblin",
+   "name": "Goblin",
+   "swordDamage": 8,
+   "x": 1000,
+   "y": 400
+  }
+ ],
+ "defaultGround": "grass",
+ "effects": [],
+ "ground": [
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    33
+   ],
+   [
+    "stone",
+    1
+   ],
+   [
+    "grass",
+    6
+   ]
+  ],
+  [
+   [
+    "grass",
+    33
+   ],
+   [
+    "stone",
+    1
+   ],
+   [
+    "grass",
+    6
+   ]
+  ],
+  [
+   [
+    "grass",
+    2
+   ],
+   [
+    "path",
+    31
+   ],
+   [
+    "stone",
+    1
+   ],
+   [
+    "path",
+    4
+   ],
+   [
+    "grass",
+    2
+   ]
+  ],
+  [
+   [
+    "grass",
+    33
+   ],
+   [
+    "stone",
+    1
+   ],
+   [
+    "grass",
+    6
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ],
+  [
+   [
+    "grass",
+    40
+   ]
+  ]
+ ],
+ "height": 24,
+ "heroStart": [
+  96,
+  400
+ ],
+ "levelVersion": 4,
+ "lights": [],
+ "name": "NPC test",
+ "nextId": 8,
+ "pickups": [],
+ "plants": [],
+ "targets": [],
+ "width": 40
+}

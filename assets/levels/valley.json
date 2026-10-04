@@ -94,6 +94,12 @@
    "name": "big fire",
    "x": 813,
    "y": 1032
+  },
+  {
+   "id": 16,
+   "name": "whirlpool",
+   "x": 1054,
+   "y": 899
   }
  ],
  "ground": [
@@ -1747,9 +1753,23 @@
   1040,
   1048
  ],
- "levelVersion": 2,
+ "levelVersion": 3,
+ "lights": [
+  {
+   "id": 17,
+   "kind": "campfire",
+   "x": 844,
+   "y": 856
+  },
+  {
+   "id": 18,
+   "kind": "campfire",
+   "x": 1262,
+   "y": 962
+  }
+ ],
  "name": "The Valley",
- "nextId": 16,
+ "nextId": 19,
  "pickups": [
   {
    "id": 10,
