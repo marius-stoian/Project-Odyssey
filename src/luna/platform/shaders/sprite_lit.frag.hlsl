@@ -27,5 +27,8 @@ float4 main(float4 position : SV_Position, float2 uv : TEXCOORD0, float4 color :
         const float facing = saturate(dot(normal, normalize(float3(toLight, b.w))));
         light += b.rgb * (a.w * reach * reach * facing);
     }
+    // Many lights on one spot add up to more than a sprite can show: past full brightness the light is squeezed toward 1.5 instead of washing the colours out to white.
+    const float3 over = max(light - 1.0, 0.0);
+    light = min(light, 1.0) + over / (1.0 + over * 2.0);
     return float4(texel.rgb * color.rgb * light, texel.a * color.a);
 }

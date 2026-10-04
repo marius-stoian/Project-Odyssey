@@ -25,6 +25,18 @@ The light of the game (US-240, M8c). One file; a mistake stops the game with the
 
 Fires and torches are steady, no flicker (D-49): campfire 6 tiles, carried torch 4. The kinds are placed on objects, effects and items in US-243; the sky (day, night, seasons) comes in US-242.
 
+**Placing lights (US-243).** A catalog entry gets light with a `light` field naming a kind of `lights.json`; without the field it gives none. A wrong name stops the game at load, naming file and field.
+
+```json
+{"name":"flame","frames":4,"ticksPerFrame":3,"loop":true,"light":"campfire"}
+{"name":"fire pit", "...":"...", "states":["cold","burning"], "light":"campfire", "lightState":"burning"}
+```
+
+- Effects (`effects.json`): the light shines while the effect plays. Objects (`objects.json`): `lightState` limits it to one state (a fire pit shines only when "burning"; empty means always). Weapons (`weapons.json`): the light shines while the weapon is held.
+- `"clanTorch": "torch"` at the top of `lights.json` gives every clan member that light at night; it moves with them. Leave it out for none.
+- `"flicker"` (0 to 1) on a kind of light makes its strength waver by a seeded noise in the Game (never the simulation's random streams). Default 0: steady (D-49).
+- Lights add only in the dark: the darker the ambient light, the stronger they shine; in full daylight they add nothing. At most 64 lights per frame.
+
 **Making the normal maps (US-241).** `odysseus_atlas --normals` writes a normal atlas next to every atlas picture in `assets/sprites/atlas/`: `characters_n.png`, `tiles_n.png` and `content-<page>_n.png` (nine pictures), each the size of its atlas. The height of every pixel comes from its distance to the sprite's edge (the middle of a body stands higher) and its brightness; the slopes of that height (Sobel filter) become the surface direction. Bodies use strength 2.0, ground tiles only 0.6 (a hint of grain). The normal atlases are committed; run the tool again after changing a sheet or a cut.
 
 **Painting one yourself.** Put a PNG named like the frame with `_n` in `assets/sprites/` (next to `cuts.json`), for example `hero.S.0_n.png` or `iron sword_n.png`, exactly the size of the frame (32 x 48 for a character, the frame's rectangle for content). The tool pastes it over the generated map of that frame and says how many it used ("N frames from hand-made maps"). A file of the wrong size stops the tool with its name.

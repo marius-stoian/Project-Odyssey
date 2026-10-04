@@ -124,6 +124,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         checkFrame(weaponsFile, where, def.frame);
         def.weaponClass = static_cast<WeaponClass>(f.choice("class", kClassNames));
         def.element = static_cast<Element>(f.choice("element", kElementNames));
+        def.light = entry.value("light", std::string());
         def.future = f.choice("era", std::array<const char*, 2>{"fantasy", "future"}) == 1;
         def.starter = f.flag("starter");
         def.damage = f.whole("damage", 0, 1000);
@@ -173,6 +174,8 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
             def.inspect = f.text("inspect");
             def.tags = readTags(entry, objectsFile, where, {"object"});
             def.states = readStates(entry, objectsFile, where, {});
+            def.light = entry.value("light", std::string());
+            def.lightState = entry.value("lightState", std::string());
             return def;
         });
         for (const PlantDef& object : objects) {
@@ -202,6 +205,7 @@ Catalogs loadCatalogs(const std::filesystem::path& dataDirectory, const ContentA
         def.frames = f.whole("frames", 1, 16);
         def.ticksPerFrame = f.whole("ticksPerFrame", 1, 60);
         def.loop = f.flag("loop");
+        def.light = entry.value("light", std::string());
         return def;
     });
     if (atlas != nullptr) {

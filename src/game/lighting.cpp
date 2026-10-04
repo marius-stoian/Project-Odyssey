@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <format>
 #include <set>
 
@@ -54,6 +55,21 @@ luna::engine::LightFrame LightingData::ambientFrame() const {
     return frame;
 }
 
+double flickerNoise(std::uint64_t seed, double seconds, double period) {
+    const auto value = [seed](std::int64_t step) {
+        std::uint64_t x = seed * 0x9E3779B97F4A7C15ULL + static_cast<std::uint64_t>(step) * 0xBF58476D1CE4E5B9ULL;
+        x ^= x >> 30; x *= 0xBF58476D1CE4E5B9ULL;
+        x ^= x >> 27; x *= 0x94D049BB133111EBULL;
+        x ^= x >> 31;
+        return static_cast<double>(x >> 11) / static_cast<double>(1ULL << 53); // 0..1
+    };
+    const double position = seconds / period;
+    const auto step = static_cast<std::int64_t>(std::floor(position));
+    double t = position - static_cast<double>(step);
+    t = t * t * (3.0 - 2.0 * t); // smoothstep: no kinks where the values meet
+    return value(step) + (value(step + 1) - value(step)) * t;
+}
+
 LightingData loadLighting(const std::filesystem::path& file) {
     LightingData data;
     if (!std::filesystem::exists(file)) {
@@ -87,7 +103,15 @@ LightingData loadLighting(const std::filesystem::path& file) {
         kind.radiusTiles = numberIn(entry, file, where, "radiusTiles", 0.5, 30.0);
         kind.strength = numberIn(entry, file, where, "strength", 0.0, 4.0);
         kind.height = numberIn(entry, file, where, "height", 1.0, 200.0);
+        kind.flicker = root.at("lights").at(i).contains("flicker") ? numberIn(entry, file, where, "flicker", 0.0, 1.0) : 0.0;
         data.kinds.push_back(std::move(kind));
+    }
+    if (root.contains("clanTorch")) {
+        if (!root.at("clanTorch").is_string()) throw sim::DataError(file, "clanTorch", "must be the name of a kind of light");
+        data.clanTorch = root.at("clanTorch").get<std::string>();
+        if (!data.clanTorch.empty() && data.kind(data.clanTorch) == nullptr) {
+            throw sim::DataError(file, "clanTorch", "\"" + data.clanTorch + "\" is not a kind of light in lights");
+        }
     }
     return data;
 }
@@ -96,13 +120,15 @@ std::string lightingToText(const LightingData& data) {
     json root;
     root["version"] = 1;
     root["ambient"] = {{"color", {data.ambientRed, data.ambientGreen, data.ambientBlue}}, {"strength", data.ambientStrength}};
+    if (!data.clanTorch.empty()) root["clanTorch"] = data.clanTorch;
     root["lights"] = json::array();
     for (const LightKindDef& kind : data.kinds) {
         root["lights"].push_back({{"name", kind.name},
                                   {"color", {kind.red, kind.green, kind.blue}},
                                   {"radiusTiles", kind.radiusTiles},
                                   {"strength", kind.strength},
-                                  {"height", kind.height}});
+                                  {"height", kind.height},
+                                  {"flicker", kind.flicker}});
     }
     return root.dump(2);
 }

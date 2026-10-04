@@ -85,6 +85,7 @@ public:
     const Hero& hero() const { return hero_; }
     const SpearRange& range() const { return range_; }
     const Level& level() const { return level_; }
+    const luna::engine::Camera& camera() const { return camera_; }
     const Definitions& definitions() const { return definitions_; }
     const std::vector<Enemy>& enemies() const { return enemies_; }
     // Effects playing now (US-132): hit sparks, smoke, trails.
@@ -227,6 +228,9 @@ public:
     void setViewScales(int cameraZoom, int uiScale);
     // The sky now (US-242): the light follows the clan's game clock (a level without a clan has no clock and stays at noon).
     SkyState sky() const;
+    // The point lights of the world now (US-243), in the pixels of the picture they light: placed effects, burning objects and the held weapon that
+    // have a `light`, and the torches clan members carry at night. They shine in proportion to how dark it is (`darkness` 0 to 1).
+    std::vector<luna::engine::PointLight> worldLights(const luna::engine::Rect& view, double alpha, double darkness) const;
     void updateZoom(const luna::engine::Intents& intents);
     int cameraZoom() const { return settings_.cameraZoom; }
     int uiScale() const { return settings_.uiScale; }

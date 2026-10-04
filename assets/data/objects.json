@@ -1,7 +1,7 @@
 {
   "objects": [
     { "name": "fire pit",       "frame": "fire-pit",       "blocks": false, "inspect": "A ring of stones around old ash.",
-      "tags": ["object", "fire", "fire-pit"], "states": ["cold", "burning"] },
+      "tags": ["object", "fire", "fire-pit"], "states": ["cold", "burning"], "light": "campfire", "lightState": "burning" },
     { "name": "knapping stone", "frame": "knapping-stone", "blocks": false, "inspect": "A flat stone scarred by many blows.",
       "tags": ["object", "workstation", "knapping-stone"] },
     { "name": "food store",     "frame": "food-store",     "blocks": false, "inspect": "A basket on a frame, out of the animals' reach.",

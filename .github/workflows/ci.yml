@@ -1,14 +1,14 @@
-# Builds and tests every push to qa and main (US-002, ADR-014; trimmed by D-46).
+# Builds and tests every merge into main (US-002, ADR-014; trimmed by D-46; qa pushes switched off by D-51).
 # It uses the same CMake presets as the owner's PC, so "works on my machine" means "works in CI".
 #
 # Who tests what (owner, 2026-10-01, D-46): the local check (tools/verify.ps1) builds and tests
-# Debug, with AddressSanitizer; CI builds and tests Release on qa. A merge into main (a milestone
-# exit) builds and tests both, as the safety net. Story branches and docs-only pushes do not run CI.
+# Debug, with AddressSanitizer. CI no longer runs on qa (D-51, owner 2026-10-04). A merge into main (a milestone
+# exit) builds and tests both, as the safety net. Story branches, qa and docs-only pushes do not run CI.
 name: CI
 
 on:
   push:
-    branches: [qa, main]
+    branches: [main]
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
