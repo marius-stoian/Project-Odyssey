@@ -1466,3 +1466,22 @@ The store keeps each field in its own `std::vector` (a struct of arrays); the in
 **Try it (15 minutes).** Read `tests/sim/npc_population_test.cpp`, then change `restoreBelow` in `DailyConfig` and see which test notices.
 
 **Check yourself.** Why is the index of a person not safe to save, while the id is?
+
+## US-263 The NPC store and detail by distance: struct of arrays, a grid and why O(n^2) breaks
+
+**What we built.** The world can hold 100,000 NPCs. Only the ones near the hero are simulated hour by hour; the rest are brought up to date once a day, and they come out the same.
+
+**The C++ idea: struct of arrays and a spatial grid.** Instead of a `std::vector<Person>` (an array of structs, each person a block with its own vectors), every field has its own array and a person is just an index:
+
+```cpp
+std::vector<std::int32_t> ages_;   // ages_[i] is the age of person i
+std::vector<std::int16_t> needs_;  // 4 numbers per person, side by side
+```
+
+A loop over one field reads memory in a straight line, which the CPU cache loves. To find who is near, a **grid** sorts persons into 256-pixel cells; a query touches a few cells instead of 100,000 persons. Checking every pair would be 100,000 x 100,000 = 10 billion pairs a day: that is what "O(n squared) breaks" means.
+
+**Where to look.** `NpcPopulation::near`, `hourMark`, `dailyUpdate` in `src/sim/npc_population.cpp`; `docs/adr/ADR-022-npc-store-and-detail-by-distance.md`.
+
+**Try it (15 minutes).** In `tests/sim/npc_scale_test.cpp` change the 100,000 to 1,000,000 and run the Load case in Release: what grows, the day, the save or the load?
+
+**Check yourself.** Why must `near()` sort its result before returning it?

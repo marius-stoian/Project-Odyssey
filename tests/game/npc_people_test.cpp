@@ -4,6 +4,7 @@
 #include "game/npc_class_book.h"
 #include "sim/npc_population.h"
 
+#include <chrono>
 #include <functional>
 #include <memory>
 
@@ -103,4 +104,24 @@ TEST_CASE("US-262 Saved in the game: the persons are written with the autosave a
     REQUIRE(village.odyssey->loadAutosave());
     CHECK(people.ageDays(0) == age);
     CHECK(people.hash() == hash);
+}
+
+TEST_CASE("US-263 Frame: the game with 100,000 far persons loaded keeps its frame time") {
+    Village village("npc-people-crowd");
+    sim::NpcPopulation& people = village.odyssey->npcPopulationMutable();
+    for (int i = 0; i < 100000; ++i) {
+        people.add(1000 + i, "wanderer", 20 * 28, i % 40, 4000 + (i * 7919) % 12000, 4000 + (i * 104729) % 12000); // all far from the hero
+    }
+    REQUIRE(people.size() == 100001);
+    double worstMs = 0.0;
+    for (int i = 0; i < 1200; ++i) { // a minute of play at 20 ticks a second
+        const auto started = std::chrono::steady_clock::now();
+        village.odyssey->update({});
+        worstMs = std::max(worstMs, std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count());
+    }
+    MESSAGE("a minute of play with 100,000 far persons: worst update ", worstMs, " ms");
+    CHECK(people.nearCount() < 50);
+#ifdef NDEBUG
+    CHECK(worstMs < 16.0); // the D-06 target of 60 FPS, for the simulation part of a frame
+#endif
 }

@@ -105,3 +105,7 @@ A person is kept in a compact store (one array per field; see ADR-022 in US-263)
 | memories | the last six: "an ordinary day", "a good day" or "a hard day" every night by how the needs are, and "met the hero" when the hero stands within 48 pixels (once a day) |
 
 A game day is the `ticksPerDay` of `calendar.json` (2400 ticks, two minutes). Persons do not move yet (schedules come in M9c). They are saved with the autosave in `npcs.json` (versioned JSON, written to a temporary file and renamed, three backups) and read back with it; the same ticks always give the same persons (the population has its own hash).
+
+## Crowds: the store, the grid and detail by distance (US-263, ADR-022)
+
+Up to 100,000 persons fit. Nothing in the game loops over all of them in a frame: the persons near the hero (within 800 pixels, 25 tiles) are simulated hour by hour, found through a grid of 256-pixel cells; everyone else is brought up to date when the game day ends. A person is the same at the end of a day whether they were near all day, far all day, or walked across the border. `NpcPopulation::near(x, y, radius)` answers "who is near" without walking the store. The numbers and the budgets are in ADR-022.

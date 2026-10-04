@@ -39,14 +39,13 @@ void OdysseyGame::buildNpcPopulation() {
     }
 }
 
-// One game tick of the placed people: the clock of their days, and meeting the hero.
+// One game tick of the placed people: the clock of their days, and meeting the hero (found through the grid, so a crowd costs nothing here).
 void OdysseyGame::tickNpcPopulation() {
+    npcPopulation_.setFocus(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY())); // the hero is the centre of the detail (ADR-022)
     npcPopulation_.tick();
-    if (ticks_ % 20 != 0 || npcPopulation_.size() > 5000) return; // US-263 brings the spatial grid for crowds
+    if (ticks_ % 20 != 0) return;
     const std::int64_t today = npcPopulation_.day();
-    for (std::size_t i = 0; i < npcPopulation_.size(); ++i) {
-        const int index = static_cast<int>(i);
-        if (std::hypot(npcPopulation_.x(index) - hero_.feetX(), npcPopulation_.y(index) - hero_.feetY()) > kMeetingDistance) continue;
+    for (const int index : npcPopulation_.near(static_cast<int>(hero_.feetX()), static_cast<int>(hero_.feetY()), static_cast<int>(kMeetingDistance))) {
         const int id = npcPopulation_.id(index);
         const auto met = npcMetDay_.find(id);
         if (met != npcMetDay_.end() && met->second == today) continue;
