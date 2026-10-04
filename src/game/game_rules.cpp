@@ -31,6 +31,24 @@ bool hasTag(const std::vector<std::string>& tags, const std::string& tag) { retu
 
 // ---- what the hero can act on
 
+std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
+    const PlacedCharacter* placed = game.placedCharacter(placedId);
+    if (placed == nullptr || game.npcPopulation().indexOf(placedId) < 0) return std::nullopt;
+    const sim::rules::ResolvedNpc resolved = game.npcClasses().resolve(*placed);
+    Subject subject;
+    subject.kind = Subject::Kind::Npc;
+    subject.index = placedId;
+    subject.name = placed->name;
+    subject.title = placed->name + " (" + game.attitudeWordOf(placedId) + ")"; // the attitude word shows in the menu title (US-264)
+    subject.x = placed->feet.x;
+    subject.y = placed->feet.y;
+    subject.info.kind = placed->kind;
+    subject.info.tags = resolved.tags;
+    subject.info.tags.push_back("npc");
+    if (game.npcDialogueFor(placedId) != nullptr) subject.info.tags.push_back("speaks"); // no dialogue for the player, no Talk (D-52 Q-11)
+    return subject;
+}
+
 Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex) {
     const WorldPlant& plant = game.plants().at(plantIndex);
     Subject subject;
@@ -57,7 +75,7 @@ Subject personSubject(const OdysseyGame& game, int person) {
     subject.title = subject.name;
     subject.x = figure.x;
     subject.y = figure.y;
-    subject.info = {"person", {"person", "clan"}};
+    subject.info = {"person", {"person", "clan", "speaks"}};
     // The tags say what they can do for the hero now: `teaches-hunter` while they are the hero's master of that profession and have no
     // apprentice yet.
     if (hero != nullptr && data != nullptr) {
@@ -99,6 +117,24 @@ std::optional<Subject> rivalSubject(const OdysseyGame& game, std::size_t i) {
 std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) {
     // A clan member.
     if (const int person = game.personAtWorld(wx, wy); person >= 0 && game.clan() != nullptr) return personSubject(game, person);
+    // A placed person (US-265): found through the grid of the population, never by walking all of it. Its picture is 32 x 48 above its feet.
+    {
+        int best = -1;
+        double bestDistance = 1e9;
+        for (const int index : game.npcPopulation().near(static_cast<int>(wx), static_cast<int>(wy), 60)) {
+            const double px = game.npcPopulation().x(index);
+            const double py = game.npcPopulation().y(index);
+            if (std::abs(wx - px) > 14.0 || wy < py - 46.0 || wy > py + 6.0) continue;
+            const double distance = std::hypot(wx - px, wy - py);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = index;
+            }
+        }
+        if (best >= 0) {
+            if (auto npc = npcSubject(game, game.npcPopulation().id(best))) return npc;
+        }
+    }
     // A workstation: the knapping stone, or the camp's fire.
     const PixelPoint stone = game.knappingStone();
     if (std::abs(wx - stone.x) < 20 && wy > stone.y - 26 && wy < stone.y + 6) return stoneSubject(game);
@@ -243,6 +279,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     case Subject::Kind::SacredFire: return sacredSubject(game);
     case Subject::Kind::RivalCamp: return rivalSubject(game, static_cast<std::size_t>(std::max(0, ref.id)));
     case Subject::Kind::Hero: return heroSubject(game);
+    case Subject::Kind::Npc: return npcSubject(game, ref.id);
     case Subject::Kind::Animal:
         for (std::size_t i = 0; i < game.enemies().size(); ++i) {
             if (game.enemies()[i].id == ref.id && game.enemies()[i].isAlive()) return animalSubject(game, i);
@@ -252,7 +289,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"person", "clan", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
+    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);
     }
@@ -333,6 +370,15 @@ Value GameRuleContext::call(const std::string& name, const std::vector<Value>& a
     if (name == "tag" && args.size() == 2 && args[0].isText && args[1].isText) {
         if (args[0].text == "target" || args[0].text == "npc") return Value::ofNumber(hasTag(subject_.info.tags, args[1].text) ? 1 : 0);
         if (args[0].text == "actor" || args[0].text == "hero") return Value::ofNumber(hasTag(actorInfo(game_, actor_).tags, args[1].text) ? 1 : 0);
+    }
+    if (subject_.kind == Subject::Kind::Npc && name == "opinion" && args.size() == 2 && args[0].isText && args[1].isText) {
+        // What a placed person thinks of the hero (US-265): opinion(npc, hero). Anything else is 0 (the hero's own opinions are not kept).
+        const bool npc = args[0].text == "npc" || args[0].text == "target";
+        const bool hero = args[1].text == "hero" || args[1].text == "actor";
+        return Value::ofNumber(npc && hero ? game_.npcPopulation().opinion(subject_.index, sim::NpcPopulation::kHero) : 0);
+    }
+    if (subject_.kind == Subject::Kind::Npc && name == "mood" && args.size() == 1 && args[0].isText) {
+        return Value::ofText(game_.attitudeWordOf(subject_.index)); // the attitude word, as in the title of the menu
     }
     if (name == "opinion" && args.size() == 2 && args[0].isText && args[1].isText && game_.clan() != nullptr) {
         const int who = personNamed(game_, subject_, args[0].text);

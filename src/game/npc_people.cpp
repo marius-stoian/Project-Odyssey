@@ -27,6 +27,22 @@ bool OdysseyGame::isPersonKind(const PlacedCharacter& placed) const {
     return !(kind->enemy && resolved.classes.empty()); // an enemy kind with no class at all keeps fighting as before
 }
 
+const PlacedCharacter* OdysseyGame::placedCharacter(int id) const {
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (placed.id == id) return &placed;
+    }
+    return nullptr;
+}
+
+const sim::rules::DlgScript* OdysseyGame::npcDialogueFor(int placedId) const {
+    const PlacedCharacter* placed = placedCharacter(placedId);
+    if (placed == nullptr) return nullptr;
+    const sim::rules::ResolvedNpc resolved = npcClasses_.resolve(*placed);
+    const auto file = resolved.dialogues.find("player");
+    if (file == resolved.dialogues.end()) return nullptr;
+    return dialogues_.find(file->second.substr(0, file->second.size() - 4)); // "trader.dlg" is the script "trader"
+}
+
 bool OdysseyGame::fightsHero(const PlacedCharacter& placed) const {
     const CharacterKindDef* kind = definitions_.character(placed.kind);
     if (kind == nullptr) return false;

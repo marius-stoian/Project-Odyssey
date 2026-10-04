@@ -156,3 +156,7 @@ child: Yes, elder!
 ## Not in this story yet
 
 Nothing of the dialogue stories remains: the owner reads the whole of M8 at its exit review (X-M8).
+
+## Talking to placed NPCs (US-265)
+
+A placed person of a level (see `docs/guides/npc-data.md`) speaks the script its `player` dialogue names. In that script `opinion(npc, hero)` reads what it thinks of the hero, `mood(npc)` its attitude word (friendly, wary, hostile...), and the effects `opinion npc hero N` and `remember npc "text" N` change its opinion and give it a memory; `{npc}` and `{hero}` fill in as usual. Name the script in the class, kind or NPC (`"dialogues": { "player": "npc-trader.dlg" }`) and give it an `@who` nobody has, so it is not chosen for a clan member.

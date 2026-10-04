@@ -1865,7 +1865,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         // A right click on something in the world offers its actions (US-061); on nothing it looks at the nearest plant.
         const luna::engine::Pointer& p = worldIntents.pointer();
         const luna::engine::Rect view = camera_.view();
-        if (!(life_ && p.inside() && runFlow_.openContext(*this, view.x + p.x, view.y + p.y))) inspectNearestPlant();
+        if (!(p.inside() && runFlow_.openContext(*this, view.x + p.x, view.y + p.y))) inspectNearestPlant(); // outside a run only placed people have a menu
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && heldSlotName.empty()) {
         inspectNearestPlant();
     }

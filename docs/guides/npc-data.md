@@ -147,3 +147,11 @@ Every person has an **opinion**, a whole number from -100 to 100, of the hero an
 **Who fights.** An NPC whose kind has a kind file fights the hero when its attitude is `hostile`: the old `enemy` switch of `characters.json` and `animals.json` only decides for kinds without a kind file. So a goblin set to `friendly` stands by, and a wanderer set to `hostile` fights. **Menu title.** The right-click menu of such an NPC shows the word: `Grub (hostile)`.
 
 The save (`npcs.json`, version 3) holds the starting attitude of each person and the opinions of the pairs that met.
+
+## Talking to a placed NPC (US-265)
+
+Right-click a placed person (a person of the level, not a creature): the menu title is its name and attitude word, `Ossa (neutral)`. **Talk** is offered when the NPC has a **dialogue for the player** and the hero is within 2 m; with no dialogue there is no Talk (D-52 Q-11). The dialogue is the `player` entry of the layers (the NPC itself, then its kind file, then its classes) and names a script of `assets/data/dialogue/` by its file name: `"player": "npc-trader.dlg"` is the script `npc-trader`. A name that has no script is no dialogue. The conversation panel pauses the game, and its title shows the attitude word. A placed person needs no run of the hero for this: it works in any level. Clan members keep their own talk (their scripts are chosen by `@who` as before).
+
+A placed NPC carries the tags of its classes, its kind and itself, plus `npc` and, when it has a dialogue for the player, `speaks`. `talk.json` targets the tag `speaks`, which clan members carry too. Give a script an `@who` that nobody has (`@who npc-trader`) so no clan member is ever given it.
+
+In the script of a placed NPC: `opinion(npc, hero)` is what it thinks of the hero (-100 to 100), `mood(npc)` is its attitude word, `{opinion npc hero 5}` changes it and `{remember npc "{hero} was kind" 20}` gives it a memory (see the dialogue format guide). Other `opinion` pairs read 0 for a placed person.

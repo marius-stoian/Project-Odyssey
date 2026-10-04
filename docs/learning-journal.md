@@ -1505,3 +1505,21 @@ Reading an opinion looks the key up and, if there is no entry, computes the defa
 **Try it (15 minutes).** In `opinions.json` set `friendly` to 5 and run the opinion test: which checks notice?
 
 **Check yourself.** Why is the family opinion a default rather than a stored entry?
+
+## US-265 Talk with placed NPCs: one interface for many kinds of things
+
+**What we built.** Any placed person with something to say can be talked to: right-click, Talk, the conversation panel opens and the game waits. A person with no dialogue has no Talk.
+
+**The C++ idea: one interface, data-driven by tags.** The game does not have a special code path for each kind of thing. Everything the hero can act on is a `Subject` with a kind, a position and a list of tags, and the interaction files say which tags they apply to:
+
+```json
+"target": { "tags": ["speaks"] }
+```
+
+A clan member and a placed trader both carry `speaks`, so the same `talk.json` serves both. To add a new kind of thing we write a function that makes a `Subject` (`npcSubject`) and give it tags; the menu, the range check and the action runner already work.
+
+**Where to look.** `npcSubject` and `subjectAt` in `src/game/game_rules.cpp`; `openConversation` in `src/game/builtin_actions.cpp`; `assets/data/interactions/talk.json`.
+
+**Try it (15 minutes).** Give the `elder` class `"dialogues": { "player": "greet-elder.dlg" }` and talk to a placed elder.
+
+**Check yourself.** Why do placed NPCs not carry the tag `person`?
