@@ -1,12 +1,12 @@
 # Build brief: M9a NPC foundation, M9b Trade economy, M9c NPC life
 
-Status: **Handed to Anima (Codex v2.9).** Owner decisions: D-52 (docs/decision-requests/D-52.md, Decided 2026-10-04). Written by Dominus (Mraw) at the owner's request, 2026-10-04. Builders follow the Codex prompts, not this brief.
+Status: **Handed to Anima (Codex v2.10).** Owner decisions: D-52 (docs/decision-requests/D-52.md, Decided 2026-10-04). Written by Dominus (Mraw) at the owner's request, 2026-10-04. Builders follow the Codex prompts, not this brief.
 
 ## 1. Goal
 
 The player talks to, confronts, trades with and uses actions on **every** NPC, including characters placed in a level. Placed NPCs are full persons of the simulation. The owner defines NPC Classes in the Editor and sets every NPC by hand: classes, attitude, dialogues, actions, trade and daily schedule. NPCs do the same things to each other. The simulation scales to 100,000 region-loaded NPCs by simulating in detail only near the hero.
 
-Source of truth: Project Odyssey.docx v2.9 does **not** yet contain this work. Mraw adds epic E17 (M9a), E18 (M9b), E19 (M9c) and the stories below to the requirements and the backlog before K-M9a (codex issue CI-012).
+Source of truth: Project Odyssey.docx v2.10 (Round 23) holds epics E26 (M9a), E27 (M9b), E28 (M9c), the stories below and requirements SDC-08..SDC-12, INT-09..INT-12, EDT-08, NFR-08, MVP-17.
 
 ## 2. What exists today (2026-10-04)
 
@@ -62,7 +62,7 @@ Source of truth: Project Odyssey.docx v2.9 does **not** yet contain this work. M
 
 ## 5. Stories
 
-### M9a NPC foundation (epic E17)
+### M9a NPC foundation (epic E26)
 Exit: every placed NPC is a person with classes, an attitude and opinions; the player talks to and confronts them, sees their actions in a pop-up; the owner edits classes, kinds and NPCs in the Editor; the test level shows all of it; 100,000 persons load and run within budget.
 
 | Id | Story | Size |
@@ -79,7 +79,7 @@ Exit: every placed NPC is a person with classes, an attitude and opinions; the p
 | US-269 | Editor kinds tab and map markers (colour ring and icon) | M |
 | US-270 | NPC test level, 7 NPCs, walk-through checklist | S |
 
-### M9b Trade economy (epic E18)
+### M9b Trade economy (epic E27)
 Exit: the player trades with any trader by barter or the region's currency; prices follow supply and demand and the trader's opinion; stock is limited and restocks daily; the owner sets currencies and stock in the Editor.
 
 | Id | Story | Size |
@@ -90,7 +90,7 @@ Exit: the player trades with any trader by barter or the region's currency; pric
 | US-283 | Trade screen for any trader (barter and currency); rival camps keep working | L |
 | US-284 | Editor trade panel; the test level's trader and wary hunter set up | M |
 
-### M9c NPC life (epic E19)
+### M9c NPC life (epic E28)
 Exit: NPCs follow day and night schedules, do their class, custom and event actions, and do everything to each other (talk, fight, trade, gift, confront) with the same files; the owner edits all of it in the Editor.
 
 | Id | Story | Size |

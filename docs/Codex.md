@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.9
+# Project Odyssey Codex v2.10
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.9 (M9a-M9c: epics E17-E19 to be added, CI-012) (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.10 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -25,7 +25,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.9)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.10)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -33,7 +33,7 @@ You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), 
 
 <project>
 Project Odyssey (game codename Odysseus): a 2D pixel-art life and civilization simulation. MVP = Age 1 vertical slice on Windows x64: one procedurally generated region, one hero from age 12 who grows into a clan leader, five professions, Trade and Religion pillars, win by leading the region.
-Source of truth for WHAT: Project Odyssey.docx v2.8 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
+Source of truth for WHAT: Project Odyssey.docx v2.10 (chapter 12: MVP; chapter 7: architecture). Source of truth for HOW and ORDER: docs/Codex.md (this Codex).
 The owner is learning C++ through this project; every story ends with a teach-back entry for him.
 </project>
 
@@ -263,7 +263,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.9 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.10 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -491,18 +491,18 @@ M8 is under way. The owner added four milestones built right after M8 and before
 </prompt>
 ```
 
-### P-012 Adopt Codex v2.9 (NPC foundation, trade economy, NPC life)
+### P-012 Adopt Codex v2.10 (NPC foundation, trade economy, NPC life)
 ```xml
-<prompt id="P-012" codex="2.9" name="Adopt Codex v2.9">
+<prompt id="P-012" codex="2.10" name="Adopt Codex v2.10">
 <context>
-The owner asked on 2026-10-04 to talk, confront and trade with every NPC, to set every NPC by hand in the Editor with owner-defined NPC Classes, and to make placed NPCs full persons of a world of up to 100,000 (D-52, Decided in six chat rounds). Three new milestones M9a, M9b, M9c come right after M8c and before M8d. Mraw's brief: docs/plans/M9a-npc-roles-brief.md. Run this prompt as soon as the Codex sync reports v2.9; a story in progress (for example US-248) is finished first.
+The owner asked on 2026-10-04 to talk, confront and trade with every NPC, to set every NPC by hand in the Editor with owner-defined NPC Classes, and to make placed NPCs full persons of a world of up to 100,000 (D-52, Decided in six chat rounds). Three new milestones M9a, M9b, M9c come right after M8c and before M8d. Mraw's brief: docs/plans/M9a-npc-roles-brief.md. Run this prompt as soon as the Codex sync reports v2.10; a story in progress (for example US-248) is finished first.
 </context>
 <instructions>
-1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.9.
+1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.10.
 2. docs/decisions.md: add D-52 as in section 5 (Decided, owner, 2026-10-04); D-15 reads "... > M8c > M9a > M9b > M9c > M8d > ...". If a story already used D-52, renumber that story's decision to the next free ID and update its references. Commit docs/decision-requests/D-52.md.
 3. docs/status.md: add P-012 after P-011; add K-M9a..X-M9a, K-M9b..X-M9b, K-M9c..X-M9c (To do) in the execution order of section 7, between X-M8c and K-M8d.
-4. Commit docs/plans/M9a-npc-roles-brief.md. Requirements: epics E17-E19 and US-260..US-270, US-280..US-284, US-290..US-294 are not yet in the source of truth; write codex issue CI-012 if the mirrored requirements do not contain them (K-M9a stops on it; M8c continues).
-5. Update Limit.md (next prompt in Codex order) and commit on qa "P-012: adopt Codex v2.9 (NPC foundation, trade economy, NPC life)" (explicit paths only), push.
+4. Requirements v2.10 and the backlog (epics E26-E28, Round 23) are on Drive; mirror them with tools/sync-workspace.ps1 if the session hook has not, and commit them with "Docs: sync workspace files from Drive". The brief and D-52.md are already committed (6c9d395).
+5. Update Limit.md (next prompt in Codex order) and commit on qa "P-012: adopt Codex v2.10 (NPC foundation, trade economy, NPC life)" (explicit paths only), push.
 </instructions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -5673,13 +5673,13 @@ Design notes for M9a-M9c (owner decisions D-52, docs/decision-requests/D-52.md; 
 - Attitude words: friendly, neutral, wary, hostile, scared, suspicious, enchanted, lovingly, enviously; derived from an integer opinion per pair; no factions.
 - Talk only for NPCs with a dialogue for that partner; Confront is a separate button (taunt, insult, ask for peace, antagonise, de-escalate) with opinion consequences. Denied actions are hidden; the Actions pop-up shows every action and its requirements.
 - Everything in the simulation is deterministic, integer and saved; Editor forms, menus, pop-ups and markers are Game code; nothing new touches SDL. Never edit assets/levels/valley.json (the owner's work); the test level is assets/levels/npc-test.json.
-- Source of truth: epics E17-E19 and US-260..US-270, US-280..US-284, US-290..US-294 must be in the requirements and the backlog before K-M9a (codex issue CI-012).
+- Source of truth: Project Odyssey.docx v2.10 holds epics E26-E28, requirements SDC-08..SDC-12, INT-09..INT-12, EDT-08, NFR-08 and MVP-17 (Round 23); SDC-12 builds the schedules that SDC-07 (M11, US-196) reuses.
 
 ```xml
 <prompt id="K-M9a" codex="2.9" name="Kick off M9a NPC foundation">
 <instructions>
 1. Confirm that M8c (docs/gates/M8c.md) and its stories are done, and that D-34, D-35 and D-52 are Decided in docs/decisions.md.
-2. Confirm that the requirements (Drive source of truth) contain epics E17-E19 and the M9a-M9c stories; if not, write codex issue CI-012 and stop (Mraw reconciles the requirements first).
+2. Confirm that the mirrored requirements (docs/project/requirements/Project Odyssey.docx) are v2.10 or later and contain epics E26-E28; if not, run tools/sync-workspace.ps1, and stop with a codex issue if they still do not.
 3. D-52 is Decided (docs/decision-requests/D-52.md). Ask the owner, in one chat round (2-4 options each, recommended first), only the questions the M9a stories still leave open after D-52 (for example: the Confront key, the Actions pop-up key, the icon set for classes). Record the answers.
 4. Architect: write docs/plans/M9-npc-design.md before US-260: class, kind and override formats; the person store and ADR-022 outline; opinion events and thresholds; talk and confront; the Actions pop-up; Editor forms; save format; test plan for M9a-M9c.
 5. Set this milestone's stories to To do in docs/status.md in this order: US-260, US-261, US-262, US-263, US-264, US-265, US-266, US-267, US-268, US-269, US-270.
@@ -5695,8 +5695,8 @@ Design notes for M9a-M9c (owner decisions D-52, docs/decision-requests/D-52.md; 
 <context>
 Story US-260: NPC Classes.
 As the owner, I want to create, edit, delete and assign NPC Classes in the Editor, each with a colour, an icon, tags, default dialogues and default actions, so that I can say what kinds of people my world has.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: INT-01, INT-03, INT-06, SDC-03.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-08, EDT-08.
 </context>
 <dependencies>
 Stories that must be Done: US-150, US-126.
@@ -5743,8 +5743,8 @@ Manual checks in docs/plans/US-260.md done, with results and screenshots (`odyss
 <context>
 Story US-261: Kind defaults and placed-NPC overrides.
 As the owner, I want defaults per NPC kind and per-NPC changes in the level, so that a new wanderer starts sensible and each placed one can differ.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: INT-01, INT-03, SDC-06.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-09, EDT-08.
 </context>
 <dependencies>
 Stories that must be Done: US-260, US-122.
@@ -5791,8 +5791,8 @@ Manual checks in docs/plans/US-261.md done, with results and screenshots (`odyss
 <context>
 Story US-262: Placed NPCs are full persons.
 As the player, I want the people placed in a level to be real members of the world, with needs, memories, ageing and families, so that they feel alive like my clan.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: new person requirement of E17 (CI-012), SDC-03.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-09.
 </context>
 <dependencies>
 Stories that must be Done: US-261, US-154.
@@ -5839,8 +5839,8 @@ Manual checks in docs/plans/US-262.md done, with results and screenshots (`odyss
 <context>
 Story US-263: The NPC store and detail by distance.
 As the owner, I want the world to hold up to 100,000 region-loaded NPCs while the game stays smooth, so that the end game can be crowded.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: D-06 (target PC); new performance requirement, CI-012.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: NFR-08, SDC-09.
 </context>
 <dependencies>
 Stories that must be Done: US-262.
@@ -5887,8 +5887,8 @@ Manual checks in docs/plans/US-263.md done, with results and screenshots (`odyss
 <context>
 Story US-264: Attitudes and opinions.
 As the player, I want every NPC to have its own attitude to me and to others, changed by what we do, so that my choices matter person by person.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: SDC-03, new opinion requirement of E17 (CI-012).
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-10.
 </context>
 <dependencies>
 Stories that must be Done: US-263.
@@ -5935,8 +5935,8 @@ Manual checks in docs/plans/US-264.md done, with results and screenshots (`odyss
 <context>
 Story US-265: Talk with placed NPCs.
 As the player, I want to talk to any NPC that has something to say, so that every person in a level can speak.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: SDC-03, INT-01.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-11, SDC-03.
 </context>
 <dependencies>
 Stories that must be Done: US-264, US-161.
@@ -5983,8 +5983,8 @@ Manual checks in docs/plans/US-265.md done, with results and screenshots (`odyss
 <context>
 Story US-266: Confront.
 As the player, I want a separate Confront button with taunt, insult, ask for peace, antagonise and de-escalate, so that I can deal with hostile NPCs by words and live with the consequences.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: SDC-03, INT-01.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-11.
 </context>
 <dependencies>
 Stories that must be Done: US-265.
@@ -6031,8 +6031,8 @@ Manual checks in docs/plans/US-266.md done, with results and screenshots (`odyss
 <context>
 Story US-267: Actions and the Actions pop-up.
 As the player, I want to see every action an NPC could offer and what each needs, while the menu shows only what I can do now, so that I know how to unlock the rest.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: INT-01, INT-03.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: INT-09.
 </context>
 <dependencies>
 Stories that must be Done: US-265.
@@ -6074,8 +6074,8 @@ Manual checks in docs/plans/US-267.md done, with results and screenshots (`odyss
 <context>
 Story US-268: Editor NPC panel.
 As the owner, I want to select a placed NPC in the Editor and set its name, classes, attitude, family, dialogues by partner type and actions, so that I set every NPC by hand.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: INT-06, SDC-06.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: EDT-08, SDC-08.
 </context>
 <dependencies>
 Stories that must be Done: US-267, US-125.
@@ -6122,8 +6122,8 @@ Manual checks in docs/plans/US-268.md done, with results and screenshots (`odyss
 <context>
 Story US-269: Editor kinds tab and map markers.
 As the owner, I want a tab for each NPC kind's defaults and a colour ring with an icon under each placed NPC, so that I can change a whole kind at once and read a level at a glance.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: INT-06, SDC-06.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: EDT-08.
 </context>
 <dependencies>
 Stories that must be Done: US-268.
@@ -6165,8 +6165,8 @@ Manual checks in docs/plans/US-269.md done, with results and screenshots (`odyss
 <context>
 Story US-270: NPC test level.
 As the owner, I want a test level with seven NPCs that shows every M9a feature, so that I can try it all in one walk.
-Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
-Traces to: SDC-03, INT-06.
+Epic E26 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-08..SDC-11, INT-09.
 </context>
 <dependencies>
 Stories that must be Done: US-269.
@@ -6238,8 +6238,8 @@ Why this milestone exists: D-52 Q-13..Q-17 and S-03: barter and owner-defined cu
 <context>
 Story US-280: Currencies per region.
 As the owner, I want to choose in the Editor which items are currency in a region, so that trade can use money where I want it.
-Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
-Traces to: new trade requirements of E18 (CI-012), INT-06.
+Epic E27 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: INT-11, EDT-08.
 </context>
 <dependencies>
 Prompts that must be Done: X-M9a.
@@ -6281,8 +6281,8 @@ Manual checks in docs/plans/US-280.md done, with results and screenshots (`odyss
 <context>
 Story US-281: Trader stock.
 As the player, I want traders to have limited goods that come back each day and to pay more for what they want, so that trade is a choice.
-Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
-Traces to: new trade requirements of E18 (CI-012), new person requirement of E17 (CI-012).
+Epic E27 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: INT-11.
 </context>
 <dependencies>
 Stories that must be Done: US-280.
@@ -6329,8 +6329,8 @@ Manual checks in docs/plans/US-281.md done, with results and screenshots (`odyss
 <context>
 Story US-282: Supply and demand, and reputation.
 As the player, I want prices to rise when goods are scarce and fall when they are plentiful, and better deals from people who like me, so that the economy feels real.
-Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
-Traces to: new trade requirements of E18 (CI-012), SDC-03.
+Epic E27 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: INT-12, SDC-10.
 </context>
 <dependencies>
 Stories that must be Done: US-281, US-264.
@@ -6377,8 +6377,8 @@ Manual checks in docs/plans/US-282.md done, with results and screenshots (`odyss
 <context>
 Story US-283: Trade screen for any trader.
 As the player, I want one trade screen for every trader, with barter and currency, so that I can trade with a passing NPC as with a rival camp.
-Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
-Traces to: new trade requirements of E18 (CI-012), SDC-03.
+Epic E27 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: INT-11.
 </context>
 <dependencies>
 Stories that must be Done: US-282.
@@ -6425,8 +6425,8 @@ Manual checks in docs/plans/US-283.md done, with results and screenshots (`odyss
 <context>
 Story US-284: Editor trade panel.
 As the owner, I want to set a trader's stock, restock, wants and price settings in the Editor, so that each trader is my own.
-Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
-Traces to: INT-06, new trade requirements of E18 (CI-012).
+Epic E27 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: EDT-08, INT-11.
 </context>
 <dependencies>
 Stories that must be Done: US-283.
@@ -6498,8 +6498,8 @@ Why this milestone exists: D-52 Q-10, Q-18, Q-19: schedules, class, quest, custo
 <context>
 Story US-290: Day and night schedules.
 As the owner, I want to give every NPC a daily schedule in the Editor, so that people work, eat, meet and sleep at their own hours.
-Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
-Traces to: new person requirement of E17 (CI-012), INT-06.
+Epic E28 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: SDC-12, SDC-07, EDT-08.
 </context>
 <dependencies>
 Prompts that must be Done: X-M9b.
@@ -6541,8 +6541,8 @@ Manual checks in docs/plans/US-290.md done, with results and screenshots (`odyss
 <context>
 Story US-291: Action sources.
 As the owner, I want NPCs to act from their classes, from my custom actions and from world events, and later from quests, all set in the Editor, so that I control what people do.
-Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
-Traces to: INT-01, INT-06.
+Epic E28 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: SDC-12, EDT-08.
 </context>
 <dependencies>
 Stories that must be Done: US-290.
@@ -6589,8 +6589,8 @@ Manual checks in docs/plans/US-291.md done, with results and screenshots (`odyss
 <context>
 Story US-292: NPCs act on each other.
 As the player, I want NPCs to talk, fight, trade, give gifts and confront each other with the same rules as me, so that the world lives without me.
-Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
-Traces to: INT-01, SDC-03.
+Epic E28 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: INT-10.
 </context>
 <dependencies>
 Stories that must be Done: US-291.
@@ -6637,8 +6637,8 @@ Manual checks in docs/plans/US-292.md done, with results and screenshots (`odyss
 <context>
 Story US-293: Default interactions by partner type.
 As the owner, I want each class and NPC to have default dialogues and actions for meeting the player, other classes, animals and the environment, with a list I can extend, so that every meeting has a sensible reaction.
-Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
-Traces to: INT-01, INT-06.
+Epic E28 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: INT-10.
 </context>
 <dependencies>
 Stories that must be Done: US-292.
@@ -6680,8 +6680,8 @@ Manual checks in docs/plans/US-293.md done, with results and screenshots (`odyss
 <context>
 Story US-294: Living test level.
 As the owner, I want the test level to show a day of NPC life, and the 100,000-person soak to pass, so that I can judge M9c in one sitting.
-Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
-Traces to: new requirements of E19, CI-012.
+Epic E28 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: SDC-12, INT-10, NFR-08.
 </context>
 <dependencies>
 Stories that must be Done: US-293.
@@ -9663,3 +9663,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.7 | 2026-10-04 | Celestial bodies (Mraw's brief docs/plans/US-248-celestial-brief.md; owner decision D-50). New story prompt S-US-248 (sun and moon as placeable light-source objects with a clock orbit, sprites in the sky, eclipses as data events, Editor placement) before S-US-244; S-US-244 now depends on US-248 and D-50 and casts its shadows along the light direction of the celestial bodies; K-M8c lists the stories in the order US-240..US-243, US-248, US-244..US-247; the execution order line (section 7) gets S-US-248; D-49 and D-50 added to the decision table; L-01 verification lines say to rerun only failing cases after a failure. M8c now has nine stories. Source of truth: ENV-22 Celestial bodies must be added to the requirements (v2.9) and US-248 to the backlog before US-248 starts (Mraw to reconcile; Anima issue CI-011). |
 | 2.8 | 2026-10-04 | NPC roles, talk and trade: first draft of milestone M9a (K-M9a, S-US-260..S-US-267, X-M9a) between X-M8e and K-M9, with the owner's 24 questions open (D-52). Superseded the same day by v2.9 before any prompt ran. |
 | 2.9 | 2026-10-04 | NPC foundation, trade economy and NPC life (owner answers D-52, six chat rounds; Mraw's brief docs/plans/M9a-npc-roles-brief.md, revised). The owner's answers tripled the v2.8 scope, so M9a is split into three milestones built right after M8c and before M8d (D-52 Q-01, S-01): M9a NPC foundation (K-M9a, S-US-260..S-US-270: NPC Classes in the Editor, kind files and overrides, placed NPCs as full persons, the person store with detail by distance for 100,000 persons and ADR-022, nine attitudes per pair, talk, Confront, hidden actions and the Actions pop-up, Editor NPC panel, kinds tab and markers, test level), M9b Trade economy (K-M9b, S-US-280..S-US-284: owner-defined currencies, limited daily stock, supply and demand with reputation, one trade screen, Editor trade panel), M9c NPC life (K-M9c, S-US-290..S-US-294: schedules, class, custom and event actions with a quest hook for M10, NPC-to-NPC interactions, partner-type defaults, living test level and soak), each with an exit review; shared design notes. The v2.8 prompts S-US-260..S-US-267 are replaced (none had run). P-012 adopts v2.9; K-M8d also checks that M9c is done; D-52 Decided in the decision table; D-15 chain and execution order updated. Source of truth: epics E17-E19 and their stories must be added to the requirements and the backlog before K-M9a (Mraw to reconcile; Anima issue CI-012). |
+| 2.10 | 2026-10-04 | Requirements reconciled (source of truth v2.10, Round 23): Mraw added the M9a-M9c work to Project Odyssey.docx and the backlog. Epic ids E17-E19 were already taken (M10-M12), so the NPC epics are E26 NPC foundation, E27 Trade economy and E28 NPC life; every M9a-M9c story prompt now traces to the new requirements SDC-08..SDC-12, INT-09..INT-12, EDT-08 and NFR-08 instead of placeholders; K-M9a step 2 checks the mirrored requirements version; P-012 adopts v2.10 and mirrors the requirements. CI-012 resolved before it was raised. Open for a later version: SDC-12 builds the schedules early, so S-US-196 (M11 routines) should reuse them; Anima amends S-US-196 when M11 comes closer. |
