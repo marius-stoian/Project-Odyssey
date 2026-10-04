@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.7
+# Project Odyssey Codex v2.9
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.9 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-04 | Source of truth: Project Odyssey.docx v2.9 (M9a-M9c: epics E17-E19 to be added, CI-012) (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -13,6 +13,7 @@ Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus A
 - Autonomous by default (owner instruction, 2026-09-30): the owner wants the game built with minimal intervention. Design decisions are delegated to Dominus, stories integrate through the `qa` branch, and a Milestone-<n>.md progress snapshot is saved after every story, so the owner can review everything later. The owner answers questions up front (before leaving the team to work), not during the run.
 - Design decisions from v2.0 on (owner, 2026-10-01, D-35): the owner takes them (D-22, Charter human gate 3). The delegated period the owner granted on 2026-10-01 for M3-M6 (D-30..D-33) ended with M6. Each kickoff K-Mx asks the owner its open design questions in one chat round before its first story.
 - M8b-M8e (owner, 2026-10-01, D-43) are built right after M8 and before M9, under the M7-M9 rules (D-35): the owner answers each kickoff's design questions in one chat round, and every story runs the full verification with green CI on qa.
+- M9a NPC foundation, M9b Trade economy and M9c NPC life (owner, 2026-10-04, D-52) are built right after M8c and before M8d, under the M7-M9 rules (D-35). The owner answered their design questions on 2026-10-04 (docs/decision-requests/D-52.md).
 - M10-M14 (owner, 2026-10-01, D-41): Dominus decides the design questions of these milestones with the recommended option and records each as "Decided by Dominus (delegated)" in docs/decisions.md and the next Milestone file; the owner may override any of them. Tests are written with each story but run at each milestone's exit review, which fixes every failure before the milestone is merged into main.
 - Blocked, wrong or ambiguous prompts become codex issues; the owner takes them to Anima with **A-002**; Anima issues a new Codex version.
 
@@ -24,7 +25,7 @@ Hybrid: **stage gates** at milestones M0-M14 (with kill gates at M2 and M6; kill
 Written verbatim to `CLAUDE.md` by P-000.
 
 ```markdown
-# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.7)
+# CLAUDE.md: Project Odyssey Charter (Codex C-01, v2.9)
 
 <role>
 You are a member of Mraw, the Dominus Full Team (also called Dominus Avengers), assembling Project Odyssey by following the Codex written by Anima. You build exactly what the current Codex prompt asks, nothing more.
@@ -236,7 +237,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open: plan ready (docs/plans/M6-playtest-plan.md), recruiting from K-M13 (D-48) |
-| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M8d > M8e > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M9a > M9b > M9c > M8d > M8e > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
 | D-GATE-M2b | Kill Gate 1 retry: the owner reads the M2b story and judges whether it is a story | X-M2b | M3 | Decided: Go (owner, 2026-09-30: "it is a story") |
@@ -255,13 +256,14 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-48 | Remaining open items, one by one (owner, 2026-10-01): ARC-01..ARC-08 confirmed as built (ARC-01 renamed Six-layer architecture); the kill gate 2 playtest is planned now in docs/plans/M6-playtest-plan.md and recruiting starts at K-M13; the Anima Prompt Catalog becomes a Google Doc on Drive | M13 | K-M13, X-M6 | Decided (owner, 2026-10-01) |
 | D-49 | Lighting design answers (K-M8c; owner, 2026-10-02) | M8c | US-240..US-247 | Decided (owner, 2026-10-02) |
 | D-50 | Celestial bodies: sun and moon as placeable light-source objects (owner, 2026-10-04); shadows by ground-plane projection from the body's position; sprites in the sky; eclipses as data events; new story US-248 before US-244 | M8c | US-248, US-244 | Decided (owner, 2026-10-04) |
+| D-52 | NPC foundation, trade economy and NPC life (owner, 2026-10-04, six chat rounds): 24 design answers and 4 follow-ups in docs/decision-requests/D-52.md: owner-defined NPC Classes (one or more per NPC), kind files, placed NPCs as full persons, up to 100,000 persons with detail by distance, nine attitudes per pair, talk only with a dialogue, a Confront button, hidden actions plus an Actions pop-up, barter and owner-defined currency with supply and demand and reputation, schedules and NPC-to-NPC interactions, forms before the graph editor, test level npc-test.json; three milestones right after M8c | M9a-M9c | US-260..US-270, US-280..US-284, US-290..US-294 | Decided (owner, 2026-10-04) |
 
 ## 6. Assembly prompts
 
 ### A-000 Start assembly (owner pastes this once)
 ```text
 Dominus Avengers Assemble.
-You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.7 written by Anima.
+You are Mraw, the Dominus Full Team, assembling Project Odyssey with Codex v2.9 written by Anima.
 Read Codex.md in this folder completely. Execute prompt P-000. Then, acting as mraw-orchestrator, execute the Codex prompts strictly in order (K-M0, then the M0 story prompts, X-M0, K-M1, ...), each through the build loop L-01.
 Stop only where the Charter's human_gates say so. End every session with an assembly report.
 ```
@@ -484,6 +486,23 @@ M8 is under way. The owner added four milestones built right after M8 and before
 3. docs/status.md: add P-011 after P-010; add K-M8b..X-M8b, K-M8c..X-M8c, K-M8d..X-M8d, K-M8e..X-M8e (To do) in the execution order of section 7, between X-M8 and K-M9.
 4. Mirror requirements v2.4 and the backlog with tools/sync-workspace.ps1 if the session hook has not already done it, and commit docs/plans/M8b-M8d-render-light-build-brief.md if it is not committed yet.
 5. Update Limit.md (next prompt in Codex order) and commit on qa "P-011: adopt Codex v2.2 (resolution, lighting, buildings)", push, and wait for green CI.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+### P-012 Adopt Codex v2.9 (NPC foundation, trade economy, NPC life)
+```xml
+<prompt id="P-012" codex="2.9" name="Adopt Codex v2.9">
+<context>
+The owner asked on 2026-10-04 to talk, confront and trade with every NPC, to set every NPC by hand in the Editor with owner-defined NPC Classes, and to make placed NPCs full persons of a world of up to 100,000 (D-52, Decided in six chat rounds). Three new milestones M9a, M9b, M9c come right after M8c and before M8d. Mraw's brief: docs/plans/M9a-npc-roles-brief.md. Run this prompt as soon as the Codex sync reports v2.9; a story in progress (for example US-248) is finished first.
+</context>
+<instructions>
+1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.9.
+2. docs/decisions.md: add D-52 as in section 5 (Decided, owner, 2026-10-04); D-15 reads "... > M8c > M9a > M9b > M9c > M8d > ...". If a story already used D-52, renumber that story's decision to the next free ID and update its references. Commit docs/decision-requests/D-52.md.
+3. docs/status.md: add P-012 after P-011; add K-M9a..X-M9a, K-M9b..X-M9b, K-M9c..X-M9c (To do) in the execution order of section 7, between X-M8c and K-M8d.
+4. Commit docs/plans/M9a-npc-roles-brief.md. Requirements: epics E17-E19 and US-260..US-270, US-280..US-284, US-290..US-294 are not yet in the source of truth; write codex issue CI-012 if the mirrored requirements do not contain them (K-M9a stops on it; M8c continues).
+5. Update Limit.md (next prompt in Codex order) and commit on qa "P-012: adopt Codex v2.9 (NPC foundation, trade economy, NPC life)" (explicit paths only), push.
 </instructions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -5642,6 +5661,1074 @@ Manual checks in docs/plans/US-247.md done on the owner's PC with the GPU render
 </prompt>
 ```
 
+### M9a NPC foundation
+Exit criteria: Every placed NPC is a person with one or more classes, an attitude and opinions; the player talks to and confronts NPCs and sees their actions in a pop-up; the owner edits classes, kinds and NPCs in the Editor; the NPC test level shows all of it; 100,000 persons run within the ADR-022 budget.
+
+Why this milestone exists: the owner asked on 2026-10-04 to talk and trade with every NPC, to set each NPC's classes, attitude and actions in the Editor, and to treat placed NPCs as full persons of a world of up to 100,000 (D-52). Today only clan members talk and only rival camps barter; placed characters are combat figures. It is built right after M8c (D-52 Q-01).
+
+Design notes for M9a-M9c (owner decisions D-52, docs/decision-requests/D-52.md; brief docs/plans/M9a-npc-roles-brief.md):
+- NPC Class is one concept for the owner's "categories" and "classes": owner-defined in the Editor (assets/data/npc-classes/<id>.json), with colour, icon, tags, default dialogues and default actions; an NPC has one or more classes.
+- Layers of data, each overriding the one before: class, kind file (assets/data/npcs/<kind>.json), placed NPC in the level (only differences). Allow and deny lists merge in that order; a later deny wins.
+- Placed NPCs other than animals and monsters are full persons of the simulation. Up to 100,000 region-loaded persons: compact store, spatial grid, detail by distance (full near the hero, a daily summary far away), opinions only for pairs that met (ADR-022, written in US-263).
+- Attitude words: friendly, neutral, wary, hostile, scared, suspicious, enchanted, lovingly, enviously; derived from an integer opinion per pair; no factions.
+- Talk only for NPCs with a dialogue for that partner; Confront is a separate button (taunt, insult, ask for peace, antagonise, de-escalate) with opinion consequences. Denied actions are hidden; the Actions pop-up shows every action and its requirements.
+- Everything in the simulation is deterministic, integer and saved; Editor forms, menus, pop-ups and markers are Game code; nothing new touches SDL. Never edit assets/levels/valley.json (the owner's work); the test level is assets/levels/npc-test.json.
+- Source of truth: epics E17-E19 and US-260..US-270, US-280..US-284, US-290..US-294 must be in the requirements and the backlog before K-M9a (codex issue CI-012).
+
+```xml
+<prompt id="K-M9a" codex="2.9" name="Kick off M9a NPC foundation">
+<instructions>
+1. Confirm that M8c (docs/gates/M8c.md) and its stories are done, and that D-34, D-35 and D-52 are Decided in docs/decisions.md.
+2. Confirm that the requirements (Drive source of truth) contain epics E17-E19 and the M9a-M9c stories; if not, write codex issue CI-012 and stop (Mraw reconciles the requirements first).
+3. D-52 is Decided (docs/decision-requests/D-52.md). Ask the owner, in one chat round (2-4 options each, recommended first), only the questions the M9a stories still leave open after D-52 (for example: the Confront key, the Actions pop-up key, the icon set for classes). Record the answers.
+4. Architect: write docs/plans/M9-npc-design.md before US-260: class, kind and override formats; the person store and ADR-022 outline; opinion events and thresholds; talk and confront; the Actions pop-up; Editor forms; save format; test plan for M9a-M9c.
+5. Set this milestone's stories to To do in docs/status.md in this order: US-260, US-261, US-262, US-263, US-264, US-265, US-266, US-267, US-268, US-269, US-270.
+6. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-260 NPC Classes
+```xml
+<prompt id="S-US-260" codex="2.9" milestone="M9a" story="US-260" priority="Must" size="M">
+<context>
+Story US-260: NPC Classes.
+As the owner, I want to create, edit, delete and assign NPC Classes in the Editor, each with a colour, an icon, tags, default dialogues and default actions, so that I can say what kinds of people my world has.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: INT-01, INT-03, INT-06, SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-150, US-126.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: a class catalog loaded from assets/data/npc-classes/<id>.json (loader and validator next to src/sim/interaction.*, errors as `file:line: message`, a bad file is skipped, F5 reloads it). Game (Editor): an NPC Classes tab: list, New, Delete (refused with the names of the NPCs that still use the class), and a form for label, colour, icon (from the icon atlas), tags, default dialogues by partner type and default allow/deny actions; saves readable JSON in the guide's field order. Ship classes for the test cast: trader, talker, hunter, elder, guard, monster, animal.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Create">
+Given the NPC Classes tab
+When the owner creates the class healer with a green colour and the tag healer and saves
+Then assets/data/npc-classes/healer.json exists and the class is offered in every class picker
+</scenario>
+<scenario name="Delete in use">
+Given a class used by two placed NPCs
+When the owner deletes it
+Then the Editor refuses and names both NPCs
+</scenario>
+<scenario name="Mistake">
+Given a class file with an unknown icon
+When the game starts
+Then the error names the file, the line and the field, and the other classes load
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-260`: the Debug build with zero warnings and every Debug test passes, including the "US-260 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-260.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-260/.
+</verification>
+<teach_back>C++ concept for the owner: Catalogs keyed by id; refusing a delete that would leave dangling references.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-261 Kind defaults and placed-NPC overrides
+```xml
+<prompt id="S-US-261" codex="2.9" milestone="M9a" story="US-261" priority="Must" size="M">
+<context>
+Story US-261: Kind defaults and placed-NPC overrides.
+As the owner, I want defaults per NPC kind and per-NPC changes in the level, so that a new wanderer starts sensible and each placed one can differ.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: INT-01, INT-03, SDC-06.
+</context>
+<dependencies>
+Stories that must be Done: US-260, US-122.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: kind files assets/data/npcs/<kind>.json (classes, attitude, tags, dialogues, actions); placed characters in the level gain the same fields, saved only where they differ. Precedence: classes, then kind, then the placed NPC; allow and deny lists merge in that order and a later deny wins. A level without the new fields loads as before. Kind files for every shipped character kind keep today's behaviour (goblin, skeleton, wolf, tiger hostile). F5 reloads kind files.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Precedence">
+Given the class trader allows trade and a placed NPC of that class denies it
+When the game resolves the NPC's actions
+Then trade is denied for that NPC only
+</scenario>
+<scenario name="Old level">
+Given a level saved before this story
+When it is loaded and saved
+Then the file is unchanged
+</scenario>
+<scenario name="Reload">
+Given a kind file changed on disk while playing
+When the owner presses F5
+Then the change applies to every NPC of that kind without an override
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-261`: the Debug build with zero warnings and every Debug test passes, including the "US-261 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-261.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-261/.
+</verification>
+<teach_back>C++ concept for the owner: Layered defaults; std::optional for 'not set'; merging lists with a precedence rule.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-262 Placed NPCs are full persons
+```xml
+<prompt id="S-US-262" codex="2.9" milestone="M9a" story="US-262" priority="Must" size="L">
+<context>
+Story US-262: Placed NPCs are full persons.
+As the player, I want the people placed in a level to be real members of the world, with needs, memories, ageing and families, so that they feel alive like my clan.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: new person requirement of E17 (CI-012), SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-261, US-154.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: every placed NPC that is not an animal or monster class becomes a person record of the simulation at level load (needs, memories, age, family; a family id may be set in the Editor later by US-268), driven by the same daily rules as clan members; its figure on the map follows the person. Animals and monsters stay creatures. Persons are saved and loaded with the game; the determinism hash test includes them.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Person">
+Given a placed wanderer
+When a day passes
+Then its needs change and a memory of the day exists, as for a clan member
+</scenario>
+<scenario name="Saved">
+Given a placed person who aged one day and met the hero
+When the game is saved and loaded
+Then age, needs and memories are the same
+</scenario>
+<scenario name="Creatures">
+Given a placed goblin of class monster
+When the level loads
+Then it is a creature, not a person, and fights as before
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-262`: the Debug build with zero warnings and every Debug test passes, including the "US-262 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-262.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-262/.
+</verification>
+<teach_back>C++ concept for the owner: Identity and lifetime: one id from the level file to the save.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-263 The NPC store and detail by distance
+```xml
+<prompt id="S-US-263" codex="2.9" milestone="M9a" story="US-263" priority="Must" size="L">
+<context>
+Story US-263: The NPC store and detail by distance.
+As the owner, I want the world to hold up to 100,000 region-loaded NPCs while the game stays smooth, so that the end game can be crowded.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: D-06 (target PC); new performance requirement, CI-012.
+</context>
+<dependencies>
+Stories that must be Done: US-262.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: a compact person store (struct of arrays, ids, no per-person heap objects in hot loops) and a spatial grid for 'who is near'. Detail by distance (D-52 S-02): persons within the near radius tick fully; far persons get one coarse summary per in-game day; moving in or out of the radius changes their level without losing state. Write ADR-022 (store layout, radius, daily budget, numbers measured). A headless load test with 100,000 generated persons.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Load">
+Given 100,000 generated persons in a headless run
+When one in-game day is simulated
+Then it finishes within the budget of ADR-022 on the D-06 PC and the determinism hash is stable over two runs
+</scenario>
+<scenario name="Near and far">
+Given a person who walks out of the near radius and back
+When the days pass
+Then its needs and memories continue without a jump or a loss
+</scenario>
+<scenario name="Frame">
+Given the test level with 100,000 far persons loaded
+When the game runs for one minute
+Then the frame time stays within the D-06 target
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-263`: the Debug build with zero warnings and every Debug test passes, including the "US-263 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-263.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-263/.
+</verification>
+<teach_back>C++ concept for the owner: Struct of arrays and cache lines; spatial hashing; why O(n^2) breaks at 100,000.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-264 Attitudes and opinions
+```xml
+<prompt id="S-US-264" codex="2.9" milestone="M9a" story="US-264" priority="Must" size="M">
+<context>
+Story US-264: Attitudes and opinions.
+As the player, I want every NPC to have its own attitude to me and to others, changed by what we do, so that my choices matter person by person.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-03, new opinion requirement of E17 (CI-012).
+</context>
+<dependencies>
+Stories that must be Done: US-263.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: nine attitude words (friendly, neutral, wary, hostile, scared, suspicious, enchanted, lovingly, enviously) derived from an integer opinion per (holder, target) pair, stored only for pairs that met. Events that change it (D-52 Q-05): dialogue quality and frequency, gifts, trade, help events, a marriage in the family, being in the same family; each with an amount in data (assets/data/sim/opinions.json). Hostile replaces the old `enemy` switch for NPCs with a kind file. The attitude word shows in the NPC's menu title.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Gift">
+Given a neutral NPC
+When the hero gives it a gift worth the 'gift' amount
+Then its opinion of the hero rises by that amount and its word changes when a threshold is crossed
+</scenario>
+<scenario name="Family">
+Given two NPCs of the same family
+When the level loads
+Then each starts with the 'same family' opinion of the other
+</scenario>
+<scenario name="Sparse">
+Given 100,000 persons where 10 pairs have met
+When the store is inspected
+Then exactly 10 opinion entries exist
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-264`: the Debug build with zero warnings and every Debug test passes, including the "US-264 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-264.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-264/.
+</verification>
+<teach_back>C++ concept for the owner: Sparse maps keyed by pairs; deriving words from numbers with thresholds.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-265 Talk with placed NPCs
+```xml
+<prompt id="S-US-265" codex="2.9" milestone="M9a" story="US-265" priority="Must" size="M">
+<context>
+Story US-265: Talk with placed NPCs.
+As the player, I want to talk to any NPC that has something to say, so that every person in a level can speak.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-03, INT-01.
+</context>
+<dependencies>
+Stories that must be Done: US-264, US-161.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: placed persons become subjects with their resolved tags; `talk.json` targets a tag every NPC with a dialogue for the player carries; the conversation opens the NPC's `player` dialogue (class default, kind or the NPC's own); an NPC with no dialogue has no Talk option (D-52 Q-11). Dialogues may read and change opinions (conditions and effects added to the .dlg guide). The panel pauses the game (D-35). Clan members keep their M8 talk.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Talk">
+Given a placed NPC with a player dialogue, 2 m from the hero
+When the player right-clicks it and chooses Talk
+Then its dialogue opens and the game pauses
+</scenario>
+<scenario name="No script">
+Given a placed NPC with no player dialogue
+When the player right-clicks it
+Then Talk is not offered
+</scenario>
+<scenario name="Clan unchanged">
+Given a clan member
+When the player chooses Talk
+Then the conversation is the same as before this story
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-265`: the Debug build with zero warnings and every Debug test passes, including the "US-265 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-265.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-265/.
+</verification>
+<teach_back>C++ concept for the owner: One interface for many kinds of things; data-driven dispatch by tags.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-266 Confront
+```xml
+<prompt id="S-US-266" codex="2.9" milestone="M9a" story="US-266" priority="Must" size="M">
+<context>
+Story US-266: Confront.
+As the player, I want a separate Confront button with taunt, insult, ask for peace, antagonise and de-escalate, so that I can deal with hostile NPCs by words and live with the consequences.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-03, INT-01.
+</context>
+<dependencies>
+Stories that must be Done: US-265.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: a Confront intent (its own key and a right-click menu entry) offered for any NPC, hostile ones included; five interaction files (taunt, insult, ask-for-peace, antagonise, de-escalate) whose effects change opinions of the target and of every NPC within hearing range who knows the target, by amounts in data; the outcome can start or stop a fight. NPCs may confront each other later (US-292).
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Calm down">
+Given a hostile NPC about to attack
+When the player chooses De-escalate and the check succeeds
+Then it stops attacking and its opinion of the hero rises
+</scenario>
+<scenario name="Insult">
+Given an NPC with two friends within hearing range
+When the player insults it
+Then its opinion and its friends' opinions of the hero fall by the data amounts
+</scenario>
+<scenario name="Separate">
+Given a friendly NPC
+When the player presses the Confront key
+Then the five confront actions are offered and Talk is not among them
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-266`: the Debug build with zero warnings and every Debug test passes, including the "US-266 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-266.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-266/.
+</verification>
+<teach_back>C++ concept for the owner: Intents mapped from keys; effects that spread to bystanders.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-267 Actions and the Actions pop-up
+```xml
+<prompt id="S-US-267" codex="2.9" milestone="M9a" story="US-267" priority="Must" size="S">
+<context>
+Story US-267: Actions and the Actions pop-up.
+As the player, I want to see every action an NPC could offer and what each needs, while the menu shows only what I can do now, so that I know how to unlock the rest.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: INT-01, INT-03.
+</context>
+<dependencies>
+Stories that must be Done: US-265.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: the offer check applies tags, then the resolved allow and deny lists (D-52 Q-08). Game: denied or unmet actions are hidden in the right-click menu (Q-09); an Actions pop-up (a menu entry and a key) lists every action the NPC has, each with its unmet requirements in plain words (for example 'needs: friendly or better').
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Hidden">
+Given a trader whose trade needs the attitude friendly and who is wary of the hero
+When the player right-clicks it
+Then Trade is not in the menu
+</scenario>
+<scenario name="Pop-up">
+Given the same trader
+When the player opens the Actions pop-up
+Then Trade is listed with 'needs: friendly or better'
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-267`: the Debug build with zero warnings and every Debug test passes, including the "US-267 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-267.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-267/.
+</verification>
+<teach_back>C++ concept for the owner: Filtering with std::ranges; turning conditions into readable text.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-268 Editor NPC panel
+```xml
+<prompt id="S-US-268" codex="2.9" milestone="M9a" story="US-268" priority="Must" size="L">
+<context>
+Story US-268: Editor NPC panel.
+As the owner, I want to select a placed NPC in the Editor and set its name, classes, attitude, family, dialogues by partner type and actions, so that I set every NPC by hand.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: INT-06, SDC-06.
+</context>
+<dependencies>
+Stories that must be Done: US-267, US-125.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game (Editor): the Select tool's properties panel for a placed character: name, classes (several), starting attitude, family, dialogues by partner type (Player, each NPC Class, Animals, Environment; the list comes from data so it can grow), allow/deny action checkboxes built from the registry, and 'Reset to defaults'. Only differences from class and kind are saved. Each change is one Undo step (US-126).
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Edit">
+Given a placed wanderer selected
+When the owner gives it the classes trader and elder, the attitude friendly and its own player dialogue, and saves
+Then the level holds only those differences and F1 plays with them
+</scenario>
+<scenario name="Actions">
+Given the actions list of a placed NPC
+When the owner unticks Give gift and plays
+Then that NPC's menu does not offer Give gift
+</scenario>
+<scenario name="Undo">
+Given five panel changes
+When the owner presses Ctrl+Z five times
+Then the NPC is as it was
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-268`: the Debug build with zero warnings and every Debug test passes, including the "US-268 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-268.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-268/.
+</verification>
+<teach_back>C++ concept for the owner: Forms bound to data; saving only the differences.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-269 Editor kinds tab and map markers
+```xml
+<prompt id="S-US-269" codex="2.9" milestone="M9a" story="US-269" priority="Must" size="M">
+<context>
+Story US-269: Editor kinds tab and map markers.
+As the owner, I want a tab for each NPC kind's defaults and a colour ring with an icon under each placed NPC, so that I can change a whole kind at once and read a level at a glance.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: INT-06, SDC-06.
+</context>
+<dependencies>
+Stories that must be Done: US-268.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game (Editor): an NPC kinds tab reusing the US-268 form, writing assets/data/npcs/<kind>.json; under every placed NPC a ring in its class colour with the class icon (several classes: the ring split in equal arcs, the first class's icon); drawn only in the Editor.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Kind">
+Given the kinds tab
+When the owner sets goblin to neutral and saves
+Then every placed goblin without an override is neutral in play
+</scenario>
+<scenario name="Markers">
+Given a level with a trader, a guard and a goblin
+When the owner opens it in the Editor
+Then each shows its ring and icon, and none shows in Game mode
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-269`: the Debug build with zero warnings and every Debug test passes, including the "US-269 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-269.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-269/.
+</verification>
+<teach_back>C++ concept for the owner: Reusing a widget for two data sources; stable JSON field order.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-270 NPC test level
+```xml
+<prompt id="S-US-270" codex="2.9" milestone="M9a" story="US-270" priority="Must" size="S">
+<context>
+Story US-270: NPC test level.
+As the owner, I want a test level with seven NPCs that shows every M9a feature, so that I can try it all in one walk.
+Epic E17 NPC foundation: Every placed NPC is a person with classes, an attitude and opinions; the player talks to, confronts and acts on any NPC; the owner sets every NPC in the Editor.
+Traces to: SDC-03, INT-06.
+</context>
+<dependencies>
+Stories that must be Done: US-269.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Data: assets/levels/npc-test.json built in the Editor with the D-52 cast: trader, talker, wary hunter, elder (with a written dialogue), guard, goblin, deer; each talking NPC with its own .dlg; a walk-through checklist in docs/guides/npc-data.md. Never edit assets/levels/valley.json.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Walk-through">
+Given `odysseus.exe --level assets/levels/npc-test.json`
+When the owner follows the checklist
+Then every NPC offers exactly the actions its classes and overrides allow, the Actions pop-up explains the rest, confront changes opinions, the goblin attacks
+</scenario>
+<scenario name="Loads clean">
+Given the test level
+When the game loads it
+Then the log has no class, kind, interaction or dialogue error
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-270`: the Debug build with zero warnings and every Debug test passes, including the "US-270 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-270.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-270/.
+</verification>
+<teach_back>C++ concept for the owner: Smoke tests that load every shipped file.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+```xml
+<prompt id="X-M9a" codex="2.9" name="Exit review M9a">
+<instructions>
+1. Demonstrate the exit criteria: Every placed NPC is a person with one or more classes, an attitude and opinions; the player talks to and confronts NPCs and sees their actions in a pop-up; the owner edits classes, kinds and NPCs in the Editor; the NPC test level shows all of it; 100,000 persons run within the ADR-022 budget.
+   Also run `pwsh tools/verify.ps1 -Story X-M9a -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M9a.md.
+2. Collect evidence (test output, CI run, screenshots) into docs/gates/M9a.md, one section per criterion, each marked met or not met. Also: the US-270 walk-through; one NPC changed in the panel and one kind and one class changed in their tabs, each shown in play; the ADR-022 load test result.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9a-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M9b Trade economy
+Exit criteria: The player trades with any trader by barter or the region's currency; prices follow supply and demand and the trader's opinion; stock is limited and restocks daily; the owner sets currencies and stock in the Editor.
+
+Why this milestone exists: D-52 Q-13..Q-17 and S-03: barter and owner-defined currency, supply and demand, reputation, limited daily stock.
+
+```xml
+<prompt id="K-M9b" codex="2.9" name="Kick off M9b Trade economy">
+<instructions>
+1. Confirm that M9a (docs/gates/M9a.md) and its stories are done, and that D-34, D-35 and D-52 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (2-4 options each, recommended first), only the questions the M9b stories leave open after D-52. Record the answers.
+3. Architect: extend docs/plans/M9-npc-design.md for M9b before its first story.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-280, US-281, US-282, US-283, US-284.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-280 Currencies per region
+```xml
+<prompt id="S-US-280" codex="2.9" milestone="M9b" story="US-280" priority="Must" size="S">
+<context>
+Story US-280: Currencies per region.
+As the owner, I want to choose in the Editor which items are currency in a region, so that trade can use money where I want it.
+Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: new trade requirements of E18 (CI-012), INT-06.
+</context>
+<dependencies>
+Prompts that must be Done: X-M9a.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: a region's currencies (item ids with a base value) in the level or region data. Game (Editor): a Currencies section in the level settings with an item picker. A region with none trades by barter only.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Set">
+Given the test level's settings
+When the owner marks shells as currency with value 1 and saves
+Then trades in that level accept shells
+</scenario>
+<scenario name="None">
+Given a level with no currency
+When the player trades
+Then only barter is offered
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-280`: the Debug build with zero warnings and every Debug test passes, including the "US-280 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-280.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-280/.
+</verification>
+<teach_back>C++ concept for the owner: Value types; why money is an integer.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-281 Trader stock
+```xml
+<prompt id="S-US-281" codex="2.9" milestone="M9b" story="US-281" priority="Must" size="M">
+<context>
+Story US-281: Trader stock.
+As the player, I want traders to have limited goods that come back each day and to pay more for what they want, so that trade is a choice.
+Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: new trade requirements of E18 (CI-012), new person requirement of E17 (CI-012).
+</context>
+<dependencies>
+Stories that must be Done: US-280.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: per-trader stock, restock per day, wants; wants are bought at full value, other goods at half (D-52 Q-17); integers only; saved; far traders restock in their daily summary (US-263).
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Restock">
+Given a trader with 0 flint and a restock of 2 per day
+When a day passes
+Then it has 2 flint
+</scenario>
+<scenario name="Wants">
+Given a trader who wants berries
+When the hero sells berries and then furs
+Then berries count at full value and furs at half
+</scenario>
+<scenario name="Saved">
+Given stock after a trade
+When save and load
+Then the stock is the same
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-281`: the Debug build with zero warnings and every Debug test passes, including the "US-281 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-281.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-281/.
+</verification>
+<teach_back>C++ concept for the owner: Integer arithmetic and rounding rules written down.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-282 Supply and demand, and reputation
+```xml
+<prompt id="S-US-282" codex="2.9" milestone="M9b" story="US-282" priority="Must" size="M">
+<context>
+Story US-282: Supply and demand, and reputation.
+As the player, I want prices to rise when goods are scarce and fall when they are plentiful, and better deals from people who like me, so that the economy feels real.
+Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: new trade requirements of E18 (CI-012), SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-281, US-264.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: price = base value adjusted by the region's supply and demand of that item (formula and limits in an ADR or the design doc, data-tunable) and by the trader's opinion of the buyer; opinion thresholds gate access to some goods or to trade at all (D-52 Q-15). Deterministic; no floats in the simulation.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Scarce">
+Given flint scarce in the region
+When the hero asks its price twice a day apart while it gets scarcer
+Then the second price is higher
+</scenario>
+<scenario name="Reputation">
+Given two traders with equal stock, one friendly and one suspicious
+When the hero asks the same item's price
+Then the friendly one is cheaper
+</scenario>
+<scenario name="Gate">
+Given a trader whose rare goods need friendly
+When the wary hero opens trade
+Then the rare goods are not offered and the Actions pop-up says why
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-282`: the Debug build with zero warnings and every Debug test passes, including the "US-282 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-282.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-282/.
+</verification>
+<teach_back>C++ concept for the owner: Fixed-point formulas; clamping; tuning through data.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-283 Trade screen for any trader
+```xml
+<prompt id="S-US-283" codex="2.9" milestone="M9b" story="US-283" priority="Must" size="L">
+<context>
+Story US-283: Trade screen for any trader.
+As the player, I want one trade screen for every trader, with barter and currency, so that I can trade with a passing NPC as with a rival camp.
+Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: new trade requirements of E18 (CI-012), SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-282.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game: `RunFlow::openBarter` takes a trader reference (rival camp or NPC); `trade.json` targets the `trader` tag; the screen shows both sides' goods, their prices and the currency balance; rival-camp barter keeps its counter-offer and pay-later behaviour and its tests.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Trade">
+Given a friendly trader with 6 flint and the hero with 10 berries
+When the player gives berries worth 2 flint
+Then the hero has 2 more flint and the trader 2 fewer, the berries moved
+</scenario>
+<scenario name="Currency">
+Given a region with shells as currency
+When the player buys 1 fur for shells
+Then the shells move at the shown price
+</scenario>
+<scenario name="Rivals unchanged">
+Given a rival camp
+When the player chooses Barter
+Then it works as before this story
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-283`: the Debug build with zero warnings and every Debug test passes, including the "US-283 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-283.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-283/.
+</verification>
+<teach_back>C++ concept for the owner: std::variant for 'one of several kinds'.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-284 Editor trade panel
+```xml
+<prompt id="S-US-284" codex="2.9" milestone="M9b" story="US-284" priority="Must" size="M">
+<context>
+Story US-284: Editor trade panel.
+As the owner, I want to set a trader's stock, restock, wants and price settings in the Editor, so that each trader is my own.
+Epic E18 Trade economy: The player trades with any trader by barter or currency; prices follow supply and demand and opinion; the owner sets currencies and stock in the Editor.
+Traces to: INT-06, new trade requirements of E18 (CI-012).
+</context>
+<dependencies>
+Stories that must be Done: US-283.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game (Editor): a Trade section in the NPC panel (US-268) and in the kinds and classes forms: stock table, restock per day, wants list; undo per change. Set up the test level's trader and wary hunter and extend the walk-through checklist.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Edit">
+Given the test level's trader selected
+When the owner adds 3 furs, a restock of 1 per day and the want berries, and saves
+Then play shows the furs and restocks one a day
+</scenario>
+<scenario name="Walk-through">
+Given the extended checklist
+When the owner follows the trade steps
+Then each step behaves as written
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-284`: the Debug build with zero warnings and every Debug test passes, including the "US-284 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-284.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-284/.
+</verification>
+<teach_back>C++ concept for the owner: Table widgets bound to maps.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+```xml
+<prompt id="X-M9b" codex="2.9" name="Exit review M9b">
+<instructions>
+1. Demonstrate the exit criteria: The player trades with any trader by barter or the region's currency; prices follow supply and demand and the trader's opinion; stock is limited and restocks daily; the owner sets currencies and stock in the Editor.
+   Also run `pwsh tools/verify.ps1 -Story X-M9b -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M9b.md.
+2. Collect evidence (test output, CI run, screenshots) into docs/gates/M9b.md, one section per criterion, each marked met or not met. Also: a trade by barter and one by currency with the test level's trader; a price before and after a scarcity; a refused trade explained in the Actions pop-up.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9b-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
+### M9c NPC life
+Exit criteria: NPCs follow day and night schedules, act from their classes, custom actions and events, and do everything to each other with the same interaction files; the owner edits it all in the Editor; the test level shows a living day and the 100,000-person soak passes.
+
+Why this milestone exists: D-52 Q-10, Q-18, Q-19: schedules, class, quest, custom and event actions (quest actions are a hook that M10 fills), NPC-to-NPC interactions.
+
+```xml
+<prompt id="K-M9c" codex="2.9" name="Kick off M9c NPC life">
+<instructions>
+1. Confirm that M9b (docs/gates/M9b.md) and its stories are done, and that D-34, D-35 and D-52 are Decided in docs/decisions.md.
+2. Ask the owner, in one chat round (2-4 options each, recommended first), only the questions the M9c stories leave open after D-52. Record the answers.
+3. Architect: extend docs/plans/M9-npc-design.md for M9c before its first story.
+4. Set this milestone's stories to To do in docs/status.md in this order: US-290, US-291, US-292, US-293, US-294.
+5. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-290 Day and night schedules
+```xml
+<prompt id="S-US-290" codex="2.9" milestone="M9c" story="US-290" priority="Must" size="L">
+<context>
+Story US-290: Day and night schedules.
+As the owner, I want to give every NPC a daily schedule in the Editor, so that people work, eat, meet and sleep at their own hours.
+Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: new person requirement of E17 (CI-012), INT-06.
+</context>
+<dependencies>
+Prompts that must be Done: X-M9b.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: a schedule is a list of (from time, activity, place) entries per class, kind or NPC (same precedence as US-261); activities are interactions or 'go to'; needs and danger can interrupt and the schedule resumes; far persons follow it in their daily summary. Game (Editor): a schedule form in the NPC panel with times, activity and place pickers.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Follow">
+Given an NPC scheduled to work at the market from 06:00 and sleep at home from 21:00
+When the day passes
+Then it is at the market at 10:00 and at home at 22:00
+</scenario>
+<scenario name="Interrupt">
+Given the same NPC very hungry at 10:00
+When it eats
+Then it returns to the market afterwards
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-290`: the Debug build with zero warnings and every Debug test passes, including the "US-290 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-290.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-290/.
+</verification>
+<teach_back>C++ concept for the owner: Time-based state machines; interruptions and resumption.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-291 Action sources
+```xml
+<prompt id="S-US-291" codex="2.9" milestone="M9c" story="US-291" priority="Must" size="M">
+<context>
+Story US-291: Action sources.
+As the owner, I want NPCs to act from their classes, from my custom actions and from world events, and later from quests, all set in the Editor, so that I control what people do.
+Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: INT-01, INT-06.
+</context>
+<dependencies>
+Stories that must be Done: US-290.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: the NPC chooser (US-154) takes candidate actions from class actions, custom actions on the NPC, and event actions (an event in data offers actions to NPCs that match it, for example a fire nearby); a quest-action source is an empty hook that M10 fills. Game (Editor): sections for custom and event actions in the NPC and class forms.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Class">
+Given an NPC of class guard whose class action is patrol
+When it is idle on duty
+Then it patrols
+</scenario>
+<scenario name="Event">
+Given an event action 'help put out fire' for class villager
+When a fire starts within 12 m of a villager
+Then the villager goes to help
+</scenario>
+<scenario name="Hook">
+Given the quest-action source
+When the game runs
+Then it offers nothing and costs nothing until M10
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-291`: the Debug build with zero warnings and every Debug test passes, including the "US-291 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-291.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-291/.
+</verification>
+<teach_back>C++ concept for the owner: Strategy objects as sources; extension points.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-292 NPCs act on each other
+```xml
+<prompt id="S-US-292" codex="2.9" milestone="M9c" story="US-292" priority="Must" size="L">
+<context>
+Story US-292: NPCs act on each other.
+As the player, I want NPCs to talk, fight, trade, give gifts and confront each other with the same rules as me, so that the world lives without me.
+Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: INT-01, SDC-03.
+</context>
+<dependencies>
+Stories that must be Done: US-291.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation: every interaction with an `npc` block may have an NPC as actor and another NPC as target (D-52 Q-19): talk (bubbles), fight, trade (both stocks), gift, confront; opinions change as for the hero; deterministic; bounded per tick by the US-263 budget.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Trade">
+Given two traders near each other where one wants what the other has
+When they are idle
+Then they trade and both stocks change
+</scenario>
+<scenario name="Fight">
+Given two NPCs who are hostile to each other
+When they meet
+Then they fight and the bystanders' opinions change
+</scenario>
+<scenario name="Budget">
+Given the 100,000-person load test
+When a day is simulated
+Then it still meets ADR-022
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-292`: the Debug build with zero warnings and every Debug test passes, including the "US-292 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-292.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-292/.
+</verification>
+<teach_back>C++ concept for the owner: Symmetric actor and target; budgets per tick.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-293 Default interactions by partner type
+```xml
+<prompt id="S-US-293" codex="2.9" milestone="M9c" story="US-293" priority="Must" size="M">
+<context>
+Story US-293: Default interactions by partner type.
+As the owner, I want each class and NPC to have default dialogues and actions for meeting the player, other classes, animals and the environment, with a list I can extend, so that every meeting has a sensible reaction.
+Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: INT-01, INT-06.
+</context>
+<dependencies>
+Stories that must be Done: US-292.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Simulation and Editor: the partner types (Player, each NPC Class, Animals, Environment) come from data (assets/data/sim/partner-types.json) so the owner can add more; for each, a class or NPC lists default dialogues and actions; the chooser prefers them when that partner is the target.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Animals">
+Given a hunter class whose Animals default is hunt
+When a deer is near an idle hunter
+Then the hunter hunts it
+</scenario>
+<scenario name="Extend">
+Given a new partner type 'buildings' added to the data file
+When the Editor opens
+Then the NPC panel offers defaults for buildings
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-293`: the Debug build with zero warnings and every Debug test passes, including the "US-293 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-293.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-293/.
+</verification>
+<teach_back>C++ concept for the owner: Data-driven enumerations.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+#### S-US-294 Living test level
+```xml
+<prompt id="S-US-294" codex="2.9" milestone="M9c" story="US-294" priority="Must" size="S">
+<context>
+Story US-294: Living test level.
+As the owner, I want the test level to show a day of NPC life, and the 100,000-person soak to pass, so that I can judge M9c in one sitting.
+Epic E19 NPC life: NPCs follow schedules, do their class, custom and event actions and do everything to each other with the same files, all edited in the Editor.
+Traces to: new requirements of E19, CI-012.
+</context>
+<dependencies>
+Stories that must be Done: US-293.
+Owner decisions that must be Decided: D-34, D-52.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Data: npc-test.json gains schedules, class, custom and event actions and NPC-to-NPC trade and talk for the seven NPCs; the walk-through checklist covers one full day; a headless soak of 100,000 persons for 10 in-game days.
+Follow the formats in the M9a-M9c design notes and docs/plans/M9-npc-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Day">
+Given the test level
+When the owner watches one in-game day
+Then every NPC follows its schedule and at least one NPC-to-NPC trade and one conversation happen
+</scenario>
+<scenario name="Soak">
+Given 100,000 persons
+When 10 in-game days run headless
+Then the budget of ADR-022 holds and the determinism hash is stable
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: every new data field is in docs/guides/npc-data.md (new in US-260) with an example; every shipped JSON and .dlg file passes the validator; load-save-load gives the same data for every shipped file this story touches.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-294`: the Debug build with zero warnings and every Debug test passes, including the "US-294 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-294.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-294/.
+</verification>
+<teach_back>C++ concept for the owner: Soak tests and what they catch.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3); a performance budget of ADR-022 that cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+```xml
+<prompt id="X-M9c" codex="2.9" name="Exit review M9c">
+<instructions>
+1. Demonstrate the exit criteria: NPCs follow day and night schedules, act from their classes, custom actions and events, and do everything to each other with the same interaction files; the owner edits it all in the Editor; the test level shows a living day and the 100,000-person soak passes.
+   Also run `pwsh tools/verify.ps1 -Story X-M9c -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M9c.md.
+2. Collect evidence (test output, CI run, screenshots) into docs/gates/M9c.md, one section per criterion, each marked met or not met. Also: one in-game day of the test level recorded; one NPC-to-NPC trade and one conversation; the 10-day soak result.
+3. If all are met: merge qa into main, push, confirm CI on main is green, tag the repository m9c-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result.</output_format>
+</prompt>
+```
+
 ### M8d Buildings
 Exit criteria: The hero builds from blueprints and piece by piece on a building grid, and rooms form; the owner composes prefabs from pieces in the Editor and places them in levels; prefabs marked buildable are offered as blueprints.
 
@@ -5650,7 +6737,7 @@ Why this milestone exists: the hero builds from blueprints and piece by piece, a
 ```xml
 <prompt id="K-M8d" codex="2.2" name="Kick off M8d Buildings">
 <instructions>
-1. Confirm that M8c (docs/gates/M8c.md) and its stories are done, and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
+1. Confirm that M8c (docs/gates/M8c.md) and, since v2.9, M9a, M9b and M9c (docs/gates/M9c.md) and their stories are done, and that D-42, D-43 and D-06 are Decided in docs/decisions.md.
 2. Ask the owner, in one chat round (AskUserQuestion, 2-4 options each, recommended first), every design question the M8d stories leave open after the brief and D-42/D-43 (for example: the Build menu's layout, which blueprints are known at the start, how blueprints look before materials arrive). Record the answers in docs/decisions.md as "Decided (owner, <date>)".
 3. Architect: write docs/plans/M8d-buildings-design.md (building data and grid, placement validity, construction as interactions, room detection, prefab format and editor, save migrations) before the first story.
 4. Set this milestone's stories to To do in docs/status.md in this order: US-250, US-251, US-252, US-256.
@@ -8524,7 +9611,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-248 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> P-012 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-248 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M9a -> S-US-260 -> S-US-261 -> S-US-262 -> S-US-263 -> S-US-264 -> S-US-265 -> S-US-266 -> S-US-267 -> S-US-268 -> S-US-269 -> S-US-270 -> X-M9a -> K-M9b -> S-US-280 -> S-US-281 -> S-US-282 -> S-US-283 -> S-US-284 -> X-M9b -> K-M9c -> S-US-290 -> S-US-291 -> S-US-292 -> S-US-293 -> S-US-294 -> X-M9c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -8574,3 +9661,5 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.5 | 2026-10-01 | Remaining open items (source of truth v2.7, Round 20, D-48): K-M13 reminds the owner to start recruiting the eight playtesters (docs/plans/M6-playtest-plan.md, written by Dominus); X-M6 runs the playtest by that plan; D-14 and D-48 in the decision table. No scope change. |
 | 2.6 | 2026-10-01 | Merge (source of truth v2.8). During US-231 Mraw found that S-US-231 contradicted the owner's M8b answers (CI-010, D-44) and aligned S-US-231 and S-US-232 itself on its story branch, labelled 2.4 there, while Anima published 2.4 and 2.5 in parallel. This version contains both: the D-44 alignment (four windowed sizes, Whole scaling with Fill in Settings, first-start defaults, zoom and UI scale controls) and every change of 2.4 and 2.5. CI-010 resolved. From now on Codex changes go through Anima (A-002), so versions stay in one line. |
 | 2.7 | 2026-10-04 | Celestial bodies (Mraw's brief docs/plans/US-248-celestial-brief.md; owner decision D-50). New story prompt S-US-248 (sun and moon as placeable light-source objects with a clock orbit, sprites in the sky, eclipses as data events, Editor placement) before S-US-244; S-US-244 now depends on US-248 and D-50 and casts its shadows along the light direction of the celestial bodies; K-M8c lists the stories in the order US-240..US-243, US-248, US-244..US-247; the execution order line (section 7) gets S-US-248; D-49 and D-50 added to the decision table; L-01 verification lines say to rerun only failing cases after a failure. M8c now has nine stories. Source of truth: ENV-22 Celestial bodies must be added to the requirements (v2.9) and US-248 to the backlog before US-248 starts (Mraw to reconcile; Anima issue CI-011). |
+| 2.8 | 2026-10-04 | NPC roles, talk and trade: first draft of milestone M9a (K-M9a, S-US-260..S-US-267, X-M9a) between X-M8e and K-M9, with the owner's 24 questions open (D-52). Superseded the same day by v2.9 before any prompt ran. |
+| 2.9 | 2026-10-04 | NPC foundation, trade economy and NPC life (owner answers D-52, six chat rounds; Mraw's brief docs/plans/M9a-npc-roles-brief.md, revised). The owner's answers tripled the v2.8 scope, so M9a is split into three milestones built right after M8c and before M8d (D-52 Q-01, S-01): M9a NPC foundation (K-M9a, S-US-260..S-US-270: NPC Classes in the Editor, kind files and overrides, placed NPCs as full persons, the person store with detail by distance for 100,000 persons and ADR-022, nine attitudes per pair, talk, Confront, hidden actions and the Actions pop-up, Editor NPC panel, kinds tab and markers, test level), M9b Trade economy (K-M9b, S-US-280..S-US-284: owner-defined currencies, limited daily stock, supply and demand with reputation, one trade screen, Editor trade panel), M9c NPC life (K-M9c, S-US-290..S-US-294: schedules, class, custom and event actions with a quest hook for M10, NPC-to-NPC interactions, partner-type defaults, living test level and soak), each with an exit review; shared design notes. The v2.8 prompts S-US-260..S-US-267 are replaced (none had run). P-012 adopts v2.9; K-M8d also checks that M9c is done; D-52 Decided in the decision table; D-15 chain and execution order updated. Source of truth: epics E17-E19 and their stories must be added to the requirements and the backlog before K-M9a (Mraw to reconcile; Anima issue CI-012). |
