@@ -446,6 +446,7 @@ add_executable(odysseus_game_tests
     tests/game/npc_life_game_test.cpp
     tests/game/npc_dealings_game_test.cpp
     tests/game/npc_defaults_game_test.cpp
+    tests/game/living_level_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -523,6 +524,16 @@ target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest n
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
 add_test(NAME odysseus_sim_tests COMMAND odysseus_sim_tests)
+
+# --- US-294: the soak (100,000 persons, 30 in-game days, twice) in its own executable so the slow run stays apart from the quick tests ---
+add_executable(odysseus_sim_soak
+    tests/main.cpp
+    tests/sim/npc_soak_test.cpp)
+target_link_libraries(odysseus_sim_soak PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
+target_compile_definitions(odysseus_sim_soak PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
+odysseus_apply_settings(odysseus_sim_soak)
+add_test(NAME odysseus_sim_soak COMMAND odysseus_sim_soak)
+set_tests_properties(odysseus_sim_soak PROPERTIES TIMEOUT 3000)
 
 # --- US-015: the headless runner from the command line (100 years; wrong input) ---
 add_test(NAME "US-015 Run"

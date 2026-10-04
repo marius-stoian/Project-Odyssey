@@ -1807,3 +1807,23 @@ The price of leaving the compiler's safety net is that *we* must check: every re
 **Try it (15 minutes).** Copy `assets/data/sim/partner-types.json`, add `"ghosts"`, start the game with that data folder and look for `Defaults with: ghosts` in the NPC panel.
 
 **Check yourself.** Why is `class` refused as a partner type while `class:guard` is always allowed?
+
+## US-294 Living test level: soak tests and what they catch
+
+**What we built.** The test level now shows a whole day of life (schedules, a swap, a chat, a hunt) and a headless **soak test**: 100,000 persons live 30 days, twice, and the two runs must end with the same saved state.
+
+**The C++ idea: soak tests.** A unit test checks one small thing for a moment. A *soak* test runs a lot of the system for a long time, and looks for the faults that only grow slowly: a counter that overflows after a million steps, a list that never gets emptied (see the `takeEvents()` call in the soak: the game drains the events, so the soak must too), a cache that grows without end, a tick that gets slower every day, and the worst one for us: **non-determinism** that hides for a day or two. Our check is simple: run the same world twice and compare one number, the hash of everything that would be saved. If anything depended on a pointer address, the order of an `unordered_map`, the clock or uninitialised memory, the numbers differ and the test fails; AddressSanitizer in Debug adds a check for memory that was never set.
+
+```cpp
+const Soak first = run(100000, 30, 7);
+const Soak second = run(100000, 30, 7);
+CHECK(first.saveHash == second.saveHash);
+```
+
+Two details worth learning. First, a second test runs with *another seed* and expects a *different* hash: a check that can never fail proves nothing, so we also prove that it can. Second, timing is only checked in Release (`#ifdef NDEBUG`): Debug is meant for finding mistakes, not for speed, and a speed rule there would only fail for the wrong reason.
+
+**Where to look.** `tests/sim/npc_soak_test.cpp` (the soak), `tests/game/living_level_test.cpp` (the day), `assets/levels/npc-test.json`.
+
+**Try it (15 minutes).** In `npc_soak_test.cpp` change `run(100000, 30, 7)` to `run(100000, 3, 7)` and see how much faster it is; then add a `rand()` call somewhere in the director on a scratch copy and watch the two hashes differ.
+
+**Check yourself.** Why does the soak call `director.takeEvents()` now and then, and what would the real game do with them?

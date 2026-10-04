@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-294: living test level and the 100,000-person soak (Mraw) - 2026-10-05
+
+**State:** On `story/US-294`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Data: `assets/levels/npc-test.json` gets five places (market, grove, hut, pond, shrine) and a schedule for Tala, Harn (with a night variant), Ossa, Vell and Gur; Ossa does `fish`, Vell does `pray`; Harn carries 2 berries so he and Tala can swap.
+- Tests (not yet run): `tests/sim/npc_soak_test.cpp` (new executable `odysseus_sim_soak`, ctest `odysseus_sim_soak`, timeout 3000 s): 100,000 persons, 1,000 traders, 30 in-game days, twice with one seed, the hash of the saved state of population, director and market must match; in Release the ADR-022 budget (day under 100 ms, worst tick under 8 ms); a different seed gives a different hash. `tests/game/living_level_test.cpp` (3 cases): one day of the level (swap, chat, met), the activity of each NPC at 11:00 and Tala at the market, the level loads clean. `tests/game/trade_editor_test.cpp`: the restock check now looks at Tala's delivery day (she can swap a flint away).
+- Docs: guide (walk-through of one day, the soak), `docs/plans/US-294.md`, learning journal.
+- Unfinished checks: build, tests and the soak timing at X-M9bc; the GPU screenshots of `docs/evidence/US-294/` are owner-only manual steps.
+
 ## US-293: default interactions by partner type (Mraw) - 2026-10-05
 
 **State:** On `story/US-293`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
