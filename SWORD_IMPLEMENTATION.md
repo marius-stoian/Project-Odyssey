@@ -1,128 +1,73 @@
 # Sword Weapon System Implementation
 
 ## Summary
-Implemented a complete sword/bow weapon switching system for the Project Odyssey game (M3 melee combat). Players can now toggle between sword (melee) and bow (ranged) weapons using the Shift or Tab key, and attack with the Interact button.
+A sword/bow weapon switching system for Project Odyssey (M3 melee combat). Players toggle between sword (melee) and bow (ranged) with Shift or Tab, and attack with the Interact button.
 
-## Features Implemented
+## Features
 
-### 1. **Weapon Intent System** (`luna/engine/input.h/cpp`)
-- Added `SwitchWeapon` intent to the Intent enum
-- Maps **Shift key** (LShift/RShift) and **Tab key** to weapon switching
-- Updated SDL3 platform layer to recognize Shift and Tab key scancodes
-
-### 2. **Sword Combat System** (`game/sword.h/cpp`)
-- **SwordConfig**: Tunable parameters for slash duration, cooldown, and range
-- **Sword class**: Manages slash state machine with 3 states:
-  - `Idle`: Ready to attack
-  - `Slashing`: Performing the attack animation (10 ticks)
-  - `Cooldown`: Cannot attack (15 ticks before returning to Idle)
-- **Animation**: 4-frame slash animation per facing direction
-- **API**:
-  - `slash(facing)`: Initiate a slash attack
-  - `update()`: Advance state machine
-  - `animationFrame()`: Get current animation frame (0-3)
-  - `isAttacking()`: Check if currently slashing
-
-### 3. **Weapon Switching** (`game/odyssey_game.h/cpp`)
-- Added `WeaponType` enum: `Sword` and `Bow`
-- Tracks current weapon in `currentWeapon_` member
-- Toggles weapon on `SwitchWeapon` intent press
-- Logs weapon switch to console
-
-### 4. **Attack Handling** (`game/odyssey_game.cpp`)
-- **Sword**: Calls `sword_.slash(hero_.facing())` on Interact when sword is active
-- **Bow**: Existing spear throw logic when bow is active
-- Both weapons work with the hero's facing direction
-
-### 5. **Rendering** (`game/odyssey_game.cpp`, `game/placeholder_art.h`)
-- Sword slash animation overlays on character when slashing
-- Added `kSwordFrames` sprite frame definitions for all 8 facing directions (4 frames each)
-- Frames are currently placeholders using character sprite positions; real art can be added in M3
-- Sword only renders when actively slashing; idle state shows no weapon
+1. **Weapon intent** (`luna/engine/input.h/cpp`): new `SwitchWeapon` intent, bound to Shift (LShift/RShift) and Tab. The SDL3 platform layer recognizes both scancodes.
+2. **Sword combat** (`game/sword.h/cpp`):
+   - `SwordConfig`: tunable slash duration, cooldown and range.
+   - `Sword` class: a slash state machine with three states: `Idle` (ready), `Slashing` (10 ticks), `Cooldown` (15 ticks, then back to Idle).
+   - 4-frame slash animation per facing direction.
+   - API: `slash(facing)` starts an attack, `update()` advances the state machine, `animationFrame()` returns the frame (0-3), `isAttacking()` checks for a slash in progress.
+3. **Weapon switching** (`game/odyssey_game.h/cpp`): `WeaponType` enum (`Sword`, `Bow`), tracked in `currentWeapon_`, toggled on the `SwitchWeapon` press and logged to the console.
+4. **Attack handling** (`game/odyssey_game.cpp`): with the sword active, Interact calls `sword_.slash(hero_.facing())`; with the bow active, the existing spear-throw logic runs. Both use the hero's facing.
+5. **Rendering** (`game/odyssey_game.cpp`, `game/placeholder_art.h`): the slash animation overlays the character while slashing; idle shows no weapon. `kSwordFrames` defines frames for all 8 directions (4 each). They are placeholders using character sprite positions; real art can come in M3.
 
 ## How to Use
 
-### In-Game Controls
-- **Shift or Tab**: Toggle between Sword and Bow
-- **E, Space, or Enter**: Attack with current weapon
-  - Sword: Performs a slash in facing direction
-  - Bow: Throws a spear (existing behavior)
-- **WASD/Arrow Keys**: Move
-- **Escape**: Menu
+Controls:
+- **Shift or Tab**: toggle Sword and Bow
+- **E, Space, or Enter**: attack (sword: slash in facing direction; bow: throw a spear, existing behavior)
+- **WASD/Arrow Keys**: move
+- **Escape**: menu
 
-### Code Integration
-```cpp
-// Game loop automatically handles:
-1. Weapon switching on SwitchWeapon intent
-2. Attack input based on current weapon
-3. Sword state updates each tick
-4. Rendering sword slash animation overlay
-```
+The game loop handles weapon switching on `SwitchWeapon`, attack input by current weapon, sword state updates each tick, and the slash overlay rendering.
 
 ## Architecture Notes
 
-### Layer Compliance
-- **Game layer** (`src/game/`) - Sword class and weapon system
-- **Platform layer** - SDL3 keyboard mappings
-- **Engine layer** - Input intent system
-- No dependencies on Simulation layer
-- Follows 6-layer architecture (Charter rule 2)
-
-### State Machine
-The sword uses a 3-state machine:
+- **Layers**: Sword class and weapon system in the Game layer (`src/game/`); SDL3 key mappings in Platform; the intent system in Engine. No dependency on the Simulation layer. Follows the 6-layer architecture (Charter rule 2).
+- **State machine**:
 ```
 Idle ← (slash cooldown expires) ← Cooldown ← (slash animation ends) ← Slashing
         ↑ (SwitchWeapon pressed)             (Interact pressed in Idle)
         └─────── Always available ──────────┘
 ```
-
-### Determinism
-- No floating-point math in sword state
-- Animation frame is deterministic: `floor(slashTicks / slashDuration * 4) % 4`
-- No random numbers or timing dependencies
-
-## Future Enhancements
-
-1. **Melee Damage System** - Detect collision between slash and enemies
-2. **Sound Effects** - Slash and hit sounds
-3. **Screen Shake** - Feedback on successful hit
-4. **Combo System** - Chain slashes for higher damage
-5. **Special Abilities** - Power slash, spinning attack, etc.
-6. **Weapon Upgrades** - Better swords, faster attacks
-7. **Real Art** - Replace placeholder sword frames with animated sprites
+- **Determinism**: no floating-point math in sword state, no random numbers or timing dependencies. Animation frame is `floor(slashTicks / slashDuration * 4) % 4`.
 
 ## Files Changed
 
-### Created
-- `src/game/sword.h` - Sword state machine
-- `src/game/sword.cpp` - Sword implementation
-- `SWORD_IMPLEMENTATION.md` - This file
+Created:
+- `src/game/sword.h`, `src/game/sword.cpp`: sword state machine
+- `SWORD_IMPLEMENTATION.md`: this file
 
-### Modified
-- `src/luna/platform/events.h` - Added Shift/Tab keys
-- `src/luna/platform/sdl_events.cpp` - SDL3 key mapping
-- `src/luna/engine/input.h` - Added SwitchWeapon intent
-- `src/luna/engine/input.cpp` - Intent binding
-- `src/game/odyssey_game.h` - Added Sword, WeaponType, weapon tracking
-- `src/game/odyssey_game.cpp` - Weapon switching and attack logic
-- `src/game/placeholder_art.h` - Sword frame definitions
-- `CMakeLists.txt` - Added sword.cpp to build
+Modified:
+- `src/luna/platform/events.h`: Shift/Tab keys
+- `src/luna/platform/sdl_events.cpp`: SDL3 key mapping
+- `src/luna/engine/input.h`: `SwitchWeapon` intent
+- `src/luna/engine/input.cpp`: intent binding
+- `src/game/odyssey_game.h`: Sword, WeaponType, weapon tracking
+- `src/game/odyssey_game.cpp`: weapon switching and attack logic
+- `src/game/placeholder_art.h`: sword frame definitions
+- `CMakeLists.txt`: added sword.cpp to the build
 
 ## Testing
 
-The sword system has been integrated with the game executable (`odysseus.exe`). To test:
+Integrated with the game executable (`odysseus.exe`). To test:
 
-1. Run the game: `./build/windows-x64/bin/Release/odysseus.exe`
+1. Run `./build/windows-x64/bin/Release/odysseus.exe`
 2. Press **Shift** to toggle between Sword and Bow
 3. Press **E** or **Space** to attack with the current weapon
 4. Watch the console for weapon switch messages
-5. Observe slash animation when sword is active
+5. Observe the slash animation when the sword is active
 
-## Next Steps
+## Future Enhancements
 
-This foundation enables:
-- Melee collision detection (detecting enemies in slash range)
-- Damage application to enemies
-- Weapon-specific mechanics (different speed, range, effects)
-- Combo systems and special attacks
-- Weapon progression and upgrades
+1. Melee damage: detect collision between slash and enemies, apply damage
+2. Sound effects for slash and hit
+3. Screen shake on a successful hit
+4. Combo system: chain slashes for higher damage
+5. Special abilities: power slash, spinning attack, etc.
+6. Weapon upgrades: better swords, faster attacks, weapon-specific speed, range and effects
+7. Real art: replace the placeholder sword frames with animated sprites

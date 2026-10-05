@@ -20,14 +20,14 @@ The owner can switch the game between **Game mode** and **Editor mode**. In the 
 | `image-gen-1(1)`, `image-gen-2(1)` (1536x1024) | a blue-scarf hero, 4 rows x 6 columns of walk frames on white | second hero animation |
 | `image-gen-1(2)`, `image-gen-2(2)`, `image-gen-3`, `image-gen-4` (1672x941) | full landscapes (for example a snowy mountain valley) | backgrounds, title screen; not tiles |
 
-Facts that shape the work: these are **raster sheets with labels, dark or white backgrounds, no fixed cell grid, and about 60-125 px per character or tile**, not game-ready atlases. The game's sizes are fixed by D-04 and D-16 (characters 32x48, tiles 32x32 = 1 m). So the sheets must be **cut, cleaned (transparent background) and reduced** into atlases by a repeatable tool, with the cut rectangles kept as data.
+These are **raster sheets with labels, dark or white backgrounds, no fixed cell grid, and about 60-125 px per character or tile**, not game-ready atlases. The game's sizes are fixed by D-04 and D-16 (characters 32x48, tiles 32x32 = 1 m). So the sheets must be **cut, cleaned (transparent background) and reduced** into atlases by a repeatable tool, with the cut rectangles kept as data.
 
 ## Architecture rules that apply (Charter)
 - Rule 2: only the Platform layer touches the OS/SDL3, so **mouse events** are translated there. Rule 4: game code reads **intents**, so the mouse becomes a platform-agnostic "pointer" in the Engine (position, buttons, wheel), plus scripted pointer input for tests.
 - Rule 9: Luna stays game-agnostic: the **UI toolkit** (font, panel, button, list, number field) goes in Luna Engine; the **Editor itself** is Game code (`src/game/editor/`), and **Level** data is Game data.
 - Rule 7: content is data: tiles, characters and levels are JSON, validated with errors naming file and field. Levels save like ADR-010 (versioned, temp file then rename, 3 backups).
 - Rule 6 / determinism: the simulation is untouched; the Editor pauses it; Game mode starts from the saved level.
-- New library: **stb_image** (single header in `third_party/`, like FastNoiseLite) to read PNG files: needs **ADR-018**. Dear ImGui is *not* used for the Editor UI: it would pull SDL3 into game code; our small UI toolkit is enough for v1 (decision to be recorded in the ADR).
+- New library: **stb_image** (single header in `third_party/`, like FastNoiseLite) to read PNG files: needs **ADR-018**. Dear ImGui is *not* used for the Editor UI: it would pull SDL3 into game code; our small UI toolkit is enough for v1 (record this in the ADR).
 
 ## Stories (proposed IDs, epic E12 Level Editor, milestone M2c)
 | ID | Story | Size | Depends on | Acceptance in one line |

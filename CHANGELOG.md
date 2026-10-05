@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## US-180 Quest data and runtime (Dominus) - 2026-10-05
+
+**State:** Merged into `qa` from `story/US-180`. Debug build zero warnings; own cases pass; full verify at X-M10 (D-41).
+
+- **New:** `src/sim/quest_data.{h,cpp}` (quest files, line-numbered errors, writer), `src/sim/quest_book.{h,cpp}` (state machine, events, save), `tests/sim/quest_test.cpp`, `docs/guides/quests.md`, `assets/data/schemas/quest.schema.json`, `docs/plans/US-180.md`.
+- **Changed:** rule language gains `quest(id)`, `step(id)` and the verb `quest`; the game loads `assets/data/quests/`, ticks the quests every 10 ticks, saves them in `things.json` version 2 (version 1 still loads), reloads them on F5.
+
 ## K-M10 kickoff (Dominus) - 2026-10-05
 
 **State:** On `qa`. Documentation only.

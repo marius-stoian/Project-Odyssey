@@ -1,0 +1,578 @@
+MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+
+  Checking File Globs
+  1>Checking architecture include rules
+  Scanning sources for module dependencies...
+  log.cpp
+  presentation.cpp
+  random.cpp
+  assertions.cpp
+  version.cpp
+  Compiling...
+  presentation.cpp
+  random.cpp
+  version.cpp
+  assertions.cpp
+  log.cpp
+  odysseus_core.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_core.lib
+  Scanning sources for module dependencies...
+  vec3.cpp
+  rigid_body.cpp
+  fixed.cpp
+  material.cpp
+  spatial_grid.cpp
+  shapes.cpp
+  ballistics.cpp
+  quat.cpp
+  Compiling...
+  ballistics.cpp
+  material.cpp
+  quat.cpp
+  shapes.cpp
+  fixed.cpp
+  vec3.cpp
+  spatial_grid.cpp
+  rigid_body.cpp
+  luna_physics.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_physics.lib
+  Scanning sources for module dependencies...
+  layer.cpp
+  window.cpp
+  sdl_renderer_backend.cpp
+  crash.cpp
+  user_paths.cpp
+  sdl_events.cpp
+  system.cpp
+  gpu_backend.cpp
+  Compiling...
+  layer.cpp
+  user_paths.cpp
+  crash.cpp
+  sdl_events.cpp
+  system.cpp
+  window.cpp
+  sdl_renderer_backend.cpp
+  gpu_backend.cpp
+  luna_platform.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_platform.lib
+  Scanning sources for module dependencies...
+  application.cpp
+  node_graph.cpp
+  layer.cpp
+  fixed_step_clock.cpp
+  frame_stats.cpp
+  input.cpp
+  camera.cpp
+  renderer.cpp
+  scaled_renderer.cpp
+  physics_view.cpp
+  tile_map.cpp
+  image_ops.cpp
+  collision.cpp
+  shadow_draw.cpp
+  sprite_layers.cpp
+  chunk_streamer.cpp
+  ui.cpp
+  effects.cpp
+  image_io.cpp
+  Compiling...
+  input.cpp
+  renderer.cpp
+  image_ops.cpp
+  shadow_draw.cpp
+  collision.cpp
+  camera.cpp
+  sprite_layers.cpp
+  frame_stats.cpp
+  scaled_renderer.cpp
+  tile_map.cpp
+  layer.cpp
+  fixed_step_clock.cpp
+  application.cpp
+  physics_view.cpp
+  image_io.cpp
+  effects.cpp
+  node_graph.cpp
+  ui.cpp
+  chunk_streamer.cpp
+  luna_engine.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_engine.lib
+  Scanning sources for module dependencies...
+  calendar.cpp
+  npc_context.cpp
+  action_runner.cpp
+  rule_json.cpp
+  game_clock.cpp
+  layer.cpp
+  rule_effect.cpp
+  json_data.cpp
+  interaction.cpp
+  rule_expr.cpp
+  npc_class.cpp
+  economy.cpp
+  partner_types.cpp
+  trade_market.cpp
+  npc_kind.cpp
+  npc_actions.cpp
+  opinion.cpp
+  dialogue_script.cpp
+  npc_schedule.cpp
+  npc_population.cpp
+  npc_chooser.cpp
+  npc_events.cpp
+  npc_director.cpp
+  npc_extras.cpp
+  dialogue_select.cpp
+  smalltalk.cpp
+  world_story.cpp
+  conversation.cpp
+  flag_store.cpp
+  world.cpp
+  world_love.cpp
+  world_care.cpp
+  world_hunt.cpp
+  episodes.cpp
+  needs.cpp
+  chronicle.cpp
+  clan.cpp
+  person.cpp
+  actions.cpp
+  ai.cpp
+  life.cpp
+  memory.cpp
+  report.cpp
+  story.cpp
+  save.cpp
+  building_data.cpp
+  rivals.cpp
+  region_save.cpp
+  hero_life.cpp
+  building_life.cpp
+  building_store.cpp
+  quest_book.cpp
+  quest_data.cpp
+  graph_check.cpp
+  test_play.cpp
+  Compiling...
+  dialogue_script.cpp
+  layer.cpp
+  npc_extras.cpp
+  game_clock.cpp
+  opinion.cpp
+  rule_expr.cpp
+  partner_types.cpp
+  interaction.cpp
+  calendar.cpp
+  npc_chooser.cpp
+  npc_kind.cpp
+  rule_effect.cpp
+  json_data.cpp
+  action_runner.cpp
+  npc_context.cpp
+  rule_json.cpp
+  npc_director.cpp
+  npc_actions.cpp
+  trade_market.cpp
+  npc_events.cpp
+  npc_class.cpp
+  npc_schedule.cpp
+  economy.cpp
+  npc_population.cpp
+  dialogue_select.cpp
+  smalltalk.cpp
+  flag_store.cpp
+  conversation.cpp
+  world.cpp
+  world_story.cpp
+  world_care.cpp
+  episodes.cpp
+  world_hunt.cpp
+  person.cpp
+  needs.cpp
+  world_love.cpp
+  clan.cpp
+  actions.cpp
+  ai.cpp
+  chronicle.cpp
+  story.cpp
+  memory.cpp
+  region_save.cpp
+  life.cpp
+  save.cpp
+  hero_life.cpp
+  rivals.cpp
+  report.cpp
+  building_data.cpp
+  building_store.cpp
+  graph_check.cpp
+  building_life.cpp
+  quest_data.cpp
+  test_play.cpp
+  quest_book.cpp
+  odysseus_sim.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_sim.lib
+  Scanning sources for module dependencies...
+  object_art.cpp
+  odyssey_game.cpp
+  layer.cpp
+  sword.cpp
+  spear_range.cpp
+  content_art.cpp
+  status.cpp
+  test_map.cpp
+  placeholder_art.cpp
+  hero.cpp
+  tags.cpp
+  materials.cpp
+  enemy.cpp
+  art.cpp
+  catalogs.cpp
+  arc_shots.cpp
+  weather.cpp
+  animals.cpp
+  game_rules.cpp
+  npc_life.cpp
+  builtin_actions.cpp
+  plants.cpp
+  pickups.cpp
+  weapons.cpp
+  lighting.cpp
+  world_lights.cpp
+  shadows.cpp
+  sky.cpp
+  bubbles.cpp
+  clan_art.cpp
+  celestial.cpp
+  clan_view.cpp
+  normal_art.cpp
+  run_flow.cpp
+  tutorial.cpp
+  region_level.cpp
+  settings.cpp
+  level.cpp
+  npc_class_book.cpp
+  editor.cpp
+  session_stats.cpp
+  npc_marker.cpp
+  npc_people.cpp
+  dialogue_graph.cpp
+  interaction_graph.cpp
+  editor_history.cpp
+  building_layer.cpp
+  graph_editor.cpp
+  building_editor.cpp
+  Compiling...
+  content_art.cpp
+  placeholder_art.cpp
+  animals.cpp
+  enemy.cpp
+  layer.cpp
+  odyssey_game.cpp
+  sword.cpp
+  weapons.cpp
+  catalogs.cpp
+  spear_range.cpp
+  plants.cpp
+  test_map.cpp
+  hero.cpp
+  builtin_actions.cpp
+  status.cpp
+  game_rules.cpp
+  tags.cpp
+  npc_life.cpp
+  weather.cpp
+  pickups.cpp
+  art.cpp
+  materials.cpp
+  object_art.cpp
+  arc_shots.cpp
+  lighting.cpp
+  world_lights.cpp
+  celestial.cpp
+  shadows.cpp
+  sky.cpp
+  normal_art.cpp
+  clan_art.cpp
+  clan_view.cpp
+  dialogue_graph.cpp
+  settings.cpp
+  session_stats.cpp
+  bubbles.cpp
+  npc_class_book.cpp
+  editor.cpp
+  region_level.cpp
+  interaction_graph.cpp
+  npc_people.cpp
+  tutorial.cpp
+  npc_marker.cpp
+  graph_editor.cpp
+  building_editor.cpp
+  building_layer.cpp
+  level.cpp
+  run_flow.cpp
+  editor_history.cpp
+  odysseus_game.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_game.lib
+  Scanning sources for module dependencies...
+  hero_test.cpp
+  normals_test.cpp
+  elements_test.cpp
+  sky_test.cpp
+  m6_test.cpp
+  lighting_test.cpp
+  art_test.cpp
+  spear_test.cpp
+  celestial_test.cpp
+  level_test.cpp
+  modes_test.cpp
+  presentation_settings_test.cpp
+  content_test.cpp
+  shadow_test.cpp
+  paint_test.cpp
+  world_lights_test.cpp
+  aiming_test.cpp
+  settings_test.cpp
+  place_test.cpp
+  weapons_test.cpp
+  plants_test.cpp
+  combat_test.cpp
+  arc_test.cpp
+  ranged_test.cpp
+  animals_test.cpp
+  weather_test.cpp
+  weather_light_test.cpp
+  npc_class_editor_test.cpp
+  lighting_editor_test.cpp
+  npc_kind_test.cpp
+  npc_people_test.cpp
+  npc_attitude_test.cpp
+  npc_talk_test.cpp
+  npc_kinds_tab_test.cpp
+  npc_actions_test.cpp
+  npc_confront_test.cpp
+  npc_editor_test.cpp
+  npc_test_level_test.cpp
+  trade_stock_test.cpp
+  economy_editor_test.cpp
+  trade_gate_test.cpp
+  trade_screen_test.cpp
+  trade_editor_test.cpp
+  npc_life_game_test.cpp
+  schedule_editor_test.cpp
+  living_level_test.cpp
+  npc_dealings_game_test.cpp
+  npc_defaults_game_test.cpp
+  clan_test.cpp
+  m4_test.cpp
+  pickups_test.cpp
+  tags_test.cpp
+  interactions_test.cpp
+  conversation_test.cpp
+  npc_test.cpp
+  menu_test.cpp
+  greeting_test.cpp
+  graph_command_test.cpp
+  exchange_test.cpp
+  renderer_test.cpp
+  dialogue_graph_test.cpp
+  building_game_test.cpp
+  graph_editor_test.cpp
+  interaction_graph_test.cpp
+  building_editor_test.cpp
+  thing_overrides_test.cpp
+  building_life_game_test.cpp
+  Compiling...
+  level_test.cpp
+  normals_test.cpp
+  modes_test.cpp
+  celestial_test.cpp
+  sky_test.cpp
+  arc_test.cpp
+  art_test.cpp
+  spear_test.cpp
+  m6_test.cpp
+  weapons_test.cpp
+  shadow_test.cpp
+  paint_test.cpp
+  ranged_test.cpp
+  aiming_test.cpp
+  presentation_settings_test.cpp
+  plants_test.cpp
+  world_lights_test.cpp
+  place_test.cpp
+  combat_test.cpp
+  settings_test.cpp
+  content_test.cpp
+  lighting_test.cpp
+  hero_test.cpp
+  elements_test.cpp
+  animals_test.cpp
+  npc_attitude_test.cpp
+  weather_test.cpp
+  lighting_editor_test.cpp
+  weather_light_test.cpp
+  npc_kind_test.cpp
+  npc_talk_test.cpp
+  npc_people_test.cpp
+  npc_class_editor_test.cpp
+  npc_confront_test.cpp
+  npc_actions_test.cpp
+  npc_editor_test.cpp
+  npc_test_level_test.cpp
+  npc_kinds_tab_test.cpp
+  trade_stock_test.cpp
+  trade_gate_test.cpp
+  economy_editor_test.cpp
+  trade_screen_test.cpp
+  trade_editor_test.cpp
+  npc_dealings_game_test.cpp
+  schedule_editor_test.cpp
+  living_level_test.cpp
+  npc_defaults_game_test.cpp
+  npc_life_game_test.cpp
+  clan_test.cpp
+  m4_test.cpp
+  interactions_test.cpp
+  pickups_test.cpp
+  tags_test.cpp
+  menu_test.cpp
+  conversation_test.cpp
+  npc_test.cpp
+  renderer_test.cpp
+  greeting_test.cpp
+  exchange_test.cpp
+  building_editor_test.cpp
+  graph_command_test.cpp
+  interaction_graph_test.cpp
+  building_game_test.cpp
+  dialogue_graph_test.cpp
+  building_life_game_test.cpp
+  thing_overrides_test.cpp
+  graph_editor_test.cpp
+  odysseus_game_tests.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\bin\Debug\odysseus_game_tests.exe
+MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+
+  Checking File Globs
+  1>Checking architecture include rules
+  Scanning sources for module dependencies...
+  odysseus_core.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_core.lib
+  Scanning sources for module dependencies...
+  luna_physics.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_physics.lib
+  Scanning sources for module dependencies...
+  odysseus_sim.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_sim.lib
+  Scanning sources for module dependencies...
+  needs_test.cpp
+  world_test.cpp
+  save_test.cpp
+  npc_schedule_test.cpp
+  npc_actions_test.cpp
+  opinion_test.cpp
+  trade_price_test.cpp
+  hero_test.cpp
+  trade_market_test.cpp
+  trade_deal_test.cpp
+  economy_test.cpp
+  story_care_test.cpp
+  story_quarrel_test.cpp
+  chronicle_test.cpp
+  story_love_test.cpp
+  rules_test.cpp
+  npc_class_test.cpp
+  report_test.cpp
+  memory_test.cpp
+  story_test.cpp
+  ai_test.cpp
+  region_test.cpp
+  story_episode_test.cpp
+  story_hunt_test.cpp
+  npc_interact_test.cpp
+  npc_population_test.cpp
+  dialogue_test.cpp
+  npc_defaults_test.cpp
+  npc_kind_test.cpp
+  runner_test.cpp
+  npc_scale_test.cpp
+  quest_test.cpp
+  conversation_test.cpp
+  selection_test.cpp
+  smalltalk_test.cpp
+  building_data_test.cpp
+  memory_talk_test.cpp
+  graph_check_test.cpp
+  building_life_test.cpp
+  building_store_test.cpp
+  test_play_test.cpp
+  Compiling...
+  save_test.cpp
+  npc_schedule_test.cpp
+  memory_test.cpp
+  rules_test.cpp
+  needs_test.cpp
+  hero_test.cpp
+  economy_test.cpp
+  npc_class_test.cpp
+  story_hunt_test.cpp
+  world_test.cpp
+  npc_actions_test.cpp
+  region_test.cpp
+  story_episode_test.cpp
+  story_quarrel_test.cpp
+  story_care_test.cpp
+  opinion_test.cpp
+  story_test.cpp
+  trade_market_test.cpp
+  trade_deal_test.cpp
+  story_love_test.cpp
+  chronicle_test.cpp
+  trade_price_test.cpp
+  report_test.cpp
+  ai_test.cpp
+  npc_interact_test.cpp
+  building_life_test.cpp
+  npc_defaults_test.cpp
+  test_play_test.cpp
+  building_data_test.cpp
+  npc_scale_test.cpp
+  npc_population_test.cpp
+  quest_test.cpp
+  dialogue_test.cpp
+  memory_talk_test.cpp
+  npc_kind_test.cpp
+  conversation_test.cpp
+  smalltalk_test.cpp
+  building_store_test.cpp
+  runner_test.cpp
+  selection_test.cpp
+  graph_check_test.cpp
+  odysseus_sim_tests.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\bin\Debug\odysseus_sim_tests.exe
+MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+
+  Checking File Globs
+  1>Checking architecture include rules
+  Scanning sources for module dependencies...
+  odysseus_core.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_core.lib
+  Scanning sources for module dependencies...
+  luna_physics.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_physics.lib
+  Scanning sources for module dependencies...
+  luna_platform.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_platform.lib
+  Scanning sources for module dependencies...
+  luna_engine.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_engine.lib
+  Scanning sources for module dependencies...
+  odysseus_sim.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_sim.lib
+  Scanning sources for module dependencies...
+  odysseus_game.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_game.lib
+  Scanning sources for module dependencies...
+  main.cpp
+  Compiling...
+  main.cpp
+  odysseus.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\bin\Debug\odysseus.exe
+MSBuild version 18.10.1-1.26427.6+3cd27c13e for .NET Framework
+
+  Checking File Globs
+  1>Checking architecture include rules
+  Scanning sources for module dependencies...
+  odysseus_core.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_core.lib
+  Scanning sources for module dependencies...
+  luna_physics.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\luna_physics.lib
+  Scanning sources for module dependencies...
+  odysseus_sim.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\Debug\odysseus_sim.lib
+  Scanning sources for module dependencies...
+  main.cpp
+  Compiling...
+  main.cpp
+  odysseus_headless.vcxproj -> C:\Users\Amek\.amek-ai\Odysseus\odysseus\build\windows-x64\bin\Debug\odysseus_headless.exe

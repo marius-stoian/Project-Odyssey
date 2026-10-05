@@ -44,6 +44,7 @@
 #include "game/bubbles.h"
 #include "sim/dialogue_script.h"
 #include "sim/flag_store.h"
+#include "sim/quest_book.h"
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
 #include "game/npc_class_book.h"
@@ -173,6 +174,8 @@ public:
     // Generated small talk (US-163): what people say when no script fits them, and for `{smalltalk.topic}`.
     sim::rules::SmallTalk& smalltalk() { return smalltalk_; }
     // Story notes set by conversations and interactions (`flag met-elder`), saved with the things (US-164).
+    sim::rules::QuestBook& quests() { return quests_; }
+    const sim::rules::QuestBook& quests() const { return quests_; }
     sim::rules::FlagStore& flags() { return flags_; }
     const sim::rules::FlagStore& flags() const { return flags_; }
     // What a conversation leaves behind (US-164): a memory in someone's mind (see World::rememberConversation) and a line in the clan's chronicle.
@@ -450,6 +453,7 @@ private:
     sim::rules::DialogueLibrary dialogues_;
     sim::rules::SmallTalk smalltalk_;
     sim::rules::FlagStore flags_;
+    sim::rules::QuestBook quests_; // the authored quests and where each stands (US-180)
     Bubbles bubbles_;
     Exchanges exchanges_;
     sim::rules::CooldownTable greetingCooldowns_;

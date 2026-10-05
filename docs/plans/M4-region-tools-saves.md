@@ -33,4 +33,4 @@ Assembly plan v1.9, prompts S-US-040..S-US-043, S-US-080, S-US-083 (M4). Decisio
 - A berry bush cut in the game regrows by the plant rule of US-136 (15 s), while the region's own regrowth rule (14 days) is the model for the clan's foraging; they are joined when the clan gathers from the region (M5).
 
 ## Verification
-Builds only: Debug and Release compiled with zero warnings; the tests were written with the code and not run (owner, 2026-10-01: no testing until told otherwise). Full verification and CI are owed.
+Builds only: Debug and Release compiled with zero warnings; the tests were written with the code but not run (owner, 2026-10-01: no testing until told otherwise). Full verification and CI are owed.

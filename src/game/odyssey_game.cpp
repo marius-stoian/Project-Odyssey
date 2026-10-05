@@ -243,6 +243,7 @@ void OdysseyGame::resetPlay() {
     greetingCooldowns_.clear();
     smalltalk_.clear();
     flags_.clear();
+    quests_.clearStates();
     dialogueRng_ = core::Pcg32(1, 8);
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
@@ -641,6 +642,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     buildings_.forgetAll(); // a new run knows only the starting blueprints (D-55 Q2)
     // A new clan is a new story: what was said, remembered and flagged in the last one does not carry over (US-162..US-164).
     flags_.clear();
+    quests_.clearStates();
     bubbles_.clear();
     exchanges_.reset(clan_->chronicle().entries().size());
     greetingCooldowns_.clear();
@@ -780,11 +782,16 @@ void OdysseyGame::loadInteractions() {
     sim::rules::LoadReport dialogueReport;
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     smalltalk_ = loadSmalltalk(dialogueReport);
+    sim::rules::LoadReport questReport;
+    quests_.replaceQuests(sim::rules::loadQuests(dataDirectory_ / "quests", questReport));
     syncEditorActions();
     syncGraphCatalog();
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
+    interactionReport_.errors.insert(interactionReport_.errors.end(), questReport.errors.begin(), questReport.errors.end());
+    interactionReport_.filesRead += questReport.filesRead;
+    core::logInfo(std::format("Quests: {} loaded from {} file(s), {} error(s)", questReport.loaded, questReport.filesRead, questReport.errors.size()));
     core::logInfo(std::format("Dialogue: {} conversation(s) loaded from {} file(s)", dialogueReport.loaded, dialogueReport.filesRead));
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
     for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
@@ -803,6 +810,10 @@ bool OdysseyGame::reloadInteractions() {
     sim::rules::LoadReport dialogueReport;
     sim::rules::DialogueLibrary freshDialogue = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     sim::rules::SmallTalk freshSmalltalk = loadSmalltalk(dialogueReport);
+    sim::rules::LoadReport questReport;
+    std::vector<sim::rules::Quest> freshQuests = sim::rules::loadQuests(dataDirectory_ / "quests", questReport);
+    report.errors.insert(report.errors.end(), questReport.errors.begin(), questReport.errors.end());
+    report.filesRead += questReport.filesRead;
     report.errors.insert(report.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     report.warnings.insert(report.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     report.filesRead += dialogueReport.filesRead;
@@ -818,6 +829,7 @@ bool OdysseyGame::reloadInteractions() {
     syncEditorActions();
     dialogues_ = std::move(freshDialogue);
     smalltalk_ = std::move(freshSmalltalk);
+    quests_.replaceQuests(std::move(freshQuests));
     syncGraphCatalog();
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
@@ -945,14 +957,14 @@ std::string OdysseyGame::thingsText() const {
     for (const WorldPlant& plant : plants_) {
         if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
     }
-    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}}.dump(1);
+    return nlohmann::json{{"version", 2}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}, {"quests", nlohmann::json::parse(quests_.save(actionClock_))}}.dump(1);
 }
 
 std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
     std::vector<std::string> notes;
     try {
         const nlohmann::json data = nlohmann::json::parse(text);
-        if (data.at("version").get<int>() != 1) return {"things.json was saved by another version and was not loaded"};
+        if (const int version = data.at("version").get<int>(); version != 1 && version != 2) return {"things.json was saved by another version and was not loaded"};
         for (const auto& [id, state] : data.at("plants").items()) {
             const int index = plantIndexById(std::stoi(id));
             if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
@@ -961,6 +973,10 @@ std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
         if (data.contains("flags")) { // saves from before US-164 have none
             const std::vector<std::string> flagNotes = flags_.load(data.at("flags").dump());
             notes.insert(notes.end(), flagNotes.begin(), flagNotes.end());
+        }
+        if (data.contains("quests")) { // saves from before US-180 (version 1) have none: every quest starts locked
+            const std::vector<std::string> questNotes = quests_.load(data.at("quests").dump(), actionClock_);
+            notes.insert(notes.end(), questNotes.begin(), questNotes.end());
         }
     } catch (const std::exception& error) {
         notes.push_back(std::string("things.json could not be read: ") + error.what());
@@ -1883,6 +1899,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (!devToolsOpen_) updateZoom(intents);
     ++ticks_;
     tickActions(intents);
+    if (ticks_ % 10 == 0) tickQuests(*this);
     tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();

@@ -4,7 +4,7 @@ Codex v1.5, prompt X-M1b, 2026-09-30. Exit criteria: Luna Physics passes its mat
 
 | Criterion | Result | Evidence |
 |---|---|---|
-| Math tests pass identically on every build | **Met** | US-025: exact raw values (independent exact fractions, plus 100,000 cases against the CPU's 128-bit instructions); one million mixed operations hash to **17224312723153614174** in Debug, Release and on GitHub's CI runner (the value is pinned, so any difference fails) |
+| Math tests pass identically on every build | **Met** | US-025: exact raw values (independent exact fractions, plus 100,000 cases against the CPU's 128-bit instructions); one million mixed operations hash to **17224312723153614174** in Debug, Release and on GitHub's CI runner (pinned, so any difference fails) |
 | Hit-detection tests pass | **Met** | US-026: touching sphere/box contact point and normal; a spear tip at 10 m per tick finds a 0.2 m target at 0.498 of the tick; 1,000 bodies: 114 of 499,500 pairs tested, same contacts as all pairs, 0.56-0.61 ms per step (Release) |
 | Ballistics tests pass | **Met** | US-027: see the textbook table below; aim solver hits a straw target 25 m away |
 | Rigid-body tests pass | **Met** | US-028: 140 N s on 70 kg gives 2 m/s; bounce heights and friction distance as below |
