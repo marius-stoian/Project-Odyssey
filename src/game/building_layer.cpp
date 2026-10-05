@@ -34,6 +34,8 @@ constexpr int kPanelWidth = 176;
 constexpr int kRowHeight = 20;
 constexpr int kRows = 8;
 constexpr int kClanCarry = 2;   // what a clan member brings of each missing item in one go (US-253)
+constexpr int kRaidRelation = -50; // a rival at or below this is at war or at feud with the hero (US-255)
+constexpr int kRaidDamage = 40;     // hit points of one raid
 constexpr int kListTop = 32;
 
 luna::engine::Color shade(int rgb, int delta) {
@@ -351,6 +353,7 @@ void BuildingLayer::tick(OdysseyGame& game, const luna::engine::Intents& world, 
         if (seasonAtLastTick_ >= 0 && season != seasonAtLastTick_) {
             store_.seasonEnded(seasonAtLastTick_);
             rivalBuilders_.seasonStarted(data_, rivalPeople(game));
+            raidsAtSeasonStart(game, season);
         }
         seasonAtLastTick_ = season;
     }
@@ -358,6 +361,16 @@ void BuildingLayer::tick(OdysseyGame& game, const luna::engine::Intents& world, 
                                     ? game.catalogs().weather[static_cast<std::size_t>(game.weather().current())].name
                                     : std::string();
     store_.advance({rainPercentOf(weather)});
+    if (game.ticks() % 10 == 0) { // flames on burning pieces (US-255)
+        int shown = 0;
+        for (const sim::buildings::PlacedBuilding& building : store_.all()) {
+            for (const sim::buildings::PieceState& piece : building.pieces) {
+                if (!piece.burning || shown >= 8) continue;
+                game.playEffect("ember sparks", piece.x * kTileSize + kTileSize / 2.0, piece.y * kTileSize + kTileSize / 2.0, 28);
+                ++shown;
+            }
+        }
+    }
     syncObstacles(game);
 }
 
@@ -443,6 +456,58 @@ std::string BuildingLayer::repair(OdysseyGame& game, int id, int hp) {
     const std::string label = store_.label(*building);
     if (!store_.repair(id, hp)) return label + " needs no repair.";
     return std::format("{}: repaired, now {}%.", label, store_.condition(*store_.find(id)));
+}
+
+bool BuildingLayer::fireHit(OdysseyGame& game, int cellX, int cellY) {
+    if (!store_.igniteAt(cellX, cellY)) return false;
+    game.showMessage("A building caught fire!");
+    return true;
+}
+
+std::string BuildingLayer::clanDouse(OdysseyGame&, int id) {
+    const sim::buildings::PlacedBuilding* building = store_.find(id);
+    if (building == nullptr) return {};
+    const auto [cx, cy] = store_.centre(*building);
+    return store_.douse(id, cx, cy) ? store_.label(*building) + ": the clan put out some of the fire." : std::string();
+}
+
+// A rival the hero is at war or at feud with (the relation at or below -50) strikes the hero's buildings when a season begins: one hit of 40 hit points on a
+// finished building and, one time in three, a fire (D-55 Q2). Whole numbers: the choice follows the store's hash, the season and the rival.
+int BuildingLayer::raidsAtSeasonStart(OdysseyGame& game, int season) {
+    if (game.life() == nullptr || game.rivals() == nullptr) return 0;
+    int raids = 0;
+    for (int rival = 0; rival < static_cast<int>(game.rivals()->clans().size()); ++rival) {
+        if (game.life()->relation(rival) <= kRaidRelation && raidFrom(game, rival, season)) ++raids;
+    }
+    return raids;
+}
+
+bool BuildingLayer::raidFrom(OdysseyGame& game, int rival, int season) {
+    {
+        std::vector<const sim::buildings::PlacedBuilding*> targets;
+        for (const sim::buildings::PlacedBuilding& building : store_.all()) {
+            if (building.state == sim::buildings::State::Finished && building.faction == 0) targets.push_back(&building);
+        }
+        if (targets.empty()) return false;
+        const std::uint64_t pick = store_.hash() ^ (static_cast<std::uint64_t>(season + 1) * 0x9E3779B97F4A7C15ULL) ^ (static_cast<std::uint64_t>(rival + 1) * 0xC2B2AE3D27D4EB4FULL);
+        const sim::buildings::PlacedBuilding& target = *targets[pick % targets.size()];
+        const std::string label = store_.label(target);
+        bool hit = false;
+        std::pair<int, int> where{0, 0};
+        const std::size_t first = static_cast<std::size_t>((pick >> 8) % std::max<std::size_t>(1, target.pieces.size()));
+        for (std::size_t i = 0; i < target.pieces.size() && !hit; ++i) {
+            const sim::buildings::PieceState& piece = target.pieces[(first + i) % target.pieces.size()];
+            if (!piece.built || piece.fell()) continue;
+            where = {piece.x, piece.y};
+            hit = store_.damageAt(piece.x, piece.y, kRaidDamage);
+        }
+        if (!hit) return false;
+        const bool fire = ((pick >> 20) % 3) == 0;
+        if (fire) store_.igniteAt(where.first, where.second);
+        game.chronicleLine(std::format("Raiders from {} struck the {}{}", (game.rivals() != nullptr && static_cast<std::size_t>(rival) < game.rivals()->clans().size() ? game.rivals()->clans()[static_cast<std::size_t>(rival)].name : std::string("a rival clan")), label, fire ? " and set it on fire" : ""), -1, -1);
+        game.showMessage(std::format("Raiders struck your {}{}!", label, fire ? " and set it on fire" : ""));
+    }
+    return true;
 }
 
 std::string BuildingLayer::douse(OdysseyGame& game, int id) {

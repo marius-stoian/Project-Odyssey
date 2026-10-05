@@ -3,12 +3,13 @@
   "id": "douse-fire",
   "label": "Put out the fire at {target.name}",
   "note": "Reach 2.5 m. Takes two seconds.",
-  "actors": ["hero"],
+  "actors": ["hero", "person"],
   "target": { "tags": ["building", "burning"] },
   "range": 2.5,
   "duration": 2,
   "order": 10,
   "effects": [
     "do douse-fire"
-  ]
+  ],
+  "npc": { "score": "90", "cooldown": 2 }
 }

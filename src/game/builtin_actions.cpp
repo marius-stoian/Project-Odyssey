@@ -307,6 +307,9 @@ public:
         } else if (name == "build-work" && subject.kind == Subject::Kind::Building) {
             const std::string said = game_.buildings().clanWork(game_, subject.index, 4);
             if (!said.empty()) game_.showMessage(said);
+        } else if (name == "douse-fire" && subject.kind == Subject::Kind::Building) {
+            const std::string said = game_.buildings().clanDouse(game_, subject.index);
+            if (!said.empty()) core::logInfo(said);
         } else if (name == "gather-berries" && who.kind == ActorRef::Kind::Person) {
             game_.helpPerson(who.index, sim::Need::Hunger, 30); // they eat a little of what they pick
         } else if (name == "flee") {

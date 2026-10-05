@@ -71,3 +71,41 @@ TEST_CASE("US-254 Interior: a finished building with an interior level opens it,
     CHECK(std::abs(camp.odyssey.hero().feetX() - outsideX) < 1.0);
     CHECK(std::abs(camp.odyssey.hero().feetY() - outsideY) < 1.0);
 }
+
+TEST_CASE("US-255 Raid: a rival at war strikes a finished building at the season start, a friendly one does not, and repair and douse put things right") {
+    Camp camp("us255-raid");
+    const auto [ax, ay] = spotNear(camp.odyssey, "hut");
+    const auto placed = camp.odyssey.buildings().store().place("hut", ax, ay, 0, 0, true, {});
+    REQUIRE(placed.problem.empty());
+    camp.play(4);
+    CHECK(camp.odyssey.buildings().raidsAtSeasonStart(camp.odyssey, 1) == 0); // no rivals in a hand-made level
+    REQUIRE(camp.odyssey.buildings().raidFrom(camp.odyssey, 0, 1));
+    const buildings::PlacedBuilding* hut = camp.odyssey.buildings().store().find(placed.id);
+    REQUIRE(hut != nullptr);
+    CHECK(camp.odyssey.buildings().store().condition(*hut) < 100);
+    // The same seed and season give the same raid (deterministic).
+    const int before = camp.odyssey.buildings().store().condition(*hut);
+    // Repair: ten seconds of work each time, through the interaction.
+    const auto subject = game::buildingSubject(camp.odyssey, placed.id);
+    REQUIRE(subject.has_value());
+    CHECK(subject->title.find("damaged") != std::string::npos);
+    REQUIRE(game::startInteraction(camp.odyssey, "repair", *subject));
+    camp.play(20 * 11);
+    CHECK(camp.odyssey.buildings().store().condition(*camp.odyssey.buildings().store().find(placed.id)) > before);
+}
+
+TEST_CASE("US-255 Fire: a burning piece can be doused through the interaction") {
+    Camp camp("us255-douse");
+    const auto [ax, ay] = spotNear(camp.odyssey, "piece:wall-wood");
+    const auto placed = camp.odyssey.buildings().store().place("piece:wall-wood", ax, ay, 0, 0, true, {});
+    REQUIRE(placed.problem.empty());
+    const buildings::PlacedBuilding* hut = camp.odyssey.buildings().store().find(placed.id);
+    REQUIRE(camp.odyssey.buildings().store().ignitePiece(placed.id, 0));
+    CHECK(camp.odyssey.buildings().store().burning(*hut));
+    const auto subject = game::buildingSubject(camp.odyssey, placed.id);
+    REQUIRE(subject.has_value());
+    CHECK(subject->title.find("fire") != std::string::npos);
+    REQUIRE(game::startInteraction(camp.odyssey, "douse-fire", *subject));
+    camp.play(50);
+    CHECK_FALSE(camp.odyssey.buildings().store().burning(*camp.odyssey.buildings().store().find(placed.id)));
+}

@@ -43,6 +43,23 @@ std::vector<OdysseyGame::LightSource> OdysseyGame::lightSources(double alpha) co
         if (!plant.def->lightState.empty() && plant.state != plant.def->lightState) continue;
         if (const LightKindDef* kind = lighting_.kind(plant.def->light)) add(*kind, plant.feet.x, plant.feet.y - 8.0, 8.0, 5000U + static_cast<std::uint64_t>(plant.id));
     }
+    // Finished buildings with a light shine at night, and a burning piece is a fire (US-255).
+    for (const sim::buildings::PlacedBuilding& building : buildings_.store().all()) {
+        if (building.state != sim::buildings::State::Finished) continue;
+        const sim::buildings::KindDef* kindDef = buildings_.data().kind(building.kind);
+        if (kindDef != nullptr && !kindDef->light.empty() && !sky().sunUp) {
+            if (const LightKindDef* kind = lighting_.kind(kindDef->light)) {
+                const auto [cx, cy] = buildings_.store().centre(building);
+                add(*kind, cx * kTileSize + kTileSize / 2.0, cy * kTileSize + kTileSize / 2.0, 24.0, 40000U + static_cast<std::uint64_t>(building.id));
+            }
+        }
+        for (std::size_t p = 0; p < building.pieces.size(); ++p) {
+            if (!building.pieces[p].burning) continue;
+            if (const LightKindDef* kind = lighting_.kind("campfire")) {
+                add(*kind, building.pieces[p].x * kTileSize + kTileSize / 2.0, building.pieces[p].y * kTileSize + kTileSize / 2.0, 24.0, 60000U + static_cast<std::uint64_t>(building.id * 64 + static_cast<int>(p)));
+            }
+        }
+    }
     // The weapon in the hero's hand, when it has a light.
     if (const WeaponDef* weapon = heldWeapon(); weapon != nullptr && !weapon->light.empty()) {
         if (const LightKindDef* kind = lighting_.kind(weapon->light)) add(*kind, hero_.feetX(alpha), hero_.feetY(alpha) - 20.0, 20.0, 9000U);

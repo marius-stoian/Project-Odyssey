@@ -178,9 +178,9 @@ void NpcLife::think(OdysseyGame& game, int runnerId, double x, double y) {
 
     // What is near: plants for everyone; for animals also the hostile and the hero.
     std::vector<Subject> subjects;
-    if (actor.kind == ActorRef::Kind::Person) { // the clan builds (US-253): blueprints close by are jobs
+    if (actor.kind == ActorRef::Kind::Person) { // the clan builds (US-253) and fights fires (US-255): blueprints and burning buildings close by are jobs
         for (const sim::buildings::PlacedBuilding& building : game.buildings().store().all()) {
-            if (building.state != sim::buildings::State::Blueprint) continue;
+            if (building.state != sim::buildings::State::Blueprint && !game.buildings().store().burning(building)) continue;
             const std::optional<Subject> job = buildingSubject(game, building.id);
             if (job && std::hypot(job->x - x, job->y - y) <= reach) subjects.push_back(*job);
         }

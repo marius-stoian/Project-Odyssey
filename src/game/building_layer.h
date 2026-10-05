@@ -81,6 +81,11 @@ public:
     // The clan builds too (US-253): a clan member brings what the site still needs from the surroundings (up to 2 of each item) and does the work.
     std::string clanDeliver(OdysseyGame& game, int id);
     std::string clanWork(OdysseyGame& game, int id, int seconds);
+    // Fire and raids (US-255): a fire weapon that stops against a standing piece sets it alight; rivals at war raid at the start of a season.
+    bool fireHit(OdysseyGame& game, int cellX, int cellY);
+    std::string clanDouse(OdysseyGame& game, int id);
+    int raidsAtSeasonStart(OdysseyGame& game, int season); // how many rivals raided
+    bool raidFrom(OdysseyGame& game, int rival, int season);   // one raid: false when there was nothing to hit
     const sim::buildings::RivalBuilders& rivalBuilders() const { return rivalBuilders_; }
     std::uint64_t hash() const { return store_.hash() ^ (rivalBuilders_.hash() * 31); }
     // Walking obstacles of the finished walls, posts and fences are put on the map again when the store says they changed.

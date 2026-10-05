@@ -2030,6 +2030,12 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
                 // Stopped by something solid: if a big plant stands there, the shot cuts it down.
                 const int cellX = static_cast<int>(std::floor(shot.x / kTileSize));
                 const int cellY = static_cast<int>(std::floor((shot.y + 20.0) / kTileSize));
+                if (shot.weapon != nullptr && shot.weapon->element == Element::Fire) { // a fire shot stops against a standing piece of a building (US-255)
+                    const int ahead = static_cast<int>(kTileSize / 2);
+                    for (const auto& [wx, wy] : {std::pair{shot.x, shot.y}, std::pair{shot.x + shot.dx * ahead, shot.y + shot.dy * ahead}}) {
+                        if (buildings_.fireHit(*this, static_cast<int>(std::floor(wx / kTileSize)), static_cast<int>(std::floor(wy / kTileSize)))) break;
+                    }
+                }
                 for (std::size_t i = 0; i < plants_.size(); ++i) {
                     const PixelPoint cell = plantCell(plants_[i].feet);
                     if (plants_[i].alive && plants_[i].def != nullptr && plants_[i].def->blocks && cell.x == cellX && cell.y == cellY) {
@@ -2057,6 +2063,9 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             } else if (event.end == ArcEnd::Enemy) {
                 destroyPlant(plantOf[event.enemy - enemies_.size()]);
                 targets[event.enemy].alive = false;
+            } else if (event.end == ArcEnd::Solid && event.weapon != nullptr && event.weapon->element == Element::Fire &&
+                       buildings_.fireHit(*this, static_cast<int>(std::floor(luna::engine::toDouble(event.point.x))), static_cast<int>(std::floor(luna::engine::toDouble(event.point.y))))) {
+                // the building caught fire
             } else if (event.end != ArcEnd::Lost) {
                 playEffect("dust", ground.x, ground.y, 16); // a miss sticks in the ground or against a rock
             }

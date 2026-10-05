@@ -8,6 +8,7 @@
 #include "core/random.h"
 
 #include <array>
+#include <algorithm>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -188,6 +189,7 @@ public:
     int religionPercent() const;
     int tradePoints() const { return tradePoints_; }
     int followers() const;
+    void setRelation(int rival, int value) { if (rival >= 0 && static_cast<std::size_t>(rival) < relations_.size()) relations_[static_cast<std::size_t>(rival)] = std::clamp(value, -100, 100); } // a story or a test sets how a rival feels
     int relation(int rival) const { return rival >= 0 && static_cast<std::size_t>(rival) < relations_.size() ? relations_[static_cast<std::size_t>(rival)] : 0; }
     // What each rival wants (the goods it pays more for).
     bool rivalNeeds(int rival, const std::string& item) const;
