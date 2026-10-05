@@ -16,7 +16,9 @@
 #include "game/catalogs.h"
 #include "game/content_art.h"
 #include "luna/engine/effects.h"
+#include "game/data_reload.h"
 #include "game/editor.h"
+#include "game/missing_kind.h"
 #include "game/enemy.h"
 #include "game/game_rules.h"
 #include "game/npc_life.h"
@@ -34,6 +36,7 @@
 #include "game/tutorial.h"
 #include "game/weather.h"
 #include "game/level.h"
+#include "game/level_baseline.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
 #include "game/weapons.h"
@@ -156,9 +159,31 @@ public:
     std::vector<sim::rules::Offer> offersFor(const Subject& subject) const;
     void setPlantState(std::size_t index, const std::string& state); // "picked", "ripe"...
     std::set<std::string> knownTags() const; // every tag a catalog or character kind carries
+    // The names of a catalog, read now, for the suggestion lists of the Editor fields (US-302): npc-classes, npc-kinds, partner-types, interactions,
+    // interaction-fields, light-kinds, objects, plants, characters, items, building-kinds, prefabs, quests, levels, tags, places, markers.
+    std::vector<std::string> suggestionNames(const std::string& catalog) const;
+    EditorHelp::Sources suggestionSources() const;
     // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the
     // last good data stays in use and the panel lists "file:line: message". Returns true when the new data was taken.
     bool reloadInteractions();
+    // Live data (US-303): every group of data files that can be read again while the game runs. An Editor save names the file it wrote, F5 reads every set.
+    DataReload& dataReload() { return reloads_; }
+    // Reads the sets that watch `file` again and shows the outcome (a toast on success, the mistakes panel and a red line on failure).
+    void fileChanged(const std::filesystem::path& file) { reported(reloads_.changed(file)); }
+    // F5: every set (the ones that only apply at the next start are left alone).
+    void reloadEverything() { reported(reloads_.reloadAll()); }
+    const std::vector<MissingKind>& missingKinds() const { return missing_; }
+    // Watching (US-304): a file saved outside the game is read again by itself, within about a second. Off by default (tests, headless runs);
+    // the game turns it on unless `--no-watch` was given. `pollFiles` takes the time in seconds, so a test drives it with a clock of its own.
+    void setWatching(bool on);
+    bool watching() const { return watching_; }
+    std::vector<ReloadOutcome> pollFiles(double nowSeconds);
+    FileWatcher& watcher() { return watcher_; }
+    const std::string& toast() const { return toast_; }
+    int toastTicks() const { return toastTicks_; }
+    static constexpr int kToastTicks = 40; // how long the toast stays: two seconds at 20 ticks a second (D-59 Q3)
+    // The mistakes of the sets other than the interactions, per set name, until the files are fixed.
+    const std::map<std::string, std::vector<std::string>>& reloadErrors() const { return reloadErrors_; }
     // Timed actions (US-153): the runner, its clock (play ticks since the run began; it stops while a screen is open), and the plant
     // with a given id (-1 when there is none).
     sim::rules::ActionRunner& actions() { return actions_; }
@@ -240,6 +265,7 @@ public:
     const std::string& inspectedName() const { return inspection_.name; }
     const std::string& inspectedText() const { return inspection_.text; }
     const PlantArt& plantArt() const { return plantArt_; }
+    const LightingData& lighting() const { return lighting_; }
     // The simulated clan (US-032, D-30): on in levels marked "clan": true, or with `--clan`. It is the M2 simulation running
     // inside the game, one simulation tick per game tick, and the view puts each person somewhere and walks them there.
     void setClan(bool on);
@@ -326,9 +352,27 @@ public:
     void removeDeadFigures(); // the figures of the persons the director says are dead leave the world (after a death, after a load)
     void syncEditorActions();
     void syncGraphCatalog();
+    // US-303: the data sets and what follows each of them (odyssey_reload.cpp).
+    void registerDataSets();
+    void reported(const std::vector<ReloadOutcome>& outcomes);
+    ReloadResult reloadInteractionSet();
+    ReloadResult reloadNpcClassSet();
+    ReloadResult reloadLights();
+    ReloadResult reloadCatalog();
+    ReloadResult reloadHelp();
+    void ownReload(const std::string& set); // an Editor save read the set itself: the watcher must not read it a second time
+    void levelChangedOutside();
+    void applyLevelFromDisk();
+    void applyCatalog(Definitions fresh, Catalogs catalogs);
+    void rebuildPlantArt();
+    std::vector<std::string> findMissingKinds(); // returns the warnings that are new
+    void drawToast(luna::engine::Renderer& renderer) const;
+    static void checkCatalogLights(const Catalogs& catalogs, const LightingData& lighting, const std::filesystem::path& dataDirectory);
+    static std::vector<std::string> addCelestialDefaults(Catalogs& catalogs, const LightingData& lighting, const std::filesystem::path& dataDirectory);
     void registerCreatures();
     void tickNpcPopulation();
     std::string loadNpcPopulation(); // the problem, or empty
+    void mergeNpcPopulation(const sim::NpcPopulation& saved); // a saved people meets the level as it is now (US-305)
     luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)
     luna::engine::LightFrame ambientLightFrame(double alpha, bool withWeather = true) const; // the ambient colour of the world now (no point lights)
     static double darknessOf(const luna::engine::LightFrame& frame);
@@ -358,6 +402,10 @@ public:
     const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
     bool autosave();              // false when it could not write
     bool loadAutosave();          // false when there is nothing to load
+    // A run was loaded (US-305): what the level changed since that save, and whether the Editor saved the level after it. Play (F1) from the Editor then loads the run again
+    // with the level edits merged in, instead of starting the run over.
+    bool runLoaded() const { return runLoaded_; }
+    const LevelChanges& runChanges() const { return runChanges_; }
     double lastAutosaveMilliseconds() const { return lastAutosaveMs_; }
     int autosaves() const { return autosaves_; }
     const std::string& message() const { return message_; }
@@ -401,6 +449,7 @@ public:
     // rebuilt from the level as edited (the hero at the hero start).
     void switchMode(Mode mode);
     Editor& editor() { return editor_; }
+    const EditorHelp& editorHelp() const { return editorHelp_; }
 
     // Where the demo's straw targets stand (US-029), in metres: one 8 tiles west of the
     // hero's start (the view is 15 tiles wide, so the whole throw fits on screen), one
@@ -429,6 +478,7 @@ private:
     std::vector<Enemy> enemies_;
     std::vector<PlacedCharacter> bystanders_; // placed characters the sword does not fight: they stand and are seen
     Editor editor_;
+    EditorHelp editorHelp_; // what every Editor field says about itself (US-300), from assets/data/editor/help.json
     NpcClassBook npcClasses_; // US-260
     sim::CalendarConfig npcCalendar_;
     sim::NeedsConfig npcNeeds_;
@@ -466,6 +516,19 @@ private:
     void loadInteractions();
     sim::rules::SmallTalk loadSmalltalk(sim::rules::LoadReport& report) const; // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
+    DataReload reloads_;                                           // US-303
+    FileWatcher watcher_;                                          // US-304
+    bool watching_ = false;
+    bool runLoaded_ = false;          // loadAutosave brought a run back (US-305)
+    bool levelSavedSinceRun_ = false; // the Editor saved the level while that run was loaded
+    LevelChanges runChanges_;         // what the level changed since the loaded save
+    bool levelReloadPending_ = false; // the level file changed while the game was playing: the Editor reads it when it opens
+    std::map<std::string, std::vector<std::string>> reloadErrors_; // the mistakes of the sets other than the interactions
+    std::vector<MissingKind> missing_;                             // things the level places whose kind is gone
+    std::string toast_;                                            // "Reloaded lights" for two seconds (D-59 Q3)
+    int toastTicks_ = 0;
+    bool toastFailed_ = false;
+    luna::engine::Renderer* renderer_ = nullptr;                   // the renderer start() was given: a reload makes new pictures with it
     sim::rules::ActionRunner actions_;
     std::int64_t actionClock_ = 0;
     NpcLife npcLife_;

@@ -2069,3 +2069,116 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Give an event a trigger `flag(x)` and watch it vanish from the draw.
 
 **Check yourself.** Why does the draw depend on the order of the events?
+
+## US-300: loading text data once and looking it up by key (M10b)
+
+**What we built.** Every field of the Editor now explains itself: rest the pointer on it for a moment and a small box shows what it is for, its range and an example. The words are not in the C++ code; they are in `assets/data/editor/help.json`, one line per field.
+
+**The idea: a map from key to value, and a test that walks every widget.** The game reads `help.json` once, at start, into a `std::map<std::string, Entry>`: the key is the field's id (`npc.sword`), the value a small struct of three strings. To show a tooltip it does one lookup, `find(id)`, which returns a pointer to the entry or `nullptr` when there is none. Checking for `nullptr` is how C++ says "not there", so a missing entry means no tooltip and never a crash. The id itself is made from the panel and the label on screen, so there is nothing to keep in step by hand. A test then opens every panel of every editor and asks each field "do you have an entry?"; this works because every field is a `TextField` or `NumberField`, and `dynamic_cast<TextField*>(widget)` answers "is this widget a TextField?" at run time.
+
+```cpp
+const Entry* entry = help.find("npc.sword");          // one lookup by key
+if (entry != nullptr) tip.text = entry->purpose;      // nullptr: nothing to show
+if (auto* field = dynamic_cast<TextField*>(child.get())) { /* it is a text field */ }
+```
+
+**Where to look.** `src/game/editor_help.cpp` (`load`, `fieldId`, `apply`), `src/luna/engine/ui.cpp` (`FieldHint`), `tests/game/editor_help_test.cpp` (the coverage test).
+
+**Try it (10 minutes).** In a copy of the data folder, delete the `npc.sword` line from `help.json`, run the coverage test with `odysseus_game_tests --test-case="US-300 Coverage*"` and read how the failure names the field.
+
+**Check yourself.** Why does `find` return a pointer instead of the entry itself?
+
+## US-301: a reusable overlay widget, and who gets a key (M10b)
+
+**What we built.** A list of suggested values that opens under a text or number field, narrows as you type, and lets you pick with Up, Down and Tab, or with a click. It lives in the Luna engine and knows nothing about Odysseus, so any field in any game can use it.
+
+**The idea: giving each key to exactly one owner.** On every tick the field asks the list first: `list_.handle(input, accepted)`. The list returns `true` when it used the input (an arrow, Tab, Escape, a click on one of its rows) and `false` when it did not. A closed list always returns `false` straight away, so the field does what it always did. The return value is how C++ code passes "I took it" up a chain, and `std::optional<std::string> accepted` is how the list hands back a result only when there is one. Letters are different: W and S also walk the hero, so the arrows got their own intents (`ListUp`, `ListDown`) that only the arrow keys raise, and a "w" you type can never move the highlight.
+
+```cpp
+std::optional<std::string> accepted;                 // empty until a row is chosen
+if (list_.handle(input, accepted)) {                 // true: the list used this tick's input
+    if (accepted) { editing_ = *accepted; commit(); }
+    return true;                                     // nobody else sees it
+}
+```
+
+**Where to look.** `SuggestList` in `src/luna/engine/ui.cpp`, the four new intents in `src/luna/engine/input.h` and `input.cpp`, the `US-301` cases in `tests/luna/ui_test.cpp`.
+
+**Try it (10 minutes).** In `SuggestList::handle` change `input.confirm && navigated_` to `input.confirm` and run the Luna tests: which case fails, and why is that Enter rule needed?
+
+**Check yourself.** Why does the field ask the list before it reads the typed text?
+
+## US-302: strategy functions as data sources (M10b)
+
+**What we built.** Every field that has a list of values now fills it from the right place: the files of a folder, a catalog of names (classes, interactions, items...), a fixed list, or for a number the kind's default, the limits and the last five you typed.
+
+**The idea: pass a function instead of the data.** `EditorHelp` has to offer the names of the NPC classes, but it must not know what an NPC class is: it belongs to the game. So the game hands it small functions (`std::function`), and the help object just calls them when a list opens. That is called the *strategy* pattern: the same call, `sources_.catalog("npc-classes")`, does different work depending on which function was plugged in, and a test plugs in its own. Because the function runs each time the list opens, a class you saved a moment ago is offered at once. The lambda that is stored in a field captures a pointer to the help object (`[this, id]`); it is safe because the field is owned by a panel that never outlives the help.
+
+```cpp
+number->suggest = [this, id, number](const std::string&) { return suggestionsFor(id, number->minimum, number->maximum); };
+sources_.catalog = [this](const std::string& name) { return suggestionNames(name); };   // set by the game
+```
+
+**Where to look.** `suggestionsFor` and `apply` in `src/game/editor_help.cpp`, `OdysseyGame::suggestionNames` in `src/game/odyssey_game.cpp`, `tests/game/editor_suggest_test.cpp`.
+
+**Try it (10 minutes).** Add a catalog `weapons` (the names in `definitions_.weapons`) to `suggestionNames` and `knownCatalog`, give a field `"suggest": "catalog:weapons"` in `help.json`, and see it in the Editor.
+
+**Check yourself.** Why is it safer to look the entry up inside the lambda (when the list opens) than to look it up once when the field is made?
+
+## US-303: a registry of reloadable data, and swapping only when the copy is clean (M10b)
+
+**What we built.** The game can now read its data files again while it runs. Each group of files (the interactions, the NPC classes, the lights, the plant and object catalogs, the help text) is a *data set* registered once; saving a file, or pressing F5, asks the registry to reload the right set. A set that finds a mistake changes nothing and says where the mistake is.
+
+**The idea: build the new thing on the side, then swap it in one move.** Every reload reads the files into a fresh object (`Catalogs catalogs = loadCatalogs(...)`) first. If any file throws, the `catch` reports it and the game's own data was never touched. Only when the whole copy is good does the game do `catalogs_.plants = std::move(catalogs.plants)`, a move: the old vector's memory is handed over, no copy, and the old data is gone. After the swap every raw pointer that pointed into the old vector (`WorldPlant::def`) would dangle, so each is pointed again at the new entry by looking up its kind's *name*; a name is data that survives the swap, an address is not.
+
+```cpp
+try {
+    Catalogs fresh = loadCatalogs(dataDirectory_);   // may throw: nothing has changed yet
+    applyCatalog(std::move(definitions), std::move(fresh));
+} catch (const std::exception& problem) { result.ok = false; result.errors.push_back(problem.what()); }
+for (WorldPlant& plant : plants_) plant.def = catalogs_.plant(plant.kind);   // by name; nullptr when the kind is gone
+```
+
+**Where to look.** `src/game/data_reload.*` (the registry), `reloadCatalog` and `applyCatalog` in `src/game/odyssey_reload.cpp`, the `US-303` cases in `tests/game/data_reload_test.cpp`.
+
+**Try it (10 minutes).** Run the game, open `assets/data/light/lights.json`, change the campfire colour and press F5: the fire changes. Then delete a quote and press F5 again: a red panel names the file and line, and the fire keeps its last good colour.
+
+**Check yourself.** Why is a `std::move` into `catalogs_.plants` safe here, but keeping a `const PlantDef*` from before the move is not?
+
+## US-304: polling file times, debouncing, ignoring your own writes (M10b)
+
+**What we built.** The game now notices when you save one of its data files in a text editor and reads it again by itself, within about a second. It does not need a thread or a library: it simply asks the file system a few times a second "what is the modification time and size of these files?" and remembers the answers.
+
+**The idea: compare with what you remembered, wait for quiet, and skip what you did yourself.** A `std::map<std::string, Stamp>` keeps the last time and size of every file. Each look builds a new map and compares: a file that is new, different or gone is a change. A text editor often writes a file twice in a row, so a change goes into a `waiting_` map with the moment it was seen, and a new change to the same file just overwrites that moment; only when the file has stayed quiet for 0.3 s is it reported (*debouncing*). The Editor's own saves would look exactly like outside edits, so just after it writes a file it records the stamp that write left (`noteOwnWrite`), and when the watcher sees a change equal to that stamp it forgets it once instead of reporting it. The watcher never reads the clock itself; the caller passes `nowSeconds`, which is why a test can run ten seconds of watching in a blink.
+
+```cpp
+auto old = known_.find(key);
+if (old != known_.end() && old->second == seen.stamp) continue;   // same as before: nothing happened
+if (own_.contains(key) && own_[key] == seen.stamp) continue;       // we wrote it ourselves
+waiting_[key] = {seen.path, nowSeconds};                           // a change: wait for quiet
+```
+
+**Where to look.** `FileWatcher` in `src/game/data_reload.*`, `pollFiles` in `src/game/odyssey_reload.cpp`, `tests/game/data_watch_test.cpp`.
+
+**Try it (10 minutes).** Start the game, open `assets/data/interactions/gather.json` in Notepad, change `"range": 2` to 3 and save: the toast appears. Then start it with `--no-watch` and see that nothing happens until you press F5.
+
+**Check yourself.** Why does the watcher take the time as a parameter instead of calling `std::chrono::steady_clock::now()` itself?
+
+## US-305: a content hash as a baseline, merging by id, and save versions (M10b)
+
+**What we built.** When you edit a level and then load an older run save, the level now wins where you changed it and the run wins everywhere else. A bush you moved is fresh in its new place; the bushes you did not touch still remember being picked; a person you deleted is gone; the clan and the hero are exactly as saved.
+
+**The idea: remember a fingerprint, compare by id.** A *hash* turns any amount of text into one number, and the same text always gives the same number. When the game saves a run it also writes, for every placed thing, its id and the hash of its entry in the level file. When it loads, it hashes the level as it is now and compares id by id with a `std::map<int, std::uint64_t>`. Same id, same hash: the thing is untouched, keep the saved state. Same id, other hash: you edited it, take it fresh. An id that is only in the new level is new; one that is only in the baseline was deleted. The hash is taken over the same JSON text that `saveLevel` writes (the helper `entryText`), so a field added to the level file tomorrow counts as a change without anyone remembering to update a list.
+
+```cpp
+const auto old = before.find(id);
+if (old == before.end() || old->second != hash) changes.kinds[kind].updated.insert(id); // new, or its entry changed
+```
+
+**Save versions and migrations.** `things.json` is now version 3. A reader accepts 1, 2 and 3 and uses `if (version >= 3 && data.contains("baseline"))`: an old save has no baseline, so nothing is compared, it loads as it always did, and the next autosave writes version 3. That is a *migration*: old files keep working and are upgraded the next time they are written. The merge for people is done by making the people from the level as it is now and then copying the saved state onto the ones the level did not touch (`NpcPopulation::adopt`), which is simpler and safer than deleting people from the middle of arrays that other classes index by position.
+
+**Where to look.** `src/game/level_baseline.*`, `OdysseyGame::restoreThings` and `mergeNpcPopulation`, `BuildingLayer::mergeLevel`, `tests/game/level_merge_test.cpp`.
+
+**Try it (10 minutes).** Start a run on a hand-made level so it autosaves, close the game, move a bush in the Editor and save, start the game with `--load`: the status line says `The level updated 1 thing`.
+
+**Check yourself.** Why is the hash of the level entry compared, and not the position of the thing in the run? (Think of a person who walked away from where the level placed them.)

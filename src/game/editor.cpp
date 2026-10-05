@@ -287,6 +287,7 @@ bool Editor::deleteClass() {
 // The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
 void Editor::buildClassPanel() {
     classesStale_ = false;
+    classesAreKinds_ = kindsTab_;
     classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 386 : 354});
     classes_->visible = classesShown_;
     const Rect box = classes_->bounds;
@@ -740,6 +741,7 @@ void Editor::buildProperties() {
     npcTrade_ = std::make_unique<Panel>(Rect{0, 0, 0, 0});
     npcTrade_->visible = false;
     propertiesFor_ = -1;
+    propertiesForPlant_ = false;
     propertiesStale_ = false;
     const PlacedCharacter* shown = selected_ ? find(*selected_) : nullptr;
     if (shown == nullptr) {
@@ -748,6 +750,7 @@ void Editor::buildProperties() {
         if (plant == nullptr) return;
         properties_->visible = true;
         propertiesFor_ = plant->id;
+        propertiesForPlant_ = true;
         const Rect box = properties_->bounds;
         properties_->add<Button>(Rect{box.x + 4, box.y + 4, box.width - 8, 11}, std::format("{} #{}", plant->kind, plant->id), [] {});
         auto& overrides = properties_->add<luna::engine::TextField>(Rect{box.x + 4, box.y + 18, box.width - 8, 11}, "Own", selectedOverridesText(), 80,
@@ -1519,6 +1522,39 @@ void Editor::panTo(double x, double y) {
     centreY_ = worldH <= viewHeight_ ? worldH / 2.0 : std::clamp(y, halfH, worldH - halfH);
 }
 
+void Editor::setHelp(EditorHelp* help) {
+    help_ = help;
+    if (help_ != nullptr && !help_->problem().empty()) say(help_->problem());
+}
+
+std::optional<int> Editor::numberDefault(const std::string& fieldId) const {
+    if (fieldId != "npc.hp" && fieldId != "npc.sword") return std::nullopt;
+    if (!selected_) return std::nullopt;
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (placed.id != *selected_) continue;
+        const CharacterKindDef* kind = definitions_.character(placed.kind);
+        if (kind == nullptr) return std::nullopt;
+        return fieldId == "npc.hp" ? kind->hp : kind->swordDamage;
+    }
+    return std::nullopt;
+}
+
+void Editor::applyHelp() {
+    if (help_ == nullptr) return;
+    const auto give = [this](const std::unique_ptr<luna::engine::Panel>& panel, const char* prefix) {
+        if (panel) help_->apply(*panel, prefix);
+    };
+    give(classes_, classesAreKinds_ ? "kind" : "class");
+    give(properties_, propertiesForPlant_ ? "plant" : "npc");
+    give(npcPanel_, "npc");
+    give(npcTrade_, "npc-life");
+    give(settings_, "level");
+    give(economy_, "economy");
+    buildingEditor_->applyHelp(*help_);
+    graphEditor_->applyHelp(*help_);
+    storyEvents_->applyHelp(*help_);
+}
+
 void Editor::say(std::string message) {
     core::logInfo("Editor: " + message);
     status_ = std::move(message);
@@ -1569,8 +1605,30 @@ bool Editor::save() {
         return false;
     }
     unsaved_ = false;
+    if (wrote_) wrote_(levelFile_); // the file is ours: a watcher must not read it a second time (US-304)
     say("Saved " + levelFile_.filename().string());
     return true;
+}
+
+bool Editor::levelChangedOnDisk() {
+    const std::string name = levelFile_.filename().string();
+    if (unsaved_) {
+        say(name + " changed on disk; your unsaved changes are kept (save to overwrite the file, or open it again to take the new one)");
+        return false;
+    }
+    try {
+        LoadedLevel loaded = loadLevel(levelFile_, definitions_);
+        const double x = centreX_;
+        const double y = centreY_;
+        replaceLevel(std::move(loaded.level), levelFile_, name + " changed on disk: read again");
+        centreX_ = x; // the view stays where the owner was looking
+        centreY_ = y;
+        levelChanged();
+        return true;
+    } catch (const sim::DataError& error) {
+        say(std::string("Not reloaded: ") + error.what()); // a half-saved file: the level in the Editor stays as it is
+        return false;
+    }
 }
 
 std::optional<std::pair<int, int>> Editor::cellAt(int screenX, int screenY) const {
@@ -1974,6 +2032,7 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
 }
 
 void Editor::update(const Intents& intents) {
+    applyHelp();
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     if (storyEvents_->shown()) { // the Story events list takes the whole screen too
         storyEvents_->update(intents);
@@ -2062,6 +2121,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
             painter.fill({0, gy - view.y, view.width, 1}, UiColor::Grid);
         }
     }
+    for (const MissingKind& missing : missing_) drawMissingMarker(painter, static_cast<int>(missing.x) - view.x, static_cast<int>(missing.y) - view.y); // a thing whose kind is gone (US-303)
     buildingEditor_->drawWorld(renderer, painter, view, map_, tool_ == EditorTool::Building, hover_);
     for (const PixelPoint& target : level_.targets) {
         renderer.draw(textures_.props, kTargetFrame, screen(target.x - kTargetFrame.width / 2, target.y - kTargetFrame.height));

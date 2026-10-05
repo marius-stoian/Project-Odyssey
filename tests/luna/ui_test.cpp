@@ -282,3 +282,337 @@ TEST_CASE("US-126 Hints stay on screen") {
     CHECK(painter.keepOnScreen({470, 260, 100, 13}) == engine::Rect{380, 257, 100, 13}); // pushed back inside
     CHECK(painter.keepOnScreen({10, 10, 100, 13}) == engine::Rect{10, 10, 100, 13});     // already inside: unchanged
 }
+
+// US-300: a field's tooltip shows once the pointer has rested on it for 0.4 s, and goes when the pointer moves or the field is used.
+TEST_CASE("US-300 Field tooltip") {
+    engine::Panel panel({0, 0, 200, 60});
+    auto& hp = panel.add<engine::NumberField>(engine::Rect{10, 10, 100, 11}, "HP", 60, 1, 999, [](int) {});
+    auto& name = panel.add<engine::TextField>(engine::Rect{10, 30, 150, 11}, "Name", "Goblin", 16, [](const std::string&) {});
+    hp.tip.text = "Health\nRange: 1 to 999\nExample: 60";
+    const auto show = [&](engine::UiPainter& painter) { panel.drawOverlay(painter); };
+
+    engine::ImageRenderer screen(480, 270);
+    const auto sheet = screen.createTexture(engine::makeUiSheet());
+    engine::UiPainter painter(screen, sheet);
+    painter.setScreen({0, 0, 480, 270});
+
+    SUBCASE("it waits, then shows purpose, range and example next to the pointer") {
+        for (int tick = 0; tick < engine::FieldHint::kDelayTicks - 1; ++tick) panel.handle(at(20, 15));
+        CHECK_FALSE(hp.tip.showing());
+        panel.handle(at(20, 15));
+        panel.handle(at(20, 15));
+        CHECK(hp.tip.showing());
+        screen.clear({0, 0, 0, 255});
+        show(painter);
+        CHECK(screen.image().get(20 + 8, 15 + 10) == luna::engine::Color{118, 104, 72}); // the box's border at its corner
+    }
+    SUBCASE("moving restarts the wait and leaving hides it") {
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 15));
+        REQUIRE(hp.tip.showing());
+        panel.handle(at(22, 15));
+        CHECK_FALSE(hp.tip.showing());
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(22, 15));
+        CHECK(hp.tip.showing());
+        panel.handle(at(300, 200));
+        CHECK_FALSE(hp.tip.showing());
+    }
+    SUBCASE("a click on the field hides it; a field without text shows nothing") {
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 15));
+        REQUIRE(hp.tip.showing());
+        panel.handle(at(20, 15, true));
+        CHECK_FALSE(hp.tip.showing());
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 35));
+        CHECK_FALSE(name.tip.showing()); // no text: no tooltip
+    }
+    SUBCASE("a long line is broken so the box stays narrow") {
+        name.tip.text = "A long purpose that goes on and on and on and on and on and on and on and on and on and on";
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 35));
+        REQUIRE(name.tip.showing());
+        screen.clear({0, 0, 0, 255});
+        show(painter);
+        const int widest = engine::FieldHint::kWrapColumns * engine::kTextAdvance + 6;
+        CHECK(screen.image().get(20 + 8 + widest + 2, 35 + 10 + 4) == luna::engine::Color{0, 0, 0, 255}); // nothing drawn beyond the wrap width
+    }
+}
+
+// ---- US-301 Suggestion list: filter, keys, rows, placement, clicks, quiet when closed.
+
+namespace {
+
+engine::UiInput pressKey(bool up, bool down, bool tab, bool escape, bool confirm = false) {
+    engine::UiInput input = at(-1, -1);
+    input.up = up;
+    input.down = down;
+    input.tab = tab;
+    input.escape = escape;
+    input.confirm = confirm;
+    return input;
+}
+engine::UiInput arrowUp() { return pressKey(true, false, false, false); }
+engine::UiInput arrowDown() { return pressKey(false, true, false, false); }
+engine::UiInput tabKey() { return pressKey(false, false, true, false); }
+engine::UiInput escapeKey() { return pressKey(false, false, false, true); }
+engine::UiInput enterKey() { return pressKey(false, false, false, false, true); }
+
+std::vector<std::string> classes() { return {"trader", "trapper", "elder"}; }
+
+// A text field at (10, y) that offers `values`, focused by a click, with a record of what it was set to.
+struct Rig {
+    engine::Panel panel{{0, 0, 480, 270}};
+    engine::TextField* field = nullptr;
+    std::string kept;
+    int changes = 0;
+    explicit Rig(std::vector<std::string> values = classes(), int y = 10, bool list = false) {
+        field = &panel.add<engine::TextField>(engine::Rect{10, y, 200, 11}, "Class", "", 40, [this](const std::string& v) {
+            kept = v;
+            ++changes;
+        });
+        field->suggest = [values](const std::string&) { return values; };
+        field->listItems = list;
+        panel.handle(at(60, y + 4, true)); // focus
+    }
+    void type(const std::string& text) { panel.handle(typed(text)); }
+    const std::vector<std::string>& rows() const { return field->suggestions().rows(); }
+};
+
+const luna::engine::Color kBorder{118, 104, 72};
+
+} // namespace
+
+TEST_CASE("US-301 Filter: typing narrows the list, prefix matches first, any letter case") {
+    Rig rig;
+    CHECK(rig.field->focused());
+    CHECK(rig.field->suggestions().isOpen());
+    CHECK(rig.rows() == classes()); // on focus: every value
+    rig.type("tr");
+    CHECK(rig.rows() == std::vector<std::string>{"trader", "trapper"});
+    rig.type("a"); // "tra": still both
+    CHECK(rig.rows() == std::vector<std::string>{"trader", "trapper"});
+    rig.type("p");
+    CHECK(rig.rows() == std::vector<std::string>{"trapper"});
+    // Substring matches come after prefix matches.
+    Rig second;
+    second.type("E");
+    CHECK(second.rows() == std::vector<std::string>{"elder", "trader", "trapper"});
+    // Nothing matches: no list, and the field still takes its text.
+    second.type("zz");
+    CHECK_FALSE(second.field->suggestions().isOpen());
+    second.panel.handle(enterKey());
+    CHECK(second.kept == "Ezz");
+}
+
+TEST_CASE("US-301 Keys: Down then Tab takes the second row; Escape closes the list and keeps the text") {
+    {
+        Rig rig;
+        rig.type("tr");
+        CHECK(rig.field->suggestions().highlighted() == 0);
+        rig.panel.handle(arrowDown());
+        CHECK(rig.field->suggestions().highlighted() == 1);
+        rig.panel.handle(tabKey());
+        CHECK(rig.kept == "trapper");
+        CHECK(rig.changes == 1);
+        CHECK_FALSE(rig.field->focused());
+        CHECK_FALSE(rig.field->suggestions().isOpen());
+    }
+    {
+        Rig rig;
+        rig.type("tr");
+        rig.panel.handle(escapeKey());
+        CHECK_FALSE(rig.field->suggestions().isOpen());
+        CHECK(rig.field->focused()); // the field is still being typed in
+        CHECK(rig.changes == 0);
+        rig.panel.handle(enterKey());
+        CHECK(rig.kept == "tr"); // what was typed is kept
+        CHECK(rig.changes == 1);
+    }
+    {
+        Rig rig;
+        rig.panel.handle(arrowDown());
+        rig.panel.handle(arrowDown());
+        rig.panel.handle(arrowUp());
+        CHECK(rig.field->suggestions().highlighted() == 1);
+        rig.panel.handle(enterKey()); // Enter takes the row once Up or Down has chosen it
+        CHECK(rig.kept == "trapper");
+    }
+}
+
+TEST_CASE("US-301 Enter keeps the typed text unless a row was chosen with Up or Down") {
+    Rig rig;
+    rig.type("tr");
+    rig.panel.handle(enterKey()); // the first row is highlighted but not chosen
+    CHECK(rig.kept == "tr");
+}
+
+TEST_CASE("US-301 Quiet: with the list closed or absent, Tab, Enter and the arrows are not used by it") {
+    SUBCASE("a field that offers nothing") {
+        engine::Panel panel({0, 0, 480, 270});
+        std::string kept;
+        auto& field = panel.add<engine::TextField>(engine::Rect{10, 10, 200, 11}, "Name", "Goblin", 16, [&](const std::string& v) { kept = v; });
+        panel.handle(at(60, 14, true));
+        REQUIRE(field.focused());
+        CHECK_FALSE(field.suggestions().isOpen());
+        panel.handle(arrowDown());
+        panel.handle(tabKey());
+        panel.handle(escapeKey());
+        CHECK(field.focused()); // none of them did anything to the field
+        CHECK(kept.empty());
+        panel.handle(typed("s"));
+        panel.handle(enterKey());
+        CHECK(kept == "Goblins"); // Enter commits the typed text, as before M10b
+    }
+    SUBCASE("a field with a list that is not focused") {
+        Rig rig;
+        rig.panel.handle(at(400, 200, true)); // click elsewhere: commits and closes
+        REQUIRE_FALSE(rig.field->focused());
+        CHECK_FALSE(rig.field->suggestions().isOpen());
+        CHECK_FALSE(rig.field->handle(arrowDown()));
+        CHECK_FALSE(rig.field->handle(tabKey()));
+    }
+    SUBCASE("the list itself uses nothing while closed") {
+        engine::SuggestList list;
+        std::optional<std::string> accepted;
+        CHECK_FALSE(list.handle(arrowDown(), accepted));
+        CHECK_FALSE(list.handle(tabKey(), accepted));
+        CHECK_FALSE(list.handle(enterKey(), accepted));
+        list.open({"a", "b"});
+        list.close();
+        CHECK_FALSE(list.handle(escapeKey(), accepted));
+        CHECK_FALSE(accepted.has_value());
+    }
+}
+
+TEST_CASE("US-301 Rows: eight at a time, scrolling with the highlight") {
+    std::vector<std::string> many;
+    for (int i = 1; i <= 12; ++i) many.push_back("item" + std::to_string(100 + i));
+    Rig rig(many);
+    engine::ImageRenderer screen(480, 270);
+    const auto sheet = screen.createTexture(engine::makeUiSheet());
+    engine::UiPainter painter(screen, sheet);
+    painter.setScreen({0, 0, 480, 270});
+    screen.clear({0, 0, 0, 255});
+    rig.panel.drawOverlay(painter);
+    const int boxX = 10 + engine::UiPainter::textWidth("Class") + 4;
+    CHECK(screen.image().get(boxX, 10 + 11) == kBorder); // the list's top-left corner, just under the field
+    const int height = engine::SuggestList::kMaxRows * engine::kLineHeight + 2;
+    CHECK(screen.image().get(boxX, 10 + 11 + height - 1) == kBorder); // the bottom edge: eight rows, not twelve
+    CHECK(screen.image().get(boxX, 10 + 11 + height + 3) != kBorder);
+    // A picture for the story's evidence: the field, its tooltip-free list with the third row highlighted and the "more rows" marks.
+    {
+        rig.panel.handle(arrowUp());
+        for (int i = 0; i < 2; ++i) rig.panel.handle(arrowDown());
+        engine::ImageRenderer picture(240, 110);
+        const auto pictureSheet = picture.createTexture(engine::makeUiSheet());
+        engine::UiPainter picturePainter(picture, pictureSheet);
+        picturePainter.setScreen({0, 0, 240, 110});
+        picture.clear({20, 20, 28, 255});
+        rig.panel.draw(picturePainter);
+        rig.panel.drawOverlay(picturePainter);
+        const std::filesystem::path file = std::filesystem::temp_directory_path() / "odysseus-us301-list.png";
+        engine::savePng(picture.image(), file);
+        MESSAGE("list picture: " << file.string());
+        rig.panel.handle(arrowUp());
+        rig.panel.handle(arrowUp());
+        rig.panel.handle(arrowUp()); // back to the first row
+    }
+    for (int i = 0; i < 10; ++i) rig.panel.handle(arrowDown());
+    CHECK(rig.field->suggestions().highlighted() == 10);
+    for (int i = 0; i < 5; ++i) rig.panel.handle(arrowDown()); // never past the last row
+    CHECK(rig.field->suggestions().highlighted() == 11);
+    rig.panel.handle(tabKey());
+    CHECK(rig.kept == "item112");
+}
+
+TEST_CASE("US-301 Placement: under the field, and above it where it would leave the screen") {
+    engine::ImageRenderer screen(480, 270);
+    const auto sheet = screen.createTexture(engine::makeUiSheet());
+    engine::UiPainter painter(screen, sheet);
+    painter.setScreen({0, 0, 480, 270});
+    const int boxX = 10 + engine::UiPainter::textWidth("Class") + 4;
+    {
+        Rig rig(classes(), 40);
+        screen.clear({0, 0, 0, 255});
+        rig.panel.drawOverlay(painter);
+        CHECK(screen.image().get(boxX, 40 + 11) == kBorder); // just under the field
+    }
+    {
+        Rig rig(classes(), 255); // 3 rows need 29 pixels; only 4 are left under the field
+        screen.clear({0, 0, 0, 255});
+        rig.panel.drawOverlay(painter);
+        const int height = 3 * engine::kLineHeight + 2;
+        CHECK(screen.image().get(boxX, 255 - height) == kBorder); // its top, above the field
+        CHECK(screen.image().get(boxX, 255 + 11) != kBorder);
+    }
+}
+
+TEST_CASE("US-301 Click: a click on a row takes it; a click elsewhere keeps the typed text") {
+    {
+        Rig rig;
+        engine::ImageRenderer screen(480, 270);
+        const auto sheet = screen.createTexture(engine::makeUiSheet());
+        engine::UiPainter painter(screen, sheet);
+        painter.setScreen({0, 0, 480, 270});
+        rig.panel.drawOverlay(painter); // the list is drawn once, so it knows where its rows are
+        const int boxX = 10 + engine::UiPainter::textWidth("Class") + 4;
+        CHECK(rig.panel.handle(at(boxX + 20, 10 + 11 + 1 + 2 * engine::kLineHeight + 3, true)));
+        CHECK(rig.kept == "elder"); // the third row
+        CHECK_FALSE(rig.field->focused());
+    }
+    {
+        Rig rig;
+        rig.type("tr");
+        rig.panel.handle(at(400, 200, true));
+        CHECK(rig.kept == "tr");
+        CHECK_FALSE(rig.field->suggestions().isOpen());
+    }
+}
+
+TEST_CASE("US-301 List items: a suggestion completes the item after the last comma and keeps the others") {
+    Rig rig(classes(), 10, true);
+    rig.type("trader, e");
+    CHECK(rig.rows() == std::vector<std::string>{"elder", "trader", "trapper"}); // "e" filters the item being typed, not the whole text
+    rig.panel.handle(tabKey());
+    CHECK(rig.kept == "trader, elder");
+}
+
+TEST_CASE("US-301 Numbers: the list offers numbers written as text and takes one within the limits") {
+    engine::Panel panel({0, 0, 480, 270});
+    int value = 0;
+    auto& hp = panel.add<engine::NumberField>(engine::Rect{10, 10, 150, 11}, "HP", 5, 1, 999, [&](int v) { value = v; });
+    hp.suggest = [](const std::string&) { return std::vector<std::string>{"60", "1", "999", "16"}; };
+    panel.handle(at(60, 14, true));
+    REQUIRE(hp.focused());
+    CHECK(hp.suggestions().rows() == std::vector<std::string>{"60", "1", "999", "16"});
+    panel.handle(typed("6"));
+    CHECK(hp.suggestions().rows() == std::vector<std::string>{"60", "16"}); // starts with 6, then contains 6
+    panel.handle(arrowDown());
+    panel.handle(tabKey());
+    CHECK(value == 16);
+    CHECK_FALSE(hp.focused());
+}
+
+TEST_CASE("US-301 Intents: the arrows, Tab and Escape also reach the list, and still do what they did") {
+    luna::engine::InputMap map;
+    map.handle(key(Key::Down, true));
+    map.handle(key(Key::Tab, true));
+    luna::engine::Intents intents = map.nextTick();
+    CHECK(intents.pressed(Intent::ListDown));
+    CHECK(intents.pressed(Intent::ListTab));
+    CHECK(intents.pressed(Intent::MoveDown)); // the movement and weapon intents are unchanged
+    CHECK(intents.pressed(Intent::SwitchWeapon));
+    CHECK(engine::UiInput::from(intents).down);
+    CHECK(engine::UiInput::from(intents).tab);
+    map.handle(key(Key::Down, false));
+    map.handle(key(Key::Tab, false));
+    map.handle(key(Key::S, true)); // a letter is not an arrow: the list ignores it
+    intents = map.nextTick();
+    CHECK(intents.pressed(Intent::MoveDown));
+    CHECK_FALSE(intents.pressed(Intent::ListDown));
+}
+
+TEST_CASE("US-302 List items: words separated by spaces complete one word, keeping the ones before it") {
+    Rig rig(classes(), 10, true);
+    rig.type("elder tr");
+    CHECK(rig.rows() == std::vector<std::string>{"trader", "trapper"});
+    rig.panel.handle(tabKey());
+    CHECK(rig.kept == "elder trader");
+}

@@ -391,12 +391,10 @@ An **interaction** is who may do what to what: "the hero may *wave* at a person"
 
 1. Keep the game running. Open `assets/data/dialogue/tut-kira.dlg` in any text editor (it is plain text).
 2. Change one of Kira's lines and save the file.
-3. In the game (Game or Editor mode), press **F5**. The log says the data was reloaded; talk to Kira: the new line is live.
-4. Now break it on purpose: delete a `=== ` node header, save, press **F5**. A red panel lists `file:line: message`, and the old data stays in use. Fix the file, **F5** again: the panel closes.
+3. Look at the game (Game or Editor mode): within a second a toast says **Reloaded interactions**; talk to Kira: the new line is live. (If you started the game with `--no-watch`, press **F5**.)
+4. Now break it on purpose: delete a `=== ` node header and save. A red panel lists `file:line: message`, and the old data stays in use. Fix the file and save again: the panel closes.
 
-**Check:** F5 reloads conversations and interaction files. Plants, animals, weapons and characters are read only when the game starts.
-
----
+**Check:** the game watches its data files and saves are read again by themselves; F5 reads everything again at once. Conversations, interaction files, quests, NPC classes, lights, plants, objects and characters reload live. Weapons, animals, effects, weather, tiles, buildings and the hero's data apply at the next start; the game tells you so when you save one.
 
 ## 19. Final exercise and clean-up
 
@@ -436,7 +434,7 @@ git status --short assets/
 | Key | Where | Does |
 |---|---|---|
 | F1 / F2 | anywhere | play / edit |
-| F5 | anywhere | reload conversations and interactions |
+| F5 | anywhere | read every data file again (all or nothing) |
 | W A S D, arrows, right-drag | map | move the view |
 | G | map | grid |
 | R | map | turn the selected character or building, or the Build ghost |

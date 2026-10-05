@@ -220,6 +220,14 @@ struct LoadedLevel {
 };
 LoadedLevel loadLevel(const std::filesystem::path& file, const Definitions& definitions);
 
+// A placed thing as its entry in the level file reads (US-305): what a run save compares to know whether the level changed it since the save.
+std::string entryText(const PlacedCharacter& thing);
+std::string entryText(const PlacedPickup& thing);
+std::string entryText(const PlacedPlant& thing);
+std::string entryText(const PlacedEffect& thing);
+std::string entryText(const PlacedLight& thing);
+std::string entryText(const PlacedBuildingSpec& thing);
+
 // Saves safely: a temporary file, then a rename; the last three saves are kept as backups.
 void saveLevel(const Level& level, const Definitions& definitions, const std::filesystem::path& file);
 

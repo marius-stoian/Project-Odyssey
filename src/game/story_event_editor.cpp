@@ -111,6 +111,10 @@ void StoryEventEditor::show(bool shown) {
 
 bool StoryEventEditor::typing() const { return shown_ && panel_ && panel_->typing(); }
 
+void StoryEventEditor::applyHelp(EditorHelp& help) {
+    if (panel_) help.apply(*panel_, "event");
+}
+
 bool StoryEventEditor::open(const std::string& id) {
     std::error_code ec;
     if (!fs::is_regular_file(fileOf(id), ec)) {

@@ -5,6 +5,7 @@
 //   --renderer <auto|gpu|sdl>  how the picture is drawn: auto (the graphics card, else the first renderer with the reason in the log; the default), gpu (stop if the card cannot be used), sdl (the first renderer)
 //   --level <file.json>      play this level (default: assets/levels/valley.json)
 //   --editor                 start in Editor mode (F1 plays, F2 edits)
+//   --no-watch               do not watch the data files for changes made outside the game (they are still read on F5 and on an Editor save)
 //   --new-game               start at the New Game screen (seed, Growing Period, Comfort)
 //   --region <seed>          play a generated region: land, resources, the clan at its start and two rival clans
 //   --save-dir <folder>      where the autosaves go (default: the user's save folder); --load brings the autosave back
@@ -48,6 +49,7 @@ struct Arguments {
     std::string renderer = "auto";
     std::filesystem::path level;
     bool editor = false;
+    bool watch = true;                 // notice files saved outside the game and read them again (US-304); --no-watch turns it off
     std::optional<std::uint64_t> seed; // fixes the weather sequence (US-138)
     std::string weather;               // start under this weather (screenshots)
     bool clan = false;                 // run the simulated clan in this level
@@ -124,6 +126,10 @@ Arguments parseArguments(int argc, char* argv[]) {
         }
         if (name == "--clan") { // a flag without a value: run the simulated clan in this level
             arguments.clan = true;
+            continue;
+        }
+        if (name == "--no-watch") { // a flag without a value: do not watch the data files (tests, headless runs)
+            arguments.watch = false;
             continue;
         }
         if (name == "--editor") { // a flag without a value
@@ -207,6 +213,7 @@ int main(int argc, char* argv[]) {
         const std::filesystem::path packaged = luna::platform::executableDirectory() / "assets" / "data";
         const bool isPackaged = std::filesystem::exists(packaged / "hero" / "hero.json");
         odysseus::game::OdysseyGame game(isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR), arguments.level);
+        if (arguments.watch) game.setWatching(true); // the files of the game are watched while it runs (US-304)
         if (!arguments.saveDirectory.empty()) {
             game.setSaveDirectory(arguments.saveDirectory);
         } else if (isPackaged) {

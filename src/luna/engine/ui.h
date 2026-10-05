@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -47,6 +48,7 @@ public:
     void setScreen(const Rect& screen) { screen_ = screen; }
     // `box` moved (not resized) so it lies inside the screen where it can.
     Rect keepOnScreen(Rect box) const;
+    const Rect& screen() const { return screen_; }
 
     static int textWidth(std::string_view text) {
         return text.empty() ? 0 : static_cast<int>(text.size()) * kTextAdvance - 1;
@@ -64,9 +66,14 @@ struct UiInput {
     std::string text;     // typed characters
     bool erase = false;   // Backspace
     bool confirm = false; // Enter
+    bool up = false;      // the arrow keys, Tab and Escape, for an open suggestion list (US-301)
+    bool down = false;
+    bool tab = false;
+    bool escape = false;
 
     static UiInput from(const Intents& intents) {
-        return {intents.pointer(), intents.text(), intents.pressed(Intent::Erase), intents.pressed(Intent::Confirm)};
+        return {intents.pointer(), intents.text(), intents.pressed(Intent::Erase), intents.pressed(Intent::Confirm), intents.pressed(Intent::ListUp),
+                intents.pressed(Intent::ListDown), intents.pressed(Intent::ListTab), intents.pressed(Intent::ListEscape)};
     }
 };
 
@@ -131,6 +138,58 @@ public:
     void draw(UiPainter& painter) const override;
 };
 
+// The tooltip of a field (D-58, D-59): its lines show once the pointer has rested on the field for kDelayTicks, and go when the pointer
+// moves, leaves, or the field is used. Game-agnostic: the game decides the text (purpose, range, example), one line each.
+class FieldHint {
+public:
+    static constexpr int kDelayTicks = 8;    // 0.4 s at 20 ticks a second (D-59)
+    static constexpr int kWrapColumns = 60;  // letters in a line of the tooltip before it breaks
+
+    std::string text; // lines separated by '\n'; empty: no tooltip
+    // Call once a tick: `resting` is true while the pointer is over the field and the field is not being typed in.
+    void track(bool resting, int x, int y);
+    bool showing() const { return !text.empty() && ticks_ >= kDelayTicks; }
+    void draw(UiPainter& painter) const;
+
+private:
+    int ticks_ = 0;
+    int x_ = 0;
+    int y_ = 0;
+};
+// The list of values under a field (US-301, D-58, D-59). It opens when the field gets focus with every value; typing filters it: the values that
+// start with the typed text first, then the ones that contain it, any letter case. At most kMaxRows rows show; Up and Down move the highlight and
+// scroll. Tab accepts the highlighted row; Enter accepts it only after Up or Down (so Enter on text typed from scratch keeps that text, as before);
+// Escape closes the list and keeps the text; a click on a row accepts it. Closed (or with no row left) it uses no input at all.
+class SuggestList {
+public:
+    static constexpr int kMaxRows = 8;
+
+    // Opens with these values, all shown. The typed text filters only once it changes (see filter).
+    void open(std::vector<std::string> values);
+    // The text of the field changed: shows the values that match it, and opens the list again if Escape had closed it.
+    void filter(const std::string& typed);
+    void close() { open_ = false; }
+    bool isOpen() const { return open_ && !rows_.empty(); }
+    const std::vector<std::string>& rows() const { return rows_; }
+    int highlighted() const { return highlight_; }
+
+    // Handles the keys and clicks of one tick. True when the list used the input; `accepted` is then set if a row was chosen.
+    bool handle(const UiInput& input, std::optional<std::string>& accepted);
+    // Draws under `field` (above it where it would leave the screen). Remembers where, for the clicks of the next tick.
+    void draw(UiPainter& painter, const Rect& field) const;
+
+private:
+    void move(int step);
+
+    std::vector<std::string> values_;
+    std::vector<std::string> rows_;
+    int highlight_ = 0;
+    int first_ = 0;          // the top visible row
+    bool open_ = false;
+    bool navigated_ = false; // Up or Down was pressed since the rows last changed
+    mutable Rect shown_{};   // where the rows were drawn last
+};
+
 // A labelled whole number: click, type digits, Enter (or click elsewhere) to keep it; the wheel
 // steps it by one. The value always stays between minimum and maximum.
 class NumberField final : public Widget {
@@ -143,16 +202,24 @@ public:
     int minimum;
     int maximum;
     std::function<void(int)> onChange;
+    std::string helpId; // the field's entry in help.json (editor_help); empty: none
+    FieldHint tip;
+    // The values to offer while the field has focus (US-301): given the digits typed so far, numbers written as text. Empty: no list.
+    std::function<std::vector<std::string>(const std::string& typed)> suggest;
 
     bool focused() const { return focused_; }
     bool typing() const override { return focused_; }
     bool handle(const UiInput& input) override;
     void draw(UiPainter& painter) const override;
+    void drawOverlay(UiPainter& painter) const override;
+    const SuggestList& suggestions() const { return list_; }
 
 private:
     void commit();
+    Rect box() const;
     bool focused_ = false;
     std::string editing_;
+    SuggestList list_;
 };
 
 // A labelled line of text: click, type, Backspace, Enter (or click elsewhere) to keep it.
@@ -165,16 +232,27 @@ public:
     std::string value;
     std::size_t maxLength;
     std::function<void(const std::string&)> onChange;
+    std::string helpId; // the field's entry in help.json (editor_help); empty: none
+    FieldHint tip;
+    // The values to offer while the field has focus (US-301): given the text typed so far (with listItems, the item after the last comma).
+    // Empty: no list.
+    std::function<std::vector<std::string>(const std::string& typed)> suggest;
+    bool listItems = false; // a list of words (separated by commas or spaces): the suggestion completes the word after the last separator and keeps what is before it
 
     bool focused() const { return focused_; }
     bool typing() const override { return focused_; }
     bool handle(const UiInput& input) override;
     void draw(UiPainter& painter) const override;
+    void drawOverlay(UiPainter& painter) const override;
+    const SuggestList& suggestions() const { return list_; }
 
 private:
     void commit();
+    Rect box() const;
+    std::string typedItem() const; // what the list filters by: the whole text, or the item after the last comma
     bool focused_ = false;
     std::string editing_;
+    SuggestList list_;
 };
 
 // A background with widgets on it. It owns them (std::unique_ptr): when the panel goes, so do

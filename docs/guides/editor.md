@@ -105,6 +105,72 @@ With unsaved changes, **New** and **Open** ask first: **Save**, **Discard**, or 
 - The tests play their own copy, `assets/levels/demo.json`; your `valley.json` is yours to change.
 - A level is a readable JSON file: you can open it in any text editor.
 
+## Tooltips and suggestions (US-300, M10b)
+
+Rest the pointer on any field of the Level Editor panels, the Building editor, the Graph editor (dialogues, rules, quests) or the Story events list and, after 0.4 seconds, a small box says what the field is for, its range and an example. Move the pointer, or click the field, and it goes. Fields that are typed in (not buttons) all have one; a button keeps its own hint.
+
+The words live in `assets/data/editor/help.json`, one entry per field. The id of a field is its panel and its label in lower case: **Sword** in the NPC panel is `npc.sword`, **says:** on a dialogue line card is `graph.line.says`. A label's hint in brackets is not part of the id (`who (elder or friend):` is `event.who`), and an indented label (a field of the row above it) starts with `sub-` (`event.sub-says`). Panels: `level`, `economy`, `npc`, `plant`, `npc-life` (the Trade, Day, Night and Does rows of a placed NPC), `class`, `kind`, `building`, `prefab`, `graph.bar`, `graph.header`, `graph.<card type>`, `graph.test` and `event`.
+
+```jsonc
+{ "version": 1,
+  "fields": {
+    "npc.sword": { "purpose": "Damage of one sword strike by this character", "example": "4", "suggest": "number" },
+    "class.tags": { "purpose": "Tags carried by NPCs of this class", "range": "words separated by commas", "example": "trader, elder", "suggest": "catalog:tags", "list": true }
+  } }
+```
+
+`purpose`, `example` and `suggest` are required; `range` is optional (a number field's range is made from its own minimum and maximum). `suggest` says where the field's list of values comes from (see Suggestions below). You may write `//` comments. Edit the file in a text editor; the Editor reads it when the game starts.
+
+If the file is missing or has a mistake, the Editor still opens, fields show no tooltip and the status line names the file and line (`help.json:4: ...`). A test checks that every field of the four editors has an entry and every entry has a field, so a new field without a line in `help.json` fails the build by name.
+
+
+### Suggestions (US-301, US-302)
+
+Click into a field that offers values and a list opens under it (above it near the bottom of the screen) with every value; type and it narrows to the values that start with what you typed, then the ones that contain it, in any letter case. **Up** and **Down** move the highlight, **Tab** takes the highlighted row, **Enter** takes it only after you moved the highlight (otherwise Enter keeps what you typed, as always), **Esc** closes the list and keeps your text, and a click on a row takes it. A list of words (commas or spaces) completes the word after the last separator and keeps the ones before it.
+
+Where the values come from is the `suggest` of the field's entry in `help.json`. The list reads the data in use each time it opens, so a class or a file you saved a moment ago is offered at once.
+
+| `suggest` | Offers | Example entry |
+|---|---|---|
+| `number` | the default of the character or class being edited (HP and Sword of the selected character: its kind's), the smallest, the largest, then the last five numbers you typed in that field this session | `"suggest": "number"` |
+| `files:<folder>/<glob>` | the file names in a folder of `assets/data` that match `*`, `*.ext` or a whole name | `"suggest": "files:dialogue/*.dlg"` gives `elder-fire.dlg` for **Script** |
+| `catalog:<name>` | the names of a catalog, listed below | `"suggest": "catalog:interactions", "list": true` for **Does** |
+| `values:a\|b\|c` | a fixed list | `"suggest": "values:elder\|friend"` for the story event's **who** |
+| `none` | nothing: the field works as before | `"suggest": "none"` |
+
+
+## Live data (US-303, M10b)
+
+The game reads its data files again while it runs, **all or nothing**: the new files are read into a copy, and only a clean copy replaces the data in use. A mistake keeps the last good data, lists `file:line: message` in a red panel at the top of the screen and a red toast ("Not reloaded: ..."), and the panel goes when the file is fixed and read again. A clean reload shows a two-second toast ("Reloaded lights"). **F5** reads every set; saving in the Editor (the graph editors, a class or a prefab) reads the set of the file it wrote.
+
+| Set | Files | What follows |
+|---|---|---|
+| `interactions` | `interactions/`, `dialogue/`, `quests/` | the Editor's action lists and the graph editors' catalog |
+| `npc-classes` | `npc-classes/`, `npcs/`, `sim/partner-types.json` | trade profiles, the partner defaults, schedules and the Class panel |
+| `lights` | `light/lights.json` | placed lights and objects that shine, at once; the Light palette |
+| `catalog` | `plants.json`, `objects.json`, `characters.json` | placed plants take the new values of their kind (by name, keeping their ids and states); a new object is on the object page of the palette; the character palette |
+| `help` | `editor/help.json` | tooltips and suggestions |
+
+A placed thing whose kind is gone (a plant or object deleted from the catalog, a light kind that left `lights.json`, a character kind that left `characters.json`) is **skipped by play**, a red **?** stands where it was placed (in the Editor and in play) and a warning names the level entry: `level "The Valley": plant #12 "oak" has no kind in plants.json or objects.json`. Nothing is deleted from the level; the thing comes back by itself when the kind comes back.
+
+These files cannot be swapped while the game runs, because the play state holds them by address or number: `weapons.json`, `animals.json`, `effects.json`, `weather.json`, `tiles.json`, `materials.json`, `buildings/`, `hero/`, `sim/`, `light/sky.json`, `light/celestial-events.json` and `story/`. When you save one, the toast says `<file> applies at the next start`, nothing is half-applied, and F5 leaves them alone. Each set reloads in well under 100 ms (`docs/evidence/US-303/`).
+
+**Files saved outside the game (US-304).** The game also watches its data files: save one in a text editor and, within about a second, it is read again by itself, with no F5. It looks at the files a few at a time (every file about four times a second), waits until the file has been quiet for 0.3 seconds (an editor often writes a file twice), and then reloads the set that reads it, all or nothing like F5. What the game writes itself (an Editor save) is not read a second time. Temporary and backup files (`.tmp`, `.swp`, `.bak`, `.bak1`...) and hidden files are ignored.
+
+The **open level** is watched too. If its file changes outside the Editor and you have nothing unsaved, the Editor reads it again (your view stays where it is) and a toast says `Reloaded <file>`. If you have unsaved changes, nothing is overwritten: the status line says the file changed on disk, and you choose (save to overwrite it, or open it again to take the new one). While you play, the new level waits and is read when you open the Editor; a run keeps going on the level it started with.
+
+`odysseus.exe --no-watch` turns the watching off (the tests and the headless runs do not watch). F5 and the Editor's saves still reload.
+
+**Level edits and run saves (US-305).** A run save remembers what the level looked like when it was saved: for every placed thing (plants and objects, characters and people, pickups, effects, lights, buildings of the level) its id and a short fingerprint (hash) of its entry in the level file. When the run is loaded, each id is compared with the level as it is now:
+
+| In the level now | In the run |
+|---|---|
+| same fingerprint | the run keeps its state: a bush picked on the other side stays picked, a person keeps their age, needs and memories, a building keeps its damage |
+| changed (moved, renamed, other class, other kind) or new | it comes fresh from the level, and what was waiting for it (a regrow timer, a trade stock) is dropped |
+| gone (deleted in the Editor) | it is removed from the run |
+
+The clan, the hero, the flags, the quests and what the clan built itself are not in the level, so the level never touches them. The status line says how many things the level updated: `Loaded clan.json: day 12. The level updated 2 things`. If you save the level in the Editor while a run is loaded and then press **F1**, the run is loaded again from its save with the same merge (it is not started over). A save made before this feature has no fingerprints: it loads as it always did, once, and the next autosave writes them. A generated region has no level file to edit and is not merged.
+Catalogs: `npc-classes`, `npc-kinds` (characters and animals), `partner-types`, `interactions`, `interaction-fields` (`gather.delay`, `gather.duration`...), `light-kinds`, `objects`, `plants`, `characters`, `items`, `building-kinds`, `prefabs`, `quests`, `levels` (the files beside the open level), `tags`, `places` (of the open level) and `markers` (`tag:edible`, `npc:ossa`, `place:market`, `object:...` for a quest step's marker). `"list": true` on a field of words (**Tags**, **Allow**, **Deny**, **Does**, **Wants**) makes the list complete one word at a time. Every entry of `help.json` needs a `suggest` (write `none` for a field that offers nothing); an unknown source is a mistake of the file and the test of the coverage names it.
 ## A conversation for a character, own values for a plant (US-173)
 
 **Conversation.** Select a placed NPC: in its NPC panel the row *Talks with* names a partner type and the *Script* field the `.dlg` file used with that partner (type a name like `elder-fire.dlg`, or press **Pick** to go to the next conversation of the dialogue folder). **Graph** opens that conversation in the graph editor. Talking to the character in the game starts it. The pick is saved in the level (`dialogues`) as before; only a difference from its classes and kind is kept.

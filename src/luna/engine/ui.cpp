@@ -160,6 +160,52 @@ void Button::drawOverlay(UiPainter& painter) const {
     painter.text(box.x + 3, box.y + 3, hint, UiColor::Text);
 }
 
+// --- FieldHint ---
+
+void FieldHint::track(bool resting, int x, int y) {
+    if (!resting) {
+        ticks_ = 0;
+        return;
+    }
+    if (x != x_ || y != y_) { // moving is not resting
+        x_ = x;
+        y_ = y;
+        ticks_ = 0;
+    } else if (ticks_ < kDelayTicks) {
+        ++ticks_;
+    }
+}
+
+void FieldHint::draw(UiPainter& painter) const {
+    if (!showing()) return;
+    // The text's lines, each broken at a space before kWrapColumns letters so a long purpose stays a readable box.
+    std::vector<std::string> lines;
+    std::string_view rest = text;
+    while (!rest.empty()) {
+        const std::size_t cut = rest.find('\n');
+        std::string_view line = rest.substr(0, cut);
+        rest = cut == std::string_view::npos ? std::string_view() : rest.substr(cut + 1);
+        while (static_cast<int>(line.size()) > kWrapColumns) {
+            std::size_t space = line.rfind(' ', kWrapColumns);
+            if (space == std::string_view::npos || space == 0) space = kWrapColumns;
+            lines.emplace_back(line.substr(0, space));
+            line.remove_prefix(std::min(line.size(), space + (line[space] == ' ' ? 1 : 0)));
+        }
+        lines.emplace_back(line);
+    }
+    if (lines.empty()) return;
+    int widest = 0;
+    for (const std::string& line : lines) widest = std::max(widest, UiPainter::textWidth(line));
+    const Rect box = painter.keepOnScreen({x_ + 8, y_ + 10, widest + 6, static_cast<int>(lines.size()) * kLineHeight + 5});
+    painter.fill(box, UiColor::Dark);
+    painter.outline(box, UiColor::Border);
+    int y = box.y + 3;
+    for (const std::string& line : lines) {
+        painter.text(box.x + 3, y, line, UiColor::Text);
+        y += kLineHeight;
+    }
+}
+
 // --- ListBox ---
 
 bool ListBox::handle(const UiInput& input) {
@@ -195,7 +241,113 @@ void ListBox::draw(UiPainter& painter) const {
     }
 }
 
+// --- SuggestList ---
+
+namespace {
+
+std::string lowered(std::string text) {
+    for (char& c : text) {
+        if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+    }
+    return text;
+}
+
+bool inside(const Rect& area, int x, int y) { return x >= area.x && y >= area.y && x < area.x + area.width && y < area.y + area.height; }
+
+} // namespace
+
+void SuggestList::open(std::vector<std::string> values) {
+    values_ = std::move(values);
+    open_ = true;
+    filter({});
+}
+
+void SuggestList::filter(const std::string& typed) {
+    open_ = true;
+    const std::string needle = lowered(typed);
+    rows_.clear();
+    const auto add = [&](const std::string& value) {
+        if (std::find(rows_.begin(), rows_.end(), value) == rows_.end()) rows_.push_back(value);
+    };
+    if (needle.empty()) {
+        for (const std::string& value : values_) add(value);
+    } else {
+        for (const std::string& value : values_) { // the ones that start with it first
+            if (lowered(value).rfind(needle, 0) == 0) add(value);
+        }
+        for (const std::string& value : values_) { // then the ones that contain it
+            if (lowered(value).find(needle) != std::string::npos) add(value);
+        }
+    }
+    highlight_ = 0;
+    first_ = 0;
+    navigated_ = false;
+}
+
+void SuggestList::move(int step) {
+    navigated_ = true;
+    highlight_ = std::clamp(highlight_ + step, 0, static_cast<int>(rows_.size()) - 1);
+    if (highlight_ < first_) first_ = highlight_;
+    if (highlight_ >= first_ + kMaxRows) first_ = highlight_ - kMaxRows + 1;
+}
+
+bool SuggestList::handle(const UiInput& input, std::optional<std::string>& accepted) {
+    if (!isOpen()) return false; // closed: no input is used, so every key does what it did before
+    if (input.pointer.wasPressed(PointerButton::Left) && inside(shown_, input.pointer.x, input.pointer.y)) {
+        const int row = first_ + (input.pointer.y - shown_.y - 1) / kLineHeight;
+        if (row >= 0 && row < static_cast<int>(rows_.size())) accepted = rows_[static_cast<std::size_t>(row)];
+        return true;
+    }
+    if (input.escape) {
+        open_ = false; // the typed text stays; typing again opens the list again
+        return true;
+    }
+    if (input.up) {
+        move(-1);
+        return true;
+    }
+    if (input.down) {
+        move(1);
+        return true;
+    }
+    if (input.tab || (input.confirm && navigated_)) {
+        accepted = rows_[static_cast<std::size_t>(highlight_)];
+        return true;
+    }
+    return false;
+}
+
+void SuggestList::draw(UiPainter& painter, const Rect& field) const {
+    shown_ = {};
+    if (!isOpen()) return;
+    const int count = static_cast<int>(rows_.size());
+    const int visible = std::min(count, kMaxRows);
+    int widest = 0;
+    for (const std::string& row : rows_) widest = std::max(widest, UiPainter::textWidth(row));
+    const int width = std::max(field.width, widest + 8);
+    const int height = visible * kLineHeight + 2;
+    const Rect& screen = painter.screen();
+    const bool below = field.y + field.height + height <= screen.y + screen.height;
+    const Rect box = painter.keepOnScreen({field.x, below ? field.y + field.height : field.y - height, width, height});
+    shown_ = box;
+    painter.fill(box, UiColor::Dark);
+    painter.outline(box, UiColor::Border);
+    for (int i = 0; i < visible; ++i) {
+        const int row = first_ + i;
+        const Rect line{box.x + 1, box.y + 1 + i * kLineHeight, box.width - 2, kLineHeight};
+        if (row == highlight_) painter.fill(line, UiColor::Selected);
+        painter.text(line.x + 2, line.y + 1, rows_[static_cast<std::size_t>(row)], row == highlight_ ? UiColor::Gold : UiColor::Text);
+    }
+    if (first_ > 0) painter.text(box.x + box.width - 8, box.y + 2, "^", UiColor::Dim); // more rows above and below
+    if (first_ + visible < count) painter.text(box.x + box.width - 8, box.y + box.height - kLineHeight, "v", UiColor::Dim);
+}
+
 // --- NumberField ---
+
+Rect NumberField::box() const {
+    const int boxX = bounds.x + UiPainter::textWidth(label) + 4;
+    return {boxX, bounds.y, bounds.x + bounds.width - boxX, bounds.height};
+}
 
 void NumberField::commit() {
     int typed = value;
@@ -204,6 +356,7 @@ void NumberField::commit() {
     }
     const int kept = std::clamp(typed, minimum, maximum);
     focused_ = false;
+    list_.close();
     if (kept != value) {
         value = kept;
         if (onChange) onChange(value);
@@ -213,20 +366,37 @@ void NumberField::commit() {
 bool NumberField::handle(const UiInput& input) {
     if (!visible) return false;
     const bool over = contains(input.pointer.x, input.pointer.y);
+    tip.track(over && !focused_ && !input.pointer.wasPressed(PointerButton::Left), input.pointer.x, input.pointer.y);
+    if (focused_) { // an open list gets the arrows, Tab, Enter after a pick, Escape and clicks on its rows first
+        std::optional<std::string> accepted;
+        if (list_.handle(input, accepted)) {
+            if (accepted) {
+                editing_ = *accepted;
+                commit();
+            }
+            return true;
+        }
+    }
     if (input.pointer.wasPressed(PointerButton::Left)) {
         if (over && !focused_) {
             focused_ = true;
             editing_.clear();
+            if (suggest) list_.open(suggest(editing_));
         } else if (!over && focused_) {
             commit();
         }
     }
     if (focused_) {
+        const std::string before = editing_;
         for (const char c : input.text) {
             if ((c >= '0' && c <= '9' && editing_.size() < 6) || (c == '-' && editing_.empty() && minimum < 0)) editing_ += c;
         }
         if (input.erase && !editing_.empty()) editing_.pop_back();
         if (input.confirm) commit();
+        if (focused_ && suggest && editing_ != before) {
+            list_.open(suggest(editing_));
+            list_.filter(editing_);
+        }
         return true;
     }
     if (over && input.pointer.wheel != 0) {
@@ -241,17 +411,36 @@ bool NumberField::handle(const UiInput& input) {
 
 void NumberField::draw(UiPainter& painter) const {
     painter.text(bounds.x, bounds.y + 2, label, UiColor::Dim);
-    const int boxX = bounds.x + UiPainter::textWidth(label) + 4;
-    const Rect box{boxX, bounds.y, bounds.x + bounds.width - boxX, bounds.height};
-    painter.fill(box, UiColor::Dark);
-    painter.outline(box, focused_ ? UiColor::Gold : UiColor::Border);
-    painter.text(box.x + 3, box.y + (box.height - kGlyphHeight) / 2, focused_ ? editing_ + "_" : std::to_string(value), UiColor::Text);
+    const Rect inner = box();
+    painter.fill(inner, UiColor::Dark);
+    painter.outline(inner, focused_ ? UiColor::Gold : UiColor::Border);
+    painter.text(inner.x + 3, inner.y + (inner.height - kGlyphHeight) / 2, focused_ ? editing_ + "_" : std::to_string(value), UiColor::Text);
+}
+
+void NumberField::drawOverlay(UiPainter& painter) const {
+    if (!visible) return;
+    tip.draw(painter);
+    if (focused_) list_.draw(painter, box());
 }
 
 // --- TextField ---
 
+Rect TextField::box() const {
+    const int boxX = bounds.x + UiPainter::textWidth(label) + 4;
+    return {boxX, bounds.y, bounds.x + bounds.width - boxX, bounds.height};
+}
+
+std::string TextField::typedItem() const {
+    if (!listItems) return editing_;
+    const std::size_t comma = editing_.find_last_of(", ");
+    std::string item = comma == std::string::npos ? editing_ : editing_.substr(comma + 1);
+    item.erase(0, item.find_first_not_of(' '));
+    return item;
+}
+
 void TextField::commit() {
     focused_ = false;
+    list_.close();
     if (editing_ != value) {
         value = editing_;
         if (onChange) onChange(value);
@@ -261,10 +450,27 @@ void TextField::commit() {
 bool TextField::handle(const UiInput& input) {
     if (!visible) return false;
     const bool over = contains(input.pointer.x, input.pointer.y);
+    tip.track(over && !focused_ && !input.pointer.wasPressed(PointerButton::Left), input.pointer.x, input.pointer.y);
+    if (focused_) { // an open list gets the arrows, Tab, Enter after a pick, Escape and clicks on its rows first
+        std::optional<std::string> accepted;
+        if (list_.handle(input, accepted)) {
+            if (accepted) {
+                if (listItems) { // keeps everything up to the last comma or space, and writes the chosen item after it
+                    const std::size_t separator = editing_.find_last_of(", ");
+                    editing_ = (separator == std::string::npos ? std::string() : editing_.substr(0, separator + 1)) + *accepted;
+                } else {
+                    editing_ = *accepted;
+                }
+                commit();
+            }
+            return true;
+        }
+    }
     if (input.pointer.wasPressed(PointerButton::Left)) {
         if (over && !focused_) {
             focused_ = true;
             editing_ = value;
+            if (suggest) list_.open(suggest(typedItem()));
         } else if (!over && focused_) {
             commit();
         }
@@ -272,21 +478,32 @@ bool TextField::handle(const UiInput& input) {
     if (!focused_) {
         return over && input.pointer.wasPressed(PointerButton::Left);
     }
+    const std::string before = editing_;
     for (const char c : input.text) {
         if (editing_.size() < maxLength) editing_ += c;
     }
     if (input.erase && !editing_.empty()) editing_.pop_back();
     if (input.confirm) commit();
+    if (focused_ && suggest && editing_ != before) {
+        const std::string item = typedItem();
+        list_.open(suggest(item));
+        list_.filter(item);
+    }
     return true;
 }
 
 void TextField::draw(UiPainter& painter) const {
     painter.text(bounds.x, bounds.y + 2, label, UiColor::Dim);
-    const int boxX = bounds.x + UiPainter::textWidth(label) + 4;
-    const Rect box{boxX, bounds.y, bounds.x + bounds.width - boxX, bounds.height};
-    painter.fill(box, UiColor::Dark);
-    painter.outline(box, focused_ ? UiColor::Gold : UiColor::Border);
-    painter.text(box.x + 3, box.y + (box.height - kGlyphHeight) / 2, focused_ ? editing_ + "_" : value, UiColor::Text);
+    const Rect inner = box();
+    painter.fill(inner, UiColor::Dark);
+    painter.outline(inner, focused_ ? UiColor::Gold : UiColor::Border);
+    painter.text(inner.x + 3, inner.y + (inner.height - kGlyphHeight) / 2, focused_ ? editing_ + "_" : value, UiColor::Text);
+}
+
+void TextField::drawOverlay(UiPainter& painter) const {
+    if (!visible) return;
+    tip.draw(painter);
+    if (focused_) list_.draw(painter, box());
 }
 
 // --- Panel ---

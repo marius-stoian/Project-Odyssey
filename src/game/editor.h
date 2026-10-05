@@ -7,8 +7,10 @@
 #include "game/building_editor.h"
 #include "game/effect_art.h"
 #include "game/graph_editor.h"
+#include "game/editor_help.h"
 #include "game/editor_history.h"
 #include "game/level.h"
+#include "game/missing_kind.h"
 #include "game/pickups.h"
 #include "game/plants.h"
 #include "luna/engine/camera.h"
@@ -156,7 +158,19 @@ public:
     // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
     // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
     void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
+    // The help of the fields (US-300): every panel of the four editors gets its tooltips once a tick. A broken help file is named in the status line.
+    void setHelp(EditorHelp* help);
+    // The default a number field of the selected character offers (US-302): its kind's hit points and sword damage. Nothing for any other field.
+    std::optional<int> numberDefault(const std::string& fieldId) const;
     void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
+    // The data of the game was reloaded (US-303): the palettes of plants, objects, lights and characters are built again from the definitions.
+    void dataChanged() {
+        buildPanels();
+        classesStale_ = true;
+        propertiesStale_ = true;
+    }
+    // The things the level places whose kind is gone (US-303): a red "?" is drawn where each stands.
+    void setMissing(std::vector<MissingKind> missing) { missing_ = std::move(missing); }
     bool classesShown() const { return classesShown_; }
     void showClasses(bool shown);
     void newClass();                          // a blank draft; Save writes it
@@ -243,6 +257,11 @@ public:
     // Saves to the level file (safely, with backups). Returns false and says why when it cannot.
     bool save();
     bool unsaved() const { return unsaved_; }
+    // The level file changed on disk outside the Editor (US-304): with no unsaved changes it is read again (the view stays where it is); with unsaved
+    // changes nothing is overwritten and the status line says the file changed. True when the file was read again.
+    bool levelChangedOnDisk();
+    // Told after the Editor writes the level file itself, so the watcher does not read it a second time.
+    void setWroteFile(std::function<void(const std::filesystem::path&)> wrote) { wrote_ = std::move(wrote); }
     const std::string& status() const { return status_; }
 
     // The map cell under a point of the screen (virtual pixels), if it is on the level.
@@ -385,6 +404,10 @@ private:
     int partnerIndex_ = 0;                          // which partner type the dialogue row shows
     int defaultsIndex_ = 0;                         // which partner type the defaults row shows (US-293)
     NpcClassBook* classBook_ = nullptr;
+    EditorHelp* help_ = nullptr;
+    std::vector<MissingKind> missing_;
+    std::function<void(const std::filesystem::path&)> wrote_;
+    void applyHelp();
     bool classesShown_ = false;
     bool classesStale_ = true;
     bool classNew_ = false;
@@ -392,6 +415,8 @@ private:
     std::string classSelected_;
     std::unique_ptr<luna::engine::Panel> classes_;
     bool kindsTab_ = false;
+    bool classesAreKinds_ = false;     // what classes_ was built as, for the help ids: the tab may have changed since
+    bool propertiesForPlant_ = false;  // what properties_ was built for
     std::string kindSelected_;
     sim::rules::NpcKind kindDraft_;
     mutable std::map<std::string, luna::engine::Texture> markerTextures_; // one picture per distinct marker, made when first drawn

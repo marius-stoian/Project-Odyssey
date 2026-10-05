@@ -85,6 +85,37 @@ int NpcPopulation::add(int id, std::string_view kind, int ageDays, int family, i
     return index;
 }
 
+void NpcPopulation::adopt(const NpcPopulation& saved, const std::set<int>& fresh) {
+    ticks_ = saved.ticks_;
+    for (std::size_t i = 0; i < ids_.size(); ++i) {
+        const int id = ids_[i];
+        const int from = saved.indexOf(id);
+        if (from < 0 || fresh.contains(id)) continue; // new to the save, or the level changed it: it stays as the level made it
+        const std::size_t s = saved.at(from);
+        ages_[i] = saved.ages_[s];
+        families_[i] = saved.families_[s];
+        attitudes_[i] = saved.attitudes_[s];
+        hours_[i] = saved.hours_[s];
+        for (std::size_t n = 0; n < kNeedCount; ++n) needs_[i * kNeedCount + n] = saved.needs_[s * kNeedCount + n];
+        noteCounts_[i] = saved.noteCounts_[s];
+        noteHeads_[i] = saved.noteHeads_[s];
+        for (std::size_t k = 0; k < static_cast<std::size_t>(saved.noteCounts_[s]); ++k) { // the texts are indexes into each population's own list
+            StoredNote note = saved.notes_[s * kNotesPerPerson + k];
+            note.text = static_cast<std::int16_t>(intern(texts_, textLookup_, saved.texts_[static_cast<std::size_t>(note.text)]));
+            notes_[i * kNotesPerPerson + k] = note;
+        }
+        move(static_cast<int>(i), saved.xs_[s], saved.ys_[s]);
+    }
+    pairs_.clear();
+    for (const auto& [key, pair] : saved.pairs_) {
+        const int holder = static_cast<int>(key >> 32);
+        const int target = static_cast<int>(key & 0xFFFFFFFFULL);
+        if (fresh.contains(holder) || fresh.contains(target)) continue;                   // a fresh person starts without opinions, and nobody has one of them
+        if (!hasOpinions(holder) || (target != kHero && !hasOpinions(target))) continue; // someone the level no longer has
+        pairs_[key] = pair;
+    }
+}
+
 void NpcPopulation::move(int index, int x, int y) {
     if (cellKey(xs_[at(index)], ys_[at(index)]) == cellKey(x, y)) { // the same cell: the grid does not change
         xs_[at(index)] = x;

@@ -91,7 +91,10 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
-    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
+    editorHelp_.setSources(suggestionSources()); // the lists of values read the data in use each time a field opens one (US-302)
+    editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
+    editor_.setHelp(&editorHelp_);
+    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { ownReload("interactions"); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
         if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
@@ -109,7 +112,12 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     actions_.setFinishObserver([this](const std::string& interaction, int actor, const sim::rules::ThingRef&) {
         if (actor == kHeroActor) questEvent(sim::rules::QuestObjective::Kind::Interact, interaction);
     });
-    editor_.storyEvents().setFolder(dataDirectory / "story" / "events"); // the events are read again when a new game starts (US-185)
+    editor_.storyEvents().setFolder(dataDirectory / "story" / "events", [this, dataDirectory] { watcher_.resync(dataDirectory / "story"); }); // the events are read when a new game starts (US-185)
+    editor_.setWroteFile([this](const std::filesystem::path& file) {
+        watcher_.noteOwnWrite(file);
+        if (runLoaded_) levelSavedSinceRun_ = true; // US-305: the level changed under a loaded run: Play loads the run again with the edits merged in
+    });   // the Editor's own saves are not read a second time (US-304)
+    npcClasses_.setWroteFile([this](const std::filesystem::path& file) { watcher_.noteOwnWrite(file); });
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -122,38 +130,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
-    // Every `light` of the catalogs must name a kind of light of lights.json (US-243).
-    {
-        const auto check = [&](const std::string& light, const std::string& file, const std::string& where) {
-            if (!light.empty() && lighting_.kind(light) == nullptr) {
-                throw sim::DataError(dataDirectory / file, where + ".light", "\"" + light + "\" is not a kind of light in light/lights.json");
-            }
-        };
-        for (const EffectDef& def : catalogs_.effects) check(def.light, "effects.json", "effect \"" + def.name + "\"");
-        for (const WeaponDef& def : catalogs_.weapons) check(def.light, "weapons.json", "weapon \"" + def.name + "\"");
-        for (const PlantDef& def : catalogs_.plants) check(def.light, def.object ? "objects.json" : "plants.json", "object \"" + def.name + "\"");
-    }
-    // The sun and moon (US-248): each names a kind of light of lights.json. A mistake in one of them, or in the eclipse file, does not stop the game:
-    // the bad entry is left out, the level keeps its default pair, and the problem (file and field) is shown as a message.
-    std::vector<std::string> celestialNotes = catalogs_.notes;
-    std::erase_if(catalogs_.plants, [&](const PlantDef& def) {
-        if (!def.celestial || lighting_.kind(def.sky.lightKind) != nullptr) return false;
-        celestialNotes.push_back(sim::DataError(dataDirectory / "objects.json", "object \"" + def.name + "\".celestial.light",
-                                                "\"" + def.sky.lightKind + "\" is not a kind of light in light/lights.json").what());
-        return true;
-    });
-    for (const char* body : {"sun", "moon"}) {
-        const bool has = std::any_of(catalogs_.plants.begin(), catalogs_.plants.end(), [&](const PlantDef& def) { return def.celestial && def.sky.followsClock && def.sky.body == body; });
-        if (has) continue;
-        PlantDef fallback; // the built-in default: a plain sun or moon on the usual orbit
-        fallback.name = body;
-        fallback.frame = body;
-        fallback.object = true;
-        fallback.celestial = true;
-        fallback.tags = {"object", "celestial"};
-        fallback.sky.body = body;
-        catalogs_.plants.push_back(fallback);
-    }
+    checkCatalogLights(catalogs_, lighting_, dataDirectory); // every `light` of the catalogs must name a kind of light of lights.json (US-243)
+    std::vector<std::string> celestialNotes = addCelestialDefaults(catalogs_, lighting_, dataDirectory); // the sun and moon (US-248)
     for (const PlantDef& def : catalogs_.plants) {
         if (def.celestial && def.sky.followsClock) defaultBodies_.push_back(&def);
     }
@@ -183,6 +161,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         host.saved = [this](const sim::buildings::KindDef& kind) {
             if (std::find(definitions_.buildingKinds.begin(), definitions_.buildingKinds.end(), kind.id) == definitions_.buildingKinds.end()) definitions_.buildingKinds.push_back(kind.id);
             if (kind.known) buildings_.learn(kind.id); // a prefab marked known is buildable at once
+            watcher_.resync(dataDirectory_ / "buildings"); // the Editor wrote the file: the watcher does not report it (US-304)
         };
         editor_.buildings().setHost(std::move(host));
         if (!buildings_.notes().empty()) {
@@ -216,6 +195,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     populate();
     buildNpcPopulation(); // the placed people are persons from the first frame, not only after a restart (X-M9a)
     if (clanEnabled_) startClan();
+    registerDataSets(); // the files of the game that can be read again while it runs (US-303)
+    findMissingKinds();
 }
 
 void OdysseyGame::resetPlay() {
@@ -270,8 +251,10 @@ void OdysseyGame::switchMode(Mode mode) {
         const luna::engine::Rect view = camera_.view();
         editor_.enter(view.x + view.width / 2.0, view.y + view.height / 2.0); // looking where the game looked
         core::logInfo("Mode: Editor");
+        if (levelReloadPending_) applyLevelFromDisk(); // the level file changed on disk while the game was playing (US-304)
     } else {
         resetPlay();
+        if (runLoaded_ && levelSavedSinceRun_) loadAutosave(); // the run comes back from its save, the level edits win over it (US-305)
         core::logInfo(std::format("Mode: Game (level \"{}\", hero at ({}, {}))", level_.name, level_.heroStart.x, level_.heroStart.y));
     }
 }
@@ -768,6 +751,69 @@ void OdysseyGame::syncEditorActions() {
 }
 
 // What the graph editor's check may name (US-175): the game's items, built-in actions, conversations, interactions and tags.
+// The names a field of the Editor may be given (US-302). Every call reads the data in use now, so a class saved a moment ago is offered at once.
+std::vector<std::string> OdysseyGame::suggestionNames(const std::string& catalog) const {
+    std::set<std::string> names;
+    if (catalog == "npc-classes") {
+        for (const std::string& id : npcClasses_.catalog().ids()) names.insert(id);
+    } else if (catalog == "npc-kinds") {
+        for (const std::string& name : editor_.kindNames()) names.insert(name);
+    } else if (catalog == "partner-types") {
+        for (const std::string& name : editor_.partnerTypes()) names.insert(name);
+    } else if (catalog == "interactions" || catalog == "interaction-fields") {
+        for (const sim::rules::Interaction& interaction : interactions_.all()) {
+            if (catalog == "interactions") {
+                names.insert(interaction.id);
+            } else {
+                names.insert(interaction.id + ".delay");
+                names.insert(interaction.id + ".duration");
+            }
+        }
+    } else if (catalog == "light-kinds") {
+        names.insert(definitions_.lightKinds.begin(), definitions_.lightKinds.end());
+    } else if (catalog == "objects") {
+        names.insert(definitions_.objects.begin(), definitions_.objects.end());
+    } else if (catalog == "plants") {
+        names.insert(definitions_.plants.begin(), definitions_.plants.end());
+    } else if (catalog == "characters") {
+        for (const CharacterKindDef& kind : definitions_.characters) names.insert(kind.name);
+    } else if (catalog == "items") {
+        if (heroData_) {
+            for (const sim::Item& item : heroData_->items) names.insert(item.id);
+        }
+    } else if (catalog == "building-kinds") {
+        names.insert(definitions_.buildingKinds.begin(), definitions_.buildingKinds.end());
+    } else if (catalog == "prefabs") {
+        std::error_code error;
+        for (const auto& file : std::filesystem::directory_iterator(dataDirectory_ / "buildings" / "prefabs", error)) {
+            if (file.is_regular_file() && file.path().extension() == ".json") names.insert(file.path().stem().string());
+        }
+    } else if (catalog == "quests") {
+        for (const sim::rules::Quest& quest : quests_.quests()) names.insert(quest.id);
+    } else if (catalog == "levels") {
+        for (const std::filesystem::path& file : editor_.levelFiles()) names.insert(file.stem().string());
+    } else if (catalog == "tags") {
+        const std::set<std::string> tags = knownTags();
+        names.insert(tags.begin(), tags.end());
+    } else if (catalog == "places") {
+        for (const PlacedPlace& place : level_.places) names.insert(place.name);
+    } else if (catalog == "markers") { // what a quest step's marker may point to
+        for (const std::string& tag : knownTags()) names.insert("tag:" + tag);
+        for (const PlacedCharacter& placed : level_.characters) names.insert("npc:" + questWord(placed.name));
+        for (const PlacedPlace& place : level_.places) names.insert("place:" + place.name);
+        for (const std::string& object : definitions_.objects) names.insert("object:" + object);
+    }
+    return {names.begin(), names.end()};
+}
+
+EditorHelp::Sources OdysseyGame::suggestionSources() const {
+    EditorHelp::Sources sources;
+    sources.dataFolder = dataDirectory_;
+    sources.catalog = [this](const std::string& catalog) { return suggestionNames(catalog); };
+    sources.numberDefault = [this](const std::string& fieldId) { return editor_.numberDefault(fieldId); };
+    return sources;
+}
+
 void OdysseyGame::syncGraphCatalog() {
     sim::rules::GraphCatalog catalog;
     if (heroData_) {
@@ -855,27 +901,30 @@ bool OdysseyGame::reloadInteractions() {
     return true;
 }
 
-// The mistakes, top of the screen, until the files are fixed and F5 is pressed again.
+// The mistakes of every data set, top of the screen, until the files are fixed (the interaction files and every set of the registry, US-303).
 void OdysseyGame::drawInteractionPanel(luna::engine::Renderer& renderer) const {
-    if (interactionReport_.errors.empty()) return;
+    std::vector<std::string> errors;
+    for (const sim::rules::Diagnostic& d : interactionReport_.errors) errors.push_back(d.text());
+    for (const auto& [set, lines] : reloadErrors_) errors.insert(errors.end(), lines.begin(), lines.end());
+    if (errors.empty()) return;
     constexpr std::size_t kMaxLines = 8;
     const int width = uiWidth() - 20;
     const int maxChars = (width - 8) / luna::engine::kTextAdvance;
-    const std::size_t shown = std::min(kMaxLines, interactionReport_.errors.size());
+    const std::size_t shown = std::min(kMaxLines, errors.size());
     const luna::engine::Rect box{10, 34, width, static_cast<int>(shown + 2) * luna::engine::kLineHeight + 6};
     luna::engine::UiPainter painter(renderer, uiSheet_);
     painter.fill(box, luna::engine::UiColor::Panel);
     painter.outline(box, luna::engine::UiColor::Red);
-    painter.text(box.x + 4, box.y + 4, std::format("Interaction files: {} mistake(s). Fix them, then press F5.", interactionReport_.errors.size()), luna::engine::UiColor::Gold);
+    painter.text(box.x + 4, box.y + 4, std::format("Data files: {} mistake(s). Fix them and save; the last good data stays in use.", errors.size()), luna::engine::UiColor::Gold);
     int y = box.y + 4 + luna::engine::kLineHeight;
     for (std::size_t i = 0; i < shown; ++i) {
-        std::string line = interactionReport_.errors[i].text();
+        std::string line = errors[i];
         if (static_cast<int>(line.size()) > maxChars) line = line.substr(0, static_cast<std::size_t>(maxChars - 3)) + "...";
         painter.text(box.x + 4, y, line, luna::engine::UiColor::Red);
         y += luna::engine::kLineHeight;
     }
-    if (interactionReport_.errors.size() > shown) {
-        painter.text(box.x + 4, y, std::format("...and {} more (see the log)", interactionReport_.errors.size() - shown), luna::engine::UiColor::Dim);
+    if (errors.size() > shown) {
+        painter.text(box.x + 4, y, std::format("...and {} more (see the log)", errors.size() - shown), luna::engine::UiColor::Dim);
     }
 }
 std::set<std::string> OdysseyGame::knownTags() const {
@@ -977,19 +1026,40 @@ std::string OdysseyGame::thingsText() const {
     for (const WorldPlant& plant : plants_) {
         if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
     }
-    return nlohmann::json{{"version", 2}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}, {"quests", nlohmann::json::parse(quests_.save(actionClock_))}}.dump(1);
+    nlohmann::json things{{"version", 3}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}, {"quests", nlohmann::json::parse(quests_.save(actionClock_))}};
+    // Version 3 (US-305): what the level looked like when the run was saved, so a later load can tell which things the owner has edited since. A generated region has no
+    // level file to edit: its level is made from the region seed, so it has no baseline.
+    if (!region_) things["baseline"] = nlohmann::json::parse(LevelBaseline::of(level_).toText());
+    return things.dump(1);
 }
 
 std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
     std::vector<std::string> notes;
     try {
         const nlohmann::json data = nlohmann::json::parse(text);
-        if (const int version = data.at("version").get<int>(); version != 1 && version != 2) return {"things.json was saved by another version and was not loaded"};
+        const int version = data.at("version").get<int>();
+        if (version < 1 || version > 3) return {"things.json was saved by another version and was not loaded"};
+        // A save from before M10b (version 1 or 2) has no baseline: it loads as before, and the next autosave writes one (US-305).
+        runChanges_ = {};
+        if (version >= 3 && data.contains("baseline") && !region_) runChanges_ = compareBaseline(LevelBaseline::fromText(data.at("baseline").dump()), level_);
         for (const auto& [id, state] : data.at("plants").items()) {
+            if (runChanges_.of(LevelBaseline::Plant).touches(std::stoi(id))) continue; // the level changed or removed this plant: it comes fresh from the level
             const int index = plantIndexById(std::stoi(id));
             if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
         }
-        notes = actions_.loadPending(data.at("timers").dump(), actionClock_);
+        nlohmann::json timers = data.at("timers");
+        if (runChanges_.any() && timers.contains("pending")) { // what was waiting for a plant or a person the level changed no longer applies
+            nlohmann::json kept = nlohmann::json::array();
+            for (const nlohmann::json& timer : timers.at("pending")) {
+                const int kind = timer.value("kind", -1);
+                const int target = timer.value("id", -1);
+                const bool plant = kind == static_cast<int>(Subject::Kind::Plant) && runChanges_.of(LevelBaseline::Plant).touches(target);
+                const bool person = kind == static_cast<int>(Subject::Kind::Npc) && runChanges_.of(LevelBaseline::Character).touches(target);
+                if (!plant && !person) kept.push_back(timer);
+            }
+            timers["pending"] = std::move(kept);
+        }
+        notes = actions_.loadPending(timers.dump(), actionClock_);
         if (data.contains("flags")) { // saves from before US-164 have none
             const std::vector<std::string> flagNotes = flags_.load(data.at("flags").dump());
             notes.insert(notes.end(), flagNotes.begin(), flagNotes.end());
@@ -1239,6 +1309,9 @@ bool OdysseyGame::loadAutosave() {
     const std::filesystem::path clanFile = saveDirectory_ / "clan.json";
     const std::filesystem::path regionFile = saveDirectory_ / "region.json";
     std::string notes;
+    runChanges_ = {};
+    runLoaded_ = false;
+    levelSavedSinceRun_ = false;
     try {
         if (std::filesystem::exists(regionFile) || std::filesystem::exists(regionFile.string() + ".bak1")) {
             sim::LoadedRegion loaded = sim::loadRegion(regionFile, sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json"));
@@ -1285,10 +1358,14 @@ bool OdysseyGame::loadAutosave() {
         if (std::ifstream built(saveDirectory_ / "buildings.json", std::ios::binary); built) {
             const std::string text((std::istreambuf_iterator<char>(built)), std::istreambuf_iterator<char>());
             for (const std::string& note : buildings_.loadText(text)) notes += (notes.empty() ? "" : "; ") + note;
+            if (runChanges_.of(LevelBaseline::Building).updated.size() + runChanges_.of(LevelBaseline::Building).removed.size() > 0) buildings_.mergeLevel(*this, runChanges_.of(LevelBaseline::Building));
             buildings_.syncObstacles(*this);
         }
         if (const std::string problem = loadNpcPopulation(); !problem.empty()) notes += (notes.empty() ? "" : "; ") + problem;
-        say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
+        runLoaded_ = true;
+        std::string line = notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes;
+        if (const std::string updated = levelChangesMessage(runChanges_); !updated.empty()) line += ". " + updated; // the level was edited since the save (US-305)
+        say(line);
         return true;
     } catch (const std::exception& error) {
         say(std::string("Could not load the save: ") + error.what());
@@ -1880,14 +1957,13 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
+    if (toastTicks_ > 0) --toastTicks_;
+    if (watching_) { // files saved outside the game (US-304)
+        static const auto started = std::chrono::steady_clock::now();
+        pollFiles(std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count());
+    }
     if (intents.pressed(luna::engine::Intent::Reload)) {
-        reloadInteractions();
-        if (npcClasses_.reload()) {
-            editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
-            refreshTraders();         // and the trade profiles that came with them (US-281)
-            reloadPartnerDefaults();  // and the default actions of the partner types (US-293)
-            refreshLife();            // and the schedules (US-290)
-        }
+        reloadEverything(); // F5 reads every data set again (US-303): the interactions, the NPC classes, the lights, the catalogs, the help
     }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
@@ -2183,6 +2259,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 }
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {
+    renderer_ = &renderer; // a reload of the plants and objects makes new pictures with it (US-303)
     // The owner's art when its atlas loads, else the programmer art (US-120).
     std::vector<std::string> groundFrames;
     for (const TileKindDef& kind : definitions_.tiles) {
@@ -2309,6 +2386,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     if (mode_ == Mode::Editor) {
         editor_.render(output, alpha);
         drawInteractionPanel(ui); // F5 works in the Editor too, so its mistakes show there
+        drawToast(ui);
         drawModeLabel(ui);
         return;
     }
@@ -2350,6 +2428,13 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
         }
     }
     drawPlants(renderer, view, alpha, true); // plants whose feet are above the hero's are behind him
+    {
+        luna::engine::UiPainter markers(renderer, uiSheet_); // a thing whose kind the data lost (US-303): a red "?" where it was placed
+        for (const MissingKind& missing : missing_) {
+            const luna::engine::Point at = screen(missing.x, missing.y);
+            drawMissingMarker(markers, at.x, at.y);
+        }
+    }
     buildings_.drawStanding(renderer, view, hero_.feetY(alpha), true);
     drawClan(renderer, view, alpha, true);
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
@@ -2465,6 +2550,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawActionRing(renderer, view);
     drawOverlay(ui);
     drawInteractionPanel(ui);
+    drawToast(ui);
     drawModeLabel(ui);
 }
 

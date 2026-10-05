@@ -1,0 +1,6 @@
+X-M10b coverage (2026-10-06), test "US-300 Coverage" (tests/game/editor_help_test.cpp), Release: 1 test case passed, 4 assertions passed.
+fields met: 127 (the tour of every panel state of the four editors; no field without a help entry, no entry without a field, every entry that offers values reached its field's list)
+  Level Editor (level, economy, npc, plant, npc-life, class, kind): 54
+  Building editor (building, prefab): 9
+  Graph editor (graph.*): 49
+  Story events (event): 15

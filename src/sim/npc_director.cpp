@@ -771,6 +771,18 @@ NpcDirector NpcDirector::fromText(std::string_view text, rules::ScheduleConfig c
     }
 }
 
+void NpcDirector::adopt(const NpcDirector& saved, const std::vector<std::pair<int, int>>& kept) {
+    for (const auto& [here, there] : kept) {
+        const auto from = static_cast<std::size_t>(there);
+        if (from >= saved.modes_.size()) continue;
+        ensure(static_cast<std::size_t>(here) + 1);
+        modes_[static_cast<std::size_t>(here)] = saved.modes_[from];
+        hp_[static_cast<std::size_t>(here)] = saved.hp_[from];
+        damage_[static_cast<std::size_t>(here)] = saved.damage_[from];
+    }
+    board_ = saved.board_;
+}
+
 std::uint64_t NpcDirector::hash() const {
     std::uint64_t h = 0xCBF29CE484222325ULL;
     mix(h, schedules_.size());

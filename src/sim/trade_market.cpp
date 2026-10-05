@@ -498,7 +498,7 @@ std::string TradeMarket::toText() const {
     return data.dump();
 }
 
-void TradeMarket::restoreState(std::string_view text) {
+void TradeMarket::restoreState(std::string_view text, const std::set<int>& skip) {
     json data;
     try {
         data = json::parse(text);
@@ -523,6 +523,7 @@ void TradeMarket::restoreState(std::string_view text) {
             state.haggleWon = entry.value("won", false);
         }
         const int id = entry.at("id").get<int>();
+        if (skip.contains(id)) continue;
         if (const auto live = traders_.find(id); live != traders_.end()) {
             live->second.stock = state.stock; // already registered: the saved state is applied at once
             live->second.drift = state.drift;

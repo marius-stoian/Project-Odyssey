@@ -2,6 +2,55 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-305 Level edits win over the run save (Mraw) - 2026-10-06
+
+**State:** On `story/US-305`, merged into `qa` after the Debug verify (zero warnings, every test group green).
+
+- **New:** `src/game/level_baseline.*` (`LevelBaseline`, `LevelChanges`, `compareBaseline`); `entryText` for every placed thing in `src/game/level.*` (the level file writer and the baseline share `entryJson`); `NpcPopulation::adopt`, `NpcDirector::adopt`, `TradeMarket::restoreState(text, skip)` in `src/sim/`; `BuildingLayer::mergeLevel` and `placeSpec`; `OdysseyGame::mergeNpcPopulation`, `runLoaded`, `runChanges`; `tests/game/level_merge_test.cpp` (11 cases); `docs/plans/US-305.md`; `Milestone-141.md` (AP-142).
+- **Changed:** `things.json` is version 3 and carries the level baseline (versions 1 and 2 still load, without a merge); `buildings.json` is version 2 and carries the level-building links (version 1 still loads); `restoreThings` skips the plants and timers the level changed; `loadAutosave` merges buildings and people and adds "The level updated N things" to the status line; Play after an Editor save under a loaded run loads the run again with the merge; `docs/guides/editor.md`, learning journal, `docs/status.md`, `Limit.md`.
+
+## US-304 File watch for outside edits (Mraw) - 2026-10-05
+
+**State:** On `story/US-304`, merged into `qa`. Debug verify: zero warnings, 27 of 27. Release watcher cost: average 0.164 ms a tick.
+
+- **New:** `FileWatcher` and `DataReload::changed(files)` (`src/game/data_reload.*`); `OdysseyGame::setWatching`, `pollFiles`, `ownReload`; `Editor::levelChangedOnDisk` and `setWroteFile`; `NpcClassBook::setWroteFile`; `--no-watch` in `apps/odysseus/main.cpp`; `tests/game/data_watch_test.cpp`; `docs/plans/US-304.md`; `Milestone-140.md` (AP-141); `docs/evidence/US-304/`.
+- **Changed:** the graph editors' Save, the level save, class and kind saves, story-event and prefab saves tell the watcher about their own writes; `docs/guides/editor.md`, `interaction-data.md`, `dialogue-format.md`, `editor-tutorial.md` (lesson 18), learning journal, `docs/status.md`, `Limit.md`.
+
+## US-303 Live reload of every data file (Mraw) - 2026-10-05
+
+**State:** On `story/US-303`, merged into `qa`. Debug verify: zero warnings, 27 of 27. Release reload times 0.2 to 4.4 ms per set.
+
+- **New:** `DataReload` registry (`src/game/data_reload.*`); the game's data sets, missing-kind markers, toast and the reload code (`src/game/odyssey_reload.cpp`, `src/game/missing_kind.h`); `EditorHelp::reload`; `Editor::dataChanged` and `setMissing`; `tests/game/data_reload_test.cpp`; `docs/plans/US-303.md`; `Milestone-139.md` (AP-140); `docs/evidence/US-303/`; CI-021.
+- **Changed:** F5 reads every set through the registry; the graph editors' Save reads the `interactions` set through it; the mistakes panel lists the mistakes of every set; `OdysseyGame` constructor uses `checkCatalogLights` and `addCelestialDefaults` (moved, not changed); the `US-156` test waits for the toast; guides ("Live data", restart lines), learning journal, `docs/status.md`, `Limit.md`.
+
+## US-302 Suggestions on every field (Mraw) - 2026-10-05
+
+**State:** On `story/US-302`, merged into `qa`. Debug verify: zero warnings, 27 of 27.
+
+- **New:** `EditorHelp::suggestionsFor`, `Sources`, `wired()`; `OdysseyGame::suggestionNames` and `suggestionSources`; `Editor::numberDefault`; `tests/game/editor_suggest_test.cpp`; `docs/plans/US-302.md`; `Milestone-138.md` (AP-139); `docs/evidence/US-302/`.
+- **Changed:** `EditorHelp::apply` wires the lists and remembers typed numbers; `help.json` entries all have `suggest` (the validator requires it; the marker field offers `catalog:markers`); a list of words completes after the last comma or space (`ui.*`); `docs/guides/editor.md`, learning journal, `docs/status.md`, `Limit.md`.
+
+## US-301 Suggestion list widget (Mraw) - 2026-10-05
+
+**State:** On `story/US-301`, merged into `qa`. Debug verify: zero warnings, 27 of 27.
+
+- **New:** `SuggestList`, `suggest` and `listItems` on the fields, `UiPainter::screen()`, intents `ListUp`, `ListDown`, `ListTab`, `ListEscape` (`src/luna/engine/ui.*`, `input.*`); ten `US-301` test cases in `tests/luna/ui_test.cpp`; `docs/plans/US-301.md`; `Milestone-137.md` (AP-138); `docs/evidence/US-301/`.
+- **Changed:** `UiInput` carries up, down, tab and escape; learning journal, `docs/status.md`, `Limit.md`. No game field uses the list yet.
+
+## US-300 Field tooltips from help.json (Mraw) - 2026-10-05
+
+**State:** On `story/US-300`, merged into `qa`. Debug verify: zero warnings, 27 of 27.
+
+- **New:** `FieldHint` and `helpId` on `TextField`/`NumberField` (`src/luna/engine/ui.*`); `EditorHelp` (`src/game/editor_help.*`); `assets/data/editor/help.json` (127 entries); tests `US-300 Field tooltip` and `tests/game/editor_help_test.cpp`; `docs/plans/US-300.md`; `Milestone-136.md` (AP-137); evidence in `docs/evidence/US-300/`.
+- **Changed:** all four editors call `applyHelp` each tick; the Editor shows a broken or missing help file in its status line; `OdysseyGame` loads the file; `docs/guides/editor.md` (Tooltips and suggestions), `docs/plans/M10b-editor-help-design.md` (ids from labels, 127 fields in four editors), learning journal, `docs/status.md`, `Limit.md`.
+
+## P-013 and K-M10b (Mraw) - 2026-10-05
+
+**State:** On `qa`. Documentation only; no code, data or test changes.
+
+- **New:** `docs/plans/M10b-editor-help-design.md`, `docs/decision-requests/D-59.md`, D-59 row in `docs/decisions.md`, `Milestone-135.md` (AP-136), CI-020 in `docs/codex-issues.md`.
+- **Changed:** `CLAUDE.md` version references (Codex v2.13, requirements v2.12), D-15 chain (M10b), `docs/status.md` (P-013 Done, K-M10b Done, M10b stories To do), `Limit.md`.
+
 ## K-M10 kickoff (Dominus) - 2026-10-05
 
 **State:** On `qa`. Documentation only.
