@@ -73,13 +73,15 @@ public:
             error(root_.line, "a quest file holds one JSON object { ... }");
             return std::nullopt;
         }
-        static const std::set<std::string> known = {"id", "title", "giver", "requires", "start", "steps", "fail", "rewards", "journal", "note"};
+        static const std::set<std::string> known = {"id", "title", "giver", "requires", "start", "steps", "fail", "rewards", "journal", "offer", "turnIn", "note"};
         for (std::size_t i = 0; i < root_.keys.size(); ++i) {
             if (known.count(root_.keys[i]) == 0) error(root_.keyLines[i], std::format("unknown field \"{}\"", root_.keys[i]));
         }
         readId(out, expectedId);
         readText("title", out.title, true);
         readText("journal", out.journal, false);
+        readText("offer", out.offer, false);
+        readText("turnIn", out.turnIn, false);
         readText("note", out.note, false);
         readGiver(out);
         out.requires_ = readConditions("requires");
@@ -95,6 +97,7 @@ private:
     const JsonValue& root_;
     std::string name_;
     LoadReport& report_;
+    std::set<std::string> broken_; // steps that failed to read
 
     void error(int line, std::string message) { report_.errors.push_back({name_, line, std::move(message)}); }
 
@@ -216,6 +219,7 @@ private:
                 continue;
             }
             if (auto step = readStep(steps->keys[i], steps->items[i])) out.steps.push_back(std::move(*step));
+            else broken_.insert(steps->keys[i]); // already reported; do not report every step that points at it as well
         }
     }
 
@@ -322,8 +326,8 @@ private:
     }
 
     void checkReferences(const Quest& q) {
-        const auto exists = [&](const std::string& id) { return id == kQuestEnd || q.find(id) != nullptr; };
-        if (!q.start.empty() && q.find(q.start) == nullptr && !q.steps.empty()) {
+        const auto exists = [&](const std::string& id) { return id == kQuestEnd || q.find(id) != nullptr || broken_.count(id) != 0; };
+        if (!q.start.empty() && !exists(q.start) && !q.steps.empty()) {
             const JsonValue* v = root_.find("start");
             error(v != nullptr ? v->line : root_.line, std::format("unknown step \"{}\"", q.start));
         }
@@ -481,7 +485,10 @@ std::string writeQuest(const Quest& q) {
     out += "  \"rewards\": [";
     for (std::size_t i = 0; i < q.rewards.size(); ++i) out += std::format("{}\n    {}", i == 0 ? "" : ",", quoted(q.rewards[i].source));
     out += q.rewards.empty() ? "]" : "\n  ]";
-    out += std::format(",\n  \"journal\": {}\n}}\n", quoted(q.journal));
+    out += std::format(",\n  \"journal\": {}", quoted(q.journal));
+    if (!q.offer.empty()) out += std::format(",\n  \"offer\": {}", quoted(q.offer));
+    if (!q.turnIn.empty()) out += std::format(",\n  \"turnIn\": {}", quoted(q.turnIn));
+    out += "\n}\n";
     return out;
 }
 

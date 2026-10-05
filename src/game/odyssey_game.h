@@ -44,6 +44,7 @@
 #include "game/bubbles.h"
 #include "sim/dialogue_script.h"
 #include "sim/flag_store.h"
+#include "sim/graph_check.h"
 #include "sim/quest_book.h"
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
@@ -174,6 +175,9 @@ public:
     // Generated small talk (US-163): what people say when no script fits them, and for `{smalltalk.topic}`.
     sim::rules::SmallTalk& smalltalk() { return smalltalk_; }
     // Story notes set by conversations and interactions (`flag met-elder`), saved with the things (US-164).
+    // Something the hero did that a quest may wait for (US-181); counted at the next quest update.
+    void questEvent(sim::rules::QuestObjective::Kind kind, const std::string& subject, int amount = 1) { quests_.notify({kind, subject, amount, actionClock_}); }
+    void setQuestMarker(bool valid, double x, double y) { questMarker_ = {valid, x, y}; }
     sim::rules::QuestBook& quests() { return quests_; }
     const sim::rules::QuestBook& quests() const { return quests_; }
     sim::rules::FlagStore& flags() { return flags_; }
@@ -261,8 +265,6 @@ public:
     // useRegion false starts the run in the level already loaded (a hand-made camp) instead of a generated region.
     void startNewRun(const sim::NewGame& game, bool useRegion = true, bool tutorial = false);
     // The elder's first-day guidance (US-090) and the opt-in session statistics (US-092).
-    Tutorial& tutorial() { return tutorial_; }
-    const Tutorial& tutorial() const { return tutorial_; }
     SessionStats& stats() { return stats_; }
     void setStatistics(bool agreed);
     // Writes the session's statistics file (only when the player agreed); called when the game ends. Returns the file or empty.
@@ -454,6 +456,9 @@ private:
     sim::rules::SmallTalk smalltalk_;
     sim::rules::FlagStore flags_;
     sim::rules::QuestBook quests_; // the authored quests and where each stands (US-180)
+    sim::rules::GraphCatalog questCatalog_; // what the quest check may name, kept from the last sync of the graph catalog (US-187)
+    void watchHeroItems(); // tells the quests what enters the hero bag (US-181)
+    struct QuestMarker { bool valid = false; double x = 0.0; double y = 0.0; } questMarker_; // where the tracked step points, found twice a second (US-183)
     Bubbles bubbles_;
     Exchanges exchanges_;
     sim::rules::CooldownTable greetingCooldowns_;
@@ -501,8 +506,6 @@ private:
     std::optional<sim::HeroData> heroData_;
     std::unique_ptr<sim::HeroLife> life_;
     RunFlow runFlow_;
-    Tutorial tutorial_;
-    TutorialScript tutorialScript_;
     SessionStats stats_;
     bool privacyAsked_ = false;
     void drawTutorial(luna::engine::Renderer& renderer) const;
@@ -584,6 +587,18 @@ private:
     void drawClan(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha, bool behindHero);
     void drawEmote(luna::engine::Renderer& renderer, Emote emote, int x, int y) const;
     void drawClanDetails(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    void drawQuestSigns(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    void drawQuestTracker(luna::engine::Renderer& renderer) const;
+    struct DebugButton { luna::engine::Rect rect; std::string label; int action = 0; bool on = false; };
+    struct DebugText { int x = 0; int y = 0; std::string text; luna::engine::UiColor colour = luna::engine::UiColor::Text; };
+    void layoutQuestDebug(std::vector<DebugButton>& buttons, std::vector<DebugText>& texts) const;
+    void updateQuestDebug(const luna::engine::Intents& intents);
+    void runQuestDebugAction(int action);
+    void drawQuestDebug(luna::engine::Renderer& renderer) const;
+    bool playHere_ = false; // the game was started by Play here: Esc goes back to the Editor
+    bool questDebugOpen_ = false;
+    int questDebugSelected_ = 0;
+    void drawQuestMarker(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawClanHud(luna::engine::Renderer& renderer) const;
     EffectArt effectArt_;
     WeatherCycle weather_;

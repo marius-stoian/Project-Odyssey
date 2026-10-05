@@ -1,12 +1,12 @@
 # Build brief: M10b Editor help and live data
 
-Status: **Handed to Anima (Codex v2.12).** Owner decisions: D-58 (docs/decision-requests/D-58.md, Decided 2026-10-05). Written by Dominus (Mraw) at the owner's request, 2026-10-05. Builders follow the Codex prompts, not this brief.
+Status: **Handed to Anima (Codex v2.13).** Owner decisions: D-58 (docs/decision-requests/D-58.md, Decided 2026-10-05). Written by Dominus (Mraw) at the owner's request, 2026-10-05. Builders follow the Codex prompts, not this brief.
 
 ## 1. Goal
 
 Make the Editor easier to use and quicker to test. Every field in every editor explains itself (a tooltip) and offers the values it accepts (a suggestion list). Anything the owner saves (in the Editor or in a text editor) shows in the running game without a restart. A level edit is never hidden by an older run save.
 
-Source of truth: Project Odyssey.docx v2.11 (Round 24) holds epic E29 (M10b), stories US-300..US-305 and requirements EDT-09, EDT-10, EDT-11, NFR-09, MVP-18.
+Source of truth: Project Odyssey.docx v2.12 (Round 25) holds epic E29 (M10b), stories US-300..US-305 and requirements EDT-09, EDT-10, EDT-11, NFR-09, MVP-18.
 
 ## 2. What exists today (2026-10-05)
 
@@ -125,7 +125,7 @@ Order: US-300, US-301, US-302, US-303, US-304, US-305. Estimate 3 / 4 / 6 weeks.
 - Removed: Given an NPC I deleted from the level, When the run loads, Then it is not in the run and the status line counts the update.
 - Old save: Given a save from before M10b, When it loads, Then it behaves as before once and is written with a baseline.
 
-## 6. Requirements (new, docx v2.11)
+## 6. Requirements (new, docx v2.12)
 
 | ID | Area | Requirement |
 |---|---|---|

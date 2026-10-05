@@ -17,6 +17,7 @@ struct GameSettings {
     std::string lighting = "Medium";
     int volume = 80; // 0..100 (there is no sound yet: it is kept for when there is)
     int statistics = 0; // local session statistics (US-092): 0 not asked yet, 1 agreed, 2 declined
+    int markers = 1;    // quest markers over targets (US-183): 1 on, 0 off
     friend bool operator==(const GameSettings&, const GameSettings&) = default;
 };
 

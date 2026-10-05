@@ -7,6 +7,7 @@
 #include "sim/dialogue_select.h"
 
 #include <algorithm>
+#include <cctype>
 #include <format>
 
 namespace odysseus::game {
@@ -149,7 +150,6 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     if (name == "gather-berries") {
         // The berries, the skill and the message; what happens to the plant is written in gather.json (it is picked, then ripens again).
         game.run().setMessage(hero->gatherBerries().message);
-        game.tutorial().notify("gather");
     } else if (name == "knap") {
         game.run().setMessage(hero->knapFlint().message);
         game.harvestPlant(plant);
@@ -175,10 +175,8 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         game.run().openCraft(args[0]);
     } else if (name == "eat-berries") {
         game.run().setMessage(hero->eatBerries().message);
-        game.tutorial().notify("eat");
     } else if (name == "tend-camp-fire") {
         game.run().setMessage(hero->tendCampFire().message);
-        game.tutorial().notify("tend");
     } else if (name == "tend-sacred-fire") {
         game.run().setMessage(hero->tendFire().message);
     } else if (name == "hold-ritual") {
@@ -293,10 +291,34 @@ public:
             if (effect.args.size() == 3 && game_.life() != nullptr && effect.args[0]->text != "npc" && effect.args[0]->text != "target") {
                 const int n = effect.args[2]->kind == sim::rules::Expr::Kind::Number ? static_cast<int>(effect.args[2]->number) : 1;
                 if (effect.verb == "give") game_.life()->give(effect.args[1]->text, n);
-                else game_.life()->take(effect.args[1]->text, n);
+                else {
+                    if (game_.life()->take(effect.args[1]->text, n)) game_.questEvent(sim::rules::QuestObjective::Kind::Give, effect.args[1]->text, n); // handed over (US-181)
+                }
             }
+        } else if (effect.verb == "quest" && effect.args.size() == 2) {
+            carryOutQuestVerb(effectWord(effect, 0), effectWord(effect, 1));
         } else {
             core::logInfo(std::format("Interactions: \"{}\" is not carried out yet", effect.source));
+        }
+    }
+
+    // quest start|complete|fail <id> (US-182): a conversation choice, an interaction or a reward changes a quest.
+    void carryOutQuestVerb(const std::string& action, const std::string& id) {
+        sim::rules::QuestBook& book = game_.quests();
+        const sim::rules::Quest* quest = book.find(id);
+        if (quest == nullptr) {
+            core::logWarning(std::format("Quests: \"quest {} {}\" names a quest that does not exist", action, id));
+            return;
+        }
+        if (action == "start") {
+            if (book.start(id, game_.actionClock())) game_.showMessage("New quest: " + quest->title);
+            else core::logInfo(std::format("Quests: \"{}\" cannot be started now ({})", id, sim::rules::statusWord(book.status(id))));
+        } else if (action == "complete") {
+            if (book.complete(id, game_.actionClock(), &game_.actions(), this, refOf(game_, heroSubject(game_)))) game_.showMessage("Quest complete: " + quest->title);
+        } else if (action == "fail") {
+            if (book.fail(id)) game_.showMessage("Quest failed: " + quest->title);
+        } else {
+            core::logWarning(std::format("Quests: \"quest {}\" is not start, complete or fail", action));
         }
     }
 
@@ -361,14 +383,146 @@ void tickInteractions(OdysseyGame& game) {
     game.actions().tick(game.actionClock(), game.interactions(), host);
 }
 
+std::string questWord(const std::string& text) {
+    std::string word;
+    for (const char raw : text) {
+        const auto c = static_cast<unsigned char>(raw);
+        if (std::isalnum(c) != 0) word += static_cast<char>(std::tolower(c));
+        else if ((raw == ' ' || raw == '-' || raw == '_') && !word.empty() && word.back() != '-') word += '-';
+    }
+    while (!word.empty() && word.back() == '-') word.pop_back();
+    return word;
+}
+
+std::vector<std::string> subjectAliases(const OdysseyGame& game, const Subject& subject) {
+    std::vector<std::string> names = {questWord(subject.name), questWord(subject.info.kind)};
+    for (const std::string& tag : subject.info.tags) names.push_back(questWord(tag));
+    if (subject.kind == Subject::Kind::Person && game.clan() != nullptr) {
+        for (const std::string& role : sim::rules::rolesOf(*game.clan(), subject.index)) names.push_back(questWord(role));
+    }
+    std::sort(names.begin(), names.end());
+    names.erase(std::unique(names.begin(), names.end()), names.end());
+    std::erase_if(names, [](const std::string& name) { return name.empty(); });
+    return names;
+}
+
+void reportTalk(OdysseyGame& game, const Subject& subject) {
+    for (const std::string& name : subjectAliases(game, subject)) game.questEvent(sim::rules::QuestObjective::Kind::Talk, name);
+}
+
+namespace {
+
+bool hasAlias(const std::vector<std::string>& aliases, const std::string& word) { return std::find(aliases.begin(), aliases.end(), word) != aliases.end(); }
+
+} // namespace
+
+// A giver is a person id (their name) or role:<role> (a role, kind or tag they have). Any person who fits can give the quest: it can be taken once.
+bool questGiverMatches(const std::string& giver, const std::vector<std::string>& aliases) {
+    if (giver == "none") return false;
+    return hasAlias(aliases, giver.rfind("role:", 0) == 0 ? questWord(giver.substr(5)) : questWord(giver));
+}
+
+QuestSign questSignFor(const OdysseyGame& game, const Subject& subject) {
+    if (game.quests().quests().empty()) return QuestSign::None;
+    const std::vector<std::string> aliases = subjectAliases(game, subject);
+    QuestSign sign = QuestSign::None;
+    for (const sim::rules::Quest& quest : game.quests().quests()) {
+        const sim::rules::QuestStatus status = game.quests().status(quest.id);
+        if (status == sim::rules::QuestStatus::Available && questGiverMatches(quest.giver, aliases)) sign = QuestSign::Offer;
+        if (status == sim::rules::QuestStatus::Active) {
+            const sim::rules::QuestStep* step = quest.find(game.quests().activeStep(quest.id));
+            if (step != nullptr && step->objective.kind == sim::rules::QuestObjective::Kind::Talk && hasAlias(aliases, step->objective.subject)) return QuestSign::HandIn;
+        }
+    }
+    return sign;
+}
+// The quest side of a conversation (US-182, D-57 Q5): the person who is handed a finished quest says their turn-in words, and the person with a quest to give gets one more
+// choice, "Do you have work for me?", that leads to the offer. The script is a copy; the files are not touched.
+void addQuestChoices(const OdysseyGame& game, sim::rules::DlgScript& script, const Subject& subject) {
+    if (game.quests().quests().empty() || script.nodes.empty()) return;
+    const std::vector<std::string> aliases = subjectAliases(game, subject);
+    std::size_t startIndex = 0;
+    for (std::size_t i = 0; i < script.nodes.size(); ++i) {
+        if (script.nodes[i].id == "start") startIndex = i;
+    }
+    for (const sim::rules::Quest& quest : game.quests().quests()) {
+        const sim::rules::QuestStatus status = game.quests().status(quest.id);
+        if (status == sim::rules::QuestStatus::Active && !quest.turnIn.empty()) {
+            const sim::rules::QuestStep* step = quest.find(game.quests().activeStep(quest.id));
+            if (step != nullptr && step->objective.kind == sim::rules::QuestObjective::Kind::Talk && hasAlias(aliases, step->objective.subject)) {
+                sim::rules::DlgLine line;
+                line.speaker = subject.name;
+                line.text = quest.turnIn;
+                script.nodes[startIndex].lines.insert(script.nodes[startIndex].lines.begin(), std::move(line));
+            }
+        }
+    }
+    for (const sim::rules::Quest& quest : game.quests().quests()) {
+        if (game.quests().status(quest.id) != sim::rules::QuestStatus::Available || !questGiverMatches(quest.giver, aliases) || quest.steps.empty()) continue;
+        sim::rules::DlgNode offer;
+        offer.id = "quest-offer";
+        sim::rules::DlgLine line;
+        line.speaker = subject.name;
+        line.text = !quest.offer.empty() ? quest.offer : quest.title + ": " + quest.steps.front().text;
+        offer.lines.push_back(std::move(line));
+        sim::rules::DlgChoice accept;
+        accept.text = "I will do it.";
+        accept.target = "END";
+        accept.effects.push_back(sim::rules::parseEffect("quest start " + quest.id).effect);
+        sim::rules::DlgChoice decline;
+        decline.text = "Not now.";
+        decline.target = script.nodes[startIndex].id;
+        offer.choices.push_back(std::move(accept));
+        offer.choices.push_back(std::move(decline));
+        sim::rules::DlgChoice ask;
+        ask.text = "Do you have work for me?";
+        ask.target = offer.id;
+        auto& choices = script.nodes[startIndex].choices;
+        const bool leaveLast = !choices.empty() && choices.back().target == "END";
+        choices.insert(leaveLast ? choices.end() - 1 : choices.end(), std::move(ask));
+        script.nodes.push_back(std::move(offer));
+        break; // one offer at a time; the next shows once this one is taken
+    }
+}
+
+bool completeQuest(OdysseyGame& game, const std::string& id) {
+    GameEffectHost host(game);
+    const sim::rules::Quest* quest = game.quests().find(id);
+    if (quest == nullptr) return false;
+    if (!game.quests().complete(id, game.actionClock(), &game.actions(), &host, refOf(game, heroSubject(game)))) return false;
+    game.showMessage("Quest complete: " + quest->title);
+    return true;
+}
+
 void tickQuests(OdysseyGame& game) {
     if (game.quests().quests().empty()) return;
+    // goto <place>: the hero is within three tiles of a named place of the level (US-181).
+    for (const PlacedPlace& place : game.level().places) {
+        const double dx = game.hero().feetX(1.0) - place.at.x;
+        const double dy = game.hero().feetY(1.0) - place.at.y;
+        if (dx * dx + dy * dy <= 96.0 * 96.0) game.questEvent(sim::rules::QuestObjective::Kind::Goto, questWord(place.name));
+    }
+    {
+        // Where the tracked step points (US-183), found here twice a second rather than every frame.
+        const std::string tracked = trackedQuest(game.quests());
+        const sim::rules::Quest* quest = game.quests().find(tracked);
+        const sim::rules::QuestState* state = tracked.empty() ? nullptr : game.quests().state(tracked);
+        const sim::rules::QuestStep* step = quest != nullptr && state != nullptr ? quest->find(state->step) : nullptr;
+        const auto spot = step != nullptr && !step->marker.empty() ? questMarkerPosition(game, step->marker) : std::nullopt;
+        game.setQuestMarker(spot.has_value(), spot ? spot->first : 0.0, spot ? spot->second : 0.0);
+    }
     GameEffectHost host(game);
     const Subject hero = heroSubject(game);
     const GameRuleContext context(game, hero);
     const std::vector<sim::rules::QuestChange> changes = game.quests().update(context, game.actionClock(), host.ticksPerDay(), game.actions(), host, refOf(game, hero));
     for (const sim::rules::QuestChange& change : changes) {
+        const sim::rules::Quest* quest = game.quests().find(change.quest);
+        if (quest == nullptr) continue;
         core::logInfo(std::format("Quest {}: {}{}", change.quest, static_cast<int>(change.kind), change.step.empty() ? std::string() : " step " + change.step));
+        using Kind = sim::rules::QuestChange::Kind;
+        if (change.kind == Kind::Started) game.showMessage("New quest: " + quest->title);
+        else if (change.kind == Kind::Done) game.showMessage(quest->giver == "none" && !quest->turnIn.empty() ? quest->turnIn : "Quest complete: " + quest->title);
+        else if (change.kind == Kind::Failed) game.showMessage("Quest failed: " + quest->title);
     }
 }
 
@@ -376,8 +530,11 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
     if (subject.kind == Subject::Kind::Npc) {
         const sim::rules::DlgScript* script = game.npcDialogueFor(subject.index);
         if (script == nullptr) return false;
-        game.run().openTalk(sim::rules::Conversation(*script, kHeroActor, refOf(game, subject)), subject);
+        sim::rules::DlgScript withQuests = *script;
+        addQuestChoices(game, withQuests, subject);
+        game.run().openTalk(sim::rules::Conversation(std::move(withQuests), kHeroActor, refOf(game, subject)), subject);
         game.run().setMessage({});
+        reportTalk(game, subject);
         return true;
     }
     if (subject.kind != Subject::Kind::Person || game.clan() == nullptr) return false;
@@ -394,9 +551,12 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
         return said ? said->text : std::string();
     };
     if (script != nullptr) {
-        sim::rules::Conversation conversation(*script, kHeroActor, refOf(game, subject));
+        sim::rules::DlgScript withQuests = *script;
+        addQuestChoices(game, withQuests, subject);
+        sim::rules::Conversation conversation(std::move(withQuests), kHeroActor, refOf(game, subject));
         conversation.setSmalltalk(smalltalkSource);
         game.run().openTalk(std::move(conversation), subject);
+        reportTalk(game, subject);
         return true;
     }
     // No script fits them: small talk, their line and a friendly answer and a rude one. The old talk still warms the two to each other.
@@ -404,8 +564,11 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
     const auto said = game.smalltalk().say(*game.clan(), person, hero, game.dialogueRandom());
     if (!said) return false;
     if (game.life() != nullptr) game.life()->talkTo(person);
-    game.run().openTalk(sim::rules::Conversation(sim::rules::smalltalkScript(subject.name, said->text), kHeroActor, refOf(game, subject)), subject);
+    sim::rules::DlgScript smallTalk = sim::rules::smalltalkScript(subject.name, said->text);
+    addQuestChoices(game, smallTalk, subject);
+    game.run().openTalk(sim::rules::Conversation(std::move(smallTalk), kHeroActor, refOf(game, subject)), subject);
     game.run().setMessage({});
+    reportTalk(game, subject);
     return true;
 }
 

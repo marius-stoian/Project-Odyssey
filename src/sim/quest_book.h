@@ -76,6 +76,9 @@ public:
     // `self` is the thing the rewards are aimed at (the hero).
     std::vector<QuestChange> update(const RuleContext& world, std::int64_t now, int ticksPerDay, ActionRunner& runner, EffectHost& host, const ThingRef& self = {});
 
+    // Whether a condition of a quest holds now, answering quest(id) and step(id) from this book (the debugger shows it, US-186).
+    bool holds(const RuleContext& world, const QuestCondition& condition) const;
+
     // True when the active step has a hint and the player has not moved the objective for as long as the hint says.
     bool hintDue(std::string_view id, std::int64_t now) const;
 

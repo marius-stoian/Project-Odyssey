@@ -353,3 +353,145 @@ TEST_CASE("US-180 Objective lines are read and explained") {
     CHECK_FALSE(rules::parseObjective("talk a b").problem.empty());
     CHECK_FALSE(rules::parseObjective("gather berries 0").problem.empty());
 }
+
+TEST_CASE("US-182 The offer and turn-in words are read, written and kept") {
+    std::string text = kFirstDay;
+    replaceFirst(text, "\"journal\": \"The elder", "\"offer\": \"Will you help?\", \"turnIn\": \"Well done.\", \"journal\": \"The elder");
+    const rules::Quest q = quest(text);
+    CHECK(q.offer == "Will you help?");
+    CHECK(q.turnIn == "Well done.");
+    const rules::Quest again = quest(rules::writeQuest(q));
+    CHECK(again.offer == q.offer);
+    CHECK(again.turnIn == q.turnIn);
+}
+
+TEST_CASE("US-182 quest(id) and step(id) answer in conditions, and the quest verb is a known effect") {
+    Table t(kFirstDay);
+    t.update();
+    const rules::ParsedExpr active = rules::parseExpression("quest(first-day) == active and step(first-day) == gather");
+    REQUIRE(active.root != nullptr);
+    CHECK(rules::parseEffect("quest complete first-day").problem == std::nullopt);
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Active);
+    CHECK(t.book.activeStep("first-day") == "gather");
+    CHECK(t.book.complete("first-day", t.now, &t.runner, &t.host));
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Done);
+    CHECK(t.host.log.size() == 2); // the rewards
+    CHECK_FALSE(t.book.complete("first-day", t.now, &t.runner, &t.host));
+}
+
+TEST_CASE("US-186 The debugger can start, jump, fail, reset and ask why a condition holds") {
+    Table t(kFirstDay);
+    t.update();
+    REQUIRE(t.book.jumpTo("first-day", "eat", t.now));
+    CHECK(t.book.activeStep("first-day") == "eat");
+    CHECK_FALSE(t.book.jumpTo("first-day", "nowhere", t.now));
+    const rules::Quest& q = *t.book.find("first-day");
+    CHECK(t.book.holds(t.world, q.requires_[0]));         // not quest(first-day) == done
+    t.world.flags["fire-out"] = 1;
+    CHECK(t.book.holds(t.world, q.find("fire")->branches[0].condition));
+    CHECK_FALSE(t.book.holds(t.world, q.fail[0]));        // hero.dead is 0
+    CHECK(t.book.fail("first-day"));
+    CHECK(t.book.reset("first-day"));
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Locked);
+    CHECK(t.book.jumpTo("first-day", "gather", t.now)); // revives it
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Active);
+}
+
+#include "sim/graph_check.h"
+#include "sim/hero_data.h"
+
+namespace {
+
+bool has(const std::vector<rules::GraphFinding>& findings, rules::GraphFinding::Kind kind, const std::string& key = {}) {
+    for (const auto& f : findings) {
+        if (f.kind == kind && (key.empty() || f.key == key)) return true;
+    }
+    return false;
+}
+
+const char* const kSmall = R"json({ "id": "small", "title": "S", "start": "a",
+  "steps": { "a": { "text": "A", "objective": "gather berries 2", "next": "END" },
+             "orphan": { "text": "O", "objective": "talk elder", "next": "END" } } })json";
+
+} // namespace
+
+TEST_CASE("US-187 Unreachable: a step no branch leads to is listed under its card") {
+    const auto findings = rules::checkQuest(quest(kSmall, "small"), {});
+    REQUIRE(findings.size() == 1);
+    CHECK(has(findings, rules::GraphFinding::Kind::Unreachable, "step:orphan"));
+    CHECK_FALSE(findings[0].error); // it loads fine: a warning
+    CHECK(findings[0].file == "quests/small.json");
+}
+
+TEST_CASE("US-187 Impossible: an objective that names an unknown item, person, place, interaction or kind is listed") {
+    rules::GraphCatalog catalog;
+    catalog.items = {"flint"};
+    catalog.people = {"tok"};
+    catalog.places = {"stream"};
+    catalog.interactions = {"drink"};
+    catalog.kinds = {"wolf"};
+    catalog.quests = {"small"};
+    const std::string text = "{ \"id\": \"small\", \"title\": \"S\", \"start\": \"a\", \"rewards\": [\"give hero flintt 1\"], \"requires\": [\"quest(ghost) == done\"], \"steps\": {"
+                             " \"a\": { \"text\": \"A\", \"objective\": \"gather berrys 2\", \"next\": \"b\" },"
+                             " \"b\": { \"text\": \"B\", \"objective\": \"talk elder\", \"next\": \"c\" },"
+                             " \"c\": { \"text\": \"C\", \"objective\": \"goto market\", \"next\": \"d\" },"
+                             " \"d\": { \"text\": \"D\", \"objective\": \"interact swim\", \"next\": \"e\" },"
+                             " \"e\": { \"text\": \"E\", \"objective\": \"defeat bear\", \"next\": \"END\" } } }";
+    const auto findings = rules::checkQuest(quest(text, "small"), catalog);
+    using Kind = rules::GraphFinding::Kind;
+    CHECK(has(findings, Kind::UnknownItem, "step:a"));
+    CHECK(has(findings, Kind::UnknownPerson, "step:b"));
+    CHECK(has(findings, Kind::UnknownPlace, "step:c"));
+    CHECK(has(findings, Kind::UnknownInteraction, "step:d"));
+    CHECK(has(findings, Kind::UnknownKind, "step:e"));
+    CHECK(has(findings, Kind::UnknownItem, "quest"));  // the reward
+    CHECK(has(findings, Kind::UnknownQuest, "quest")); // the prerequisite
+    // An empty catalog checks nothing.
+    CHECK(rules::checkQuest(quest(text, "small"), {}).empty());
+}
+
+TEST_CASE("US-187 A loop with no way out, and a quest with no END, cannot be finished") {
+    const std::string loop = "{ \"id\": \"small\", \"title\": \"S\", \"start\": \"a\", \"steps\": {"
+                             " \"a\": { \"text\": \"A\", \"objective\": \"talk x\", \"next\": \"b\", \"branches\": [ { \"if\": \"flag(q)\", \"to\": \"c\" } ] },"
+                             " \"b\": { \"text\": \"B\", \"objective\": \"talk x\", \"next\": \"END\" },"
+                             " \"c\": { \"text\": \"C\", \"objective\": \"talk x\", \"next\": \"c\" } } }";
+    const auto findings = rules::checkQuest(quest(loop, "small"), {});
+    CHECK(has(findings, rules::GraphFinding::Kind::CannotFinish, "step:c"));
+    const std::string never = "{ \"id\": \"small\", \"title\": \"S\", \"start\": \"a\", \"steps\": { \"a\": { \"text\": \"A\", \"objective\": \"talk x\", \"next\": \"a\" } } }";
+    CHECK(has(rules::checkQuest(quest(never, "small"), {}), rules::GraphFinding::Kind::CannotFinish, "quest"));
+}
+
+TEST_CASE("US-187 Cycle: quests that require each other are listed once") {
+    const auto make = [](const std::string& id, const std::string& needs) {
+        return quest("{ \"id\": \"" + id + "\", \"title\": \"T\", \"requires\": [\"" + needs + "\"], \"start\": \"a\", \"steps\": { \"a\": { \"text\": \"A\", \"objective\": \"talk x\", \"next\": \"END\" } } }", id);
+    };
+    const std::vector<rules::Quest> quests = {make("a", "quest(b) == done"), make("b", "quest(c) == done"), make("c", "quest(a) == done"), make("d", "not quest(d) == done")};
+    const auto findings = rules::checkQuests(quests, {});
+    int cycles = 0;
+    for (const auto& f : findings) {
+        if (f.kind == rules::GraphFinding::Kind::Cycle) {
+            ++cycles;
+            CHECK(f.error);
+            CHECK(f.message.find("a -> b -> c -> a") != std::string::npos);
+        }
+    }
+    CHECK(cycles == 1); // d only forbids itself: not a cycle
+}
+
+TEST_CASE("US-187 Every quest that ships passes the check") {
+    const fs::path folder = fs::path(ODYSSEUS_DATA_DIR) / "quests";
+    rules::LoadReport report;
+    const std::vector<rules::Quest> quests = rules::loadQuests(folder, report);
+    for (const auto& e : report.errors) MESSAGE(e.text());
+    CHECK(report.errors.empty());
+    rules::GraphCatalog catalog;
+    const odysseus::sim::HeroData heroData = odysseus::sim::loadHeroData(ODYSSEUS_DATA_DIR);
+    for (const auto& item : heroData.items) catalog.items.insert(item.id);
+    rules::LoadReport interactionReport;
+    const rules::InteractionRegistry interactions = rules::InteractionRegistry::load(fs::path(ODYSSEUS_DATA_DIR) / "interactions", interactionReport);
+    for (const auto& i : interactions.all()) catalog.interactions.insert(i.id);
+    for (const auto& q : quests) catalog.quests.insert(q.id);
+    for (const auto& f : rules::checkQuests(quests, catalog)) {
+        if (f.error) FAIL_CHECK(f.text());
+    }
+}

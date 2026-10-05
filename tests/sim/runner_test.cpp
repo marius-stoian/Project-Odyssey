@@ -249,3 +249,19 @@ TEST_CASE("US-154 An interaction an actor just did rests for its cooldown") {
     CHECK(table.ready(7, "gather", 0));
     CHECK(table.hash() != hash);
 }
+TEST_CASE("US-181 The runner tells who finished an interaction, so quests count only the hero") {
+    const auto registry = registryOf("observer", {{"zap", job("zap", "0", "\"fx a\"")}, {"slow", job("slow", "1", "\"fx b\"")}});
+    rules::ActionRunner runner;
+    Recorder host;
+    std::vector<std::string> told;
+    runner.setFinishObserver([&told](const std::string& id, int actor, const rules::ThingRef&) { told.push_back(id + ":" + std::to_string(actor)); });
+    REQUIRE(runner.start(*registry.find("zap"), 0, {1, 7}, 100, host));  // instant, by the hero
+    REQUIRE(runner.start(*registry.find("zap"), 1003, {1, 7}, 100, host)); // instant, by a clan member
+    REQUIRE(runner.start(*registry.find("slow"), 0, {1, 7}, 100, host));  // timed: told only when it ends
+    CHECK(told == std::vector<std::string>{"zap:0", "zap:1003"});
+    runner.tick(105, registry, host);
+    CHECK(told.size() == 2);
+    runner.tick(120, registry, host);
+    CHECK(told == std::vector<std::string>{"zap:0", "zap:1003", "slow:0"});
+    runner.cancel(0);
+}

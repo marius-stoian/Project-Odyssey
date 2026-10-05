@@ -1,0 +1,34 @@
+{
+  "id": "first-blood",
+  "order": 11,
+  "title": "The first kill",
+  "text": "The hunters give you the spear for the last throw at a wounded deer.",
+  "minAge": 14,
+  "maxAge": 25,
+  "role": "elder",
+  "requires": {
+    "affinity": "hunter",
+    "min": 10
+  },
+  "options": [
+    {
+      "text": "Throw true.",
+      "affinity": {
+        "hunter": 9
+      },
+      "opinion": 8,
+      "trait": "brave",
+      "note": "{hero} made a first kill with a spear throw, and {other} was proud."
+    },
+    {
+      "text": "Hand the spear back: the deer should be spared.",
+      "affinity": {
+        "religion": 5,
+        "shaman": 3
+      },
+      "opinion": -2,
+      "trait": "kind",
+      "note": "{hero} would not make the last throw, and {other} shrugged."
+    }
+  ]
+}

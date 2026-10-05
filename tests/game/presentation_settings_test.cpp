@@ -129,3 +129,17 @@ TEST_CASE("US-231 Invalid settings") {
         CHECK(readJson(file) == future);
     }
 }
+
+TEST_CASE("US-183 The Markers switch is on by default and survives a save") {
+    const fs::path file = settingsFile("markers.json");
+    fs::remove(file);
+    CHECK(game::loadSettings(file).markers == 1);
+    game::GameSettings chosen;
+    chosen.markers = 0;
+    game::saveSettings(chosen, file);
+    CHECK(game::loadSettings(file).markers == 0);
+    json data = readJson(file);
+    data["markers"] = 7; // out of range: the file is not trusted
+    writeJson(file, data);
+    CHECK(game::loadSettings(file).markers == 1);
+}

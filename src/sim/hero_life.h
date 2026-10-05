@@ -7,6 +7,7 @@
 
 #include "core/random.h"
 
+#include <functional>
 #include <array>
 #include <algorithm>
 #include <cstdint>
@@ -160,6 +161,12 @@ public:
     int useSkill(int profession, bool success);
     int count(const std::string& item) const;
     void give(const std::string& item, int count);
+    // Told whenever items enter the bag (US-181): what, how many, and whether they were just crafted. Quests count gathering and crafting from it.
+    // Decides a story event's `trigger` (US-185): the game answers it in the rule language. Without one every trigger counts as true.
+    using TriggerCheck = std::function<bool(const std::string& condition)>;
+    void setEventTrigger(TriggerCheck check) { eventTrigger_ = std::move(check); }
+    using ItemObserver = std::function<void(const std::string& item, int amount, bool crafted)>;
+    void setItemObserver(ItemObserver observer) { itemObserver_ = std::move(observer); }
     bool take(const std::string& item, int count);
     const std::map<std::string, int>& inventory() const { return inventory_; }
     bool hasToolFor(int profession) const;
@@ -224,6 +231,10 @@ public:
 private:
     struct RestoreTag {};
     HeroLife(const HeroData& data, World& world, RestoreTag) : data_(&data), world_(&world), rng_(1, 61) {}
+
+    ItemObserver itemObserver_;
+    TriggerCheck eventTrigger_;
+    bool crafting_ = false;
 
     void dayEnded();
     void end(Outcome outcome, const std::string& reason);

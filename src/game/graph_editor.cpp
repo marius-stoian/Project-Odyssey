@@ -83,21 +83,22 @@ GraphEditor::GraphEditor(int viewWidth, int viewHeight, Record record, Say say)
     panel_ = std::make_unique<Panel>(Rect{viewWidth - kPanelWidth - 2, kBarHeight + 4, kPanelWidth, viewHeight - kBarHeight - kStatusHeight - 6});
 }
 
-void GraphEditor::setFolders(fs::path dialogueFolder, fs::path interactionFolder, std::function<void()> saved) {
+void GraphEditor::setFolders(fs::path dialogueFolder, fs::path interactionFolder, std::function<void()> saved, fs::path questFolder) {
     folder_ = std::move(dialogueFolder);
     interactionFolder_ = std::move(interactionFolder);
+    questFolder_ = std::move(questFolder);
     saved_ = std::move(saved);
 }
 
 fs::path GraphEditor::fileOf(const std::string& name) const {
-    return kind_ == Kind::Dialogue ? folder_ / (name + ".dlg") : interactionFolder_ / (name + ".json");
+    return kind_ == Kind::Dialogue ? folder_ / (name + ".dlg") : (kind_ == Kind::Interaction ? interactionFolder_ : questFolder_) / (name + ".json");
 }
 
 std::vector<std::string> GraphEditor::files() const {
     std::vector<std::string> names;
     std::error_code ec;
     const std::string extension = kind_ == Kind::Dialogue ? ".dlg" : ".json";
-    for (const auto& entry : fs::directory_iterator(kind_ == Kind::Dialogue ? folder_ : interactionFolder_, ec)) {
+    for (const auto& entry : fs::directory_iterator(kind_ == Kind::Dialogue ? folder_ : (kind_ == Kind::Interaction ? interactionFolder_ : questFolder_), ec)) {
         if (!entry.is_regular_file() || entry.path().extension() != extension) continue;
         const std::string stem = entry.path().stem().string();
         if (stem.size() > 7 && stem.compare(stem.size() - 7, 7, ".layout") == 0) continue; // `<name>.dlg.layout.json` and `<id>.json.layout.json` are sidecars
@@ -156,7 +157,7 @@ bool GraphEditor::open(const std::string& name) {
         bindView();
         return true;
     }
-    return kind_ == Kind::Dialogue ? openDialogue(name) : openInteraction(name);
+    return kind_ == Kind::Dialogue ? openDialogue(name) : (kind_ == Kind::Interaction ? openInteraction(name) : openQuest(name));
 }
 
 bool GraphEditor::openDialogue(const std::string& name) {
@@ -218,6 +219,35 @@ bool GraphEditor::openInteraction(const std::string& name) {
     return true;
 }
 
+bool GraphEditor::openQuest(const std::string& name) {
+    const fs::path file = fileOf(name);
+    std::error_code ec;
+    if (!fs::is_regular_file(file, ec)) {
+        say_("Quest: no file " + name + ".json");
+        return false;
+    }
+    const std::string text = readText(file);
+    sim::rules::LoadReport report;
+    const std::optional<sim::rules::Quest> quest = sim::rules::parseQuest(text, "quests/" + name + ".json", report, name);
+    if (!quest) {
+        say_("Quest: " + (report.errors.empty() ? name : report.errors.front().text()));
+        return false;
+    }
+    const fs::path sidecar = questFolder_ / (name + ".quest.layout.json");
+    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(readText(sidecar)) : DialogueLayout{};
+    Doc& doc = docs_[docKey(Kind::Quest, name)];
+    doc.name = name;
+    doc.kind = Kind::Quest;
+    *doc.graph = questToGraph(*quest, layout);
+    doc.saved = *doc.graph;
+    doc.leading = leadingComments(text);
+    doc.loadedAt = fs::last_write_time(file, ec);
+    doc.existed = true;
+    current_ = &doc;
+    bindView();
+    return true;
+}
+
 bool GraphEditor::createNew(const std::string& name) {
     const bool valid = !name.empty() && name.size() <= 40 &&
                        std::all_of(name.begin(), name.end(), [](unsigned char c) { return std::islower(c) != 0 || std::isdigit(c) != 0 || c == '-'; });
@@ -244,6 +274,14 @@ bool GraphEditor::createNew(const std::string& name) {
         *doc.graph = std::move(d.graph);
         doc.header = std::move(d.header);
         doc.savedHeader = headerText(doc.header);
+    } else if (kind_ == Kind::Quest) {
+        const std::string text = "{ \"id\": \"" + name + "\", \"title\": \"New quest\", \"start\": \"first\", \"steps\": { \"first\": { \"text\": \"Talk to the elder.\", \"objective\": \"talk elder\", \"next\": \"END\" } } }";
+        const auto quest = sim::rules::parseQuest(text, "quests/" + name + ".json", report, name);
+        if (!quest) {
+            say_("New: the starting quest could not be made" + (report.errors.empty() ? std::string() : ": " + report.errors.front().text()));
+            return false;
+        }
+        *doc.graph = questToGraph(*quest, {});
     } else {
         const std::string text = "{ \"id\": \"" + name + "\", \"label\": \"New action\", \"actors\": [\"hero\"], \"target\": { \"tags\": [\"edible\"] }, \"range\": 1.5, "
                                  "\"duration\": 0, \"order\": 100, \"requires\": [], \"effects\": [ \"say \\\"Nothing to do yet\\\"\" ] }";
@@ -289,12 +327,13 @@ void GraphEditor::edit(const std::string& name, const std::function<void(NodeGra
 // What a card shows is made from its fields, by the kind of graph it is in.
 static void describeAny(GraphEditor::Kind kind, GraphNode& card) {
     if (kind == GraphEditor::Kind::Dialogue) describeCard(card);
+    else if (kind == GraphEditor::Kind::Quest) describeQuestCard(card);
     else describeRuleCard(card);
 }
 
 int GraphEditor::addCard(const std::string& type) {
     if (current_ == nullptr || !view_) return 0;
-    GraphNode card = kind_ == Kind::Dialogue ? newDialogueCard(type) : newRuleCard(type);
+    GraphNode card = kind_ == Kind::Dialogue ? newDialogueCard(type) : (kind_ == Kind::Quest ? newQuestCard(type) : newRuleCard(type));
     if (kind_ == Kind::Dialogue && type == dlg_card::kNode) {
         std::string id;
         do {
@@ -313,6 +352,7 @@ void GraphEditor::tidy() {
     const Kind kind = kind_;
     edit("tidy", [kind](NodeGraph& g) {
         if (kind == Kind::Dialogue) arrangeDialogue(g);
+        else if (kind == Kind::Quest) arrangeQuest(g);
         else arrangeInteraction(g);
     });
     if (view_) view_->frameAll();
@@ -334,7 +374,8 @@ bool GraphEditor::setCardField(int card, std::size_t index, const std::string& v
 
 // The cards that hold a list of lines: effects and notes.
 static bool isListCard(const GraphNode& card) {
-    return card.type == dlg_card::kEffect || card.type == dlg_card::kComment || card.type == rule_card::kEffects;
+    return card.type == dlg_card::kEffect || card.type == dlg_card::kComment || card.type == rule_card::kEffects ||
+           card.type == quest_card::kRequires || card.type == quest_card::kFail || card.type == quest_card::kRewards;
 }
 
 bool GraphEditor::addCardField(int card) {
@@ -365,7 +406,7 @@ bool GraphEditor::removeCardField(int card) {
 
 bool GraphEditor::save() {
     if (current_ == nullptr) return false;
-    return current_->kind == Kind::Dialogue ? saveDialogue() : saveInteraction();
+    return current_->kind == Kind::Dialogue ? saveDialogue() : (current_->kind == Kind::Interaction ? saveInteraction() : saveQuest());
 }
 
 // The checks before a file is touched, the same for both kinds: the file changed on disk since it was opened asks once.
@@ -448,6 +489,45 @@ bool GraphEditor::saveInteraction() {
     return true;
 }
 
+bool GraphEditor::saveQuest() {
+    Doc& doc = *current_;
+    problems_.clear();
+    std::string json;
+    const std::optional<sim::rules::Quest> quest = graphToQuest(*doc.graph, problems_, json);
+    if (!quest) {
+        const auto error = std::find_if(problems_.begin(), problems_.end(), [](const std::string& p) { return p.rfind("error:", 0) == 0; });
+        say_("Not saved: " + (error != problems_.end() ? *error : std::string("the quest cannot be written")));
+        return false;
+    }
+    if (quest->id != doc.name) { // one file per quest, named by its id: renaming means a new file, which this editor does not make
+        problems_.push_back("error: the quest id \"" + quest->id + "\" must stay \"" + doc.name + "\", the name of the file");
+        say_("Not saved: " + problems_.back());
+        return false;
+    }
+    const fs::path file = fileOf(doc.name);
+    std::error_code ec;
+    if (changedOnDisk(file, doc.loadedAt, doc.existed) && !overwriteArmed_) {
+        overwriteArmed_ = true;
+        say_(doc.name + ".json changed on disk since it was opened: press Save again to overwrite it");
+        return false;
+    }
+    if (fs::is_regular_file(file, ec)) fs::copy_file(file, fs::path(file).concat(".bak"), fs::copy_options::overwrite_existing, ec);
+    if (!writeText(file, doc.leading + json) || !writeText(questFolder_ / (doc.name + ".quest.layout.json"), layoutToJson(questLayoutOf(*doc.graph)))) {
+        say_("Not saved: " + doc.name + ".json cannot be written");
+        return false;
+    }
+    doc.saved = *doc.graph;
+    doc.loadedAt = fs::last_write_time(file, ec);
+    doc.existed = true;
+    overwriteArmed_ = false;
+    int warnings = 0;
+    for (const std::string& p : problems_) warnings += p.rfind("warning:", 0) == 0 ? 1 : 0;
+    recheck();
+    say_("Saved " + doc.name + ".json" + (warnings > 0 ? " (" + std::to_string(warnings) + " card(s) not connected)" : "") + errorsNote());
+    if (saved_) saved_();
+    return true;
+}
+
 void GraphEditor::recheck() {
     findings_.clear();
     if (current_ == nullptr) {
@@ -463,6 +543,13 @@ void GraphEditor::recheck() {
         for (const std::string& s : structural) findings_.push_back({s.rfind("error:", 0) == 0, std::string(), s});
         if (script) {
             for (const sim::rules::GraphFinding& f : sim::rules::checkDialogue(*script, catalog_)) findings_.push_back({f.error, f.key, f.message});
+        }
+    } else if (current_->kind == Kind::Quest) {
+        std::string json;
+        const std::optional<sim::rules::Quest> quest = graphToQuest(*current_->graph, structural, json);
+        for (const std::string& s : structural) findings_.push_back({s.rfind("error:", 0) == 0, std::string(), s});
+        if (quest) {
+            for (const sim::rules::GraphFinding& f : sim::rules::checkQuest(*quest, catalog_)) findings_.push_back({f.error, f.key, f.message});
         }
     } else {
         std::string json;
@@ -480,7 +567,7 @@ void GraphEditor::recheck() {
 bool GraphEditor::pickProblem(std::size_t index) {
     if (current_ == nullptr || !view_ || index >= findings_.size() || findings_[index].key.empty()) return false;
     const std::map<std::string, int> keys = current_->kind == Kind::Dialogue ? cardKeys(DialogueGraph{*current_->graph, current_->header})
-                                                                              : interactionCardKeys(*current_->graph);
+                                                                              : (current_->kind == Kind::Quest ? questCardKeys(*current_->graph) : interactionCardKeys(*current_->graph));
     const auto found = keys.find(findings_[index].key);
     if (found == keys.end()) return false;
     const GraphNode* card = current_->graph->find(found->second);
@@ -532,9 +619,9 @@ void GraphEditor::buildChrome() {
     button("Tidy", "Put the cards in rows again", [this] { tidy(); });
     x += 6;
     {
-        const bool talk = kind_ == Kind::Dialogue;
-        button(talk ? "[Talk]" : "Talk", "Conversations (.dlg)", [this] { if (kind_ != Kind::Dialogue) showKind(Kind::Dialogue); });
-        button(talk ? "Rules" : "[Rules]", "Interactions (.json): who may do what to what", [this] { if (kind_ != Kind::Interaction) showKind(Kind::Interaction); });
+        button(kind_ == Kind::Dialogue ? "[Talk]" : "Talk", "Conversations (.dlg)", [this] { if (kind_ != Kind::Dialogue) showKind(Kind::Dialogue); });
+        button(kind_ == Kind::Interaction ? "[Rules]" : "Rules", "Interactions (.json): who may do what to what", [this] { if (kind_ != Kind::Interaction) showKind(Kind::Interaction); });
+        button(kind_ == Kind::Quest ? "[Quests]" : "Quests", "Quests (.json): steps, branches, rewards", [this] { if (kind_ != Kind::Quest) showKind(Kind::Quest); });
     }
     x += 6;
     if (kind_ == Kind::Dialogue) button("Test", "Play this conversation with values you choose; nothing is saved", [this] { showTest(!testShown_); });
@@ -546,6 +633,13 @@ void GraphEditor::buildChrome() {
         button("+Do", "Effects: wire them to the Do port of a choice", [this] { addCard(dlg_card::kEffect); });
         button("+Goto", "A named jump to a node, for a wire that would be too long", [this] { addCard(dlg_card::kGoto); });
         button("+Note", "A note kept in the file: wire it to what it is about", [this] { addCard(dlg_card::kComment); });
+    } else if (kind_ == Kind::Quest) {
+        button("+Step", "A step: what the player must do", [this] { addCard(quest_card::kStep); });
+        button("+If", "A branch: wire it to its step, and to the step it leads to", [this] { addCard(quest_card::kBranch); });
+        button("+End", "The end of the quest: wire a step to it", [this] { addCard(quest_card::kEnd); });
+        button("+Needs", "Prerequisites: wire to the quest card", [this] { addCard(quest_card::kRequires); });
+        button("+Fails", "When the quest fails: wire to the quest card", [this] { addCard(quest_card::kFail); });
+        button("+Rewards", "Effects given at the end: wire to the quest card", [this] { addCard(quest_card::kRewards); });
     } else {
         button("+Needs", "A requirement: wire it to the Requires port of the verb", [this] { addCard(rule_card::kRequirement); });
         button("+Effects", "Effects: wire them to the Do port of the verb", [this] { addCard(rule_card::kEffects); });
@@ -579,9 +673,9 @@ void GraphEditor::buildPanel() {
         y += kRow;
     };
     if (card == nullptr) {
-        if (current_->kind == Kind::Interaction) {
+        if (current_->kind == Kind::Interaction || current_->kind == Kind::Quest) {
             panelTitle_ = current_->name + ".json";
-            return; // the verb card holds the file's own values
+            return; // the verb card (or the quest card) holds the file's own values
         }
         panelTitle_ = current_->name + ".dlg";
         sim::rules::DlgScript& h = current_->header;
@@ -609,6 +703,25 @@ void GraphEditor::buildPanel() {
         field("if: ", at(0), set(0));
     } else if (card->type == dlg_card::kGoto) {
         field("to: ", at(0), set(0));
+    } else if (card->type == quest_card::kQuest) {
+        field("id: ", at(0), set(0)); // stays the name of the file; Save refuses another
+        field("title: ", at(1), set(1));
+        field("giver: ", at(2), set(2));
+        field("note: ", at(3), set(3));
+        field("journal: ", at(4), set(4));
+        field("offer: ", at(5), set(5));
+        field("turn in: ", at(6), set(6));
+    } else if (card->type == quest_card::kStep) {
+        field("id: ", at(0), set(0));
+        field("text: ", at(1), set(1));
+        field("goal: ", at(2), set(2));
+        field("marker: ", at(3), set(3));
+        field("hint in: ", at(4), set(4));
+        field("hint: ", at(5), set(5));
+    } else if (card->type == quest_card::kBranch) {
+        field("if: ", at(0), set(0));
+    } else if (card->type == quest_card::kEnd) {
+        // nothing to set
     } else if (card->type == rule_card::kActor) {
         field("actors: ", at(0), set(0));
     } else if (card->type == rule_card::kVerb) {
@@ -631,7 +744,7 @@ void GraphEditor::buildPanel() {
     } else if (card->type == rule_card::kChronicle) {
         field("text: ", at(0), set(0));
     } else {
-        for (std::size_t i = 0; i < card->fields.size(); ++i) field(card->type == dlg_card::kComment ? "note: " : "do: ", at(i), set(i));
+        for (std::size_t i = 0; i < card->fields.size(); ++i) field(card->type == dlg_card::kComment ? "note: " : (card->type == quest_card::kRequires || card->type == quest_card::kFail) ? "if: " : "do: ", at(i), set(i));
         panel_->add<Button>(Rect{left, y, 40, kRow - 2}, "+ line", [this, cardId] { addCardField(cardId); });
         panel_->add<Button>(Rect{left + 44, y, 40, kRow - 2}, "- line", [this, cardId] { removeCardField(cardId); });
         y += kRow;
@@ -819,7 +932,8 @@ void GraphEditor::draw(UiPainter& painter) const {
     const Rect bar{0, viewHeight_ - kStatusHeight, viewWidth_, kStatusHeight};
     painter.fill(bar, UiColor::Shade);
     const bool talk = kind_ == Kind::Dialogue;
-    std::string line = current_ != nullptr ? std::string(talk ? "Dialogue: " : "Interaction: ") + current_->name + (talk ? ".dlg" : ".json") + (dirty() ? "  *unsaved" : "") : std::string(talk ? "Dialogue" : "Interaction") + ": no file";
+    const std::string kindName = talk ? "Dialogue" : (kind_ == Kind::Quest ? "Quest" : "Interaction");
+    std::string line = current_ != nullptr ? kindName + ": " + current_->name + (talk ? ".dlg" : ".json") + (dirty() ? "  *unsaved" : "") : kindName + ": no file";
     if (view_) line += "  zoom " + std::to_string(view_->zoomPercent()) + "%";
     int errors = 0;
     for (const Problem& p : findings_) errors += p.error ? 1 : 0;

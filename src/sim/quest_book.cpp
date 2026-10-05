@@ -245,6 +245,11 @@ std::vector<QuestChange> QuestBook::update(const RuleContext& world, std::int64_
     return changes;
 }
 
+bool QuestBook::holds(const RuleContext& world, const QuestCondition& condition) const {
+    const BookContext context(world, *this);
+    return condition.expr != nullptr && isTrue(*condition.expr, context);
+}
+
 bool QuestBook::hintDue(std::string_view id, std::int64_t now) const {
     const Quest* quest = find(id);
     const QuestState* st = state(id);

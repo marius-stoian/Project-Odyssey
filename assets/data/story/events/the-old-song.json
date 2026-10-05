@@ -1,0 +1,38 @@
+{
+  "id": "the-old-song",
+  "order": 3,
+  "title": "The old song",
+  "text": "An old woman by the fire begins a song about how the world began and invites you to learn it.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "elder",
+  "options": [
+    {
+      "text": "Learn every word.",
+      "affinity": {
+        "religion": 8,
+        "fireKeeper": 3
+      },
+      "opinion": 8,
+      "note": "{hero} learned the old song from {other}."
+    },
+    {
+      "text": "Listen, but slip away early.",
+      "affinity": {
+        "hunter": 2,
+        "religion": 1
+      },
+      "opinion": -2,
+      "note": "{hero} left {other}'s song before its end."
+    },
+    {
+      "text": "Ask what the song is worth.",
+      "affinity": {
+        "trade": 6
+      },
+      "opinion": -6,
+      "trait": "greedy",
+      "note": "{hero} asked {other} what the old song was worth, and was not thanked."
+    }
+  ]
+}
