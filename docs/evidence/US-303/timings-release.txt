@@ -1,0 +1,6 @@
+US-303 reload times on the shipped data, ms (budget 100 per set, NFR-09)
+interactions        4.4
+npc-classes         3.2
+lights              0.2
+catalog             4.3
+help                0.4

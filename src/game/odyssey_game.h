@@ -16,7 +16,9 @@
 #include "game/catalogs.h"
 #include "game/content_art.h"
 #include "luna/engine/effects.h"
+#include "game/data_reload.h"
 #include "game/editor.h"
+#include "game/missing_kind.h"
 #include "game/enemy.h"
 #include "game/game_rules.h"
 #include "game/npc_life.h"
@@ -163,6 +165,18 @@ public:
     // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the
     // last good data stays in use and the panel lists "file:line: message". Returns true when the new data was taken.
     bool reloadInteractions();
+    // Live data (US-303): every group of data files that can be read again while the game runs. An Editor save names the file it wrote, F5 reads every set.
+    DataReload& dataReload() { return reloads_; }
+    // Reads the sets that watch `file` again and shows the outcome (a toast on success, the mistakes panel and a red line on failure).
+    void fileChanged(const std::filesystem::path& file) { reported(reloads_.changed(file)); }
+    // F5: every set (the ones that only apply at the next start are left alone).
+    void reloadEverything() { reported(reloads_.reloadAll()); }
+    const std::vector<MissingKind>& missingKinds() const { return missing_; }
+    const std::string& toast() const { return toast_; }
+    int toastTicks() const { return toastTicks_; }
+    static constexpr int kToastTicks = 40; // how long the toast stays: two seconds at 20 ticks a second (D-59 Q3)
+    // The mistakes of the sets other than the interactions, per set name, until the files are fixed.
+    const std::map<std::string, std::vector<std::string>>& reloadErrors() const { return reloadErrors_; }
     // Timed actions (US-153): the runner, its clock (play ticks since the run began; it stops while a screen is open), and the plant
     // with a given id (-1 when there is none).
     sim::rules::ActionRunner& actions() { return actions_; }
@@ -244,6 +258,7 @@ public:
     const std::string& inspectedName() const { return inspection_.name; }
     const std::string& inspectedText() const { return inspection_.text; }
     const PlantArt& plantArt() const { return plantArt_; }
+    const LightingData& lighting() const { return lighting_; }
     // The simulated clan (US-032, D-30): on in levels marked "clan": true, or with `--clan`. It is the M2 simulation running
     // inside the game, one simulation tick per game tick, and the view puts each person somewhere and walks them there.
     void setClan(bool on);
@@ -330,6 +345,20 @@ public:
     void removeDeadFigures(); // the figures of the persons the director says are dead leave the world (after a death, after a load)
     void syncEditorActions();
     void syncGraphCatalog();
+    // US-303: the data sets and what follows each of them (odyssey_reload.cpp).
+    void registerDataSets();
+    void reported(const std::vector<ReloadOutcome>& outcomes);
+    ReloadResult reloadInteractionSet();
+    ReloadResult reloadNpcClassSet();
+    ReloadResult reloadLights();
+    ReloadResult reloadCatalog();
+    ReloadResult reloadHelp();
+    void applyCatalog(Definitions fresh, Catalogs catalogs);
+    void rebuildPlantArt();
+    std::vector<std::string> findMissingKinds(); // returns the warnings that are new
+    void drawToast(luna::engine::Renderer& renderer) const;
+    static void checkCatalogLights(const Catalogs& catalogs, const LightingData& lighting, const std::filesystem::path& dataDirectory);
+    static std::vector<std::string> addCelestialDefaults(Catalogs& catalogs, const LightingData& lighting, const std::filesystem::path& dataDirectory);
     void registerCreatures();
     void tickNpcPopulation();
     std::string loadNpcPopulation(); // the problem, or empty
@@ -472,6 +501,13 @@ private:
     void loadInteractions();
     sim::rules::SmallTalk loadSmalltalk(sim::rules::LoadReport& report) const; // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
+    DataReload reloads_;                                           // US-303
+    std::map<std::string, std::vector<std::string>> reloadErrors_; // the mistakes of the sets other than the interactions
+    std::vector<MissingKind> missing_;                             // things the level places whose kind is gone
+    std::string toast_;                                            // "Reloaded lights" for two seconds (D-59 Q3)
+    int toastTicks_ = 0;
+    bool toastFailed_ = false;
+    luna::engine::Renderer* renderer_ = nullptr;                   // the renderer start() was given: a reload makes new pictures with it
     sim::rules::ActionRunner actions_;
     std::int64_t actionClock_ = 0;
     NpcLife npcLife_;

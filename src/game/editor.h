@@ -10,6 +10,7 @@
 #include "game/editor_help.h"
 #include "game/editor_history.h"
 #include "game/level.h"
+#include "game/missing_kind.h"
 #include "game/pickups.h"
 #include "game/plants.h"
 #include "luna/engine/camera.h"
@@ -162,6 +163,14 @@ public:
     // The default a number field of the selected character offers (US-302): its kind's hit points and sword damage. Nothing for any other field.
     std::optional<int> numberDefault(const std::string& fieldId) const;
     void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
+    // The data of the game was reloaded (US-303): the palettes of plants, objects, lights and characters are built again from the definitions.
+    void dataChanged() {
+        buildPanels();
+        classesStale_ = true;
+        propertiesStale_ = true;
+    }
+    // The things the level places whose kind is gone (US-303): a red "?" is drawn where each stands.
+    void setMissing(std::vector<MissingKind> missing) { missing_ = std::move(missing); }
     bool classesShown() const { return classesShown_; }
     void showClasses(bool shown);
     void newClass();                          // a blank draft; Save writes it
@@ -391,6 +400,7 @@ private:
     int defaultsIndex_ = 0;                         // which partner type the defaults row shows (US-293)
     NpcClassBook* classBook_ = nullptr;
     EditorHelp* help_ = nullptr;
+    std::vector<MissingKind> missing_;
     void applyHelp();
     bool classesShown_ = false;
     bool classesStale_ = true;

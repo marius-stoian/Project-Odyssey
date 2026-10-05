@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-303 Live reload of every data file (Mraw) - 2026-10-05
+
+**State:** On `story/US-303`, merged into `qa`. Debug verify: zero warnings, 27 of 27. Release reload times 0.2 to 4.4 ms per set.
+
+- **New:** `DataReload` registry (`src/game/data_reload.*`); the game's data sets, missing-kind markers, toast and the reload code (`src/game/odyssey_reload.cpp`, `src/game/missing_kind.h`); `EditorHelp::reload`; `Editor::dataChanged` and `setMissing`; `tests/game/data_reload_test.cpp`; `docs/plans/US-303.md`; `Milestone-139.md` (AP-140); `docs/evidence/US-303/`; CI-021.
+- **Changed:** F5 reads every set through the registry; the graph editors' Save reads the `interactions` set through it; the mistakes panel lists the mistakes of every set; `OdysseyGame` constructor uses `checkCatalogLights` and `addCelestialDefaults` (moved, not changed); the `US-156` test waits for the toast; guides ("Live data", restart lines), learning journal, `docs/status.md`, `Limit.md`.
+
 ## US-302 Suggestions on every field (Mraw) - 2026-10-05
 
 **State:** On `story/US-302`, merged into `qa`. Debug verify: zero warnings, 27 of 27.

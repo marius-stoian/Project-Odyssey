@@ -44,6 +44,8 @@ public:
     // missing counts as a mistake too. After a mistake the help is empty: no field gets a tooltip.
     void load(const std::filesystem::path& file);
     const std::vector<std::string>& problems() const { return problems_; }
+    // Reads the file again into a copy (US-303): only a clean copy replaces the entries in use. Returns the mistakes, none when it was taken.
+    std::vector<std::string> reload(const std::filesystem::path& file);
     // The first mistake, for the Editor's status line; empty when the file is clean.
     std::string problem() const { return problems_.empty() ? std::string() : problems_.front(); }
 

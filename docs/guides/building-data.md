@@ -1,6 +1,6 @@
 # Building data (US-250, US-256; D-42, D-55)
 
-Buildings are data: pieces, kinds and prefabs live in `assets/data/buildings/`. Building data is read when the game starts (a prefab you save in the Editor is available at once). A mistake in a file is shown as `buildings/<file>:<line>: <message>`, that file is left out and the rest load.
+Buildings are data: pieces, kinds and prefabs live in `assets/data/buildings/`. Building data is read when the game starts (a prefab you save in the Editor is available at once; edits to `kinds.json` and `pieces.json` apply at the next start, and the game says so when you save). A mistake in a file is shown as `buildings/<file>:<line>: <message>`, that file is left out and the rest load.
 
 A cell is one tile, which is one metre. A cell holds at most **one piece of each layer**: a *floor* under, a *wall* (wall, door, window, post or fence) standing, a *roof* over.
 
