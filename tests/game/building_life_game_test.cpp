@@ -1,0 +1,73 @@
+// US-253 .. US-257: the clan builds, interiors, damage and fire, buildings in the clan's life.
+#include "camp.h"
+
+#include "game/game_rules.h"
+
+using namespace camp_support;
+namespace buildings = odysseus::sim::buildings;
+
+namespace {
+
+// A top-left cell near the hero where `kind` stands.
+std::pair<int, int> spotNear(game::OdysseyGame& odyssey, const std::string& kind) {
+    const auto [hx, hy] = game::BuildingLayer::cellOf(odyssey.hero().feetX(), odyssey.hero().feetY());
+    const auto [w, h] = odyssey.buildings().store().sizeOf(kind, 0);
+    for (int ay = hy - 6; ay <= hy + 6; ++ay) {
+        for (int ax = hx - 6; ax <= hx + 6; ++ax) {
+            if (std::abs(ax + w / 2 - hx) < 3 && std::abs(ay + h / 2 - hy) < 3) continue; // not on top of the hero
+            if (odyssey.buildings().whyNot(odyssey, kind, ax, ay, 0).empty()) return {ax, ay};
+        }
+    }
+    FAIL("no free place near the hero");
+    return {0, 0};
+}
+
+} // namespace
+
+TEST_CASE("US-253 Clan: clan members bring materials to a blueprint and work on it without the hero") {
+    Camp camp("us253-clan");
+    const auto [ax, ay] = spotNear(camp.odyssey, "windbreak");
+    camp.odyssey.buildings().select("windbreak");
+    REQUIRE(camp.odyssey.buildings().placeSelected(camp.odyssey, ax, ay).empty());
+    camp.odyssey.buildings().stopPlacing();
+    const int id = camp.odyssey.buildings().store().all().back().id;
+    camp.play(20 * 60 * 5); // five minutes
+    const buildings::PlacedBuilding* building = camp.odyssey.buildings().store().find(id);
+    REQUIRE(building != nullptr);
+    const bool somethingDone = building->state == buildings::State::Finished || !building->delivered.empty() || building->workMilli > 0;
+    CHECK(somethingDone);
+}
+
+TEST_CASE("US-254 Interior: a finished building with an interior level opens it, the outside waits, and leaving brings the hero back to the door") {
+    Camp camp("us254-interior");
+    fs::create_directories(camp.data.parent_path() / "levels");
+    fs::copy_file(fs::path(ODYSSEUS_DATA_DIR).parent_path() / "levels" / "interior-hut.json", camp.data.parent_path() / "levels" / "interior-hut.json", fs::copy_options::overwrite_existing);
+    const auto [ax, ay] = spotNear(camp.odyssey, "hut");
+    const auto placed = camp.odyssey.buildings().store().place("hut", ax, ay, 0, 0, true, {});
+    REQUIRE(placed.problem.empty());
+    buildings::PlacedBuilding* hut = camp.odyssey.buildings().store().findMutable(placed.id);
+    // Without an interior level the door leads nowhere.
+    CHECK_FALSE(camp.odyssey.enterBuilding(placed.id).empty());
+    hut->interior = "map";
+    hut->interiorLevel = "interior-hut";
+    const auto tags = camp.odyssey.buildings().store().tags(*hut);
+    CHECK(std::find(tags.begin(), tags.end(), "enterable") != tags.end());
+    const double outsideX = camp.odyssey.hero().feetX();
+    const double outsideY = camp.odyssey.hero().feetY();
+    const std::string outsideLevel = camp.odyssey.level().name;
+    const std::size_t outsideBuildings = camp.odyssey.buildings().store().all().size();
+    REQUIRE(camp.odyssey.enterBuilding(placed.id).empty());
+    CHECK(camp.odyssey.insideBuilding());
+    CHECK(camp.odyssey.level().name == "Hut inside");
+    camp.play(40);
+    // The way out is the place named exit.
+    bool hasExit = false;
+    for (const auto& place : camp.odyssey.level().places) hasExit = hasExit || place.name == "exit";
+    CHECK(hasExit);
+    REQUIRE(camp.odyssey.leaveBuilding().empty());
+    CHECK_FALSE(camp.odyssey.insideBuilding());
+    CHECK(camp.odyssey.level().name == outsideLevel);
+    CHECK(camp.odyssey.buildings().store().all().size() == outsideBuildings);
+    CHECK(std::abs(camp.odyssey.hero().feetX() - outsideX) < 1.0);
+    CHECK(std::abs(camp.odyssey.hero().feetY() - outsideY) < 1.0);
+}

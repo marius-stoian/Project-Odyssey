@@ -1,0 +1,14 @@
+// Go into a building whose inside is a map of its own (US-254). Only a finished building the Editor gave an interior level.
+{
+  "id": "enter-building",
+  "label": "Go into {target.name}",
+  "note": "The inside is a level made in the Editor; the world outside waits.",
+  "actors": ["hero"],
+  "target": { "tags": ["building", "enterable"] },
+  "range": 2.5,
+  "duration": 0.5,
+  "order": 5,
+  "effects": [
+    "do enter-building"
+  ]
+}

@@ -6,6 +6,7 @@
 #include "luna/engine/image.h"
 #include "luna/engine/input.h"
 #include "luna/engine/renderer.h"
+#include "sim/building_life.h"
 #include "sim/building_store.h"
 
 #include <filesystem>
@@ -77,6 +78,11 @@ public:
     std::string cancel(OdysseyGame& game, int id);
     std::string repair(OdysseyGame& game, int id, int hp);
     std::string douse(OdysseyGame& game, int id);
+    // The clan builds too (US-253): a clan member brings what the site still needs from the surroundings (up to 2 of each item) and does the work.
+    std::string clanDeliver(OdysseyGame& game, int id);
+    std::string clanWork(OdysseyGame& game, int id, int seconds);
+    const sim::buildings::RivalBuilders& rivalBuilders() const { return rivalBuilders_; }
+    std::uint64_t hash() const { return store_.hash() ^ (rivalBuilders_.hash() * 31); }
     // Walking obstacles of the finished walls, posts and fences are put on the map again when the store says they changed.
     void syncObstacles(OdysseyGame& game);
 
@@ -127,6 +133,7 @@ private:
 
     sim::buildings::BuildingData data_;
     sim::buildings::BuildingStore store_{nullptr};
+    sim::buildings::RivalBuilders rivalBuilders_;
     std::vector<std::string> notes_;
     std::set<std::string> known_;
     std::vector<std::pair<int, int>> obstacleCells_; // the cells this layer put on the map, to take them off again

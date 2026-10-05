@@ -347,7 +347,8 @@ std::vector<std::string> BuildingStore::tags(const PlacedBuilding& building) con
     if (building.state == State::Blueprint) out.push_back("construction");
     if (building.state == State::Finished) {
         if (condition(building) < 100) out.push_back("repairable");
-        for (const std::string& use : uses(building)) out.push_back(use);
+        for (const std::string& use : uses(building)) out.push_back(use == "store" ? "storage" : use); // "store" is the clan's store place; a building keeps goods in "storage"
+        if (interiorMode(building) == "map" && !interiorLevelOf(building).empty()) out.push_back("enterable");
     }
     if (burning(building)) out.push_back("burning");
     return out;

@@ -1,0 +1,14 @@
+// Go back out of a building (US-254): a place named exit in the interior level, tagged "exit".
+{
+  "id": "leave-building",
+  "label": "Go outside",
+  "note": "Brings you back to the door.",
+  "actors": ["hero"],
+  "target": { "tags": ["exit"] },
+  "range": 2.5,
+  "duration": 0.5,
+  "order": 5,
+  "effects": [
+    "do leave-building"
+  ]
+}

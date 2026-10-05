@@ -190,6 +190,10 @@ public:
     luna::engine::TileMap& tileMapMutable() { return map_; } // the buildings put their walls on it (US-251)
     // The buildings of the level being played (M8d, M8e): the store, the Build menu, the art.
     BuildingLayer& buildings() { return buildings_; }
+    // Inside a building whose interior is a map (US-254): the level of the interior is played, the world outside is kept and comes back when the hero leaves.
+    bool insideBuilding() const { return outside_ != nullptr; }
+    std::string enterBuilding(int buildingId);
+    std::string leaveBuilding();
     const BuildingLayer& buildings() const { return buildings_; }
     // A line in the message box for a few seconds.
     void showMessage(const std::string& text) { say(text); }
@@ -552,6 +556,8 @@ private:
     int clanSpeed_ = 1;
     std::unique_ptr<sim::Region> region_;
     std::unique_ptr<sim::Rivals> rivals_;
+    struct OutsideWorld;                      // what stands outside while the hero is inside a building
+    std::shared_ptr<OutsideWorld> outside_;
     std::filesystem::path saveDirectory_;
     std::int64_t lastSavedDay_ = -1;
     double lastAutosaveMs_ = 0.0;

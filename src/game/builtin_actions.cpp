@@ -47,6 +47,16 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         else return false;
         return true;
     }
+    if (name == "enter-building" && subject.kind == Subject::Kind::Building) {
+        const std::string problem = game.enterBuilding(subject.index);
+        if (!problem.empty()) game.showMessage(problem);
+        return true;
+    }
+    if (name == "leave-building") {
+        const std::string problem = game.leaveBuilding();
+        if (!problem.empty()) game.showMessage(problem);
+        return true;
+    }
     // A blueprint learned (from a conversation or a quest): `do learn-blueprint windbreak`.
     if (name == "learn-blueprint" && args.size() == 1) {
         game.buildings().learn(args[0]);
@@ -291,7 +301,13 @@ public:
         }
         if (effect.verb != "do" || effect.args.empty()) return;
         const std::string& name = effect.args[0]->text;
-        if (name == "gather-berries" && who.kind == ActorRef::Kind::Person) {
+        if (name == "deliver-materials" && subject.kind == Subject::Kind::Building) {
+            const std::string said = game_.buildings().clanDeliver(game_, subject.index);
+            if (!said.empty()) core::logInfo(said);
+        } else if (name == "build-work" && subject.kind == Subject::Kind::Building) {
+            const std::string said = game_.buildings().clanWork(game_, subject.index, 4);
+            if (!said.empty()) game_.showMessage(said);
+        } else if (name == "gather-berries" && who.kind == ActorRef::Kind::Person) {
             game_.helpPerson(who.index, sim::Need::Hunger, 30); // they eat a little of what they pick
         } else if (name == "flee") {
             game_.npcs().fleeFrom(game_, actor, subject);
@@ -308,7 +324,7 @@ private:
 } // namespace
 
 const std::vector<std::string>& builtInActionNames() {
-    static const std::vector<std::string> names = {"deliver-materials", "build-work", "cancel-blueprint", "repair", "douse-fire", "learn-blueprint", "gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
+    static const std::vector<std::string> names = {"deliver-materials", "build-work", "cancel-blueprint", "repair", "douse-fire", "learn-blueprint", "enter-building", "leave-building", "gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
                                                    "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "open-trade", "rare-goods", "walk-to", "chat", "swap", "gift", "fight", "hunt", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }

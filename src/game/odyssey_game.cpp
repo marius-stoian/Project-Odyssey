@@ -1856,20 +1856,22 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
-    tickNpcPopulation();
+    if (!insideBuilding()) tickNpcPopulation();
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
-        clanView_.update(*clan_, map_);
+        if (!insideBuilding()) clanView_.update(*clan_, map_);
         // An in-game day ended: save (US-080).
         const std::int64_t day = clan_->date().day;
         if (day != lastSavedDay_) {
-            if (lastSavedDay_ >= 0) autosave();
+            if (lastSavedDay_ >= 0 && !insideBuilding()) autosave();
             lastSavedDay_ = day;
         }
         bubbles_.tick();
-        updateGreetings(*this);
-        exchanges_.update(*this);
-        npcLife_.tick(*this); // clan members and animals look around, walk and do things with the same interactions as the hero (US-154)
+        if (!insideBuilding()) {
+            updateGreetings(*this);
+            exchanges_.update(*this);
+            npcLife_.tick(*this); // clan members and animals look around, walk and do things with the same interactions as the hero (US-154)
+        }
     }
     if (rivals_) rivals_->tick({static_cast<int>(hero_.feetX()) / kTileSize, static_cast<int>(hero_.feetY()) / kTileSize});
     if (life_ && clan_) {
@@ -2387,6 +2389,97 @@ luna::engine::AppConfig odysseyAppConfig() {
     config.clearGreen = 52;
     config.clearBlue = 60;
     return config;
+}
+
+
+// ---- inside a building (US-254)
+
+// The world outside, kept while the hero is in an interior map and put back when the hero leaves.
+struct OdysseyGame::OutsideWorld {
+    Level level;
+    std::filesystem::path levelFile;
+    std::optional<luna::engine::TileMap> map;
+    std::vector<WorldPlant> plants;
+    std::vector<Enemy> enemies;
+    std::vector<PlacedCharacter> bystanders;
+    std::vector<WorldPickup> pickups;
+    std::string buildingsText;
+    double heroX = 0.0;
+    double heroY = 0.0;
+    int buildingId = 0;
+};
+
+std::string OdysseyGame::enterBuilding(int buildingId) {
+    if (insideBuilding()) return "You are already inside.";
+    const sim::buildings::BuildingStore& store = buildings_.store();
+    const sim::buildings::PlacedBuilding* building = store.find(buildingId);
+    if (building == nullptr || building->state != sim::buildings::State::Finished) return "There is nothing to go into.";
+    const std::string name = store.interiorLevelOf(*building);
+    if (store.interiorMode(*building) != "map" || name.empty()) return "This building has no inside to see.";
+    const std::filesystem::path file = dataDirectory_.parent_path() / "levels" / (name + ".json");
+    LoadedLevel loaded;
+    try {
+        loaded = loadLevel(file, definitions_);
+    } catch (const std::exception& error) {
+        return std::string("The inside could not be opened: ") + error.what();
+    }
+    auto stash = std::make_shared<OutsideWorld>();
+    stash->level = level_;
+    stash->levelFile = levelFile_;
+    stash->map = map_;
+    stash->plants = plants_;
+    stash->enemies = enemies_;
+    stash->bystanders = bystanders_;
+    stash->pickups = pickups_;
+    stash->buildingsText = buildings_.saveText();
+    stash->heroX = hero_.feetX();
+    stash->heroY = hero_.feetY();
+    stash->buildingId = buildingId;
+    outside_ = stash;
+    level_ = loaded.level;
+    map_ = buildTileMap(level_, definitions_);
+    const MaterialsConfig materials = range_.materials();
+    range_ = SpearRange(map_, materials);
+    camera_ = luna::engine::Camera(viewWidth(), viewHeight(), map_.pixelWidth(), map_.pixelHeight());
+    hero_ = Hero(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y));
+    projectiles_.clear();
+    arcShots_.clear();
+    populate();
+    clanView_.setAllHidden(true);
+    if (clan_) clanView_.update(*clan_, map_);
+    camera_.centreOn(hero_.feetX(), hero_.feetY());
+    editor_.levelChanged();
+    say("You go inside.");
+    return {};
+}
+
+std::string OdysseyGame::leaveBuilding() {
+    if (!insideBuilding()) return "You are not inside a building.";
+    const std::shared_ptr<OutsideWorld> stash = outside_;
+    outside_.reset();
+    level_ = stash->level;
+    levelFile_ = stash->levelFile;
+    map_ = *stash->map;
+    const MaterialsConfig materials = range_.materials();
+    range_ = SpearRange(map_, materials);
+    camera_ = luna::engine::Camera(viewWidth(), viewHeight(), map_.pixelWidth(), map_.pixelHeight());
+    plants_ = stash->plants;
+    enemies_ = stash->enemies;
+    bystanders_ = stash->bystanders;
+    pickups_ = stash->pickups;
+    projectiles_.clear();
+    arcShots_.clear();
+    startPlacedEffects();
+    buildings_.start(*this);
+    buildings_.loadText(stash->buildingsText);
+    buildings_.syncObstacles(*this);
+    hero_ = Hero(stash->heroX, stash->heroY);
+    clanView_.setAllHidden(false);
+    if (clan_) clanView_.update(*clan_, map_);
+    camera_.centreOn(hero_.feetX(), hero_.feetY());
+    editor_.levelChanged();
+    say("You step outside.");
+    return {};
 }
 
 } // namespace odysseus::game

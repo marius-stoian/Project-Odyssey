@@ -1,0 +1,25 @@
+{
+ "buildings": [],
+ "characters": [],
+ "defaultGround": "wooden floor",
+ "ground": [
+  [["wooden floor", 12]],
+  [["wooden floor", 12]],
+  [["wooden floor", 12]],
+  [["wooden floor", 12]],
+  [["wooden floor", 12]],
+  [["wooden floor", 12]],
+  [["wooden floor", 12]],
+  [["wooden floor", 12]]
+ ],
+ "height": 8,
+ "heroStart": [192, 160],
+ "levelVersion": 6,
+ "name": "Hut inside",
+ "nextId": 1,
+ "pickups": [],
+ "places": [ { "name": "exit", "tags": ["exit"], "x": 192, "y": 224 } ],
+ "plants": [],
+ "targets": [],
+ "width": 12
+}

@@ -64,6 +64,7 @@ public:
     PixelPoint camp() const { return camp_; }
     // The person the player plays is drawn as the hero avatar, not as a clan member: no figure for them.
     void setHidden(int personId) { hidden_ = personId; }
+    void setAllHidden(bool hidden) { allHidden_ = hidden; } // nobody is seen (the hero is inside a building, US-254)
 
     // An errand (US-154): a person walks to a place of their own choosing (a ripe bush) instead of where their hour's action
     // would take them, until the errand is cleared.
@@ -78,6 +79,7 @@ public:
 private:
     PixelPoint camp_;
     int hidden_ = -1;
+    bool allHidden_ = false;
     std::vector<Figure> figures_;
     std::map<int, PixelPoint> errands_;
 };

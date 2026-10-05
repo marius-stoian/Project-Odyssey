@@ -110,7 +110,7 @@ void ClanView::update(const sim::World& world, const luna::engine::TileMap& map)
     for (std::size_t i = 0; i < people.size(); ++i) {
         const sim::Person& person = people[i];
         Figure& figure = figures_[i];
-        figure.present = person.alive && !person.exiled && person.id != hidden_;
+        figure.present = person.alive && !person.exiled && person.id != hidden_ && !allHidden_;
         if (!figure.present) {
             figure.walking = false;
             continue;

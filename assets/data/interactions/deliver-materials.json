@@ -3,7 +3,7 @@
   "id": "deliver-materials",
   "label": "Bring materials to {target.name}",
   "note": "Moves what the site still needs out of the bag. Instant.",
-  "actors": ["hero"],
+  "actors": ["hero", "person"],
   "target": { "tags": ["building", "construction"] },
   "range": 2.5,
   "duration": 0.5,
@@ -13,5 +13,6 @@
   ],
   "effects": [
     "do deliver-materials"
-  ]
+  ],
+  "npc": { "score": "40 + trait(diligent) * 10", "cooldown": 60 }
 }

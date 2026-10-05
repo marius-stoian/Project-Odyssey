@@ -362,7 +362,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"building", "construction", "repairable", "burning", "shelter", "sleep", "store", "work", "person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "can-swap", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving", "forage", "shelter", "water", "shrine", "market", "prey", "animal"};
+    std::vector<std::string> tags = {"building", "construction", "repairable", "burning", "enterable", "exit", "shelter", "sleep", "store", "storage", "work", "person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "can-swap", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving", "forage", "shelter", "water", "shrine", "market", "prey", "animal"};
     for (const PlacedPlace& place : game.level().places) tags.insert(tags.end(), place.tags.begin(), place.tags.end()); // the purposes the owner gave the places of this level
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);

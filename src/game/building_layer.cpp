@@ -33,6 +33,7 @@ constexpr int kPanelY = 28;
 constexpr int kPanelWidth = 176;
 constexpr int kRowHeight = 20;
 constexpr int kRows = 8;
+constexpr int kClanCarry = 2;   // what a clan member brings of each missing item in one go (US-253)
 constexpr int kListTop = 32;
 
 luna::engine::Color shade(int rgb, int delta) {
@@ -127,6 +128,20 @@ std::pair<int, int> BuildingLayer::cellOf(double worldX, double worldY) {
 
 // ---- a level starts
 
+// How many living people each rival clan has (US-253).
+static std::vector<int> rivalPeople(const OdysseyGame& game) {
+    std::vector<int> people;
+    if (game.rivals() == nullptr) return people;
+    for (const sim::RivalClan& clan : game.rivals()->clans()) {
+        int n = 0;
+        if (clan.world != nullptr) {
+            for (const sim::Person& person : clan.world->people()) n += person.alive && !person.exiled ? 1 : 0;
+        }
+        people.push_back(n);
+    }
+    return people;
+}
+
 void BuildingLayer::start(OdysseyGame& game) {
     const luna::engine::TileMap& map = game.tileMap();
     store_.setData(&data_);
@@ -137,6 +152,7 @@ void BuildingLayer::start(OdysseyGame& game) {
     menuOpen_ = false;
     dayAtLastTick_ = ~0ULL;
     seasonAtLastTick_ = -1;
+    rivalBuilders_.reset(game.rivals() != nullptr ? static_cast<int>(game.rivals()->clans().size()) : 0, WeatherCycle::seedFromText(game.level().name) ^ 0xB11D2ULL);
     for (const PlacedBuildingSpec& spec : game.level().buildings) {
         const auto placed = store_.place(spec.kind, spec.x, spec.y, spec.turns, 0, spec.finished, {});
         if (!placed.problem.empty()) {
@@ -326,10 +342,16 @@ void BuildingLayer::tick(OdysseyGame& game, const luna::engine::Intents& world, 
     // Days and seasons pass with the clan's clock: seasons wear buildings (D-55 Q5: very slowly).
     if (const sim::World* clan = game.clan()) {
         const sim::Date date = clan->date();
-        if (dayAtLastTick_ != ~0ULL && static_cast<std::uint64_t>(date.day) != dayAtLastTick_) store_.dayEnded();
+        if (dayAtLastTick_ != ~0ULL && static_cast<std::uint64_t>(date.day) != dayAtLastTick_) {
+            store_.dayEnded();
+            rivalBuilders_.dayEnded(data_, rivalPeople(game));
+        }
         dayAtLastTick_ = static_cast<std::uint64_t>(date.day);
         const int season = static_cast<int>(date.season);
-        if (seasonAtLastTick_ >= 0 && season != seasonAtLastTick_) store_.seasonEnded(seasonAtLastTick_);
+        if (seasonAtLastTick_ >= 0 && season != seasonAtLastTick_) {
+            store_.seasonEnded(seasonAtLastTick_);
+            rivalBuilders_.seasonStarted(data_, rivalPeople(game));
+        }
         seasonAtLastTick_ = season;
     }
     const std::string weather = game.weather().current() >= 0 && static_cast<std::size_t>(game.weather().current()) < game.catalogs().weather.size()
@@ -361,6 +383,30 @@ std::string BuildingLayer::deliver(OdysseyGame& game, int id) {
         if (left > 0) missing[item] = left;
     }
     return std::format("{}{} Still needs: {}.", label, moved.empty() ? ": you have none of what it needs." : ": delivered " + costText(game, moved) + ".", costText(game, missing));
+}
+
+std::string BuildingLayer::clanDeliver(OdysseyGame&, int id) {
+    const sim::buildings::PlacedBuilding* building = store_.find(id);
+    if (building == nullptr || building->state != sim::buildings::State::Blueprint) return {};
+    sim::ItemCounts surroundings; // what the clan finds around the site: a little of each missing item
+    for (const auto& [item, need] : store_.cost(*building)) {
+        const auto have = building->delivered.find(item);
+        const int left = need - (have == building->delivered.end() ? 0 : have->second);
+        if (left > 0) surroundings[item] = std::min(left, kClanCarry);
+    }
+    const sim::ItemCounts moved = store_.deliver(id, surroundings);
+    return moved.empty() ? std::string() : store_.label(*building) + ": the clan brought materials.";
+}
+
+std::string BuildingLayer::clanWork(OdysseyGame& game, int id, int seconds) {
+    const sim::buildings::PlacedBuilding* building = store_.find(id);
+    if (building == nullptr || building->state != sim::buildings::State::Blueprint || heroInTheWay(game, *building) || store_.workAvailable(*building) <= 0) return {};
+    const bool done = store_.work(id, seconds * 1000);
+    if (!done) return {};
+    syncObstacles(game);
+    const std::string label = store_.label(*building);
+    game.chronicleLine("The clan finished building a " + label, -1, -1);
+    return label + " is finished.";
 }
 
 std::string BuildingLayer::work(OdysseyGame& game, int id, int seconds) {
@@ -412,6 +458,7 @@ std::string BuildingLayer::saveText() const {
     root["version"] = 1;
     root["known"] = std::vector<std::string>(known_.begin(), known_.end());
     root["store"] = nlohmann::json::parse(store_.toJson());
+    root["rivals"] = nlohmann::json::parse(rivalBuilders_.toJson());
     return root.dump(1, '\t') + "\n";
 }
 
@@ -427,6 +474,7 @@ std::vector<std::string> BuildingLayer::loadText(const std::string& text) {
     }
     std::string problem;
     if (!store_.fromJson(root["store"].dump(), problem)) notes.push_back(problem);
+    if (root.contains("rivals") && !rivalBuilders_.fromJson(root["rivals"].dump(), problem)) notes.push_back(problem);
     return notes;
 }
 
