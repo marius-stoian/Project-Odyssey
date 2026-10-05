@@ -2144,3 +2144,22 @@ for (WorldPlant& plant : plants_) plant.def = catalogs_.plant(plant.kind);   // 
 **Try it (10 minutes).** Run the game, open `assets/data/light/lights.json`, change the campfire colour and press F5: the fire changes. Then delete a quote and press F5 again: a red panel names the file and line, and the fire keeps its last good colour.
 
 **Check yourself.** Why is a `std::move` into `catalogs_.plants` safe here, but keeping a `const PlantDef*` from before the move is not?
+
+## US-304: polling file times, debouncing, ignoring your own writes (M10b)
+
+**What we built.** The game now notices when you save one of its data files in a text editor and reads it again by itself, within about a second. It does not need a thread or a library: it simply asks the file system a few times a second "what is the modification time and size of these files?" and remembers the answers.
+
+**The idea: compare with what you remembered, wait for quiet, and skip what you did yourself.** A `std::map<std::string, Stamp>` keeps the last time and size of every file. Each look builds a new map and compares: a file that is new, different or gone is a change. A text editor often writes a file twice in a row, so a change goes into a `waiting_` map with the moment it was seen, and a new change to the same file just overwrites that moment; only when the file has stayed quiet for 0.3 s is it reported (*debouncing*). The Editor's own saves would look exactly like outside edits, so just after it writes a file it records the stamp that write left (`noteOwnWrite`), and when the watcher sees a change equal to that stamp it forgets it once instead of reporting it. The watcher never reads the clock itself; the caller passes `nowSeconds`, which is why a test can run ten seconds of watching in a blink.
+
+```cpp
+auto old = known_.find(key);
+if (old != known_.end() && old->second == seen.stamp) continue;   // same as before: nothing happened
+if (own_.contains(key) && own_[key] == seen.stamp) continue;       // we wrote it ourselves
+waiting_[key] = {seen.path, nowSeconds};                           // a change: wait for quiet
+```
+
+**Where to look.** `FileWatcher` in `src/game/data_reload.*`, `pollFiles` in `src/game/odyssey_reload.cpp`, `tests/game/data_watch_test.cpp`.
+
+**Try it (10 minutes).** Start the game, open `assets/data/interactions/gather.json` in Notepad, change `"range": 2` to 3 and save: the toast appears. Then start it with `--no-watch` and see that nothing happens until you press F5.
+
+**Check yourself.** Why does the watcher take the time as a parameter instead of calling `std::chrono::steady_clock::now()` itself?

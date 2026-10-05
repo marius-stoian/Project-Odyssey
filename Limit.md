@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-304):** S-US-304 DONE (Milestone-140.md, AP-141), Debug zero warnings, 27/27, Release watcher cost 0.164 ms a tick. Next: S-US-305 (level edits win over the run save: things.json version 3 with a per-id hash baseline, merge on load and after an Editor save, migration of version 2; check first how region.json and the level file relate when a run is loaded; a save format change beyond the baseline is a design question for the owner), then X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
+
 **Resume update (2026-10-05, US-303):** S-US-303 DONE (Milestone-139.md, AP-140), Debug zero warnings, 27/27, Release reload 0.2-4.4 ms. Next: S-US-304 (file watch in src/game/data_reload.*: poll last_write_time every 250 ms, 300 ms debounce, own-write filter, --no-watch; calls DataReload::changed; open level never overwritten while the Editor has unsaved changes), then US-305, X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
 
 **Resume update (2026-10-05, US-302):** S-US-302 DONE (Milestone-138.md, AP-139), Debug zero warnings, 27/27. Next: S-US-303 (src/game/data_reload.*: registry of data sets, all or nothing, F5 reloads all; lights, objects, plants, catalogs re-point placed things by name; red ? marker for a missing kind), then US-304, 305, X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020.

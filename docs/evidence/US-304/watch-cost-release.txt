@@ -1,0 +1,1 @@
+US-304 watcher cost on the shipped data (194 files, 400 ticks of 50 ms): average 0.164 ms a tick, 95th percentile 0.641 ms, worst 0.850 ms (budget 0.5 ms a frame)

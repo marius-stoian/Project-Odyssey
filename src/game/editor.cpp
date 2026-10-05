@@ -1605,8 +1605,30 @@ bool Editor::save() {
         return false;
     }
     unsaved_ = false;
+    if (wrote_) wrote_(levelFile_); // the file is ours: a watcher must not read it a second time (US-304)
     say("Saved " + levelFile_.filename().string());
     return true;
+}
+
+bool Editor::levelChangedOnDisk() {
+    const std::string name = levelFile_.filename().string();
+    if (unsaved_) {
+        say(name + " changed on disk; your unsaved changes are kept (save to overwrite the file, or open it again to take the new one)");
+        return false;
+    }
+    try {
+        LoadedLevel loaded = loadLevel(levelFile_, definitions_);
+        const double x = centreX_;
+        const double y = centreY_;
+        replaceLevel(std::move(loaded.level), levelFile_, name + " changed on disk: read again");
+        centreX_ = x; // the view stays where the owner was looking
+        centreY_ = y;
+        levelChanged();
+        return true;
+    } catch (const sim::DataError& error) {
+        say(std::string("Not reloaded: ") + error.what()); // a half-saved file: the level in the Editor stays as it is
+        return false;
+    }
 }
 
 std::optional<std::pair<int, int>> Editor::cellAt(int screenX, int screenY) const {

@@ -7,6 +7,7 @@
 #include "sim/npc_kind.h"
 
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -33,6 +34,9 @@ public:
     const sim::rules::LoadReport& report() const { return report_; }
     const std::filesystem::path& folder() const { return folder_; }
 
+    // Told after the book writes a class or kind file itself, so the file watcher does not read it a second time (US-304).
+    void setWroteFile(std::function<void(const std::filesystem::path&)> wrote) { wrote_ = std::move(wrote); }
+
     // Reads every file again (F5). All or nothing: when any file has a mistake the classes in use stay and false comes back (the report names the mistakes).
     bool reload();
 
@@ -49,6 +53,7 @@ public:
 
 private:
     std::filesystem::path folder_;
+    std::function<void(const std::filesystem::path&)> wrote_;
     std::filesystem::path kindsFolder_;
     sim::rules::NpcClassCatalog catalog_;
     sim::rules::NpcKindCatalog kinds_;

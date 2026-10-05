@@ -304,4 +304,64 @@ void OdysseyGame::drawToast(luna::engine::Renderer& renderer) const {
     painter.text(box.x + 5, box.y + 4, toast_, toastFailed_ ? luna::engine::UiColor::Red : luna::engine::UiColor::Text);
 }
 
+// ---- Watching the files for changes made outside the game (US-304)
+
+void OdysseyGame::setWatching(bool on) {
+    watching_ = on;
+    if (!on) return;
+    for (const DataSet& set : reloads_.sets()) {
+        for (const std::filesystem::path& root : set.watch) watcher_.watch(root);
+    }
+    watcher_.watch(levelFile_); // the open level: read again when the Editor has nothing unsaved
+    watcher_.snapshot();        // what is there now is not a change
+}
+
+// One tick of the watcher. The files that changed outside and have settled are read again by the sets that watch them; the open level is handled apart.
+std::vector<ReloadOutcome> OdysseyGame::pollFiles(double nowSeconds) {
+    std::vector<ReloadOutcome> outcomes;
+    const std::vector<std::filesystem::path> files = watcher_.poll(nowSeconds);
+    if (files.empty()) return outcomes;
+    std::vector<std::filesystem::path> data;
+    bool level = false;
+    for (const std::filesystem::path& file : files) {
+        std::error_code error;
+        if (std::filesystem::equivalent(file, levelFile_, error) && !error) level = true;
+        else data.push_back(file);
+    }
+    if (!data.empty()) {
+        outcomes = reloads_.changed(data);
+        reported(outcomes);
+    }
+    if (level) levelChangedOutside();
+    return outcomes;
+}
+
+// An Editor save read this set itself: the watcher takes the times of its files as they are, so it does not read the set a second time.
+void OdysseyGame::ownReload(const std::string& set) {
+    reported(reloads_.reload(set));
+    for (const DataSet& entry : reloads_.sets()) {
+        if (entry.name != set) continue;
+        for (const std::filesystem::path& root : entry.watch) watcher_.resync(root);
+    }
+}
+
+void OdysseyGame::levelChangedOutside() {
+    if (mode_ == Mode::Editor) applyLevelFromDisk();
+    else levelReloadPending_ = true; // the run goes on; the Editor reads the new file when it opens
+}
+
+void OdysseyGame::applyLevelFromDisk() {
+    levelReloadPending_ = false;
+    const std::string name = levelFile_.filename().string();
+    if (editor_.levelChangedOnDisk()) {
+        findMissingKinds();
+        toast_ = "Reloaded " + name;
+        toastFailed_ = false;
+    } else {
+        toast_ = name + " changed on disk (your unsaved changes are kept)";
+        toastFailed_ = true;
+    }
+    toastTicks_ = kToastTicks;
+}
+
 } // namespace odysseus::game
