@@ -361,6 +361,17 @@ void tickInteractions(OdysseyGame& game) {
     game.actions().tick(game.actionClock(), game.interactions(), host);
 }
 
+void tickQuests(OdysseyGame& game) {
+    if (game.quests().quests().empty()) return;
+    GameEffectHost host(game);
+    const Subject hero = heroSubject(game);
+    const GameRuleContext context(game, hero);
+    const std::vector<sim::rules::QuestChange> changes = game.quests().update(context, game.actionClock(), host.ticksPerDay(), game.actions(), host, refOf(game, hero));
+    for (const sim::rules::QuestChange& change : changes) {
+        core::logInfo(std::format("Quest {}: {}{}", change.quest, static_cast<int>(change.kind), change.step.empty() ? std::string() : " step " + change.step));
+    }
+}
+
 bool openConversation(OdysseyGame& game, const Subject& subject) {
     if (subject.kind == Subject::Kind::Npc) {
         const sim::rules::DlgScript* script = game.npcDialogueFor(subject.index);

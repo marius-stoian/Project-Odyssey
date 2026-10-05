@@ -1,7 +1,6 @@
 # Project Odyssey: assembly progress
 
-A snapshot of where the assembly stands, saved at the end of each assembly session. Each save gets the next ID (AP-001, AP-002, ...) and records the Codex and requirements versions it was measured against. The newest snapshot is on top; older ones stay below as history. Live details: [docs/status.md](docs/status.md) (every prompt), [docs/decisions.md](docs/decisions.md) (owner decisions).
-
+A snapshot of where the assembly stands, saved at the end of each session. Each save gets the next ID (AP-001, AP-002, ...) and records the Codex and requirements versions it was measured against. The newest snapshot is on top; older ones stay below. Live details: [docs/status.md](docs/status.md) (every prompt), [docs/decisions.md](docs/decisions.md) (owner decisions).
 
 **Newer snapshots:** [Milestone-2.md](Milestone-2.md) (AP-003) and later Milestone-<n>.md files.
 
@@ -21,22 +20,13 @@ A snapshot of where the assembly stands, saved at the end of each assembly sessi
 
 ### Assembly outcome
 
-US-003 implements five build targets, private layer identities, guarded headers,
-narrow include visibility and per-build validation. Supplementary GCC Debug and
-Release pass 5 named CTests, 5 doctest cases / 17 assertions, 14 compiler probes and
-six validator rejection checks. Windows/MSVC, ASan and main CI remain unverified;
-acceptor rejected completion pending those checks. US-003 stays **Blocked**.
+US-003 implements five build targets, private layer identities, guarded headers, narrow include visibility and per-build validation. Supplementary GCC Debug and Release pass 5 named CTests, 5 doctest cases / 17 assertions, 14 compiler probes and six validator rejection checks. Windows/MSVC, ASan and main CI remain unverified; the acceptor rejected completion pending those checks. US-003 stays **Blocked**.
 
-Full change tracking: [CHANGELOG.md](CHANGELOG.md). Evidence and resume instructions:
-[assembly report](docs/reports/US-003-2026-09-29.md), [plan](docs/plans/US-003.md).
-The owner requested changelog coverage for every future PR; `AGENTS.md` records it.
+Full change tracking: [CHANGELOG.md](CHANGELOG.md). Evidence and resume instructions: [assembly report](docs/reports/US-003-2026-09-29.md), [plan](docs/plans/US-003.md). The owner requested changelog coverage for every future PR; `AGENTS.md` records it.
 
 ### Decisions and Codex issues
 
-D-04, D-12 and D-13 are Decided; no newly answered decision unblocks a currently
-Blocked story. No new design requests or Codex issues. Existing CI-004 remains Open.
-M1-M6 remain To do; M0's US-004 and X-M0 remain To do. Formal US-003 teach-back is
-drafted in its plan and will enter the learning journal after acceptance.
+D-04, D-12 and D-13 are Decided; no newly answered decision unblocks a currently Blocked story. No new design requests or Codex issues. Existing CI-004 remains Open. M1-M6 remain To do; M0's US-004 and X-M0 remain To do. The formal US-003 teach-back is drafted in its plan and will enter the learning journal after acceptance.
 
 ### Next
 
@@ -94,7 +84,7 @@ Also done outside the Codex, at the owner's request: Codex sync from Google Driv
 CI-001, CI-002, CI-003 resolved in Codex v1.2. Open: CI-004 (make Milestone.md an official state file, so every session adds a snapshot); take it to Anima with A-002.
 
 ### Next
-1. S-US-003: build targets for all five layers, and the build rejects forbidden includes (including game code inside Luna).
+1. S-US-003: build targets for all five layers; the build rejects forbidden includes (including game code inside Luna).
 2. S-US-004: logging with session log rotation and asserts.
 3. X-M0: exit review, tag `m0-done`.
 4. K-M1: start the Luna engine.

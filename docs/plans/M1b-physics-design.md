@@ -16,12 +16,12 @@ Architect's design for M1b, shared by US-025..US-029. Codex v1.5; requirements v
 
 ## Numbers: `Fixed` (32.32)
 - A 64-bit signed integer holding value x 2^32: 32 integer bits (range about +/-2.1 billion), 32 fractional bits (resolution 2.3e-10). Metres, seconds, kilograms: plenty for a region (the MVP world is 256 m across); space Ages will use a larger unit (PHY-06).
-- `+`, `-`: plain integer add and subtract. `*`: the full 128-bit product, shifted back by 32, computed with our own portable 32-bit-limb multiplication (no compiler-specific 128-bit types), rounded to nearest. `/`: 128-by-64-bit long division, rounded to nearest. Overflow is a bug: asserted in Debug (ADR-015).
-- `sqrt`: integer square root of the 128-bit value (bit-by-bit, exact floor). `sin`/`cos`: angle reduction to [0, pi/2] plus a fixed-point polynomial; `atan2`: polynomial with octant folding. All built from integer operations only, so every compiler and CPU gives the same bits.
+- `+`, `-`: plain integer add and subtract. `*`: the full 128-bit product, shifted back by 32, using our own portable 32-bit-limb multiplication (no compiler-specific 128-bit types), rounded to nearest. `/`: 128-by-64-bit long division, rounded to nearest. Overflow is a bug: asserted in Debug (ADR-015).
+- `sqrt`: integer square root of the 128-bit value (bit-by-bit, exact floor). `sin`/`cos`: angle reduction to [0, pi/2] plus a fixed-point polynomial; `atan2`: polynomial with octant folding. All use integer operations only, so every compiler and CPU gives the same bits.
 - Conversions from `double` exist only for literals in tests and for the Engine's drawing (`toDouble()`), never inside physics steps.
 
 ## Vectors and rotations
-`Vec3` (x east, y south, z up; matches screen x/y for top-down drawing), dot, cross, length, normalise. `Quat` (unit quaternion): from axis-angle, multiply, rotate a vector, normalise. Tests: 4 x 90 degrees about z returns to the start within 1/65536.
+`Vec3` (x east, y south, z up; matches screen x/y for top-down drawing): dot, cross, length, normalise. `Quat` (unit quaternion): from axis-angle, multiply, rotate a vector, normalise. Tests: 4 x 90 degrees about z returns to the start within 1/65536.
 
 ## Shapes and hits (US-026)
 Sphere, capsule (segment + radius), axis-aligned box. Queries: overlap with contact point, normal and depth; raycast; swept sphere (continuous) against each shape for time of impact. Broad phase: a uniform spatial grid (cell = 2 m) over the region; pairs only from neighbouring cells.

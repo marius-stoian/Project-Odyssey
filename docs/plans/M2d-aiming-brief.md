@@ -3,7 +3,7 @@
 Written by Mraw (the Dominus council) for Anima, 2026-10-01. Phase 1 of the Amek workflow: **Anima turns this brief into Codex v1.9** (three new story prompts inside M2d); Mraw then assembles them in order. Requirements v1.9 adds stories US-139..US-141 to epic E13 (the requirements document stays the source of truth for *what*).
 
 ## Goal
-After US-135 (elements) the owner asked, before plants: "I want to be able to aim the weapons with the mouse and we need ballistics and multiple ranged weapons so that I can shoot enemies." Today ranged weapons fly flat in the hero's 8 facing directions and the only arc is the old spear-throw demo. Now the hero aims at the mouse pointer, projectiles fly real arcs from Luna Physics, and bows, crossbows, thrown weapons and staffs are shootable from the hotbar.
+After US-135 (elements) the owner asked, before plants: "I want to be able to aim the weapons with the mouse and we need ballistics and multiple ranged weapons so that I can shoot enemies." Today ranged weapons fly flat in the hero's 8 facing directions, and the only arc is the old spear-throw demo. Now the hero aims at the mouse pointer, projectiles fly real arcs from Luna Physics, and bows, crossbows, thrown weapons and staffs are shootable from the hotbar.
 
 ## Owner decisions (2026-10-01, two rounds in chat) = D-25
 | Topic | Decision |
@@ -24,9 +24,9 @@ After US-135 (elements) the owner asked, before plants: "I want to be able to ai
 | US-141 | Bows, crossbows, thrown weapons and staff bolts | M | US-140 | The ranged starters (bow, crossbow, thrown, staff) use the arcs (staff bolts flat and fast); speeds, ranges and damage from weapons.json; elements apply on hit; a shooting-range level (straw targets and goblins behind rocks) in the demo evidence; the spear-throw demo still works |
 
 ## Risks
-- **Two aim systems**: the M1b spear-throw demo has its own aim solver path; keep it working (its tests stay) and reuse its physics functions rather than duplicating them.
+- **Two aim systems**: the M1b spear-throw demo has its own aim solver path. Keep it working (its tests stay) and reuse its physics functions rather than duplicating them.
 - **Top-down height**: height is drawn by lifting the sprite and drawing a ground shadow; hit tests use height, not the drawn position. Keep the conversion in one place.
-- **Determinism**: arcs use Luna Physics fixed-point, so a replay with the same inputs flies the same shots (Charter rule 6, rule 10).
+- **Determinism**: arcs use Luna Physics fixed-point, so a replay with the same inputs flies the same shots (Charter rules 6 and 10).
 
 ## Next steps
 1. Mraw updates **requirements v1.9**: stories US-139..US-141 in E13, D-25.

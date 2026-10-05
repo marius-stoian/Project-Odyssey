@@ -106,6 +106,8 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 
 // One tick of the runner: effects waiting for their time happen, finished actions do their effects. Called by the game each play tick.
 void tickInteractions(OdysseyGame& game);
+// Moves the quests on (US-180): counts what happened, checks prerequisites, waits, failures, gives rewards.
+void tickQuests(OdysseyGame& game);
 
 // Talk (US-161): opens the conversation panel with the script that speaks for this clan member and pauses the world. False when no
 // script fits them (then the caller keeps to the plain talk).

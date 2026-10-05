@@ -144,6 +144,7 @@ const std::vector<VerbInfo>& knownVerbs() {
         {"take", 3, 3, "remove items from someone: take hero berries 1"},
         {"set", 2, 2, "change a state of a thing: set target.state picked"},
         {"flag", 1, 2, "set a story note (1 unless a value is given): flag met-elder"},
+        {"quest", 2, 2, "start, complete or fail a quest: quest start first-day"},
         {"opinion", 3, 3, "change what the first thinks of the second: opinion npc hero +5"},
         {"remember", 2, 3, "give someone a memory with a feeling: remember npc \"shared berries\" 20"},
         {"start", 1, 2, "begin another interaction: start inspect target"},

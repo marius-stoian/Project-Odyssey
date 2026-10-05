@@ -1,12 +1,12 @@
 # Beta test plan after M9 (Dominus, 2026-10-05)
 
-Owner runs this by hand on the PC after X-M9 is green and `m9-done` is tagged. It covers everything built through M9 (M0 to M9, with M10 onward not built). Every row says what to do and what you should see. Controls and file names come from `README.md` and `docs/guides/`; if a guide and the game disagree, that is a finding.
+The owner runs this by hand on the PC after X-M9 is green and `m9-done` is tagged. It covers everything built through M9 (M0 to M9; M10 onward is not built). Each row says what to do and what you should see. Controls and file names come from `README.md` and `docs/guides/`; if a guide and the game disagree, that is a finding.
 
 ## 1. Purpose and rules
 
-- Find what the 27 automated test groups cannot: how it looks, how it feels, GPU behaviour, long play, and mistakes of design.
+- Find what the 27 automated test groups cannot: how it looks, how it feels, GPU behaviour, long play, and design mistakes.
 - Close the open owner rows of the gates: M8c rows 7 and 8, M8d, M8e, M9a row 7, M9b row 6, M9c rows 6 and 7, M6 row 10 (playtesters).
-- Three passes: **A. Smoke** (30 min, can the game be played at all), **B. Feature walk** (about 6 hours over several days, sections 4.1 to 4.14), **C. Soak and stress** (overnight, section 5).
+- Three passes: **A. Smoke** (30 min: can the game be played at all), **B. Feature walk** (about 6 hours over several days, sections 4.1 to 4.14), **C. Soak and stress** (overnight, section 5).
 - Out of scope: quests, data editors, world editing, politics, technology (M10 to M14), mobile.
 
 ## 2. Preparation
@@ -52,7 +52,7 @@ Result column: P pass, F fail, N not as designed, - skipped. Write the bug id in
 | 1.8 | Damaged settings | Corrupt `settings.json` by hand, start | defaults restored and the problem reported, no crash |
 | 1.9 | Renderer | Normal start; then force the fallback if the guide says how | GPU path looks the same as the SDL fallback |
 | 1.10 | Crash log | Debug build only: trigger a known assert if one is documented | log names file and line; last save intact |
-| 1.11 | Zip package | Build the CPack zip, unzip on a clean folder, run | starts without Visual Studio or dev tools |
+| 1.11 | Zip package | Build the CPack zip, unzip into a clean folder, run | starts without Visual Studio or dev tools |
 
 ### 4.2 New game, hero and tutorial (M5, M6)
 

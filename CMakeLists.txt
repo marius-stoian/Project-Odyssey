@@ -228,7 +228,9 @@ add_library(odysseus_sim STATIC
     src/sim/building_store.cpp
     src/sim/building_life.cpp
     src/sim/graph_check.cpp
-    src/sim/test_play.cpp)
+    src/sim/test_play.cpp
+    src/sim/quest_data.cpp
+    src/sim/quest_book.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -536,6 +538,7 @@ add_executable(odysseus_sim_tests
     tests/sim/npc_scale_test.cpp
     tests/sim/runner_test.cpp
     tests/sim/dialogue_test.cpp
+    tests/sim/quest_test.cpp
     tests/sim/conversation_test.cpp
     tests/sim/selection_test.cpp
     tests/sim/smalltalk_test.cpp

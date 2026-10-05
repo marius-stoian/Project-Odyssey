@@ -1,6 +1,6 @@
 # M2d exit review: Content and combat (2026-10-01)
 
-**Result: built and demonstrated story by story; merge to `main`, tag, full test run and CI are deferred to the M4 gate** (owner, 2026-10-01: "Proceed without testing until reaching M4"). Nothing below was run as a full test suite after US-135 except where said.
+**Result: built and demonstrated story by story. Merge to `main`, tag, full test run and CI are deferred to the M4 gate** (owner, 2026-10-01: "Proceed without testing until reaching M4"). Nothing below was run as a full test suite after US-135 except where stated.
 
 | Exit criterion | State | Evidence |
 |---|---|---|
@@ -19,4 +19,4 @@
 - The owner's uncommitted `assets/levels/valley.json` edits were never touched.
 
 ## Owner notes
-None given yet. Notes from playing with `docs/guides/editor.md` become new stories through Anima.
+None yet. Notes from playing with `docs/guides/editor.md` become new stories through Anima.

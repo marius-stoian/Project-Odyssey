@@ -25,7 +25,7 @@ Gate decision (owner): **Go** if all three pass; **Pivot** if stability passes b
 
 ## 4. Session script (about 75 minutes)
 1. **Welcome (3 min):** "We are testing the game, not you. Play as long as you like and stop whenever you want; there is no right way. Please think aloud if you can." Ask the statistics question honestly (US-092): the file stays on their PC and they choose whether to send it.
-2. **Play (up to 60 min):** start a new game with default settings and the tutorial on. The observer says nothing, does not help, and notes the time of every stop, confusion, laugh and question. At 30 minutes, the observer does **not** ask whether they want to continue; the clock simply keeps running until they stop or 60 minutes pass.
+2. **Play (up to 60 min):** start a new game with default settings and the tutorial on. The observer says nothing, does not help, and notes the time of every stop, confusion, laugh and question. At 30 minutes the observer does **not** ask whether they want to continue; the clock keeps running until they stop or 60 minutes pass.
 3. **Interview (10 min):** section 5.
 4. **Close (2 min):** thank them; ask whether the statistics file and any crash folder may be sent.
 
@@ -37,7 +37,7 @@ Gate decision (owner): **Go** if all three pass; **Pivot** if stability passes b
 5. "What did you want to do that the game did not let you do?"
 6. "Would you play again tomorrow? What would you do first?"
 
-The answer to question 1 (and 2, 3) is scored for "emergent story": it counts when the player retells a chain of at least two simulated events with a cause (a feud, a hunt gone wrong, a courtship, a theft, a hard winter), not the tutorial or a scripted crossroads event alone.
+Answers to questions 1-3 are scored for "emergent story": it counts when the player retells a chain of at least two simulated events with a cause (a feud, a hunt gone wrong, a courtship, a theft, a hard winter), not the tutorial or a scripted crossroads event alone.
 
 ## 6. Evidence (filled in at X-M6)
 `docs/gates/M6.md`, one row per player: ID (P1..P8, no names), date, PC, minutes played, why they stopped, story retold (yes or no, with the quote), crashes, statistics file received; then the three criteria counted and the owner's gate decision (D-GATE-M6).
