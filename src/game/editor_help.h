@@ -5,7 +5,9 @@
 #include "luna/engine/ui.h"
 
 #include <filesystem>
+#include <functional>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <string_view>
@@ -26,6 +28,18 @@ public:
         bool list = false;   // comma separated: the suggestion completes the item after the last comma
     };
 
+    // Where the suggestions of a field come from (US-302). The game fills it in; every function reads the data in use at the moment it is called, so a class
+    // saved a moment ago is offered at once.
+    struct Sources {
+        std::filesystem::path dataFolder;                                            // "files:<folder>/<glob>" is looked up under it
+        std::function<std::vector<std::string>(const std::string& catalog)> catalog; // "catalog:<name>": the names of that catalog
+        std::function<std::optional<int>(const std::string& fieldId)> numberDefault; // "number": the default of the kind or class being edited, if any
+    };
+    void setSources(Sources sources) { sources_ = std::move(sources); }
+    // The values a field offers: what its entry's "suggest" names, read now. Empty for "none", for an id without an entry and for a source that is not set.
+    // `minimum` and `maximum` are the limits of a number field (both 0: not a number field).
+    std::vector<std::string> suggestionsFor(const std::string& id, int minimum = 0, int maximum = 0) const;
+
     // Reads the file. Every mistake becomes a line "file:line: message" in problems(); a clean file has none. A file that is
     // missing counts as a mistake too. After a mistake the help is empty: no field gets a tooltip.
     void load(const std::filesystem::path& file);
@@ -36,12 +50,15 @@ public:
     const Entry* find(const std::string& id) const;
     const std::map<std::string, Entry>& entries() const { return entries_; }
 
-    // "npc" and "Sword: " give "npc.sword"; "who (elder or friend): " gives "who-elder-or-friend". Lower case, letters and digits, other
+    // "npc" and "Sword: " give "npc.sword"; "who (elder or friend): " gives "event.who" (a hint in brackets is dropped) and an indented label gets "sub-". Lower case, letters and digits, other
     // runs become one '-'. Made from the label so the id cannot drift from the screen.
     static std::string fieldId(std::string_view panel, std::string_view label);
 
     // Gives every text and number field of the panel its help id and tooltip. Remembers the ids it was asked for (coverage test).
     void apply(luna::engine::Panel& panel, std::string_view prefix);
+
+    // The ids of the fields apply() gave a list of suggestions to (a coverage test: every entry that is not "none" must reach a field).
+    const std::set<std::string>& wired() const { return wired_; }
 
     // Every id apply() has met, and the ones of those without an entry.
     const std::set<std::string>& asked() const { return asked_; }
@@ -52,6 +69,9 @@ private:
     std::map<std::string, Entry> entries_;
     std::vector<std::string> problems_;
     std::set<std::string> asked_;
+    std::set<std::string> wired_;
+    Sources sources_;
+    std::map<std::string, std::vector<int>> recent_; // per field id: the last numbers typed there this session, newest first
 };
 
 } // namespace odysseus::game

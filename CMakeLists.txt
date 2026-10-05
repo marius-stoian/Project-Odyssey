@@ -459,6 +459,7 @@ add_executable(odysseus_game_tests
     tests/game/npc_test_level_test.cpp
     tests/game/economy_editor_test.cpp
     tests/game/editor_help_test.cpp
+    tests/game/editor_suggest_test.cpp
     tests/game/trade_stock_test.cpp
     tests/game/trade_gate_test.cpp
     tests/game/trade_screen_test.cpp

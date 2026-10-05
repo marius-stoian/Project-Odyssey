@@ -608,3 +608,11 @@ TEST_CASE("US-301 Intents: the arrows, Tab and Escape also reach the list, and s
     CHECK(intents.pressed(Intent::MoveDown));
     CHECK_FALSE(intents.pressed(Intent::ListDown));
 }
+
+TEST_CASE("US-302 List items: words separated by spaces complete one word, keeping the ones before it") {
+    Rig rig(classes(), 10, true);
+    rig.type("elder tr");
+    CHECK(rig.rows() == std::vector<std::string>{"trader", "trapper"});
+    rig.panel.handle(tabKey());
+    CHECK(rig.kept == "elder trader");
+}
