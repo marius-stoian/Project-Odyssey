@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-303):** S-US-303 DONE (Milestone-139.md, AP-140), Debug zero warnings, 27/27, Release reload 0.2-4.4 ms. Next: S-US-304 (file watch in src/game/data_reload.*: poll last_write_time every 250 ms, 300 ms debounce, own-write filter, --no-watch; calls DataReload::changed; open level never overwritten while the Editor has unsaved changes), then US-305, X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
+
 **Resume update (2026-10-05, US-302):** S-US-302 DONE (Milestone-138.md, AP-139), Debug zero warnings, 27/27. Next: S-US-303 (src/game/data_reload.*: registry of data sets, all or nothing, F5 reloads all; lights, objects, plants, catalogs re-point placed things by name; red ? marker for a missing kind), then US-304, 305, X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020.
 
 **Resume update (2026-10-05, US-301):** S-US-301 DONE (Milestone-137.md, AP-138), Debug zero warnings, 27/27. Next: S-US-302 (editor_help suggestion sources: catalogs, files, fixed lists, numbers with default/min/max/last 5; set suggest and listItems on every field from help.json), then US-303..305, X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020.

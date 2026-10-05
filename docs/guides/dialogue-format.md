@@ -1,6 +1,6 @@
 # Dialogue format guide
 
-How to write a conversation as plain text (US-160, SDC-04, ADR-019). One conversation per file, `assets/data/dialogue/<name>.dlg`, written in any text editor. The game reads the folder at start and again on F5. A mistake is reported as `dialogue/<name>.dlg:<line>: message`; a file with a mistake is left out and the rest load. The Editor's graph (M9) reads and writes the same files and keeps your `#` notes.
+How to write a conversation as plain text (US-160, SDC-04, ADR-019). One conversation per file, `assets/data/dialogue/<name>.dlg`, written in any text editor. The game reads the folder at start, again when you save a file in the Editor, and on F5 (press it after you edited a file in a text editor). A mistake is reported as `dialogue/<name>.dlg:<line>: message`; a file with a mistake is left out and the rest load. The Editor's graph (M9) reads and writes the same files and keeps your `#` notes.
 
 Conditions (`[if ...]`) and effects (`{...}`) are the language of the interaction files: see `docs/guides/interaction-data.md` for every function and effect verb.
 

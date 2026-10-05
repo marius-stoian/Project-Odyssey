@@ -138,6 +138,22 @@ Where the values come from is the `suggest` of the field's entry in `help.json`.
 | `values:a\|b\|c` | a fixed list | `"suggest": "values:elder\|friend"` for the story event's **who** |
 | `none` | nothing: the field works as before | `"suggest": "none"` |
 
+
+## Live data (US-303, M10b)
+
+The game reads its data files again while it runs, **all or nothing**: the new files are read into a copy, and only a clean copy replaces the data in use. A mistake keeps the last good data, lists `file:line: message` in a red panel at the top of the screen and a red toast ("Not reloaded: ..."), and the panel goes when the file is fixed and read again. A clean reload shows a two-second toast ("Reloaded lights"). **F5** reads every set; saving in the Editor (the graph editors, a class or a prefab) reads the set of the file it wrote.
+
+| Set | Files | What follows |
+|---|---|---|
+| `interactions` | `interactions/`, `dialogue/`, `quests/` | the Editor's action lists and the graph editors' catalog |
+| `npc-classes` | `npc-classes/`, `npcs/`, `sim/partner-types.json` | trade profiles, the partner defaults, schedules and the Class panel |
+| `lights` | `light/lights.json` | placed lights and objects that shine, at once; the Light palette |
+| `catalog` | `plants.json`, `objects.json`, `characters.json` | placed plants take the new values of their kind (by name, keeping their ids and states); a new object is on the object page of the palette; the character palette |
+| `help` | `editor/help.json` | tooltips and suggestions |
+
+A placed thing whose kind is gone (a plant or object deleted from the catalog, a light kind that left `lights.json`, a character kind that left `characters.json`) is **skipped by play**, a red **?** stands where it was placed (in the Editor and in play) and a warning names the level entry: `level "The Valley": plant #12 "oak" has no kind in plants.json or objects.json`. Nothing is deleted from the level; the thing comes back by itself when the kind comes back.
+
+These files cannot be swapped while the game runs, because the play state holds them by address or number: `weapons.json`, `animals.json`, `effects.json`, `weather.json`, `tiles.json`, `materials.json`, `buildings/`, `hero/`, `sim/`, `light/sky.json`, `light/celestial-events.json` and `story/`. When you save one, the toast says `<file> applies at the next start`, nothing is half-applied, and F5 leaves them alone. Each set reloads in well under 100 ms (`docs/evidence/US-303/`).
 Catalogs: `npc-classes`, `npc-kinds` (characters and animals), `partner-types`, `interactions`, `interaction-fields` (`gather.delay`, `gather.duration`...), `light-kinds`, `objects`, `plants`, `characters`, `items`, `building-kinds`, `prefabs`, `quests`, `levels` (the files beside the open level), `tags`, `places` (of the open level) and `markers` (`tag:edible`, `npc:ossa`, `place:market`, `object:...` for a quest step's marker). `"list": true` on a field of words (**Tags**, **Allow**, **Deny**, **Does**, **Wants**) makes the list complete one word at a time. Every entry of `help.json` needs a `suggest` (write `none` for a field that offers nothing); an unknown source is a mistake of the file and the test of the coverage names it.
 ## A conversation for a character, own values for a plant (US-173)
 

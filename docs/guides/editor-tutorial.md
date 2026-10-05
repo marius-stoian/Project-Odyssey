@@ -396,7 +396,7 @@ An **interaction** is who may do what to what: "the hero may *wave* at a person"
 
 **Check:** F5 reloads conversations and interaction files. Plants, animals, weapons and characters are read only when the game starts.
 
----
+**Check:** F5 (and a save) reloads conversations, interaction files, NPC classes, lights, plants, objects and characters. Weapons, animals, effects, weather, tiles, buildings and the hero's data apply at the next start; the game tells you so when you save one.
 
 ## 19. Final exercise and clean-up
 
@@ -436,7 +436,7 @@ git status --short assets/
 | Key | Where | Does |
 |---|---|---|
 | F1 / F2 | anywhere | play / edit |
-| F5 | anywhere | reload conversations and interactions |
+| F5 | anywhere | read every data file again (all or nothing) |
 | W A S D, arrows, right-drag | map | move the view |
 | G | map | grid |
 | R | map | turn the selected character or building, or the Build ghost |

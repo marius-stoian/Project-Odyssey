@@ -82,6 +82,15 @@ void EditorHelp::load(const std::filesystem::path& file) {
     if (!problems_.empty()) entries_.clear(); // all or nothing, like every data file: a mistake means no tooltips, not half of them
 }
 
+std::vector<std::string> EditorHelp::reload(const std::filesystem::path& file) {
+    EditorHelp fresh;
+    fresh.load(file);
+    if (!fresh.problems_.empty()) return fresh.problems_; // all or nothing: the entries in use stay
+    entries_ = std::move(fresh.entries_);
+    problems_.clear();
+    return {};
+}
+
 const EditorHelp::Entry* EditorHelp::find(const std::string& id) const {
     const auto found = entries_.find(id);
     return found == entries_.end() ? nullptr : &found->second;

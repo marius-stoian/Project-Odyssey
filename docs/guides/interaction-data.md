@@ -40,7 +40,7 @@ The things of a camp are listed in `assets/data/objects.json`, as plants are in 
 | `inspect` | the line the Inspect item shows |
 | `tags`, `states` | as for plants (see below); with no `tags` an object is tagged just `object`. Unlike plants, objects are never hidden by their states |
 
-Add an entry and restart the game: it is in the palette with its tags. Give it actions by writing interaction files that target its tags. The shipped ones:
+Add an entry and press F5: it is in the palette (the last page of the Plant palette) with its tags, no restart needed. Give it actions by writing interaction files that target its tags. The shipped ones:
 
 | Object | Interactions (files) |
 |---|---|
@@ -139,13 +139,13 @@ A `do` that names anything the game does not have is an error at load (`do names
 
 ## Editing while the game runs: F5
 
-Edit a file, save it, and press **F5** in the game (Game or Editor mode). The game reads the whole folder again:
+Edit a file, save it, and press **F5** in the game (Game or Editor mode); a file you save in the Editor's graph editor is read again at once. The game reads the whole folder:
 
 - No mistakes: the new data is live at once (well under a second), and the log says `Interactions reloaded: 2 from 2 file(s) in 3.1 ms`.
 - Any mistake: nothing changes. The data you had stays in use, and a red panel at the top lists each mistake as `file:line: message` (the first eight; the log has all). Fix the file and press F5 again; the panel closes by itself.
 - If a file has a mistake when the game *starts*, it is left out, the others load, and the same panel shows until you fix it and press F5.
 
-F5 reads the interaction files and the conversations (`assets/data/dialogue/*.dlg`, see `docs/guides/dialogue-format.md`); a mistake in either keeps both as they were. Plants, animals, weapons and characters (the catalogs) are read only at start for now.
+F5 reads the interaction files and the conversations (`assets/data/dialogue/*.dlg`, see `docs/guides/dialogue-format.md`) together, with the quests; a mistake in any keeps all as they were. The catalogs reload too: see "Live data" in `docs/guides/editor.md`.
 
 ## A whole file
 

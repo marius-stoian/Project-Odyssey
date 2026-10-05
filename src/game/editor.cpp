@@ -2099,6 +2099,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
             painter.fill({0, gy - view.y, view.width, 1}, UiColor::Grid);
         }
     }
+    for (const MissingKind& missing : missing_) drawMissingMarker(painter, static_cast<int>(missing.x) - view.x, static_cast<int>(missing.y) - view.y); // a thing whose kind is gone (US-303)
     buildingEditor_->drawWorld(renderer, painter, view, map_, tool_ == EditorTool::Building, hover_);
     for (const PixelPoint& target : level_.targets) {
         renderer.draw(textures_.props, kTargetFrame, screen(target.x - kTargetFrame.width / 2, target.y - kTargetFrame.height));

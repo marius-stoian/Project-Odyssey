@@ -250,6 +250,7 @@ TEST_CASE("US-156 A bad file lists file:line: message and the last good data sta
     odyssey.update(reloadPressed());
     CHECK_FALSE(odyssey.interactionPanelOpen());
     CHECK(odyssey.interactions().find("gather")->rangeMilli == 3000); // now the new data
+    for (int tick = 0; tick < game::OdysseyGame::kToastTicks + 2; ++tick) odyssey.update({}); // the "Reloaded" toast (US-303) is gone again
     renderer.clear();
     odyssey.render(renderer, 0.0);
     CHECK(renderer.draws().size() == quietDraws);

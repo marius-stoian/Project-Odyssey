@@ -241,6 +241,7 @@ odysseus_apply_settings(odysseus_sim)
 add_library(odysseus_game STATIC
     src/game/layer.cpp
     src/game/odyssey_game.cpp
+    src/game/odyssey_reload.cpp
     src/game/placeholder_art.cpp
     src/game/test_map.cpp
     src/game/hero.cpp
@@ -288,6 +289,7 @@ add_library(odysseus_game STATIC
     src/game/npc_people.cpp
     src/game/building_layer.cpp
     src/game/building_editor.cpp
+    src/game/data_reload.cpp
     src/game/editor_help.cpp
     src/game/editor_history.cpp
     src/game/dialogue_graph.cpp
@@ -460,6 +462,7 @@ add_executable(odysseus_game_tests
     tests/game/economy_editor_test.cpp
     tests/game/editor_help_test.cpp
     tests/game/editor_suggest_test.cpp
+    tests/game/data_reload_test.cpp
     tests/game/trade_stock_test.cpp
     tests/game/trade_gate_test.cpp
     tests/game/trade_screen_test.cpp

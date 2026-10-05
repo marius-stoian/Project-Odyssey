@@ -2124,3 +2124,23 @@ sources_.catalog = [this](const std::string& name) { return suggestionNames(name
 **Try it (10 minutes).** Add a catalog `weapons` (the names in `definitions_.weapons`) to `suggestionNames` and `knownCatalog`, give a field `"suggest": "catalog:weapons"` in `help.json`, and see it in the Editor.
 
 **Check yourself.** Why is it safer to look the entry up inside the lambda (when the list opens) than to look it up once when the field is made?
+
+## US-303: a registry of reloadable data, and swapping only when the copy is clean (M10b)
+
+**What we built.** The game can now read its data files again while it runs. Each group of files (the interactions, the NPC classes, the lights, the plant and object catalogs, the help text) is a *data set* registered once; saving a file, or pressing F5, asks the registry to reload the right set. A set that finds a mistake changes nothing and says where the mistake is.
+
+**The idea: build the new thing on the side, then swap it in one move.** Every reload reads the files into a fresh object (`Catalogs catalogs = loadCatalogs(...)`) first. If any file throws, the `catch` reports it and the game's own data was never touched. Only when the whole copy is good does the game do `catalogs_.plants = std::move(catalogs.plants)`, a move: the old vector's memory is handed over, no copy, and the old data is gone. After the swap every raw pointer that pointed into the old vector (`WorldPlant::def`) would dangle, so each is pointed again at the new entry by looking up its kind's *name*; a name is data that survives the swap, an address is not.
+
+```cpp
+try {
+    Catalogs fresh = loadCatalogs(dataDirectory_);   // may throw: nothing has changed yet
+    applyCatalog(std::move(definitions), std::move(fresh));
+} catch (const std::exception& problem) { result.ok = false; result.errors.push_back(problem.what()); }
+for (WorldPlant& plant : plants_) plant.def = catalogs_.plant(plant.kind);   // by name; nullptr when the kind is gone
+```
+
+**Where to look.** `src/game/data_reload.*` (the registry), `reloadCatalog` and `applyCatalog` in `src/game/odyssey_reload.cpp`, the `US-303` cases in `tests/game/data_reload_test.cpp`.
+
+**Try it (10 minutes).** Run the game, open `assets/data/light/lights.json`, change the campfire colour and press F5: the fire changes. Then delete a quote and press F5 again: a red panel names the file and line, and the fire keeps its last good colour.
+
+**Check yourself.** Why is a `std::move` into `catalogs_.plants` safe here, but keeping a `const PlantDef*` from before the move is not?

@@ -94,7 +94,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editorHelp_.setSources(suggestionSources()); // the lists of values read the data in use each time a field opens one (US-302)
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
-    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
+    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reported(reloads_.reload("interactions")); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
         if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
@@ -125,38 +125,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
     catalogs_ = loadCatalogs(dataDirectory); // M2d content (US-130): weapons, plants, animals, effects, weather
-    // Every `light` of the catalogs must name a kind of light of lights.json (US-243).
-    {
-        const auto check = [&](const std::string& light, const std::string& file, const std::string& where) {
-            if (!light.empty() && lighting_.kind(light) == nullptr) {
-                throw sim::DataError(dataDirectory / file, where + ".light", "\"" + light + "\" is not a kind of light in light/lights.json");
-            }
-        };
-        for (const EffectDef& def : catalogs_.effects) check(def.light, "effects.json", "effect \"" + def.name + "\"");
-        for (const WeaponDef& def : catalogs_.weapons) check(def.light, "weapons.json", "weapon \"" + def.name + "\"");
-        for (const PlantDef& def : catalogs_.plants) check(def.light, def.object ? "objects.json" : "plants.json", "object \"" + def.name + "\"");
-    }
-    // The sun and moon (US-248): each names a kind of light of lights.json. A mistake in one of them, or in the eclipse file, does not stop the game:
-    // the bad entry is left out, the level keeps its default pair, and the problem (file and field) is shown as a message.
-    std::vector<std::string> celestialNotes = catalogs_.notes;
-    std::erase_if(catalogs_.plants, [&](const PlantDef& def) {
-        if (!def.celestial || lighting_.kind(def.sky.lightKind) != nullptr) return false;
-        celestialNotes.push_back(sim::DataError(dataDirectory / "objects.json", "object \"" + def.name + "\".celestial.light",
-                                                "\"" + def.sky.lightKind + "\" is not a kind of light in light/lights.json").what());
-        return true;
-    });
-    for (const char* body : {"sun", "moon"}) {
-        const bool has = std::any_of(catalogs_.plants.begin(), catalogs_.plants.end(), [&](const PlantDef& def) { return def.celestial && def.sky.followsClock && def.sky.body == body; });
-        if (has) continue;
-        PlantDef fallback; // the built-in default: a plain sun or moon on the usual orbit
-        fallback.name = body;
-        fallback.frame = body;
-        fallback.object = true;
-        fallback.celestial = true;
-        fallback.tags = {"object", "celestial"};
-        fallback.sky.body = body;
-        catalogs_.plants.push_back(fallback);
-    }
+    checkCatalogLights(catalogs_, lighting_, dataDirectory); // every `light` of the catalogs must name a kind of light of lights.json (US-243)
+    std::vector<std::string> celestialNotes = addCelestialDefaults(catalogs_, lighting_, dataDirectory); // the sun and moon (US-248)
     for (const PlantDef& def : catalogs_.plants) {
         if (def.celestial && def.sky.followsClock) defaultBodies_.push_back(&def);
     }
@@ -219,6 +189,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     populate();
     buildNpcPopulation(); // the placed people are persons from the first frame, not only after a restart (X-M9a)
     if (clanEnabled_) startClan();
+    registerDataSets(); // the files of the game that can be read again while it runs (US-303)
+    findMissingKinds();
 }
 
 void OdysseyGame::resetPlay() {
@@ -921,27 +893,30 @@ bool OdysseyGame::reloadInteractions() {
     return true;
 }
 
-// The mistakes, top of the screen, until the files are fixed and F5 is pressed again.
+// The mistakes of every data set, top of the screen, until the files are fixed (the interaction files and every set of the registry, US-303).
 void OdysseyGame::drawInteractionPanel(luna::engine::Renderer& renderer) const {
-    if (interactionReport_.errors.empty()) return;
+    std::vector<std::string> errors;
+    for (const sim::rules::Diagnostic& d : interactionReport_.errors) errors.push_back(d.text());
+    for (const auto& [set, lines] : reloadErrors_) errors.insert(errors.end(), lines.begin(), lines.end());
+    if (errors.empty()) return;
     constexpr std::size_t kMaxLines = 8;
     const int width = uiWidth() - 20;
     const int maxChars = (width - 8) / luna::engine::kTextAdvance;
-    const std::size_t shown = std::min(kMaxLines, interactionReport_.errors.size());
+    const std::size_t shown = std::min(kMaxLines, errors.size());
     const luna::engine::Rect box{10, 34, width, static_cast<int>(shown + 2) * luna::engine::kLineHeight + 6};
     luna::engine::UiPainter painter(renderer, uiSheet_);
     painter.fill(box, luna::engine::UiColor::Panel);
     painter.outline(box, luna::engine::UiColor::Red);
-    painter.text(box.x + 4, box.y + 4, std::format("Interaction files: {} mistake(s). Fix them, then press F5.", interactionReport_.errors.size()), luna::engine::UiColor::Gold);
+    painter.text(box.x + 4, box.y + 4, std::format("Data files: {} mistake(s). Fix them and save; the last good data stays in use.", errors.size()), luna::engine::UiColor::Gold);
     int y = box.y + 4 + luna::engine::kLineHeight;
     for (std::size_t i = 0; i < shown; ++i) {
-        std::string line = interactionReport_.errors[i].text();
+        std::string line = errors[i];
         if (static_cast<int>(line.size()) > maxChars) line = line.substr(0, static_cast<std::size_t>(maxChars - 3)) + "...";
         painter.text(box.x + 4, y, line, luna::engine::UiColor::Red);
         y += luna::engine::kLineHeight;
     }
-    if (interactionReport_.errors.size() > shown) {
-        painter.text(box.x + 4, y, std::format("...and {} more (see the log)", interactionReport_.errors.size() - shown), luna::engine::UiColor::Dim);
+    if (errors.size() > shown) {
+        painter.text(box.x + 4, y, std::format("...and {} more (see the log)", errors.size() - shown), luna::engine::UiColor::Dim);
     }
 }
 std::set<std::string> OdysseyGame::knownTags() const {
@@ -1946,14 +1921,9 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 }
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
+    if (toastTicks_ > 0) --toastTicks_;
     if (intents.pressed(luna::engine::Intent::Reload)) {
-        reloadInteractions();
-        if (npcClasses_.reload()) {
-            editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
-            refreshTraders();         // and the trade profiles that came with them (US-281)
-            reloadPartnerDefaults();  // and the default actions of the partner types (US-293)
-            refreshLife();            // and the schedules (US-290)
-        }
+        reloadEverything(); // F5 reads every data set again (US-303): the interactions, the NPC classes, the lights, the catalogs, the help
     }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
@@ -2249,6 +2219,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
 }
 
 void OdysseyGame::start(luna::engine::Renderer& renderer) {
+    renderer_ = &renderer; // a reload of the plants and objects makes new pictures with it (US-303)
     // The owner's art when its atlas loads, else the programmer art (US-120).
     std::vector<std::string> groundFrames;
     for (const TileKindDef& kind : definitions_.tiles) {
@@ -2375,6 +2346,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     if (mode_ == Mode::Editor) {
         editor_.render(output, alpha);
         drawInteractionPanel(ui); // F5 works in the Editor too, so its mistakes show there
+        drawToast(ui);
         drawModeLabel(ui);
         return;
     }
@@ -2416,6 +2388,13 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
         }
     }
     drawPlants(renderer, view, alpha, true); // plants whose feet are above the hero's are behind him
+    {
+        luna::engine::UiPainter markers(renderer, uiSheet_); // a thing whose kind the data lost (US-303): a red "?" where it was placed
+        for (const MissingKind& missing : missing_) {
+            const luna::engine::Point at = screen(missing.x, missing.y);
+            drawMissingMarker(markers, at.x, at.y);
+        }
+    }
     buildings_.drawStanding(renderer, view, hero_.feetY(alpha), true);
     drawClan(renderer, view, alpha, true);
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
@@ -2531,6 +2510,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawActionRing(renderer, view);
     drawOverlay(ui);
     drawInteractionPanel(ui);
+    drawToast(ui);
     drawModeLabel(ui);
 }
 
