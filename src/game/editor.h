@@ -72,6 +72,8 @@ public:
     // Call after changing the level from outside the editor (the map shown is rebuilt).
     void levelChanged();
     const luna::engine::Camera& camera() const { return camera_; }
+    // The world point under a pointer (Play here, US-186).
+    std::pair<int, int> worldUnder(const luna::engine::Pointer& pointer) const { return toWorld(pointer.x, pointer.y); }
     double centreX() const { return centreX_; }
     double centreY() const { return centreY_; }
 

@@ -591,6 +591,15 @@ private:
     void drawClanDetails(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawQuestSigns(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawQuestTracker(luna::engine::Renderer& renderer) const;
+    struct DebugButton { luna::engine::Rect rect; std::string label; int action = 0; bool on = false; };
+    struct DebugText { int x = 0; int y = 0; std::string text; luna::engine::UiColor colour = luna::engine::UiColor::Text; };
+    void layoutQuestDebug(std::vector<DebugButton>& buttons, std::vector<DebugText>& texts) const;
+    void updateQuestDebug(const luna::engine::Intents& intents);
+    void runQuestDebugAction(int action);
+    void drawQuestDebug(luna::engine::Renderer& renderer) const;
+    bool playHere_ = false; // the game was started by Play here: Esc goes back to the Editor
+    bool questDebugOpen_ = false;
+    int questDebugSelected_ = 0;
     void drawQuestMarker(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawClanHud(luna::engine::Renderer& renderer) const;
     EffectArt effectArt_;

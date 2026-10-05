@@ -264,6 +264,7 @@ void OdysseyGame::switchMode(Mode mode) {
         return;
     }
     mode_ = mode;
+    if (mode == Mode::Editor) playHere_ = false;
     if (mode == Mode::Editor) {
         const luna::engine::Rect view = camera_.view();
         editor_.enter(view.x + view.width / 2.0, view.y + view.height / 2.0); // looking where the game looked
@@ -1881,6 +1882,14 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         switchMode(Mode::Game);
     }
     if (mode_ == Mode::Editor) {
+        if (intents.pressed(luna::engine::Intent::PlayHere) && intents.pointer().inside()) { // Play here (US-186): the hero starts at the cursor; F2 returns to the Editor, which has not changed
+            const auto [wx, wy] = editor_.worldUnder(intents.pointer());
+            switchMode(Mode::Game);
+            hero_ = Hero(wx, wy);
+            playHere_ = true;
+            camera_.centreOn(hero_.feetX(), hero_.feetY());
+            return;
+        }
         editor_.update(intents); // the world stands still
         return;
     }
@@ -1891,7 +1900,12 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         privacyAsked_ = true;
         if (settings_.statistics == 0) runFlow_.openPrivacy();
     }
-    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::Journal) && life_) runFlow_.openJournal();
+    if (playHere_ && !runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) { // Esc ends a Play here session (US-186)
+        playHere_ = false;
+        switchMode(Mode::Editor);
+        return;
+    }
+    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::Journal)) runFlow_.openJournal();
     if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu) && !buildings_.escape()) runFlow_.openMenu(); // Esc first leaves placing and the Build menu
     // Two pictures, two pointers (US-232): the world is drawn zoomed and the interface scaled, so the pointer is
     // turned into the pixels of each one before anything reads it.
@@ -1899,6 +1913,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     worldIntents.setPointer(luna::engine::scaledPointer(intents.pointer(), settings_.cameraZoom));
     luna::engine::Intents uiIntents = intents;
     uiIntents.setPointer(luna::engine::scaledPointer(intents.pointer(), settings_.uiScale));
+    updateQuestDebug(uiIntents);
     if (runFlow_.modal()) {
         updateAim(worldIntents.pointer(), true, hero_.facing()); // keeps the pointer for drawing
         runFlow_.update(*this, uiIntents);
@@ -2433,6 +2448,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawDevTools(ui, view, alpha);
     drawTutorial(ui);
     drawQuestTracker(ui);
+    drawQuestDebug(ui);
     runFlow_.draw(ui, uiSheet_);
     drawActionRing(renderer, view);
     drawOverlay(ui);

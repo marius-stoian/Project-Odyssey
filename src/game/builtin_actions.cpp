@@ -488,6 +488,15 @@ void addQuestChoices(const OdysseyGame& game, sim::rules::DlgScript& script, con
     }
 }
 
+bool completeQuest(OdysseyGame& game, const std::string& id) {
+    GameEffectHost host(game);
+    const sim::rules::Quest* quest = game.quests().find(id);
+    if (quest == nullptr) return false;
+    if (!game.quests().complete(id, game.actionClock(), &game.actions(), &host, refOf(game, heroSubject(game)))) return false;
+    game.showMessage("Quest complete: " + quest->title);
+    return true;
+}
+
 void tickQuests(OdysseyGame& game) {
     if (game.quests().quests().empty()) return;
     // goto <place>: the hero is within three tiles of a named place of the level (US-181).

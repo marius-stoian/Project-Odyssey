@@ -378,3 +378,21 @@ TEST_CASE("US-182 quest(id) and step(id) answer in conditions, and the quest ver
     CHECK(t.host.log.size() == 2); // the rewards
     CHECK_FALSE(t.book.complete("first-day", t.now, &t.runner, &t.host));
 }
+
+TEST_CASE("US-186 The debugger can start, jump, fail, reset and ask why a condition holds") {
+    Table t(kFirstDay);
+    t.update();
+    REQUIRE(t.book.jumpTo("first-day", "eat", t.now));
+    CHECK(t.book.activeStep("first-day") == "eat");
+    CHECK_FALSE(t.book.jumpTo("first-day", "nowhere", t.now));
+    const rules::Quest& q = *t.book.find("first-day");
+    CHECK(t.book.holds(t.world, q.requires_[0]));         // not quest(first-day) == done
+    t.world.flags["fire-out"] = 1;
+    CHECK(t.book.holds(t.world, q.find("fire")->branches[0].condition));
+    CHECK_FALSE(t.book.holds(t.world, q.fail[0]));        // hero.dead is 0
+    CHECK(t.book.fail("first-day"));
+    CHECK(t.book.reset("first-day"));
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Locked);
+    CHECK(t.book.jumpTo("first-day", "gather", t.now)); // revives it
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Active);
+}

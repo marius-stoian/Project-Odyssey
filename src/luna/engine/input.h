@@ -40,6 +40,8 @@ enum class Intent {
     Build,
     // Journal (US-183): the key J opens the journal of quests, or closes it.
     Journal,
+    // QuestDebug (US-186): F10 opens the quest debugger panel (Debug builds). PlayHere: the key P in the Editor plays from the cursor.
+    QuestDebug, PlayHere,
     Count
 };
 

@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-186):** S-US-186 DONE (Milestone-130.md, AP-131). Next: S-US-184 (quest graph editor: new Editor tab on the NodeGraph widget, writeQuest saves, layout sidecar), then US-187 (validation), US-185 (tutorial and story events), X-M10.
+
 **Resume update (2026-10-05, US-183):** S-US-183 DONE (Milestone-129.md, AP-130). Next: S-US-186 (debugger panel in the Editor on a throwaway copy of the quest book), then US-184, 187, 185, X-M10.
 
 **Resume update (2026-10-05, US-182):** S-US-182 DONE (Milestone-128.md, AP-129). Next: S-US-183 (journal tab, tracker, markers; systems.markers in Game Rules), then US-186, 184, 187, 185, X-M10. Open for Anima: CI-017, CI-018.
