@@ -4,6 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M9 Interaction and dialogue editor: K-M9, US-170 (Mraw) - 2026-10-05
+
+**State:** On `story/US-170`, merged into `qa`. K-M9 answered by the owner (D-56, 24 questions); design in `docs/plans/M9-graph-editor-design.md`.
+
+- **US-170 node-graph widget:** `src/luna/engine/node_graph.h/.cpp` (`NodeGraph` model, `NodeGraphView` canvas: right-drag pan, wheel zoom 25-400% around the cursor, drag, selection box, wire from output to input, delete, frame all, `layoutLayers`); `src/game/graph_commands.h` (`GraphEditCommand`, graph edits in the one Editor History). Tests: `tests/luna/node_graph_test.cpp` (9 cases), `tests/game/graph_command_test.cpp` (1 case). Only `CMakeLists.txt` of the existing code changed (three source lines). Verified: Debug build, zero warnings; the 10 US-170 cases pass alone; full verify at X-M9.
+- **Owner change to the Codex text:** zoom range 25-400% (Codex said 50-200%), D-56 Q7.
+
 ## M8e Building life: US-253, US-254, US-255, US-257 (Mraw) - 2026-10-05
 
 **State:** On `qa`. K-M8e answered by the owner (design in `docs/plans/M8e-building-life-design.md`).
