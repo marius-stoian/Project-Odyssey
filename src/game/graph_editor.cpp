@@ -458,7 +458,7 @@ void GraphEditor::refresh() {
     panelKey_.clear();
 }
 
-bool GraphEditor::typing() const { return shown_ && ((panel_ && panel_->typing()) || (chrome_ && chrome_->typing())); }
+bool GraphEditor::typing() const { return shown_ && ((panel_ && panel_->typing()) || (chrome_ && chrome_->typing()) || (testShown_ && testPanel_ && testPanel_->typing())); }
 
 void GraphEditor::buildChrome() {
     chrome_ = std::make_unique<Panel>(Rect{0, 0, viewWidth_, kBarHeight}); // only the bar is the panel: the file list and the canvas are not under it
@@ -481,6 +481,7 @@ void GraphEditor::buildChrome() {
         button(talk ? "Rules" : "[Rules]", "Interactions (.json): who may do what to what", [this] { if (kind_ != Kind::Interaction) showKind(Kind::Interaction); });
     }
     x += 6;
+    if (kind_ == Kind::Dialogue) button("Test", "Play this conversation with values you choose; nothing is saved", [this] { showTest(!testShown_); });
     if (kind_ == Kind::Dialogue) {
         button("+Node", "A new node: a stop in the conversation", [this] { addCard(dlg_card::kNode); });
         button("+Line", "A line someone says", [this] { addCard(dlg_card::kLine); });
@@ -580,6 +581,127 @@ void GraphEditor::buildPanel() {
     });
 }
 
+// ---- Test-play (US-174)
+
+std::string GraphEditor::nodeOfSelection() const {
+    if (current_ == nullptr || current_->kind != Kind::Dialogue) return {};
+    const int id = selectedCard();
+    if (id == 0) return {};
+    for (const auto& [key, card] : cardKeys(DialogueGraph{*current_->graph, current_->header})) {
+        if (card == id) return key.substr(0, key.find('/')); // "start/choice1" belongs to the node "start"
+    }
+    return {};
+}
+
+bool GraphEditor::startTest(bool fromSelected) {
+    test_.reset();
+    if (current_ == nullptr || current_->kind != Kind::Dialogue) {
+        say_("Test-play: open a conversation first");
+        return false;
+    }
+    sim::rules::TestState state;
+    std::string problem;
+    if (!sim::rules::applyTestState(state, testWords_, problem)) {
+        say_("Test-play: " + problem);
+        testRebuild_ = true;
+        return false;
+    }
+    std::string startNode;
+    if (fromSelected) {
+        startNode = nodeOfSelection();
+        if (startNode.empty()) {
+            say_("Test-play: select a card of the node to play from");
+            return false;
+        }
+    }
+    std::vector<std::string> conversion;
+    const std::optional<sim::rules::DlgScript> script = graphToDialogue(DialogueGraph{*current_->graph, current_->header}, conversion);
+    if (!script) {
+        const auto error = std::find_if(conversion.begin(), conversion.end(), [](const std::string& p) { return p.rfind("error:", 0) == 0; });
+        say_("Test-play: " + (error != conversion.end() ? *error : std::string("the conversation cannot be written yet")));
+        return false;
+    }
+    auto play = std::make_unique<sim::rules::TestPlay>(*script, state, startNode);
+    if (!play->started()) {
+        say_("Test-play: there is no node \"" + startNode + "\"");
+        return false;
+    }
+    test_ = std::move(play);
+    testShown_ = true;
+    testRebuild_ = true;
+    return true;
+}
+
+void GraphEditor::stopTest() {
+    test_.reset();
+    testRebuild_ = true;
+}
+
+void GraphEditor::showTest(bool shown) {
+    testShown_ = shown && kind_ == Kind::Dialogue;
+    if (!testShown_) test_.reset();
+    testRebuild_ = true;
+}
+
+bool GraphEditor::testChoose(int visibleIndex) {
+    if (!test_) return false;
+    const bool chosen = test_->choose(visibleIndex);
+    testRebuild_ = true;
+    return chosen;
+}
+
+void GraphEditor::buildTestPanel() {
+    testRebuild_ = false;
+    testLines_.clear();
+    testLog_.clear();
+    const int width = std::min(440, canvas_.width - 16);
+    const Rect box{canvas_.x + 8, canvas_.y + canvas_.height - 216, width, 208};
+    testPanel_ = std::make_unique<Panel>(box);
+    testPanel_->visible = testShown_;
+    if (!testShown_) return;
+    const int left = box.x + 4;
+    const int inner = box.width - 8;
+    testPanel_->add<TextField>(Rect{left, box.y + 13, inner, kRow - 2}, "state: ", testWords_, 160, [this](const std::string& v) { testWords_ = v; });
+    int x = left;
+    auto button = [&](const std::string& label, const std::string& hint, auto action) {
+        const int w = UiPainter::textWidth(label) + 8;
+        testPanel_->add<Button>(Rect{x, box.y + 29, w, 12}, label, action).hint = hint;
+        x += w + 3;
+    };
+    button("Play", "Start at the beginning with these values", [this] { startTest(false); });
+    button("From here", "Start at the node of the selected card", [this] { startTest(true); });
+    button("Leave", "Walk away from the talk", [this] {
+        if (test_) test_->leave();
+        testRebuild_ = true;
+    });
+    button("Stop", "End the test-play and forget it", [this] { stopTest(); });
+    button("Close", "Hide this card", [this] { showTest(false); });
+    if (!test_) return;
+    // What the NPC says now, wrapped to the card.
+    const std::size_t chars = static_cast<std::size_t>(inner / luna::engine::kTextAdvance);
+    const sim::rules::ConversationView view = test_->view();
+    for (const sim::rules::ConversationLine& line : view.lines) {
+        std::string text = line.speaker + ": " + line.text;
+        while (!text.empty() && testLines_.size() < 4) {
+            testLines_.push_back(text.substr(0, chars));
+            text = text.size() > chars ? text.substr(chars) : std::string();
+        }
+    }
+    int y = box.y + 45 + 4 * luna::engine::kLineHeight + 2;
+    if (test_->finished()) {
+        testLog_.push_back("-- the talk is over --");
+    } else {
+        for (const sim::rules::ConversationChoice& choice : view.choices) {
+            const std::string label = std::to_string(choice.index + 1) + ". " + choice.text + (choice.enabled ? "" : "  (" + choice.reason + ")");
+            Button& b = testPanel_->add<Button>(Rect{left, y, inner, 11}, label.substr(0, chars - 1), [this, index = static_cast<int>(&choice - view.choices.data())] { testChoose(index); });
+            if (!choice.enabled) b.hint = "Greyed out: " + choice.reason;
+            y += 12;
+        }
+    }
+    for (const std::string& line : test_->log()) testLog_.push_back(line);
+    if (testLog_.size() > 6) testLog_.erase(testLog_.begin(), testLog_.end() - 6);
+}
+
 void GraphEditor::update(const luna::engine::Intents& intents) {
     if (!shown_) return;
     if (rebuild_) {
@@ -602,8 +724,10 @@ void GraphEditor::update(const luna::engine::Intents& intents) {
         buildPanel();
     }
     if (current_ != nullptr && (!checked_ || !(*checked_ == *current_->graph))) recheck();
+    if (testRebuild_ || !testPanel_) buildTestPanel();
     const bool onChrome = chrome_->handle(input);
-    const bool onPanel = panel_->handle(input) || problemList_->handle(input);
+    const bool onTest = testShown_ && testPanel_->handle(input);
+    const bool onPanel = panel_->handle(input) || problemList_->handle(input) || onTest;
     if (!onChrome && !onPanel && view_) view_->handle(input);
     if (!typing() && view_ && intents.pressed(Intent::Delete)) view_->deleteSelected();
 }
@@ -617,6 +741,21 @@ void GraphEditor::draw(UiPainter& painter) const {
     problemList_->draw(painter);
     panel_->draw(painter);
     painter.text(panel_->bounds.x + 4, panel_->bounds.y + 3, panelTitle_, UiColor::Gold);
+    if (testShown_ && testPanel_) {
+        testPanel_->draw(painter);
+        const Rect box = testPanel_->bounds;
+        painter.text(box.x + 4, box.y + 3, test_ ? "Test-play: " + test_->nodeId() : std::string("Test-play: type values, then Play"), UiColor::Gold);
+        int y = box.y + 45;
+        for (const std::string& line : testLines_) {
+            painter.text(box.x + 4, y, line, UiColor::Text);
+            y += luna::engine::kLineHeight;
+        }
+        int logY = box.y + box.height - static_cast<int>(testLog_.size()) * luna::engine::kLineHeight - 2;
+        for (const std::string& line : testLog_) {
+            painter.text(box.x + 4, logY, line.substr(0, static_cast<std::size_t>((box.width - 8) / luna::engine::kTextAdvance)), UiColor::Dim);
+            logY += luna::engine::kLineHeight;
+        }
+    }
     const Rect bar{0, viewHeight_ - kStatusHeight, viewWidth_, kStatusHeight};
     painter.fill(bar, UiColor::Shade);
     const bool talk = kind_ == Kind::Dialogue;
@@ -631,6 +770,7 @@ void GraphEditor::draw(UiPainter& painter) const {
 
 void GraphEditor::drawOverlay(UiPainter& painter) const {
     if (!shown_) return;
+    if (testShown_ && testPanel_) testPanel_->drawOverlay(painter);
     chrome_->drawOverlay(painter);
     panel_->drawOverlay(painter);
 }

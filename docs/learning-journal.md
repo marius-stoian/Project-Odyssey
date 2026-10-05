@@ -1991,3 +1991,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Put `gather.delay=5` on one bush and watch it ripen long before its neighbours.
 
 **Check yourself.** Why does the adjuster get asked again when the action ends, and not only when it starts?
+
+## US-174: a world made to be thrown away (M9)
+
+**Idea.** Test-play needs the same questions answered as the real game ("what does she think of the hero?") but must never touch the real game. So it has its own small world that answers the questions from a table of values, and carries out effects on that table. The conversation runner does not know the difference: it asks a `RuleContext`, and either world will do. That is why nothing needs to be saved or undone afterwards.
+
+**Where to look.** `TestWorld::call` (the answers), `TestWorld::apply` (the effects), `TestPlay::TestPlay` (starting at any node).
+
+**Try it.** Type `opinion=25 item.berries=1` and play `elder-fire`: the berry choice appears and the log shows what it did.
+
+**Check yourself.** Why is it safe that test-play uses the graph on screen, even with mistakes in it?

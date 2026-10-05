@@ -369,3 +369,128 @@ TEST_CASE("US-175 Unknown: the interaction graph is checked too") {
     CHECK(target);
     CHECK(rig.editor.pickProblem(0));
 }
+
+namespace {
+
+const char* kTestScript =
+    "=== start\n"
+    "Elder: Hello.\n"
+    "-> Ask for help [if opinion(npc, hero) >= 20] [else Not yet] => help\n"
+    "-> Leave => END\n"
+    "\n"
+    "=== help\n"
+    "Elder: Take this.\n"
+    "-> Thanks {give hero stone 1} => END\n";
+
+} // namespace
+
+TEST_CASE("US-174 Branch: with the opinion set to 25 the choice that needs 20 is offered") {
+    Folder folder;
+    writeFile(folder.path / "help.dlg", kTestScript);
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("help"));
+    rig.editor.setTestWords("");
+    REQUIRE(rig.editor.startTest(false));
+    CHECK_FALSE(rig.editor.testPlay()->view().choices[0].enabled);
+    rig.editor.setTestWords("opinion=25");
+    REQUIRE(rig.editor.startTest(false));
+    CHECK(rig.editor.testPlay()->view().choices[0].enabled);
+    CHECK(rig.editor.testChoose(0));
+    CHECK(rig.editor.testPlay()->nodeId() == "help");
+}
+
+TEST_CASE("US-174 Start anywhere: Play from here starts at the node of the selected card, with edits not yet saved") {
+    Folder folder;
+    writeFile(folder.path / "help.dlg", kTestScript);
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("help"));
+    CHECK_FALSE(rig.editor.startTest(true)); // nothing selected
+    CHECK(rig.said.back().rfind("Test-play: select a card", 0) == 0);
+    const int line = rig.card(dlg_card::kLine, "Elder");
+    REQUIRE(line != 0);
+    // The first Elder line belongs to "start": select the line of "help" instead.
+    int helpLine = 0;
+    for (const auto& c : rig.editor.graph()->nodes()) {
+        if (c.type == dlg_card::kLine && c.fields.size() > 1 && c.fields[1] == "Take this.") helpLine = c.id;
+    }
+    REQUIRE(helpLine != 0);
+    CHECK(rig.editor.setCardField(helpLine, 1, "Take this, friend.")); // not saved
+    rig.editor.view()->select(helpLine);
+    REQUIRE(rig.editor.startTest(true));
+    CHECK(rig.editor.testPlay()->nodeId() == "help");
+    CHECK(rig.editor.testPlay()->view().lines[0].text == "Take this, friend.");
+}
+
+TEST_CASE("US-174 No side effects: a test-play that gives items leaves the file, the undo steps and the saved state as they were") {
+    Folder folder;
+    writeFile(folder.path / "help.dlg", kTestScript);
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("help"));
+    const std::string before = readFile(folder.path / "help.dlg");
+    const std::size_t steps = rig.history.size();
+    rig.editor.setTestWords("opinion=30");
+    REQUIRE(rig.editor.startTest(false));
+    REQUIRE(rig.editor.testChoose(0));
+    REQUIRE(rig.editor.testChoose(0)); // Thanks: gives a stone
+    CHECK(rig.editor.testPlay()->state().items.at("stone") == 1);
+    CHECK(rig.editor.testPlay()->finished());
+    rig.editor.stopTest();
+    CHECK_FALSE(rig.editor.testing());
+    CHECK(readFile(folder.path / "help.dlg") == before);
+    CHECK(rig.history.size() == steps);
+    CHECK_FALSE(rig.editor.dirty());
+    CHECK(rig.savedCalls == 0);
+    CHECK(fs::directory_iterator(folder.path) != fs::directory_iterator()); // the folder holds what it did: the .dlg and the interactions folder
+    int files = 0;
+    for (const auto& entry : fs::directory_iterator(folder.path)) files += entry.is_regular_file() ? 1 : 0;
+    CHECK(files == 2); // elder-fire.dlg and help.dlg: no sidecar, no backup
+}
+
+TEST_CASE("US-174 State: a mistake in the values is said and nothing starts; a conversation that cannot be written is not played") {
+    Folder folder;
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("elder-fire"));
+    rig.editor.setTestWords("opinion=999");
+    CHECK_FALSE(rig.editor.startTest(false));
+    CHECK(rig.said.back().rfind("Test-play: ", 0) == 0);
+    CHECK_FALSE(rig.editor.testing());
+    rig.editor.setTestWords("");
+    const int condition = rig.editor.addCard(dlg_card::kCondition);
+    CHECK(rig.editor.setCardField(condition, 0, "this is not ( an expression"));
+    REQUIRE(rig.editor.graph()->connect(condition, 0, rig.card(dlg_card::kChoice, "Leave"), 1));
+    CHECK_FALSE(rig.editor.startTest(false));
+    CHECK_FALSE(rig.editor.testing());
+}
+
+TEST_CASE("US-174 Draw: the Test-play card shows the lines, the numbered choices and the log") {
+    Folder folder;
+    writeFile(folder.path / "help.dlg", kTestScript);
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("help"));
+    rig.editor.show(true);
+    rig.editor.showTest(true);
+    rig.editor.setTestWords("opinion=25");
+    REQUIRE(rig.editor.startTest(false));
+    luna::engine::ImageRenderer renderer(960, 540);
+    renderer.clear({20, 20, 28, 255});
+    const luna::engine::Texture sheet = renderer.createTexture(luna::engine::makeUiSheet());
+    luna::engine::UiPainter painter(renderer, sheet);
+    painter.setScreen({0, 0, 960, 540});
+    luna::engine::Intents idle;
+    rig.editor.update(idle);
+    rig.editor.draw(painter);
+    rig.editor.drawOverlay(painter);
+    CHECK(luna::engine::savePng(renderer.image(), fs::temp_directory_path() / "odysseus-us174-test-play.png"));
+    // A click on the first choice button of the card chooses it.
+    const luna::engine::Rect canvas = rig.editor.canvasBounds();
+    luna::engine::Intents click;
+    luna::engine::Pointer pointer;
+    pointer.x = canvas.x + 20;
+    pointer.y = canvas.y + canvas.height - 216 + 45 + 4 * luna::engine::kLineHeight + 2 + 4; // the first choice row
+    pointer.pressed[0] = true;
+    pointer.held[0] = true;
+    pointer.released[0] = true; // a Button reacts when the pointer is let go over it
+    click.setPointer(pointer);
+    rig.editor.update(click);
+    CHECK(rig.editor.testPlay()->nodeId() == "help");
+}
