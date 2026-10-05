@@ -5,6 +5,7 @@
 #include "game/dialogue_graph.h"
 #include "game/editor_history.h"
 #include "game/interaction_graph.h"
+#include "game/quest_graph.h"
 #include "sim/graph_check.h"
 #include "sim/test_play.h"
 #include "luna/engine/input.h"
@@ -28,12 +29,12 @@ class GraphEditor {
 public:
     using Record = std::function<void(std::unique_ptr<Command>)>; // remember a command that is already applied
     using Say = std::function<void(const std::string&)>;          // a line for the Editor's status bar
-    enum class Kind { Dialogue, Interaction }; // what the editor shows: conversations (`.dlg`) or interactions (`.json`)
+    enum class Kind { Dialogue, Interaction, Quest }; // what the editor shows: conversations (`.dlg`) or interactions (`.json`)
 
     GraphEditor(int viewWidth, int viewHeight, Record record, Say say);
 
     // The folders the files live in, and what to call after a file was written (the game reads the data again, like F5).
-    void setFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved);
+    void setFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved, std::filesystem::path questFolder = {});
 
     bool shown() const { return shown_; }
     void show(bool shown);
@@ -118,11 +119,13 @@ private:
     void edit(const std::string& name, const std::function<void(luna::engine::NodeGraph&)>& change);
     void onViewEdit(const std::string& name, const luna::engine::NodeGraph& before, const luna::engine::NodeGraph& after);
     std::filesystem::path fileOf(const std::string& name) const; // in the folder of the shown kind
-    static std::string docKey(Kind kind, const std::string& name) { return (kind == Kind::Dialogue ? "d:" : "i:") + name; }
+    static std::string docKey(Kind kind, const std::string& name) { return (kind == Kind::Dialogue ? "d:" : kind == Kind::Interaction ? "i:" : "q:") + name; }
     bool openDialogue(const std::string& name);
     bool openInteraction(const std::string& name);
     bool saveDialogue();
     bool saveInteraction();
+    bool openQuest(const std::string& name);
+    bool saveQuest();
     void bindView();
     std::string errorsNote() const;
     std::string newName_;
@@ -134,6 +137,7 @@ private:
     Say say_;
     std::filesystem::path folder_;            // dialogue
     std::filesystem::path interactionFolder_;
+    std::filesystem::path questFolder_;
     std::function<void()> saved_;
     bool shown_ = false;
     std::string empty_;

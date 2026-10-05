@@ -97,6 +97,7 @@ private:
     const JsonValue& root_;
     std::string name_;
     LoadReport& report_;
+    std::set<std::string> broken_; // steps that failed to read
 
     void error(int line, std::string message) { report_.errors.push_back({name_, line, std::move(message)}); }
 
@@ -218,6 +219,7 @@ private:
                 continue;
             }
             if (auto step = readStep(steps->keys[i], steps->items[i])) out.steps.push_back(std::move(*step));
+            else broken_.insert(steps->keys[i]); // already reported; do not report every step that points at it as well
         }
     }
 
@@ -324,8 +326,8 @@ private:
     }
 
     void checkReferences(const Quest& q) {
-        const auto exists = [&](const std::string& id) { return id == kQuestEnd || q.find(id) != nullptr; };
-        if (!q.start.empty() && q.find(q.start) == nullptr && !q.steps.empty()) {
+        const auto exists = [&](const std::string& id) { return id == kQuestEnd || q.find(id) != nullptr || broken_.count(id) != 0; };
+        if (!q.start.empty() && !exists(q.start) && !q.steps.empty()) {
             const JsonValue* v = root_.find("start");
             error(v != nullptr ? v->line : root_.line, std::format("unknown step \"{}\"", q.start));
         }

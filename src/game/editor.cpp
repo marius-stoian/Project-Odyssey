@@ -105,6 +105,7 @@ void Editor::buildPanels() {
     button("Class", "NPC Classes: create, edit and delete the kinds of people of your world", [this] { showClasses(!classesShown_); });
     button("Talk", "Dialogue: open a conversation as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Dialogue); });
     button("Rules", "Interactions: open who may do what to what as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Interaction); });
+    button("Quests", "Quests: open a quest as a graph of steps, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Quest); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });

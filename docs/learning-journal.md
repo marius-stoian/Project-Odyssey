@@ -2038,3 +2038,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Select a quest that needs a flag, press set, and watch `[no]` become `[yes]` without moving the hero.
 
 **Check yourself.** Why does the layout function build the buttons again for both drawing and clicking?
+
+## US-184: one editor, three kinds of file (M10)
+
+**Idea.** The graph editor already knew conversations and interactions. A quest is a third kind: a small converter turns the file into cards and wires and back, and everything else (the file list, Undo, Save, the list of problems) is reused. The converter ends by running the real loader on what it wrote, so the editor can never save a quest the game would refuse.
+
+**Where to look.** `questToGraph` and `graphToQuest` in `src/game/quest_graph.cpp`; the `Kind::Quest` branches in `graph_editor.cpp`.
+
+**Try it.** Cut the wire out of a step and press Save: the message names the step.
+
+**Check yourself.** Why does a branch card have two outputs while a step has one?
