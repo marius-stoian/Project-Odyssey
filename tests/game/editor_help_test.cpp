@@ -191,7 +191,7 @@ TEST_CASE("US-300 Hover: a field shows purpose, range and example from help.json
         "version": 1,
         "fields": {
             "npc.sword": { "purpose": "Damage of one strike", "example": "wolf 8", "suggest": "number" },
-            "npc.name": { "purpose": "The name shown over the head", "range": "up to 18 letters", "example": "Ossa" } } })");
+            "npc.name": { "purpose": "The name shown over the head", "range": "up to 18 letters", "example": "Ossa", "suggest": "none" } } })");
     game::EditorHelp help;
     help.load(folder / "help.json");
     REQUIRE(help.problems().empty());
@@ -250,6 +250,11 @@ TEST_CASE("US-300 Coverage: every field of the Level, Building, Graph and Story 
         if (!help.asked().contains(id)) unused.push_back(id);
     }
     CHECK_MESSAGE(unused.empty(), "help entries no field uses: " << joined(unused));
+    std::vector<std::string> unwired; // an entry that offers values must have reached its field's list (US-302)
+    for (const auto& [id, entry] : help.entries()) {
+        if (entry.suggest != "none" && !help.wired().contains(id)) unwired.push_back(id);
+    }
+    CHECK_MESSAGE(unwired.empty(), "entries that offer values but no field got them: " << joined(unwired));
     MESSAGE("fields met: " << help.asked().size());
 }
 

@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-302 Suggestions on every field (Mraw) - 2026-10-05
+
+**State:** On `story/US-302`, merged into `qa`. Debug verify: zero warnings, 27 of 27.
+
+- **New:** `EditorHelp::suggestionsFor`, `Sources`, `wired()`; `OdysseyGame::suggestionNames` and `suggestionSources`; `Editor::numberDefault`; `tests/game/editor_suggest_test.cpp`; `docs/plans/US-302.md`; `Milestone-138.md` (AP-139); `docs/evidence/US-302/`.
+- **Changed:** `EditorHelp::apply` wires the lists and remembers typed numbers; `help.json` entries all have `suggest` (the validator requires it; the marker field offers `catalog:markers`); a list of words completes after the last comma or space (`ui.*`); `docs/guides/editor.md`, learning journal, `docs/status.md`, `Limit.md`.
+
 ## US-301 Suggestion list widget (Mraw) - 2026-10-05
 
 **State:** On `story/US-301`, merged into `qa`. Debug verify: zero warnings, 27 of 27.

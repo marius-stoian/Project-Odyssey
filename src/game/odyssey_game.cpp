@@ -91,6 +91,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
+    editorHelp_.setSources(suggestionSources()); // the lists of values read the data in use each time a field opens one (US-302)
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
     editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
@@ -770,6 +771,69 @@ void OdysseyGame::syncEditorActions() {
 }
 
 // What the graph editor's check may name (US-175): the game's items, built-in actions, conversations, interactions and tags.
+// The names a field of the Editor may be given (US-302). Every call reads the data in use now, so a class saved a moment ago is offered at once.
+std::vector<std::string> OdysseyGame::suggestionNames(const std::string& catalog) const {
+    std::set<std::string> names;
+    if (catalog == "npc-classes") {
+        for (const std::string& id : npcClasses_.catalog().ids()) names.insert(id);
+    } else if (catalog == "npc-kinds") {
+        for (const std::string& name : editor_.kindNames()) names.insert(name);
+    } else if (catalog == "partner-types") {
+        for (const std::string& name : editor_.partnerTypes()) names.insert(name);
+    } else if (catalog == "interactions" || catalog == "interaction-fields") {
+        for (const sim::rules::Interaction& interaction : interactions_.all()) {
+            if (catalog == "interactions") {
+                names.insert(interaction.id);
+            } else {
+                names.insert(interaction.id + ".delay");
+                names.insert(interaction.id + ".duration");
+            }
+        }
+    } else if (catalog == "light-kinds") {
+        names.insert(definitions_.lightKinds.begin(), definitions_.lightKinds.end());
+    } else if (catalog == "objects") {
+        names.insert(definitions_.objects.begin(), definitions_.objects.end());
+    } else if (catalog == "plants") {
+        names.insert(definitions_.plants.begin(), definitions_.plants.end());
+    } else if (catalog == "characters") {
+        for (const CharacterKindDef& kind : definitions_.characters) names.insert(kind.name);
+    } else if (catalog == "items") {
+        if (heroData_) {
+            for (const sim::Item& item : heroData_->items) names.insert(item.id);
+        }
+    } else if (catalog == "building-kinds") {
+        names.insert(definitions_.buildingKinds.begin(), definitions_.buildingKinds.end());
+    } else if (catalog == "prefabs") {
+        std::error_code error;
+        for (const auto& file : std::filesystem::directory_iterator(dataDirectory_ / "buildings" / "prefabs", error)) {
+            if (file.is_regular_file() && file.path().extension() == ".json") names.insert(file.path().stem().string());
+        }
+    } else if (catalog == "quests") {
+        for (const sim::rules::Quest& quest : quests_.quests()) names.insert(quest.id);
+    } else if (catalog == "levels") {
+        for (const std::filesystem::path& file : editor_.levelFiles()) names.insert(file.stem().string());
+    } else if (catalog == "tags") {
+        const std::set<std::string> tags = knownTags();
+        names.insert(tags.begin(), tags.end());
+    } else if (catalog == "places") {
+        for (const PlacedPlace& place : level_.places) names.insert(place.name);
+    } else if (catalog == "markers") { // what a quest step's marker may point to
+        for (const std::string& tag : knownTags()) names.insert("tag:" + tag);
+        for (const PlacedCharacter& placed : level_.characters) names.insert("npc:" + questWord(placed.name));
+        for (const PlacedPlace& place : level_.places) names.insert("place:" + place.name);
+        for (const std::string& object : definitions_.objects) names.insert("object:" + object);
+    }
+    return {names.begin(), names.end()};
+}
+
+EditorHelp::Sources OdysseyGame::suggestionSources() const {
+    EditorHelp::Sources sources;
+    sources.dataFolder = dataDirectory_;
+    sources.catalog = [this](const std::string& catalog) { return suggestionNames(catalog); };
+    sources.numberDefault = [this](const std::string& fieldId) { return editor_.numberDefault(fieldId); };
+    return sources;
+}
+
 void OdysseyGame::syncGraphCatalog() {
     sim::rules::GraphCatalog catalog;
     if (heroData_) {

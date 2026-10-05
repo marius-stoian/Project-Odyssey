@@ -2107,3 +2107,20 @@ if (list_.handle(input, accepted)) {                 // true: the list used this
 **Try it (10 minutes).** In `SuggestList::handle` change `input.confirm && navigated_` to `input.confirm` and run the Luna tests: which case fails, and why is that Enter rule needed?
 
 **Check yourself.** Why does the field ask the list before it reads the typed text?
+
+## US-302: strategy functions as data sources (M10b)
+
+**What we built.** Every field that has a list of values now fills it from the right place: the files of a folder, a catalog of names (classes, interactions, items...), a fixed list, or for a number the kind's default, the limits and the last five you typed.
+
+**The idea: pass a function instead of the data.** `EditorHelp` has to offer the names of the NPC classes, but it must not know what an NPC class is: it belongs to the game. So the game hands it small functions (`std::function`), and the help object just calls them when a list opens. That is called the *strategy* pattern: the same call, `sources_.catalog("npc-classes")`, does different work depending on which function was plugged in, and a test plugs in its own. Because the function runs each time the list opens, a class you saved a moment ago is offered at once. The lambda that is stored in a field captures a pointer to the help object (`[this, id]`); it is safe because the field is owned by a panel that never outlives the help.
+
+```cpp
+number->suggest = [this, id, number](const std::string&) { return suggestionsFor(id, number->minimum, number->maximum); };
+sources_.catalog = [this](const std::string& name) { return suggestionNames(name); };   // set by the game
+```
+
+**Where to look.** `suggestionsFor` and `apply` in `src/game/editor_help.cpp`, `OdysseyGame::suggestionNames` in `src/game/odyssey_game.cpp`, `tests/game/editor_suggest_test.cpp`.
+
+**Try it (10 minutes).** Add a catalog `weapons` (the names in `definitions_.weapons`) to `suggestionNames` and `knownCatalog`, give a field `"suggest": "catalog:weapons"` in `help.json`, and see it in the Editor.
+
+**Check yourself.** Why is it safer to look the entry up inside the lambda (when the list opens) than to look it up once when the field is made?

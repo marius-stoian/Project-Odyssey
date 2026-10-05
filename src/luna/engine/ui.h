@@ -237,7 +237,7 @@ public:
     // The values to offer while the field has focus (US-301): given the text typed so far (with listItems, the item after the last comma).
     // Empty: no list.
     std::function<std::vector<std::string>(const std::string& typed)> suggest;
-    bool listItems = false; // a comma separated list: the suggestion completes the item after the last comma and keeps the ones before it
+    bool listItems = false; // a list of words (separated by commas or spaces): the suggestion completes the word after the last separator and keeps what is before it
 
     bool focused() const { return focused_; }
     bool typing() const override { return focused_; }

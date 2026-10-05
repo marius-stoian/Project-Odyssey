@@ -119,10 +119,26 @@ The words live in `assets/data/editor/help.json`, one entry per field. The id of
   } }
 ```
 
-`purpose` and `example` are required; `range` is optional (a number field's range is made from its own minimum and maximum). `suggest` says where the field's list of values comes from (the suggestion list arrives with US-301 and US-302). You may write `//` comments. Edit the file in a text editor; the Editor reads it when the game starts.
+`purpose`, `example` and `suggest` are required; `range` is optional (a number field's range is made from its own minimum and maximum). `suggest` says where the field's list of values comes from (see Suggestions below). You may write `//` comments. Edit the file in a text editor; the Editor reads it when the game starts.
 
 If the file is missing or has a mistake, the Editor still opens, fields show no tooltip and the status line names the file and line (`help.json:4: ...`). A test checks that every field of the four editors has an entry and every entry has a field, so a new field without a line in `help.json` fails the build by name.
 
+
+### Suggestions (US-301, US-302)
+
+Click into a field that offers values and a list opens under it (above it near the bottom of the screen) with every value; type and it narrows to the values that start with what you typed, then the ones that contain it, in any letter case. **Up** and **Down** move the highlight, **Tab** takes the highlighted row, **Enter** takes it only after you moved the highlight (otherwise Enter keeps what you typed, as always), **Esc** closes the list and keeps your text, and a click on a row takes it. A list of words (commas or spaces) completes the word after the last separator and keeps the ones before it.
+
+Where the values come from is the `suggest` of the field's entry in `help.json`. The list reads the data in use each time it opens, so a class or a file you saved a moment ago is offered at once.
+
+| `suggest` | Offers | Example entry |
+|---|---|---|
+| `number` | the default of the character or class being edited (HP and Sword of the selected character: its kind's), the smallest, the largest, then the last five numbers you typed in that field this session | `"suggest": "number"` |
+| `files:<folder>/<glob>` | the file names in a folder of `assets/data` that match `*`, `*.ext` or a whole name | `"suggest": "files:dialogue/*.dlg"` gives `elder-fire.dlg` for **Script** |
+| `catalog:<name>` | the names of a catalog, listed below | `"suggest": "catalog:interactions", "list": true` for **Does** |
+| `values:a\|b\|c` | a fixed list | `"suggest": "values:elder\|friend"` for the story event's **who** |
+| `none` | nothing: the field works as before | `"suggest": "none"` |
+
+Catalogs: `npc-classes`, `npc-kinds` (characters and animals), `partner-types`, `interactions`, `interaction-fields` (`gather.delay`, `gather.duration`...), `light-kinds`, `objects`, `plants`, `characters`, `items`, `building-kinds`, `prefabs`, `quests`, `levels` (the files beside the open level), `tags`, `places` (of the open level) and `markers` (`tag:edible`, `npc:ossa`, `place:market`, `object:...` for a quest step's marker). `"list": true` on a field of words (**Tags**, **Allow**, **Deny**, **Does**, **Wants**) makes the list complete one word at a time. Every entry of `help.json` needs a `suggest` (write `none` for a field that offers nothing); an unknown source is a mistake of the file and the test of the coverage names it.
 ## A conversation for a character, own values for a plant (US-173)
 
 **Conversation.** Select a placed NPC: in its NPC panel the row *Talks with* names a partner type and the *Script* field the `.dlg` file used with that partner (type a name like `elder-fire.dlg`, or press **Pick** to go to the next conversation of the dialogue folder). **Graph** opens that conversation in the graph editor. Talking to the character in the game starts it. The pick is saved in the level (`dialogues`) as before; only a difference from its classes and kind is kept.

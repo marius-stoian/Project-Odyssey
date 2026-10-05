@@ -156,6 +156,10 @@ public:
     std::vector<sim::rules::Offer> offersFor(const Subject& subject) const;
     void setPlantState(std::size_t index, const std::string& state); // "picked", "ripe"...
     std::set<std::string> knownTags() const; // every tag a catalog or character kind carries
+    // The names of a catalog, read now, for the suggestion lists of the Editor fields (US-302): npc-classes, npc-kinds, partner-types, interactions,
+    // interaction-fields, light-kinds, objects, plants, characters, items, building-kinds, prefabs, quests, levels, tags, places, markers.
+    std::vector<std::string> suggestionNames(const std::string& catalog) const;
+    EditorHelp::Sources suggestionSources() const;
     // F5 (US-156): reads the interaction files again. With no mistakes the new data replaces the old and the panel closes; with mistakes the
     // last good data stays in use and the panel lists "file:line: message". Returns true when the new data was taken.
     bool reloadInteractions();

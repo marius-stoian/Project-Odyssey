@@ -1527,6 +1527,18 @@ void Editor::setHelp(EditorHelp* help) {
     if (help_ != nullptr && !help_->problem().empty()) say(help_->problem());
 }
 
+std::optional<int> Editor::numberDefault(const std::string& fieldId) const {
+    if (fieldId != "npc.hp" && fieldId != "npc.sword") return std::nullopt;
+    if (!selected_) return std::nullopt;
+    for (const PlacedCharacter& placed : level_.characters) {
+        if (placed.id != *selected_) continue;
+        const CharacterKindDef* kind = definitions_.character(placed.kind);
+        if (kind == nullptr) return std::nullopt;
+        return fieldId == "npc.hp" ? kind->hp : kind->swordDamage;
+    }
+    return std::nullopt;
+}
+
 void Editor::applyHelp() {
     if (help_ == nullptr) return;
     const auto give = [this](const std::unique_ptr<luna::engine::Panel>& panel, const char* prefix) {

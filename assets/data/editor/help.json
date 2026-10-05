@@ -79,7 +79,7 @@
     "graph.step.hint-in": {"purpose":"How long without progress before the hint shows","range":"a number with s or m","example":"2m","suggest":"none"},
     "graph.step.hint": {"purpose":"The hint shown when the goal has not moved for that long","range":"words","example":"Berry bushes grow by the stream.","suggest":"none"},
     "graph.step.id": {"purpose":"The id of this step; wires and branches name it","range":"one word","example":"eat","suggest":"none"},
-    "graph.step.marker": {"purpose":"Where the map marker points","range":"tag:<tag>, object:<id>, npc:<id> or place:<name>","example":"tag:edible","suggest":"none"},
+    "graph.step.marker": {"purpose":"Where the map marker points","range":"tag:<tag>, object:<id>, npc:<id> or place:<name>","example":"tag:edible","suggest":"catalog:markers"},
     "graph.step.text": {"purpose":"What the tracker and journal show for this step","range":"words","example":"Gather berries for the clan.","suggest":"none"},
     "graph.target.kinds": {"purpose":"Kinds the target may be; with tags too, either match counts","range":"words separated by spaces","example":"deer","suggest":"catalog:characters","list":true},
     "graph.target.tags": {"purpose":"What the action can be done to: the thing must carry every tag","range":"words separated by spaces","example":"edible plant","suggest":"catalog:tags","list":true},

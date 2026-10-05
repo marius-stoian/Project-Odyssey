@@ -159,6 +159,8 @@ public:
     void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
     // The help of the fields (US-300): every panel of the four editors gets its tooltips once a tick. A broken help file is named in the status line.
     void setHelp(EditorHelp* help);
+    // The default a number field of the selected character offers (US-302): its kind's hit points and sword damage. Nothing for any other field.
+    std::optional<int> numberDefault(const std::string& fieldId) const;
     void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
     bool classesShown() const { return classesShown_; }
     void showClasses(bool shown);

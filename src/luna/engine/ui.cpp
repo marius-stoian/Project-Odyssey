@@ -432,7 +432,7 @@ Rect TextField::box() const {
 
 std::string TextField::typedItem() const {
     if (!listItems) return editing_;
-    const std::size_t comma = editing_.rfind(',');
+    const std::size_t comma = editing_.find_last_of(", ");
     std::string item = comma == std::string::npos ? editing_ : editing_.substr(comma + 1);
     item.erase(0, item.find_first_not_of(' '));
     return item;
@@ -455,10 +455,9 @@ bool TextField::handle(const UiInput& input) {
         std::optional<std::string> accepted;
         if (list_.handle(input, accepted)) {
             if (accepted) {
-                if (listItems) { // keeps the items before the last comma, and writes the chosen one after them
-                    const std::size_t comma = editing_.rfind(',');
-                    const std::string kept = comma == std::string::npos ? std::string() : editing_.substr(0, comma + 1) + " ";
-                    editing_ = kept + *accepted;
+                if (listItems) { // keeps everything up to the last comma or space, and writes the chosen item after it
+                    const std::size_t separator = editing_.find_last_of(", ");
+                    editing_ = (separator == std::string::npos ? std::string() : editing_.substr(0, separator + 1)) + *accepted;
                 } else {
                     editing_ = *accepted;
                 }
