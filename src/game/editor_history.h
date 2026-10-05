@@ -127,6 +127,23 @@ private:
     int nextIdAfter_;
 };
 
+// Buildings placed, turned, changed or removed (US-256): the whole list before and after.
+class BuildingsCommand final : public Command {
+public:
+    BuildingsCommand(std::string what, std::vector<PlacedBuildingSpec> before, std::vector<PlacedBuildingSpec> after, int nextIdBefore, int nextIdAfter)
+        : what_(std::move(what)), before_(std::move(before)), after_(std::move(after)), nextIdBefore_(nextIdBefore), nextIdAfter_(nextIdAfter) {}
+    void apply(Level& level) const override;
+    void undo(Level& level) const override;
+    std::string name() const override { return what_; }
+
+private:
+    std::string what_;
+    std::vector<PlacedBuildingSpec> before_;
+    std::vector<PlacedBuildingSpec> after_;
+    int nextIdBefore_;
+    int nextIdAfter_;
+};
+
 // A whole-level change: a resize, a new name, another default ground, a moved hero start. It
 // keeps the level before and after (a resize changes everything, and is rare).
 class LevelCommand final : public Command {

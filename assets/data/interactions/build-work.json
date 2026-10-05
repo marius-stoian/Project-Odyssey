@@ -1,0 +1,17 @@
+// Work on a blueprint whose materials are here (US-251): four seconds of work each time, until its build time is done.
+{
+  "id": "build-work",
+  "label": "Build {target.name}",
+  "note": "Reach 2.5 m. Moving or attacking before the ring is full stops the job and gives nothing. Four seconds of work each time (do build-work 4).",
+  "actors": ["hero"],
+  "target": { "tags": ["building", "construction"] },
+  "range": 2.5,
+  "duration": 4,
+  "order": 20,
+  "requires": [
+    { "if": "target.state == ready", "else": "Bring the materials first" }
+  ],
+  "effects": [
+    "do build-work 4"
+  ]
+}

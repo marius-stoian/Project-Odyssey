@@ -4,6 +4,17 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M8d Buildings: US-250, US-251, US-252, US-256 (Mraw) - 2026-10-05
+
+**State:** On `qa`. K-M8d answered by the owner (D-55); tests are written per story and run once at X-M8d (owner, 2026-10-05). X-M8d: verify ran, two shards failed (level version, three actions without a file), fixed; see docs/gates/M8d.md.
+
+- **US-250 data:** `assets/data/buildings/pieces.json`, `kinds.json` and `prefabs/<id>.json` (twelve pieces, five kinds: hut, windbreak, storage pit, drying rack, palisade); the loader `src/sim/building_data.h/.cpp` reads them with `file:line: field` mistakes and leaves a bad file out; level version 6 gets a `buildings` list of its own (not the plant list, CI-008); the guide `docs/guides/building-data.md`.
+- **US-251 blueprints:** `src/sim/building_store.h/.cpp` (placing with a validity check, delivering materials, work in stages limited by what was delivered, cancelling with a drop of the delivered materials, a hash, a save) and the Game layer `src/game/building_layer.h/.cpp`: the Build menu (key **B**, a side list), the ghost on a 1 m grid with **R** to turn it, red where it cannot stand, a see-through blueprint with a bar, placeholder art made from the data, the walls as walking obstacles, `buildings.json` in the autosave. New intent `Build` (key B). Subject kind `Building` for the right-click menu; interactions `deliver-materials`, `build-work`, `cancel-blueprint`; built-in actions of the same names and `learn-blueprint`.
+- **US-252 pieces and rooms:** a piece is a one-piece building (`piece:<id>`); walls, posts and fences block walking, doors and windows do not; a room is found by a flood fill over the walls, doors and windows (enclosed, fully roofed, with a door); the roof fades over the room the hero is in.
+- **US-256 Editor:** the **Build** tool (kinds and prefabs, R turns, click places finished), the panel of a selected building (turn, interior mode and level, owner, blueprint or finished, delete) and the **Prefab** tab (piece list, grid, size, interior, uses, cost, build time, Save); `src/game/building_editor.h/.cpp`; a saved prefab joins the data and the Build menu at once. Undo steps through `BuildingsCommand`.
+- Tests: `tests/sim/building_data_test.cpp`, `building_store_test.cpp`, `tests/game/building_game_test.cpp`, `building_editor_test.cpp`.
+- Owner-only: GPU screenshots of the Build menu, a blueprint and a built hut (`docs/plans/US-250.md` .. `US-256.md`).
+
 ## X-M9bc: exit of M9b and M9c (Mraw) - 2026-10-05
 
 - One full verify, Debug and Release, zero warnings, 27 of 27 each. Fixes: loaders of trade, schedule and events files, director default actions, `hunt` built-in name, place tags, empty class default, need-based environment scores, trade title, Editor Trade panel below the NPC panel.

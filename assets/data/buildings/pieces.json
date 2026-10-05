@@ -1,0 +1,26 @@
+// The pieces buildings are made of (US-250, docs/guides/building-data.md). A cell holds at most one piece of each layer:
+// a floor under, a wall (wall, door, window, post, fence) standing, a roof over. Times are in seconds, heights in metres.
+// "materials" says how a material burns: flammability is the percent chance each second that a burning neighbour sets it alight (US-255).
+{
+  "materials": {
+    "wood":  { "flammability": 60, "burnSeconds": 30 },
+    "straw": { "flammability": 90, "burnSeconds": 12 },
+    "hide":  { "flammability": 40, "burnSeconds": 20 },
+    "mud":   { "flammability": 5,  "burnSeconds": 0 }
+  },
+  "maxRoomCells": 64,
+  "pieces": [
+    { "id": "floor-straw",  "label": "Straw floor",   "type": "floor",  "material": "straw", "hp": 30,  "buildSeconds": 1, "cost": { "herbs": 1 }, "colour": "#b9a35a", "height": 0 },
+    { "id": "floor-planks", "label": "Plank floor",   "type": "floor",  "material": "wood",  "hp": 60,  "buildSeconds": 2, "cost": { "wood": 1 },  "colour": "#9a7b4f", "height": 0 },
+    { "id": "wall-wood",    "label": "Wooden wall",   "type": "wall",   "material": "wood",  "hp": 100, "buildSeconds": 3, "cost": { "wood": 2 },  "colour": "#7a5a34", "height": 2 },
+    { "id": "wall-mud",     "label": "Mud wall",      "type": "wall",   "material": "mud",   "hp": 140, "buildSeconds": 4, "cost": { "herbs": 1, "flint": 1 }, "colour": "#8a7a62", "height": 2 },
+    { "id": "wall-hide",    "label": "Hide screen",   "type": "wall",   "material": "hide",  "hp": 40,  "buildSeconds": 2, "cost": { "fur": 1 },   "colour": "#a0805a", "height": 1.5 },
+    { "id": "door-wood",    "label": "Wooden door",   "type": "door",   "material": "wood",  "hp": 60,  "buildSeconds": 2, "cost": { "wood": 1 },  "colour": "#5e4426", "height": 2 },
+    { "id": "door-hide",    "label": "Hide flap",     "type": "door",   "material": "hide",  "hp": 30,  "buildSeconds": 1, "cost": { "fur": 1 },   "colour": "#8e6f4b", "height": 2 },
+    { "id": "window-wood",  "label": "Window",        "type": "window", "material": "wood",  "hp": 40,  "buildSeconds": 2, "cost": { "wood": 1 },  "colour": "#6b4e2c", "height": 2 },
+    { "id": "post-wood",    "label": "Post",          "type": "post",   "material": "wood",  "hp": 80,  "buildSeconds": 2, "cost": { "wood": 1 },  "colour": "#6b4e2c", "height": 2 },
+    { "id": "fence-wood",   "label": "Palisade stake","type": "fence",  "material": "wood",  "hp": 70,  "buildSeconds": 2, "cost": { "wood": 1 },  "colour": "#7f6038", "height": 1.8 },
+    { "id": "roof-thatch",  "label": "Thatch roof",   "type": "roof",   "material": "straw", "hp": 50, "buildSeconds": 2, "cost": { "herbs": 1 }, "colour": "#c9b25c", "height": 0 },
+    { "id": "roof-hide",    "label": "Hide roof",     "type": "roof",   "material": "hide",  "hp": 40,  "buildSeconds": 2, "cost": { "fur": 1 },   "colour": "#a98a62", "height": 0 }
+  ]
+}

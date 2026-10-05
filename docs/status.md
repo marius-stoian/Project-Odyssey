@@ -170,12 +170,12 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-293 | US-293 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-294 | US-294 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | X-M9c | - | M9c | Done | Verified Debug+Release 27/27 (soak skipped by owner); gate docs/gates/M9c.md |
-| K-M8d | - | M8d | To do |  |
-| S-US-250 | US-250 | M8d | To do |  |
-| S-US-251 | US-251 | M8d | To do |  |
-| S-US-252 | US-252 | M8d | To do |  |
-| S-US-256 | US-256 | M8d | To do |  |
-| X-M8d | - | M8d | To do |  |
+| K-M8d | - | M8d | Done | Owner answers 2026-10-05 (D-55), docs/plans/M8d-buildings-design.md |
+| S-US-250 | US-250 | M8d | Done | Tests deferred to X-M8d (owner, 2026-10-05); its cases ran alone and pass |
+| S-US-251 | US-251 | M8d | Done | Tests deferred to X-M8d (owner, 2026-10-05); its cases ran alone and pass |
+| S-US-252 | US-252 | M8d | Done | Tests deferred to X-M8d (owner, 2026-10-05); its cases ran alone and pass |
+| S-US-256 | US-256 | M8d | Done | Tests deferred to X-M8d (owner, 2026-10-05); its cases ran alone and pass |
+| X-M8d | - | M8d | Done | docs/gates/M8d.md; two shards failed at first, fixed, failing cases rerun |
 | K-M8e | - | M8e | To do |  |
 | S-US-253 | US-253 | M8e | To do |  |
 | S-US-254 | US-254 | M8e | To do |  |

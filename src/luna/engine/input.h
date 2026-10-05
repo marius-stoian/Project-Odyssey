@@ -36,6 +36,8 @@ enum class Intent {
     // Confront (US-266, D-53): the key C offers the Confront actions for the NPC under the pointer or the nearest one.
     // Actions (US-267, D-53): the key X opens the Actions pop-up of an NPC: everything it could offer and what each needs.
     Confront, Actions,
+    // Build (US-251, D-55): the key B opens the Build menu: a list of the blueprints and pieces the hero knows.
+    Build,
     Count
 };
 

@@ -1827,3 +1827,77 @@ Two details worth learning. First, a second test runs with *another seed* and ex
 **Try it (15 minutes).** In `npc_soak_test.cpp` change `run(100000, 30, 7)` to `run(100000, 3, 7)` and see how much faster it is; then add a `rand()` call somewhere in the director on a scratch copy and watch the two hashes differ.
 
 **Check yourself.** Why does the soak call `director.takeEvents()` now and then, and what would the real game do with them?
+
+## US-250 Buildings as data: pieces, kinds and a store of their own
+
+**What we built.** A hut is not code: it is a list of pieces (walls, a door, a roof) laid on a grid in `kinds.json`. The game reads the files, checks every field and says `file:line: message` when something is wrong.
+
+**The C++ idea: a lookup table of plain structs.** `PieceDef` and `KindDef` hold only data. The kinds refer to pieces by *name*, never by pointer, and the loader checks every name when it reads the file:
+
+```cpp
+const PieceDef* def = data.piece(lp.piece);          // nullptr when the name is unknown
+if (def == nullptr) p.error(line, "no piece named ...");
+```
+
+Names in files, pointers only while the program runs: that is why a typo is found in seconds instead of crashing a game. Buildings live in a list of their own in the level (not among the plants), because a building has pieces, a state and an owner that a plant does not.
+
+**Where to look.** `src/sim/building_data.cpp`, `tests/sim/building_data_test.cpp`, `docs/guides/building-data.md`.
+
+**Try it (15 minutes).** Add a piece `wall-test` to `pieces.json` and a kind that uses it; then misspell the piece name in the kind and read the message.
+
+**Check yourself.** Why does a kind's layout store offsets from the footprint's corner instead of absolute cells?
+
+## US-251 Placing on a grid, and a ghost that says no
+
+**What we built.** The Build menu, the ghost under the pointer (green or red), blueprints that wait for materials and work, and cancelling that drops what was delivered.
+
+**The C++ idea: validity as a function, not a flag.** The question "may this stand here?" is one function that returns the *reason* (an empty string means yes):
+
+```cpp
+std::string whyNot(const std::string& kind, int x, int y, int turns, const Blocked& blocked) const;
+```
+
+The menu, the click, the tests and the Editor all call it, so there is one rule. The `Blocked` callback is a `std::function`: the store does not know about trees or water, the game tells it. Turning a layout is arithmetic on the offsets, `(height - 1 - y, x)` for one quarter turn; four turns bring every cell back.
+
+**Where to look.** `BuildingStore::whyNot`, `turnedOffset` in `building_data.cpp`, `BuildingLayer::updatePointer`.
+
+**Try it (15 minutes).** Print `turnedOffset(0, 0, 3, 2, t)` for t = 0..3 on paper first, then run it.
+
+**Check yourself.** Why must work on a site be limited by the share of materials delivered?
+
+## US-252 Finding rooms with a flood fill
+
+**What we built.** Walls, doors, windows and roofs placed piece by piece, and a room found by the game: enclosed, roofed and with a door.
+
+**The C++ idea: flood fill.** Start in a cell, spread to its four neighbours until a wall stops you. If you reach the edge of the map or fill more than the room limit, the space is open; otherwise it is enclosed:
+
+```cpp
+while (!frontier.empty() && !open) { /* take a cell, add its free neighbours */ }
+```
+
+Two details: a *stamp* array marks which fill visited a cell (so a failed fill never poisons the next one), and the rooms are found again only when `version()` changes, not every tick.
+
+**Where to look.** `BuildingStore::findRooms`, `tests/sim/building_store_test.cpp`.
+
+**Try it (15 minutes).** Build a ring of walls with a one-cell gap and watch the room disappear; close the gap and watch it come back.
+
+**Check yourself.** Why does a post not close a room, while a fence does?
+
+## US-256 Saving a group of parts as one reusable asset
+
+**What we built.** The Editor's Prefab tab: draw a building from pieces on a grid, set its materials, time and interior mode, and save it as a file; the Build tool places it whole and the game offers it as a blueprint.
+
+**The C++ idea: a draft you edit, and a round trip you can trust.** The tab edits a *draft* (`KindDef`); **Save** turns the draft into text, reads that text back through the same checks as every other file, and only then writes it:
+
+```cpp
+const auto parsed = data()->parseKind(toJson(out), name, report, true, out.id);
+if (!parsed) return refuse(report.errors.front().text());
+```
+
+If the text cannot be read back, it is never written, so the Editor can never create a file the game refuses. The test compares the kind read from disk with the one in memory (`CHECK(*again.kind("x") == *lodge)`), which works because the struct has a defaulted `operator==`.
+
+**Where to look.** `BuildingEditor::savePrefab`, `tests/game/building_editor_test.cpp`.
+
+**Try it (15 minutes).** Compose a prefab, save it, open the file in a text editor, break a field, and start the game to read the message.
+
+**Check yourself.** Why is a kind of `kinds.json` saved under a new id when you open it in the Prefab tab?

@@ -37,6 +37,7 @@ const char* toolName(EditorTool tool) {
     case EditorTool::Plant: return "Plant";
     case EditorTool::Effect: return "Effect";
     case EditorTool::Light: return "Light";
+    case EditorTool::Building: return "Build";
     }
     return "?";
 }
@@ -63,11 +64,13 @@ constexpr int kPropertiesWidth = 136;
 Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::path levelFile, int viewWidth, int viewHeight)
     : level_(level), definitions_(definitions), levelFile_(std::move(levelFile)), viewWidth_(viewWidth), viewHeight_(viewHeight),
       map_(buildTileMap(level, definitions)), camera_(viewWidth, viewHeight, map_.pixelWidth(), map_.pixelHeight()) {
+    buildingEditor_ = std::make_unique<BuildingEditor>(level_, viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { run(std::move(command)); }, [this](const std::string& message) { say(message); });
     buildPanels();
 }
 
 void Editor::setTextures(const EditorTextures& textures) {
     textures_ = textures;
+    buildingEditor_->setLayer(textures.buildings);
     markerTextures_.clear(); // the pictures belong to the renderer that made them
     buildPanels(); // the palette's buttons show pieces of the tile texture
 }
@@ -92,6 +95,8 @@ void Editor::buildPanels() {
     button("Plant", "Place a plant: choose one (pages with the arrows), click the map", [this] { tool_ = EditorTool::Plant; });
     button("Fx", "Place a looping effect (fireflies, campfire, portal): choose one, click the map", [this] { tool_ = EditorTool::Effect; });
     button("Light", "Place a light (campfire, torch): choose a kind, click the map; it shines in the game after dark", [this] { tool_ = EditorTool::Light; });
+    button("Build", "Place a building (or a blueprint): choose a kind or prefab, R turns it, click the map", [this] { tool_ = EditorTool::Building; });
+    button("Prefab", "Compose a building from pieces on a grid and save it as a prefab", [this] { buildingEditor_->showPrefabs(!buildingEditor_->prefabsShown()); });
     button("Select", "Select a character, pickup, plant, effect or light: drag to move, R to turn, Delete to remove", [this] { tool_ = EditorTool::Select; });
     x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
@@ -1520,7 +1525,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
                       (b->label == "Fill" && tool_ == EditorTool::Fill) || (b->label == "Erase" && tool_ == EditorTool::Eraser) ||
                       (b->label == "Place" && tool_ == EditorTool::Place) || (b->label == "Select" && tool_ == EditorTool::Select) || (b->label == "Arms" && tool_ == EditorTool::Weapon) || (b->label == "Plant" && tool_ == EditorTool::Plant) || (b->label == "Level" && settingsShown_) || (b->label == "Class" && classesShown_) ||
                       (b->label == "#" && grid_) || (b->label == "Fx" && tool_ == EditorTool::Effect) || (b->label == "Light" && tool_ == EditorTool::Light) ||
-                      (b->label == "Sky" && previewHour_.has_value());
+                      (b->label == "Sky" && previewHour_.has_value()) || (b->label == "Build" && tool_ == EditorTool::Building) || (b->label == "Prefab" && buildingEditor_->prefabsShown());
     }
     for (std::size_t i = 0; i < palette_->children().size(); ++i) {
         if (auto* b = dynamic_cast<Button*>(palette_->children()[i].get())) b->selected = static_cast<int>(i) == tile_;
@@ -1546,7 +1551,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     plantPalette_->visible = tool_ == EditorTool::Plant;
     effectPalette_->visible = tool_ == EditorTool::Effect;
     lightPalette_->visible = tool_ == EditorTool::Light;
-    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect && tool_ != EditorTool::Light;
+    characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect && tool_ != EditorTool::Light && tool_ != EditorTool::Building;
     if (propertiesStale_ && !properties_->typing() && !npcPanel_->typing() && !npcTrade_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
@@ -1586,9 +1591,10 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input) || lightPalette_->handle(input);
     const bool onProperties = properties_->handle(input) || npcPanel_->handle(input) || npcTrade_->handle(input);
     const bool onSettings = settings_->handle(input);
+    const bool onBuildings = buildingEditor_->handle(input, tool_ == EditorTool::Building);
     const bool onClasses = classes_->handle(input);
     const bool onEconomy = economy_->handle(input);
-    return onToolbar || onPalette || onProperties || onSettings || onClasses || onEconomy;
+    return onToolbar || onPalette || onProperties || onSettings || onClasses || onEconomy || onBuildings;
 }
 
 void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
@@ -1606,6 +1612,10 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
             changeCharacters(std::format("place {} #{}", kind.name, id), std::move(after), level_.nextId + 1);
             select(id);
         }
+        return;
+    }
+    if (tool_ == EditorTool::Building) {
+        if (pressed && hover_) buildingEditor_->placeAt(map_, hover_->first, hover_->second);
         return;
     }
     if (tool_ == EditorTool::Weapon) {
@@ -1697,6 +1707,8 @@ void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed
         if (!hit) hit = effectAt(pointer.x, pointer.y);  // effects float above the plants
         const bool effect = hit.has_value() && !character && !pickup && !light;
         if (!hit) hit = plantAt(pointer.x, pointer.y);   // plants stand under everything
+        const bool onBuilding = !hit && buildingEditor_->selectAt(wx, wy); // buildings are the biggest things: picked when nothing smaller is there
+        if (!onBuilding) buildingEditor_->clearSelection();
         select(hit);
         if (hit && light) {
             const PlacedLight& grabbed = *findLight(*hit);
@@ -1872,14 +1884,17 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || npcTrade_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
+    const bool typing = buildingEditor_->typing() || toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || npcTrade_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
         if (intents.pressed(Intent::Save)) save();
         if (intents.pressed(Intent::ToggleGrid)) grid_ = !grid_;
-        if (selected_ && intents.pressed(Intent::Delete)) removeSelected();
-        if (selected_ && find(*selected_) != nullptr && intents.pressed(Intent::Rotate)) {
+        if (buildingEditor_->hasSelection() && intents.pressed(Intent::Delete)) buildingEditor_->removeSelected();
+        else if (selected_ && intents.pressed(Intent::Delete)) removeSelected();
+        if (intents.pressed(Intent::Rotate) && buildingEditor_->hasSelection()) buildingEditor_->turnSelected();
+        else if (intents.pressed(Intent::Rotate) && tool_ == EditorTool::Building) buildingEditor_->turnPlaced();
+        else if (selected_ && find(*selected_) != nullptr && intents.pressed(Intent::Rotate)) {
             auto after = level_.characters;
             for (PlacedCharacter& c : after) {
                 if (c.id == *selected_) c.facing = static_cast<Facing>((static_cast<int>(c.facing) + 1) % static_cast<int>(Facing::Count)); // clockwise
@@ -1930,6 +1945,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
             painter.fill({0, gy - view.y, view.width, 1}, UiColor::Grid);
         }
     }
+    buildingEditor_->drawWorld(renderer, painter, view, map_, tool_ == EditorTool::Building, hover_);
     for (const PixelPoint& target : level_.targets) {
         renderer.draw(textures_.props, kTargetFrame, screen(target.x - kTargetFrame.width / 2, target.y - kTargetFrame.height));
     }
@@ -2096,6 +2112,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         }
     }
     lightPalette_->draw(painter);
+    buildingEditor_->drawPanels(painter, renderer, tool_ == EditorTool::Building);
     weaponPalette_->draw(painter);
     if (weaponPalette_->visible && textures_.weapons != nullptr) {
         for (std::size_t i = 0; i < weaponPalette_->children().size() && i < weaponNames_.size(); ++i) {
@@ -2121,6 +2138,8 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         what = weaponNames_.empty() ? "no weapons" : weaponNames_[static_cast<std::size_t>(weapon_)];
     } else if (tool_ == EditorTool::Effect) {
         what = definitions_.loopingEffects.empty() ? "no effects" : definitions_.loopingEffects[static_cast<std::size_t>(effect_)];
+    } else if (tool_ == EditorTool::Building) {
+        what = buildingEditor_->currentKind().empty() ? "no buildings" : buildingEditor_->currentKind();
     } else if (tool_ == EditorTool::Light) {
         what = definitions_.lightKinds.empty() ? "no lights" : definitions_.lightKinds[static_cast<std::size_t>(light_)];
     } else if (selected_ && findLight(*selected_) != nullptr) {
@@ -2154,6 +2173,7 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         plantPalette_->drawOverlay(painter);
         effectPalette_->drawOverlay(painter);
         lightPalette_->drawOverlay(painter);
+        buildingEditor_->drawOverlay(painter, tool_ == EditorTool::Building);
         properties_->drawOverlay(painter);
         npcPanel_->drawOverlay(painter);
         npcTrade_->drawOverlay(painter);

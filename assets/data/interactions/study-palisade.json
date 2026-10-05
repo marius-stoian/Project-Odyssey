@@ -1,0 +1,14 @@
+// A place of the level that teaches a blueprint (US-251): a level or a quest may tag a thing "blueprint-palisade". The effect is the same as in a conversation.
+{
+  "id": "study-palisade",
+  "label": "Learn to build a palisade",
+  "note": "Teaches the palisade blueprint (do learn-blueprint palisade).",
+  "actors": ["hero"],
+  "target": { "tags": ["blueprint-palisade"] },
+  "range": 2.5,
+  "duration": 2,
+  "order": 50,
+  "effects": [
+    "do learn-blueprint palisade"
+  ]
+}

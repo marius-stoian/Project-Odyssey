@@ -222,7 +222,9 @@ add_library(odysseus_sim STATIC
     src/sim/rivals.cpp
     src/sim/region_save.cpp
     src/sim/hero_data.cpp
-    src/sim/hero_life.cpp)
+    src/sim/hero_life.cpp
+    src/sim/building_data.cpp
+    src/sim/building_store.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -273,6 +275,8 @@ add_library(odysseus_game STATIC
     src/game/npc_class_book.cpp
     src/game/npc_marker.cpp
     src/game/npc_people.cpp
+    src/game/building_layer.cpp
+    src/game/building_editor.cpp
     src/game/editor_history.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
@@ -457,7 +461,9 @@ add_executable(odysseus_game_tests
     tests/game/conversation_test.cpp
     tests/game/greeting_test.cpp
     tests/game/exchange_test.cpp
-    tests/game/renderer_test.cpp)
+    tests/game/renderer_test.cpp
+    tests/game/building_game_test.cpp
+    tests/game/building_editor_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -519,7 +525,9 @@ add_executable(odysseus_sim_tests
     tests/sim/conversation_test.cpp
     tests/sim/selection_test.cpp
     tests/sim/smalltalk_test.cpp
-    tests/sim/memory_talk_test.cpp)
+    tests/sim/memory_talk_test.cpp
+    tests/sim/building_data_test.cpp
+    tests/sim/building_store_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

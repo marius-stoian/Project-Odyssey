@@ -11,6 +11,7 @@
 #include "game/animals.h"
 #include "game/arc_shots.h"
 #include "game/art.h"
+#include "game/building_layer.h"
 #include "game/clan_view.h"
 #include "game/catalogs.h"
 #include "game/content_art.h"
@@ -186,6 +187,12 @@ public:
     std::vector<PlacedCharacter>& bystandersMutable() { return bystanders_; }
     ClanView& clanViewMutable() { return clanView_; }
     const luna::engine::TileMap& tileMap() const { return map_; }
+    luna::engine::TileMap& tileMapMutable() { return map_; } // the buildings put their walls on it (US-251)
+    // The buildings of the level being played (M8d, M8e): the store, the Build menu, the art.
+    BuildingLayer& buildings() { return buildings_; }
+    const BuildingLayer& buildings() const { return buildings_; }
+    // A line in the message box for a few seconds.
+    void showMessage(const std::string& text) { say(text); }
     // Outside help for a clan member's need (a fire pit's warmth, a bed): false when there is no clan or the person is gone.
     bool helpPerson(int personId, sim::Need need, int amount);
     // What `who` thinks of `about` changes by `delta` (a conversation's choice, US-161); the world keeps it between -100 and 100.
@@ -448,6 +455,7 @@ private:
     sim::rules::ActionRunner actions_;
     std::int64_t actionClock_ = 0;
     NpcLife npcLife_;
+    BuildingLayer buildings_; // US-250
     void tickActions(const luna::engine::Intents& intents);
     void drawActionRing(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
     std::string thingsText() const;                          // the plants' states and the waiting effects, as saved in things.json

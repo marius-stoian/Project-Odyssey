@@ -147,7 +147,30 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
+    {
+        // The buildings of the data folder (US-250): a cost may only name an item the hero's data knows. A mistake leaves that file out and is shown.
+        // Loaded before the interactions: the kinds give places their `blueprint-...` tags.
+        std::set<std::string> items;
+        if (heroData_) {
+            for (const sim::Item& item : heroData_->items) items.insert(item.id);
+        }
+        buildings_.loadData(dataDirectory, items);
+    }
     loadInteractions(); // after the hero data: the professions give people their `teaches-...` tags
+    {
+        BuildingEditor::Host host;
+        host.data = &buildings_.dataMutable();
+        host.prefabFolder = dataDirectory / "buildings" / "prefabs";
+        host.saved = [this](const sim::buildings::KindDef& kind) {
+            if (std::find(definitions_.buildingKinds.begin(), definitions_.buildingKinds.end(), kind.id) == definitions_.buildingKinds.end()) definitions_.buildingKinds.push_back(kind.id);
+            if (kind.known) buildings_.learn(kind.id); // a prefab marked known is buildable at once
+        };
+        editor_.buildings().setHost(std::move(host));
+        if (!buildings_.notes().empty()) {
+            message_ = buildings_.notes().front();
+            for (const std::string& note : buildings_.notes()) core::logWarning(note);
+        }
+    }
     {
         std::string note;
         settings_ = loadSettings(saveDirectory_ / "settings.json", &note);
@@ -245,6 +268,7 @@ void OdysseyGame::drawModeLabel(luna::engine::Renderer& renderer) const {
 
 void OdysseyGame::populate() {
     populatePlants();
+    buildings_.start(*this); // after the plants, so a wall never stands where a tree does
     startPlacedEffects();
     enemies_.clear();
     bystanders_.clear();
@@ -600,6 +624,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     clanView_.setHidden(life_->personId());
     clanView_.update(*clan_, map_);
     lastSavedDay_ = -1;
+    buildings_.forgetAll(); // a new run knows only the starting blueprints (D-55 Q2)
     // A new clan is a new story: what was said, remembered and flagged in the last one does not carry over (US-162..US-164).
     flags_.clear();
     bubbles_.clear();
@@ -1131,6 +1156,7 @@ bool OdysseyGame::autosave() {
         if (region_) sim::saveRegion(*region_, saveDirectory_ / "region.json");
         if (life_) life_->save(saveDirectory_ / "hero.json");
         sim::writeSaveText(saveDirectory_ / "things.json", thingsText());
+        sim::writeSaveText(saveDirectory_ / "buildings.json", buildings_.saveText()); // US-257
         if (!saveNpcPopulation()) say("The placed people could not be saved");
     } catch (const std::exception& error) {
         say(std::string("Autosave failed: ") + error.what());
@@ -1189,6 +1215,11 @@ bool OdysseyGame::loadAutosave() {
         if (std::ifstream things(saveDirectory_ / "things.json", std::ios::binary); things) {
             const std::string text((std::istreambuf_iterator<char>(things)), std::istreambuf_iterator<char>());
             for (const std::string& note : restoreThings(text)) notes += (notes.empty() ? "" : "; ") + note;
+        }
+        if (std::ifstream built(saveDirectory_ / "buildings.json", std::ios::binary); built) {
+            const std::string text((std::istreambuf_iterator<char>(built)), std::istreambuf_iterator<char>());
+            for (const std::string& note : buildings_.loadText(text)) notes += (notes.empty() ? "" : "; ") + note;
+            buildings_.syncObstacles(*this);
         }
         if (const std::string problem = loadNpcPopulation(); !problem.empty()) notes += (notes.empty() ? "" : "; ") + problem;
         say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
@@ -1807,7 +1838,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         privacyAsked_ = true;
         if (settings_.statistics == 0) runFlow_.openPrivacy();
     }
-    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) runFlow_.openMenu();
+    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu) && !buildings_.escape()) runFlow_.openMenu(); // Esc first leaves placing and the Build menu
     // Two pictures, two pointers (US-232): the world is drawn zoomed and the interface scaled, so the pointer is
     // turned into the pixels of each one before anything reads it.
     luna::engine::Intents worldIntents = intents;
@@ -1892,7 +1923,9 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     // Plants (US-136): Interact with empty hands, or the right mouse button, looks at the plant next to the hero.
     if (!fallen && intents.pressed(luna::engine::Intent::Confront)) confrontKey(worldIntents.pointer());
     if (!fallen && intents.pressed(luna::engine::Intent::Actions)) actionsKey(worldIntents.pointer());
-    if (!fallen && intents.pressed(luna::engine::Intent::Inspect)) {
+    if (!fallen && intents.pressed(luna::engine::Intent::Inspect) && buildings_.placing()) {
+        buildings_.stopPlacing(); // a right click while placing a blueprint stops placing (US-251)
+    } else if (!fallen && intents.pressed(luna::engine::Intent::Inspect)) {
         // A right click on something in the world offers its actions (US-061); on nothing it looks at the nearest plant.
         const luna::engine::Pointer& p = worldIntents.pointer();
         const luna::engine::Rect view = camera_.view();
@@ -1902,9 +1935,10 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     }
     if (inspection_.ticks > 0) --inspection_.ticks;
     tickPlants();
+    buildings_.tick(*this, worldIntents, uiIntents);
 
     // Attack (the left button) goes toward the pointer; Interact goes along the facing, as before.
-    const bool mouseAttack = heldWeapon() != nullptr && aiming_ && intents.held(luna::engine::Intent::Attack) && !devToolsOpen_;
+    const bool mouseAttack = heldWeapon() != nullptr && aiming_ && intents.held(luna::engine::Intent::Attack) && !devToolsOpen_ && !buildings_.capturesPointer(uiIntents.pointer());
     if (!fallen && heldWeapon() != nullptr && (mouseAttack || intents.pressed(luna::engine::Intent::Interact))) {
         double dirX = aimDx_;
         double dirY = aimDy_;
@@ -2087,7 +2121,8 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
     charactersAtlas_ = withNormals(art_.characters, art_.charactersNormals);
     charactersHitAtlas_ = withNormals(art_.charactersHit, art_.charactersNormals);
     uiSheet_ = renderer.createTexture(luna::engine::makeUiSheet());
-    editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_});
+    buildings_.loadArt(renderer); // the placeholder pieces of the buildings (US-250)
+    editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, nullptr, nullptr, nullptr, nullptr, &buildings_});
     // The M2d content atlas (US-130); without it the game plays on, just without effects.
     std::string problem;
     if (auto content = loadContent(spritesDirectory_ / "atlas", problem)) {
@@ -2148,7 +2183,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         for (const WeaponDef& weapon : catalogs_.weapons) {
             if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
         }
-        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_, &effectArt_});
+        editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_, &effectArt_, &buildings_});
         startPlacedEffects(); // the content is loaded now: the effects placed in the level start
     } else {
         core::logWarning("Content art missing, no effects: " + problem);
@@ -2177,6 +2212,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     lastRender_ = renderStarted;
     // The world is drawn zoomed and the interface scaled (US-232): each is laid out in its own small pixels.
     luna::engine::ScaledRenderer ui(output, settings_.uiScale);
+    if (buildings_.artStale()) buildings_.loadArt(output); // the Editor saved a prefab: its icon is new
     if (mode_ == Mode::Editor) {
         editor_.render(output, alpha);
         drawInteractionPanel(ui); // F5 works in the Editor too, so its mistakes show there
@@ -2194,6 +2230,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     map_.draw(renderer, tiles_, camera_, alpha);
     const luna::engine::Rect view = camera_.view(alpha);
     drawShadows(renderer, view, alpha); // on the ground, under everything that stands or flies
+    buildings_.drawGround(renderer, view);
     auto screen = [&view](double worldX, double worldY) {
         return luna::engine::Point{static_cast<int>(std::lround(worldX)) - view.x, static_cast<int>(std::lround(worldY)) - view.y};
     };
@@ -2220,6 +2257,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
         }
     }
     drawPlants(renderer, view, alpha, true); // plants whose feet are above the hero's are behind him
+    buildings_.drawStanding(renderer, view, hero_.feetY(alpha), true);
     drawClan(renderer, view, alpha, true);
     // The hero, blended between ticks like the camera, so walking looks smooth at 60 FPS.
     renderer.draw(characters_, hero_.spriteFrame(),
@@ -2285,6 +2323,10 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
 
     drawPlants(renderer, view, alpha, false); // the plants in front of the hero and the enemies
     drawClan(renderer, view, alpha, false);
+    buildings_.drawStanding(renderer, view, hero_.feetY(alpha), false);
+    buildings_.drawRoofs(*this, renderer, view);
+    buildings_.drawBlueprints(*this, renderer, uiSheet_, view);
+    buildings_.drawGhost(*this, renderer, view);
 
     // Draw sword if it's the current weapon and actively attacking.
     if (currentWeapon_ == WeaponType::Sword && sword_.isAttacking()) {
@@ -2317,6 +2359,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawRunWorld(renderer, view);
     drawClanDetails(renderer, view, alpha);
     drawHud(ui);
+    buildings_.drawMenu(*this, ui, uiSheet_);
     drawClanHud(ui);
     drawRunHud(ui);
     drawDevTools(ui, view, alpha);

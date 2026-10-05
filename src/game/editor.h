@@ -4,6 +4,7 @@
 
 #include "game/animals.h"
 #include "game/art.h"
+#include "game/building_editor.h"
 #include "game/effect_art.h"
 #include "game/editor_history.h"
 #include "game/level.h"
@@ -42,10 +43,11 @@ struct EditorTextures {
     const PlantArt* plants = nullptr;   // the plant pictures, for the plant palette and placed plants (US-136)
     const AnimalArt* animals = nullptr; // the animal pictures, for the character palette and placed animals (US-137)
     const EffectArt* effects = nullptr; // the first picture of each effect, for the effect palette and placed effects (US-138)
+    const BuildingLayer* buildings = nullptr; // the placeholder pieces of the buildings, for placed buildings, the ghost and the Prefab tab (US-256)
 };
 
 // What a left click on the map does.
-enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant, Effect, Light };
+enum class EditorTool { Brush, Rectangle, Fill, Eraser, Place, Select, Weapon, Plant, Effect, Light, Building };
 
 const char* toolName(EditorTool tool);
 
@@ -130,6 +132,9 @@ public:
     void setLevelSize(int width, int height);  // keeps painted cells; drops characters outside
     void setDefaultGround(int tile);
     void moveHeroStart(PixelPoint feet);
+    // Buildings (US-256): the Build tool, the panel of a selected building and the Prefab tab. The game gives it the data to read and the folder prefabs are written to.
+    BuildingEditor& buildings() { return *buildingEditor_; }
+    const BuildingEditor& buildings() const { return *buildingEditor_; }
     // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
     // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
     // line and changes nothing (the function returns false).
@@ -288,6 +293,7 @@ private:
 
     Level& level_;
     const Definitions& definitions_;
+    std::unique_ptr<BuildingEditor> buildingEditor_;
     std::filesystem::path levelFile_;
     int viewWidth_;
     int viewHeight_;

@@ -81,6 +81,27 @@ Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex) {
     return subject;
 }
 
+std::optional<Subject> buildingSubject(const OdysseyGame& game, int buildingId) {
+    const sim::buildings::BuildingStore& store = game.buildings().store();
+    const sim::buildings::PlacedBuilding* building = store.find(buildingId);
+    if (building == nullptr) return std::nullopt;
+    Subject subject;
+    subject.kind = Subject::Kind::Building;
+    subject.index = buildingId;
+    subject.name = store.label(*building);
+    const std::string state = store.ruleState(*building);
+    std::string words = state == "waiting" ? "needs materials" : (state == "ready" ? "ready to build" : state);
+    if (state == "damaged") words = std::format("damaged, {}%", store.condition(*building));
+    if (state == "burning") words = "on fire!";
+    subject.title = subject.name + ": " + words;
+    const auto [cx, cy] = store.centre(*building);
+    subject.x = cx * kTileSize + kTileSize / 2.0;
+    subject.y = cy * kTileSize + kTileSize / 2.0;
+    subject.info.kind = building->kind;
+    subject.info.tags = store.tags(*building);
+    return subject;
+}
+
 namespace {
 
 Subject personSubject(const OdysseyGame& game, int person) {
@@ -184,6 +205,11 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) 
             const auto rival = rivalSubject(game, i);
             if (rival && std::hypot(wx - rival->x, wy - (rival->y - 12)) < 26) return rival;
         }
+    }
+    // A building of the level: any of its pieces under the pointer (US-251).
+    {
+        const auto [cx, cy] = BuildingLayer::cellOf(wx, wy);
+        if (const int id = game.buildings().store().buildingAt(cx, cy); id != 0) return buildingSubject(game, id);
     }
     // A plant: berries, flint, a tree.
     if (const int plantIndex = game.plantAtWorld(wx, wy); plantIndex >= 0) return plantSubject(game, static_cast<std::size_t>(plantIndex));
@@ -326,6 +352,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     case Subject::Kind::RivalCamp: return rivalSubject(game, static_cast<std::size_t>(std::max(0, ref.id)));
     case Subject::Kind::Hero: return heroSubject(game);
     case Subject::Kind::Npc: return npcSubject(game, ref.id);
+    case Subject::Kind::Building: return buildingSubject(game, ref.id);
     case Subject::Kind::Animal:
         for (std::size_t i = 0; i < game.enemies().size(); ++i) {
             if (game.enemies()[i].id == ref.id && game.enemies()[i].isAlive()) return animalSubject(game, i);
@@ -335,11 +362,12 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "can-swap", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving", "forage", "shelter", "water", "shrine", "market", "prey", "animal"};
+    std::vector<std::string> tags = {"building", "construction", "repairable", "burning", "shelter", "sleep", "store", "work", "person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "can-swap", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving", "forage", "shelter", "water", "shrine", "market", "prey", "animal"};
     for (const PlacedPlace& place : game.level().places) tags.insert(tags.end(), place.tags.begin(), place.tags.end()); // the purposes the owner gave the places of this level
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);
     }
+    for (const sim::buildings::KindDef& kind : game.buildings().data().kinds()) tags.push_back("blueprint-" + kind.id); // a place may teach a blueprint (US-251)
     return tags;
 }
 
@@ -367,6 +395,10 @@ Value GameRuleContext::path(const std::string& dotted) const {
     if (dotted == "hero.kind") return Value::ofText("hero");
     if (dotted == "target.name" || dotted == "npc.name") return Value::ofText(subject_.name);
     if (dotted == "target.kind" || dotted == "npc.kind") return Value::ofText(subject_.info.kind);
+    if (dotted == "target.state" && subject_.kind == Subject::Kind::Building) {
+        const sim::buildings::PlacedBuilding* building = game_.buildings().store().find(subject_.index);
+        return Value::ofText(building != nullptr ? game_.buildings().store().ruleState(*building) : std::string());
+    }
     if (dotted == "target.state") return Value::ofText(plant != nullptr ? plant->state : std::string());
     if (dotted == "target.inspect") return Value::ofText(plant != nullptr && plant->def != nullptr ? plant->def->inspect : std::string());
     if (dotted == "season") {

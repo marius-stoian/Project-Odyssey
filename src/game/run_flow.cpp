@@ -454,7 +454,7 @@ bool RunFlow::openContext(OdysseyGame& game, double wx, double wy) {
     const std::optional<Subject> subject = subjectAt(game, wx, wy);
     if (!subject) return false;
     const bool placed = subject->kind == Subject::Kind::Npc || (subject->kind == Subject::Kind::Animal && placedIdOf(game, *subject) >= 0);
-    if (!inRun && !placed) return false; // outside a run only the placed people and creatures of a level have a menu (US-265)
+    if (!inRun && !placed && subject->kind != Subject::Kind::Building) return false; // outside a run only the placed people, creatures and buildings of a level have a menu (US-265, US-251)
     return openMenuFor(game, *subject, MenuMode::Ordinary);
 }
 

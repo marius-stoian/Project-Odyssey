@@ -46,6 +46,8 @@ struct Definitions {
     std::vector<std::string> objects;   // names of objects.json (US-155): world objects, placed in the Editor like plants
     std::vector<std::string> weapons;   // names a pickup may carry (US-134): the weapons of weapons.json, then the built-in demo weapons
     std::vector<std::string> lightKinds; // names of the kinds of light of lights.json (US-247): what the Editor's Light tool may place
+    std::vector<std::string> buildingKinds;  // ids of kinds.json and the prefabs (US-250): what a level may hold finished or as a blueprint
+    std::vector<std::string> buildingPieces; // ids of pieces.json: a lone piece may be placed on its own (US-252)
 
     int tileNumber(const std::string& name) const;                     // -1 when unknown
     const CharacterKindDef* character(const std::string& name) const;  // nullptr when unknown
@@ -53,6 +55,7 @@ struct Definitions {
     bool hasPlant(const std::string& name) const;
     bool hasLoopingEffect(const std::string& name) const;
     bool hasLightKind(const std::string& name) const;
+    bool hasBuildingKind(const std::string& name) const; // a kind or prefab, or "piece:<id>" of a known piece
 };
 
 // The demo weapons of M1b and US-029 (the physics spear throw, the plain sword slash) are not in
@@ -89,9 +92,10 @@ struct PlacedCharacter {
     friend bool operator==(const PlacedCharacter&, const PlacedCharacter&) = default;
 };
 
+// Version 6 (US-250) adds the buildings of the level (their own list, not plants: CI-008).
 // Version 2 (US-134, US-136, US-138) adds weapon pickups, plants and effects; version 3 (US-247) adds placed lights; version 4 (US-260) adds the
 // NPC Classes of placed characters; version 5 (US-280, M9b and M9c) adds the region economy (currencies, prices, resources), the NPC trade, schedule and action fields and the places. Older files still load, without them, and are written as version 5 the next time they are saved.
-inline constexpr int kLevelVersion = 5;
+inline constexpr int kLevelVersion = 6;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;
@@ -131,6 +135,20 @@ struct PlacedLight {
     friend bool operator==(const PlacedLight&, const PlacedLight&) = default;
 };
 
+// A building the owner placed in the level with the Editor (US-250, US-256), or a blueprint left standing. Same ids as the rest. Cells are tiles (one metre).
+struct PlacedBuildingSpec {
+    int id = 0;
+    std::string kind;        // a kind or prefab id, or "piece:<id>"
+    int x = 0;               // the footprint's top-left cell
+    int y = 0;
+    int turns = 0;           // quarter turns clockwise
+    bool finished = true;    // false: a blueprint waiting for materials
+    int owner = -1;          // a clan member id, or -1
+    std::string interior;    // "", "fade" or "map": overrides the kind (US-254)
+    std::string interiorLevel;
+    friend bool operator==(const PlacedBuildingSpec&, const PlacedBuildingSpec&) = default;
+};
+
 // A named spot of the level (US-290): where a schedule sends people ("market", "well"), and what the environment interactions use (tags: forage, shelter, water, shrine).
 // The name "home" is built in (where an NPC was placed). Level version 5.
 struct PlacedPlace {
@@ -152,6 +170,7 @@ struct Level {
     std::vector<PlacedPlant> plants;
     std::vector<PlacedEffect> effects;
     std::vector<PlacedLight> lights;     // level version 3 (US-247)
+    std::vector<PlacedBuildingSpec> buildings; // level version 6 (US-250): finished buildings and blueprints, in their own list
     sim::RegionEconomy economy;          // level version 5 (US-280): the currencies, market prices and resources of this region; written only when set
     std::vector<PlacedPlace> places;     // level version 5 (US-290): the named spots schedules refer to; written only when there are some
     bool clan = false;                   // the simulated clan lives here (US-032); written only when true

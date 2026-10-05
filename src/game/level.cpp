@@ -2,6 +2,7 @@
 
 #include "game/lighting.h"
 #include "game/tags.h"
+#include "sim/building_data.h"
 #include "sim/economy_json.h"
 #include "sim/rule_json.h"
 #include "sim/npc_kind.h"
@@ -106,6 +107,11 @@ bool Definitions::hasLoopingEffect(const std::string& name) const {
 
 bool Definitions::hasLightKind(const std::string& name) const {
     return std::find(lightKinds.begin(), lightKinds.end(), name) != lightKinds.end();
+}
+
+bool Definitions::hasBuildingKind(const std::string& name) const {
+    if (name.rfind("piece:", 0) == 0) return std::find(buildingPieces.begin(), buildingPieces.end(), name.substr(6)) != buildingPieces.end();
+    return std::find(buildingKinds.begin(), buildingKinds.end(), name) != buildingKinds.end();
 }
 
 bool Definitions::hasPlant(const std::string& name) const {
@@ -256,6 +262,13 @@ Definitions loadDefinitions(const std::filesystem::path& dataDirectory) {
     }
     // The kinds of light a level may place (US-247); a missing lights.json means none.
     for (const LightKindDef& kind : loadLighting(dataDirectory / "light" / "lights.json").kinds) definitions.lightKinds.push_back(kind.name);
+    // The kinds and pieces of buildings a level may hold (US-250); a missing folder means none. Mistakes in the files are reported by the game when it loads them.
+    {
+        sim::rules::LoadReport ignored;
+        const sim::buildings::BuildingData buildingData = sim::buildings::BuildingData::load(dataDirectory / "buildings", ignored);
+        for (const sim::buildings::KindDef& kind : buildingData.kinds()) definitions.buildingKinds.push_back(kind.id);
+        for (const sim::buildings::PieceDef& piece : buildingData.pieces()) definitions.buildingPieces.push_back(piece.id);
+    }
     definitions.weapons.push_back(kSpearThrowName);
     definitions.weapons.push_back(kSwordSlashName);
     return definitions;
@@ -291,6 +304,7 @@ Level resized(const Level& level, int width, int height) {
     std::erase_if(out.plants, [&](const PlacedPlant& p) { return !inside(p.feet); });
     std::erase_if(out.effects, [&](const PlacedEffect& p) { return !inside(p.at); });
     std::erase_if(out.lights, [&](const PlacedLight& p) { return !inside(p.at); });
+    std::erase_if(out.buildings, [&](const PlacedBuildingSpec& b) { return b.x < 0 || b.y < 0 || b.x >= out.width || b.y >= out.height; });
     std::erase_if(out.places, [&](const PlacedPlace& p) { return !inside(p.at); });
     out.heroStart = {std::min(out.heroStart.x, pixelsWide - 1), std::min(out.heroStart.y, pixelsHigh - 1)};
     return out;
@@ -565,6 +579,36 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.lights.push_back(light);
         }
     }
+    if (data.contains("buildings")) { // level version 6 (US-250); older files have none
+        if (!data.at("buildings").is_array()) throw DataError(file, "buildings", "must be a list");
+        for (std::size_t i = 0; i < data.at("buildings").size(); ++i) {
+            const json& entry = data.at("buildings").at(i);
+            const std::string where = std::format("buildings[{}]", i);
+            PlacedBuildingSpec building;
+            building.id = whole(entry, file, "id", 1, level.nextId - 1);
+            const auto used = [&] { return DataError(file, where + ".id", std::format("{} is used twice", building.id)); };
+            for (const PlacedCharacter& other : level.characters) if (other.id == building.id) throw used();
+            for (const PlacedPickup& other : level.pickups) if (other.id == building.id) throw used();
+            for (const PlacedPlant& other : level.plants) if (other.id == building.id) throw used();
+            for (const PlacedEffect& other : level.effects) if (other.id == building.id) throw used();
+            for (const PlacedLight& other : level.lights) if (other.id == building.id) throw used();
+            for (const PlacedBuildingSpec& other : level.buildings) if (other.id == building.id) throw used();
+            building.kind = text(entry, file, "kind");
+            if (!definitions.hasBuildingKind(building.kind)) {
+                throw DataError(file, where + ".kind", "\"" + building.kind + "\" is not a building kind, prefab or piece (assets/data/buildings)");
+            }
+            building.x = whole(entry, file, "x", 0, level.width - 1);
+            building.y = whole(entry, file, "y", 0, level.height - 1);
+            building.turns = entry.value("turns", 0);
+            if (building.turns < 0 || building.turns > 3) throw DataError(file, where + ".turns", "must be 0 to 3 quarter turns");
+            building.finished = entry.value("finished", true);
+            building.owner = entry.value("owner", -1);
+            building.interior = entry.value("interior", std::string());
+            if (!building.interior.empty() && building.interior != "fade" && building.interior != "map") throw DataError(file, where + ".interior", "must be \"fade\" or \"map\"");
+            building.interiorLevel = entry.value("interiorLevel", std::string());
+            level.buildings.push_back(building);
+        }
+    }
     if (data.contains("targets")) {
         if (!data.at("targets").is_array()) throw DataError(file, "targets", "must be a list of [x, y]");
         for (std::size_t i = 0; i < data.at("targets").size(); ++i) {
@@ -673,6 +717,19 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"lights", lights},
                     {"targets", targets},
                     {"ground", ground}};
+    if (!level.buildings.empty()) { // level version 6 (US-250): only when there are some, so older levels save as they were
+        json buildings = json::array();
+        for (const PlacedBuildingSpec& b : level.buildings) {
+            json entry{{"id", b.id}, {"kind", b.kind}, {"x", b.x}, {"y", b.y}};
+            if (b.turns != 0) entry["turns"] = b.turns;
+            if (!b.finished) entry["finished"] = false;
+            if (b.owner >= 0) entry["owner"] = b.owner;
+            if (!b.interior.empty()) entry["interior"] = b.interior;
+            if (!b.interiorLevel.empty()) entry["interiorLevel"] = b.interiorLevel;
+            buildings.push_back(entry);
+        }
+        data["buildings"] = buildings;
+    }
     if (level.clan) data["clan"] = true;
     if (!level.economy.empty()) data["economy"] = sim::economyToJson(level.economy); // only when the owner set something, so older levels save as they were
     if (!level.places.empty()) {

@@ -1,0 +1,46 @@
+// The kinds of buildings (US-250, docs/guides/building-data.md). The layout puts pieces on a grid of 1 m cells, x to the right and y down,
+// before any turn. "cost" and "buildSeconds" are the sums of the pieces unless written here. A prefab (assets/data/buildings/prefabs) has the same fields.
+// "known": the hero has the blueprint at the start of a run (D-55). "wear": hp each piece loses when that season ends (D-55: very slow).
+{
+  "kinds": [
+    {
+      "id": "hut", "label": "Hut", "footprint": [3, 3],
+      "layout": [
+        { "piece": "wall-wood", "x": 0, "y": 0 }, { "piece": "wall-wood", "x": 1, "y": 0 }, { "piece": "wall-wood", "x": 2, "y": 0 },
+        { "piece": "wall-wood", "x": 0, "y": 1 },                                          { "piece": "wall-wood", "x": 2, "y": 1 },
+        { "piece": "wall-wood", "x": 0, "y": 2 }, { "piece": "door-hide", "x": 1, "y": 2 }, { "piece": "wall-wood", "x": 2, "y": 2 },
+        { "piece": "floor-straw", "x": 1, "y": 1 },
+        { "piece": "roof-thatch", "x": 0, "y": 0 }, { "piece": "roof-thatch", "x": 1, "y": 0 }, { "piece": "roof-thatch", "x": 2, "y": 0 },
+        { "piece": "roof-thatch", "x": 0, "y": 1 }, { "piece": "roof-thatch", "x": 1, "y": 1 }, { "piece": "roof-thatch", "x": 2, "y": 1 },
+        { "piece": "roof-thatch", "x": 0, "y": 2 }, { "piece": "roof-thatch", "x": 1, "y": 2 }, { "piece": "roof-thatch", "x": 2, "y": 2 }
+      ],
+      "interior": "fade", "uses": ["shelter", "sleep"], "owner": "person", "light": "torch",
+      "wear": { "autumn": 0, "winter": 1 }, "known": true, "colour": "#a98a62",
+      "note": "A one-room hut: warm and sheltered once the walls, the door and the roof stand."
+    },
+    {
+      "id": "windbreak", "label": "Windbreak", "footprint": [3, 1],
+      "layout": [ { "piece": "wall-hide", "x": 0, "y": 0 }, { "piece": "wall-hide", "x": 1, "y": 0 }, { "piece": "wall-hide", "x": 2, "y": 0 } ],
+      "interior": "fade", "uses": ["shelter"], "owner": "clan", "wear": { "winter": 1 }, "known": true, "colour": "#a0805a",
+      "note": "Three hide screens out of the wind. Not a room: it has no roof."
+    },
+    {
+      "id": "storage-pit", "label": "Storage pit", "footprint": [2, 2],
+      "layout": [ { "piece": "floor-planks", "x": 0, "y": 0 }, { "piece": "floor-planks", "x": 1, "y": 0 }, { "piece": "floor-planks", "x": 0, "y": 1 }, { "piece": "floor-planks", "x": 1, "y": 1 } ],
+      "uses": ["store"], "owner": "clan", "colour": "#7a6a4a",
+      "note": "A lined pit that keeps food cool."
+    },
+    {
+      "id": "drying-rack", "label": "Drying rack", "footprint": [2, 1],
+      "layout": [ { "piece": "post-wood", "x": 0, "y": 0 }, { "piece": "post-wood", "x": 1, "y": 0 } ],
+      "cost": { "wood": 3 }, "uses": ["work"], "owner": "clan", "colour": "#6b4e2c",
+      "note": "Two posts and a pole: meat and hides dry here."
+    },
+    {
+      "id": "palisade", "label": "Palisade", "footprint": [5, 1],
+      "layout": [ { "piece": "fence-wood", "x": 0, "y": 0 }, { "piece": "fence-wood", "x": 1, "y": 0 }, { "piece": "fence-wood", "x": 2, "y": 0 }, { "piece": "fence-wood", "x": 3, "y": 0 }, { "piece": "fence-wood", "x": 4, "y": 0 } ],
+      "owner": "clan", "wear": { "winter": 1 }, "colour": "#7f6038",
+      "note": "A short line of stakes."
+    }
+  ]
+}

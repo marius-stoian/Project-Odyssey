@@ -1,0 +1,14 @@
+// Take a blueprint back (US-251): what was delivered is left on the ground where it stood.
+{
+  "id": "cancel-blueprint",
+  "label": "Cancel {target.name}",
+  "note": "The delivered materials are dropped on the site; walk over them to pick them up.",
+  "actors": ["hero"],
+  "target": { "tags": ["building", "construction"] },
+  "range": 2.5,
+  "duration": 0.5,
+  "order": 90,
+  "effects": [
+    "do cancel-blueprint"
+  ]
+}

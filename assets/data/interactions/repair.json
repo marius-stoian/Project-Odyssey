@@ -1,0 +1,14 @@
+// Repair a damaged building (US-255): ten seconds of work each time, until every piece is whole.
+{
+  "id": "repair",
+  "label": "Repair {target.name}",
+  "note": "Reach 2.5 m. Ten seconds of work each time (do repair 10).",
+  "actors": ["hero"],
+  "target": { "tags": ["building", "repairable"] },
+  "range": 2.5,
+  "duration": 10,
+  "order": 30,
+  "effects": [
+    "do repair 10"
+  ]
+}

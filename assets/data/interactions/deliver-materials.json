@@ -1,0 +1,17 @@
+// Bring what a blueprint needs from the bag to the site (US-251). Without a run the materials are free (D-55).
+{
+  "id": "deliver-materials",
+  "label": "Bring materials to {target.name}",
+  "note": "Moves what the site still needs out of the bag. Instant.",
+  "actors": ["hero"],
+  "target": { "tags": ["building", "construction"] },
+  "range": 2.5,
+  "duration": 0.5,
+  "order": 10,
+  "requires": [
+    { "if": "target.state == waiting", "else": "Everything it needs is already here" }
+  ],
+  "effects": [
+    "do deliver-materials"
+  ]
+}
