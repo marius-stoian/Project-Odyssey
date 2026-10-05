@@ -180,6 +180,10 @@ public:
         propertiesStale_ = true;
     }
     bool selectedIsNpc() const;
+    // Per-thing interaction values (US-173, D-56 Q14): the selected placed plant may change a value of an interaction for itself only, as text "gather.delay=60 gather.duration=2.5"
+    // (delay is the wait of every `after` effect, the regrow time of a bush; both in seconds). One step of Undo; a mistake is said in the status line and changes nothing.
+    bool setSelectedOverrides(const std::string& text);
+    std::string selectedOverridesText() const;
     void setSelectedClasses(std::vector<std::string> classes);
     void toggleSelectedClass(const std::string& id);
     void setSelectedAttitude(const std::string& word);

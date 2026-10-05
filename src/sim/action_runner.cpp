@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <optional>
 #include <format>
 
 namespace odysseus::sim::rules {
@@ -32,8 +33,10 @@ std::uint64_t mixText(std::uint64_t hash, const std::string& text) {
 
 } // namespace
 
-bool ActionRunner::start(const Interaction& interaction, int actor, const ThingRef& target, std::int64_t now, EffectHost& host) {
+bool ActionRunner::start(const Interaction& base, int actor, const ThingRef& target, std::int64_t now, EffectHost& host) {
     if (running(actor) != nullptr) return false;
+    std::optional<Interaction> changed = adjuster_ ? adjuster_(base, target) : std::nullopt; // this thing may have its own values (US-173)
+    const Interaction& interaction = changed ? *changed : base;
     if (interaction.durationMilli <= 0) {
         for (const Effect& effect : interaction.effects) run(effect, actor, target, now, host);
         return true;
@@ -94,9 +97,11 @@ void ActionRunner::tick(std::int64_t now, const InteractionRegistry& registry, E
     }
     std::erase_if(running_, [now](const RunningAction& a) { return now >= a.endTick; });
     for (const RunningAction& action : finished) {
-        const Interaction* interaction = registry.find(action.interaction);
-        if (interaction == nullptr) continue; // taken out of the data while it ran: nothing happens
-        for (const Effect& effect : interaction->effects) run(effect, action.actor, action.target, now, host);
+        const Interaction* found = registry.find(action.interaction);
+        if (found == nullptr) continue; // taken out of the data while it ran: nothing happens
+        std::optional<Interaction> changed = adjuster_ ? adjuster_(*found, action.target) : std::nullopt;
+        const Interaction& interaction = changed ? *changed : *found;
+        for (const Effect& effect : interaction.effects) run(effect, action.actor, action.target, now, host);
     }
 }
 

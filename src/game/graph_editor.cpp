@@ -106,6 +106,16 @@ std::vector<std::string> GraphEditor::files() const {
     return names;
 }
 
+std::vector<std::string> GraphEditor::dialogueNames() const {
+    std::vector<std::string> names;
+    std::error_code ec;
+    for (const auto& entry : fs::directory_iterator(folder_, ec)) {
+        if (entry.is_regular_file() && entry.path().extension() == ".dlg") names.push_back(entry.path().stem().string());
+    }
+    std::sort(names.begin(), names.end());
+    return names;
+}
+
 void GraphEditor::show(bool shown) {
     shown_ = shown;
     if (!shown_) return;

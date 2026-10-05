@@ -4,6 +4,7 @@
 #include "sim/data.h"
 
 #include <algorithm>
+#include <sstream>
 #include <cmath>
 #include <format>
 
@@ -738,7 +739,21 @@ void Editor::buildProperties() {
     propertiesFor_ = -1;
     propertiesStale_ = false;
     const PlacedCharacter* shown = selected_ ? find(*selected_) : nullptr;
-    if (shown == nullptr) return;
+    if (shown == nullptr) {
+        // A placed plant (US-173): its own values of an interaction, for this plant only.
+        const PlacedPlant* plant = selected_ ? findPlant(*selected_) : nullptr;
+        if (plant == nullptr) return;
+        properties_->visible = true;
+        propertiesFor_ = plant->id;
+        const Rect box = properties_->bounds;
+        properties_->add<Button>(Rect{box.x + 4, box.y + 4, box.width - 8, 11}, std::format("{} #{}", plant->kind, plant->id), [] {});
+        auto& overrides = properties_->add<luna::engine::TextField>(Rect{box.x + 4, box.y + 18, box.width - 8, 11}, "Own", selectedOverridesText(), 80,
+                                                                       [this](const std::string& text) { setSelectedOverrides(text); });
+        (void)overrides;
+        properties_->add<Button>(Rect{box.x + 4, box.y + 32, box.width - 8, 11}, "e.g. gather.delay=60", [] {}).hint =
+            "Values of an interaction changed for this plant only: delay (the wait of every `after` effect: the regrow time) and duration, in seconds";
+        return;
+    }
     properties_->visible = true;
     propertiesFor_ = shown->id;
     const Rect box = properties_->bounds;
@@ -801,6 +816,25 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
     npcPanel_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Script", file == resolved.dialogues.end() ? std::string() : file->second, 40,
                                             [this, partner](const std::string& value) { setSelectedDialogue(partner, value); });
     y += kRow;
+    // The pick list of the script (US-173, D-56 Q13): Pick goes to the next conversation of the folder, Graph opens the chosen one as a graph.
+    {
+        const std::vector<std::string> names = graphEditor_->dialogueNames();
+        const std::string current = file == resolved.dialogues.end() ? std::string() : file->second;
+        Button& pick = npcPanel_->add<Button>(Rect{left, y, width / 2 - 1, 11}, "Pick", [this, partner, names, current] {
+            if (names.empty()) return;
+            const auto at = std::find(names.begin(), names.end(), current.size() > 4 ? current.substr(0, current.size() - 4) : current);
+            const std::size_t next = at == names.end() ? 0 : (static_cast<std::size_t>(at - names.begin()) + 1) % names.size();
+            setSelectedDialogue(partner, names[next] + ".dlg");
+        });
+        pick.hint = "Click: the next conversation in the dialogue folder";
+        Button& graph = npcPanel_->add<Button>(Rect{left + width / 2 + 1, y, width / 2 - 1, 11}, "Graph", [this, current] {
+            if (current.size() <= 4) return;
+            graphEditor_->showKind(GraphEditor::Kind::Dialogue);
+            graphEditor_->open(current.substr(0, current.size() - 4));
+        });
+        graph.hint = "Open this conversation as a graph";
+        y += kRow;
+    }
     // Actions: a tick for every interaction of the registry; unticked means denied for this NPC.
     std::vector<std::string> actions;
     for (const std::string& id : actionIds_) actions.push_back(std::string(resolved.denied(id) ? "[ ] " : "[x] ") + id);
@@ -1047,6 +1081,59 @@ void Editor::setSelectedHp(int hp) {
         if (placed.id == *selected_) placed.hp = std::clamp(hp, 1, 9999);
     }
     changeCharacters(std::format("HP {}", hp), std::move(after), level_.nextId);
+}
+
+// ---- per-thing overrides (US-173)
+
+std::string Editor::selectedOverridesText() const {
+    const PlacedPlant* plant = selected_ ? findPlant(*selected_) : nullptr;
+    std::string out;
+    if (plant == nullptr) return out;
+    for (const ThingOverride& change : plant->overrides) out += (out.empty() ? "" : " ") + change.interaction + "." + change.field + "=" + milliToText(change.valueMilli);
+    return out;
+}
+
+bool Editor::setSelectedOverrides(const std::string& text) {
+    const PlacedPlant* plant = selected_ ? findPlant(*selected_) : nullptr;
+    if (plant == nullptr) return false;
+    std::vector<ThingOverride> parsed;
+    std::istringstream in(text);
+    for (std::string word; in >> word;) {
+        const std::size_t equals = word.find('=');
+        const std::size_t dot = equals == std::string::npos ? std::string::npos : word.rfind('.', equals);
+        if (equals == std::string::npos || dot == std::string::npos || dot == 0) {
+            say(std::format("overrides: \"{}\" is not like gather.delay=60", word));
+            propertiesStale_ = true;
+            return false;
+        }
+        ThingOverride change{word.substr(0, dot), word.substr(dot + 1, equals - dot - 1), 0};
+        const auto value = textToMilli(word.substr(equals + 1));
+        if (change.field != "delay" && change.field != "duration") {
+            say(std::format("overrides: \"{}\" is not a value to change; use delay or duration", change.field));
+            propertiesStale_ = true;
+            return false;
+        }
+        if (!value || *value > 86400000) {
+            say(std::format("overrides: \"{}\" is not a number of seconds", word.substr(equals + 1)));
+            propertiesStale_ = true;
+            return false;
+        }
+        if (!actionIds_.empty() && std::find(actionIds_.begin(), actionIds_.end(), change.interaction) == actionIds_.end()) {
+            say(std::format("overrides: there is no interaction \"{}\"", change.interaction));
+            propertiesStale_ = true;
+            return false;
+        }
+        change.valueMilli = *value;
+        parsed.push_back(std::move(change));
+    }
+    if (parsed == plant->overrides) return true;
+    auto after = level_.plants;
+    for (PlacedPlant& p : after) {
+        if (p.id == plant->id) p.overrides = parsed;
+    }
+    run(std::make_unique<PlantsCommand>(parsed.empty() ? "clear own values" : "own values " + text, level_.plants, std::move(after), level_.nextId, level_.nextId));
+    propertiesStale_ = true;
+    return true;
 }
 
 // ---- the NPC panel (US-268)

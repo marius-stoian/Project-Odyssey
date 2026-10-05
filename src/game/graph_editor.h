@@ -41,7 +41,8 @@ public:
     // Opens `assets/data/dialogue/<name>.dlg` with its layout sidecar. False (and says why) when the file has mistakes.
     bool open(const std::string& name);
     const std::string& openName() const { return current_ != nullptr ? current_->name : empty_; }
-    std::vector<std::string> files() const; // the .dlg names in the folder
+    std::vector<std::string> files() const; // the files of the shown kind (names without the extension)
+    std::vector<std::string> dialogueNames() const; // the .dlg names, whatever kind is shown: the pick list of a placed character's script
     // Writes the open conversation and its layout. Refuses (and says why) with a card that cannot be written, and, once, when the file changed on
     // disk since it was opened (press Save again to overwrite).
     bool save();
