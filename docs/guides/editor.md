@@ -105,6 +105,24 @@ With unsaved changes, **New** and **Open** ask first: **Save**, **Discard**, or 
 - The tests play their own copy, `assets/levels/demo.json`; your `valley.json` is yours to change.
 - A level is a readable JSON file: you can open it in any text editor.
 
+## Tooltips and suggestions (US-300, M10b)
+
+Rest the pointer on any field of the Level Editor panels, the Building editor, the Graph editor (dialogues, rules, quests) or the Story events list and, after 0.4 seconds, a small box says what the field is for, its range and an example. Move the pointer, or click the field, and it goes. Fields that are typed in (not buttons) all have one; a button keeps its own hint.
+
+The words live in `assets/data/editor/help.json`, one entry per field. The id of a field is its panel and its label in lower case: **Sword** in the NPC panel is `npc.sword`, **says:** on a dialogue line card is `graph.line.says`. A label's hint in brackets is not part of the id (`who (elder or friend):` is `event.who`), and an indented label (a field of the row above it) starts with `sub-` (`event.sub-says`). Panels: `level`, `economy`, `npc`, `plant`, `npc-life` (the Trade, Day, Night and Does rows of a placed NPC), `class`, `kind`, `building`, `prefab`, `graph.bar`, `graph.header`, `graph.<card type>`, `graph.test` and `event`.
+
+```jsonc
+{ "version": 1,
+  "fields": {
+    "npc.sword": { "purpose": "Damage of one sword strike by this character", "example": "4", "suggest": "number" },
+    "class.tags": { "purpose": "Tags carried by NPCs of this class", "range": "words separated by commas", "example": "trader, elder", "suggest": "catalog:tags", "list": true }
+  } }
+```
+
+`purpose` and `example` are required; `range` is optional (a number field's range is made from its own minimum and maximum). `suggest` says where the field's list of values comes from (the suggestion list arrives with US-301 and US-302). You may write `//` comments. Edit the file in a text editor; the Editor reads it when the game starts.
+
+If the file is missing or has a mistake, the Editor still opens, fields show no tooltip and the status line names the file and line (`help.json:4: ...`). A test checks that every field of the four editors has an entry and every entry has a field, so a new field without a line in `help.json` fails the build by name.
+
 ## A conversation for a character, own values for a plant (US-173)
 
 **Conversation.** Select a placed NPC: in its NPC panel the row *Talks with* names a partner type and the *Script* field the `.dlg` file used with that partner (type a name like `elder-fire.dlg`, or press **Pick** to go to the next conversation of the dialogue folder). **Graph** opens that conversation in the graph editor. Talking to the character in the game starts it. The pick is saved in the level (`dialogues`) as before; only a difference from its classes and kind is kept.

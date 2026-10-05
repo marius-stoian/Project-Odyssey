@@ -282,3 +282,55 @@ TEST_CASE("US-126 Hints stay on screen") {
     CHECK(painter.keepOnScreen({470, 260, 100, 13}) == engine::Rect{380, 257, 100, 13}); // pushed back inside
     CHECK(painter.keepOnScreen({10, 10, 100, 13}) == engine::Rect{10, 10, 100, 13});     // already inside: unchanged
 }
+
+// US-300: a field's tooltip shows once the pointer has rested on it for 0.4 s, and goes when the pointer moves or the field is used.
+TEST_CASE("US-300 Field tooltip") {
+    engine::Panel panel({0, 0, 200, 60});
+    auto& hp = panel.add<engine::NumberField>(engine::Rect{10, 10, 100, 11}, "HP", 60, 1, 999, [](int) {});
+    auto& name = panel.add<engine::TextField>(engine::Rect{10, 30, 150, 11}, "Name", "Goblin", 16, [](const std::string&) {});
+    hp.tip.text = "Health\nRange: 1 to 999\nExample: 60";
+    const auto show = [&](engine::UiPainter& painter) { panel.drawOverlay(painter); };
+
+    engine::ImageRenderer screen(480, 270);
+    const auto sheet = screen.createTexture(engine::makeUiSheet());
+    engine::UiPainter painter(screen, sheet);
+    painter.setScreen({0, 0, 480, 270});
+
+    SUBCASE("it waits, then shows purpose, range and example next to the pointer") {
+        for (int tick = 0; tick < engine::FieldHint::kDelayTicks - 1; ++tick) panel.handle(at(20, 15));
+        CHECK_FALSE(hp.tip.showing());
+        panel.handle(at(20, 15));
+        panel.handle(at(20, 15));
+        CHECK(hp.tip.showing());
+        screen.clear({0, 0, 0, 255});
+        show(painter);
+        CHECK(screen.image().get(20 + 8, 15 + 10) == luna::engine::Color{118, 104, 72}); // the box's border at its corner
+    }
+    SUBCASE("moving restarts the wait and leaving hides it") {
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 15));
+        REQUIRE(hp.tip.showing());
+        panel.handle(at(22, 15));
+        CHECK_FALSE(hp.tip.showing());
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(22, 15));
+        CHECK(hp.tip.showing());
+        panel.handle(at(300, 200));
+        CHECK_FALSE(hp.tip.showing());
+    }
+    SUBCASE("a click on the field hides it; a field without text shows nothing") {
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 15));
+        REQUIRE(hp.tip.showing());
+        panel.handle(at(20, 15, true));
+        CHECK_FALSE(hp.tip.showing());
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 35));
+        CHECK_FALSE(name.tip.showing()); // no text: no tooltip
+    }
+    SUBCASE("a long line is broken so the box stays narrow") {
+        name.tip.text = "A long purpose that goes on and on and on and on and on and on and on and on and on and on";
+        for (int tick = 0; tick < 20; ++tick) panel.handle(at(20, 35));
+        REQUIRE(name.tip.showing());
+        screen.clear({0, 0, 0, 255});
+        show(painter);
+        const int widest = engine::FieldHint::kWrapColumns * engine::kTextAdvance + 6;
+        CHECK(screen.image().get(20 + 8 + widest + 2, 35 + 10 + 4) == luna::engine::Color{0, 0, 0, 255}); // nothing drawn beyond the wrap width
+    }
+}

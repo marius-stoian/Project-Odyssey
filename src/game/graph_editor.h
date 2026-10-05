@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/dialogue_graph.h"
+#include "game/editor_help.h"
 #include "game/editor_history.h"
 #include "game/interaction_graph.h"
 #include "game/quest_graph.h"
@@ -74,6 +75,8 @@ public:
     void draw(luna::engine::UiPainter& painter) const;
     void drawOverlay(luna::engine::UiPainter& painter) const;
     bool typing() const;
+    // Gives the fields of every panel their help (US-300); call once a tick.
+    void applyHelp(EditorHelp& help);
 
     // For the panel and for tests: every change is one step of Undo.
     luna::engine::NodeGraph* graph() { return current_ != nullptr ? current_->graph.get() : nullptr; }
@@ -164,6 +167,7 @@ private:
     std::optional<luna::engine::NodeGraph> checked_; // the graph the findings were made from
     std::unique_ptr<luna::engine::ListBox> problemList_;
     std::string panelTitle_;
+    std::string panelPrefix_; // the help ids of the side panel: graph.<card type>, or graph.header for the file
     std::vector<std::string> problems_;
     bool overwriteArmed_ = false;
     int nodeCounter_ = 1;

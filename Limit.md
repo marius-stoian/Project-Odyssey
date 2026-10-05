@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-300):** S-US-300 DONE (Milestone-136.md, AP-137), Debug zero warnings, 27/27. Next: S-US-301 (SuggestList widget in src/luna/engine/ui.*: focus opens it, filter, Up/Down/Tab/Enter/Esc, click, 8 rows, above or below), then US-302..305, X-M10b. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020.
+
 **Resume update (2026-10-05, K-M10b):** K-M10b Done (Milestone-135.md, AP-136, D-59, docs/plans/M10b-editor-help-design.md). Next: S-US-300 (help.json, hint and helpId on TextField/NumberField, 0.4 s hover, coverage test over four editors), then US-301..305 and X-M10b. Every story runs the full verify (D-22, not D-41). Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020.
 
 **Resume update (2026-10-05, P-013):** P-013 Done: Codex v2.13 adopted (CLAUDE.md names Codex v2.13 and requirements v2.12; D-15 now has M10b; status.md lists K-M10b, US-300..305, X-M10b). Next: K-M10b (ask the owner the open design questions in one chat round, record D-59, write docs/plans/M10b-editor-help-design.md), then S-US-300..305, X-M10b. M10b runs under the owner-decides rules (D-22), not D-41. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020.

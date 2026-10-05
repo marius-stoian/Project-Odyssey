@@ -7,6 +7,7 @@
 #include "game/building_editor.h"
 #include "game/effect_art.h"
 #include "game/graph_editor.h"
+#include "game/editor_help.h"
 #include "game/editor_history.h"
 #include "game/level.h"
 #include "game/pickups.h"
@@ -156,6 +157,8 @@ public:
     // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
     // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
     void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
+    // The help of the fields (US-300): every panel of the four editors gets its tooltips once a tick. A broken help file is named in the status line.
+    void setHelp(EditorHelp* help);
     void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
     bool classesShown() const { return classesShown_; }
     void showClasses(bool shown);
@@ -385,6 +388,8 @@ private:
     int partnerIndex_ = 0;                          // which partner type the dialogue row shows
     int defaultsIndex_ = 0;                         // which partner type the defaults row shows (US-293)
     NpcClassBook* classBook_ = nullptr;
+    EditorHelp* help_ = nullptr;
+    void applyHelp();
     bool classesShown_ = false;
     bool classesStale_ = true;
     bool classNew_ = false;
@@ -392,6 +397,8 @@ private:
     std::string classSelected_;
     std::unique_ptr<luna::engine::Panel> classes_;
     bool kindsTab_ = false;
+    bool classesAreKinds_ = false;     // what classes_ was built as, for the help ids: the tab may have changed since
+    bool propertiesForPlant_ = false;  // what properties_ was built for
     std::string kindSelected_;
     sim::rules::NpcKind kindDraft_;
     mutable std::map<std::string, luna::engine::Texture> markerTextures_; // one picture per distinct marker, made when first drawn
