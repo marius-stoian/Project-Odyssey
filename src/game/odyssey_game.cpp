@@ -91,7 +91,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
-    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }); // Save in the graph editor reads the data again, like F5 (M9)
+    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
         if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
