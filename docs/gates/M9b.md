@@ -13,7 +13,7 @@ Found and fixed by the one full verify (the stories were built without running t
 | 3 | Prices from base x stock curve x drift, reputation last (US-282) | Met | `trade_price_test`, ADR-023 |
 | 4 | Trade screen, Haggle, reputation bands, rare goods (US-283) | Met | `trade_deal_test`, `trade_screen_test`, `trade_gate_test` |
 | 5 | Editor trade panel and the test-level traders (US-284) | Met | `trade_editor_test` |
-| 6 | Screenshots of the trade screen and the Editor Trade panel | **Not produced** | GPU screenshots are manual (`docs/plans/US-283.md`, `US-284.md`) |
+| 6 | Screenshots of the trade screen and the Editor Trade panel | **Not produced** | GPU screenshots are manual (`docs/plans/stories-M9b.md#us-283`, `US-284.md`) |
 
 ## For the owner
 - Row 6 needs your PC and the window.

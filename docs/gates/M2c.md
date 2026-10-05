@@ -14,7 +14,7 @@ F2 opens the Editor (the world pauses, the camera pans); F1 plays the level agai
 - Every change is undoable (`US-124 Undo`: random sequences).
 
 ## 3. Save, reload, play: **Met**
-A scripted session on a copy of the demo level ([evidence](../evidence/X-M2c/)): the Editor painted water (3 cells), placed a goblin (#2), renamed the level "Exit Review" in the settings panel, and saved ([1-edited.png](../evidence/X-M2c/1-edited.png), [log](../evidence/X-M2c/1-editor-session.log)). A new run loaded "Exit Review" with its 2 characters, took the sword and struck the goblin twice: 55 then 50 of 60 HP, flashing red ([2-played.png](../evidence/X-M2c/2-played.png), [log](../evidence/X-M2c/2-game-session.log)).
+A scripted session on a copy of the demo level ([evidence](../evidence/X-M2c)): the Editor painted water (3 cells), placed a goblin (#2), renamed the level "Exit Review" in the settings panel, and saved ([1-edited.png](../evidence/X-M2c/1-edited.png), [log](../evidence/X-M2c/1-editor-session.log)). A new run loaded "Exit Review" with its 2 characters, took the sword and struck the goblin twice: 55 then 50 of 60 HP, flashing red ([2-played.png](../evidence/X-M2c/2-played.png), [log](../evidence/X-M2c/2-game-session.log)).
 
 ## 4. The owner's art: **Met**
 Hero, ground and monsters come from the owner's sheets, cut into atlases by `odysseus_atlas` (`US-120 ...`; [contact sheet](../evidence/US-120/contact-sheet.png)).

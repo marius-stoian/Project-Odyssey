@@ -108,6 +108,10 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 void tickInteractions(OdysseyGame& game);
 // Moves the quests on (US-180): counts what happened, checks prerequisites, waits, failures, gives rewards.
 void tickQuests(OdysseyGame& game);
+// A name as quest files write it: lower case, words joined by - ("Old Tok" -> "old-tok").
+std::string questWord(const std::string& text);
+// The hero has started talking with `subject`: every name it goes by (its name, roles, kind) is reported to the quests as a talk event.
+void reportTalk(OdysseyGame& game, const Subject& subject);
 
 // Talk (US-161): opens the conversation panel with the script that speaks for this clan member and pauses the world. False when no
 // script fits them (then the caller keeps to the plain talk).

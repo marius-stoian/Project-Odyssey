@@ -17,7 +17,7 @@
 - No new decision. Deviation: files are flat in `src/sim/` (`quest_data`, `quest_book`), not `src/sim/quests/` as the Codex text says, to match every other Simulation file. Suggested for Anima: CI-017, change the path in the Codex M10 prompts.
 
 ### Files changed
-`src/sim/quest_data.{h,cpp}`, `src/sim/quest_book.{h,cpp}` (new); `src/sim/rule_expr.cpp` (functions `quest`, `step`), `src/sim/rule_effect.cpp` (verb `quest`); `src/game/odyssey_game.{h,cpp}`, `src/game/builtin_actions.cpp`, `src/game/game_rules.h` (load, tick, save, reload); `tests/sim/quest_test.cpp` (new), `tests/sim/rules_test.cpp`; `CMakeLists.txt`; `docs/guides/quests.md`, `docs/guides/interaction-data.md`, `docs/plans/US-180.md`, `assets/data/schemas/quest.schema.json`, `docs/learning-journal.md`, `docs/status.md`, `CHANGELOG.md`, `Limit.md`, `Milestone-126.md`.
+`src/sim/quest_data.{h,cpp}`, `src/sim/quest_book.{h,cpp}` (new); `src/sim/rule_expr.cpp` (functions `quest`, `step`), `src/sim/rule_effect.cpp` (verb `quest`); `src/game/odyssey_game.{h,cpp}`, `src/game/builtin_actions.cpp`, `src/game/game_rules.h` (load, tick, save, reload); `tests/sim/quest_test.cpp` (new), `tests/sim/rules_test.cpp`; `CMakeLists.txt`; `docs/guides/quests.md`, `docs/guides/interaction-data.md`, `docs/plans/stories-M10.md#us-180`, `assets/data/schemas/quest.schema.json`, `docs/learning-journal.md`, `docs/status.md`, `CHANGELOG.md`, `Limit.md`, `Milestone-126.md`.
 
 ### Next
 - S-US-181 Objectives from world events (the Game reports talk, goto, gather, give, craft, interact, defeat and flag events to the book).

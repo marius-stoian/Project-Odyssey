@@ -37,7 +37,7 @@ Characters, plants and buildings have a `height` (metres) in their catalog (defa
 `weather.json` entries get `light` (dim, tint) and `flash` (lightning); rain dims the ambient 15 to 30%, a lightning flash raises the ambient for a few frames.
 
 ## 8. Editor and quality (US-247)
-The Editor previews any time of day (a slider and the hour keys). `settings.json` `lighting` (Low, Medium, High): Low = ambient tint only, no shadows; Medium = ambient, lights, sun shadows; High = adds normal maps and fire shadows. Budget: 60 FPS at 1080p on the D-06 PC on High (the method of `docs/plans/US-234.md`).
+The Editor previews any time of day (a slider and the hour keys). `settings.json` `lighting` (Low, Medium, High): Low = ambient tint only, no shadows; Medium = ambient, lights, sun shadows; High = adds normal maps and fire shadows. Budget: 60 FPS at 1080p on the D-06 PC on High (the method of `docs/plans/stories-M8b.md#us-234`).
 
 ## 9. Risks
 | Risk | Answer |

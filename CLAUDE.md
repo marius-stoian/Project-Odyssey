@@ -79,6 +79,7 @@ Every session ends with an assembly report:
 - Decisions requested: IDs or none
 - Codex issues found: IDs or none
 - Milestone file: Milestone-<n>.md (AP-###)
+- Story plans are merged per milestone into docs/plans/stories-<M>.md (one section per story, anchor `#us-<id>`)
 - Next prompt: <ID>
 </report_format>
 

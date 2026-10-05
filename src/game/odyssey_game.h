@@ -174,6 +174,8 @@ public:
     // Generated small talk (US-163): what people say when no script fits them, and for `{smalltalk.topic}`.
     sim::rules::SmallTalk& smalltalk() { return smalltalk_; }
     // Story notes set by conversations and interactions (`flag met-elder`), saved with the things (US-164).
+    // Something the hero did that a quest may wait for (US-181); counted at the next quest update.
+    void questEvent(sim::rules::QuestObjective::Kind kind, const std::string& subject, int amount = 1) { quests_.notify({kind, subject, amount, actionClock_}); }
     sim::rules::QuestBook& quests() { return quests_; }
     const sim::rules::QuestBook& quests() const { return quests_; }
     sim::rules::FlagStore& flags() { return flags_; }
@@ -454,6 +456,7 @@ private:
     sim::rules::SmallTalk smalltalk_;
     sim::rules::FlagStore flags_;
     sim::rules::QuestBook quests_; // the authored quests and where each stands (US-180)
+    void watchHeroItems(); // tells the quests what enters the hero bag (US-181)
     Bubbles bubbles_;
     Exchanges exchanges_;
     sim::rules::CooldownTable greetingCooldowns_;

@@ -247,6 +247,7 @@ int HeroLife::count(const std::string& item) const {
 void HeroLife::give(const std::string& item, int amount) {
     if (amount <= 0) return;
     inventory_[item] += amount;
+    if (itemObserver_) itemObserver_(item, amount, crafting_);
 }
 
 bool HeroLife::take(const std::string& item, int amount) {
@@ -319,7 +320,9 @@ ActionResult HeroLife::craft(const std::string& recipeId) {
     // Quality: skill plus a roll; more skill gives a better tier more often.
     const int score = skillPoints(recipe->profession) + static_cast<int>(rng_.below(41));
     made.quality = std::min(3, score / 25);
+    crafting_ = true;
     give(recipe->output, recipe->count);
+    crafting_ = false;
     crafted_.push_back(made);
     useSkill(recipe->profession, true);
     return {true, std::format("You make a {} {}.", qualityName(made.quality), data_->item(recipe->output) != nullptr ? data_->item(recipe->output)->name : recipe->output)};

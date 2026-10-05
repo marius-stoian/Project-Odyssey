@@ -46,7 +46,7 @@ Early development. The simulation, the playable world, the Editor and the new GP
 - See [docs/guides/editor.md](docs/guides/editor.md).
 
 ### Content is data
-Characters, plants, animals, weapons, materials, interactions, dialogue, light and simulation rules live as JSON in [assets/data/](assets/data/). Errors name the file and the field.
+Characters, plants, animals, weapons, materials, interactions, dialogue, light and simulation rules live as JSON in [assets/data/](assets/data). Errors name the file and the field.
 
 ## Planned
 
@@ -133,7 +133,7 @@ Rules worth knowing:
 - Randomness comes from seeded PCG32 streams, physics uses 32.32 fixed-point numbers, and the simulation runs on a fixed 20 ticks per second.
 - Luna never includes simulation or game code.
 
-[cmake/ValidateLayerIncludes.cmake](cmake/ValidateLayerIncludes.cmake) checks these boundaries on every build, and [tests/architecture/](tests/architecture/) proves them. The rationale is in [ADR-016](docs/adr/ADR-016-layer-boundary-enforcement.md), and the full charter is [CLAUDE.md](CLAUDE.md).
+[cmake/ValidateLayerIncludes.cmake](cmake/ValidateLayerIncludes.cmake) checks these boundaries on every build, and [tests/architecture/](tests/architecture) proves them. The rationale is in [ADR-016](docs/adr/ADR-016-layer-boundary-enforcement.md), and the full charter is [CLAUDE.md](CLAUDE.md).
 
 ## Repository layout
 | Folder | What |
@@ -149,4 +149,4 @@ Rules worth knowing:
 
 Built by Mraw (the Dominus Full Team) following [docs/Codex.md](docs/Codex.md), a sequence of build prompts written by Anima. The requirements document is the source of truth for what to build, and the Codex for how and in what order. Owner decisions are in [docs/decisions.md](docs/decisions.md), and every story ends with a teach-back note in [docs/learning-journal.md](docs/learning-journal.md).
 
-When an AI coding session starts in this folder, [tools/sync-codex.ps1](tools/sync-codex.ps1) copies in a newer Codex from Google Drive and regenerates `CLAUDE.md` and `.claude/agents/`. [tools/sync-workspace.ps1](tools/sync-workspace.ps1) mirrors the project documents. The Dominus and Anima skills live in [.claude/skills/](.claude/skills/).
+When an AI coding session starts in this folder, [tools/sync-codex.ps1](tools/sync-codex.ps1) copies in a newer Codex from Google Drive and regenerates `CLAUDE.md` and `.claude/agents/`. [tools/sync-workspace.ps1](tools/sync-workspace.ps1) mirrors the project documents. The Dominus and Anima skills live in [.claude/skills/](.claude/skills).

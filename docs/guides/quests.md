@@ -86,3 +86,18 @@ quests/first-day.json:9: "many" is not a count from 1 to 9999
 ## Saves
 
 The state of every quest (status, step, progress, time on the step) is saved with the world in `things.json` (version 2). Older saves load with every quest locked. A quest or step that no longer exists in the data loses its progress with a note in the log.
+
+## What the game reports (US-181)
+
+Only what the hero does counts; clan members and other people doing the same thing never advance a quest.
+
+| Objective | The game reports it when |
+|---|---|
+| `talk <who>` | a conversation with that person opens; `<who>` is their name in lower case with `-` for spaces (`old-tok`), one of their roles (`elder`) or their kind |
+| `goto <place>` | the hero is within three tiles of a named place of the level (`places` in the level file), named in lower case with `-` |
+| `gather <item> [n]` | items enter the hero bag, except crafted ones (picking, gathering, a `give hero ...` effect, a reward) |
+| `give <item> [n]` | a conversation or interaction effect `take hero <item> n` removes items from the bag |
+| `craft <item> [n]` | a recipe produces the item |
+| `interact <interaction>` | the hero finishes that interaction (a timed one counts when it ends, not when it is stopped) |
+| `defeat <kind> [n]` | the hero strikes the blow that defeats a character of that kind (the kind name of characters.json, lower case) |
+| `wait <time>`, `flag <name>` | no report needed: the clock and the story notes are looked at once a second |

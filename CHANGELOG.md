@@ -1,15 +1,6 @@
 # Changelog
 
-Record every pull request's full change set here before opening or updating it.
-Entries describe the final changes and their verification; update an entry when
-its PR changes rather than leaving an outdated description.
-
-## US-180 Quest data and runtime (Dominus) - 2026-10-05
-
-**State:** Merged into `qa` from `story/US-180`. Debug build zero warnings; own cases pass; full verify at X-M10 (D-41).
-
-- **New:** `src/sim/quest_data.{h,cpp}` (quest files, line-numbered errors, writer), `src/sim/quest_book.{h,cpp}` (state machine, events, save), `tests/sim/quest_test.cpp`, `docs/guides/quests.md`, `assets/data/schemas/quest.schema.json`, `docs/plans/US-180.md`.
-- **Changed:** rule language gains `quest(id)`, `step(id)` and the verb `quest`; the game loads `assets/data/quests/`, ticks the quests every 10 ticks, saves them in `things.json` version 2 (version 1 still loads), reloads them on F5.
+Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
 ## K-M10 kickoff (Dominus) - 2026-10-05
 
@@ -29,33 +20,33 @@ its PR changes rather than leaving an outdated description.
 
 **State:** On `qa`. K-M9 answered by the owner (D-56, 24 questions); design in `docs/plans/M9-graph-editor-design.md`.
 
-- **US-170 node-graph widget:** `src/luna/engine/node_graph.h/.cpp` (`NodeGraph` model, `NodeGraphView` canvas: right-drag pan, wheel zoom 25-400% around the cursor, drag, selection box, wire from output to input, delete, frame all, `layoutLayers`); `src/game/graph_commands.h` (`GraphEditCommand`, graph edits in the one Editor History). Tests: `tests/luna/node_graph_test.cpp` (9 cases), `tests/game/graph_command_test.cpp` (1 case). Only `CMakeLists.txt` of the existing code changed (three source lines). Verified: Debug build, zero warnings; the 10 US-170 cases pass alone; full verify at X-M9.
-- **US-171 dialogue graph editor:** `src/game/dialogue_graph.h/.cpp` (a `.dlg` as Node, Line, Choice, If, Do, Goto and Note cards and back through `parseDialogue` and `writeDialogue`, notes kept; rows layout; `<name>.dlg.layout.json` sidecar), `src/game/graph_editor.h/.cpp` (full-screen editor: file list, add bar, side panel, Save with a backup and an ask-once overwrite guard, Save reads the data like F5), `Editor`: **Talk** button, Esc/Ctrl+S/Ctrl+Z/Ctrl+Y inside the graph, graph edits in the one History. `NodeGraph` cards gained `fields`; wires route around when they run backwards. Guide: `docs/guides/dialogue-format.md` (The graph editor). Evidence: `docs/evidence/US-171/dialogue-graph.png`. Tests: `tests/game/dialogue_graph_test.cpp` (7), `tests/game/graph_editor_test.cpp` (7). Not built: the Sub-conversation call card (CI-014).
-- **US-172 interaction graph editor:** `src/game/interaction_graph.h/.cpp` (an interaction file as Actor, Verb, Target, Needs, Effects, NPC rule and Chronicle cards and back; the real loader checks the result; `toJson` writes it; the `//` lines at the top of a file are kept), `GraphEditor` serves two kinds (`Kind::Dialogue`, `Kind::Interaction`) with a Talk/Rules switch, the Editor's **Rules** button. Guide: `docs/guides/interaction-data.md` (The graph editor). Evidence: `docs/evidence/US-172/interaction-graph.png`. Tests: `tests/game/interaction_graph_test.cpp` (8) and 3 more in `graph_editor_test.cpp`.
-- **US-175 graph validation:** `src/sim/graph_check.h/.cpp` (headless: unreachable nodes, dead ends, unknown nodes, items, needs, built-in actions, conversations, interactions, tags; `GraphCatalog`), the finding list under the canvas in the graph editor (live, click selects the card; errors block shipping, warnings do not; Save is allowed with errors and says so), `OdysseyGame::syncGraphCatalog`, `NodeGraphView::centerOn`. Guide: `docs/guides/dialogue-format.md` (The check). Tests: `tests/sim/graph_check_test.cpp` (7, with every shipped file) and 4 in `graph_editor_test.cpp`.
-- **US-173 attach to placed things:** Pick and Graph buttons on the NPC panel's *Script* row (a placed NPC's per-partner dialogue stands from M9a); own values for a placed plant (`overrides` in the level: `interaction`, `field` delay or duration, `value` in seconds; a plant with none writes none), `sim::applyPatch`, `ActionRunner::setAdjuster`, `Editor::setSelectedOverrides` and a plant panel. Guide: `docs/guides/editor.md`. Tests: `tests/game/thing_overrides_test.cpp` (6). Shared code touched: `level.h/.cpp`, `plants.h`, `editor.h/.cpp`, `odyssey_game.cpp`, `sim/interaction.*`, `sim/action_runner.*`, `tests/game/camp.h` (one optional field).
-- **US-174 test-play:** `src/sim/test_play.h/.cpp` (headless: `TestState` and `applyTestState` words, `TestWorld`, `TestPlay` over `Conversation`), `Conversation::jumpTo`, the **Test** card of the graph editor (values as words, Play, From here, Leave, Stop, numbered choices, effect log; plays the unsaved graph on a world of its own, nothing written, no Undo step). Guide: `docs/guides/dialogue-format.md` (Test-play). Evidence: `docs/evidence/US-174/test-play.png`. Tests: `tests/sim/test_play_test.cpp` (7) and 5 in `graph_editor_test.cpp`. Not built: forced rolls (none exists in the languages) and test-play of an interaction.
+- **US-170 node-graph widget:** `src/luna/engine/node_graph.h/.cpp` (`NodeGraph` model, `NodeGraphView` canvas: right-drag pan, wheel zoom 25-400% around the cursor, drag, selection box, wire from output to input, delete, frame all, `layoutLayers`); `src/game/graph_commands.h` (`GraphEditCommand`, graph edits in the one Editor History). Tests: `tests/luna/node_graph_test.cpp` (9 cases), `tests/game/graph_command_test.cpp` (1). Only `CMakeLists.txt` of existing code changed (three source lines). Debug build, zero warnings; the 10 US-170 cases pass alone; full verify at X-M9.
+- **US-171 dialogue graph editor:** `src/game/dialogue_graph.h/.cpp` (a `.dlg` as Node, Line, Choice, If, Do, Goto and Note cards and back through `parseDialogue` and `writeDialogue`, notes kept; rows layout; `<name>.dlg.layout.json` sidecar), `src/game/graph_editor.h/.cpp` (full-screen editor: file list, add bar, side panel, Save with a backup and an ask-once overwrite guard, Save reads the data like F5). `Editor`: **Talk** button, Esc/Ctrl+S/Ctrl+Z/Ctrl+Y inside the graph, graph edits in the one History. `NodeGraph` cards gained `fields`; wires route around when they run backwards. Guide: `docs/guides/dialogue-format.md` (The graph editor). Evidence: `docs/evidence/US-171/dialogue-graph.png`. Tests: `tests/game/dialogue_graph_test.cpp` (7), `tests/game/graph_editor_test.cpp` (7). Not built: the Sub-conversation call card (CI-014).
+- **US-172 interaction graph editor:** `src/game/interaction_graph.h/.cpp` (an interaction file as Actor, Verb, Target, Needs, Effects, NPC rule and Chronicle cards and back; the real loader checks the result; `toJson` writes it; the `//` lines at the top of a file are kept). `GraphEditor` serves two kinds (`Kind::Dialogue`, `Kind::Interaction`) with a Talk/Rules switch and the Editor's **Rules** button. Guide: `docs/guides/interaction-data.md` (The graph editor). Evidence: `docs/evidence/US-172/interaction-graph.png`. Tests: `tests/game/interaction_graph_test.cpp` (8) and 3 more in `graph_editor_test.cpp`.
+- **US-175 graph validation:** `src/sim/graph_check.h/.cpp` (headless: unreachable nodes, dead ends, unknown nodes, items, needs, built-in actions, conversations, interactions, tags; `GraphCatalog`); the finding list under the canvas in the graph editor (live, click selects the card; errors block shipping, warnings do not; Save is allowed with errors and says so); `OdysseyGame::syncGraphCatalog`, `NodeGraphView::centerOn`. Guide: `docs/guides/dialogue-format.md` (The check). Tests: `tests/sim/graph_check_test.cpp` (7, with every shipped file) and 4 in `graph_editor_test.cpp`.
+- **US-173 attach to placed things:** Pick and Graph buttons on the NPC panel's *Script* row (a placed NPC's per-partner dialogue stands from M9a); own values for a placed plant (`overrides` in the level: `interaction`, `field` delay or duration, `value` in seconds; a plant with none writes none); `sim::applyPatch`, `ActionRunner::setAdjuster`, `Editor::setSelectedOverrides` and a plant panel. Guide: `docs/guides/editor.md`. Tests: `tests/game/thing_overrides_test.cpp` (6). Shared code touched: `level.h/.cpp`, `plants.h`, `editor.h/.cpp`, `odyssey_game.cpp`, `sim/interaction.*`, `sim/action_runner.*`, `tests/game/camp.h` (one optional field).
+- **US-174 test-play:** `src/sim/test_play.h/.cpp` (headless: `TestState` and `applyTestState` words, `TestWorld`, `TestPlay` over `Conversation`), `Conversation::jumpTo`, the **Test** card of the graph editor (values as words, Play, From here, Leave, Stop, numbered choices, effect log; plays the unsaved graph on a world of its own, nothing written, no Undo step). Guide: `docs/guides/dialogue-format.md` (Test-play). Evidence: `docs/evidence/US-174/test-play.png`. Tests: `tests/sim/test_play_test.cpp` (7) and 5 in `graph_editor_test.cpp`. Not built: forced rolls (none exist in the languages) and test-play of an interaction.
 - **Owner change to the Codex text:** zoom range 25-400% (Codex said 50-200%), D-56 Q7.
 
 ## M8e Building life: US-253, US-254, US-255, US-257 (Mraw) - 2026-10-05
 
 **State:** On `qa`. K-M8e answered by the owner (design in `docs/plans/M8e-building-life-design.md`).
 
-- **US-253 clans build:** idle clan members bring up to 2 of each missing material from their surroundings (60 s rest) and work on blueprints (`npc` rules in `deliver-materials.json` and `build-work.json`); `src/sim/building_life.h/.cpp` `RivalBuilders` (a list of rival buildings per season, deterministic, saved, hashed). Rival buildings are lists, not cells of the level (technical choice, see `docs/plans/US-253.md`). Tests: `tests/sim/building_life_test.cpp`, `tests/game/building_life_game_test.cpp`.
+- **US-253 clans build:** idle clan members bring up to 2 of each missing material from their surroundings (60 s rest) and work on blueprints (`npc` rules in `deliver-materials.json` and `build-work.json`); `src/sim/building_life.h/.cpp` `RivalBuilders` (a list of rival buildings per season, deterministic, saved, hashed). Rival buildings are lists, not cells of the level (technical choice, see `docs/plans/stories-M8e.md#us-253`). Tests: `tests/sim/building_life_test.cpp`, `tests/game/building_life_game_test.cpp`.
 - **US-254 interiors:** `OdysseyGame::enterBuilding/leaveBuilding` keep the outside world while an interior level plays; `Subject::Kind::Place` makes named places with tags right-clickable; interactions `enter-building`, `leave-building`; sample level `assets/levels/interior-hut.json`; tag `enterable`.
 - **US-255 damage and fire:** raids by rivals at war at each season start (40 hp, 1 in 3 a fire), fire shots ignite, `repair`, `douse-fire` (clan members too), flames and fire light on burning pieces, `light` of finished buildings at night; `HeroLife::setRelation`.
 - **US-257 life:** owners at dawn, `World::setHoused` with `shelterWarmthPercent` 40 (`needs.json`), `World::setStorageMeals` halves spoilage, kind field `capacity`, interaction `store-food`, tag `storage` for the store use.
 
 ## M8d Buildings: US-250, US-251, US-252, US-256 (Mraw) - 2026-10-05
 
-**State:** On `qa`. K-M8d answered by the owner (D-55); tests are written per story and run once at X-M8d (owner, 2026-10-05). X-M8d: verify ran, two shards failed (level version, three actions without a file), fixed; see docs/gates/M8d.md.
+**State:** On `qa`. K-M8d answered by the owner (D-55); tests are written per story and run once at X-M8d (owner, 2026-10-05). X-M8d: verify ran, two shards failed (level version, three actions without a file), fixed; see `docs/gates/M8d.md`.
 
-- **US-250 data:** `assets/data/buildings/pieces.json`, `kinds.json` and `prefabs/<id>.json` (twelve pieces, five kinds: hut, windbreak, storage pit, drying rack, palisade); the loader `src/sim/building_data.h/.cpp` reads them with `file:line: field` mistakes and leaves a bad file out; level version 6 gets a `buildings` list of its own (not the plant list, CI-008); the guide `docs/guides/building-data.md`.
+- **US-250 data:** `assets/data/buildings/pieces.json`, `kinds.json` and `prefabs/<id>.json` (twelve pieces, five kinds: hut, windbreak, storage pit, drying rack, palisade); the loader `src/sim/building_data.h/.cpp` reads them with `file:line: field` mistakes and leaves a bad file out; level version 6 gets a `buildings` list of its own (not the plant list, CI-008); guide `docs/guides/building-data.md`.
 - **US-251 blueprints:** `src/sim/building_store.h/.cpp` (placing with a validity check, delivering materials, work in stages limited by what was delivered, cancelling with a drop of the delivered materials, a hash, a save) and the Game layer `src/game/building_layer.h/.cpp`: the Build menu (key **B**, a side list), the ghost on a 1 m grid with **R** to turn it, red where it cannot stand, a see-through blueprint with a bar, placeholder art made from the data, the walls as walking obstacles, `buildings.json` in the autosave. New intent `Build` (key B). Subject kind `Building` for the right-click menu; interactions `deliver-materials`, `build-work`, `cancel-blueprint`; built-in actions of the same names and `learn-blueprint`.
 - **US-252 pieces and rooms:** a piece is a one-piece building (`piece:<id>`); walls, posts and fences block walking, doors and windows do not; a room is found by a flood fill over the walls, doors and windows (enclosed, fully roofed, with a door); the roof fades over the room the hero is in.
 - **US-256 Editor:** the **Build** tool (kinds and prefabs, R turns, click places finished), the panel of a selected building (turn, interior mode and level, owner, blueprint or finished, delete) and the **Prefab** tab (piece list, grid, size, interior, uses, cost, build time, Save); `src/game/building_editor.h/.cpp`; a saved prefab joins the data and the Build menu at once. Undo steps through `BuildingsCommand`.
 - Tests: `tests/sim/building_data_test.cpp`, `building_store_test.cpp`, `tests/game/building_game_test.cpp`, `building_editor_test.cpp`.
-- Owner-only: GPU screenshots of the Build menu, a blueprint and a built hut (`docs/plans/US-250.md` .. `US-256.md`).
+- Owner-only: GPU screenshots of the Build menu, a blueprint and a built hut (`docs/plans/stories-M8d.md#us-250` .. `US-256.md`).
 
 ## X-M9bc: exit of M9b and M9c (Mraw) - 2026-10-05
 
@@ -68,21 +59,21 @@ its PR changes rather than leaving an outdated description.
 **State:** On `story/US-294`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
 
 - Data: `assets/levels/npc-test.json` gets five places (market, grove, hut, pond, shrine) and a schedule for Tala, Harn (with a night variant), Ossa, Vell and Gur; Ossa does `fish`, Vell does `pray`; Harn carries 2 berries so he and Tala can swap.
-- Tests (not yet run): `tests/sim/npc_soak_test.cpp` (new executable `odysseus_sim_soak`, ctest `odysseus_sim_soak`, timeout 3000 s): 100,000 persons, 1,000 traders, 30 in-game days, twice with one seed, the hash of the saved state of population, director and market must match; in Release the ADR-022 budget (day under 100 ms, worst tick under 8 ms); a different seed gives a different hash. `tests/game/living_level_test.cpp` (3 cases): one day of the level (swap, chat, met), the activity of each NPC at 11:00 and Tala at the market, the level loads clean. `tests/game/trade_editor_test.cpp`: the restock check now looks at Tala's delivery day (she can swap a flint away).
-- Docs: guide (walk-through of one day, the soak), `docs/plans/US-294.md`, learning journal.
-- Unfinished checks: build, tests and the soak timing at X-M9bc; the GPU screenshots of `docs/evidence/US-294/` are owner-only manual steps.
+- Tests (not yet run): `tests/sim/npc_soak_test.cpp` (new executable `odysseus_sim_soak`, ctest `odysseus_sim_soak`, timeout 3000 s): 100,000 persons, 1,000 traders, 30 in-game days, run twice with one seed; the hash of the saved state of population, director and market must match; in Release the ADR-022 budget (day under 100 ms, worst tick under 8 ms); a different seed gives a different hash. `tests/game/living_level_test.cpp` (3 cases): one day of the level (swap, chat, met), each NPC's activity at 11:00 and Tala at the market, the level loads clean. `tests/game/trade_editor_test.cpp`: the restock check now looks at Tala's delivery day (she can swap a flint away).
+- Docs: guide (walk-through of one day, the soak), `docs/plans/stories-M9c.md#us-294`, learning journal.
+- Unfinished: build, tests and soak timing at X-M9bc; the GPU screenshots of `docs/evidence/US-294/` are owner-only manual steps.
 
 ## US-293: default interactions by partner type (Mraw) - 2026-10-05
 
 **State:** On `story/US-293`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
 
-- Simulation: `src/sim/partner_types.h/.cpp` (the partner types from `partner-types.json`, `validPartnerType` over them, the `defaults-<type>.json` loader); `NpcExtras::partnerActions` (read, written, merged: the highest layer's list for a type wins) with the Editor line; `resolveNpc` takes the defaults as the lowest layer; `DefaultActionSource` (a fourth action source) and the preference bonus; the director sees animals (`setAnimals`, `AnimalThing`), hunts them (`do hunt`, `dealings.huntPercent`, the `Hunted` event) and prefers the actions of the partner type it meets; `InteractionRegistry::load` skips `defaults-*.json`.
+- Simulation: `src/sim/partner_types.h/.cpp` (partner types from `partner-types.json`, `validPartnerType`, the `defaults-<type>.json` loader); `NpcExtras::partnerActions` (read, written, merged: the highest layer's list for a type wins) with the Editor line; `resolveNpc` takes the defaults as the lowest layer; `DefaultActionSource` (a fourth action source) and the preference bonus; the director sees animals (`setAnimals`, `AnimalThing`), hunts them (`do hunt`, `dealings.huntPercent`, the `Hunted` event) and prefers the actions of the partner type it meets; `InteractionRegistry::load` skips `defaults-*.json`.
 - Game: partner types registered before anything is read, defaults loaded and reloaded with F5, the profile carries `partnerActions`, animals fed to the director, a hunted animal leaves the world.
 - Editor: **Defaults with: <type>** and its Does line in the NPC panel, the Class panel and the Kinds tab; the partner types of the data file are offered.
 - Data: `assets/data/sim/partner-types.json`, `interactions/defaults-{class,animal,environment}.json`, `hunt.json`, `forage.json`, `rest-at-shelter.json`, `fish.json`, `pray.json`; the hunter class hunts animals; `lookRadius` and `huntPercent` in `schedule.json`.
-- Docs: guide, `docs/plans/US-293.md`, learning journal.
-- Tests (not yet run): `tests/sim/npc_defaults_test.cpp` (7 cases), `tests/game/npc_defaults_game_test.cpp` (4 cases); the `sources.count()` checks of US-291 say 4.
-- Unfinished checks: build and tests at X-M9bc.
+- Docs: guide, `docs/plans/stories-M9c.md#us-293`, learning journal.
+- Tests (not yet run): `tests/sim/npc_defaults_test.cpp` (7 cases), `tests/game/npc_defaults_game_test.cpp` (4); the `sources.count()` checks of US-291 say 4.
+- Unfinished: build and tests at X-M9bc.
 
 ## US-292: NPCs act on each other (Mraw) - 2026-10-05
 
@@ -91,9 +82,9 @@ its PR changes rather than leaving an outdated description.
 - Simulation: `NpcDirector` lets a free person near the hero choose among the interactions it can do to its close neighbour (`npc-chat`, `npc-swap`, `npc-gift`, `npc-confront`, `npc-fight`) as well as its place and event actions; the effects `opinion`, `remember`, `give`, `take` and the words `chat`, `swap`, `gift`, `fight`, `spread-opinion`, `restore`, `walk-to` are carried out in the simulation; fights with hit points and damage, deaths, witnesses and family; far persons deal once a day by a seeded roll (abstract, no events but deaths); events for the game (`NpcEvent`); the budget `maxPerHour` goes round; `NpcPopulation::neighbour` finds the partner in the grid cell; `NpcRuleContext` reads bare roots.
 - Game: the market is the director's stock book, the combat numbers come from the placed character, events drain every tick (bubbles over speakers, deaths take the figure out of the world, also after a load), the dead are no subject.
 - Data: five interaction files `npc-*.json`; `dealings` section of `assets/data/sim/schedule.json`; built-in words `chat`, `swap`, `gift`, `fight`; the tag `can-swap`.
-- Docs: guide (NPCs act on each other), `docs/plans/US-292.md`, learning journal.
-- Tests (not yet run): `tests/sim/npc_interact_test.cpp` (11 cases), `tests/game/npc_dealings_game_test.cpp` (4 cases); the US-291 sim tests load only patrol and help-with-fire so neighbouring persons do not chat there.
-- Unfinished checks: build and tests at X-M9bc.
+- Docs: guide (NPCs act on each other), `docs/plans/stories-M9c.md#us-292`, learning journal.
+- Tests (not yet run): `tests/sim/npc_interact_test.cpp` (11 cases), `tests/game/npc_dealings_game_test.cpp` (4); the US-291 sim tests load only patrol and help-with-fire so neighbouring persons do not chat there.
+- Unfinished: build and tests at X-M9bc.
 
 ## US-291: action sources (Mraw) - 2026-10-05
 
@@ -103,33 +94,33 @@ its PR changes rather than leaving an outdated description.
 - Game: the profile of every person, the registry and the events given to the director, the fire (a pit set to `burning`) posts the event `fire`; problems with `does` are logged.
 - Data: `assets/data/sim/events.json`, interactions `patrol.json` and `help-with-fire.json`, `does: ["patrol"]` in the guard class; `walk-to` among the built-in words; the tags `place`, `post`, `event`; `free` and `maxPerHour` in `schedule.json`.
 - Editor: the Does line (NPC panel, Class panel, Kinds tab).
-- Docs: guide (action sources, events.json), `docs/plans/US-291.md`, learning journal.
-- Tests (not yet run): `tests/sim/npc_actions_test.cpp` (9 cases), `tests/game/npc_life_game_test.cpp` (4 cases).
-- Unfinished checks: build and tests at X-M9bc.
+- Docs: guide (action sources, events.json), `docs/plans/stories-M9c.md#us-291`, learning journal.
+- Tests (not yet run): `tests/sim/npc_actions_test.cpp` (9 cases), `tests/game/npc_life_game_test.cpp` (4).
+- Unfinished: build and tests at X-M9bc.
 
 ## US-290: day and night schedules (Mraw) - 2026-10-05
 
 **State:** On `story/US-290`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
 
-- Simulation: `src/sim/npc_schedule.h/.cpp` (blocks of time, day and night variants, the Editor text, problems, `ScheduleConfig` and its loader); `src/sim/npc_director.h/.cpp` (`NpcDirector`: places, schedules, homes, modes; the persons near the hero follow their schedule on the hour and are interrupted by hunger and danger, the far ones are visited in slices of the day; run-length coded save `npc-life.json`); `NpcExtras` carries the `schedule` block (highest layer wins) and its Editor text fields; `NpcPopulation` gets `nearFocus`, `neighbour`, `setNeed`, hour and day accessors, a cheaper `move` and a grid whose cells are kept sorted.
+- Simulation: `src/sim/npc_schedule.h/.cpp` (blocks of time, day and night variants, the Editor text, problems, `ScheduleConfig` and its loader); `src/sim/npc_director.h/.cpp` (`NpcDirector`: places, schedules, homes, modes; persons near the hero follow their schedule on the hour and are interrupted by hunger and danger, far ones are visited in slices of the day; run-length coded save `npc-life.json`); `NpcExtras` carries the `schedule` block (highest layer wins) and its Editor text fields; `NpcPopulation` gets `nearFocus`, `neighbour`, `setNeed`, hour and day accessors, a cheaper `move` and a grid whose cells are kept sorted.
 - Level format version 5: `places` (`PlacedPlace`, `placesText`, `parsePlacesText`); the NPC `schedule` block.
 - Editor: the Places line of the Economy panel, the Day and Night lines of the Schedule form in the NPC panel, the Class panel and the Kinds tab.
 - Game: the director runs with the placed people, the figures walk to where it sends them (with collision), danger from hostiles, F5 refresh, `npc-life.json` saved and loaded; the menu of a person is where its figure stands.
 - Data: `assets/data/sim/schedule.json`.
-- Docs: guide (places, schedules, interruptions, the form), `docs/plans/US-290.md`, learning journal.
-- Tests (not yet run): `tests/sim/npc_schedule_test.cpp` (13 cases), `tests/game/schedule_editor_test.cpp` (5 cases).
-- Unfinished checks: build and tests at X-M9bc.
+- Docs: guide (places, schedules, interruptions, the form), `docs/plans/stories-M9c.md#us-290`, learning journal.
+- Tests (not yet run): `tests/sim/npc_schedule_test.cpp` (13 cases), `tests/game/schedule_editor_test.cpp` (5).
+- Unfinished: build and tests at X-M9bc.
 
 ## US-284: Editor trade panel (Mraw) - 2026-10-05
 
 **State:** On `story/US-284`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc, which now ends M9b and M9c together.
 
 - Simulation: `tradeFieldNames`, `tradeFieldText`, `setTradeField` in `src/sim/npc_extras.h/.cpp` (the six text fields of a profile and their mistakes); `trade.weights` may be 0 (switches an inherited weight off).
-- Editor: a Trade section beside the NPC panel (own values, one step of Undo per line), and the same six lines in the Class panel and the Kinds tab (`Editor::setSelectedTrade`, `setClassTrade`, `setKindTrade`, `addTradeRows`); the Class panel is taller.
+- Editor: a Trade section beside the NPC panel (own values, one Undo step per line), and the same six lines in the Class panel and the Kinds tab (`Editor::setSelectedTrade`, `setClassTrade`, `setKindTrade`, `addTradeRows`); the Class panel is taller.
 - Data: `assets/levels/npc-test.json` (written in the game's own format): shells as money, the region's berries and flint, Tala's stock and wants, Harn's furs and his rare spearhead.
-- Docs: the guide (Trade section and the extended walk-through), `docs/plans/US-284.md`, learning journal.
+- Docs: the guide (Trade section and the extended walk-through), `docs/plans/stories-M9b.md#us-284`, learning journal.
 - Tests (not yet run): `tests/game/trade_editor_test.cpp` (5 cases), `tests/sim/trade_market_test.cpp` (one more case).
-- Unfinished checks: build and tests at X-M9bc; screenshots are manual.
+- Unfinished: build and tests at X-M9bc; screenshots are manual.
 
 ## US-283: trade screen for any trader (Mraw) - 2026-10-05
 
@@ -138,19 +129,19 @@ its PR changes rather than leaving an outdated description.
 - Simulation: `TradeMarket` gains the deal rules (`Deal`, `quote`, `execute`: stock, prices, rare goods, balance, purse, surplus), the hero's balance and the traders' purses, Haggle (one seeded try a day, discount, opinion cost), all saved (`src/sim/trade_market.h/.cpp`); `purse` section in `assets/data/sim/trade.json`. On the paying side the stock curve is capped at 100 (ADR-023).
 - Game: `TraderRef` (`std::variant<RivalTrader, NpcTrader>`) and `RunFlow::openBarter(TraderRef)` (the old `openBarter(int)` stays); `Screen::Barter` shows the rival barter unchanged or the new NPC trade screen (`buildTrade`, `actTrade`, coins in and out of the balance); the action `trade` (`assets/data/interactions/trade.json`, `do open-trade`) and the tag `trades`.
 - Test fixes: the M9a Actions tests removed the shipped `trade.json` from their data copy (their stand-in `trade-test` action is about gating by attitude).
-- Docs: guide, ADR-023, `docs/plans/US-283.md`, learning journal.
-- Tests (not yet run): `tests/sim/trade_deal_test.cpp` (9 cases), `tests/game/trade_screen_test.cpp` (7 cases).
-- Unfinished checks: build and tests at X-M9bc.
+- Docs: guide, ADR-023, `docs/plans/stories-M9b.md#us-283`, learning journal.
+- Tests (not yet run): `tests/sim/trade_deal_test.cpp` (9 cases), `tests/game/trade_screen_test.cpp` (7).
+- Unfinished: build and tests at X-M9bc.
 
 ## US-282: supply and demand, and reputation (Mraw) - 2026-10-05
 
 **State:** On `story/US-282`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
 
 - Simulation: `TradeMarket` gains the price functions (`basePrice`, `stockRatioPercent`, `marketMilli`, `heroPaysMilli`, `traderPaysMilli`, in thousandths of a unit), the drift (`nudge`, daily decay), reputation (`reputationPercent`, `refuses`) and rare goods (`rareUnlocked`, `offeredGoods`, `lockedGoods`) (`src/sim/trade_market.h/.cpp`).
-- Game: the traders get the tags `has-rare-goods` and `rare-open`; the action `rare-goods` (`assets/data/interactions/rare-goods.json`, `do rare-goods`) and its reason in the Actions pop-up.
-- Docs: ADR-023 (the formula and the reasons), the guide, `docs/plans/US-282.md`, learning journal.
-- Tests (not yet run): `tests/sim/trade_price_test.cpp` (9 cases), `tests/game/trade_gate_test.cpp` (3 cases).
-- Unfinished checks: build and tests at X-M9bc.
+- Game: traders get the tags `has-rare-goods` and `rare-open`; the action `rare-goods` (`assets/data/interactions/rare-goods.json`, `do rare-goods`) and its reason in the Actions pop-up.
+- Docs: ADR-023 (the formula and the reasons), the guide, `docs/plans/stories-M9b.md#us-282`, learning journal.
+- Tests (not yet run): `tests/sim/trade_price_test.cpp` (9 cases), `tests/game/trade_gate_test.cpp` (3).
+- Unfinished: build and tests at X-M9bc.
 
 ## US-281: trader stock (Mraw) - 2026-10-05
 
@@ -158,11 +149,11 @@ its PR changes rather than leaving an outdated description.
 
 - Simulation: `src/sim/npc_extras.h/.cpp` (the `trade` block: `TradeProfile`, reading with line-numbered mistakes, writing, merging; `NpcExtras` is the one place later stories add schedules and actions); `src/sim/trade_market.h/.cpp` (`TradeMarket`: limited stock, the daily restock with fixed pieces and seeded weighted picks, wants, saved state; `PriceConfig` and its loader).
 - Classes, kinds, placed NPCs: `extras` in `NpcClass`, `NpcLayer`, `ResolvedNpc` and `PlacedCharacter`; a resolved NPC with a profile carries the tag `trader` (D-54 Q7); the level reader and writer carry the block.
-- Game: the traders are registered from the placed people, restocked once a day, saved as `trade.json`, refreshed by F5.
+- Game: traders are registered from the placed people, restocked once a day, saved as `trade.json`, refreshed by F5.
 - Data: `assets/data/sim/trade.json` (all trade numbers).
-- Docs: guide, `docs/plans/US-281.md`, learning journal.
-- Tests (not yet run): `tests/sim/trade_market_test.cpp` (8 cases), `tests/game/trade_stock_test.cpp` (5 cases).
-- Unfinished checks: build and tests at X-M9bc.
+- Docs: guide, `docs/plans/stories-M9b.md#us-281`, learning journal.
+- Tests (not yet run): `tests/sim/trade_market_test.cpp` (8 cases), `tests/game/trade_stock_test.cpp` (5).
+- Unfinished: build and tests at X-M9bc.
 
 ## US-280: currencies per region (Mraw) - 2026-10-05
 
@@ -170,68 +161,66 @@ its PR changes rather than leaving an outdated description.
 
 - Simulation: `src/sim/economy.h/.cpp` (`RegionEconomy` with currencies, prices, resources; `parsePairs`/`formatPairs` for the Editor text; `coinValue`, `takeCoins`, `makeChange`), `src/sim/economy_json.h` (level JSON).
 - Level format version 5: an optional `economy` object (`src/game/level.h/.cpp`); the shipped `npc-test.json` is rewritten as version 5; tests that look for the version number say 5.
-- Editor: Economy panel (Level, Economy...) with Money, Prices, Goods; each table one step of Undo (`Editor::setEconomyCurrencies/Prices/Resources`).
+- Editor: Economy panel (Level, Economy...) with Money, Prices, Goods; each table one Undo step (`Editor::setEconomyCurrencies/Prices/Resources`).
 - Data: item `shells` (kind `currency`, value 1) in `assets/data/hero/items.json`; the rival barter screen does not list it.
-- Docs: `docs/guides/npc-data.md`, `docs/plans/US-280.md`, `docs/learning-journal.md`, D-54 and the M9b/M9c design notes (kickoff).
-- Tests (not yet run): `tests/sim/economy_test.cpp` (4 cases), `tests/game/economy_editor_test.cpp` (5 cases).
-- Unfinished checks: build and tests at X-M9bc; screenshots are manual (`docs/plans/US-280.md`).
+- Docs: `docs/guides/npc-data.md`, `docs/plans/stories-M9b.md#us-280`, `docs/learning-journal.md`, D-54 and the M9b/M9c design notes (kickoff).
+- Tests (not yet run): `tests/sim/economy_test.cpp` (4 cases), `tests/game/economy_editor_test.cpp` (5).
+- Unfinished: build and tests at X-M9bc; screenshots are manual (`docs/plans/stories-M9b.md#us-280`).
 
 ## X-M9a: exit review of M9a NPC foundation (Mraw) - 2026-10-05
 
-**State:** On `qa`, merged into `main`. `tools/verify.ps1 -Story X-M9a -Config Both`: zero warnings, 27/27 test groups in Debug and in Release.
+**State:** On `qa`, merged into `main`. `tools/verify.ps1 -Story X-M9a -Config Both`: zero warnings, 27/27 test groups in Debug and Release.
 
 - Fix: `OdysseyGame` builds the placed people into the simulation in its constructor, not only after a restart (`src/game/odyssey_game.cpp`).
 - Test fixes: US-268 partner-types test (one vector instead of the begin/end of two temporaries), US-266 insult test level (a character was placed outside the map).
 - Gate: `docs/gates/M9a.md`; evidence `docs/evidence/X-M9a/`.
 
-
 ## US-270: NPC test level (Mraw) - 2026-10-04
 
-**State:** On `story/US-270`, merged into `qa`. Debug builds with zero warnings; the three `US-270 ...` cases (`tests/game/npc_test_level_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-270.md`).
+**State:** On `story/US-270`, merged into `qa`. Debug builds with zero warnings; the three `US-270 ...` cases (`tests/game/npc_test_level_test.cpp`) pass on their own; full verify and Release at X-M9a; screenshots manual (`docs/plans/stories-M9a.md#us-270`).
 
 - Data: `assets/levels/npc-test.json` (40 x 24, the D-52 cast: Tala trader, Ossa talker, Harn wary hunter, Vell friendly elder, Gur guard, a goblin, a deer; written by `saveLevel`) and five scripts `assets/data/dialogue/npc-{tala,ossa,harn,vell,gur}.dlg`. `valley.json` untouched.
 - Guide: the walk-through checklist table in `docs/guides/npc-data.md`.
 - Tests: loads clean (no class, kind, interaction or dialogue error; every named class and script exists), load-save-load gives the same text, each NPC's classes, attitude and who fights the hero.
 
-
 ## US-269: Editor kinds tab and map markers (Mraw) - 2026-10-04
 
-**State:** On `story/US-269`, merged into `qa`. Debug builds with zero warnings; the four `US-269 ...` cases (`tests/game/npc_kinds_tab_test.cpp`) were run on their own and pass; the full verify and Release run at X-M9a; screenshots manual (`docs/plans/US-269.md`).
+**State:** On `story/US-269`, merged into `qa`. Debug builds with zero warnings; the four `US-269 ...` cases (`tests/game/npc_kinds_tab_test.cpp`) pass on their own; full verify and Release at X-M9a; screenshots manual (`docs/plans/stories-M9a.md#us-269`).
 
 - Editor: the Class panel has the tabs Classes and Kinds. The Kinds tab edits `assets/data/npcs/<kind>.json` (classes, attitude, tags, talk, allow, deny) and Save writes it at once (`Editor::showKinds`, `selectKind`, `toggleKindClass`, `saveKind`, `kindNames`). `NpcClassBook::saveKind` checks the text with the kind parser before writing (temporary file, then rename).
-- Markers: `src/game/npc_marker.{h,cpp}` (the ring split in equal arcs per class, the first class's icon, 24 8x8 icon bitmaps); drawn only by `Editor::render`, so never in play.
+- Markers: `src/game/npc_marker.{h,cpp}` (the ring split in equal arcs per class, the first class's icon, 24 8x8 icon bitmaps); drawn only by `Editor::render`, never in play.
 - Guide extended (`docs/guides/npc-data.md`).
 
 ## US-268: Editor NPC panel (Mraw) - 2026-10-04
 
-**State:** On `story/US-268`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_editor_test.cpp`), run once at X-M9a; screenshots manual.
+**State:** On `story/US-268`, merged into `qa`. Zero warnings in Debug; tests written (`tests/game/npc_editor_test.cpp`), run once at X-M9a; screenshots manual.
 
 - Editor: the NPC panel under the properties of a selected NPC (`Editor::buildNpcPanel`): classes list, attitude, family, dialogue per partner type (`partnerTypes()`, from the class catalog), action ticks (the interactions of the registry, kept in step by `OdysseyGame::syncEditorActions`), Reset to defaults. Model: `setSelectedClasses`, `toggleSelectedClass`, `setSelectedAttitude`, `setSelectedFamily`, `setSelectedDialogue`, `setSelectedActionDenied`, `resetSelectedNpc`: only differences from the classes and the kind are kept, each change is one Undo step, a no-op makes none. Guide extended.
 
 ## US-267: actions and the Actions pop-up (Mraw) - 2026-10-04
 
-**State:** On `story/US-267`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_actions_test.cpp`), run once at X-M9a.
+**State:** On `story/US-267`, merged into `qa`. Zero warnings in Debug; tests written (`tests/game/npc_actions_test.cpp`), run once at X-M9a.
 
 - Simulation: `ThingInfo` carries the resolved `allow` and `deny` lists; `InteractionRegistry::offered` skips denied interactions, accepts allowed ones whose tags do not match, and marks range failures (`Offer::tooFar`).
-- Game: placed NPCs and creatures carry their lists (`applyActionLists`); the right-click menu of an NPC hides what it cannot do for its own reasons; `RunFlow::openActions` (`MenuMode`) lists every action with what it needs; the key X (`OdysseyGame::actionsKey`) and the `actions` interaction (`do actions`) open it. Guide extended.
+- Game: placed NPCs and creatures carry their lists (`applyActionLists`); the right-click menu of an NPC hides what it cannot do for its own reasons; `RunFlow::openActions` (`MenuMode`) lists every action with what it needs; key X (`OdysseyGame::actionsKey`) and the `actions` interaction (`do actions`) open it. Guide extended.
 
 ## US-266: confront (Mraw) - 2026-10-04
 
-**State:** On `story/US-266`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_confront_test.cpp`), run once at X-M9a.
+**State:** On `story/US-266`, merged into `qa`. Zero warnings in Debug; tests written (`tests/game/npc_confront_test.cpp`), run once at X-M9a.
 
 - New interaction field `menu: "confront"` (`src/sim/interaction.*`); five confront files and `confront.json` in `assets/data/interactions/`; built-ins `confront`, `spread-opinion`, `calm`, `provoke`. `RunFlow::openConfront` lists only the confront actions; the ordinary menu skips them. New intents `Confront` (key C) and `Actions` (key X, used by US-267); `OdysseyGame::confrontKey`.
 - Creatures with a kind file are NPCs too: they appear in `subjectAt` (tag `npc`), keep an opinion of the hero (`NpcPopulation::addCreature`), can be calmed (`Enemy::calm`) or provoked; a peaceful person can become an enemy (`startFight`). `hearingTiles` in `opinions.json`; `NpcPopulation::knows`. Guides extended.
 
 ## US-265: talk with placed NPCs (Mraw) - 2026-10-04
 
-**State:** On `story/US-265`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/game/npc_talk_test.cpp`), run once at X-M9a.
+**State:** On `story/US-265`, merged into `qa`. Zero warnings in Debug; tests written (`tests/game/npc_talk_test.cpp`), run once at X-M9a.
 
 - New subject kind `Npc` (`npcSubject`, found through the grid of the population in `subjectAt`); tags = resolved tags + `npc` + `speaks` when it has a dialogue for the player (`OdysseyGame::npcDialogueFor`, `placedCharacter`). `talk.json` now targets `speaks`; clan members carry it too.
 - `runBuiltin("talk")` and `openConversation` open the NPC's player script; `RunFlow::openContext` and `buildTalk` work for placed people without a run of the hero; the title shows the attitude word. Rule context: `opinion(npc, hero)`, `mood(npc)`; effects `opinion` and `remember` for placed people. Guides extended.
 
 ## US-264: attitudes and opinions (Mraw) - 2026-10-04
 
-**State:** On `story/US-264`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/opinion_test.cpp`, `tests/game/npc_attitude_test.cpp`), run once at X-M9a.
+**State:** On `story/US-264`, merged into `qa`. Zero warnings in Debug; tests written (`tests/sim/opinion_test.cpp`, `tests/game/npc_attitude_test.cpp`), run once at X-M9a.
 
 - `src/sim/opinion.*`: the nine `Attitude` words, `Mood` (scared, enviously), `OpinionConfig` read from the new `assets/data/sim/opinions.json` (bands, starting opinions, event amounts, same-family, dialogue worth and frequency), `attitudeFor`.
 - `NpcPopulation`: opinions of the pairs that met (a sparse map, created on the first event; reading never creates), `opinion`, `attitude`, `adjust`, `event`, `talked`, `setMood`, the same-family default, the starting attitude per person; hash and save (version 3) include them.
@@ -239,52 +228,52 @@ its PR changes rather than leaving an outdated description.
 
 ## US-263: the NPC store and detail by distance (Mraw) - 2026-10-04
 
-**State:** On `story/US-263`, merged into `qa`. Builds with zero warnings in Debug and Release; tests written (`tests/sim/npc_scale_test.cpp`, `US-263 Frame` in `tests/game/npc_people_test.cpp`), run once at X-M9a; the four sim cases were run once in Release to take the ADR-022 measurements (all passed).
+**State:** On `story/US-263`, merged into `qa`. Zero warnings in Debug and Release; tests written (`tests/sim/npc_scale_test.cpp`, `US-263 Frame` in `tests/game/npc_people_test.cpp`), run once at X-M9a; the four sim cases were run once in Release to take the ADR-022 measurements (all passed).
 
-- `NpcPopulation`: spatial grid (256-pixel cells, `near`, `move`), focus and near radius (800 px), hourly simulation of near persons and a day-end catch-up of everyone with a state that is the same whichever way the day was split, hash and save include the hours applied, compact save format version 2 (one array per person). The game sets the focus to the hero each tick and finds who meets the hero through the grid (no size limit).
+- `NpcPopulation`: spatial grid (256-pixel cells, `near`, `move`), focus and near radius (800 px), hourly simulation of near persons and a day-end catch-up of everyone, with a state that is the same however the day was split; hash and save include the hours applied; compact save format version 2 (one array per person). The game sets the focus to the hero each tick and finds who meets the hero through the grid (no size limit).
 - ADR-022 written with the measured numbers (100,000 persons: a day in 1.5 ms, worst tick 1.0 ms, save 16 ms). Guide and plan updated.
 
 ## US-262: placed NPCs are full persons (Mraw) - 2026-10-04
 
-**State:** On `story/US-262`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_population_test.cpp`, `tests/game/npc_people_test.cpp`), run once at X-M9a.
+**State:** On `story/US-262`, merged into `qa`. Zero warnings in Debug; tests written (`tests/sim/npc_population_test.cpp`, `tests/game/npc_people_test.cpp`), run once at X-M9a.
 
 - Simulation: `src/sim/npc_population.*` `NpcPopulation`: compact store (arrays per field, ring of six notes per person, interned texts), daily rules (age, needs fall and are restored, a memory of the day), `meetHero`, `hash`, versioned JSON save (`toText`/`fromText`).
-- Game: `src/game/npc_people.cpp`: `isPersonKind` (animals, monsters and the hero's kind stay creatures), `buildNpcPopulation` at every play start, `tickNpcPopulation` each tick (days and meeting the hero), save with the autosave (`npcs.json`) and load with it. Guide `docs/guides/npc-data.md` extended.
+- Game: `src/game/npc_people.cpp`: `isPersonKind` (animals, monsters and the hero's kind stay creatures), `buildNpcPopulation` at every play start, `tickNpcPopulation` each tick (days and meeting the hero), saved with the autosave (`npcs.json`) and loaded with it. Guide `docs/guides/npc-data.md` extended.
 
 ## US-261: kind defaults and placed-NPC overrides (Mraw) - 2026-10-04
 
-**State:** On `story/US-261`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_kind_test.cpp`, `tests/game/npc_kind_test.cpp`), run once at X-M9a.
+**State:** On `story/US-261`, merged into `qa`. Zero warnings in Debug; tests written (`tests/sim/npc_kind_test.cpp`, `tests/game/npc_kind_test.cpp`), run once at X-M9a.
 
 - Simulation: `src/sim/npc_kind.*`: `NpcLayer`, `NpcKind`/`NpcKindCatalog` (`assets/data/npcs/<kind>.json`, 61 shipped files), the nine attitude words, `resolveNpc` (classes, then kind, then placed NPC; allow and deny merge, later layer wins, deny wins inside a layer), `ResolvedNpc`.
 - Game: placed characters gain `attitude`, `tags`, `dialogues`, `allow`, `deny` (written only when set; level version stays 4, so older levels save unchanged); `NpcClassBook` loads the kind files, `resolve(placed)`, F5 reloads classes and kinds together. Guide `docs/guides/npc-data.md` extended.
 
 ## US-260: NPC Classes (Mraw) - 2026-10-04
 
-**State:** On `story/US-260`, merged into `qa`. Builds with zero warnings in Debug; tests written (`tests/sim/npc_class_test.cpp`, `tests/game/npc_class_editor_test.cpp`) and run once at the milestone exit X-M9a (owner, 2026-10-04); screenshots manual (`docs/plans/US-260.md`).
+**State:** On `story/US-260`, merged into `qa`. Zero warnings in Debug; tests written (`tests/sim/npc_class_test.cpp`, `tests/game/npc_class_editor_test.cpp`) and run once at the milestone exit X-M9a (owner, 2026-10-04); screenshots manual (`docs/plans/stories-M9a.md#us-260`).
 
 - Simulation: `src/sim/npc_class.*`: `NpcClass`, `NpcClassCatalog::load/parse` (errors `file:line: message`, a bad file is skipped), `toJson` (canonical, guide field order), the 24-icon set, partner types, colour helpers. Shipped classes in `assets/data/npc-classes/`: trader, talker, hunter, elder, guard, monster, animal.
-- Game: `NpcClassBook` (`src/game/npc_class_book.*`): save (checked, temp file then rename), delete (refused naming the NPCs that use it), F5 reload (all or nothing). Editor: **Class** panel (list, form, New, Save, Delete). Level version 4: `classes` on placed characters. Tests that expected "levelVersion": 3 now expect 4.
+- Game: `NpcClassBook` (`src/game/npc_class_book.*`): save (checked, temp file then rename), delete (refused naming the NPCs that use it), F5 reload (all or nothing). Editor: **Class** panel (list, form, New, Save, Delete). Level version 4: `classes` on placed characters. Tests that expected `"levelVersion": 3` now expect 4.
 - Guide `docs/guides/npc-data.md` (new).
 
 ## US-247: lighting in the Editor and quality settings (Mraw) - 2026-10-04
 
-**State:** On `story/US-247`, merged into `qa`. Built with zero warnings in Debug; tests written (`tests/game/lighting_editor_test.cpp`) and run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots and frame times are manual (`docs/plans/US-247.md`).
+**State:** On `story/US-247`, merged into `qa`. Zero warnings in Debug; tests written (`tests/game/lighting_editor_test.cpp`) and run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots and frame times are manual (`docs/plans/stories-M8c.md#us-247`).
 
-- Level version 3 (`kLevelVersion`): `lights` (`PlacedLight`: id, kind of `lights.json`, x, y); versions 1 and 2 load without them and are written as 3 on save. `Definitions::lightKinds` from `lights.json`. Tests that read "levelVersion": 2 after a save now expect 3.
+- Level version 3 (`kLevelVersion`): `lights` (`PlacedLight`: id, kind of `lights.json`, x, y); versions 1 and 2 load without them and are written as 3 on save. `Definitions::lightKinds` from `lights.json`. Tests that read `"levelVersion": 2` after a save now expect 3.
 - Editor: Light tool and palette (place, select, move, delete, undo; `LightsCommand`), Sky button and time-of-day slider (`previewHour`, view only), lit preview through `OdysseyGame::editorLightFrame`. `levelLightSources()` gives the level's lights to the game and the preview; `pointLights()` shares the conversion.
-- Quality: `LightFrame::normalMaps` / `LightingState::normalMaps`: Low lights sprites flat (the GPU backend binds the flat normal), fire shadows stay off on Low (US-245). Medium and High are the same today (Milestone-91.md). Guides: lighting, editor, settings.
+- Quality: `LightFrame::normalMaps` / `LightingState::normalMaps`: Low lights sprites flat (the GPU backend binds the flat normal), fire shadows stay off on Low (US-245). Medium and High are the same today (`docs/archive/milestones/Milestone-91.md`). Guides: lighting, editor, settings.
 
 ## US-246: weather and light (Mraw) - 2026-10-04
 
-**State:** On `story/US-246`, merged into `qa`. Tests written (`tests/game/weather_light_test.cpp`); run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots are manual (`docs/plans/US-246.md`).
+**State:** On `story/US-246`, merged into `qa`. Tests written (`tests/game/weather_light_test.cpp`); run once at the milestone exit X-M8c (owner, 2026-10-04); GPU screenshots are manual (`docs/plans/stories-M8c.md#us-246`).
 
 - `weather.json` entries gain `light` (`dim`, `tint`) and `flash` (lightning per minute). `weatherLight`, `weatherFlashRate` and `lightningFlash` (`src/game/weather.*`); `OdysseyGame::ambientLightFrame` multiplies the ambient light by the weather's light, blended over the 3 s fade, and lifts it toward white for a strike. Shipped values for rain, storms, snow, fog and dust; guide `docs/guides/lighting.md`.
 
 ## US-245: shadows from fires (Mraw) - 2026-10-04
 
-**State:** On `story/US-245`, merged into `qa` after verification in Debug (zero warnings); GPU screenshots are manual (`docs/plans/US-245.md`).
+**State:** On `story/US-245`, merged into `qa` after verification in Debug (zero warnings); GPU screenshots are manual (`docs/plans/stories-M8c.md#us-245`).
 
-- At night things near a fire throw faint shadows away from it: `OdysseyGame::castShadow` (`src/game/shadows.cpp`) shades each thing from the nearest `fireShadows.maxPerObject` shadow-casting lights that reach it (nearer is longer and darker, none in daylight, none on the Low lighting preset, none from a thing's own torch).
+- At night things near a fire throw faint shadows away from it: `OdysseyGame::castShadow` (`src/game/shadows.cpp`) shades each thing from the nearest `fireShadows.maxPerObject` shadow-casting lights that reach it (nearer is longer and darker; none in daylight, none on the Low lighting preset, none from a thing's own torch).
 - `world_lights.cpp` now builds world-space `lightSources()` shared by the lights and the shadows, and `ambientLightFrame()` / `darknessOf()` replace the inline ambient code in `render`.
 - New data in `assets/data/light/lights.json`: `fireShadows` (`maxPerObject`, `strength`) and `shadows` on a kind of light; guide `docs/guides/lighting.md`. Tests: five `US-245` cases in `tests/game/shadow_test.cpp` (one fire, two fires, budget, Low, daylight, data round trip).
 
@@ -293,15 +282,15 @@ its PR changes rather than leaving an outdated description.
 **State:** On `story/US-244`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-244/`.
 
 - Shadows of the hero, clan, placed characters, enemies, animals, plants and objects, cut from black copies of their sprite textures (`silhouette` in `image_ops`) and laid along the light by `drawShadow` (`src/luna/engine/shadow_draw.*`, one ground row at a time); `OdysseyGame::drawShadows` (`src/game/shadows.cpp`) draws them after the ground and before everything that stands. Direction, length and strength come from `celestialLight()` (US-248), the hour's `shadow` of `sky.json`, eclipses and weather.
-- New optional data: `height` and `shadow` in plants, objects, animals and characters; `shadowFade` in `weather.json` (fog, mist, cloud, overcast and whiteout 1.0, haze, smog and gloom 0.5). Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/US-244.md`. Tests: `tests/game/shadow_test.cpp`; US-155 and sky object counts untouched.
+- New optional data: `height` and `shadow` in plants, objects, animals and characters; `shadowFade` in `weather.json` (fog, mist, cloud, overcast and whiteout 1.0; haze, smog and gloom 0.5). Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/stories-M8c.md#us-244`. Tests: `tests/game/shadow_test.cpp`; US-155 and sky object counts untouched.
 
 ## US-248: celestial bodies (Mraw) - 2026-10-04
 
 **State:** On `story/US-248`, merged into `qa` after verification in Debug (zero warnings); evidence in `docs/evidence/US-248/`.
 
-- Sun and moon as `celestial` world objects of `objects.json` (`body`, `light`, `follows` clock or fixed, `orbitRadius`, `tilt`, `height`); placed ones are in the Editor's object palette; the default pair follows the clock. `src/game/celestial.*`: `currentLight` (direction away from the body, clamped elevation, strongest body wins, eclipse dimming, shadow length factor with the D-49 caps), `skySprites`, `loadCelestialEvents`; `OdysseyGame::celestialLight()` is the one function US-244 uses. Sprites drawn in the sky band; an eclipse dims the world's ambient light.
+- Sun and moon as `celestial` world objects of `objects.json` (`body`, `light`, `follows` clock or fixed, `orbitRadius`, `tilt`, `height`); placed ones are in the Editor's object palette; the default pair follows the clock. `src/game/celestial.*`: `currentLight` (direction away from the body, clamped elevation, strongest body wins, eclipse dimming, shadow length factor with the D-49 caps), `skySprites`, `loadCelestialEvents`; `OdysseyGame::celestialLight()` is the one function US-244 uses. Sprites are drawn in the sky band; an eclipse dims the world's ambient light.
 - `assets/data/light/celestial-events.json` (two sample eclipses); `sun` and `moon` kinds in `lights.json`. A mistake in an entry or the events file is a message naming file and field; the default pair stays (built-in fallback). Celestial objects are never drawn, hit or inspected as plants.
-- Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/US-248.md`. Tests: `tests/game/celestial_test.cpp`.
+- Guide `docs/guides/lighting.md` extended; manual checks `docs/plans/stories-M8c.md#us-248`. Tests: `tests/game/celestial_test.cpp`.
 
 ## US-243: fires, torches and glowing effects (Mraw) - 2026-10-04
 
@@ -315,6 +304,7 @@ its PR changes rather than leaving an outdated description.
 
 - `assets/data/light/sky.json` (keyframes relative to sunrise and sunset, D-49 values, sun and moon peaks) and `daylight` in `assets/data/sim/calendar.json` (summer 15 h, winter 8 h); the simulation ignores the new part. `skyAt` blends the light from the clan's clock; the world's ambient follows it; the moon is the dim blue light of the night and gives the shadow direction.
 - Guide `docs/guides/lighting.md` extended. Tests: `tests/game/sky_test.cpp`. The GPU-against-SDL picture test runs with the sky off.
+
 ## US-241: generated normal maps (Mraw) - 2026-10-02
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-241/`.
@@ -322,6 +312,7 @@ its PR changes rather than leaving an outdated description.
 - `odysseus_atlas --normals` (Tools) makes a normal atlas for every atlas picture (nine, committed in `assets/sprites/atlas/*_n.png`); height from the distance to the edge and the brightness, Sobel slopes; a hand-made `<frame>_n.png` next to `cuts.json` wins; a wrong-sized one is refused by name.
 - The game gives the renderer the normal maps of the hero, characters, ground and the plant, tree and animal pages (mirrored animals get mirrored normals); sprites without a map, or with a map that does not fit, are lit flat with no error.
 - `Luna` image ops `normalAtlas` and `mirroredNormals`; guide `docs/guides/lighting.md` extended. Tests: `tests/luna/normals_test.cpp`, `tests/game/normals_test.cpp` (generate, committed maps, missing, own map, the shaded hero on the GPU).
+
 ## US-240: the lighting pipeline (Mraw) - 2026-10-02
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); evidence in `docs/evidence/US-240/`.
@@ -329,19 +320,22 @@ its PR changes rather than leaving an outdated description.
 - Lit sprite shader (ambient plus up to 64 point lights, normal-map facing), `setLighting` and `setNormalMap` through Window, backends and Renderer; the SDL fallback tints by the ambient colour only; additive draws are not lit.
 - `assets/data/light/lights.json` (ambient, light kinds; D-49 values), `LightingData`, guide `docs/guides/lighting.md`; the world is drawn lit, the interface not; default is neutral, so the picture is unchanged.
 - Tests: window tests for ambient, point light and a 64-light budget (0.28 ms on the card); game tests for the data, the round trip, errors and lit-world drawing.
+
 ## US-234: frame budget at the new size (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); 10-minute run in `docs/evidence/US-234/`.
 
 - F3 overlay shows CPU (tick, draw) and GPU time; GPU time is measured on the card with a fence (SDL_GPU has no timestamp queries), only while the overlay or `--perf` is on. `--perf` logs frame figures each minute; `--people N` starts the clan with N people.
-- Dev PC (RX 7900 XTX), Release, 1080p, 500 people, 10 minutes: 59.9 FPS average, draw 0.14 ms, GPU 0.20 ms, 32 of 35,920 frames over 20 ms (autosave at day end). Scaled to the D-06 minimum PC (4x GPU, 2x CPU): about 1.4 ms of 16.7 ms. Method in `docs/plans/US-234.md`.
+- Dev PC (RX 7900 XTX), Release, 1080p, 500 people, 10 minutes: 59.9 FPS average, draw 0.14 ms, GPU 0.20 ms, 32 of 35,920 frames over 20 ms (autosave at day end). Scaled to the D-06 minimum PC (4x GPU, 2x CPU): about 1.4 ms of 16.7 ms. Method in `docs/plans/stories-M8b.md#us-234`.
 - New test `US-234 The overlay shows CPU and GPU times`.
+
 ## US-233: every screen at the new size (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings); contact sheet for the owner in `docs/evidence/US-233/`.
 
 - `RunFlow` lays its panel out from the interface size (centred, as tall as its content, up to 600 x 420) and its shade covers the whole interface; paragraphs wrap to the panel width. All run screens, the menu, Settings and the dialogue panel use it.
 - New test `US-233 Screens fit the interface at both UI scales`.
+
 ## US-232: camera zoom and UI scale (Mraw) - 2026-10-01
 
 **State:** Merged into `qa`; verified in Debug (27 of 27, zero warnings), GPU screenshots in `docs/evidence/US-232/`.
@@ -349,6 +343,7 @@ its PR changes rather than leaving an outdated description.
 - `ScaledRenderer` (Engine) draws a whole-number larger; the world is drawn at camera zoom 1x or 2x (default 2x) and the interface at UI scale 1x or 2x (default 1x), each laid out in its own pixels. `Camera::setViewSize`; pointer mapping goes through zoom and UI scale.
 - Settings screen buttons; keys + and - and the mouse wheel zoom in play; `cameraZoom` and `uiScale` in `settings.json` (guide updated).
 - Tests: `tests/luna/zoom_test.cpp`, two US-232 cases in `aiming_test.cpp`; older game tests run at zoom 1x.
+
 ## US-231: 960x540 virtual screen, window modes, hero facing and eight directions (Mraw) - 2026-10-01
 
 **State:** Merged into `qa` locally; verified in Debug (27 of 27, zero warnings).
@@ -364,7 +359,7 @@ its PR changes rather than leaving an outdated description.
 
 - While Anima published Codex v2.4 and v2.5 and requirements v2.6 and v2.7, Mraw aligned US-231 and US-232 with the owner's M8b answers (D-44, CI-010) on `story/US-231` and published its own "v2.4" Codex and "v2.6" requirements to Drive. Both lines are merged: Codex v2.6 and requirements v2.8 contain every change from both sides (Mraw's S-US-231 and S-US-232 prompts are kept word for word).
 - `docs/project/requirements/`: requirements v2.8 and the backlog; `docs/Codex.md`, `CLAUDE.md`: Codex v2.6; `docs/codex-issues.md`: CI-010 resolved.
-- For `story/US-231` when it merges `qa`: take `qa`'s version of `docs/Codex.md`, `CLAUDE.md`, `docs/codex-issues.md` and the two files in `docs/project/requirements/` (they already contain the branch's changes); keep the branch's own versions of `Handover.md`, `Limit.md`, `docs/status.md` and `docs/project/README.md`.
+- When `story/US-231` merges `qa`: take `qa`'s version of `docs/Codex.md`, `CLAUDE.md`, `docs/codex-issues.md` and the two files in `docs/project/requirements/` (they already contain the branch's changes); keep the branch's own versions of `Handover.md`, `Limit.md`, `docs/status.md` and `docs/project/README.md`.
 - From now on Codex changes go through Anima (A-002) so versions stay in one line.
 
 ## Docs: Codex v2.5, requirements v2.7, playtest plan (Dominus, Anima, D-48) - 2026-10-01
@@ -395,11 +390,10 @@ its PR changes rather than leaving an outdated description.
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-230`); merged into `qa`.
 
-- Platform: `RenderBackend` with two implementations, `GpuBackend` (SDL_GPU device and swapchain, a virtual-screen texture, nearest-neighbour sampling, batched quads, Normal and Add pipelines, a whole-number blit into the window, screenshots) and `SdlRendererBackend` (the old drawing, now also drawing through a virtual-screen texture so both give the same picture); HLSL shaders compiled with the Windows SDK's `dxc.exe` at build time (`-DLUNA_GPU=OFF` or no `dxc.exe`: the GPU backend is left out); the Window falls back to SDL_Renderer with the reason logged.
+- Platform: `RenderBackend` with two implementations, `GpuBackend` (SDL_GPU device and swapchain, a virtual-screen texture, nearest-neighbour sampling, batched quads, Normal and Add pipelines, a whole-number blit into the window, screenshots) and `SdlRendererBackend` (the old drawing, now also through a virtual-screen texture so both give the same picture). HLSL shaders are compiled with the Windows SDK's `dxc.exe` at build time (`-DLUNA_GPU=OFF` or no `dxc.exe`: the GPU backend is left out). The Window falls back to SDL_Renderer with the reason logged.
 - Engine and app: `--renderer auto|gpu|sdl`; the log says which renderer is used. The `Renderer` interface and `src/game/` did not change.
-- Docs: `docs/adr/ADR-021-sdl-gpu-renderer.md`, `docs/plans/US-230.md`, teach-back, evidence `docs/evidence/US-230/` (demo level and camp on both renderers: byte-identical).
-- Tests: `tests/game/renderer_test.cpp` (the demo level and the camp, GPU against SDL_Renderer, 0 different pixels; fallback), `tests/luna/pixels_window_test.cpp` (crisp pixels with each renderer; alpha, additive and scaled draws identical).
-
+- Docs: `docs/adr/ADR-021-sdl-gpu-renderer.md`, `docs/plans/stories-M8b.md#us-230`, teach-back, evidence `docs/evidence/US-230/` (demo level and camp on both renderers: byte-identical).
+- Tests: `tests/game/renderer_test.cpp` (demo level and camp, GPU against SDL_Renderer, 0 different pixels; fallback), `tests/luna/pixels_window_test.cpp` (crisp pixels with each renderer; alpha, additive and scaled draws identical).
 
 ## CI: failures were hidden; fixed (Dominus) - 2026-10-01
 
@@ -434,30 +428,34 @@ its PR changes rather than leaving an outdated description.
 - `docs/decisions.md`: D-44, the owner's answers to the M8b design questions (window sizes, whole steps with bars by default, zoom and UI scale in Settings and zoom on wheel and keys, first start at windowed 1280x720, zoom 2x, UI scale 1x, lighting Medium).
 - `docs/plans/M8b-renderer-design.md`: the GPU path (device and swapchain, a virtual screen texture, batching, HLSL shaders compiled with the Windows SDK's `dxc.exe` at build time, fallback to SDL_Renderer), presentation and window modes, camera zoom and UI scale, layout rules, tests without a GPU, performance method.
 - `docs/codex-issues.md`: CI-009 (K-M8b step 1 asks to confirm M8e, which cannot be done before M8b).
-- `docs/status.md`: K-M8b Done; `Milestone-75.md`, `Limit.md`.
+- `docs/status.md`: K-M8b Done; `docs/archive/milestones/Milestone-75.md`, `Limit.md`.
+
 ## X-M8: exit review of Speak to NPCs (Avengers) - 2026-10-01
 
 **State:** Documents only; all five exit criteria met; `qa` merged into `main`, tag `m8-done`.
 
 - `docs/gates/M8.md`: one section per exit criterion with its evidence, the stories, the questions for the owner (the greeting rule, the 50 small-talk lines) and the delegated technical choices.
 - `docs/gates/M8-smalltalk.md`: 50 generated small-talk lines from one seed for the owner to read, with the count of repeated lines (42 different, none more than twice).
-- `Milestone-74.md` (AP-075), `Limit.md`, `docs/status.md`.
+- `docs/archive/milestones/Milestone-74.md` (AP-075), `Limit.md`, `docs/status.md`.
+
 ## US-165: NPCs talk to each other (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-165`); merged into `qa`.
 
 - Simulation: `World::takeTalks()` (who has just talked, for the screen only: not saved, not hashed), `selectPair` (the `@pair` script for two people and a kind of event).
 - Game: `Exchanges` (talk, quarrel, courtship, pairing, sharing and gift events of two clan members within 12 m of the hero become an exchange of speech bubbles: 3 s a line, in turn, one exchange at a time, three may wait) and `Bubbles::remove`.
-- Data and docs: `social.*` topics in `smalltalk.json`, `pair-elder-child.dlg`, the guide section "Clan members talking to each other", `docs/plans/US-165.md`, teach-back, evidence `docs/evidence/US-165/`.
+- Data and docs: `social.*` topics in `smalltalk.json`, `pair-elder-child.dlg`, the guide section "Clan members talking to each other", `docs/plans/stories-M8.md#us-165`, teach-back, evidence `docs/evidence/US-165/`.
 - Tests: 5 game cases in `tests/game/exchange_test.cpp`, 3 simulation cases in `tests/sim/selection_test.cpp`.
+
 ## US-164: Conversations are remembered (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-164`); merged into `qa`.
 
 - Simulation: `World::rememberConversation` (an ordinary memory, Gift or Quarrel by the feeling, major from 60, plus a free-text note), `MemoryNote::clause`, `FlagStore` (story notes, ordered, saved, hashed).
 - Game: the effects `remember`, `flag` and `chronicle` are carried out; `flag(name)` reads the store; flags are saved in `things.json` and start empty in a new run; the rude answer of generated small talk leaves a bad memory (-40); the elder remembers the berries (20).
-- Docs: the guide section "Being remembered", `docs/plans/US-164.md`, teach-back.
+- Docs: the guide section "Being remembered", `docs/plans/stories-M8.md#us-164`, teach-back.
 - Tests: `tests/sim/memory_talk_test.cpp` (7 cases: memory, gossip at half strength, two days, flags, saved), 4 new game cases in `tests/game/conversation_test.cpp`.
+
 ## US-163: Generated small talk (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-163`); merged into `qa`.
@@ -465,7 +463,8 @@ its PR changes rather than leaving an outdated description.
 - Data: `assets/data/dialogue/smalltalk.json` (topics memory, people, needs, season, hero, hunt; templates for any mood and for a mood).
 - Simulation: `smalltalk` (the checked file reader and the generator: topic by weights, one of the three newest facts, a template for the mood that is not tired out), `MemoryNote` and `Person::notes` (free-text memories: saved, hashed, never read by the simulation), `{smalltalk.topic}` in scripts, the generated talk with Thank you and Be quiet (opinion -10).
 - Game: Talk with no script opens small talk (and still warms the two); the file loads and reloads with the dialogue files.
-- Tests: `tests/sim/smalltalk_test.cpp` (11 cases), 4 new game cases in `tests/game/conversation_test.cpp`; the older Talk checks of US-152 and US-161 follow the new behaviour. Docs: the small-talk section of the dialogue guide, `docs/plans/US-163.md`, teach-back, evidence `docs/evidence/US-163/` (50 sample lines, a screenshot).
+- Tests: `tests/sim/smalltalk_test.cpp` (11 cases), 4 new game cases in `tests/game/conversation_test.cpp`; the older Talk checks of US-152 and US-161 follow the new behaviour. Docs: the small-talk section of the dialogue guide, `docs/plans/stories-M8.md#us-163`, teach-back, evidence `docs/evidence/US-163/` (50 sample lines, a screenshot).
+
 ## P-011: adopt Codex v2.2 and record D-40..D-43 (Avengers) - 2026-10-01
 
 **State:** Documents only; merged into `qa`.
@@ -480,30 +479,32 @@ its PR changes rather than leaving an outdated description.
 
 - Simulation: `selectScript` breaks exact ties with the seeded stream (one draw per call), `selectBark` and `barkText` for greetings, roles `hunter` and `gatherer`, the condition function `mood(who)`.
 - Game: `Bubbles` and `updateGreetings` (friendly people within 3 m greet in a bubble, at most once a minute each, at most two bubbles at once, nearest first); the greeting cooldowns and the stream "dialogue" belong to the game and reset with a run.
-- Data and docs: `greet-elder.dlg`, `greet-friend.dlg`, `greet-friend-warm.dlg`, the guide sections on ties, roles, mood and greetings, `docs/plans/US-162.md`, teach-back, evidence `docs/evidence/US-162/`.
-- Tests: `tests/sim/selection_test.cpp` (7 cases), `tests/game/greeting_test.cpp` (4 cases).
+- Data and docs: `greet-elder.dlg`, `greet-friend.dlg`, `greet-friend-warm.dlg`, the guide sections on ties, roles, mood and greetings, `docs/plans/stories-M8.md#us-162`, teach-back, evidence `docs/evidence/US-162/`.
+- Tests: `tests/sim/selection_test.cpp` (7 cases), `tests/game/greeting_test.cpp` (4).
+
 ## US-161: Conversations and the dialogue panel (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-161`: zero warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
 
 - Simulation: `conversation` (the runtime: lines and choices by condition, effects in order through the action runner, END, `leave`; the mood word; `{hero}` and `{npc}` tokens), `dialogue_select` (roles `elder` and `child`; the script that speaks for someone: name over role over kind, then priority), `ActionRunner::runEffects`.
 - Game: `Screen::Talk` in `RunFlow` (the world pauses; name and mood, words, up to five numbered choices by mouse or keys 1 to 5, greyed choices with their reason, Esc leaves); Talk opens it when a script fits, else the plain talk; the effect `opinion npc hero n` and the condition `opinion(a, b)` are real.
-- Tests: `tests/sim/conversation_test.cpp` (8 cases), `tests/game/conversation_test.cpp` (5 cases). Docs: `docs/plans/US-161.md`, the new section of `docs/guides/dialogue-format.md`, teach-back, evidence `docs/evidence/US-161/`.
+- Tests: `tests/sim/conversation_test.cpp` (8 cases), `tests/game/conversation_test.cpp` (5). Docs: `docs/plans/stories-M8.md#us-161`, the new section of `docs/guides/dialogue-format.md`, teach-back, evidence `docs/evidence/US-161/`.
+
 ## P-010: adopt Codex v2.1 (Avengers) - 2026-10-01
 
 **State:** Documents only; merged into `qa`.
 
 - `docs/status.md`: P-010 Done; K-M10..X-M14 (47 rows, To do) in Codex order; X-M6 now waits for X-M14.
 - `docs/codex-issues.md`: CI-007 and CI-008 marked resolved in Codex v2.1. D-40, D-41 and the v2.1 Charter were already synced.
-- `Milestone-68.md` (AP-069) and `Limit.md` updated.
+- `docs/archive/milestones/Milestone-68.md` (AP-069) and `Limit.md` updated.
 
 ## US-160: The .dlg format (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-160`); merged into `qa`.
 
 - Simulation: `dialogue_script` (the `.dlg` parser with `file:line: message` errors, the script model, the canonical writer, `DialogueLibrary`).
-- Data and docs: `assets/data/dialogue/elder-fire.dlg`, `docs/guides/dialogue-format.md`, `docs/plans/US-160.md`, teach-back.
-- Game: the conversations load at start and reload with F5 together with the interaction files (same panel).
+- Data and docs: `assets/data/dialogue/elder-fire.dlg`, `docs/guides/dialogue-format.md`, `docs/plans/stories-M8.md#us-160`, teach-back.
+- Game: conversations load at start and reload with F5 together with the interaction files (same panel).
 - Tests: 10 simulation cases (`tests/sim/dialogue_test.cpp`, incl. the line-9 error, the exact round trip of every shipped file and 300 mutations) and 1 game case.
 
 ## Docs: Codex v2.1, requirements v2.2 and the M10-M14 brief (Anima, Dominus) - 2026-10-01
@@ -521,7 +522,7 @@ its PR changes rather than leaving an outdated description.
 
 - Simulation: `pickBest` and `CooldownTable` (`npc_chooser`), `World::drainPersonNeed`.
 - Game: `NpcLife` (clan members and animals score the interactions near them with the files' `npc.score`, walk there, and do them with the same runner as the hero; danger drops what they were doing), actors and new subjects (animals, the hero with `armed` and `moving` tags) in the rule context, `need(...)` now means how much is missing, built-in `graze` and `flee`, errands in the clan view, placed harmless animals now walk, graze and flee.
-- Data and docs: `graze`, `flee-predator`, `flee-armed-hero`, `flee-moving-hero`; the grasses tagged `grass`; guide section "Clan members and animals act on their own"; `docs/plans/US-154.md`; teach-back.
+- Data and docs: `graze`, `flee-predator`, `flee-armed-hero`, `flee-moving-hero`; the grasses tagged `grass`; guide section "Clan members and animals act on their own"; `docs/plans/stories-M7.md#us-154`; teach-back.
 - Tests: 3 sim cases, 6 game cases (`tests/game/npc_test.cpp`); the menu test helper moved to `tests/game/camp.h`.
 
 ## US-155: Age 1 world objects (Avengers) - 2026-10-01
@@ -531,7 +532,7 @@ its PR changes rather than leaving an outdated description.
 - Data: `assets/data/objects.json` (fire pit, knapping stone, food store, shelter, flint nodule, water source, sleeping furs) and 9 interaction files.
 - Game: objects are loaded into the plant catalog (flagged `object`) and placed, saved and edited like plants (codex issue CI-008: no level format bump); programmer art by code (`object_art`); the Editor's plant tool gets the objects as a last page; built-in actions `restore` and `warm-nearby`, effect verb `fx`.
 - Simulation: `World::satisfyPersonNeed`.
-- Docs and tests: guide section "World objects", `docs/plans/US-155.md`, teach-back, 6 new game cases and 1 sim case; `US-130 Cut`, `US-136 Editor` and `US-151 Catalog` adapted (reasons in the plan).
+- Docs and tests: guide section "World objects", `docs/plans/stories-M7.md#us-155`, teach-back, 6 new game cases and 1 sim case; `US-130 Cut`, `US-136 Editor` and `US-151 Catalog` adapted (reasons in the plan).
 
 ## US-153: Timed actions and world state (Avengers) - 2026-10-01
 
@@ -539,7 +540,7 @@ its PR changes rather than leaving an outdated description.
 
 - Simulation: `ActionRunner` (durations, progress, interruption, waiting effects in a deterministic order, saved timers), `EffectHost`, `ThingRef`.
 - Game: the hero's timed actions with a ring of dots over the target; moving or attacking stops the action and gives nothing; plants have states and a plant out of its starting state is hidden (D-37); `things.json` saved with the autosave (plant states and waiting effects); `gather.json` is a 3 s job that picks the plant and ripens it again after 15 s; built-in `gather` became `gather-berries`.
-- Docs and tests: guide section "Timed actions and things that change", `docs/plans/US-153.md`, teach-back, `tests/sim/runner_test.cpp` (9 cases), 5 new cases in `tests/game/menu_test.cpp`; D-37 recorded.
+- Docs and tests: guide section "Timed actions and things that change", `docs/plans/stories-M7.md#us-153`, teach-back, `tests/sim/runner_test.cpp` (9 cases), 5 new cases in `tests/game/menu_test.cpp`; D-37 recorded.
 
 ## US-152: The context menu from data (Avengers) - 2026-10-01
 
@@ -548,7 +549,7 @@ its PR changes rather than leaving an outdated description.
 - Simulation: the effect verb `do` (a built-in action of the game); `LoadOptions::knownBuiltins` makes an unknown built-in a load error.
 - Game: `Subject` and `subjectAt` (what the hero can act on), `GameRuleContext` for any subject, 14 built-in actions moved unchanged out of the old menu code (`builtin_actions.cpp`), `RunFlow::openContext` now builds the menu from the registry.
 - Data: 20 interaction files (every action the old menu had); `gather.json` now does what the game did (instant, 2 m, "Gather").
-- Docs and tests: guide sections "Built-in actions" and the tags of the game's things, `docs/plans/US-152.md`, teach-back, `tests/game/menu_test.cpp` (6 cases); US-150 and US-156 tests adapted (see the plan).
+- Docs and tests: guide sections "Built-in actions" and the tags of the game's things, `docs/plans/stories-M7.md#us-152`, teach-back, `tests/game/menu_test.cpp` (6 cases); US-150 and US-156 tests adapted (see the plan).
 
 ## US-156: Hot reload (F5) and the validation panel (Avengers) - 2026-10-01
 
@@ -556,37 +557,37 @@ its PR changes rather than leaving an outdated description.
 
 - Luna: key F5 and the intent `Reload` (platform, engine).
 - Game: `OdysseyGame::reloadInteractions()` (all or nothing: only a clean registry replaces the data in use), the error panel (`file:line: message`, Game and Editor modes, also shown at start when a file was left out).
-- Docs and tests: guide section "Editing while the game runs: F5", `docs/plans/US-156.md`, codex issue CI-007 (catalog reload not part of this story), teach-back, 4 cases in `tests/game/tags_test.cpp`.
+- Docs and tests: guide section "Editing while the game runs: F5", `docs/plans/stories-M7.md#us-156`, codex issue CI-007 (catalog reload not part of this story), teach-back, 4 cases in `tests/game/tags_test.cpp`.
 
 ## US-151: Tags and smart objects (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-151`); merged into `qa`.
 
-- Tags and states: optional `tags` and `states` in plants, animals, weapons and characters (derived from the old fields when not written); `Catalogs::knownTags()`; unknown tag in an interaction file = warning naming file and tag.
+- Tags and states: optional `tags` and `states` in plants, animals, weapons and characters (derived from the old fields when not written); `Catalogs::knownTags()`; an unknown tag in an interaction file is a warning naming file and tag.
 - Game: `GameRuleContext` (the real world for the rule language), `plantOffers` / `plantThing` / `setPlantState`, `WorldPlant::state`; the plant context menu lists the interaction files' offers (Gather, Inspect); `assets/data/interactions/inspect.json`.
-- Docs and tests: guide section "Tags and states", `docs/plans/US-151.md`, teach-back, `tests/game/tags_test.cpp` (5 cases).
+- Docs and tests: guide section "Tags and states", `docs/plans/stories-M7.md#us-151`, teach-back, `tests/game/tags_test.cpp` (5 cases).
 
 ## US-150: Interaction data and the rule language (Avengers) - 2026-10-01
 
 **State:** Built and verified (`tools/verify.ps1 -Story US-150`: 0 warnings, 27 of 27 tests in Debug and Release); merged into `qa`.
 
 - Simulation: `rule_json` (line-aware JSON reader with comments), `rule_expr` (condition and score language: lexer, recursive-descent parser, evaluator, 8 functions), `rule_effect` (13 effect verbs, `after` delays), `interaction` (registry that loads a folder, matching with reasons, `file:line: message` errors, canonical writer).
-- Data and docs: `assets/data/interactions/gather.json`, `docs/guides/interaction-data.md`, `docs/plans/US-150.md`, teach-back in `docs/learning-journal.md`.
+- Data and docs: `assets/data/interactions/gather.json`, `docs/guides/interaction-data.md`, `docs/plans/stories-M7.md#us-150`, teach-back in `docs/learning-journal.md`.
 - Game: loads the interactions at start and logs mistakes (`odyssey_game.*`).
 - Tests: `tests/sim/rules_test.cpp` (20 cases, includes the line-12 error, the guide check, 300 damaged-file mutations), `tests/game/interactions_test.cpp`. Evidence `docs/evidence/US-150/`.
- (Avengers) - 2026-10-01
 
-**State:** Docs only. D-36 records the owner's four design answers; the design is `docs/plans/M7-interactions-design.md`; Milestone-57.md (AP-058).
+## (Avengers) - 2026-10-01
+
+**State:** Docs only. D-36 records the owner's four design answers; the design is `docs/plans/M7-interactions-design.md`; `docs/archive/milestones/Milestone-57.md` (AP-058). (The original entry title was lost.)
 
 ## P-009: Adopt Codex v2.0 and pay the test debt (Avengers) - 2026-10-01
 
 **State:** Docs only; no code changed. Verified: Debug and Release build with 0 warnings, 25 of 25 tests pass in each (`docs/evidence/P-009/`).
 
 - `docs/status.md` lists P-009 and the M7, M8, M9 prompts; `docs/decisions.md` records D-08 (answered by D-34) and D-35; `CLAUDE.md` and `docs/Codex.md` are at v2.0; the requirements and backlog are synced from Drive.
-- CI speed: the tests that open no window run in parallel (`ctest -LE window -j 4`), window tests one at a time after them; `odysseus_game_tests` is split into three CTest runs by source file (A, B, and C = everything else); Debug-only trims (Release keeps the full sizes) of `US-139 No flicker walking past the pointer` (108 to 16 combinations), `US-040 Playable` (30 to 8 seeds) and `US-014 No two living people share a name` (2 to 1 seed). Locally the non-window Debug tests went from about 450 s to 94 s.
-- `US-029` flight run is retried up to 3 times because one slow frame on a CI runner let the spear land before the quit (CI run 36828924780); the check itself is unchanged.
+- CI speed: tests that open no window run in parallel (`ctest -LE window -j 4`), window tests one at a time after them; `odysseus_game_tests` is split into three CTest runs by source file (A, B, and C = everything else); Debug-only trims (Release keeps the full sizes) of `US-139 No flicker walking past the pointer` (108 to 16 combinations), `US-040 Playable` (30 to 8 seeds) and `US-014 No two living people share a name` (2 to 1 seed). Locally the non-window Debug tests went from about 450 s to 94 s.
+- The `US-029` flight run is retried up to 3 times because one slow frame on a CI runner let the spear land before the quit (CI run 36828924780); the check itself is unchanged.
 - `docs/gates/test-debt.md` records the run; the owed test checks of M2d, M4, M5, M6 are closed there.
-
 
 ## M6: Playtest readiness - US-090, US-091, US-092 (Avengers) - 2026-10-01
 
@@ -602,74 +603,80 @@ its PR changes rather than leaving an outdated description.
 - Simulation: `HeroData` (assets/data/hero/*.json, validated with file and field), `HeroLife` (imprint, presets, comforts, focus and crossroads, mantle, professions, crafting quality, apprenticeship, dominion, barter and debts, sacred fire, aging, win and lose, save and load).
 - Game and Luna: `RunFlow` screens and context menu, `GameSettings`, F3 overlay, fullscreen switching, `--new-game`.
 - D-32 records the choices. Tests: `tests/sim/hero_test.cpp`. Evidence `docs/evidence/US-050`; exit review `docs/gates/M5.md`.
-## M4: Region, tools and saves — US-040, US-041, US-042, US-043, US-080, US-083 (Avengers) — 2026-10-01
 
-**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing); merged into local `qa`.
+## M4: Region, tools and saves - US-040, US-041, US-042, US-043, US-080, US-083 (Avengers) - 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written, not run (owner: no testing); merged into local `qa`.
 
 - `sim::Region` (seeded, integer-only, chunked), resources by biome with berry regrowth, `Rivals` (two clans, levels of detail, moving camps), region delta saves, `ChunkStreamer` (Luna), `levelFromRegion`; `--region`, `--save-dir`, `--load`; autosave at each day's end with backups; F12 developer tools (Debug only); `writeSaveText` shared by the world and region saves.
 - D-31 records the choices. Tests: `tests/sim/region_test.cpp`, `tests/game/m4_test.cpp`. Evidence `docs/evidence/US-040`, `US-083`; plan `docs/plans/M4-region-tools-saves.md`; exit review `docs/gates/M4.md`.
-## M3: The clan on screen — US-030, US-032, US-031 (Avengers) — 2026-10-01
 
-**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run (owner: no testing until M4); merged into local `qa`. Full verification and CI at the M4 gate.
+## M3: The clan on screen - US-030, US-032, US-031 (Avengers) - 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written, not run (owner: no testing until M4); merged into local `qa`. Full verification and CI at the M4 gate.
 
 - Luna: `recoloured` and `composed` (`sprite_layers`). Game: layered code-drawn people (`clan_art`), `ClanView` (the simulation's actions given places, people walking at 60 px/s with interpolation), `Level::clan` and `assets/levels/camp.json`, the clan's simulation running inside the game (`--clan`, `--clan-speed`), emote bubbles and shiver, the hover panel, the date line.
-- D-30 records the choices. Tests in `tests/game/clan_test.cpp`. Evidence `docs/evidence/US-030..US-032`; plans `docs/plans/US-030.md`, `US-031.md`, `US-032.md`.
-## US-138: Placed effects and random weather (Avengers) — 2026-10-01
+- D-30 records the choices. Tests in `tests/game/clan_test.cpp`. Evidence `docs/evidence/US-030..US-032`; plans `docs/plans/stories-M3.md#us-030`, `US-031.md`, `US-032.md`.
 
-**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
+## US-138: Placed effects and random weather (Avengers) - 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written, not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
 
 - Level format version 2 gains `effects`; the Editor has an **Fx** tool and palette of the 17 looping effects with place, select, move, delete, Undo and Redo; the toolbar button **Grid** is now **#**.
 - `WeatherCycle` (seeded PCG32 stream `weather`): a random weather from weather.json every 60-120 s, 3 s cross-fade, clear about a third of the time; drawn over the world and under the interface; `--seed` and `--weather` flags.
-- D-29 records the small choices. Tests: US-138 Weather cycle, Weather in the game, Placed effects. Evidence `docs/evidence/US-138/`; plan `docs/plans/US-138.md`; guide `docs/guides/editor.md`.
-## US-137: Animals in the Editor (Avengers) — 2026-10-01
+- D-29 records the small choices. Tests: US-138 Weather cycle, Weather in the game, Placed effects. Evidence `docs/evidence/US-138/`; plan `docs/plans/stories-M2d.md#us-138`; guide `docs/guides/editor.md`.
 
-**State:** Built and compiled (Debug and Release, zero warnings); tests written but not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
+## US-137: Animals in the Editor (Avengers) - 2026-10-01
+
+**State:** Built and compiled (Debug and Release, zero warnings); tests written, not run by the owner's instruction "Proceed without testing until reaching M4"; merged into local `qa`. Full verification and CI at the M4 gate.
 
 - The 50 animals are character kinds (`CharacterKindDef::animal`); the Editor's character palette has pages (12 to a page) with arrows; animals are drawn from the content atlas side views (`animals.{h,cpp}`), mirrored for west; the 20 predators and boars are enemies that are hit, strike back and die; the others are harmless bystanders.
-- D-28 records the small choices. Tests: US-137 The fifty animals are character kinds, Place, Enemies, Bystanders. Evidence `docs/evidence/US-137/`; plan `docs/plans/US-137.md`; guide `docs/guides/editor.md`.
-## US-136: Plants (Avengers) — 2026-10-01
+- D-28 records the small choices. Tests: US-137 The fifty animals are character kinds, Place, Enemies, Bystanders. Evidence `docs/evidence/US-137/`; plan `docs/plans/stories-M2d.md#us-137`; guide `docs/guides/editor.md`.
+
+## US-136: Plants (Avengers) - 2026-10-01
 
 **State:** Done on local verification (Debug and Release); merged into local `qa`, pushed with the M2d milestone gate.
 
 - Level format version 2 gains `plants`; the Editor has a **Plant** tool and a palette of all 153 plants (36 to a page); the toolbar button **Weapon** is now **Arms**.
 - Game: plants stand in the world; big ones (bushes, trees) block walking and flat shots through a new obstacle layer in Luna's `TileMap`; Interact with empty hands or the right mouse button (new intent `Inspect`) shows a plant's name and text for 3 s; any weapon hit destroys a plant with a leaf burst, an edible one heals 10 HP; 15 s later the same plant grows back at a random free cell in the camera view (seeded PCG32), with a growth effect.
-- D-27 records the small choices. Tests: US-136 Level format, Editor, Place and block, Inspect, Chop, Eat, Regrow. Evidence `docs/evidence/US-136/`; plan `docs/plans/US-136.md`; guide `docs/guides/editor.md`.
-## Hero orientation by the pointer, no sprite flicker (Avengers) — 2026-10-01 (follow-up to US-139, D-26)
+- D-27 records the small choices. Tests: US-136 Level format, Editor, Place and block, Inspect, Chop, Eat, Regrow. Evidence `docs/evidence/US-136/`; plan `docs/plans/stories-M2d.md#us-136`; guide `docs/guides/editor.md`.
+
+## Hero orientation by the pointer, no sprite flicker (Avengers) - 2026-10-01 (follow-up to US-139, D-26)
 
 **State:** Done on local verification (Debug and Release, 25/25); merged into local `qa`, pushed with the M2d milestone gate.
 
 - The hero always faces the mouse pointer while it is over the picture (also with empty hands and the demo weapons); off the picture he faces the way he walks. Only a held catalog weapon still aims attacks and shows the aim line.
 - Flicker fix: the facing is measured from the chest, ignores a pointer within 16 px, and changes only when the pointer is 10 degrees past the edge of the current facing's sector (`facingToward` with hysteresis); the facing before the tick's walking is what counts.
-- Tests: US-139 The hero always faces the pointer, No flicker walking past the pointer (fails without the fix), Facing with hysteresis. Evidence `docs/evidence/US-139/walk-east-facing-pointer.png`; plan `docs/plans/US-139.md` (follow-up section).
+- Tests: US-139 The hero always faces the pointer, No flicker walking past the pointer (fails without the fix), Facing with hysteresis. Evidence `docs/evidence/US-139/walk-east-facing-pointer.png`; plan `docs/plans/stories-M2d.md#us-139` (follow-up section).
 
-## US-141: Bows, crossbows, thrown weapons and staff bolts (Avengers) — 2026-10-01
+## US-141: Bows, crossbows, thrown weapons and staff bolts (Avengers) - 2026-10-01
 
 **State:** Done. Merged into `qa`, pushed; hosted CI green (run 36783802996).
 
 - `assets/data/weapons.json`: new `classes` section (launch speeds for bow, thrown, staff, gun), validated naming file and field; no speeds are hard-coded any more (`ClassDef`, `Catalogs::weaponClass`, `launchArcShot(weapon, launchSpeed, ...)`).
 - Game: bows and crossbows (class bow) and thrown weapons shoot the US-140 arcs, staffs fire flat bolts aimed at the pointer, all at the speed from the file; elements apply on hit; `OdysseyGame::cameraView()`.
 - `assets/levels/range.json`: the shooting range (seven ranged weapons to pick up, goblins in the open and behind rocks).
-- Tests: US-141 Each ranged class shoots, Every ranged starter is shootable from the hotbar, Elements on shots, Speeds come from weapons.json, Shooting range. Evidence `docs/evidence/US-141/`; plan `docs/plans/US-141.md`.
+- Tests: US-141 Each ranged class shoots, Every ranged starter is shootable from the hotbar, Elements on shots, Speeds come from weapons.json, Shooting range. Evidence `docs/evidence/US-141/`; plan `docs/plans/stories-M2d.md#us-141`.
 
-## US-140: Arc ballistics for shots (Avengers) — 2026-10-01
+## US-140: Arc ballistics for shots (Avengers) - 2026-10-01
 
 **State:** Done. Merged into `qa`, pushed; hosted CI green (run 36782177188).
 
 - `src/game/arc_shots.{h,cpp}`: bow and thrown shots are Luna Physics projectiles (fixed-point, gravity, height); the launch angle lands them at the pointer, clamped to the weapon's range and its speed's reach; each tick they stop at the first enemy (feet to 1.5 m), rock (1.0 m tall) or the ground; a miss sticks 2 s, then is gone.
 - Game: sprites lifted by height with a ground shadow; log line per shot and end; staff bolts and bullets keep the flat path. Key aim (Interact) fires a shallow chest-height arrow to the weapon's range.
 - Earlier test "US-133 Starters fight" aims thrown weapons with the pointer. D-25 covers the design.
-- Tests: US-140 Lands at the cursor, Range and misses, Hits in its path, In the game. Evidence `docs/evidence/US-140/`; plan `docs/plans/US-140.md`.
+- Tests: US-140 Lands at the cursor, Range and misses, Hits in its path, In the game. Evidence `docs/evidence/US-140/`; plan `docs/plans/stories-M2d.md#us-140`.
 
-## US-139: Mouse aiming (Avengers) — 2026-10-01
+## US-139: Mouse aiming (Avengers) - 2026-10-01
 
 **State:** Done. Merged into `qa`, pushed; hosted CI green (merge 00c0095).
 
 - Luna Engine: new intent `Attack` (left mouse button, or scripted with `--hold Attack`); `--aim` flag (same as `--point`).
 - Game: while a catalog weapon is held and the pointer is over the picture, the hero faces the pointer (nearest of 8) and Attack swings or shoots toward it at the exact angle; Interact still attacks along the facing. Dotted aim line (to the weapon's range) and a crosshair (red beyond range).
 - `WeaponBehaviour::swingToward` / `launchToward` (unit direction), `facingToward`, `Hero::face`; the old facing versions still work.
-- D-25 recorded. Tests: US-139 Facing from a direction, Face the cursor, Swing toward the cursor, Keys still work, Interact goes along the facing...; luna_tests: the left button is the Attack intent. Evidence `docs/evidence/US-139/`; plan `docs/plans/US-139.md`.
+- D-25 recorded. Tests: US-139 Facing from a direction, Face the cursor, Swing toward the cursor, Keys still work, Interact goes along the facing...; luna_tests: the left button is the Attack intent. Evidence `docs/evidence/US-139/`; plan `docs/plans/stories-M2d.md#us-139`.
 
-## US-135: Elements (Avengers) — 2026-09-30
+## US-135: Elements (Avengers) - 2026-09-30
 
 **State:** Done. Merged into `qa`, pushed; hosted CI run 36776897333 green.
 
@@ -677,9 +684,9 @@ its PR changes rather than leaving an outdated description.
 - `src/game/status.{h,cpp}`: `StatusEffects` (burn, poison, slow) held by every `Enemy`; a new hit restarts the timer, it never stacks.
 - Combat: fire burns 2 HP/s for 3 s, poison 1 HP/s for 5 s, ice slows to 50% for 2 s (a slowed enemy winds up at half speed), lightning jumps once to the nearest other enemy within 3 m for half damage, void heals the hero 25% of the damage. Hit and status effects come from effects.json. `Enemy::takeDamage(damage, flash)`.
 - D-24 (owner answers of this story) recorded in docs/decisions.md.
-- Tests: US-135 Numbers, Status effects, Fire, Fire shows, Poison, Ice, Lightning, Void, Bad numbers (odysseus_game_tests). Evidence `docs/evidence/US-135/` (a screenshot per element, the levels used); plan `docs/plans/US-135.md`.
+- Tests: US-135 Numbers, Status effects, Fire, Fire shows, Poison, Ice, Lightning, Void, Bad numbers (odysseus_game_tests). Evidence `docs/evidence/US-135/` (a screenshot per element, the levels used); plan `docs/plans/stories-M2d.md#us-135`.
 
-## US-134: Pickups and the hotbar (Avengers) — 2026-09-30
+## US-134: Pickups and the hotbar (Avengers) - 2026-09-30
 
 **State:** Done. Merged into `qa`, pushed; hosted CI run 36766225054 green.
 
@@ -688,38 +695,38 @@ its PR changes rather than leaving an outdated description.
 - Platform and Engine: keys 1-9, intents `Slot1..Slot9` (scriptable with `--hold Slot3`).
 - Game: 9-slot hotbar at the bottom centre, pickups lying in the world, first free slot, "Hotbar full", 1-9 and Shift; the starters no longer cycle with Shift. `pickups.{h,cpp}`.
 - `assets/levels/demo.json` is version 2 with the spear throw and sword as pickups. D-23 recorded in docs/decisions.md. docs/guides/editor.md explains pickups.
-- Tests: US-134 Place, Move and delete, Level versions, Pick up, Full hotbar, Select, Hotbar drawn (odysseus_game_tests); number keys (luna_tests). Evidence `docs/evidence/US-134/`; plan `docs/plans/US-134.md`.
+- Tests: US-134 Place, Move and delete, Level versions, Pick up, Full hotbar, Select, Hotbar drawn (odysseus_game_tests); number keys (luna_tests). Evidence `docs/evidence/US-134/`; plan `docs/plans/stories-M2d.md#us-134`.
 - Verification: zero warnings; 25/25 checks passed in Debug and Release, including simulation determinism and the earlier end-to-end tests. The first run exposed stale ID/effect assumptions and one missed scripted paint click; the full rerun passed.
 
-## US-133: Weapon classes and the starter set (Mraw) — 2026-09-30
+## US-133: Weapon classes and the starter set (Mraw) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
 - Game: `WeaponBehaviour` with `MeleeBehaviour` and `RangedBehaviour` for the 8 classes; projectiles for bow, thrown, staff, gun; 16 starters cycled with Shift; held icon in the hero's hand; `atlas --starters` contact sheet.
-- Tests: US-133 Classes, Starters fight, Starter set, In hand; US-029 tests kept. Evidence `docs/evidence/US-133/`; plan `docs/plans/US-133.md`.
+- Tests: US-133 Classes, Starters fight, Starter set, In hand; US-029 tests kept. Evidence `docs/evidence/US-133/`; plan `docs/plans/stories-M2d.md#us-133`.
 - Verification: `tools/verify.ps1 -Story US-133`: zero warnings, ctest 25/25 in Debug and Release.
 - Known gap: held icons are mirrored for west, not rotated (no renderer rotation).
 
-## US-132: Effect player (Mraw) — 2026-09-30
+## US-132: Effect player (Mraw) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
 - Luna: `Renderer::drawStyled` (stretch, alpha, additive) in the window, the recorder and `ImageRenderer`; `EffectPlayer` (`effects.{h,cpp}`).
 - Game: catalogs and content atlas loaded; `playEffect`; hit spark, death smoke, spear dust trail.
-- Tests: US-132 One-shot, Looping, Placement and style, Additive light (luna_tests); Combat effects, Death smoke (odysseus_game_tests). Evidence `docs/evidence/US-132/`; plan `docs/plans/US-132.md`.
+- Tests: US-132 One-shot, Looping, Placement and style, Additive light (luna_tests); Combat effects, Death smoke (odysseus_game_tests). Evidence `docs/evidence/US-132/`; plan `docs/plans/stories-M2d.md#us-132`.
 - Verification: `tools/verify.ps1 -Story US-132`: zero warnings, ctest 25/25 in Debug and Release.
 
-## US-131: Hero HP, fighting back and death (Mraw) — 2026-09-30
+## US-131: Hero HP, fighting back and death (Mraw) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
 - `Enemy`: strike-back state machine (0.5 s wind-up, one strike per wind-up, no strikes from the dead), `reachMetres`; character kinds may set `reach`.
 - `OdysseyGame`: hero 100 HP; hit enemies strike back with their sword damage within reach; fall, 1 s fade, respawn at the hero start; HUD (hero HP, red "!" over a wind-up).
 - `characters.json`: strike numbers per D-21.
-- Tests: US-131 Strike back, One strike per wind-up, Out of reach, Death and respawn; evidence `docs/evidence/US-131/`; plan `docs/plans/US-131.md`.
+- Tests: US-131 Strike back, One strike per wind-up, Out of reach, Death and respawn; evidence `docs/evidence/US-131/`; plan `docs/plans/stories-M2d.md#us-131`.
 - Verification: `tools/verify.ps1 -Story US-131`: zero warnings, ctest 25/25 in Debug and Release.
 
-## US-130: Content catalogs from the new sheets (Mraw) — 2026-09-30
+## US-130: Content catalogs from the new sheets (Mraw) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
@@ -727,27 +734,27 @@ its PR changes rather than leaving an outdated description.
 - Game: content atlas (`content_art.{h,cpp}`: pages, cut list, cutting, save/load, numbered review sheets) and catalogs (`catalogs.{h,cpp}`: weapons, plants, animals, effects, weather; validated, frames checked against the atlas).
 - `odysseus_atlas` cuts `assets/sprites/content-cuts.json` (653 items, 1,191 frames) into `assets/sprites/atlas/content-*.png` + `content.json`; `--content-preview`.
 - Data: `weapons.json` (150, 16 starters), `plants.json` (153), `animals.json` (50, 20 enemies), `effects.json` (200), `weather.json` (101); `tools/art/` scripts that measured the sheets and wrote the first catalogs; the seven sheets are in `assets/sprites/`.
-- Evidence: `docs/evidence/US-130/` (numbered sheet and name list per page); plan `docs/plans/US-130.md`.
+- Evidence: `docs/evidence/US-130/` (numbered sheet and name list per page); plan `docs/plans/stories-M2d.md#us-130`.
 - Verification: `tools/verify.ps1 -Story US-130`: Debug and Release zero warnings, ctest 25/25 in both (new cases US-130 Cut, Keys, Valid, Review).
 
-## K-M2d: Kick off M2d (Mraw) — 2026-09-30
+## K-M2d: Kick off M2d (Mraw) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
 - `docs/plans/M2d-content-design.md`: atlas pages, cut-list grids and smooth background removal, catalogs, Luna renderer additions and effect player, combat state machine, level format version 2, plants, weather.
 - Verification: docs only.
 
-## P-007: Adopt Codex v1.8 (Mraw) — 2026-09-30
+## P-007: Adopt Codex v1.8 (Mraw) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
 - `docs/status.md`: P-007 Done; K-M2d, S-US-130..S-US-138, X-M2d added (To do).
 - `docs/decisions.md`: D-21 (M2d content and combat) and D-22 (design decisions are the owner's).
 - `assets/sprites/`: the seven new sheets committed unchanged.
-- `Limit.md`, `Milestone-41.md` (AP-042): next prompt K-M2d.
+- `Limit.md`, `docs/archive/milestones/Milestone-41.md` (AP-042): next prompt K-M2d.
 - Verification: docs and assets only; CI on `qa`.
 
-## M2d planning: brief, requirements v1.8, Codex v1.8 (Mraw, Anima) — 2026-09-30
+## M2d planning: brief, requirements v1.8, Codex v1.8 (Mraw, Anima) - 2026-09-30
 
 **State:** Done; merged into `qa`.
 
@@ -756,35 +763,31 @@ its PR changes rather than leaving an outdated description.
 - Codex v1.8 by Anima (`docs/Codex.md`, `CLAUDE.md` regenerated): P-007, the M2d section (K-M2d, S-US-130..S-US-138, X-M2d), Charter human gate 3, D-15 chain, execution order, amendment log.
 - Verification: docs only; no code changed.
 
-
-## X-M2c: Exit review M2c (Mraw) — 2026-09-30
+## X-M2c: Exit review M2c (Mraw) - 2026-09-30
 
 **State:** Done; `qa` merged into `main`, tag `m2c-done`.
 
 - Evidence: `docs/gates/M2c.md`, `docs/evidence/X-M2c/` (a scripted session: paint, place, rename, save; then load, play and strike).
 - Fix: scripted input with two holds of the same intent no longer presses it on every tick (`src/luna/engine/application.cpp`); regression ctest `X-M2c Two scripted presses`; ctest 25/25 in Debug and Release, zero warnings.
 
-
-## US-126 / S-US-126: Level and character settings (Mraw) — 2026-09-30
+## US-126 / S-US-126: Level and character settings (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2c.
 
-- Game: the Editor's Level panel sets the level's name, width and height (a resize keeps what was painted and drops characters that fall outside) and the default ground; the hero start marker is dragged with Select; New and Open switch levels and ask first about unsaved changes (Save, Discard, Cancel); every setting is one step of Undo. The game plays the level the Editor has open.
+- Game: the Editor's Level panel sets the level's name, width and height (a resize keeps what was painted and drops characters that fall outside) and the default ground; the hero start marker is dragged with Select; New and Open switch levels and ask first about unsaved changes (Save, Discard, Cancel); every setting is one Undo step. The game plays the level the Editor has open.
 - Engine: hover hints stay on screen (`UiPainter::setScreen`, `keepOnScreen`).
 - Docs: `docs/guides/editor.md`, the owner's guide to every control.
 - Tests: `tests/game/settings_test.cpp` (4 cases) and a UI case; ctest 24/24 in Debug and Release, zero warnings.
 
-
-## US-125 / S-US-125: Place characters (Mraw) — 2026-09-30
+## US-125 / S-US-125: Place characters (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Sixth story of M2c.
 
-- Game: the Editor places characters from a palette of every kind (hero, wanderer, 10 monsters); Select picks one by clicking it, drags it to move it, R turns it, Delete removes it; a properties panel edits its name, HP and sword damage; every change is one step of Undo; saved with the level. In Game mode placed enemies take sword hits, flash red and are defeated; other placed characters stand where they were put.
+- Game: the Editor places characters from a palette of every kind (hero, wanderer, 10 monsters); Select picks one by clicking it, drags it to move it, R turns it, Delete removes it; a properties panel edits its name, HP and sword damage; every change is one Undo step; saved with the level. In Game mode placed enemies take sword hits, flash red and are defeated; other placed characters stand where they were put.
 - Levels: `assets/levels/demo.json` (the original demo) is what every test plays; the owner's edited `valley.json` stays the game's level (delegated decision D-20); level backups are not committed.
 - Tests: `tests/game/place_test.cpp` (3 cases), end-to-end `US-125 Place in the game`; the end-to-end tests of US-024, US-029, US-123 and US-124 now play demo.json; ctest 24/24 in Debug and Release, zero warnings.
 
-
-## US-124 / S-US-124: Paint ground tiles (Mraw) — 2026-09-30
+## US-124 / S-US-124: Paint ground tiles (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fifth story of M2c.
 
@@ -792,8 +795,7 @@ its PR changes rather than leaving an outdated description.
 - Code: `src/game/editor_history.{h,cpp}` (commands, history, line, rectangle and flood fill); `src/game/editor.{h,cpp}` extended.
 - Tests: `tests/game/paint_test.cpp` (4 cases, including random undo and redo sequences), end-to-end `US-124 Paint in the game`; ctest 23/23 in Debug and Release, zero warnings.
 
-
-## US-123 / S-US-123: Game mode and Editor mode (Mraw) — 2026-09-30
+## US-123 / S-US-123: Game mode and Editor mode (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fourth story of M2c.
 
@@ -801,8 +803,7 @@ its PR changes rather than leaving an outdated description.
 - Code: `src/game/editor.{h,cpp}` (codex issue CI-007: not in a sub-folder, because of ADR-016).
 - Tests: `tests/game/modes_test.cpp` (3 cases), end-to-end `US-123 Modes in the game`; ctest 22/22 in Debug and Release, zero warnings.
 
-
-## US-122 / S-US-122: Levels as data (Mraw) — 2026-09-30
+## US-122 / S-US-122: Levels as data (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Third story of M2c.
 
@@ -810,8 +811,7 @@ its PR changes rather than leaving an outdated description.
 - Game: `level.{h,cpp}` (definitions; level model; validated reading with file and field in every error; safe saving with 3 backups; falling back to a backup when damaged); the game starts from a level (`--level <file>`); enemies are the level's placed characters, each drawn with its own art; the ground strip follows tiles.json.
 - Tests: `tests/game/level_test.cpp` (3 cases), US-120 tests adapted; ctest 21/21 in Debug and Release, zero warnings.
 
-
-## US-121 / S-US-121: Point, click and read on screen (Mraw) — 2026-09-30
+## US-121 / S-US-121: Point, click and read on screen (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Second story of M2c.
 
@@ -820,8 +820,7 @@ its PR changes rather than leaving an outdated description.
 - Program: `odysseus.exe --click / --drag / --point / --type`; every intent usable with `--hold`.
 - Tests: `tests/luna/ui_test.cpp` (4 cases), SDL mouse and text translation; ctest 21/21 in Debug and Release, zero warnings.
 
-
-## US-120 / S-US-120: Real art in the game (Mraw) — 2026-09-30
+## US-120 / S-US-120: Real art in the game (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2c.
 
@@ -831,20 +830,17 @@ its PR changes rather than leaving an outdated description.
 - Data: the owner's sheets committed unchanged; `cuts.json` (74 character frames, 16 tiles); the atlas.
 - Tests: `tests/game/art_test.cpp` (5 cases); ctest 21/21 in Debug and Release, zero warnings.
 
-
-## US-115 / S-US-115: Tell the clan's story in episodes (Mraw) — 2026-09-30
+## US-115 / S-US-115: Tell the clan's story in episodes (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2b.
 
-- Simulation: episodes derived from the chronicle (no new state, so the hash and the save format are unchanged). Events and their causes are linked; the hardship events of a hard season are joined; the best groups (at least 3 events, one important) are told, at most 40 a century, each as one named paragraph: "The Hard Winter of year 2. It began in Summer, year 2: ... The turn came in Winter, year 2: ... It ended in Spring, year 3: ... Those who lived it: ...". Names by theme: hardship, feud and vengeance, hunting, sickness, love, apprenticeship.
+- Simulation: episodes derived from the chronicle (no new state, so the hash and save format are unchanged). Events and their causes are linked; the hardship events of a hard season are joined; the best groups (at least 3 events, one important) are told, at most 40 a century, each as one named paragraph: "The Hard Winter of year 2. It began in Summer, year 2: ... The turn came in Winter, year 2: ... It ended in Spring, year 3: ... Those who lived it: ...". Names by theme: hardship, feud and vengeance, hunting, sickness, love, apprenticeship.
 - Headless runner: `--story` prints the episodes, then the births, deaths, pairings, partings and feuds with their reasons; `--chronicle` still prints every event.
-- Data: `story.json` section `episodes`.
-- Code: `src/sim/episodes.{h,cpp}` (new).
+- Data: `story.json` section `episodes`. Code: `src/sim/episodes.{h,cpp}` (new).
 - Tests: `tests/sim/story_episode_test.cpp` (3 cases) and the command-line check `US-115 Both views`; ctest 21/21 in Debug and Release, zero warnings.
 - Balance (10 seeds x 100 years): 29 to 51 alive; every seed tells the maximum 40 episodes.
 
-
-## US-114 / S-US-114: Teach the young and hunt together (Mraw) — 2026-09-30
+## US-114 / S-US-114: Teach the young and hunt together (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fifth story of M2b.
 
@@ -855,8 +851,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `tests/sim/story_hunt_test.cpp` (6 cases); ctest 20/20 in Debug and Release, zero warnings.
 - Balance (10 seeds x 100 years): 29 to 51 alive. Seed 7: 205 apprenticeships, 73 hunting parties, 61 rescues, 2 cowards.
 
-
-## US-113 / S-US-113: Court and compete for a partner (Mraw) — 2026-09-30
+## US-113 / S-US-113: Court and compete for a partner (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Fourth story of M2b.
 
@@ -868,8 +863,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `tests/sim/story_love_test.cpp` (9 cases); ctest 20/20 in Debug and Release, zero warnings.
 - Balance (owner limit: 10 seeds x 100 years): 27 to 45 alive (before: down to 9). Seed 7 story: 109 courtships begun, 46 pairings, 4 turned down, 6 jealousies, 0 partings; partings are rare because partners rarely fall out (tuning pass before the gate).
 
-
-## US-112 / S-US-112: Share food and nurse the sick (Mraw) — 2026-09-30
+## US-112 / S-US-112: Share food and nurse the sick (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Third story of M2b.
 
@@ -878,17 +872,17 @@ its PR changes rather than leaving an outdated description.
 - Tuning: wound and sickness numbers chosen on 100 seeds x 100 years (9 to 53 alive, median 38); the low end is lifted by courtship (US-113) and a final pass.
 - Tests: `tests/sim/story_care_test.cpp` (11 cases).
 
-## US-111 / S-US-111: Quarrel, blame and take revenge (Mraw) — 2026-09-30
+## US-111 / S-US-111: Quarrel, blame and take revenge (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Second story of M2b.
 
 - Simulation: every morning each person meets someone (often a person they hold a grudge against); people who dislike each other quarrel (more when hungry or tired); grieving kin blame the thief they know of or the one who struck the blow; a feud that keeps worsening ends in an attack: a fight (injury, sometimes death) or, when the clan is against the aggressor, an exile. New: `Health` (wounds heal or kill), exile (`Person::exiled`, counted apart from the dead), death causes "a fight" and "wounds", feud records (start event, since, last revenge).
 - Data: `story.json` sections `quarrel`, `blame`, `revenge`, `health`.
 - Code: `src/sim/world_story.cpp`; `world.{h,cpp}`, `person.h`, `memory.h`, `ai.{h,cpp}`, `save.cpp` (feud records, health, exile), `report.{h,cpp}`.
-- Tests: `tests/sim/story_quarrel_test.cpp` (8 cases), shared helpers `tests/sim/story_helpers.h`, the version-2 upgrade test now also covers feuds and health.
+- Tests: `tests/sim/story_quarrel_test.cpp` (8 cases), shared helpers `tests/sim/story_helpers.h`; the version-2 upgrade test now also covers feuds and health.
 - Balance: 30 seeds x 100 years, no crash or extinction (17 to 50 alive).
 
-## US-110 / S-US-110: Give every death and feud a reason (Mraw) — 2026-09-30
+## US-110 / S-US-110: Give every death and feud a reason (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2b (Kill Gate 1 retry).
 
@@ -898,16 +892,16 @@ its PR changes rather than leaving an outdated description.
 - Runner: `[#id]` in chronicle lines, `--why <id>`.
 - Tests: `US-110 ...` cases in `tests/sim/story_test.cpp`, a real version-2 upgrade in `save_test.cpp`, ctest `US-110 Traceable`; existing texts updated ("died of hunger", "over stolen meat").
 
-## Kill Gate 1 pivot: requirements v1.6, Codex v1.6, P-005 (Mraw, Anima) — 2026-09-30
+## Kill Gate 1 pivot: requirements v1.6, Codex v1.6, P-005 (Mraw, Anima) - 2026-09-30
 
 **State:** On `qa`.
 
 - Owner verdict on Kill Gate 1 (D-GATE-M2): Pivot. Owner's redesign choices recorded as D-18; retry gate D-GATE-M2b open.
 - Requirements v1.6 and backlog (Drive, mirrored): STO-02, STO-03, SDC-02; milestone M2b Story engine; epic E11; US-110..US-115; timeline shifted 15 weeks; 12.6 statuses updated.
 - Codex v1.6 (Anima): P-005, K-M2b, S-US-110..S-US-115, X-M2b; decision table; execution order; CI-006 resolved; header without AI-vendor names.
-- P-005: docs/status.md (X-M2 failed, M2b prompts), docs/decisions.md, CI-006 fix in `tests/luna/run_game_window.cmake` and `CMakeLists.txt` (first frame within 3 s in Release, 15 s in Debug).
+- P-005: `docs/status.md` (X-M2 failed, M2b prompts), `docs/decisions.md`, CI-006 fix in `tests/luna/run_game_window.cmake` and `CMakeLists.txt` (first frame within 3 s in Release, 15 s in Debug).
 
-## X-M2: Exit review M2 = Kill Gate 1 (Mraw) — 2026-09-30
+## X-M2: Exit review M2 = Kill Gate 1 (Mraw) - 2026-09-30
 
 **State:** On `qa`. **Waiting for the owner** (human gate D-GATE-M2); `qa` is not merged into `main` and M3 does not start until the answer.
 
@@ -916,7 +910,7 @@ its PR changes rather than leaving an outdated description.
 - `docs/decisions.md`: D-GATE-M2 (open); `docs/status.md`: X-M2 blocked on the human gate.
 - Verification: 0 warnings; ctest 19/19 Debug and Release.
 
-## US-016 / S-US-016: Save and load the simulation (Mraw) — 2026-09-30
+## US-016 / S-US-016: Save and load the simulation (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Last story of M2.
 
@@ -924,10 +918,10 @@ its PR changes rather than leaving an outdated description.
 - `odysseus_headless --save <file>`, `--load <file>`.
 - Tests: `US-016 Round trip`, `US-016 Crash-safe`, three backups, `US-016 Old version`, inconsistent saves.
 - Evidence: 50 years + save + load + 50 years = 100 years straight (same hash).
-- Docs: plan `docs/plans/US-016.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M2.md#us-016`, teach-back entry.
 - Verification: 0 warnings; ctest 19/19 Debug and Release.
 
-## US-015 / S-US-015: Soak-test the simulation from the command line (Mraw) — 2026-09-30
+## US-015 / S-US-015: Soak-test the simulation from the command line (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -935,10 +929,10 @@ its PR changes rather than leaving an outdated description.
 - `odysseus_headless`: `--years`, `--help`, strict number parsing (`std::from_chars`), usage message and exit code 2 on bad input, report and tick time.
 - Tests: `US-015 Run` and `US-015 Bad input` (ctest, the real program), `US-015 The report adds up`.
 - Evidence: 100-year soak for seed 7 in Release and Debug (same world hash), bad-input output.
-- Docs: plan `docs/plans/US-015.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M2.md#us-015`, teach-back entry.
 - Verification: 0 warnings; ctest 19/19 Debug and Release.
 
-## US-014 / S-US-014: Write a readable chronicle (Mraw) — 2026-09-30
+## US-014 / S-US-014: Write a readable chronicle (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -946,20 +940,20 @@ its PR changes rather than leaving an outdated description.
 - Data: `assets/data/sim/life.json` (new); `actions.json` (forage and game budgets, rarer mammoths).
 - `odysseus_headless --chronicle [year] --threshold <n>`.
 - Tests: `US-014 Record`, `US-014 Filter`, generations.
-- Docs: plan `docs/plans/US-014.md` (with the balance notes), D-02 tuning note, teach-back entry; evidence: a century's chronicle for seed 42.
+- Docs: plan `docs/plans/stories-M2.md#us-014` (with the balance notes), D-02 tuning note, teach-back entry; evidence: a century's chronicle for seed 42.
 - Verification: 0 warnings; ctest 17/17 Debug and Release.
 
-## US-013 / S-US-013: Remember events and spread gossip (Mraw) — 2026-09-30
+## US-013 / S-US-013: Remember events and spread gossip (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
 - Data: `assets/data/sim/social.json` (new).
 - Simulation: `memory.{h,cpp}` (memories, social config, forgetting, memory limit); people keep memories, opinions and last gift and theft days; new actions GiveGift and Steal; `World::giveGift`, `recordTheft`, `talk` (gossip at half strength), favourite partners by opinion, daily forgetting; memories and opinions in the world hash.
 - Tests: `US-013 Memory`, `US-013 Gossip`, `US-013 Forgetting`, memory limit, a living clan's year.
-- Docs: plan `docs/plans/US-013.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M2.md#us-013`, teach-back entry.
 - Verification: 0 warnings; ctest 17/17 Debug and Release.
 
-## US-012 / S-US-012: Let people choose what to do (utility AI) (Mraw) — 2026-09-30
+## US-012 / S-US-012: Let people choose what to do (utility AI) (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -967,20 +961,20 @@ its PR changes rather than leaving an outdated description.
 - Simulation: `actions.{h,cpp}`, `ai.{h,cpp}` (availability, scores, decision with seeded tie-break, printable decisions); traits, skills, current action and last decision on `Person`; founders get traits and skills; the World runs hourly decisions and action effects (food store, hunting with rare mammoths, sleep, fire, talk, rest, practice), the evening meal and daily spoilage; `setDailyLife(false)` for needs-only tests.
 - `odysseus_headless --inspect <name or id>`; population and food printed.
 - Tests: `US-012 Pick best action`, `US-012 No option`, `US-012 Inspectable`, first-year survival; US-011 tests run with daily life off.
-- Docs: plan `docs/plans/US-012.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M2.md#us-012`, teach-back entry.
 - Verification: 0 warnings; ctest 17/17 Debug and Release.
 
-## US-011 / S-US-011: Give every person needs that change over time (Mraw) — 2026-09-30
+## US-011 / S-US-011: Give every person needs that change over time (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Second story of M2 (paused during M1b, resumed on its branch).
 
 - Data: `assets/data/sim/needs.json`, `clan.json`, `names.json`.
 - Simulation: `needs.{h,cpp}` (hourly decay adding up exactly to the daily rates, winter Warmth, capped satisfaction), `person.{h,cpp}`, `clan.{h,cpp}` (founders from data, names), `chronicle.{h,cpp}`; `World` holds the clan, the food store and the chronicle, decays needs every game hour, ages people and applies starvation and winter-cold deaths each morning; the world hash covers them; `calendar`: `kHoursPerDay`, `ticksPerHour()`, day length must split into hours.
 - Tests: `US-011 Decay`, `US-011 Satisfaction`, `US-011 Consequence`, starting clan from data.
-- Docs: plan `docs/plans/US-011.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M2.md#us-011`, teach-back entry.
 - Verification: 0 warnings; ctest 17/17 Debug and Release.
 
-## X-M1b: Exit review M1b, Luna Physics (Mraw) — 2026-09-30
+## X-M1b: Exit review M1b, Luna Physics (Mraw) - 2026-09-30
 
 **State:** On `qa`; merged into `main` and tagged `m1b-done` once CI on `main` is green.
 
@@ -989,7 +983,7 @@ its PR changes rather than leaving an outdated description.
 - Evidence: `docs/evidence/M1b/` (physics test output in both builds, ctest logs, screenshot).
 - Verification: 0 warnings; ctest 17/17 Debug and Release; luna_physics_tests 19 cases, 404,518 assertions.
 
-## US-029 / S-US-029: Throw a spear in the demo (Mraw) — 2026-09-30
+## US-029 / S-US-029: Throw a spear in the demo (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Completes the M1b stories (Luna Physics).
 
@@ -1001,52 +995,52 @@ its PR changes rather than leaving an outdated description.
 - Evidence: `docs/evidence/US-029/spear-in-flight.png`, `spear-hit.png`, game log.
 - Verification: 0 warnings; ctest 17/17 Debug and Release.
 
-## US-028 / S-US-028: Push and bounce bodies (Mraw) — 2026-09-30
+## US-028 / S-US-028: Push and bounce bodies (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
 - Luna Physics: `rigid_body.{h,cpp}`: `SurfaceMaterial` and combining rules, `Ground`, `RigidBody` (invariants checked in the constructor; impulses, forces, exact constant-acceleration flight, impact times inside a step, restitution and friction impulses, Coulomb sliding, rest and sleep, wake on push).
 - Tests: `US-028 Impulse` (70 kg, 140 N s -> 2 m/s), `US-028 Bounce and rest` (height ratios 0.25 = e^2, then asleep), `US-028 Friction` (stops at v^2/(2 mu g) = 1.226 m).
-- Docs: plan `docs/plans/US-028.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M1b.md#us-028`, teach-back entry.
 - Verification: 0 warnings; ctest 16/16 Debug and Release.
 
-## US-027 / S-US-027: Fly projectiles with real ballistics (Mraw) — 2026-09-30
+## US-027 / S-US-027: Fly projectiles with real ballistics (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
 - Luna Physics: `atan2`; `ballistics.{h,cpp}`: `Air` (density, wind, gravity), `Projectile` (mass, Cd*A), quadratic drag against the air's motion, semi-implicit Euler at 10 sub-steps per tick, `flyTick` (swept collisions per sub-step), `flyUntilLanding`, `launchAngleWithoutDrag` (textbook low arc), `aimLaunchAngle` (secant refinement with drag), `launchVelocity`.
 - Tests: `US-027 Arc` (40.704 m vs v^2/g = 40.775 m), `US-027 Drag and wind` (within 1% of an independent Runge-Kutta solution of the drag equation; 1.20 m drift in a 5 m/s crosswind), `US-027 Aim` (25 m target hit after 33 ticks), atan2 accuracy.
-- Docs: plan `docs/plans/US-027.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M1b.md#us-027`, teach-back entry.
 - Verification: 0 warnings; ctest 16/16 Debug and Release.
 
-## US-026 / S-US-026: Detect hits between shapes (Mraw) — 2026-09-30
+## US-026 / S-US-026: Detect hits between shapes (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
 - Luna Physics: `Sphere`, `Capsule`, `Box`, `Shape` (variant), `bounds()`, `overlap()` for all six pairings (contact point, normal, depth), `raycast()`, `sweep()` of a moving sphere (Minkowski sum; exact rounded box corners), closest-point helpers; `SpatialGrid` (2 m cells, sorted unique candidate pairs) and `findContacts()`.
 - Tests: `US-026 Overlap`, `US-026 No tunnelling` (10 m per tick, 0.2 m target, time of impact 0.498 of a tick), `US-026 Many bodies` (1,000 bodies, 114 pairs tested, same contacts as all pairs, 0.61 ms in Release), every shape pairing, rays and rounded corners.
-- Docs: plan `docs/plans/US-026.md`, teach-back entry.
+- Docs: plan `docs/plans/stories-M1b.md#us-026`, teach-back entry.
 - Verification: 0 warnings; ctest 16/16 Debug and Release.
 
-## US-025 / S-US-025: Build deterministic 3D math (Mraw) — 2026-09-30
+## US-025 / S-US-025: Build deterministic 3D math (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M1b (Luna Physics).
 
 - New layer Luna Physics (`src/luna/physics/`, target `luna_physics`, ARC-10): `Fixed` 32.32 numbers (own 128-bit multiply and long division, rounded to nearest, overflow asserted in Debug), `sqrt`, `sin`, `cos`, `degrees`; `Vec3` (dot, cross, length, normalise); `Quat` (axis-angle, product, conjugate, rotate, normalise). No floating point inside the layer.
 - Layer enforcement (ADR-016 update): all six `boundary.h` know the Physics identity; the include validator's table; Engine and Simulation link Physics.
 - Tests: `luna_physics_tests` (new, Physics identity): `US-025 Exact arithmetic` (+ 100,000 pairs against the CPU's 128-bit instructions), `US-025 Rotations`, `US-025 Determinism` (1,000,000 operations, pinned hash), sine/cosine accuracy, vectors; `US-025 Physics layer rules` (11 compiler probes); 4 more validator fixtures; `US-025 Physics uses no floating point` (source review).
-- Docs: plan `docs/plans/US-025.md`, ADR-016 update, README, teach-back entry.
+- Docs: plan `docs/plans/stories-M1b.md#us-025`, ADR-016 update, README, teach-back entry.
 - Verification: 0 warnings; ctest 16/16 Debug and Release.
 
-## Codex v1.5 and K-M1b (Anima, Mraw) — 2026-09-30
+## Codex v1.5 and K-M1b (Anima, Mraw) - 2026-09-30
 
 **State:** On `qa`.
 
 - Codex v1.5 (Anima): Limit.md and `tools/verify.ps1` are state files; L-01 continues paused story branches, verifies with `verify.ps1`, updates Limit.md; the Charter says how to stop safely at usage limits; section 0: Dominus designs, implements and tests, Anima alone writes the Codex; continuous assembly; P-004.
 - K-M1b: `docs/plans/M1b-physics-design.md` (fixed-point 32.32 with portable 128-bit arithmetic, Vec3 and quaternions, shapes and swept tests, spatial grid, integrator, ballistics and aim solver, rigid bodies, materials, top-down drawing of 3D).
-- Session end: Milestone-10.md (AP-011), Limit.md points the next chat at S-US-025.
+- Session end: `docs/archive/milestones/Milestone-10.md` (AP-011), `Limit.md` points the next chat at S-US-025.
 
-## Luna Physics added to the requirements and the Codex (Dominus, Anima) — 2026-09-30
+## Luna Physics added to the requirements and the Codex (Dominus, Anima) - 2026-09-30
 
 **State:** On `qa`. Owner decisions of 2026-09-30: Luna gets its own physics, core in the MVP, full 3D math, built right after M1.
 
@@ -1055,7 +1049,7 @@ its PR changes rather than leaving an outdated description.
 - Codex v1.4 (Anima): Charter rules 1, 3, 9 and new rule 10 (deterministic fixed-point physics, SI units, 1 tile = 1 m); K-M1b, S-US-025..S-US-029, X-M1b; P-003.
 - Repo: `docs/adr/ADR-017-luna-physics.md`, ADR index, README layer tables, status (M1b next; US-011 paused on its branch), decisions (D-15), design-doc note.
 
-## US-010 / S-US-010: Advance a seeded world clock (Mraw) — 2026-09-30
+## US-010 / S-US-010: Advance a seeded world clock (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M2 (console clan simulator).
 
@@ -1065,7 +1059,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `odysseus_sim_tests` (new, Simulation identity): Calendar, Determinism, Speed control, data validation. `tools/verify.ps1`: the tester's standard build-and-test run with evidence.
 - Verification: 0 warnings; ctest 13/13 Debug and Release.
 
-## US-024 / S-US-024: Walk the character around the map (Mraw) — 2026-09-30
+## US-024 / S-US-024: Walk the character around the map (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. Completes M1 (Luna walking skeleton).
 
@@ -1075,7 +1069,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `odysseus_game_tests` (new, Game identity: `US-024 Walk right`, `Stop at a rock`, `Stop and face the last direction`, diagonal speed), Luna collision tests, end to end `US-024 Walk to the rock` (label `window`).
 - Verification: 0 warnings; ctest 12/12 Debug and Release; real window: hero stops at x 1142.0 facing East.
 
-## US-023 / S-US-023: Show a tile map with a following camera (Mraw) — 2026-09-30
+## US-023 / S-US-023: Show a tile map with a following camera (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -1084,7 +1078,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `US-023 Only visible tiles are drawn`, `US-023 Camera follows and stops at the map edges`, TileMap grid test.
 - Verification: 0 warnings; ctest 10/10 Debug and Release; screenshot `docs/evidence/US-023/game-map.png`.
 
-## US-022 / S-US-022: Draw sprites with crisp pixels (Mraw) — 2026-09-30
+## US-022 / S-US-022: Draw sprites with crisp pixels (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -1095,7 +1089,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `US-022 Whole-number scale`, `luna_window_tests` (`US-022 Crisp pixels`, label `window`: real hidden window, pixel readback).
 - Verification: 0 warnings; ctest 10/10 Debug and Release; 1920x1080 x4 with 0 wrong pixels; 1366x768 x2 letterboxed at (203, 114).
 
-## US-021 / S-US-021: Control the game through intents (Mraw) — 2026-09-30
+## US-021 / S-US-021: Control the game through intents (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -1104,7 +1098,7 @@ its PR changes rather than leaving an outdated description.
 - Tests: `luna_platform_tests` (new, Platform identity), `US-021 Default bindings`, `US-021 Gamepad`, `US-021 Game reads only intents` (automated review).
 - Verification: 0 warnings; ctest 9/9 Debug and Release. No physical gamepad available: proven with synthetic SDL events.
 
-## US-020 / S-US-020: Open a window with a steady game loop (Mraw) — 2026-09-30
+## US-020 / S-US-020: Open a window with a steady game loop (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`. First story of M1 (Luna engine).
 
@@ -1112,10 +1106,10 @@ its PR changes rather than leaving an outdated description.
 - Luna Engine: `FixedStepClock` (20 ticks/s, capped catch-up, interpolation alpha), `FrameStats`, `Game` interface, `run()` loop with logging.
 - Game: `OdysseyGame` and its window settings. `odysseus.exe` opens the window; `--quit-after <s>`, `--log-dir <folder>`.
 - Tests: `luna_tests` (Engine identity, `US-020 Steady`), end-to-end `US-020 Open and close` (label `window`).
-- Docs: `docs/plans/M1-luna-design.md`, `docs/plans/US-020.md`, evidence, teach-back; delegated decisions D-16 (32x32 tiles), D-17 (8-way movement).
+- Docs: `docs/plans/M1-luna-design.md`, `docs/plans/stories-M1.md#us-020`, evidence, teach-back; delegated decisions D-16 (32x32 tiles), D-17 (8-way movement).
 - Verification: 0 warnings; ctest 7/7 Debug and Release; 60-second run: 60.0 FPS, 1200 ticks, first frame 279 ms.
 
-## US-004 / S-US-004: Log what happens and stop on broken assumptions (Mraw) — 2026-09-30
+## US-004 / S-US-004: Log what happens and stop on broken assumptions (Mraw) - 2026-09-30
 
 **State:** Accepted; merged into `qa`.
 
@@ -1128,93 +1122,53 @@ its PR changes rather than leaving an outdated description.
 - Docs: plan, evidence (`docs/evidence/US-004/`), teach-back, README "Logs".
 - Verification: Debug and Release 0 warnings; ctest 5/5 both; US-004 doctest 3 cases / 24 assertions; end to end: 7 runs leave 5 logs; cdb stops at `assert_probe.cpp @ 13`.
 
-## QA integration of ChatGPT's work (Mraw) — 2026-09-30 — branch `qa`
+## QA integration of ChatGPT's work (Mraw) - 2026-09-30 - branch `qa`
 
 **State:** Merged into `qa`; GitHub CI green on `qa` ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). `qa` merges into `main` at the M0 exit review.
 
-### Integration
-- New branch `qa` from `main` @ `76ee34e`; ChatGPT's work recreated as `story/US-003` @ `2170dfb` on its base `fb21b48` (all 90 uploaded files verified identical) and merged with `--no-ff`.
-- `README.md`: merge conflict resolved; keeps main's layout table (Luna, `docs/project/`) plus ChatGPT's "Layer boundaries" section; lists `cmake/` and `tests/architecture/`.
+- **Integration:** new branch `qa` from `main` @ `76ee34e`; ChatGPT's work recreated as `story/US-003` @ `2170dfb` on its base `fb21b48` (all 90 uploaded files verified identical) and merged with `--no-ff`. `README.md` merge conflict resolved: keeps main's layout table (Luna, `docs/project/`) plus ChatGPT's "Layer boundaries" section; lists `cmake/` and `tests/architecture/`.
+- **Fixes:** `tests/architecture/run_probe.cmake` accepts MSBuild's `fatal  error C1083` spelling (two spaces) by matching the error code. On Windows, 2 of 5 tests had failed although every forbidden include was rejected; no check was weakened.
+- **Verification (owner's PC, Visual Studio Community 2026, MSVC 19.51):** Debug and Release builds exit 0 with 0 warning lines. ctest 5/5 in both, AddressSanitizer on in Debug. Evidence: `docs/evidence/US-003/windows-*.txt`. GitHub Actions (Windows runner) on `qa`: green, 5/5 in Debug and Release, 1 min 50 s.
+- **Documentation and tracking:** `docs/plans/stories-M0.md#us-003`, `docs/reports/US-003-2026-09-30.md`, `docs/learning-journal.md` (US-003 teach-back), `docs/status.md` (US-003 Done), ADR-016 status; `docs/decisions.md`: D-01 and D-03 Decided by the owner, standing owner instructions (delegated decisions, `qa` branch rule, Milestone-<n>.md after every story); `docs/README.md`: new index of the docs folder; `docs/codex-issues.md`: CI-005 for Anima; `docs/archive/milestones/Milestone-2.md`: progress snapshot AP-003.
+- **Clean-up:** removed the ChatGPT upload folder, its identical zip and the duplicate local checkpoint (kept as `docs/reports/local-checkpoint-2026-09-29.md`); removed `.gitkeep` placeholders in `src/game`, `src/sim`, `src/luna/engine`, `src/luna/platform` and `tools/`, which now contain files.
 
-### Fixes
-- `tests/architecture/run_probe.cmake`: accept MSBuild's `fatal  error C1083` spelling (two spaces) by matching the error code. On Windows, 2 of 5 tests had failed although every forbidden include was rejected; no check was weakened.
+## US-003 / S-US-003: Enforce the layer rules in the build (ChatGPT) - 2026-09-29
 
-### Verification (owner's PC, Visual Studio Community 2026, MSVC 19.51)
-- Debug and Release builds: exit 0, 0 warning lines. ctest 5/5 in both, AddressSanitizer on in Debug. Evidence: `docs/evidence/US-003/windows-*.txt`.
-- GitHub Actions (Windows runner) on `qa`: green, 5/5 in Debug and Release, 1 min 50 s.
-
-### Documentation and tracking
-- `docs/plans/US-003.md`, `docs/reports/US-003-2026-09-30.md`, `docs/learning-journal.md` (US-003 teach-back), `docs/status.md` (US-003 Done), ADR-016 status.
-- `docs/decisions.md`: D-01 and D-03 Decided by the owner; standing owner instructions (delegated decisions, `qa` branch rule, Milestone-<n>.md after every story).
-- `docs/README.md`: new index of the docs folder. `docs/codex-issues.md`: CI-005 for Anima.
-- `Milestone-2.md`: progress snapshot AP-003.
-
-### Clean-up
-- Removed the ChatGPT upload folder, its identical zip and the duplicate local checkpoint (kept as `docs/reports/local-checkpoint-2026-09-29.md`).
-- Removed `.gitkeep` placeholders in `src/game`, `src/sim`, `src/luna/engine`, `src/luna/platform` and `tools/`, which now contain files.
-
-## US-003 / S-US-003: Enforce the layer rules in the build (ChatGPT) — 2026-09-29
-
-**State:** Built by ChatGPT on local `story/US-003` (GitHub push refused, HTTP 403).
-Imported unchanged as `2170dfb` and merged into `qa` on 2026-09-30; Windows
-verification and one test-harness fix in the QA entry above. **Done.**
+**State:** Built by ChatGPT on local `story/US-003` (GitHub push refused, HTTP 403). Imported unchanged as `2170dfb` and merged into `qa` on 2026-09-30; Windows verification and one test-harness fix are in the QA entry above. **Done.**
 
 ### Build and source
 
-- `CMakeLists.txt`: replace shared source-root includes with five layer targets;
-  link only downward; identify consumers privately; route game/headless through
-  Game/Simulation; register separate, serialized architecture CTest scenarios.
-- `cmake/LayerRules.cmake`: expose each layer's own headers through a narrow
-  forwarding include tree and run architecture validation on every build.
-- `cmake/ValidateLayerIncludes.cmake`: check header boundary coverage and normalized
-  include directions; restrict SDL3 to Platform and reject uncheckable macro includes.
-- `src/core/boundary.h`, `src/core/version.h`: protect Core headers with a single
-  source-layer identity check while keeping the existing version API.
-- `src/luna/platform/{boundary.h,layer.h,layer.cpp}` and
-  `src/luna/engine/{boundary.h,layer.h,layer.cpp}`: add empty Luna scaffolds with
-  guards rejecting Simulation/Game dependencies and invalid consumers.
-- `src/sim/{boundary.h,layer.h,layer.cpp}` and
-  `src/game/{boundary.h,layer.h,layer.cpp}`: add empty, guarded Simulation/Game
-  scaffolds; relative and absolute paths cannot bypass the include boundaries.
+- `CMakeLists.txt`: replace shared source-root includes with five layer targets; link only downward; identify consumers privately; route game/headless through Game/Simulation; register separate, serialized architecture CTest scenarios.
+- `cmake/LayerRules.cmake`: expose each layer's own headers through a narrow forwarding include tree and run architecture validation on every build.
+- `cmake/ValidateLayerIncludes.cmake`: check header boundary coverage and normalized include directions; restrict SDL3 to Platform and reject uncheckable macro includes.
+- `src/core/boundary.h`, `src/core/version.h`: protect Core headers with a single source-layer identity check while keeping the existing version API.
+- `src/luna/platform/{boundary.h,layer.h,layer.cpp}` and `src/luna/engine/{boundary.h,layer.h,layer.cpp}`: add empty Luna scaffolds with guards rejecting Simulation/Game dependencies and invalid consumers.
+- `src/sim/{boundary.h,layer.h,layer.cpp}` and `src/game/{boundary.h,layer.h,layer.cpp}`: add empty, guarded Simulation/Game scaffolds; relative and absolute paths cannot bypass the include boundaries.
 
 ### Tests
 
-- `tests/architecture/CMakeLists.txt`: 14 real compiler probes for five allowed
-  edges and forbidden Simulation/Luna includes, including relative/absolute paths.
-- `tests/architecture/layer_rules_test.cpp`: the three named acceptance scenarios
-  plus guard completeness; quote diagnostic arguments safely in test commands.
-- `tests/architecture/run_probe.cmake`: require the expected compiler/include
-  diagnostic for rejected probes rather than accepting arbitrary build failures.
-- `tests/architecture/run_validator.cmake`: clean controls and six violations
-  injected after configure, proving validation runs on subsequent builds.
-- `docs/evidence/US-003/`: preserve the tests-first baseline and supplementary
-  Debug/Release test output.
+- `tests/architecture/CMakeLists.txt`: 14 real compiler probes for five allowed edges and forbidden Simulation/Luna includes, including relative/absolute paths.
+- `tests/architecture/layer_rules_test.cpp`: the three named acceptance scenarios plus guard completeness; quote diagnostic arguments safely in test commands.
+- `tests/architecture/run_probe.cmake`: require the expected compiler/include diagnostic for rejected probes rather than accepting arbitrary build failures.
+- `tests/architecture/run_validator.cmake`: clean controls and six violations injected after configure, proving validation runs on subsequent builds.
+- `docs/evidence/US-003/`: preserve the tests-first baseline and supplementary Debug/Release test output.
 
 ### Documentation and tracking
 
-- `docs/reports/local-checkpoint-2026-09-29.md`: save the local code location,
-  resume point, current playability and outstanding owner requests.
-- `docs/plans/US-003.md`: implementation plan, tests-first evidence, local results,
-  pending acceptance/Windows checks and a teach-back draft awaiting acceptance.
-- `docs/adr/ADR-016-layer-boundary-enforcement.md`, `docs/adr/README.md`: record
-  the enforcement pattern and index it; no new project library was added.
-- `README.md`: explain the five layer targets and architecture include checks.
-- `docs/status.md`: keep US-003 Blocked by required Windows CI/integration access.
-- `Milestone.md`: prepend AP-002 with unfinished US-003 and the exact resume point.
+- `docs/reports/local-checkpoint-2026-09-29.md`: saves the local code location, resume point, current playability and outstanding owner requests.
+- `docs/plans/stories-M0.md#us-003`: implementation plan, tests-first evidence, local results, pending acceptance/Windows checks and a teach-back draft awaiting acceptance.
+- `docs/adr/ADR-016-layer-boundary-enforcement.md`, `docs/adr/README.md`: record the enforcement pattern and index it; no new project library was added.
+- `README.md`: explains the five layer targets and architecture include checks.
+- `docs/status.md`: keeps US-003 Blocked by required Windows CI/integration access.
+- `Milestone.md`: prepends AP-002 with unfinished US-003 and the exact resume point.
 - `docs/reports/US-003-2026-09-29.md`: assembly report and acceptance limitations.
-- `AGENTS.md`, `CHANGELOG.md`: persist the owner's requirement to track every PR's
-  complete change set in this changelog.
+- `AGENTS.md`, `CHANGELOG.md`: persist the owner's requirement to track every PR's complete change set in this changelog.
 
 ### Verification
 
-Supplementary GCC Debug and Release builds pass with `-Wall -Wextra -Werror`:
-5 doctest cases, 17 assertions, 14 compiler probes and six validator rejection
-checks in each configuration. Required MSVC Windows Debug/Release, AddressSanitizer,
-Windows CTest and green CI on `main` are unverified. Completion is not accepted.
-Determinism testing starts at US-010. No owner design decision is requested.
+Supplementary GCC Debug and Release builds pass with `-Wall -Wextra -Werror`: 5 doctest cases, 17 assertions, 14 compiler probes and six validator rejection checks in each configuration. Required MSVC Windows Debug/Release, AddressSanitizer, Windows CTest and green CI on `main` are unverified. Completion is not accepted. Determinism testing starts at US-010. No owner design decision is requested.
 
-
-## Before this changelog existed — 2026-09-29 — `main`
+## Before this changelog existed - 2026-09-29 - `main`
 
 | Commit | Change |
 |---|---|

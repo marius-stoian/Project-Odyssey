@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-181):** S-US-181 DONE (Milestone-127.md, AP-128), own cases pass, Debug zero warnings. Next: S-US-182 (giver, extra dialogue choice, the game runs the quest verb and answers quest(id)/step(id) in dialogue conditions, NPC action source quest), then US-183, 186, 184, 187, 185, X-M10.
+
 **Resume update (2026-10-05, US-180):** S-US-180 DONE (Milestone-126.md, AP-127), own cases pass, Debug zero warnings. Next: S-US-181 (the Game reports quest events: talk, goto, gather, give, craft, interact, defeat, flag), then US-182, 183, 186, 184, 187, 185, X-M10. Open for Anima: CI-017.
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
@@ -60,7 +62,7 @@ This file is kept current after every story, so if a session stops (usage limit,
 - US-245: DONE (Milestone-89.md, AP-090). Next: S-US-246 (weather and light), US-247, X-M8c; then K-M9a stops on CI-012.
 - US-244: DONE (Milestone-88.md, AP-089). Next: S-US-245 (shadows from fires), US-246, US-247, X-M8c; then K-M9a stops on CI-012.
 - P-012 DONE (Milestone-87.md, AP-088): Codex v2.9 adopted (CLAUDE.md and agents regenerated, D-52 and D-15 in decisions.md, M9a-M9c in status.md, CI-012 raised: requirements lack E17-E19 and US-260..294). Next: S-US-244 (shadows from OdysseyGame::celestialLight()), US-245, US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements are updated.
-- US-248: DONE (Milestone-86.md, AP-087). Next: S-US-244 (shadows drawn from OdysseyGame::celestialLight()), then US-245, US-246, US-247, X-M8c. GPU screenshots for US-248 are manual (docs/plans/US-248.md).
+- US-248: DONE (Milestone-86.md, AP-087). Next: S-US-244 (shadows drawn from OdysseyGame::celestialLight()), then US-245, US-246, US-247, X-M8c. GPU screenshots for US-248 are manual (docs/plans/stories-M8c.md#us-248).
 - US-243: DONE (Milestone-85.md, AP-086). Next: S-US-244 (sun and moon shadows), then US-245, US-246, US-247, X-M8c. Test tip: rerun only a failing case with the doctest filter on the exe (odysseus_game_tests.exe -tc="US-243*"), full verify once at the end.
 
 **M8c / M8b** (2026-10-02 and earlier):

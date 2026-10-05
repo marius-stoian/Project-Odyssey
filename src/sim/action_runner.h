@@ -62,6 +62,10 @@ public:
     using Adjuster = std::function<std::optional<Interaction>(const Interaction&, const ThingRef&)>;
     void setAdjuster(Adjuster adjuster) { adjuster_ = std::move(adjuster); }
 
+    // Told each time an interaction has done its effects (US-181), with who did it, so quests can count what the hero finishes.
+    using FinishObserver = std::function<void(const std::string& interactionId, int actor, const ThingRef& target)>;
+    void setFinishObserver(FinishObserver observer) { finished_ = std::move(observer); }
+
     // Starts `interaction` for `actor` on `target`. An instant one (duration 0) carries out its effects now. False when the actor is
     // already busy with another action.
     bool start(const Interaction& interaction, int actor, const ThingRef& target, std::int64_t now, EffectHost& host);
@@ -100,6 +104,7 @@ private:
     std::vector<PendingEffect> pending_; // sorted by (dueTick, seq)
     std::int64_t nextSeq_ = 0;
     Adjuster adjuster_;
+    FinishObserver finished_;
 };
 
 } // namespace odysseus::sim::rules
