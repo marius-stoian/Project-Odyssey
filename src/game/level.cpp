@@ -9,6 +9,7 @@
 #include "sim/data.h"
 #include "sim/json_data.h"
 
+#include <cmath>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -55,6 +56,36 @@ int whole(const json& object, const std::filesystem::path& file, const std::stri
         throw DataError(file, field, std::format("must be between {} and {} (is {})", minimum, maximum, value));
     }
     return static_cast<int>(value);
+}
+
+// The overrides of a placed thing (US-173): a list of { "interaction": "gather", "field": "delay", "value": 60 } (seconds, decimals allowed).
+std::vector<ThingOverride> readOverrides(const json& list, const std::filesystem::path& file, const std::string& where) {
+    if (!list.is_array()) throw DataError(file, where, "must be a list");
+    std::vector<ThingOverride> out;
+    for (std::size_t i = 0; i < list.size(); ++i) {
+        const json& entry = list.at(i);
+        const std::string at = std::format("{}[{}]", where, i);
+        if (!entry.is_object()) throw DataError(file, at, "must be an object with interaction, field and value");
+        ThingOverride change;
+        change.interaction = text(entry, file, "interaction");
+        change.field = text(entry, file, "field");
+        if (change.field != "duration" && change.field != "delay") throw DataError(file, at + ".field", "must be \"duration\" or \"delay\"");
+        if (!entry.contains("value") || !entry.at("value").is_number() || entry.at("value").get<double>() < 0.0 || entry.at("value").get<double>() > 86400.0) {
+            throw DataError(file, at + ".value", "must be a number of seconds between 0 and 86400");
+        }
+        change.valueMilli = static_cast<int>(std::llround(entry.at("value").get<double>() * 1000.0));
+        out.push_back(std::move(change));
+    }
+    return out;
+}
+
+json writeOverrides(const std::vector<ThingOverride>& overrides) {
+    json list = json::array();
+    for (const ThingOverride& change : overrides) {
+        json value = change.valueMilli % 1000 == 0 ? json(change.valueMilli / 1000) : json(change.valueMilli / 1000.0);
+        list.push_back({{"interaction", change.interaction}, {"field", change.field}, {"value", value}});
+    }
+    return list;
 }
 
 // The trade (and later schedule and action) fields of a placed character, read by the same reader as the class and kind files, so a mistake says what is wrong in the
@@ -534,6 +565,7 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
                 throw DataError(file, where + ".kind", "\"" + plant.kind + "\" is not a plant in plants.json");
             }
             plant.feet = point(json::array({entry.value("x", -1), entry.value("y", -1)}), file, where + ".x/y", level);
+            if (entry.contains("overrides")) plant.overrides = readOverrides(entry.at("overrides"), file, where + ".overrides");
             level.plants.push_back(plant);
         }
     }
@@ -696,7 +728,11 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
     json pickups = json::array();
     for (const PlacedPickup& p : level.pickups) pickups.push_back({{"id", p.id}, {"weapon", p.weapon}, {"x", p.at.x}, {"y", p.at.y}});
     json plants = json::array();
-    for (const PlacedPlant& p : level.plants) plants.push_back({{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}});
+    for (const PlacedPlant& p : level.plants) {
+        json entry = {{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}};
+        if (!p.overrides.empty()) entry["overrides"] = writeOverrides(p.overrides); // a plant with none writes none: old files save as they were
+        plants.push_back(std::move(entry));
+    }
     json effects = json::array();
     for (const PlacedEffect& e : level.effects) effects.push_back({{"id", e.id}, {"name", e.name}, {"x", e.at.x}, {"y", e.at.y}});
     json lights = json::array();

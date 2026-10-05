@@ -473,6 +473,7 @@ add_executable(odysseus_game_tests
     tests/game/dialogue_graph_test.cpp
     tests/game/graph_editor_test.cpp
     tests/game/interaction_graph_test.cpp
+    tests/game/thing_overrides_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
     tests/game/building_editor_test.cpp)

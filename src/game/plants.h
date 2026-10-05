@@ -46,6 +46,7 @@ struct WorldPlant {
     bool alive = true;
     int regrowTicks = 0; // destroyed: ticks left before the same kind grows back somewhere else
     std::string state;   // US-151: "ripe", "picked"...; the first of the plant's states, empty for a plant that never changes
+    std::vector<ThingOverride> overrides; // values of interactions changed for this one plant (US-173): it regrows in 60 s, only this one
 
     // A plant that is in any state but its first is hidden until it is back to it (D-37: a picked plant vanishes, and reappears
     // in the same spot when ripe again). A hidden plant cannot be seen, clicked, inspected or hit.

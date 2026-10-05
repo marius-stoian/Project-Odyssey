@@ -92,6 +92,19 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
     editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }); // Save in the graph editor reads the data again, like F5 (M9)
+    // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
+    actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
+        if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
+        const int index = plantIndexById(target.id);
+        if (index < 0) return std::nullopt;
+        std::optional<sim::rules::Interaction> changed;
+        for (const ThingOverride& change : plants_[static_cast<std::size_t>(index)].overrides) {
+            if (change.interaction != base.id) continue;
+            if (!changed) changed = base;
+            sim::rules::applyPatch(*changed, {change.field, change.valueMilli});
+        }
+        return changed;
+    });
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -1465,6 +1478,7 @@ void OdysseyGame::populatePlants() {
         const PlantDef* def = catalogs_.plant(placed.kind);
         if (def == nullptr) continue; // the level names a plant the catalog lost: skipped
         plants_.push_back({placed.id, placed.kind, def, placed.feet, true, 0, def->states.empty() ? std::string() : def->states.front()});
+        plants_.back().overrides = placed.overrides; // this plant's own interaction values (US-173)
         if (const double height = plantObstacleHeight(*def); height > 0.0) {
             const PixelPoint cell = plantCell(placed.feet);
             map_.setObstacle(cell.x, cell.y, height);

@@ -1981,3 +1981,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Add a node nobody leads to: it shows as a warning, and the file still loads in the game.
 
 **Check yourself.** Why is an unreachable node a warning but a dead end an error?
+
+## US-173: a change that belongs to one thing (M9)
+
+**Idea.** A shared file says how every bush behaves; the level says what is different about this one bush. The runner does not know about bushes: it asks a function "is this interaction different for this target?" and uses the answer. That keeps the sim layer free of the game and lets a later story give the same power to other things.
+
+**Where to look.** `ActionRunner::setAdjuster` and its two call sites, `applyPatch` in `interaction.cpp`, the `overrides` reading in `level.cpp`.
+
+**Try it.** Put `gather.delay=5` on one bush and watch it ripen long before its neighbours.
+
+**Check yourself.** Why does the adjuster get asked again when the action ends, and not only when it starts?

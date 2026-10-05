@@ -102,6 +102,15 @@ private:
     std::vector<Interaction> interactions_; // sorted by order, then id
 };
 
+// A change to one interaction for one placed thing (US-173, D-56 Q14): "duration" (the length of the action) or "delay" (the wait of every `after` effect, the
+// regrow time of a bush), each in thousandths of a second.
+struct InteractionPatch {
+    std::string field;
+    int valueMilli = 0;
+};
+// The interaction with the change made; false (and nothing changed) for a field that is not one of the two.
+bool applyPatch(Interaction& interaction, const InteractionPatch& patch);
+
 // The interaction as canonical JSON text, the form the Editor saves. Loading it again gives the same interaction.
 std::string toJson(const Interaction& interaction);
 

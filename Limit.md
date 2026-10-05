@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-173):** S-US-173 DONE (Milestone-122.md, AP-123), own cases run alone. Next: S-US-174 (Test-play: a panel that runs the dialogue runtime on a throwaway copy with chosen opinion, needs, items, flags, time, season, forced rolls; Play from here), then X-M9.
+
 **Resume update (2026-10-05, US-175):** S-US-175 DONE (Milestone-121.md, AP-122), own cases run alone. Next: S-US-173 (attach to placed things; M9a already has a dialogue per NPC and partner: reuse it, add per-thing overrides), then US-174 (Test-play), X-M9.
 
 **Resume update (2026-10-05, US-172):** S-US-172 DONE (Milestone-120.md, AP-121), own cases run alone. Next: S-US-175 (graph validation: list of problems, clickable, live), then US-173 (attach), US-174 (Test-play), X-M9.

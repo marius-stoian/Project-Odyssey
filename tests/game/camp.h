@@ -54,6 +54,7 @@ struct Spec {
     };
     std::vector<At> plants;
     std::vector<At> characters; // animals and monsters of characters.json and animals.json
+    std::vector<game::ThingOverride> wheatOverrides; // the wheat of `wheat = true` carries these own values (US-173)
 };
 
 // A camp level: the clan lives here, its fire burns where the hero starts, and the run starts with no growing years (the "Off" preset).
@@ -71,7 +72,7 @@ struct Camp {
         level.characters.clear();
         level.clan = true;
         level.effects.push_back({level.nextId++, "flame", level.heroStart});
-        if (wheat) level.plants.push_back({level.nextId++, "wheat", {level.heroStart.x + 32, level.heroStart.y}}); // 1 m east of the hero, ripe
+        if (wheat) level.plants.push_back({level.nextId++, "wheat", {level.heroStart.x + 32, level.heroStart.y}, spec.wheatOverrides}); // 1 m east of the hero, ripe
         if (!object.empty()) level.plants.push_back({level.nextId++, object, {level.heroStart.x + 32, level.heroStart.y}}); // a world object 1 m east of the hero
         for (const Spec::At& at : spec.plants) level.plants.push_back({level.nextId++, at.kind, {level.heroStart.x + 32 * at.east, level.heroStart.y + 32 * at.south}});
         for (const Spec::At& at : spec.characters) {

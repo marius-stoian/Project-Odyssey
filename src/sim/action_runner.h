@@ -6,6 +6,7 @@
 #include "sim/rule_effect.h"
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -56,6 +57,11 @@ class ActionRunner {
 public:
     static constexpr int kTicksPerSecond = 20;
 
+    // A change of an interaction for one thing (US-173): the game gives a function that returns the interaction as it is for this target, or nothing when it
+    // is not changed. It is asked when an action starts and again when it finishes.
+    using Adjuster = std::function<std::optional<Interaction>(const Interaction&, const ThingRef&)>;
+    void setAdjuster(Adjuster adjuster) { adjuster_ = std::move(adjuster); }
+
     // Starts `interaction` for `actor` on `target`. An instant one (duration 0) carries out its effects now. False when the actor is
     // already busy with another action.
     bool start(const Interaction& interaction, int actor, const ThingRef& target, std::int64_t now, EffectHost& host);
@@ -93,6 +99,7 @@ private:
     std::vector<RunningAction> running_; // sorted by actor
     std::vector<PendingEffect> pending_; // sorted by (dueTick, seq)
     std::int64_t nextSeq_ = 0;
+    Adjuster adjuster_;
 };
 
 } // namespace odysseus::sim::rules

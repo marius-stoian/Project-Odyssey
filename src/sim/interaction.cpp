@@ -490,6 +490,23 @@ std::string fillTokens(const std::string& text, const RuleContext& context) {
     return out;
 }
 
+bool applyPatch(Interaction& interaction, const InteractionPatch& patch) {
+    if (patch.valueMilli < 0) return false;
+    if (patch.field == "duration") {
+        interaction.durationMilli = patch.valueMilli;
+        return true;
+    }
+    if (patch.field == "delay") {
+        for (Effect& effect : interaction.effects) {
+            if (effect.verb != "after") continue;
+            effect.delayAmount = (patch.valueMilli + 500) / 1000; // whole seconds, as the runner counts
+            effect.delayUnit = DelayUnit::Seconds;
+        }
+        return true;
+    }
+    return false;
+}
+
 std::string toJson(const Interaction& i) {
     const auto list = [](const std::vector<std::string>& words) {
         std::string out = "[";
