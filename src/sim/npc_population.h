@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <set>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -144,6 +145,11 @@ public:
     static NpcPopulation fromText(std::string_view text, CalendarConfig calendar, NeedsConfig needs, DailyConfig daily = {});
 
     static constexpr int kSaveVersion = 3;
+
+    // A saved population meets the level as it is now (US-305): this population was just made from the level; every person of it who is also in `saved` and whose id is
+    // not in `fresh` takes the saved state (age, needs, place, memories, opinions) and the saved clock. The persons in `fresh` stay as the level made them, a person only
+    // the save knows is left out, and the opinions of those two kinds of persons are dropped.
+    void adopt(const NpcPopulation& saved, const std::set<int>& fresh);
 
 private:
     struct StoredNote {

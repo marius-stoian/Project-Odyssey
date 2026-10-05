@@ -398,6 +398,33 @@ bool OdysseyGame::saveNpcPopulation() const {
     return true;
 }
 
+// The level changed since the save (US-305): the people made from the level as it is now take the saved state of the persons the level did not touch. A person
+// the level changed or added comes fresh, and one it removed is not in the run (nothing made them). The persons of the save keep their places in the schedule files: the
+// director takes over only what happened in the run (mode and hit points); homes and schedules are the data of now.
+void OdysseyGame::mergeNpcPopulation(const sim::NpcPopulation& saved) {
+    const LevelChanges::Ids& people = runChanges_.of(LevelBaseline::Character);
+    npcPopulation_.adopt(saved, people.updated);
+    tradeDay_ = npcPopulation_.day();
+    std::set<int> skip = people.updated;
+    skip.insert(people.removed.begin(), people.removed.end());
+    if (std::ifstream tradeIn(saveDirectory_ / "trade.json", std::ios::binary); tradeIn) {
+        const std::string tradeText((std::istreambuf_iterator<char>(tradeIn)), std::istreambuf_iterator<char>());
+        tradeMarket_.restoreState(tradeText, skip);
+    }
+    if (std::ifstream lifeIn(saveDirectory_ / "npc-life.json", std::ios::binary); lifeIn) {
+        const std::string lifeText((std::istreambuf_iterator<char>(lifeIn)), std::istreambuf_iterator<char>());
+        const sim::NpcDirector savedDirector = sim::NpcDirector::fromText(lifeText, scheduleConfig_);
+        std::vector<std::pair<int, int>> kept; // the index here and the index in the save of every person both have
+        for (std::size_t here = 0; here < npcPopulation_.size(); ++here) {
+            const int id = npcPopulation_.id(static_cast<int>(here));
+            if (people.updated.contains(id)) continue;
+            if (const int there = saved.indexOf(id); there >= 0) kept.emplace_back(static_cast<int>(here), there);
+        }
+        npcDirector_.adopt(savedDirector, kept);
+        removeDeadFigures(); // those who died before the save do not come back
+    }
+}
+
 // Brings the saved persons back: those the level still has take their saved state; the rest of the level's people stay as freshly made.
 std::string OdysseyGame::loadNpcPopulation() {
     const std::filesystem::path file = saveDirectory_ / "npcs.json";
@@ -407,6 +434,11 @@ std::string OdysseyGame::loadNpcPopulation() {
     try {
         sim::NpcPopulation saved = sim::NpcPopulation::fromText(text, npcCalendar_, npcNeeds_);
         saved.setOpinionConfig(npcOpinions_);
+        const LevelChanges::Ids& people = runChanges_.of(LevelBaseline::Character);
+        if (!people.updated.empty() || !people.removed.empty()) { // the level was edited since the save: the people are merged by id (US-305)
+            mergeNpcPopulation(saved);
+            return {};
+        }
         npcPopulation_ = std::move(saved);
         // A person the level gained since the save joins as new; one the level lost stays in the save (the owner may bring them back).
         const int daysPerYear = sim::Calendar(npcCalendar_).daysPerYear();

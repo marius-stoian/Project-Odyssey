@@ -36,6 +36,7 @@
 #include "game/tutorial.h"
 #include "game/weather.h"
 #include "game/level.h"
+#include "game/level_baseline.h"
 #include "game/spear_range.h"
 #include "game/sword.h"
 #include "game/weapons.h"
@@ -371,6 +372,7 @@ public:
     void registerCreatures();
     void tickNpcPopulation();
     std::string loadNpcPopulation(); // the problem, or empty
+    void mergeNpcPopulation(const sim::NpcPopulation& saved); // a saved people meets the level as it is now (US-305)
     luna::engine::LightFrame editorLightFrame(double hour, const luna::engine::Rect& view) const; // the Editor's time-of-day preview (US-247)
     luna::engine::LightFrame ambientLightFrame(double alpha, bool withWeather = true) const; // the ambient colour of the world now (no point lights)
     static double darknessOf(const luna::engine::LightFrame& frame);
@@ -400,6 +402,10 @@ public:
     const std::filesystem::path& saveDirectory() const { return saveDirectory_; }
     bool autosave();              // false when it could not write
     bool loadAutosave();          // false when there is nothing to load
+    // A run was loaded (US-305): what the level changed since that save, and whether the Editor saved the level after it. Play (F1) from the Editor then loads the run again
+    // with the level edits merged in, instead of starting the run over.
+    bool runLoaded() const { return runLoaded_; }
+    const LevelChanges& runChanges() const { return runChanges_; }
     double lastAutosaveMilliseconds() const { return lastAutosaveMs_; }
     int autosaves() const { return autosaves_; }
     const std::string& message() const { return message_; }
@@ -513,6 +519,9 @@ private:
     DataReload reloads_;                                           // US-303
     FileWatcher watcher_;                                          // US-304
     bool watching_ = false;
+    bool runLoaded_ = false;          // loadAutosave brought a run back (US-305)
+    bool levelSavedSinceRun_ = false; // the Editor saved the level while that run was loaded
+    LevelChanges runChanges_;         // what the level changed since the loaded save
     bool levelReloadPending_ = false; // the level file changed while the game was playing: the Editor reads it when it opens
     std::map<std::string, std::vector<std::string>> reloadErrors_; // the mistakes of the sets other than the interactions
     std::vector<MissingKind> missing_;                             // things the level places whose kind is gone

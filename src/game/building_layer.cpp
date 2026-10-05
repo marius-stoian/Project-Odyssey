@@ -157,16 +157,43 @@ void BuildingLayer::start(OdysseyGame& game) {
     dayAtLastTick_ = ~0ULL;
     seasonAtLastTick_ = -1;
     rivalBuilders_.reset(game.rivals() != nullptr ? static_cast<int>(game.rivals()->clans().size()) : 0, WeatherCycle::seedFromText(game.level().name) ^ 0xB11D2ULL);
+    fromLevel_.clear();
     for (const PlacedBuildingSpec& spec : game.level().buildings) {
-        const auto placed = store_.place(spec.kind, spec.x, spec.y, spec.turns, 0, spec.finished, {});
-        if (!placed.problem.empty()) {
-            core::logWarning(std::format("Buildings: the {} at {}, {} was not placed: {}", spec.kind, spec.x, spec.y, placed.problem));
-            continue;
+        if (const int id = placeSpec(spec); id > 0) fromLevel_[spec.id] = id;
+    }
+    syncObstacles(game);
+}
+
+int BuildingLayer::placeSpec(const PlacedBuildingSpec& spec) {
+    const auto placed = store_.place(spec.kind, spec.x, spec.y, spec.turns, 0, spec.finished, {});
+    if (!placed.problem.empty()) {
+        core::logWarning(std::format("Buildings: the {} at {}, {} was not placed: {}", spec.kind, spec.x, spec.y, placed.problem));
+        return 0;
+    }
+    sim::buildings::PlacedBuilding* building = store_.findMutable(placed.id);
+    building->owner = spec.owner;
+    building->interior = spec.interior;
+    building->interiorLevel = spec.interiorLevel;
+    return placed.id;
+}
+
+void BuildingLayer::mergeLevel(OdysseyGame& game, const LevelChanges::Ids& changes) {
+    for (const int specId : changes.removed) {
+        if (const auto link = fromLevel_.find(specId); link != fromLevel_.end()) {
+            store_.remove(link->second); // false when the clan already pulled it down: nothing left to remove
+            fromLevel_.erase(link);
         }
-        sim::buildings::PlacedBuilding* building = store_.findMutable(placed.id);
-        building->owner = spec.owner;
-        building->interior = spec.interior;
-        building->interiorLevel = spec.interiorLevel;
+    }
+    for (const int specId : changes.updated) {
+        if (const auto link = fromLevel_.find(specId); link != fromLevel_.end()) {
+            store_.remove(link->second);
+            fromLevel_.erase(link);
+        }
+        for (const PlacedBuildingSpec& spec : game.level().buildings) {
+            if (spec.id != specId) continue;
+            if (const int id = placeSpec(spec); id > 0) fromLevel_[specId] = id;
+            break;
+        }
     }
     syncObstacles(game);
 }
@@ -580,7 +607,10 @@ std::string BuildingLayer::douse(OdysseyGame& game, int id) {
 
 std::string BuildingLayer::saveText() const {
     nlohmann::json root;
-    root["version"] = 1;
+    root["version"] = 2; // 2 (US-305): which building of the store is which building of the level
+    nlohmann::json links = nlohmann::json::object();
+    for (const auto& [specId, storeId] : fromLevel_) links[std::to_string(specId)] = storeId;
+    root["levelIds"] = std::move(links);
     root["known"] = std::vector<std::string>(known_.begin(), known_.end());
     root["store"] = nlohmann::json::parse(store_.toJson());
     root["rivals"] = nlohmann::json::parse(rivalBuilders_.toJson());
@@ -599,6 +629,12 @@ std::vector<std::string> BuildingLayer::loadText(const std::string& text) {
     }
     std::string problem;
     if (!store_.fromJson(root["store"].dump(), problem)) notes.push_back(problem);
+    if (root.contains("levelIds") && root["levelIds"].is_object()) { // a version 1 file has none: the links the level made at the start stay (the store ids it gave are the same ones)
+        fromLevel_.clear();
+        for (const auto& [specId, storeId] : root["levelIds"].items()) {
+            if (storeId.is_number_integer()) fromLevel_[std::stoi(specId)] = storeId.get<int>();
+        }
+    }
     if (root.contains("rivals") && !rivalBuilders_.fromJson(root["rivals"].dump(), problem)) notes.push_back(problem);
     return notes;
 }
