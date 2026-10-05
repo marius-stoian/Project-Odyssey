@@ -320,3 +320,5 @@ In the Editor, the **Rules** button opens every interaction file as a graph over
 | **Chronicle** | `chronicle` | out, wired to the verb's chronicle port |
 
 Save writes the canonical text of the file (`toJson`) after the real loader has read it back, so a mistake is named and nothing is written from it. The `//` comment lines at the very top of the file are kept; comments inside the braces are not (the `note` field is the place for the owner's words). The verb id must stay the name of the file (renaming would make a new file, which this editor does not do). The previous text is kept as `<id>.json.bak`, card places are saved in `<id>.json.layout.json`, a file changed on disk since it was opened asks once before it is overwritten, and the game reads its data again like F5.
+
+**New and Tidy.** The *name* field and **New** button of the bar start a new interaction file of that name (a verb whose id is the name, an actor, a target and one effect that says there is nothing to do yet); it is written when you press Save. **Tidy** puts the cards in a row again.

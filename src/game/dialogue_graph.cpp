@@ -397,6 +397,8 @@ DialogueLayout layoutOf(const DialogueGraph& dialogue) {
     return layout;
 }
 
+void arrangeDialogue(luna::engine::NodeGraph& graph) { layoutRows(graph); }
+
 std::map<std::string, int> cardKeys(const DialogueGraph& dialogue) {
     std::map<std::string, int> keys;
     for (const auto& [id, key] : walkGraph(dialogue).keys) keys[key] = id;

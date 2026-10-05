@@ -211,3 +211,5 @@ The **Test** button of the graph editor opens a card over the canvas that plays 
 | `hero=Joro` `npc=Ama` | the names that `{hero}` and `{npc}` become |
 
 A word it does not understand is named and nothing starts. Nothing a test-play does is written anywhere: not the level, not a save, not the `.dlg`, and it is not a step of Undo. Forcing the result of random rolls (haggling, persuading) is not offered yet: the dialogue language has no roll to force.
+
+**New and Tidy.** Type a name (lower-case letters, digits and hyphens) in the *name* field of the bar and press **New** to start a file in the shown kind: a conversation with a start node, a line and a way out, or (under **Rules**) an interaction with an actor, a verb and a target. It exists only on screen until you press Save; a name that is taken is refused. **Tidy** puts the cards in rows again as one step of Undo.
