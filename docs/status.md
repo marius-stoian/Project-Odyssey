@@ -184,7 +184,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | X-M8e | - | M8e | Done | docs/gates/M8e.md; Debug and Release 27/27, zero warnings |
 | K-M9 | - | M9 | Done | Owner answers 2026-10-05 (D-56), docs/plans/M9-graph-editor-design.md |
 | S-US-170 | US-170 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
-| S-US-171 | US-171 | M9 | To do |  |
+| S-US-171 | US-171 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | S-US-172 | US-172 | M9 | To do |  |
 | S-US-175 | US-175 | M9 | To do |  |
 | S-US-173 | US-173 | M9 | To do |  |

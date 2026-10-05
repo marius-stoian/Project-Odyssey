@@ -6,6 +6,7 @@
 #include "game/art.h"
 #include "game/building_editor.h"
 #include "game/effect_art.h"
+#include "game/graph_editor.h"
 #include "game/editor_history.h"
 #include "game/level.h"
 #include "game/pickups.h"
@@ -135,6 +136,9 @@ public:
     // Buildings (US-256): the Build tool, the panel of a selected building and the Prefab tab. The game gives it the data to read and the folder prefabs are written to.
     BuildingEditor& buildings() { return *buildingEditor_; }
     const BuildingEditor& buildings() const { return *buildingEditor_; }
+    // The graph editor (M9, D-56): the Dialogue button opens it over the map; its edits are steps of this Editor's one Undo. `saved` is called after a file was written (the game reads its data again).
+    GraphEditor& graphs() { return *graphEditor_; }
+    void setGraphFolders(std::filesystem::path dialogueFolder, std::function<void()> saved) { graphEditor_->setFolders(std::move(dialogueFolder), std::move(saved)); }
     // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
     // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
     // line and changes nothing (the function returns false).
@@ -294,6 +298,7 @@ private:
     Level& level_;
     const Definitions& definitions_;
     std::unique_ptr<BuildingEditor> buildingEditor_;
+    std::unique_ptr<GraphEditor> graphEditor_; // the dialogue graph (M9)
     std::filesystem::path levelFile_;
     int viewWidth_;
     int viewHeight_;

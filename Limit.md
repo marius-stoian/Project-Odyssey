@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-171):** S-US-171 DONE (Milestone-119.md, AP-120), own cases run alone. Open CI-014 for Anima (sub-call card missing). Next: S-US-172 (interaction graph editor, new files src/game/interaction_graph.*, same GraphEditor), then US-175, US-173, US-174, X-M9.
+
 **Resume update (2026-10-05, US-170):** K-M9 Done (D-56, 24 owner answers, docs/plans/M9-graph-editor-design.md). S-US-170 DONE (Milestone-118.md, AP-119), written with its own cases run alone (owner rule: one full verify at X-M9). Next: S-US-171 (dialogue graph editor), then US-172, US-175, US-173, US-174, X-M9. Another session may leave level-5.json untracked in assets/levels; it is not M9.
 
 **Resume update (2026-10-05, X-M9bc):** X-M9b and X-M9c DONE (Milestone-115.md, AP-116): one verify green, Debug and Release 27/27. Soak skipped by owner. Next: merge qa into main, tags m9b-done and m9c-done, CI on main.

@@ -65,6 +65,7 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
     : level_(level), definitions_(definitions), levelFile_(std::move(levelFile)), viewWidth_(viewWidth), viewHeight_(viewHeight),
       map_(buildTileMap(level, definitions)), camera_(viewWidth, viewHeight, map_.pixelWidth(), map_.pixelHeight()) {
     buildingEditor_ = std::make_unique<BuildingEditor>(level_, viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { run(std::move(command)); }, [this](const std::string& message) { say(message); });
+    graphEditor_ = std::make_unique<GraphEditor>(viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { history_.record(std::move(command)); }, [this](const std::string& message) { say(message); });
     buildPanels();
 }
 
@@ -101,6 +102,7 @@ void Editor::buildPanels() {
     x += 2;
     button("Level", "Level settings: name, size, ground; new and open", [this] { showSettings(!settingsShown_); });
     button("Class", "NPC Classes: create, edit and delete the kinds of people of your world", [this] { showClasses(!classesShown_); });
+    button("Talk", "Dialogue: open a conversation as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->show(true); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -1446,7 +1448,7 @@ bool Editor::undo() {
         say("Nothing to undo");
         return false;
     }
-    unsaved_ = true;
+    if (!graphEditor_->shown()) unsaved_ = true; // a graph edit is saved with its file, not with the level
     levelChanged();
     propertiesStale_ = true; // the selected character may have changed, or be gone
     select(selected_);
@@ -1459,7 +1461,7 @@ bool Editor::redo() {
         say("Nothing to redo");
         return false;
     }
-    unsaved_ = true;
+    if (!graphEditor_->shown()) unsaved_ = true; // a graph edit is saved with its file, not with the level
     levelChanged();
     propertiesStale_ = true;
     select(selected_);
@@ -1882,6 +1884,22 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
 
 void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
+    if (graphEditor_->shown()) { // the graph editor takes the whole screen; the map waits behind it
+        graphEditor_->update(intents);
+        if (!graphEditor_->typing()) {
+            if (intents.pressed(Intent::OpenMenu)) graphEditor_->show(false);
+            if (intents.pressed(Intent::Undo)) {
+                undo();
+                graphEditor_->refresh();
+            }
+            if (intents.pressed(Intent::Redo)) {
+                redo();
+                graphEditor_->refresh();
+            }
+            if (intents.pressed(Intent::Save)) graphEditor_->save();
+        }
+        return;
+    }
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
     const bool typing = buildingEditor_->typing() || toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || npcTrade_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
@@ -2188,6 +2206,10 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         question_->draw(painter);
         openList_->drawOverlay(painter);
         question_->drawOverlay(painter);
+    }
+    if (graphEditor_->shown()) { // the graph editor covers the map
+        graphEditor_->draw(painter);
+        graphEditor_->drawOverlay(painter);
     }
 }
 

@@ -160,3 +160,21 @@ Nothing of the dialogue stories remains: the owner reads the whole of M8 at its 
 ## Talking to placed NPCs (US-265)
 
 A placed person of a level (see `docs/guides/npc-data.md`) speaks the script its `player` dialogue names. In that script `opinion(npc, hero)` reads what it thinks of the hero, `mood(npc)` its attitude word (friendly, wary, hostile...), and the effects `opinion npc hero N` and `remember npc "text" N` change its opinion and give it a memory; `{npc}` and `{hero}` fill in as usual. Name the script in the class, kind or NPC (`"dialogues": { "player": "npc-trader.dlg" }`) and give it an `@who` nobody has, so it is not chosen for a clan member.
+
+## The graph editor (US-171, M9)
+
+In the Editor, the **Talk** button opens every `.dlg` file of the dialogue folder as a graph over the map (Esc comes back). The graph is only a view of the file: saving writes the canonical text described above, so a hand-edited file and a graph-edited file look the same, and every `#` note stays where it was.
+
+| Card | In the file | Ports |
+|---|---|---|
+| **Node** (blue) | `=== id` | its output starts the chain of lines and choices |
+| **Line** | `Speaker: words` | flow in, `if` in; flow out |
+| **Choice** | `-> words [else ...] => node` | flow in, `if` in, `do` in; flow out (next choice), `to` out |
+| **If** (red) | the `[if ...]` of a line or choice | out, wired to an `if` port |
+| **Do** | the `{...}` effects of a choice, one per line | out, wired to a `do` port |
+| **Note** | the `#` lines above whatever it is wired to | out, wired to the flow port of a line, a choice or a node |
+| **Goto** | a named jump | in, out; a choice may lead to it instead of to a node |
+
+A choice with no wire from its `to` port ends the conversation (`END`). The pointer: right button drag pans, the wheel zooms (25 to 400 percent) around the pointer, left button drags cards, draws wires from a yellow port to a white one, and selects with a box. **Delete** removes the selected cards, **Ctrl+Z** and **Ctrl+Y** walk back and forth through graph and map edits together, **Ctrl+S** (or Save) writes the file.
+
+The side panel edits the chosen card; with nothing chosen it edits the file's headers (`@who`, `@when`, `@priority`, `@bark`, `@pair`). Where each card sits is saved in `<name>.dlg.layout.json` beside the script (card places keyed by what the card is in the file, for example `start/choice1`); delete it and the graph is laid out again. A card nothing leads to is not in the text, and Save says so. Save refuses a graph the loader would refuse (the first mistake is named), asks once before overwriting a file that changed on disk since it was opened, keeps the previous text as `<name>.dlg.bak`, and reads the game's data again like F5.

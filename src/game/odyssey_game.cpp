@@ -91,6 +91,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
+    editor_.setGraphFolders(dataDirectory / "dialogue", [this] { reloadInteractions(); }); // Save in the graph editor reads the data again, like F5 (M9)
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");

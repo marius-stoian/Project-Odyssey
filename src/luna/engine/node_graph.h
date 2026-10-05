@@ -25,6 +25,7 @@ struct GraphNode {
     std::string type;                  // "line", "choice"... the host gives it meaning
     std::string title;
     std::vector<std::string> lines;    // preview text under the header
+    std::vector<std::string> fields;   // what the host keeps in the card (a line's speaker and text...); part of the value, so an edit of it can be undone
     UiColor header = UiColor::Selected; // the card's header colour, one per type
     int x = 0;                         // graph units
     int y = 0;

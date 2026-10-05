@@ -1951,3 +1951,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Change `kGraphZoomMax` in `node_graph.h` to 800 and see which test names the limit.
 
 **Check yourself.** Why do hit tests look at the last node first?
+
+## US-171: a view is not the truth (M9)
+
+**Idea.** The conversation file stays the one truth. The graph is built from it by the parser, and saved back by the same writer the tests already trust, so a note you wrote by hand cannot be lost by a drag. The final judge of every save is the real loader: the editor writes the text in memory, reads it back, and only then touches the disk.
+
+**Where to look.** `dialogueToGraph` and `graphToDialogue` in `dialogue_graph.cpp` (the two directions), `GraphEditor::save` (the order of checks).
+
+**Try it.** In Notepad add a `# note` above a choice, open the file in the graph, move a card and save: the note is still there.
+
+**Check yourself.** Why does Save write a temporary file first and then rename it?

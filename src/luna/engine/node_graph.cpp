@@ -336,11 +336,24 @@ void NodeGraphView::draw(UiPainter& painter) const {
             painter.text(x, y, shown, color);
         }
     };
-    auto line = [&](Point a, Point b, UiColor color) { // a horizontal-vertical-horizontal run
-        const int mid = std::max((a.x + b.x) / 2, a.x + 4);
-        fill({std::min(a.x, mid), a.y, std::abs(mid - a.x) + 1, 1}, color);
-        fill({mid, std::min(a.y, b.y), 1, std::abs(b.y - a.y) + 1}, color);
-        fill({std::min(mid, b.x), b.y, std::abs(b.x - mid) + 1, 1}, color);
+    auto hline = [&](int x0, int x1, int y, UiColor color) { fill({std::min(x0, x1), y, std::abs(x1 - x0) + 1, 1}, color); };
+    auto vline = [&](int x, int y0, int y1, UiColor color) { fill({x, std::min(y0, y1), 1, std::abs(y1 - y0) + 1}, color); };
+    auto line = [&](Point a, Point b, UiColor color) {
+        if (b.x >= a.x + 12) { // forward: right, down or up, right
+            const int mid = (a.x + b.x) / 2;
+            hline(a.x, mid, a.y, color);
+            vline(mid, a.y, b.y, color);
+            hline(mid, b.x, b.y, color);
+        } else { // backward: out to the right, across between the rows, in from the left
+            const int out = a.x + 6;
+            const int in = b.x - 6;
+            const int across = (a.y + b.y) / 2;
+            hline(a.x, out, a.y, color);
+            vline(out, a.y, across, color);
+            hline(out, in, across, color);
+            vline(in, across, b.y, color);
+            hline(in, b.x, b.y, color);
+        }
     };
 
     fill(bounds, UiColor::Dark);
@@ -364,9 +377,9 @@ void NodeGraphView::draw(UiPainter& painter) const {
         fill({rect.x, rect.y, 1, rect.height}, chosen ? UiColor::Gold : UiColor::Border);
         fill({rect.x + rect.width - 1, rect.y, 1, rect.height}, chosen ? UiColor::Gold : UiColor::Border);
         if (zoom_ >= 50) text(rect.x + 3, rect.y + (headerPixels - kGlyphHeight) / 2 + 1, node.title, UiColor::Text, rect.width - 6);
-        if (zoom_ >= 100) {
+        if (zoom_ >= 80) { // below that a line of text is taller than its room on the card
             for (std::size_t i = 0; i < node.lines.size(); ++i) {
-                text(rect.x + 4, rect.y + headerPixels + 2 + static_cast<int>(i) * kLineHeight, node.lines[i], UiColor::Dim, rect.width - 8);
+                text(rect.x + 4, rect.y + headerPixels + 2 + static_cast<int>(i) * std::max(kGlyphHeight + 1, kLineHeight * zoom_ / 100), node.lines[i], UiColor::Dim, rect.width - 8);
             }
         }
         for (int output = 0; output < 2; ++output) {

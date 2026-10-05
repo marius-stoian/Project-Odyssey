@@ -1,0 +1,104 @@
+#pragma once
+
+#include "boundary.h"
+
+#include "game/dialogue_graph.h"
+#include "game/editor_history.h"
+#include "luna/engine/input.h"
+#include "luna/engine/node_graph.h"
+#include "luna/engine/ui.h"
+
+#include <filesystem>
+#include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace odysseus::game {
+
+// The graph editor of the Editor (M9, D-56): a full-screen canvas over the map with a file list, an "add card" bar and a side panel for the
+// chosen card. US-171 opens `.dlg` conversations in it; the interaction graphs (US-172) use the same canvas.
+// Every edit of a graph is a Command in the Editor's one History (Q19), through `record`.
+class GraphEditor {
+public:
+    using Record = std::function<void(std::unique_ptr<Command>)>; // remember a command that is already applied
+    using Say = std::function<void(const std::string&)>;          // a line for the Editor's status bar
+
+    GraphEditor(int viewWidth, int viewHeight, Record record, Say say);
+
+    // The folders the files live in, and what to call after a file was written (the game reads the data again, like F5).
+    void setFolders(std::filesystem::path dialogueFolder, std::function<void()> saved);
+
+    bool shown() const { return shown_; }
+    void show(bool shown);
+    // Opens `assets/data/dialogue/<name>.dlg` with its layout sidecar. False (and says why) when the file has mistakes.
+    bool open(const std::string& name);
+    const std::string& openName() const { return current_ != nullptr ? current_->name : empty_; }
+    std::vector<std::string> files() const; // the .dlg names in the folder
+    // Writes the open conversation and its layout. Refuses (and says why) with a card that cannot be written, and, once, when the file changed on
+    // disk since it was opened (press Save again to overwrite).
+    bool save();
+    bool dirty() const;
+    // After Undo or Redo outside: selection and side panel are looked at again.
+    void refresh();
+
+    // One tick: keys, the toolbar, the canvas, the side panel.
+    void update(const luna::engine::Intents& intents);
+    void draw(luna::engine::UiPainter& painter) const;
+    void drawOverlay(luna::engine::UiPainter& painter) const;
+    bool typing() const;
+
+    // For the panel and for tests: every change is one step of Undo.
+    luna::engine::NodeGraph* graph() { return current_ != nullptr ? current_->graph.get() : nullptr; }
+    luna::engine::NodeGraphView* view() { return view_.get(); }
+    int addCard(const std::string& type); // a new empty card in the middle of the canvas, selected; returns its id
+    bool setCardField(int card, std::size_t index, const std::string& value);
+    bool addCardField(int card);          // one more line in an effect or comment card
+    bool removeCardField(int card);       // the last line of an effect or comment card
+    sim::rules::DlgScript& header() { return current_->header; } // @who and the rest: kept with the file, not part of Undo
+    const std::vector<std::string>& problems() const { return problems_; } // from the last save or check, "error: ..." and "warning: ..."
+    luna::engine::Rect canvasBounds() const { return canvas_; }
+
+private:
+    struct Doc {
+        std::string name;
+        std::shared_ptr<luna::engine::NodeGraph> graph = std::make_shared<luna::engine::NodeGraph>();
+        sim::rules::DlgScript header;
+        luna::engine::NodeGraph saved; // the graph as loaded or last saved, to know whether it changed
+        std::string savedHeader;
+        std::filesystem::file_time_type loadedAt{};
+        bool existed = false;
+    };
+
+    void buildChrome();
+    void buildPanel();
+    int selectedCard() const; // the id of the one selected card, or 0
+    void edit(const std::string& name, const std::function<void(luna::engine::NodeGraph&)>& change);
+    void onViewEdit(const std::string& name, const luna::engine::NodeGraph& before, const luna::engine::NodeGraph& after);
+    std::filesystem::path fileOf(const std::string& name) const;
+    std::string headerText(const sim::rules::DlgScript& script) const;
+
+    int viewWidth_;
+    int viewHeight_;
+    Record record_;
+    Say say_;
+    std::filesystem::path folder_;
+    std::function<void()> saved_;
+    bool shown_ = false;
+    std::string empty_;
+
+    std::map<std::string, Doc> docs_;
+    Doc* current_ = nullptr;
+    std::unique_ptr<luna::engine::NodeGraphView> view_;
+    luna::engine::Rect canvas_{};
+    std::unique_ptr<luna::engine::Panel> chrome_; // the bar and the file list
+    std::unique_ptr<luna::engine::Panel> panel_;  // the side panel of the chosen card (or of the file)
+    std::string panelKey_;
+    std::string panelTitle_;
+    std::vector<std::string> problems_;
+    bool overwriteArmed_ = false;
+    int nodeCounter_ = 1;
+};
+
+} // namespace odysseus::game
