@@ -3,6 +3,9 @@
 
 #include <doctest/doctest.h>
 
+#include "sim/data.h"
+#include "sim/world.h"
+
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -59,4 +62,35 @@ TEST_CASE("US-253 Rivals: the same seed and days give the same hash, and the lis
     CHECK(loaded.hash() == a.hash());
     b.seasonStarted(data(), {9, 12});
     CHECK(a.hash() != b.hash());
+}
+
+TEST_CASE("US-257 Warmth and storage: a housed person loses warmth more slowly, and a storage pit halves the spoilage of the meals it holds") {
+    // The world's own rules are tested with the clan of the game (tests/game); here the data is checked: the pit says how much it keeps.
+    const buildings::KindDef* pit = data().kind("storage-pit");
+    REQUIRE(pit != nullptr);
+    CHECK(pit->capacity > 0);
+    CHECK(data().kind("hut")->capacity == 0);
+}
+
+TEST_CASE("US-257 World: housed people keep more warmth, and meals in a storage pit spoil more slowly") {
+    const auto config = odysseus::sim::loadSimConfig(ODYSSEUS_DATA_DIR);
+    odysseus::sim::World plain(42, config);
+    odysseus::sim::World housed(42, config);
+    std::vector<int> everyone;
+    for (const odysseus::sim::Person& person : housed.people()) everyone.push_back(person.id);
+    housed.setHoused(everyone);
+    housed.setStorageMeals(100000);
+    const auto warmth = [](const odysseus::sim::World& world) {
+        int total = 0;
+        for (const odysseus::sim::Person& person : world.people()) total += person.alive ? person.needs[odysseus::sim::Need::Warmth] : 0;
+        return total;
+    };
+    const int day = static_cast<int>(plain.calendar().ticksPerDay());
+    for (int tick = 0; tick < day * 2 + 1; ++tick) {
+        plain.tick();
+        housed.tick();
+    }
+    CHECK(housed.population() == plain.population());
+    CHECK(warmth(housed) > warmth(plain));
+    CHECK(housed.food() >= plain.food());
 }

@@ -1,0 +1,18 @@
+// Put berries in a storage pit (US-257): they join the clan's store, and the pit keeps its meals cool (half the spoilage, up to its capacity).
+{
+  "id": "store-food",
+  "label": "Put berries in {target.name}",
+  "note": "Two berries become two meals of the clan's store.",
+  "actors": ["hero"],
+  "target": { "tags": ["building", "storage"] },
+  "range": 2.5,
+  "duration": 2,
+  "order": 40,
+  "requires": [
+    { "if": "has(berries, 2)", "else": "You need 2 berries" }
+  ],
+  "effects": [
+    "take actor berries 2",
+    "do store-food 2"
+  ]
+}

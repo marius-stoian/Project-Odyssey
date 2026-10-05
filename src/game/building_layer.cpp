@@ -34,6 +34,8 @@ constexpr int kPanelWidth = 176;
 constexpr int kRowHeight = 20;
 constexpr int kRows = 8;
 constexpr int kClanCarry = 2;   // what a clan member brings of each missing item in one go (US-253)
+constexpr int kAdultYears = 15;   // a person this old may own a hut (US-257)
+constexpr int kBedsPerSleepingPlace = 4;
 constexpr int kRaidRelation = -50; // a rival at or below this is at war or at feud with the hero (US-255)
 constexpr int kRaidDamage = 40;     // hit points of one raid
 constexpr int kListTop = 32;
@@ -348,6 +350,7 @@ void BuildingLayer::tick(OdysseyGame& game, const luna::engine::Intents& world, 
             store_.dayEnded();
             rivalBuilders_.dayEnded(data_, rivalPeople(game));
         }
+        if (dayAtLastTick_ == ~0ULL || static_cast<std::uint64_t>(date.day) != dayAtLastTick_) applyClanLife(game);
         dayAtLastTick_ = static_cast<std::uint64_t>(date.day);
         const int season = static_cast<int>(date.season);
         if (seasonAtLastTick_ >= 0 && season != seasonAtLastTick_) {
@@ -456,6 +459,63 @@ std::string BuildingLayer::repair(OdysseyGame& game, int id, int hp) {
     const std::string label = store_.label(*building);
     if (!store_.repair(id, hp)) return label + " needs no repair.";
     return std::format("{}: repaired, now {}%.", label, store_.condition(*store_.find(id)));
+}
+
+// Each dawn: a finished building whose kind says `owner: person` goes to the lowest-id living adult without one; the owners and, up to four beds a
+// sleeping place, the next adults without a home are housed (they lose warmth more slowly); storage kinds tell the world how many meals they keep cool.
+void BuildingLayer::applyClanLife(OdysseyGame& game) {
+    sim::World* clan = game.clanMutable();
+    if (clan == nullptr) return;
+    const int daysPerYear = clan->calendar().daysPerYear();
+    std::vector<int> adults;
+    for (const sim::Person& person : clan->people()) {
+        if (person.alive && !person.exiled && person.ageYears(daysPerYear) >= kAdultYears) adults.push_back(person.id);
+    }
+    std::sort(adults.begin(), adults.end());
+    const auto owns = [&](int person) {
+        for (const sim::buildings::PlacedBuilding& building : store_.all()) {
+            if (building.state == sim::buildings::State::Finished && building.owner == person) return true;
+        }
+        return false;
+    };
+    std::vector<int> ids;
+    for (const sim::buildings::PlacedBuilding& building : store_.all()) ids.push_back(building.id);
+    for (const int id : ids) {
+        sim::buildings::PlacedBuilding& building = *store_.findMutable(id);
+        if (building.state != sim::buildings::State::Finished) continue;
+        const sim::buildings::KindDef* kind = data_.kind(building.kind);
+        const bool alive = std::find(adults.begin(), adults.end(), building.owner) != adults.end();
+        if (kind == nullptr || kind->owner != "person" || (building.owner >= 0 && alive)) continue;
+        building.owner = -1;
+        for (const int person : adults) {
+            if (!owns(person)) {
+                building.owner = person;
+                break;
+            }
+        }
+    }
+    std::vector<int> housed;
+    int storage = 0;
+    for (const sim::buildings::PlacedBuilding& building : store_.all()) {
+        if (building.state != sim::buildings::State::Finished || store_.condition(building) <= 0) continue;
+        const std::vector<std::string> uses = store_.uses(building);
+        const sim::buildings::KindDef* kind = data_.kind(building.kind);
+        if (kind != nullptr) storage += std::find(uses.begin(), uses.end(), "store") != uses.end() ? kind->capacity : 0;
+        if (std::find(uses.begin(), uses.end(), "sleep") == uses.end()) continue;
+        int beds = kBedsPerSleepingPlace;
+        if (building.owner >= 0) {
+            housed.push_back(building.owner);
+            --beds;
+        }
+        for (const int person : adults) {
+            if (beds <= 0) break;
+            if (std::find(housed.begin(), housed.end(), person) != housed.end() || owns(person)) continue;
+            housed.push_back(person);
+            --beds;
+        }
+    }
+    clan->setHoused(std::move(housed));
+    clan->setStorageMeals(storage);
 }
 
 bool BuildingLayer::fireHit(OdysseyGame& game, int cellX, int cellY) {

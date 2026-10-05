@@ -87,7 +87,12 @@ void World::passHour(int hour) {
     const bool winter = calendar_.dateAt(ticks_ - 1).season == Season::Winter;
     for (Person& person : people_) {
         if (person.alive) {
+            const int warmthBefore = person.needs[Need::Warmth];
             decayForHour(person.needs, config_.needs, winter, hour);
+            if (std::find(housed_.begin(), housed_.end(), person.id) != housed_.end()) { // under a roof the night is less cold (US-257)
+                const int rate = dailyRate(config_.needs, Need::Warmth, winter) * config_.needs.shelterWarmthPercent / 100;
+                person.needs[Need::Warmth] = std::max(0, warmthBefore - hourlyDrop(rate, hour));
+            }
             if (dailyLife_) {
                 doAction(person); // what they chose for this hour now pays off
             }
@@ -823,7 +828,9 @@ void World::startDay() {
         return; // the first morning: everyone starts rested and fed
     }
     const bool winterNight = calendar_.dateAt(ticks_ - 1).season == Season::Winter;
-    food_ -= food_ * config_.actions.spoilPercent / 100; // some of the store spoils every day
+    // Some of the store spoils every day; what a storage pit holds spoils at half the rate (US-257).
+    const int kept = std::min(food_, storageMeals_);
+    food_ -= (food_ - kept) * config_.actions.spoilPercent / 100 + kept * config_.actions.spoilPercent / 200;
     for (Person& person : people_) {
         if (!person.alive) {
             continue;

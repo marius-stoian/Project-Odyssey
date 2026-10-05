@@ -82,10 +82,15 @@ public:
     std::string clanDeliver(OdysseyGame& game, int id);
     std::string clanWork(OdysseyGame& game, int id, int seconds);
     // Fire and raids (US-255): a fire weapon that stops against a standing piece sets it alight; rivals at war raid at the start of a season.
+    // Buildings in the clan's life (US-257): owners at dawn, who is housed, what a storage pit keeps. Called by `tick` each dawn; public for tests.
+    void applyClanLife(OdysseyGame& game);
     bool fireHit(OdysseyGame& game, int cellX, int cellY);
     std::string clanDouse(OdysseyGame& game, int id);
     int raidsAtSeasonStart(OdysseyGame& game, int season); // how many rivals raided
     bool raidFrom(OdysseyGame& game, int rival, int season);   // one raid: false when there was nothing to hit
+    // The clan lends a hand with blueprints (US-253). Off: only the hero builds (tests of the hero's own work switch it off).
+    void setClanBuilds(bool builds) { clanBuilds_ = builds; }
+    bool clanBuilds() const { return clanBuilds_; }
     const sim::buildings::RivalBuilders& rivalBuilders() const { return rivalBuilders_; }
     std::uint64_t hash() const { return store_.hash() ^ (rivalBuilders_.hash() * 31); }
     // Walking obstacles of the finished walls, posts and fences are put on the map again when the store says they changed.
@@ -139,6 +144,7 @@ private:
     sim::buildings::BuildingData data_;
     sim::buildings::BuildingStore store_{nullptr};
     sim::buildings::RivalBuilders rivalBuilders_;
+    bool clanBuilds_ = true;
     std::vector<std::string> notes_;
     std::set<std::string> known_;
     std::vector<std::pair<int, int>> obstacleCells_; // the cells this layer put on the map, to take them off again

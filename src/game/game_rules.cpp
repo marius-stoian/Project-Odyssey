@@ -102,6 +102,21 @@ std::optional<Subject> buildingSubject(const OdysseyGame& game, int buildingId) 
     return subject;
 }
 
+std::optional<Subject> placeSubject(const OdysseyGame& game, int placeIndex) {
+    if (placeIndex < 0 || static_cast<std::size_t>(placeIndex) >= game.level().places.size()) return std::nullopt;
+    const PlacedPlace& place = game.level().places[static_cast<std::size_t>(placeIndex)];
+    Subject subject;
+    subject.kind = Subject::Kind::Place;
+    subject.index = placeIndex;
+    subject.name = place.name;
+    subject.title = place.name;
+    subject.x = place.at.x;
+    subject.y = place.at.y;
+    subject.info.kind = "place";
+    subject.info.tags = place.tags;
+    return subject;
+}
+
 namespace {
 
 Subject personSubject(const OdysseyGame& game, int person) {
@@ -210,6 +225,11 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) 
     {
         const auto [cx, cy] = BuildingLayer::cellOf(wx, wy);
         if (const int id = game.buildings().store().buildingAt(cx, cy); id != 0) return buildingSubject(game, id);
+    }
+    // A place with tags: the way out of a building and the like (US-254).
+    for (std::size_t i = 0; i < game.level().places.size(); ++i) {
+        const PlacedPlace& place = game.level().places[i];
+        if (!place.tags.empty() && std::hypot(wx - place.at.x, wy - place.at.y) < 24) return placeSubject(game, static_cast<int>(i));
     }
     // A plant: berries, flint, a tree.
     if (const int plantIndex = game.plantAtWorld(wx, wy); plantIndex >= 0) return plantSubject(game, static_cast<std::size_t>(plantIndex));
@@ -353,6 +373,7 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     case Subject::Kind::Hero: return heroSubject(game);
     case Subject::Kind::Npc: return npcSubject(game, ref.id);
     case Subject::Kind::Building: return buildingSubject(game, ref.id);
+    case Subject::Kind::Place: return placeSubject(game, ref.id);
     case Subject::Kind::Animal:
         for (std::size_t i = 0; i < game.enemies().size(); ++i) {
             if (game.enemies()[i].id == ref.id && game.enemies()[i].isAlive()) return animalSubject(game, i);

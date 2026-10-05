@@ -176,11 +176,11 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-252 | US-252 | M8d | Done | Tests deferred to X-M8d (owner, 2026-10-05); its cases ran alone and pass |
 | S-US-256 | US-256 | M8d | Done | Tests deferred to X-M8d (owner, 2026-10-05); its cases ran alone and pass |
 | X-M8d | - | M8d | Done | docs/gates/M8d.md; two shards failed at first, fixed, failing cases rerun |
-| K-M8e | - | M8e | To do |  |
-| S-US-253 | US-253 | M8e | To do |  |
-| S-US-254 | US-254 | M8e | To do |  |
-| S-US-255 | US-255 | M8e | To do |  |
-| S-US-257 | US-257 | M8e | To do |  |
+| K-M8e | - | M8e | Done | Owner answers 2026-10-05, docs/plans/M8e-building-life-design.md |
+| S-US-253 | US-253 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
+| S-US-254 | US-254 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
+| S-US-255 | US-255 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
+| S-US-257 | US-257 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
 | X-M8e | - | M8e | To do |  |
 | K-M9 | - | M9 | To do |  |
 | S-US-170 | US-170 | M9 | To do |  |

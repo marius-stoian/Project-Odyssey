@@ -18,7 +18,7 @@ class OdysseyGame;
 // What the hero is acting on (US-151, US-152): one thing in the world as the rules see it. Things are named by an index into the
 // game's own lists (a plant, a clan member, a rival camp), never by pointer, so a Subject stays valid while the menu is open.
 struct Subject {
-    enum class Kind { Plant, Person, KnappingStone, CampFire, SacredFire, RivalCamp, Animal, Hero, Npc, Building };
+    enum class Kind { Plant, Person, KnappingStone, CampFire, SacredFire, RivalCamp, Animal, Hero, Npc, Building, Place };
 
     Kind kind = Kind::Plant;
     int index = -1;               // the plant, the clan member, the rival camp or the animal; the id of the placed character for an Npc; -1 for the one-of-a-kind things
@@ -52,6 +52,7 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double worldX, double 
 Subject plantSubject(const OdysseyGame& game, std::size_t plantIndex);
 // A building of the level (US-251): the index is the id the store gave it. Tags: building, construction, repairable, burning and the uses; target.state is its state word.
 std::optional<Subject> buildingSubject(const OdysseyGame& game, int buildingId);
+std::optional<Subject> placeSubject(const OdysseyGame& game, int placeIndex); // a named place of the level that carries tags (the way out of a building, US-254)
 // A placed person of the level (US-265): tags are the resolved tags of its classes, kind and own fields, plus "npc" and, when it has a dialogue for the
 // player, "speaks". Empty when the id is not a placed person.
 std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId);

@@ -39,12 +39,20 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     // Buildings (US-251, US-255): bring materials, work on the site, cancel it, repair, put out a fire.
     if (subject.kind == Subject::Kind::Building) {
         const int seconds = args.empty() ? 4 : std::clamp(std::atoi(args[0].c_str()), 1, 60);
+        bool handled = true;
         if (name == "deliver-materials") game.showMessage(game.buildings().deliver(game, subject.index));
         else if (name == "build-work") game.showMessage(game.buildings().work(game, subject.index, seconds));
         else if (name == "cancel-blueprint") game.showMessage(game.buildings().cancel(game, subject.index));
         else if (name == "repair") game.showMessage(game.buildings().repair(game, subject.index, args.empty() ? 10 : seconds));
         else if (name == "douse-fire") game.showMessage(game.buildings().douse(game, subject.index));
-        else return false;
+        else handled = false;
+        if (handled) return true;
+    }
+    if (name == "store-food" && subject.kind == Subject::Kind::Building && args.size() == 1) {
+        const int meals = std::max(1, std::atoi(args[0].c_str()));
+        game.buildings().store().deposit(subject.index, "berries", meals);
+        if (sim::World* clan = game.clanMutable()) clan->adjustFood(meals);
+        game.showMessage(std::format("{} meals go into the store.", meals));
         return true;
     }
     if (name == "enter-building" && subject.kind == Subject::Kind::Building) {
@@ -327,7 +335,7 @@ private:
 } // namespace
 
 const std::vector<std::string>& builtInActionNames() {
-    static const std::vector<std::string> names = {"deliver-materials", "build-work", "cancel-blueprint", "repair", "douse-fire", "learn-blueprint", "enter-building", "leave-building", "gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
+    static const std::vector<std::string> names = {"deliver-materials", "build-work", "cancel-blueprint", "repair", "douse-fire", "learn-blueprint", "enter-building", "leave-building", "store-food", "gather-berries", "knap", "pick-flint", "chop", "inspect", "talk", "confront", "actions", "spread-opinion", "calm", "provoke", "give-berries", "ask-to-teach",
                                                    "open-craft", "eat-berries", "tend-camp-fire", "tend-sacred-fire", "hold-ritual", "open-barter", "open-trade", "rare-goods", "walk-to", "chat", "swap", "gift", "fight", "hunt", "restore", "warm-nearby", "graze", "flee"};
     return names;
 }

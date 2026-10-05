@@ -115,6 +115,7 @@ TEST_CASE("US-250 Own list: buildings are saved in their own list (level version
 
 TEST_CASE("US-250 Game: the buildings of a level stand when the game starts, and a mistake in the data is shown, not fatal") {
     Camp camp("us250-game");
+    camp.odyssey.buildings().setClanBuilds(false); // the hero's own work is under test, not the clan's help
     CHECK(camp.odyssey.buildings().notes().empty());
     CHECK(camp.odyssey.buildings().data().kinds().size() >= 5);
     CHECK(camp.odyssey.buildings().knows("hut"));
@@ -136,6 +137,7 @@ TEST_CASE("US-250 Game: the buildings of a level stand when the game starts, and
 
 TEST_CASE("US-251 Place: the Build menu lists what the hero knows; a click places a see-through blueprint; an invalid spot is red and refused") {
     Camp camp("us251-place");
+    camp.odyssey.buildings().setClanBuilds(false); // the hero's own work is under test, not the clan's help
     game::OdysseyGame& odyssey = camp.odyssey;
     odyssey.setViewScales(1, 1);
     camp.play(2);
@@ -180,6 +182,7 @@ TEST_CASE("US-251 Place: the Build menu lists what the hero knows; a click place
 
 TEST_CASE("US-251 Place: an invalid spot is shown red and nothing is placed there") {
     Camp camp("us251-red");
+    camp.odyssey.buildings().setClanBuilds(false); // the hero's own work is under test, not the clan's help
     game::OdysseyGame& odyssey = camp.odyssey;
     odyssey.setViewScales(1, 1);
     odyssey.buildings().select("hut");
@@ -215,6 +218,7 @@ TEST_CASE("US-251 Place: an invalid spot is shown red and nothing is placed ther
 
 TEST_CASE("US-251 Build: bring materials from the bag, work on the site, and the building is finished after its build time") {
     Camp camp("us251-build");
+    camp.odyssey.buildings().setClanBuilds(false); // the hero's own work is under test, not the clan's help
     game::OdysseyGame& odyssey = camp.odyssey;
     odyssey.setViewScales(1, 1);
     const auto spot = spotNear(odyssey, "hut", 1);
@@ -279,6 +283,7 @@ TEST_CASE("US-251 Build: bring materials from the bag, work on the site, and the
 
 TEST_CASE("US-251 Cancel: the delivered materials are dropped on the site and picked up by walking over them") {
     Camp camp("us251-cancel");
+    camp.odyssey.buildings().setClanBuilds(false); // the hero's own work is under test, not the clan's help
     game::OdysseyGame& odyssey = camp.odyssey;
     odyssey.setViewScales(1, 1);
     // A windbreak a few cells away from the hero, along a row nothing stands on (so the hero can walk to the drop).
@@ -320,6 +325,7 @@ TEST_CASE("US-251 Cancel: the delivered materials are dropped on the site and pi
 
 TEST_CASE("US-252 Pieces: walls, a door and a roof are placed one by one, each built like a small blueprint, and the room forms when it is closed") {
     Camp camp("us252-pieces");
+    camp.odyssey.buildings().setClanBuilds(false); // the hero's own work is under test, not the clan's help
     game::OdysseyGame& odyssey = camp.odyssey;
     odyssey.setViewScales(1, 1);
     // A free 3 x 3 square east of the hero, found by the pieces themselves.

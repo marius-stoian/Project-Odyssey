@@ -5,6 +5,7 @@
 
 using namespace camp_support;
 namespace buildings = odysseus::sim::buildings;
+namespace sim = odysseus::sim;
 
 namespace {
 
@@ -108,4 +109,63 @@ TEST_CASE("US-255 Fire: a burning piece can be doused through the interaction") 
     REQUIRE(game::startInteraction(camp.odyssey, "douse-fire", *subject));
     camp.play(50);
     CHECK_FALSE(camp.odyssey.buildings().store().burning(*camp.odyssey.buildings().store().find(placed.id)));
+}
+
+TEST_CASE("US-257 Life: a finished hut is given to the lowest-id adult, housed people lose warmth more slowly, a storage pit halves spoilage and store-food fills it") {
+    Camp camp("us257-life");
+    sim::World* clan = camp.odyssey.clanMutable();
+    REQUIRE(clan != nullptr);
+    const auto [ax, ay] = spotNear(camp.odyssey, "hut");
+    const auto hut = camp.odyssey.buildings().store().place("hut", ax, ay, 0, 0, true, {});
+    REQUIRE(hut.problem.empty());
+    camp.odyssey.buildings().applyClanLife(camp.odyssey);
+    const buildings::PlacedBuilding* placed = camp.odyssey.buildings().store().find(hut.id);
+    REQUIRE(placed != nullptr);
+    REQUIRE(placed->owner >= 0);
+    int lowest = -1;
+    for (const sim::Person& person : clan->people()) {
+        if (person.alive && !person.exiled && person.ageYears(clan->calendar().daysPerYear()) >= 15) {
+            lowest = lowest < 0 ? person.id : std::min(lowest, person.id);
+        }
+    }
+    CHECK(placed->owner == lowest);
+    // The pit keeps meals: put some in with the interaction (the hero needs berries).
+    const auto [bx, by] = spotNear(camp.odyssey, "storage-pit");
+    const auto pit = camp.odyssey.buildings().store().place("storage-pit", bx, by, 0, 0, true, {});
+    REQUIRE(pit.problem.empty());
+    camp.odyssey.life()->give("berries", 4);
+    const int foodBefore = clan->food();
+    const auto subject = game::buildingSubject(camp.odyssey, pit.id);
+    REQUIRE(subject.has_value());
+    REQUIRE(game::startInteraction(camp.odyssey, "store-food", *subject));
+    camp.play(60);
+    CHECK(clan->food() == foodBefore + 2);
+    CHECK(camp.odyssey.buildings().store().find(pit.id)->contents.at("berries") == 2);
+}
+
+TEST_CASE("US-254 Doors: enter-building and leave-building work through the interactions of the right-click menu") {
+    Camp camp("us254-doors");
+    fs::create_directories(camp.data.parent_path() / "levels");
+    fs::copy_file(fs::path(ODYSSEUS_DATA_DIR).parent_path() / "levels" / "interior-hut.json", camp.data.parent_path() / "levels" / "interior-hut.json", fs::copy_options::overwrite_existing);
+    const auto [ax, ay] = spotNear(camp.odyssey, "hut");
+    const auto placed = camp.odyssey.buildings().store().place("hut", ax, ay, 0, 0, true, {});
+    REQUIRE(placed.problem.empty());
+    buildings::PlacedBuilding* hut = camp.odyssey.buildings().store().findMutable(placed.id);
+    hut->interior = "map";
+    hut->interiorLevel = "interior-hut";
+    const auto subject = game::buildingSubject(camp.odyssey, placed.id);
+    REQUIRE(subject.has_value());
+    REQUIRE(game::startInteraction(camp.odyssey, "enter-building", *subject));
+    camp.play(30);
+    CHECK(camp.odyssey.insideBuilding());
+    // The exit is a place of the interior level: its subject is found by tag.
+    const auto& places = camp.odyssey.level().places;
+    const auto exitPlace = std::find_if(places.begin(), places.end(), [](const game::PlacedPlace& p) { return p.name == "exit"; });
+    REQUIRE(exitPlace != places.end());
+    CHECK(std::find(exitPlace->tags.begin(), exitPlace->tags.end(), "exit") != exitPlace->tags.end());
+    const auto out = game::placeSubject(camp.odyssey, static_cast<int>(exitPlace - places.begin()));
+    REQUIRE(out.has_value());
+    REQUIRE(game::startInteraction(camp.odyssey, "leave-building", *out));
+    camp.play(30);
+    CHECK_FALSE(camp.odyssey.insideBuilding());
 }

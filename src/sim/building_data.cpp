@@ -186,8 +186,8 @@ std::optional<KindDef> parseKindValue(const BuildingData& data, const JsonValue&
         p.error(entry.line, "a kind must be a {...} object");
         return std::nullopt;
     }
-    p.unknownFields(entry, {"id", "label", "footprint", "layout", "cost", "buildSeconds", "interior", "interiorLevel", "uses", "light", "owner", "wear", "buildable", "known", "colour", "note"},
-                    "id, label, footprint, layout, cost, buildSeconds, interior, interiorLevel, uses, light, owner, wear, buildable, known, colour, note");
+    p.unknownFields(entry, {"id", "label", "footprint", "layout", "cost", "buildSeconds", "interior", "interiorLevel", "uses", "light", "owner", "wear", "buildable", "known", "colour", "note", "capacity"},
+                    "id, label, footprint, layout, cost, buildSeconds, interior, interiorLevel, uses, light, owner, wear, buildable, known, colour, note, capacity");
     KindDef kind;
     kind.prefab = prefab;
     kind.file = name;
@@ -285,6 +285,7 @@ std::optional<KindDef> parseKindValue(const BuildingData& data, const JsonValue&
             else (std::string_view(flag) == "buildable" ? kind.buildable : kind.known) = value->boolean;
         }
     }
+    kind.capacity = p.number(entry, "capacity", 0, 1000, 0); // meals of the clan's store a storage kind keeps at half the spoilage (US-257)
     kind.colour = p.colour(entry, "colour", kind.colour);
     kind.note = p.text(entry, "note", false);
     if (p.errors() != before) return std::nullopt;
@@ -539,6 +540,7 @@ std::string toJson(const KindDef& k) {
         out += " }";
     }
     out += std::format(",\n  \"buildable\": {},\n  \"known\": {},\n  \"colour\": {}", k.buildable ? "true" : "false", k.known ? "true" : "false", quoteJson(rules::formatColour(k.colour)));
+    if (k.capacity > 0) out += std::format(",\n  \"capacity\": {}", k.capacity);
     if (!k.note.empty()) out += std::format(",\n  \"note\": {}", quoteJson(k.note));
     out += "\n}\n";
     return out;

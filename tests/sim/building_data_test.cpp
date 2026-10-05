@@ -101,7 +101,7 @@ TEST_CASE("US-250 Uses: the shipped kinds say what they are for") {
     const auto pit = store.place("storage-pit", 2, 2, 0, 0, true, {});
     REQUIRE(pit.problem.empty());
     const auto tags = store.tags(*store.find(pit.id));
-    CHECK(std::ranges::find(tags, "store") != tags.end());
+    CHECK(std::ranges::find(tags, "storage") != tags.end());
     CHECK(std::ranges::find(tags, "building") != tags.end());
 }
 

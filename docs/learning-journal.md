@@ -1901,3 +1901,43 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it (15 minutes).** Compose a prefab, save it, open the file in a text editor, break a field, and start the game to read the message.
 
 **Check yourself.** Why is a kind of `kinds.json` saved under a new id when you open it in the Prefab tab?
+
+## US-253: a second builder (M8e)
+
+**Idea.** Clan members use the same interaction files as the hero; only the `npc` rule says when they want to. A job is just a thing a person can see.
+
+**Where to look.** `NpcLife::think` (blueprints join the list of things near), `BuildingLayer::clanDeliver`, `RivalBuilders`.
+
+**Try it.** Place a blueprint near the camp and watch who comes. Change `"score"` in `build-work.json` to make them lazier.
+
+**Check yourself.** Why do the rival clans keep a list of kinds, not cells?
+
+## US-254: two levels at once (M8e)
+
+**Idea.** Going inside keeps the whole outside world in a box (`OutsideWorld`) and plays another level; leaving puts the box back. Copying a whole world is simple; sharing pieces of it would need care about who owns what.
+
+**Where to look.** `OdysseyGame::enterBuilding`, `leaveBuilding`.
+
+**Try it.** Make an interior level in the Editor with a place called `exit` tagged `exit`.
+
+**Check yourself.** What would break if the buildings store was not saved before going in?
+
+## US-255: events, not decay (M8e)
+
+**Idea.** The owner chose very slow wear, so trouble comes from events: raids, fire, storms. All of them use whole numbers and the store's hash, so a replay gives the same raid.
+
+**Where to look.** `BuildingLayer::raidFrom`, `BuildingStore::advance`.
+
+**Try it.** Call `setRelation(0, -80)` in a test and begin a new season.
+
+**Check yourself.** Why is the choice of target taken from a hash and not from a random call?
+
+## US-257: what a roof is for (M8e)
+
+**Idea.** A building matters to the clan when the simulation reads it. The game tells the world each dawn who is housed and how many meals are kept cool; the world never looks at buildings itself, which keeps the simulation layer free of the game.
+
+**Where to look.** `BuildingLayer::applyClanLife`, `World::setHoused`.
+
+**Try it.** Raise `shelterWarmthPercent` to 100 in `needs.json` and see the difference vanish.
+
+**Check yourself.** Why does the world not save the housed list?

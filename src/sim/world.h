@@ -134,6 +134,10 @@ public:
     };
     std::vector<TalkEvent> takeTalks() { return std::exchange(talks_, {}); }
     void adjustFood(int meals) { food_ = food_ + meals < 0 ? 0 : food_ + meals; }
+    // Buildings in the clan's life (US-257): who sleeps under a roof, and how many meals a storage pit keeps at half the spoilage. The game sets both
+    // every hour from its buildings; they are not saved.
+    void setHoused(std::vector<int> people) { housed_ = std::move(people); }
+    void setStorageMeals(int meals) { storageMeals_ = meals < 0 ? 0 : meals; }
     // Writes an entry in the chronicle now; returns its id.
     int note(const std::string& text, int importance, EventKind kind = EventKind::Note, int who = -1, int other = -1);
 
@@ -234,6 +238,8 @@ private:
     int temperature_ = 0;
     std::vector<Person> people_;
     int food_ = 0;
+    std::vector<int> housed_;  // person ids
+    int storageMeals_ = 0;
     Chronicle chronicle_;
     std::vector<TalkEvent> talks_; // see takeTalks()
 };

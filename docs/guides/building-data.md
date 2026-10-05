@@ -58,6 +58,7 @@ A prefab is a kind in a file of its own; the Editor's **Prefab** tab writes it. 
 | `wear` | hit points each piece loses when that season ends (`spring`, `summer`, `autumn`, `winter`); wear never takes a piece below 1 hp (D-55: very slow) |
 | `buildable` | offered in the Build menu once known. `false`: only the owner places it |
 | `known` | the hero has the blueprint at the start of a run (D-55: the hut and the windbreak) |
+| `capacity` | storage kinds: how many meals of the clan's store the building keeps at half the spoilage (US-257) |
 
 ## In levels and saves
 
@@ -74,3 +75,10 @@ A level has a `buildings` list (level version 6), in its own list and not among 
 
 - **Build** tool: choose a kind or prefab (`*`), **R** turns it, a click places it finished. Select a building to turn it, set its interior mode and level, set its owner, make it a blueprint, or delete it.
 - **Prefab** tab: pick a piece, click the grid (right click erases the top piece of the cell), set the size, interior mode, uses, flags, cost and build time, then **Save**. The prefab appears in the Build tool and, when *buildable* and *known*, in the game's Build menu.
+
+## Building life (M8e)
+
+- The clan builds blueprints too; idle clan members bring up to 2 of each missing material and work (US-253).
+- A building whose interior is `map` can be entered (*Go into ...*); the level named by `interiorLevel` is read from `assets/levels/<name>.json` and needs a place named `exit` with the tag `exit` (US-254).
+- Rivals at war raid finished buildings at the start of a season; fire weapons ignite; repair and putting out fires are interactions (US-255).
+- `owner: person` buildings are given to adults at dawn; housed people lose warmth more slowly; `uses: ["store"]` kinds with a `capacity` keep meals cool; interactions see the use as the tag `storage` (US-257).

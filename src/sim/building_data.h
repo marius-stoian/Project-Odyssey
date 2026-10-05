@@ -83,6 +83,7 @@ struct KindDef {
     std::map<std::string, int> wear; // season name (lower case) -> hp each piece loses when that season ends
     bool buildable = true; // offered in the Build menu once known
     bool known = false;    // the hero knows the blueprint at the start of a run
+    int capacity = 0;      // storage: meals of the clan's store kept at half the spoilage (US-257)
     int colour = 0x8B6B3E; // the Build menu's icon
     std::string note;
     bool prefab = false;   // read from prefabs/<id>.json (the Editor's Prefab tab writes these)

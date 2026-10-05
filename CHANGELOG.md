@@ -4,6 +4,15 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## M8e Building life: US-253, US-254, US-255, US-257 (Mraw) - 2026-10-05
+
+**State:** On `qa`. K-M8e answered by the owner (design in `docs/plans/M8e-building-life-design.md`).
+
+- **US-253 clans build:** idle clan members bring up to 2 of each missing material from their surroundings (60 s rest) and work on blueprints (`npc` rules in `deliver-materials.json` and `build-work.json`); `src/sim/building_life.h/.cpp` `RivalBuilders` (a list of rival buildings per season, deterministic, saved, hashed). Rival buildings are lists, not cells of the level (technical choice, see `docs/plans/US-253.md`). Tests: `tests/sim/building_life_test.cpp`, `tests/game/building_life_game_test.cpp`.
+- **US-254 interiors:** `OdysseyGame::enterBuilding/leaveBuilding` keep the outside world while an interior level plays; `Subject::Kind::Place` makes named places with tags right-clickable; interactions `enter-building`, `leave-building`; sample level `assets/levels/interior-hut.json`; tag `enterable`.
+- **US-255 damage and fire:** raids by rivals at war at each season start (40 hp, 1 in 3 a fire), fire shots ignite, `repair`, `douse-fire` (clan members too), flames and fire light on burning pieces, `light` of finished buildings at night; `HeroLife::setRelation`.
+- **US-257 life:** owners at dawn, `World::setHoused` with `shelterWarmthPercent` 40 (`needs.json`), `World::setStorageMeals` halves spoilage, kind field `capacity`, interaction `store-food`, tag `storage` for the store use.
+
 ## M8d Buildings: US-250, US-251, US-252, US-256 (Mraw) - 2026-10-05
 
 **State:** On `qa`. K-M8d answered by the owner (D-55); tests are written per story and run once at X-M8d (owner, 2026-10-05). X-M8d: verify ran, two shards failed (level version, three actions without a file), fixed; see docs/gates/M8d.md.
