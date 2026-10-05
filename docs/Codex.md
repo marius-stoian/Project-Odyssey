@@ -1,6 +1,6 @@
-# Project Odyssey Codex v2.12
+# Project Odyssey Codex v2.13
 
-Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-05 (v2.12 amended in the repository copy by Mraw at the owner's order, D-54, CI-013) | Source of truth: Project Odyssey.docx v2.10 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
+Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus Avengers) | Date: 2026-10-05 | Source of truth: Project Odyssey.docx v2.11 (chapter 12: MVP; chapter 7: architecture) | Executor: autonomous AI coding agents (the strongest available model for orchestrator, architect and acceptor; any current model for the others) | Human gate: kill-gate results that need people, accounts, credentials and money; design decisions are taken by the owner in chat (D-22)
 
 ## 0. How to use this Codex
 
@@ -12,6 +12,7 @@ Author: **Anima** (Prompt Architect) for **Mraw** (Dominus Full Team / Dominus A
 - Continuous assembly: the owner wants the MVP as fast as quality allows, engine first. After each prompt, continue with the next one in Codex order without waiting, until a Charter human gate or the end of the session.
 - Autonomous by default (owner instruction, 2026-09-30): the owner wants the game built with minimal intervention. Design decisions are delegated to Dominus, stories integrate through the `qa` branch, and a Milestone-<n>.md progress snapshot is saved after every story, so the owner can review everything later. The owner answers questions up front (before leaving the team to work), not during the run.
 - Design decisions from v2.0 on (owner, 2026-10-01, D-35): the owner takes them (D-22, Charter human gate 3). The delegated period the owner granted on 2026-10-01 for M3-M6 (D-30..D-33) ended with M6. Each kickoff K-Mx asks the owner its open design questions in one chat round before its first story.
+- M10b (owner, 2026-10-05, D-58) is built after X-M10 and before K-M11 under the owner-decides rules (D-22): the owner answers its kickoff questions in one chat round, every story runs the full verification with green CI on qa, and X-M10b ends with a 10-minute owner walkthrough.
 - M8b-M8e (owner, 2026-10-01, D-43) are built right after M8 and before M9, under the M7-M9 rules (D-35): the owner answers each kickoff's design questions in one chat round, and every story runs the full verification with green CI on qa.
 - M9a NPC foundation, M9b Trade economy and M9c NPC life (owner, 2026-10-04, D-52) are built right after M8c and before M8d, under the M7-M9 rules (D-35). The owner answered their design questions on 2026-10-04 (docs/decision-requests/D-52.md).
 - M10-M14 (owner, 2026-10-01, D-41): Dominus decides the design questions of these milestones with the recommended option and records each as "Decided by Dominus (delegated)" in docs/decisions.md and the next Milestone file; the owner may override any of them. Tests are written with each story but run at each milestone's exit review, which fixes every failure before the milestone is merged into main.
@@ -237,7 +238,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-12 | Visual Studio, CMake, Git, vcpkg installed; GitHub account and private repo | M0 | US-001, US-002 | Decided |
 | D-13 | SDL3, EnTT, Dear ImGui, nlohmann/json, doctest, FastNoiseLite available via vcpkg or third_party | M0-M4 | US-020, US-032, US-083, US-016, US-040 | Decided |
 | D-14 | Eight outside playtesters recruited | M6 | Kill gate 2 | Open: plan ready (docs/plans/M6-playtest-plan.md), recruiting from K-M13 (D-48) |
-| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M9a > M9b > M9c > M8d > M8e > M9 > M10 > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
+| D-15 | Technical chain: M0 > M1 > M1b > M2 > M2b > M2c > M2d > M3 > M4 > M5 > M7 > M8 > M8b > M8c > M9a > M9b > M9c > M8d > M8e > M9 > M10 > M10b > M11 > M12 > M13 > M14 > M6 (each milestone needs the previous one) | All | All | Planned |
 | D-GATE-M2 | Kill Gate 1 result (M2): did 2 of 3 readers find a story? | X-M2 | M3 | Decided: Pivot (owner, 2026-09-30) |
 | D-18 | Story pivot design: story arcs on a richer social simulation; quarrels, blame and revenge; sharing and nursing; courtship and rivals; teaching and hunting parties; episodes plus lines with reasons; the owner judges the retry alone | M2b | US-110..US-115 | Decided (owner, 2026-09-30) |
 | D-GATE-M2b | Kill Gate 1 retry: the owner reads the M2b story and judges whether it is a story | X-M2b | M3 | Decided: Go (owner, 2026-09-30: "it is a story") |
@@ -257,6 +258,7 @@ Agents stop only for owner design decisions. The decision log starts with these 
 | D-49 | Lighting design answers (K-M8c; owner, 2026-10-02) | M8c | US-240..US-247 | Decided (owner, 2026-10-02) |
 | D-50 | Celestial bodies: sun and moon as placeable light-source objects (owner, 2026-10-04); shadows by ground-plane projection from the body's position; sprites in the sky; eclipses as data events; new story US-248 before US-244 | M8c | US-248, US-244 | Decided (owner, 2026-10-04) |
 | D-52 | NPC foundation, trade economy and NPC life (owner, 2026-10-04, six chat rounds): 24 design answers and 4 follow-ups in docs/decision-requests/D-52.md: owner-defined NPC Classes (one or more per NPC), kind files, placed NPCs as full persons, up to 100,000 persons with detail by distance, nine attitudes per pair, talk only with a dialogue, a Confront button, hidden actions plus an Actions pop-up, barter and owner-defined currency with supply and demand and reputation, schedules and NPC-to-NPC interactions, forms before the graph editor, test level npc-test.json; three milestones right after M8c | M9a-M9c | US-260..US-270, US-280..US-284, US-290..US-294 | Decided (owner, 2026-10-04) |
+| D-58 | Editor help and live data (owner, 2026-10-05, three chat rounds, docs/decision-requests/D-58.md): tooltips with purpose, range and example from assets/data/editor/help.json on every field of the Level, Building and Graph editors (a test enforces it); a dropdown suggestion list on every field (numbers: default, min, max, last 5 typed); hot reload of every data file on save and by a file watch within 1 s, all or nothing, placed things follow, a missing kind shows a red marker; level edits win over an older run save by id; new milestone M10b after X-M10; exit = tests plus a 10-minute owner walkthrough | M10b | US-300..US-305 | Decided (owner, 2026-10-05) |
 
 ## 6. Assembly prompts
 
@@ -503,6 +505,23 @@ The owner asked on 2026-10-04 to talk, confront and trade with every NPC, to set
 3. docs/status.md: add P-012 after P-011; add K-M9a..X-M9a, K-M9b..X-M9b, K-M9c..X-M9c (To do) in the execution order of section 7, between X-M8c and K-M8d.
 4. Requirements v2.10 and the backlog (epics E26-E28, Round 23) are on Drive; mirror them with tools/sync-workspace.ps1 if the session hook has not, and commit them with "Docs: sync workspace files from Drive". The brief and D-52.md are already committed (6c9d395).
 5. Update Limit.md (next prompt in Codex order) and commit on qa "P-012: adopt Codex v2.11 (NPC foundation, trade economy, NPC life)" (explicit paths only), push.
+</instructions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+### P-013 Adopt Codex v2.13 (Editor help and live data)
+```xml
+<prompt id="P-013" codex="2.13" name="Adopt Codex v2.13">
+<context>
+The owner asked on 2026-10-05 for tooltips in the Game Editor, auto-suggestions on every field, and Editor changes reflected in the game after save (D-58, Decided in three chat rounds). A new milestone M10b Editor help and live data (epic E29, US-300..US-305) is queued after X-M10 and before K-M11. Mraw's brief: docs/plans/M10b-editor-help-live-data-brief.md. Run this prompt as soon as the Codex sync reports v2.13; a story in progress (for example an M10 story) is finished and merged first, then M10 continues in Codex order.
+</context>
+<instructions>
+1. CLAUDE.md and .claude/agents/: regenerate from the Charter C-01 and roles (tools/sync-codex.ps1 does it): version references v2.13.
+2. docs/decisions.md: D-58 is already there (Decided, owner, 2026-10-05) with docs/decision-requests/D-58.md, committed on qa by Mraw with the brief. Make D-15 read "... > M10 > M10b > M11 > ...". If a story already used D-58, renumber that story's decision to the next free ID and update its references.
+3. docs/status.md: add P-013 after P-012; add K-M10b, S-US-300, S-US-301, S-US-302, S-US-303, S-US-304, S-US-305, X-M10b (To do) between X-M10 and K-M11.
+4. Requirements v2.11 and the backlog (epic E29, Round 24) are on Drive; mirror them with tools/sync-workspace.ps1 if the session hook has not, and commit them with "Docs: sync workspace files from Drive".
+5. Update Limit.md (next prompt in Codex order) and commit on qa "P-013: adopt Codex v2.13 (Editor help and live data)" (explicit paths only), push.
 </instructions>
 <output_format>Assembly report (Charter report_format).</output_format>
 </prompt>
@@ -7928,15 +7947,368 @@ Manual checks in docs/plans/US-185.md listed, to be run at X-M10.
 </prompt>
 ```
 
+### M10b Editor help and live data
+Exit criteria: The owner rests the pointer on any field of the Level, Building and Graph editors and reads what it does, its range and an example; picks values from the suggestion list of every field; saves a light kind, an object and an interaction (in the Editor and in a text editor) and sees each change in the running game within a second; and a bush moved in the Editor shows in its new place in a loaded run.
+
+Why this milestone exists: the owner asked on 2026-10-05 for tooltips in the Game Editor, auto-suggestions on every field, and Editor changes reflected in the game after save (D-58, 11 answers in three chat rounds). Today only buttons have hover hints, no field suggests values, objects.json and lights.json need a restart, outside edits need F5, and the run save restored at launch can hide level edits. It is built after X-M10 and before K-M11 (D-58 Q1).
+
+Design notes for M10b (owner decisions D-58, docs/decision-requests/D-58.md; brief docs/plans/M10b-editor-help-live-data-brief.md):
+- Rules: the owner takes design decisions (D-22, Charter human gate 3); the M10-M14 delegation of D-41 does **not** apply to M10b. Every story runs the full verification with green CI on qa (D-46), like M9a.
+- Tooltip (D-58 Q2, Q5): purpose, range and example, one or two short lines, drawn like today's `Button::hint`; on every field of the Level Editor panels, the Building editor and the Graph editor. A coverage test fails by name when a field has no help entry, so later fields (M11 forms included) get one too.
+- Help source (Q7): `assets/data/editor/help.json`, one entry per field id `<panel>.<field>` with `purpose`, `range`, `example`, `suggest` and optional `list`. A missing or broken file never stops the Editor.
+- Suggestions (Q3, Q6): a dropdown under the focused field (above it near the screen bottom), up to 8 rows, prefix matches first then substring, case-insensitive; Up/Down, Tab/Enter accept, Esc closes, a click accepts; closed, it takes no keys. Sources: catalogs, file names, fixed lists; number fields: the kind or class default, the min, the max and the last 5 values typed in that field this session.
+- Live data (Q4, Q8, Q9): every data file the Editor saves, and every file under assets/data/ and the open level changed outside, applies in the running game within 1 s, all or nothing (like F5 today: a broken file keeps the last good data and the mistakes panel names file and line). Placed things follow the new data unless they have their own value; a thing whose kind is gone shows a red "?" marker, is skipped by play, and a warning names the level entry. F5 stays and reloads everything.
+- Run save vs level (Q10): when the level was saved after the run's save, every placed thing changed, added or removed in the level comes from the level, matched by id through a per-id hash baseline stored in the run save; untouched run state stays. Save format version bump with a migration (Charter rule 8).
+- Layers (Charter rules 1, 9): `TextField`/`NumberField` hint and suggest and the new `SuggestList` are Luna Engine widgets, game-agnostic; help loading, suggestion sources, the reload registry and the watcher are Game code (`src/game/editor_help.*`, `src/game/data_reload.*`); the baseline merge of saved state belongs where each saved system lives. The watcher polls file times (no new library); tests and headless runs turn it off (`--no-watch`), so determinism tests never see a reload.
+- Never edit assets/levels/valley.json (the owner's work); tests use their own copies.
+- Source of truth: Project Odyssey.docx v2.11 holds epic E29, requirements EDT-09, EDT-10, EDT-11, NFR-09 and MVP-18 (Round 24).
+
+```xml
+<prompt id="K-M10b" codex="2.13" name="Kick off M10b Editor help and live data">
+<instructions>
+1. Confirm that M10 (docs/gates/M10.md) and its stories are done, and that D-58 is Decided in docs/decisions.md.
+2. Confirm that the mirrored requirements (docs/project/requirements/Project Odyssey.docx) are v2.11 or later and contain epic E29; if not, run tools/sync-workspace.ps1, and stop with a codex issue if they still do not.
+3. D-58 is Decided (docs/decision-requests/D-58.md). Ask the owner, in one chat round (2-4 options each, recommended first), only the questions the M10b stories still leave open after D-58 and the design document draft (for example: the tooltip hover delay, whether the suggestion list opens on focus or on the first typed letter, the colour of the missing-kind marker). Record the answers as D-59 in docs/decisions.md (or the next free ID).
+4. Architect: write docs/plans/M10b-editor-help-design.md before US-300: the full list of fields and their help ids (count them per editor; the brief found about 41), the help.json format and its validator, the SuggestList widget and key handling, every suggestion source, the reload registry (data sets, files, all-or-nothing swap, what follows each), the watcher (poll interval, debounce, own-write filter, `--no-watch`), the run-save baseline and its migration, and the test plan. Technical choices are the architect's; record them there.
+5. Set this milestone's stories to To do in docs/status.md in this order: US-300, US-301, US-302, US-303, US-304, US-305.
+6. Continue with the first story prompt.
+</instructions>
+<output_format>Short kickoff note in the assembly report: milestone goal, stories, the owner's answers.</output_format>
+</prompt>
+```
+
+#### S-US-300 Field tooltips from help.json
+```xml
+<prompt id="S-US-300" codex="2.13" milestone="M10b" story="US-300" priority="Must" size="M">
+<context>
+Story US-300: Field tooltips from help.json.
+As the owner, I want every Editor field to say what it does, its range and an example, so that I never need the guide to fill a form.
+Epic E29 Editor help and live data: Every Editor field explains itself and suggests its values; whatever the owner saves shows in the running game at once, and level edits win over an older run save.
+Traces to: EDT-09.
+</context>
+<dependencies>
+Stories that must be Done: US-123, US-173.
+Owner decisions that must be Decided: D-58.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna Engine (src/luna/engine/ui.*): `TextField` and `NumberField` get a `hint` drawn in `drawOverlay` exactly like `Button::hint`. Game: src/game/editor_help.* loads assets/data/editor/help.json (comments allowed; errors as `file:line: message`) and gives every field its help id and hint when a panel is built in editor.cpp, building_editor.cpp and graph_editor.cpp (small additive edits there). Write the entries for every field listed in docs/plans/M10b-editor-help-design.md. A coverage test builds every panel headless and fails naming each field without an entry.
+Follow the M10b design notes and docs/plans/M10b-editor-help-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Hover">
+Given the NPC panel
+When the pointer rests on Sword
+Then a tooltip shows purpose, range and example from help.json
+</scenario>
+<scenario name="Coverage">
+Given all panels of the Level, Building and Graph editors
+When the coverage test builds them
+Then every field has a help entry, and a missing one fails the test by name
+</scenario>
+<scenario name="Broken file">
+Given a help.json with a syntax error
+When the Editor opens
+Then fields show no tooltip, the status line names the line, and nothing crashes
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: docs/guides/editor.md gains a "Tooltips and suggestions" section and a line on help.json with an example entry; the shipped help.json passes its validator.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-300`: the Debug build with zero warnings and every Debug test passes, including the "US-300 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-300.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-300/.
+</verification>
+<teach_back>C++ concept for the owner: Loading text data once and looking it up by key; tests that walk every widget.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-301 Suggestion list widget
+```xml
+<prompt id="S-US-301" codex="2.13" milestone="M10b" story="US-301" priority="Must" size="M">
+<context>
+Story US-301: Suggestion list widget.
+As the owner, I want a list of matching values under the field I type in, so that I pick instead of remembering names.
+Epic E29 Editor help and live data: Every Editor field explains itself and suggests its values; whatever the owner saves shows in the running game at once, and level edits win over an older run save.
+Traces to: EDT-10.
+</context>
+<dependencies>
+Stories that must be Done: US-300.
+Owner decisions that must be Decided: D-58.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Luna Engine only (src/luna/engine/ui.*, game-agnostic): `TextField` and `NumberField` get a `suggest` function (typed text to a list of strings); a new `SuggestList` overlay under the focused field (above it when it would leave the screen), up to 8 rows with scrolling, prefix matches first then substring, case-insensitive; Up/Down move, Tab/Enter accept, Esc closes and keeps the typed text, a click on a row accepts. Closed, it consumes no input, so every existing key and shortcut behaves as before. Unit tests drive it through `UiInput` without a window. No game field is wired yet (US-302).
+Follow the M10b design notes and docs/plans/M10b-editor-help-design.md.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Filter">
+Given a field with suggestions trader, trapper, elder
+When the owner types "tr"
+Then the list shows trader and trapper
+</scenario>
+<scenario name="Keys">
+Given the list open
+When the owner presses Down then Tab
+Then the second row is the field's text; Esc closes the list and keeps what was typed
+</scenario>
+<scenario name="Quiet">
+Given the list closed
+When the owner presses Tab, Enter or the arrows
+Then they do what they did before M10b
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: Luna stays game-agnostic (the ADR-016 boundary check passes).</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-301`: the Debug build with zero warnings and every Debug test passes, including the "US-301 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-301.md done, with results in docs/evidence/US-301/.
+</verification>
+<teach_back>C++ concept for the owner: A reusable overlay widget; keyboard focus and who gets a key.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-302 Suggestions on every field
+```xml
+<prompt id="S-US-302" codex="2.13" milestone="M10b" story="US-302" priority="Must" size="L">
+<context>
+Story US-302: Suggestions on every field.
+As the owner, I want every field to suggest the values it accepts, so that I never type an id that does not exist.
+Epic E29 Editor help and live data: Every Editor field explains itself and suggests its values; whatever the owner saves shows in the running game at once, and level edits win over an older run save.
+Traces to: EDT-10.
+</context>
+<dependencies>
+Stories that must be Done: US-301, US-260, US-170.
+Owner decisions that must be Decided: D-58.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game (src/game/editor_help.*): resolve each help entry's `suggest` source against the data in use: `number` (kind or class default, min, max, last 5 typed in that field this session), `files:<folder>/<glob>`, `catalog:<name>` (every catalog the design document lists: NPC classes and kinds, partner types, interactions and their fields, light kinds, objects, plants, characters, items, building kinds, prefabs, quests, levels), `values:a|b|c`, `none`; `list: true` completes the item after the last comma and keeps the rest. Sources read the current data each time the list opens, so a catalog saved a moment ago is offered at once. Wire every field of the three editors. The coverage test of US-300 also fails for a field whose `suggest` is missing or names an unknown source.
+Follow the M10b design notes and docs/plans/M10b-editor-help-design.md; a format change is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Text">
+Given the NPC Script field
+When the owner types "el"
+Then the .dlg files of the dialogue folder starting with "el" are listed
+</scenario>
+<scenario name="Lists">
+Given the Classes field holding "trader, "
+When the owner types "e"
+Then the classes starting with "e" are listed and accepting one keeps "trader, "
+</scenario>
+<scenario name="Numbers">
+Given the HP field of a wolf
+When it gets focus
+Then the list shows the kind default, the min, the max and the last 5 values typed there
+</scenario>
+<scenario name="Fresh">
+Given a new NPC Class saved
+When the owner opens the Classes field
+Then the new class is listed without a restart
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: docs/guides/editor.md lists every suggestion source with an example.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-302`: the Debug build with zero warnings and every Debug test passes, including the "US-302 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-302.md done, with results and screenshots (`odysseus.exe --screenshot`) in docs/evidence/US-302/.
+</verification>
+<teach_back>C++ concept for the owner: Strategy functions as data sources; completing one item of a comma list.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-303 Live reload of every data file
+```xml
+<prompt id="S-US-303" codex="2.13" milestone="M10b" story="US-303" priority="Must" size="L">
+<context>
+Story US-303: Live reload of every data file.
+As the owner, I want everything I save to show in the running game at once, so that I test changes without a restart.
+Epic E29 Editor help and live data: Every Editor field explains itself and suggests its values; whatever the owner saves shows in the running game at once, and level edits win over an older run save.
+Traces to: EDT-11, NFR-09.
+</context>
+<dependencies>
+Stories that must be Done: US-156, US-260.
+Owner decisions that must be Decided: D-58.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game (src/game/data_reload.*): one registry of reloadable data sets, each with its files, an all-or-nothing reload (read into a side copy; only a clean copy replaces the data in use, as `OdysseyGame::reloadInteractions` does today) and what must follow it (placed things, Editor palettes, help suggestions). Move the existing reloads (interactions, dialogues, NPC classes and kinds, partner defaults, building kinds and prefabs, quests) into it and add objects.json, lights.json, characters, plants, items, help.json and every other catalog under assets/data/ that today needs a restart. Every Editor save calls the registry for the file it wrote; F5 reloads every set. Placed things without their own value follow the new data; a placed thing whose kind is gone draws a red "?" marker, is skipped by play, and a warning names the level entry. Simulation catalogs reload through ids, never pointers (CI-007). Remove every "restart the game" line from the guides.
+Follow the M10b design notes and docs/plans/M10b-editor-help-design.md.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Catalog">
+Given a running game
+When the owner changes a light kind's colour in lights.json and saves
+Then placed lights of that kind shine in the new colour within 1 s
+</scenario>
+<scenario name="Object">
+Given objects.json
+When the owner adds an object and saves
+Then it is on the object page of the palette without a restart
+</scenario>
+<scenario name="All or nothing">
+Given a broken interaction file saved
+When the reload runs
+Then the last good data stays in use and the mistakes panel names the file and line
+</scenario>
+<scenario name="Missing kind">
+Given a placed thing whose kind the owner deleted
+When the data reloads
+Then it shows a red marker and a warning naming the level entry, and the game runs on
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: a timing test shows each data set reloads in under 100 ms on the D-06 PC (NFR-09) and records the numbers in docs/evidence/US-303/; the determinism hash test runs with no reload.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-303`: the Debug build with zero warnings and every Debug test passes, including the "US-303 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-303.md done, with results and screenshots in docs/evidence/US-303/.
+</verification>
+<teach_back>C++ concept for the owner: A registry of reloadable data sets; swapping data only when the new copy is clean.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3); the NFR-09 budget cannot be met (write a decision request for the owner).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-304 File watch for outside edits
+```xml
+<prompt id="S-US-304" codex="2.13" milestone="M10b" story="US-304" priority="Must" size="M">
+<context>
+Story US-304: File watch for outside edits.
+As the owner, I want files I edit in a text editor to reload by themselves, so that I can work outside the Editor too.
+Epic E29 Editor help and live data: Every Editor field explains itself and suggests its values; whatever the owner saves shows in the running game at once, and level edits win over an older run save.
+Traces to: EDT-11, NFR-09.
+</context>
+<dependencies>
+Stories that must be Done: US-303.
+Owner decisions that must be Decided: D-58.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: Game (src/game/data_reload.*): a watcher that polls the `last_write_time` of every registered file and folder (std::filesystem; no new library, no thread unless the design document justifies one) at the design document's interval with a debounce, so a saved change is live within 1 s; it ignores, once, the files the game wrote itself. The open level changed outside: reloaded when the Editor has no unsaved changes; otherwise the status line says the file changed and nothing is overwritten. `--no-watch` turns it off; tests and headless runs use it.
+Follow the M10b design notes and docs/plans/M10b-editor-help-design.md.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Outside">
+Given the game running
+When the owner saves an interaction file in a text editor
+Then the change is live within 1 s, without F5
+</scenario>
+<scenario name="Own writes">
+Given the Editor saves a file
+When the watcher sees it
+Then it does not reload it a second time
+</scenario>
+<scenario name="Open level">
+Given the Editor open with unsaved changes
+When the level file changes on disk
+Then nothing is overwritten and the status line says the file changed
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: the watcher costs under 0.5 ms per frame on the D-06 PC with the shipped data (recorded in docs/evidence/US-304/); docs/guides/editor.md explains live data and `--no-watch`.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-304`: the Debug build with zero warnings and every Debug test passes, including the "US-304 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-304.md done, with results in docs/evidence/US-304/.
+</verification>
+<teach_back>C++ concept for the owner: Polling file times; debouncing; ignoring your own writes.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+#### S-US-305 Level edits win over the run save
+```xml
+<prompt id="S-US-305" codex="2.13" milestone="M10b" story="US-305" priority="Must" size="L">
+<context>
+Story US-305: Level edits win over the run save.
+As the owner, I want my level edits to win over an older run save, so that what I saved is what I play.
+Epic E29 Editor help and live data: Every Editor field explains itself and suggests its values; whatever the owner saves shows in the running game at once, and level edits win over an older run save.
+Traces to: EDT-11, ADR-010.
+</context>
+<dependencies>
+Stories that must be Done: US-303, US-153.
+Owner decisions that must be Decided: D-58.
+</dependencies>
+<instructions>
+Run the Mraw build loop L-01 for this story only.
+Where the work belongs: every run save (things.json, buildings.json, the placed people) also stores the level baseline: for each placed thing (plants and objects, characters and NPCs, pickups, effects, lights, level buildings) its id and a hash of its level entry. On load, and after every Editor save while a run is loaded, each id is compared with the level now: the same hash keeps the run state; changed or new comes fresh from the level; gone from the level is removed from the run. The status line says how many things the level updated. Bump each save format's version with a migration: a save without a baseline loads as before once and is written with one. Saved state stays in the layer that owns it (Simulation state in src/sim/, Game state in src/game/).
+Follow the M10b design notes and docs/plans/M10b-editor-help-design.md; a save format change beyond the baseline is a design question for the owner.
+Scope is exactly the acceptance criteria below; anything else is a new story, not part of this one.
+Completion: the story is complete only when every scenario passes with evidence, the Definition of Done holds, and it is merged into qa with green CI; a progress summary is not completion.
+</instructions>
+<acceptance_criteria>
+<scenario name="Edited">
+Given a run saved
+When the owner moves a berry bush in the Editor and saves
+Then the next start (and F1) shows it in its new place, fresh
+</scenario>
+<scenario name="Untouched">
+Given the same run
+When the owner starts again
+Then the berries picked on another bush still ripen, and the clan and hero are as saved
+</scenario>
+<scenario name="Removed">
+Given an NPC deleted from the level
+When the run loads
+Then it is not in the run and the status line counts the update
+</scenario>
+<scenario name="Old save">
+Given a save from before M10b
+When it loads
+Then it behaves as before once and is written with a baseline
+</scenario>
+</acceptance_criteria>
+<definition_of_done>Charter definition_of_done, plus: load-save-load round-trip tests for every changed save format; docs/guides/editor.md says how level edits and run saves combine.</definition_of_done>
+<verification>
+`pwsh tools/verify.ps1 -Story US-305`: the Debug build with zero warnings and every Debug test passes, including the "US-305 ..." cases and the determinism hash test. After a failure rerun only the failing cases; run the full verification once at the end.
+Green CI on qa after the merge (Release build and every Release test, D-46).
+Manual checks in docs/plans/US-305.md done, with results and screenshots in docs/evidence/US-305/.
+</verification>
+<teach_back>C++ concept for the owner: Content hashes as a baseline; merging by id; save versions and migrations.</teach_back>
+<stop_conditions>Build loop L-01 stop conditions; a design or save-format question this Codex does not answer (ask the owner, Charter human gate 3).</stop_conditions>
+<output_format>Assembly report (Charter report_format).</output_format>
+</prompt>
+```
+
+```xml
+<prompt id="X-M10b" codex="2.13" name="Exit review M10b">
+<instructions>
+1. Run `pwsh tools/verify.ps1 -Story X-M10b` on qa (Debug, every test) and confirm CI on qa is green. Also run `pwsh tools/verify.ps1 -Story X-M10b -Config Release` on the owner's PC: every Release test with the strict 3-second first-frame limit, which GitHub's GPU-less runners only check at 10 seconds (D-47); record the result in docs/gates/M10b.md.
+2. Write docs/gates/M10b-walkthrough.md: a 10-minute script for the owner (D-58 Q11) that covers every exit criterion: hover five fields in each editor; pick a class, a dialogue file and a number from suggestion lists; change a light kind's colour and add an object in a text editor and watch the running game; save a broken interaction and see the mistakes panel; move a bush, save, start the run again.
+3. Demonstrate the exit criteria: The owner rests the pointer on any field of the Level, Building and Graph editors and reads what it does, its range and an example; picks values from the suggestion list of every field; saves a light kind, an object and an interaction (in the Editor and in a text editor) and sees each change in the running game within a second; and a bush moved in the Editor shows in its new place in a loaded run.
+4. Collect evidence into docs/gates/M10b.md, one section per criterion, met or not met, with the coverage test output (fields per editor) and the NFR-09 timings.
+5. Owner gate: ask the owner in chat to run the walkthrough and answer Pass or Fail with notes; record the answer in docs/gates/M10b.md. This is the only stop of M10b.
+6. If all are met, the walkthrough passed and CI on qa is green: merge qa into main, push, confirm CI on main is green, tag the repository m10b-done and push the tag, and save a Milestone-<n>.md snapshot. If not: list what is missing as new stories in docs/codex-issues.md (for Anima) and stop.
+</instructions>
+<output_format>Assembly report with the exit result, the walkthrough answer and the test-run table.</output_format>
+</prompt>
+```
+
 ### M11 Data editors
 Exit criteria: Every data file has a schema; the owner edits any entity, mechanic, story tuning value, game rule and daily routine in Editor forms with pickers and validation, and the running game reloads it.
 
 Why this milestone exists: every data file becomes editable in the Editor through forms built from schemas (D-40, EDT-02, EDT-03, SDC-07). The design notes under M10 apply.
 
 ```xml
-<prompt id="K-M11" codex="2.1" name="Kick off M11 Data editors">
+<prompt id="K-M11" codex="2.13" name="Kick off M11 Data editors">
 <instructions>
-1. Confirm that M10 (docs/gates/M10.md) and its stories are done (for M10: X-M9 also ran its full verification and CI), and that D-40 and D-41 are Decided in docs/decisions.md.
+1. Confirm that M10 and M10b (docs/gates/M10.md, docs/gates/M10b.md) and their stories are done (X-M10 and X-M10b ran their full verification and CI), and that D-40, D-41 and D-58 are Decided in docs/decisions.md. The M11 schema forms reuse the M10b help ids, tooltips and suggestion lists: a schema field's description and examples feed its entry in assets/data/editor/help.json (one help source), and every new form field passes the M10b coverage test.
 2. Architect: write docs/plans/M11-data-editors-design.md (schema subset and validator, form widgets, reference index, catalog reload by id (CI-007), quick check, Game Rules loading, routines as role-level weights on the M9c schedules of US-290) before the first story. Every design question it meets, Dominus decides (D-41) and records as delegated.
 3. Set this milestone's stories to To do in docs/status.md in this order: US-190, US-191, US-193, US-194, US-195, US-196, US-192.
 4. Continue with the first story prompt.
@@ -9617,7 +9989,7 @@ Manual checks in docs/plans/US-092.md done, with results recorded there.
 ```
 
 ### Execution order
-P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> P-012 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-248 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M9a -> S-US-260 -> S-US-261 -> S-US-262 -> S-US-263 -> S-US-264 -> S-US-265 -> S-US-266 -> S-US-267 -> S-US-268 -> S-US-269 -> S-US-270 -> X-M9a -> K-M9b -> S-US-280 -> S-US-281 -> S-US-282 -> S-US-283 -> S-US-284 -> X-M9b -> K-M9c -> S-US-290 -> S-US-291 -> S-US-292 -> S-US-293 -> S-US-294 -> X-M9c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
+P-000 -> P-001 -> P-002 -> P-003 -> P-004 -> P-005 -> P-006 -> P-007 -> P-008 -> P-009 -> P-010 -> P-011 -> P-012 -> P-013 -> K-M0 -> S-US-001 -> S-US-002 -> S-US-003 -> S-US-004 -> X-M0 -> K-M1 -> S-US-020 -> S-US-021 -> S-US-022 -> S-US-023 -> S-US-024 -> X-M1 -> K-M1b -> S-US-025 -> S-US-026 -> S-US-027 -> S-US-028 -> S-US-029 -> X-M1b -> K-M2 -> S-US-010 -> S-US-011 -> S-US-012 -> S-US-013 -> S-US-014 -> S-US-015 -> S-US-016 -> X-M2 -> K-M2b -> S-US-110 -> S-US-111 -> S-US-112 -> S-US-113 -> S-US-114 -> S-US-115 -> X-M2b -> K-M2c -> S-US-120 -> S-US-121 -> S-US-122 -> S-US-123 -> S-US-124 -> S-US-125 -> S-US-126 -> X-M2c -> K-M2d -> S-US-130 -> S-US-131 -> S-US-132 -> S-US-133 -> S-US-134 -> S-US-135 -> S-US-139 -> S-US-140 -> S-US-141 -> S-US-136 -> S-US-137 -> S-US-138 -> X-M2d -> K-M3 -> S-US-030 -> S-US-032 -> S-US-031 -> X-M3 -> K-M4 -> S-US-040 -> S-US-041 -> S-US-042 -> S-US-043 -> S-US-080 -> S-US-083 -> X-M4 -> K-M5 -> S-US-050 -> S-US-053 -> S-US-051 -> S-US-052 -> S-US-054 -> S-US-060 -> S-US-061 -> S-US-062 -> S-US-063 -> S-US-070 -> S-US-055 -> S-US-071 -> S-US-072 -> S-US-073 -> S-US-081 -> S-US-082 -> X-M5 -> K-M7 -> S-US-150 -> S-US-151 -> S-US-156 -> S-US-152 -> S-US-153 -> S-US-155 -> S-US-154 -> X-M7 -> K-M8 -> S-US-160 -> S-US-161 -> S-US-162 -> S-US-163 -> S-US-164 -> S-US-165 -> X-M8 -> K-M8b -> S-US-230 -> S-US-231 -> S-US-232 -> S-US-233 -> S-US-234 -> X-M8b -> K-M8c -> S-US-240 -> S-US-241 -> S-US-242 -> S-US-243 -> S-US-248 -> S-US-244 -> S-US-245 -> S-US-246 -> S-US-247 -> X-M8c -> K-M9a -> S-US-260 -> S-US-261 -> S-US-262 -> S-US-263 -> S-US-264 -> S-US-265 -> S-US-266 -> S-US-267 -> S-US-268 -> S-US-269 -> S-US-270 -> X-M9a -> K-M9b -> S-US-280 -> S-US-281 -> S-US-282 -> S-US-283 -> S-US-284 -> X-M9b -> K-M9c -> S-US-290 -> S-US-291 -> S-US-292 -> S-US-293 -> S-US-294 -> X-M9c -> K-M8d -> S-US-250 -> S-US-251 -> S-US-252 -> S-US-256 -> X-M8d -> K-M8e -> S-US-253 -> S-US-254 -> S-US-255 -> S-US-257 -> X-M8e -> K-M9 -> S-US-170 -> S-US-171 -> S-US-172 -> S-US-175 -> S-US-173 -> S-US-174 -> X-M9 -> K-M10 -> S-US-180 -> S-US-181 -> S-US-182 -> S-US-183 -> S-US-186 -> S-US-184 -> S-US-187 -> S-US-185 -> X-M10 -> K-M10b -> S-US-300 -> S-US-301 -> S-US-302 -> S-US-303 -> S-US-304 -> S-US-305 -> X-M10b -> K-M11 -> S-US-190 -> S-US-191 -> S-US-193 -> S-US-194 -> S-US-195 -> S-US-196 -> S-US-192 -> X-M11 -> K-M12 -> S-US-200 -> S-US-201 -> S-US-202 -> S-US-203 -> S-US-204 -> S-US-205 -> S-US-206 -> S-US-207 -> X-M12 -> K-M13 -> S-US-210 -> S-US-211 -> S-US-212 -> S-US-213 -> S-US-214 -> S-US-215 -> S-US-216 -> X-M13 -> K-M14 -> S-US-220 -> S-US-221 -> S-US-226 -> S-US-222 -> S-US-224 -> S-US-223 -> S-US-225 -> X-M14 -> K-M6 -> S-US-090 -> S-US-091 -> S-US-092 -> X-M6
 
 ## 8. State files
 A fresh session resumes from these files only (A-001), never from chat history.
@@ -9672,3 +10044,4 @@ A fresh session resumes from these files only (A-001), never from chat history.
 | 2.10 | 2026-10-04 | Requirements reconciled (source of truth v2.10, Round 23): Mraw added the M9a-M9c work to Project Odyssey.docx and the backlog. Epic ids E17-E19 were already taken (M10-M12), so the NPC epics are E26 NPC foundation, E27 Trade economy and E28 NPC life; every M9a-M9c story prompt now traces to the new requirements SDC-08..SDC-12, INT-09..INT-12, EDT-08 and NFR-08 instead of placeholders; K-M9a step 2 checks the mirrored requirements version; P-012 adopts v2.10 and mirrors the requirements. CI-012 resolved before it was raised. Open for a later version: SDC-12 builds the schedules early, so S-US-196 (M11 routines) should reuse them; Anima amends S-US-196 when M11 comes closer. |
 | 2.11 | 2026-10-04 | S-US-196 (M11 Daily routines as data) reuses the M9c schedules (US-290, SDC-12; owner request): routines are the US-290 schedule format per role and per person, the story adds tag weights per block for the utility scoring, routines for clan members by profession, a 24-hour timeline view in the US-290 schedule form and the schedule schema for the M11 editors; no routines.json and no second scheduler. New dependencies US-290, US-291 and D-52; traces add SDC-12; new scenario "One format". K-M11's design document covers routines on the M9c schedules. P-012 adopts v2.11. |
 | 2.12 | 2026-10-05 | M9b and M9c kickoff answers (owner, D-54; amended in the repository copy by Mraw at the owner's order, to be adopted by Anima, CI-013). S-US-291 loses the quest-action hook (action sources are class, custom and event actions; M10 adds the quest hook and changes the action schema); S-US-293 names the defaults files assets/data/interactions/defaults-<type>.json and the four environment interactions; S-US-294 and X-M9c soak 30 in-game days (was 10) with the same save hash on two runs. The M9b trade design (currency items and a balance, item-value currencies, prices from base x stock curve x drift with reputation last, bands, Haggle, weighted daily restock) is in docs/plans/M9-npc-design.md and ADR-023. |
+| 2.13 | 2026-10-05 | Anima adopts the repository v2.12 (M9b and M9c kickoff answers D-54, amended by Mraw at the owner order; CI-013 resolved) unchanged, and adds Editor help and live data (owner answers D-58, three chat rounds; Mraw's brief docs/plans/M10b-editor-help-live-data-brief.md; source of truth v2.11, Round 24: epic E29, EDT-09..EDT-11, NFR-09, MVP-18). New milestone M10b between X-M10 and K-M11: K-M10b, S-US-300 (field tooltips from help.json), S-US-301 (suggestion list widget), S-US-302 (suggestions on every field), S-US-303 (live reload of every data file), S-US-304 (file watch for outside edits), S-US-305 (level edits win over the run save), X-M10b (tests plus a 10-minute owner walkthrough). M10b runs under the owner-decides rules (D-22), not the D-41 delegation. New P-013 adopts v2.13. K-M11 (now v2.13) checks M10b and reuses its help source for the schema forms; its old reference to X-M9 is corrected to X-M10. D-15 chain and execution order updated. Not specified here: the exact field list and hover delay (K-M10b design document and owner round). |
