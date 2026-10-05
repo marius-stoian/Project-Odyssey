@@ -40,7 +40,7 @@ Tooling tips (Windows): CMake presets `windows-x64-debug` and `windows-x64-relea
 - **CI result:** green on qa at 9f51a9c (run 36892611637, Release build and tests) with US-230 merged, so S-US-230 is Done. The first CI run of the merge (4d97913) failed on one check only: US-160 Guide ... found CRLF in the guide on the Windows runner; fixed by 9f51a9c (guides keep LF via .gitattributes). The runner built the GPU backend or skipped it as ADR-021 allows; check the log line enderer if you care. Next, start S-US-231.
 - Local verification of US-230: Debug and Release, zero warnings, 27/27 tests (log in `docs/evidence/US-230/`).
 
-### What US-230 built (read `docs/plans/US-230.md` and `docs/adr/ADR-021-sdl-gpu-renderer.md`)
+### What US-230 built (read `docs/plans/stories-M8b.md#us-230` and `docs/adr/ADR-021-sdl-gpu-renderer.md`)
 - `src/luna/platform/backend.h`: `RenderBackend` interface. `sdl_renderer_backend.cpp` is the old SDL_Renderer drawing, now into a virtual-screen texture, then enlarged. `gpu_backend.cpp` uses SDL_GPU, Direct3D 12 and HLSL shaders compiled at build time by the Windows SDK `dxc.exe` into DXIL headers, with batching, Normal and Add blend pipelines, whole-step blit with black bars, and screenshots through a download buffer. Shaders: `src/luna/platform/shaders/*.hlsl`.
 - `Window` owns the OS window, events and gamepads and asks a backend to draw. `--renderer auto|gpu|sdl` (default auto: GPU, falling back to SDL_Renderer with the reason logged). `-DLUNA_GPU=OFF` builds without the GPU backend.
 - The `Renderer` interface and everything in `src/game/` are unchanged. GPU and SDL_Renderer pictures are identical to the pixel (tests compare 921,600 pixels, 0 different; `kTexelNudge = 1/512` in both backends).

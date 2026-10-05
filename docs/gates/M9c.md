@@ -12,7 +12,7 @@ Found and fixed by the one full verify: the director returned early for a person
 | 4 | Default interactions by partner type (US-293) | Met | `npc_defaults_test`, `npc_defaults_game_test` |
 | 5 | The test level shows one day (US-294) | Met | `living_level_test` |
 | 6 | Soak: 100,000 persons x 30 days, same seed gives the same save hash, ADR-022 budget | **Skipped by owner** | Owner decision 2026-10-05 (D-54 follow-up): kept as `odysseus_sim_soak`, label `soak`, not run in verify or CI; run by hand with `ctest --preset windows-x64-release -L soak`. The one-day 100,000-person budget test of US-263 still runs and passed |
-| 7 | Screenshots of the living test level | **Not produced** | GPU screenshots are manual (`docs/plans/US-294.md` step 4) |
+| 7 | Screenshots of the living test level | **Not produced** | GPU screenshots are manual (`docs/plans/stories-M9c.md#us-294` step 4) |
 
 ## For the owner
 - Row 7 needs your PC and the window; row 6 is yours to run when you want it.

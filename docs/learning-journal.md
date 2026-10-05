@@ -1012,7 +1012,7 @@ Tags that were never written are **derived** from the fields that were (a plant 
 
 **Where to look.** `matchesTarget` in [src/sim/interaction.cpp](../src/sim/interaction.cpp); `readTags` in [src/game/tags.cpp](../src/game/tags.cpp); the derived tags in `loadCatalogs` ([src/game/catalogs.cpp](../src/game/catalogs.cpp)); `GameRuleContext::path` in [src/game/game_rules.cpp](../src/game/game_rules.cpp).
 
-**Try it (15 minutes).** Follow the manual checks in [docs/plans/US-151.md](plans/US-151.md): add a mango to `plants.json`, then change its tags and watch the menu change.
+**Try it (15 minutes).** Follow the manual checks in [docs/plans/US-151.md](plans/stories-M7.md#us-151): add a mango to `plants.json`, then change its tags and watch the menu change.
 
 **Check yourself.** Why does a plant that bears fruit and blocks walking get the tag `fruit-bearing` and not `edible`, and what would change in the game if it got `edible`?
 
@@ -1024,7 +1024,7 @@ The catalogs are *not* reloaded yet, and that is the other half of the lesson: t
 
 **Where to look.** `OdysseyGame::reloadInteractions` and `drawInteractionPanel` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); the key path `Key::F5` to `Intent::Reload` in [src/luna/engine/input.cpp](../src/luna/engine/input.cpp).
 
-**Try it (15 minutes).** The three manual checks in [docs/plans/US-156.md](plans/US-156.md).
+**Try it (15 minutes).** The three manual checks in [docs/plans/US-156.md](plans/stories-M7.md#us-156).
 
 **Check yourself.** Why is "keep the old data when the new data has any mistake" safer than "load every good file and skip the bad one" during a reload, even though the game does the second at start?
 
@@ -1034,9 +1034,9 @@ The right-click menu was 150 lines of "if it is a person, offer these; if it is 
 
 The old code moved rather than disappeared. Each item's body became a **built-in action** with a name (`give-berries`, `tend-camp-fire`), and a data file points at it with `do give-berries`. This is a small version of a common pattern, a table from a name to a function (here `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp)). Later stories replace `do ...` lines with plain effects one at a time, each checked against the same tests.
 
-**Where to look.** `RunFlow::openContext` in [src/game/run_flow.cpp](../src/game/run_flow.cpp) (now short); `subjectAt` in [src/game/game_rules.cpp](../src/game/game_rules.cpp); `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp); any file in [assets/data/interactions/](../assets/data/interactions/).
+**Where to look.** `RunFlow::openContext` in [src/game/run_flow.cpp](../src/game/run_flow.cpp) (now short); `subjectAt` in [src/game/game_rules.cpp](../src/game/game_rules.cpp); `runBuiltin` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp); any file in [assets/data/interactions/](../assets/data/interactions).
 
-**Try it (15 minutes).** Do the three manual checks in [docs/plans/US-152.md](plans/US-152.md); then add `"order": 5` to `eat-berries.json`, press F5 and see it jump to the top of the fire's menu.
+**Try it (15 minutes).** Do the three manual checks in [docs/plans/US-152.md](plans/stories-M7.md#us-152); then add `"order": 5` to `eat-berries.json`, press F5 and see it jump to the top of the fire's menu.
 
 **Check yourself.** Why was it important to write the tests for the old menu *before* connecting the new one, and what would you not know if you had written them afterwards from the new code?
 
@@ -1048,7 +1048,7 @@ Saving a clock is a trap: tick 5000 means nothing to a game that starts again fr
 
 **Where to look.** `ActionRunner::tick`, `start` and `savePending` in [src/sim/action_runner.cpp](../src/sim/action_runner.cpp); `OdysseyGame::tickActions` and `thingsText` in [src/game/odyssey_game.cpp](../src/game/odyssey_game.cpp); `GameEffectHost::setState` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp).
 
-**Try it (15 minutes).** The four manual checks in [docs/plans/US-153.md](plans/US-153.md); then set `"after 15s"` in `gather.json` to `"after 3s"` and see plants come back quickly.
+**Try it (15 minutes).** The four manual checks in [docs/plans/US-153.md](plans/stories-M7.md#us-153); then set `"after 15s"` in `gather.json` to `"after 3s"` and see plants come back quickly.
 
 **Check yourself.** Why does the saved file store "in 200 ticks" rather than "at tick 5200", and what would go wrong after loading if it stored the second?
 
@@ -1060,7 +1060,7 @@ The fire pit's behaviour needs very little: its interaction file says "needs a f
 
 **Where to look.** `loadCatalogs` (the objects part) in [src/game/catalogs.cpp](../src/game/catalogs.cpp); `makeObjectPage` in [src/game/object_art.cpp](../src/game/object_art.cpp); `Editor::plantKinds` and `plantPageSize` in [src/game/editor.cpp](../src/game/editor.cpp); [assets/data/objects.json](../assets/data/objects.json) and [assets/data/interactions/light-fire.json](../assets/data/interactions/light-fire.json).
 
-**Try it (15 minutes).** The three manual checks in [docs/plans/US-155.md](plans/US-155.md); then change `warm-nearby 6 25` to `warm-nearby 12 50` in `light-fire.json`, press F5 and light a fire again.
+**Try it (15 minutes).** The three manual checks in [docs/plans/US-155.md](plans/stories-M7.md#us-155); then change `warm-nearby 6 25` to `warm-nearby 12 50` in `light-fire.json`, press F5 and light a fire again.
 
 **Check yourself.** Why does an object without `tags` in the file still get Inspect, and which one line in the code makes that so?
 
@@ -1072,7 +1072,7 @@ Sharing one system with the player means the same timed runner, menu rules and d
 
 **Where to look.** `NpcLife::think` and `NpcLife::runMind` in [src/game/npc_life.cpp](../src/game/npc_life.cpp); `pickBest` in [src/sim/npc_chooser.cpp](../src/sim/npc_chooser.cpp); the NPC rule context in [src/game/game_rules.cpp](../src/game/game_rules.cpp); [assets/data/interactions/graze.json](../assets/data/interactions/graze.json) and [flee-predator.json](../assets/data/interactions/flee-predator.json).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-154.md](plans/US-154.md); then change the Flee score in `flee-predator.json` to `(6 - distance) * 10` and see the deer wait longer before running.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-154.md](plans/stories-M7.md#us-154); then change the Flee score in `flee-predator.json` to `(6 - distance) * 10` and see the deer wait longer before running.
 
 **Check yourself.** Why does `pickBest` draw a random number even when there is no tie, and what would go wrong with the world-hash test if it drew only when there was one?
 
@@ -1084,7 +1084,7 @@ Two details are worth learning. First, the end of a choice line holds up to thre
 
 **Where to look.** `Parser::parseLine`, `parseChoice` and `takeSuffix` in [src/sim/dialogue_script.cpp](../src/sim/dialogue_script.cpp); `writeDialogue` in the same file; the example [assets/data/dialogue/elder-fire.dlg](../assets/data/dialogue/elder-fire.dlg).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-160.md](plans/US-160.md); then add a fourth node of your own to `elder-fire.dlg` and a choice that leads to it, and press F5.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-160.md](plans/stories-M8.md#us-160); then add a fourth node of your own to `elder-fire.dlg` and a choice that leads to it, and press F5.
 
 **Check yourself.** Why must the lines a character says come before the choices of a node, and what would the canonical writer have to do if they could be mixed?
 
@@ -1096,7 +1096,7 @@ Two choices are worth learning from. First, the `Conversation` holds a **copy** 
 
 **Where to look.** `Conversation::view` and `Conversation::choose` in [src/sim/conversation.cpp](../src/sim/conversation.cpp); `moodWord` in the same file; `selectScript` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `RunFlow::buildTalk` in [src/game/run_flow.cpp](../src/game/run_flow.cpp).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-161.md](plans/US-161.md); then in `elder-fire.dlg` give the thanks node a second choice with `[if opinion(npc, hero) >= 10]` and press F5.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-161.md](plans/stories-M8.md#us-161); then in `elder-fire.dlg` give the thanks node a second choice with `[if opinion(npc, hero) >= 10]` and press F5.
 
 **Check yourself.** Why does `choose` ask `view()` for the list of choices instead of numbering the node's choices itself, and what would pressing the key 2 do if it did the latter while choice 1 was hidden?
 
@@ -1106,9 +1106,9 @@ Several scripts may fit the same person, and the game must pick one the same way
 
 The tie is the interesting part. Two scripts can be equally good, and `max_element` just returns the first of them, so one script would always win. So after finding the best, the code collects everyone who is not worse *and* not better than it (the tied ones) and picks between them with the game's seeded random stream. The number is drawn **every call**, even when nobody is tied. If the code drew only on a tie, the stream would run ahead by a different amount depending on how many scripts happened to fit, and a new script file would quietly change what happens elsewhere. Drawing exactly once keeps each system's stream predictable (Charter rule 6).
 
-**Where to look.** `choose` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `updateGreetings` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); the shipped greetings in [assets/data/dialogue/](../assets/data/dialogue/).
+**Where to look.** `choose` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp); `updateGreetings` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); the shipped greetings in [assets/data/dialogue/](../assets/data/dialogue).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-162.md](plans/US-162.md); then add a fourth greeting for anyone and see, by restarting a few times, that it joins the rotation.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-162.md](plans/stories-M8.md#us-162); then add a fourth greeting for anyone and see, by restarting a few times, that it joins the rotation.
 
 **Check yourself.** Why does `choose` compare with `better(c, best) == false && better(best, c) == false` to find the tied scripts instead of `c == best`, and what would happen if the `@priority` of two scripts differed by one?
 
@@ -1122,7 +1122,7 @@ One detail echoes the last story: `say` draws three random numbers *every time*,
 
 **Where to look.** `SmallTalk::say` and `phraseOf` in [src/sim/smalltalk.cpp](../src/sim/smalltalk.cpp); the templates in [assets/data/dialogue/smalltalk.json](../assets/data/dialogue/smalltalk.json); the checker in `SmalltalkData::parse`.
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-163.md](plans/US-163.md); then add three templates to the `hunt` topic, press F5, and ask the elder about the hunt a few times.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-163.md](plans/stories-M8.md#us-163); then add three templates to the `hunt` topic, press F5, and ask the elder about the hunt a few times.
 
 **Check yourself.** Why is a template that uses `{gossip.who}` a mistake in the topic `memory`, and what would the generator print if the file checker did not catch it?
 
@@ -1134,7 +1134,7 @@ Two small things are worth noticing. The feeling decides the *kind* of memory (a
 
 **Where to look.** `World::rememberConversation` in [src/sim/world.cpp](../src/sim/world.cpp); `World::talk` (the gossip) just above it; `FlagStore` in [src/sim/flag_store.cpp](../src/sim/flag_store.cpp); the three effects in `GameEffectHost::apply` in [src/game/builtin_actions.cpp](../src/game/builtin_actions.cpp).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-164.md](plans/US-164.md); then add `flag trust 1` to the elder's thanks node and a choice that appears only `[if flag(trust)]`.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-164.md](plans/stories-M8.md#us-164); then add `flag trust 1` to the elder's thanks node and a choice that appears only `[if flag(trust)]`.
 
 **Check yourself.** Why does `FlagStore::set` erase a flag when you set it to 0 instead of storing a 0, and what would two saves of the same game look like if it did not?
 
@@ -1148,7 +1148,7 @@ The exchange itself is a little timetable: a list of lines, a counter of ticks l
 
 **Where to look.** `Exchanges::update` and `makeExchange` in [src/game/bubbles.cpp](../src/game/bubbles.cpp); `World::takeTalks` in [src/sim/world.h](../src/sim/world.h); `selectPair` in [src/sim/dialogue_select.cpp](../src/sim/dialogue_select.cpp).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-165.md](plans/US-165.md); then write a `.dlg` file with `@pair elder person` and `@bark sharing`, so the elder has their own words when they share food.
+**Try it (15 minutes).** The manual checks in [docs/plans/US-165.md](plans/stories-M8.md#us-165); then write a `.dlg` file with `@pair elder person` and `@bark sharing`, so the elder has their own words when they share food.
 
 **Check yourself.** Why does `Exchanges::update` check `seenEntries_ > entries.size()` before reading the chronicle, and when can the chronicle be shorter than the last time it was looked at?
 
@@ -1160,9 +1160,9 @@ Two ideas make this fast. **Batching:** instead of asking the card to draw each 
 
 One detail to remember: a sprite drawn at three quarters of its size has pixels that fall *exactly* between two source pixels, and the two renderers rounded the last bit of a floating-point number differently, so 352 pixels differed. Moving both by a five-hundredth of a pixel made them agree. Floating-point numbers are not exact, and sometimes you have to decide for them.
 
-**Where to look.** `GpuBackend::drawTexture`, `recordScene` and `recordBlit` in [src/luna/platform/gpu_backend.cpp](../src/luna/platform/gpu_backend.cpp); the four shaders in [src/luna/platform/shaders/](../src/luna/platform/shaders/); how CMake compiles them in [CMakeLists.txt](../CMakeLists.txt) (search for `LUNA_DXC`).
+**Where to look.** `GpuBackend::drawTexture`, `recordScene` and `recordBlit` in [src/luna/platform/gpu_backend.cpp](../src/luna/platform/gpu_backend.cpp); the four shaders in [src/luna/platform/shaders/](../src/luna/platform/shaders); how CMake compiles them in [CMakeLists.txt](../CMakeLists.txt) (search for `LUNA_DXC`).
 
-**Try it (15 minutes).** The manual checks in [docs/plans/US-230.md](plans/US-230.md); then in `sprite.frag.hlsl` change `texel.rgb * color.rgb` to `texel.rgb * color.rgb * 0.5`, rebuild, run with `--renderer gpu` and with `--renderer sdl`, and see the picture darken only on the GPU (then undo it).
+**Try it (15 minutes).** The manual checks in [docs/plans/US-230.md](plans/stories-M8b.md#us-230); then in `sprite.frag.hlsl` change `texel.rgb * color.rgb` to `texel.rgb * color.rgb * 0.5`, rebuild, run with `--renderer gpu` and with `--renderer sdl`, and see the picture darken only on the GPU (then undo it).
 
 **Check yourself.** Why does the GPU renderer collect all the rectangles of a frame into one list and send them together at the end, instead of drawing each one the moment the game asks for it?
 
@@ -1334,7 +1334,7 @@ We walk down the ground rows instead of up the picture rows so that every ground
 
 **Where to look.** `drawShadow` in `src/luna/engine/shadow_draw.cpp`; `OdysseyGame::drawShadows` in `src/game/shadows.cpp`.
 
-**Try it (15 minutes).** Change the `height` of the `olive tree` in `plants.json` from 4.0 to 8.0 and take the 09:00 screenshot from `docs/plans/US-244.md`: the shadow doubles in length.
+**Try it (15 minutes).** Change the `height` of the `olive tree` in `plants.json` from 4.0 to 8.0 and take the 09:00 screenshot from `docs/plans/stories-M8c.md#us-244`: the shadow doubles in length.
 
 **Check yourself.** Why does `drawShadow` give a shadow that points exactly sideways a minimum depth (`kMinShadowDepth`)?
 
@@ -1353,7 +1353,7 @@ The comparison breaks ties by the light's id, so two fires that are equally near
 
 **Where to look.** `OdysseyGame::castShadow` in `src/game/shadows.cpp`; `lightSources` in `src/game/world_lights.cpp`; `fireShadows` in `assets/data/light/lights.json`.
 
-**Try it (15 minutes).** In `lights.json` set `fireShadows.maxPerObject` to 1, take a night screenshot between two fires (`docs/plans/US-245.md`): one of the two shadows is gone.
+**Try it (15 minutes).** In `lights.json` set `fireShadows.maxPerObject` to 1, take a night screenshot between two fires (`docs/plans/stories-M8c.md#us-245`): one of the two shadows is gone.
 
 **Check yourself.** Why does `castShadow` skip a light that is less than 12 pixels from the thing's feet?
 
@@ -1998,3 +1998,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Write a quest with a `branches` entry whose condition is `flag(x)`, set the flag with a dialogue effect, and watch the quest take the other step.
 
 **Check yourself.** Why does the book save how long ago a step started, and not the tick it started at?
+
+## US-181: tell, do not ask (M10)
+
+**Idea.** The quest book does not look at the world to see whether the hero gathered berries. The places that already know it (the bag, the action runner, the conversation screen) tell the book with a small message, an event. The message carries the tick it happened at, so a quest only counts what happened after its step began, and it carries no pointer, only words and numbers. This is called an observer: a function you hand to someone so they can call you back.
+
+**Where to look.** `ActionRunner::setFinishObserver`, `HeroLife::setItemObserver`, `watchHeroItems` in `odyssey_game.cpp`, `reportTalk` in `builtin_actions.cpp`.
+
+**Try it.** Add a log line inside the finish observer and finish any interaction: you see the id and who did it.
+
+**Check yourself.** Why does the observer check that the actor is the hero before it reports?

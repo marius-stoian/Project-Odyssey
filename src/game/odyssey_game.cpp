@@ -105,6 +105,10 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         }
         return changed;
     });
+    // What the hero finishes counts for quests (US-181); other people's interactions do not.
+    actions_.setFinishObserver([this](const std::string& interaction, int actor, const sim::rules::ThingRef&) {
+        if (actor == kHeroActor) questEvent(sim::rules::QuestObjective::Kind::Interact, interaction);
+    });
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -400,6 +404,7 @@ void OdysseyGame::strike(Enemy& enemy, int damage, const WeaponDef* weapon) {
     const bool defeated = enemy.takeDamage(damage);
     playEffect("spark", enemy.feetX(), enemy.feetY() - kCharacterHeight / 2.0, 24); // US-132: where the blow lands
     if (defeated) {
+        if (!enemy.kindName.empty()) questEvent(sim::rules::QuestObjective::Kind::Defeat, questWord(enemy.kindName)); // the hero struck the blow (US-181)
         playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
     } else {
         enemy.provoke();
@@ -634,6 +639,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     if (useRegion) loadRegion(game.seed);
     clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
     life_ = std::make_unique<sim::HeroLife>(*heroData_, *clan_, game);
+    watchHeroItems();
     clanEnabled_ = true;
     clanView_ = ClanView(clanView_.camp());
     clanView_.setHidden(life_->personId());
@@ -1254,6 +1260,7 @@ bool OdysseyGame::loadAutosave() {
         lastSavedDay_ = clan_->date().day;
         if (heroData_ && std::filesystem::exists(saveDirectory_ / "hero.json")) {
             life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
+            watchHeroItems();
             clanView_.setHidden(life_->personId());
             clanView_.update(*clan_, map_);
         }
@@ -2536,6 +2543,14 @@ std::string OdysseyGame::leaveBuilding() {
     editor_.levelChanged();
     say("You step outside.");
     return {};
+}
+
+// What enters the hero bag is reported to the quests (US-181): crafted things count as crafting, everything else as gathering.
+void OdysseyGame::watchHeroItems() {
+    if (!life_) return;
+    life_->setItemObserver([this](const std::string& item, int amount, bool crafted) {
+        questEvent(crafted ? sim::rules::QuestObjective::Kind::Craft : sim::rules::QuestObjective::Kind::Gather, item, amount);
+    });
 }
 
 } // namespace odysseus::game

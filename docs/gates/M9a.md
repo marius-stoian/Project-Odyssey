@@ -14,7 +14,7 @@ Found and fixed by the one full verify (the stories were built without running t
 | 4 | The NPC test level shows all of it | Met | US-270; `npc_test_level_test`; walk-through table in `docs/guides/npc-data.md` |
 | 5 | 100,000 persons run within the ADR-022 budget | Met | US-263 load test inside `npc_people_test` (Debug and Release green) |
 | 6 | Release: strict 3 s first frame on the owner's PC | Met | Release 27/27 above |
-| 7 | Screenshots of the Editor Kinds tab, markers and the test level | **Not produced** | GPU screenshots are manual: `docs/plans/US-269.md` step 6, `US-270.md` step 4 |
+| 7 | Screenshots of the Editor Kinds tab, markers and the test level | **Not produced** | GPU screenshots are manual: `docs/plans/stories-M9a.md#us-269` step 6, `US-270.md` step 4 |
 
 ## For the owner
 - Row 7 needs your PC and the window; follow the walk-through of the test level (`odysseus.exe --level assets/levels/npc-test.json`).

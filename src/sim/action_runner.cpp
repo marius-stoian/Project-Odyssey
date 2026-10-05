@@ -39,6 +39,7 @@ bool ActionRunner::start(const Interaction& base, int actor, const ThingRef& tar
     const Interaction& interaction = changed ? *changed : base;
     if (interaction.durationMilli <= 0) {
         for (const Effect& effect : interaction.effects) run(effect, actor, target, now, host);
+        if (finished_) finished_(interaction.id, actor, target);
         return true;
     }
     RunningAction action;
@@ -102,6 +103,7 @@ void ActionRunner::tick(std::int64_t now, const InteractionRegistry& registry, E
         std::optional<Interaction> changed = adjuster_ ? adjuster_(*found, action.target) : std::nullopt;
         const Interaction& interaction = changed ? *changed : *found;
         for (const Effect& effect : interaction.effects) run(effect, action.actor, action.target, now, host);
+        if (finished_) finished_(interaction.id, action.actor, action.target);
     }
 }
 

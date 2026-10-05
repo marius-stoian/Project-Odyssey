@@ -567,3 +567,20 @@ TEST_CASE("US-082 Budget") {
     CHECK(average < 100.0);
 #endif
 }
+
+TEST_CASE("US-181 The hero bag tells what enters it, and whether it was crafted") {
+    Run run(off());
+    std::vector<std::string> told;
+    run.life.setItemObserver([&told](const std::string& item, int amount, bool crafted) { told.push_back(item + " " + std::to_string(amount) + (crafted ? " crafted" : " found")); });
+    CHECK(run.life.gatherBerries().ok);
+    CHECK(told == std::vector<std::string>{"berries 2 found"});
+    run.life.give("flint", 3);
+    run.life.give("wood", 0); // nothing entered
+    run.life.give("hammerstone", 1);
+    CHECK(told.size() == 3);
+    told.clear();
+    const sim::ActionResult made = run.life.craft("spearhead");
+    REQUIRE(made.ok); // the inputs are not told (they leave the bag); the product is, as crafted
+    REQUIRE(told.size() == 1);
+    CHECK(told[0].find("crafted") != std::string::npos);
+}

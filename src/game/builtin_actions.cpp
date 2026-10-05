@@ -7,6 +7,7 @@
 #include "sim/dialogue_select.h"
 
 #include <algorithm>
+#include <cctype>
 #include <format>
 
 namespace odysseus::game {
@@ -293,7 +294,9 @@ public:
             if (effect.args.size() == 3 && game_.life() != nullptr && effect.args[0]->text != "npc" && effect.args[0]->text != "target") {
                 const int n = effect.args[2]->kind == sim::rules::Expr::Kind::Number ? static_cast<int>(effect.args[2]->number) : 1;
                 if (effect.verb == "give") game_.life()->give(effect.args[1]->text, n);
-                else game_.life()->take(effect.args[1]->text, n);
+                else {
+                    if (game_.life()->take(effect.args[1]->text, n)) game_.questEvent(sim::rules::QuestObjective::Kind::Give, effect.args[1]->text, n); // handed over (US-181)
+                }
             }
         } else {
             core::logInfo(std::format("Interactions: \"{}\" is not carried out yet", effect.source));
@@ -361,8 +364,37 @@ void tickInteractions(OdysseyGame& game) {
     game.actions().tick(game.actionClock(), game.interactions(), host);
 }
 
+std::string questWord(const std::string& text) {
+    std::string word;
+    for (const char raw : text) {
+        const auto c = static_cast<unsigned char>(raw);
+        if (std::isalnum(c) != 0) word += static_cast<char>(std::tolower(c));
+        else if ((raw == ' ' || raw == '-' || raw == '_') && !word.empty() && word.back() != '-') word += '-';
+    }
+    while (!word.empty() && word.back() == '-') word.pop_back();
+    return word;
+}
+
+void reportTalk(OdysseyGame& game, const Subject& subject) {
+    std::vector<std::string> names = {questWord(subject.name), questWord(subject.info.kind)};
+    if (subject.kind == Subject::Kind::Person && game.clan() != nullptr) {
+        for (const std::string& role : sim::rules::rolesOf(*game.clan(), subject.index)) names.push_back(questWord(role));
+    }
+    std::sort(names.begin(), names.end());
+    names.erase(std::unique(names.begin(), names.end()), names.end());
+    for (const std::string& name : names) {
+        if (!name.empty()) game.questEvent(sim::rules::QuestObjective::Kind::Talk, name);
+    }
+}
+
 void tickQuests(OdysseyGame& game) {
     if (game.quests().quests().empty()) return;
+    // goto <place>: the hero is within three tiles of a named place of the level (US-181).
+    for (const PlacedPlace& place : game.level().places) {
+        const double dx = game.hero().feetX(1.0) - place.at.x;
+        const double dy = game.hero().feetY(1.0) - place.at.y;
+        if (dx * dx + dy * dy <= 96.0 * 96.0) game.questEvent(sim::rules::QuestObjective::Kind::Goto, questWord(place.name));
+    }
     GameEffectHost host(game);
     const Subject hero = heroSubject(game);
     const GameRuleContext context(game, hero);
@@ -378,6 +410,7 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
         if (script == nullptr) return false;
         game.run().openTalk(sim::rules::Conversation(*script, kHeroActor, refOf(game, subject)), subject);
         game.run().setMessage({});
+        reportTalk(game, subject);
         return true;
     }
     if (subject.kind != Subject::Kind::Person || game.clan() == nullptr) return false;
@@ -397,6 +430,7 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
         sim::rules::Conversation conversation(*script, kHeroActor, refOf(game, subject));
         conversation.setSmalltalk(smalltalkSource);
         game.run().openTalk(std::move(conversation), subject);
+        reportTalk(game, subject);
         return true;
     }
     // No script fits them: small talk, their line and a friendly answer and a rude one. The old talk still warms the two to each other.
@@ -406,6 +440,7 @@ bool openConversation(OdysseyGame& game, const Subject& subject) {
     if (game.life() != nullptr) game.life()->talkTo(person);
     game.run().openTalk(sim::rules::Conversation(sim::rules::smalltalkScript(subject.name, said->text), kHeroActor, refOf(game, subject)), subject);
     game.run().setMessage({});
+    reportTalk(game, subject);
     return true;
 }
 
