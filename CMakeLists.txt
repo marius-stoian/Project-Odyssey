@@ -253,6 +253,7 @@ add_library(odysseus_game STATIC
     src/game/catalogs.cpp
     src/game/tags.cpp
     src/game/game_rules.cpp
+    src/game/quest_ui.cpp
     src/game/object_art.cpp
     src/game/npc_life.cpp
     src/game/builtin_actions.cpp

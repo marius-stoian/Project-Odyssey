@@ -353,3 +353,28 @@ TEST_CASE("US-180 Objective lines are read and explained") {
     CHECK_FALSE(rules::parseObjective("talk a b").problem.empty());
     CHECK_FALSE(rules::parseObjective("gather berries 0").problem.empty());
 }
+
+TEST_CASE("US-182 The offer and turn-in words are read, written and kept") {
+    std::string text = kFirstDay;
+    replaceFirst(text, "\"journal\": \"The elder", "\"offer\": \"Will you help?\", \"turnIn\": \"Well done.\", \"journal\": \"The elder");
+    const rules::Quest q = quest(text);
+    CHECK(q.offer == "Will you help?");
+    CHECK(q.turnIn == "Well done.");
+    const rules::Quest again = quest(rules::writeQuest(q));
+    CHECK(again.offer == q.offer);
+    CHECK(again.turnIn == q.turnIn);
+}
+
+TEST_CASE("US-182 quest(id) and step(id) answer in conditions, and the quest verb is a known effect") {
+    Table t(kFirstDay);
+    t.update();
+    const rules::ParsedExpr active = rules::parseExpression("quest(first-day) == active and step(first-day) == gather");
+    REQUIRE(active.root != nullptr);
+    CHECK(rules::parseEffect("quest complete first-day").problem == std::nullopt);
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Active);
+    CHECK(t.book.activeStep("first-day") == "gather");
+    CHECK(t.book.complete("first-day", t.now, &t.runner, &t.host));
+    CHECK(t.book.status("first-day") == rules::QuestStatus::Done);
+    CHECK(t.host.log.size() == 2); // the rewards
+    CHECK_FALSE(t.book.complete("first-day", t.now, &t.runner, &t.host));
+}

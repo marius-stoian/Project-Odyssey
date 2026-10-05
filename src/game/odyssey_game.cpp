@@ -2423,6 +2423,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawRivals(renderer, view);
     drawRunWorld(renderer, view);
     drawClanDetails(renderer, view, alpha);
+    drawQuestSigns(renderer, view, alpha);
     drawHud(ui);
     buildings_.drawMenu(*this, ui, uiSheet_);
     drawClanHud(ui);

@@ -1,0 +1,116 @@
+{
+ "characters": [],
+ "defaultGround": "planks",
+ "effects": [],
+ "ground": [
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ],
+  [
+   [
+    "stone",
+    16
+   ]
+  ]
+ ],
+ "height": 16,
+ "heroStart": [
+  511,
+  511
+ ],
+ "levelVersion": 6,
+ "lights": [],
+ "name": "beta-1",
+ "nextId": 1,
+ "pickups": [],
+ "plants": [],
+ "targets": [],
+ "width": 16
+}

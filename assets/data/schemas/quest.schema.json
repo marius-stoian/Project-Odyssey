@@ -25,6 +25,8 @@
     "fail": { "type": "array", "items": { "type": "string" }, "description": "When any holds, the quest fails for good" },
     "rewards": { "type": "array", "items": { "type": "string" }, "description": "Effect lines run when the quest ends" },
     "journal": { "type": "string", "description": "The line shown for a finished quest" },
+    "offer": { "type": "string", "description": "What the giver says when offering the quest" },
+    "turnIn": { "type": "string", "description": "What the giver says when the quest is handed in" },
     "note": { "type": "string", "description": "The owner's own words" }
   }
 }

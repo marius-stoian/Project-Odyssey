@@ -2008,3 +2008,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Add a log line inside the finish observer and finish any interaction: you see the id and who did it.
 
 **Check yourself.** Why does the observer check that the actor is the hero before it reports?
+
+## US-182: adding a choice without touching the file (M10)
+
+**Idea.** The elder's conversation file does not mention quests. When the conversation opens, the game copies the script in memory, adds one choice and one node, and talks from the copy. The file on disk stays as the owner wrote it, and the quest data stays in one place.
+
+**Where to look.** `addQuestChoices` and `questSignFor` in `src/game/builtin_actions.cpp`, `drawQuestSigns` in `src/game/quest_ui.cpp`.
+
+**Try it.** Give a quest `giver: "role:elder"` and watch the sign appear.
+
+**Check yourself.** Why is it safe to change the copy and not the script in the library?
