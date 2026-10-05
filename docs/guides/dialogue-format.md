@@ -160,3 +160,56 @@ Nothing of the dialogue stories remains: the owner reads the whole of M8 at its 
 ## Talking to placed NPCs (US-265)
 
 A placed person of a level (see `docs/guides/npc-data.md`) speaks the script its `player` dialogue names. In that script `opinion(npc, hero)` reads what it thinks of the hero, `mood(npc)` its attitude word (friendly, wary, hostile...), and the effects `opinion npc hero N` and `remember npc "text" N` change its opinion and give it a memory; `{npc}` and `{hero}` fill in as usual. Name the script in the class, kind or NPC (`"dialogues": { "player": "npc-trader.dlg" }`) and give it an `@who` nobody has, so it is not chosen for a clan member.
+
+## The graph editor (US-171, M9)
+
+In the Editor, the **Talk** button opens every `.dlg` file of the dialogue folder as a graph over the map (Esc comes back). The graph is only a view of the file: saving writes the canonical text described above, so a hand-edited file and a graph-edited file look the same, and every `#` note stays where it was.
+
+| Card | In the file | Ports |
+|---|---|---|
+| **Node** (blue) | `=== id` | its output starts the chain of lines and choices |
+| **Line** | `Speaker: words` | flow in, `if` in; flow out |
+| **Choice** | `-> words [else ...] => node` | flow in, `if` in, `do` in; flow out (next choice), `to` out |
+| **If** (red) | the `[if ...]` of a line or choice | out, wired to an `if` port |
+| **Do** | the `{...}` effects of a choice, one per line | out, wired to a `do` port |
+| **Note** | the `#` lines above whatever it is wired to | out, wired to the flow port of a line, a choice or a node |
+| **Goto** | a named jump | in, out; a choice may lead to it instead of to a node |
+
+A choice with no wire from its `to` port ends the conversation (`END`). The pointer: right button drag pans, the wheel zooms (25 to 400 percent) around the pointer, left button drags cards, draws wires from a yellow port to a white one, and selects with a box. **Delete** removes the selected cards, **Ctrl+Z** and **Ctrl+Y** walk back and forth through graph and map edits together, **Ctrl+S** (or Save) writes the file.
+
+The side panel edits the chosen card; with nothing chosen it edits the file's headers (`@who`, `@when`, `@priority`, `@bark`, `@pair`). Where each card sits is saved in `<name>.dlg.layout.json` beside the script (card places keyed by what the card is in the file, for example `start/choice1`); delete it and the graph is laid out again. A card nothing leads to is not in the text, and Save says so. Save refuses a graph the loader would refuse (the first mistake is named), asks once before overwriting a file that changed on disk since it was opened, keeps the previous text as `<name>.dlg.bak`, and reads the game's data again like F5.
+
+### The check (US-175)
+
+Under the canvas the graph editor lists what is wrong with the open file, live as you edit; a click on a line selects and shows the card it points to. **Errors** (`!`) block shipping, **warnings** (`?`) only say something looks wrong. Saving is always allowed, and says how many errors remain.
+
+| Finding | Kind | Meaning |
+|---|---|---|
+| node cannot be reached | warning | no choice leads to it from `start` (breadth-first); the file still loads |
+| dead end | error | a node with no choice and no `END` (not in a `@bark` or `@pair` script, which are one line by design) |
+| unknown node | error | a choice leads to a node that does not exist |
+| unknown item | error | `give`, `take` or `has(...)` names an item the hero data does not have |
+| unknown need | error | `need(x)` where x is not hunger, energy, warmth or social |
+| unknown built-in, conversation, interaction | error | `do x`, `talk x`, `start x` name something that is not there |
+| unknown tag | warning | `tag(target, x)` where no thing carries x |
+
+The same check runs over every shipped `.dlg` and interaction file in the tests (`US-175 Shipped`), so a mistake in a shipped file fails CI.
+
+### Test-play (US-174)
+
+The **Test** button of the graph editor opens a card over the canvas that plays the open conversation, with the edits you have not saved yet, on a world of its own. Type the values as words in the *state* field and press **Play**; **From here** starts at the node of the selected card; **Leave** walks away; **Stop** forgets the play. Click a numbered choice to take it. Choices whose `[if]` fails are greyed out with their `[else]` reason, as in the game. Under the choices a log lists each effect that ran (`gave 1 stone to hero`, `opinion of npc about hero +5`, `later (5 s): say "Thanks"`).
+
+| Words | Sets |
+|---|---|
+| `opinion=25` | what the NPC thinks of the hero, -100 to 100 |
+| `hunger=40` `energy=` `warmth=` `social=` | a need, 0 (empty) to 100 (full) |
+| `item.berries=2` | what the hero carries |
+| `skill.hunter=3` `trait.diligent` | the hero's skills and traits |
+| `flag.met-elder` or `flag.x=3` | a story note |
+| `tag.trader` `kin` | tags the NPC carries; the NPC is family |
+| `time=night` `season=winter` | the clock words (`morning`, `afternoon`, `evening`, `night`) and the season |
+| `hero=Joro` `npc=Ama` | the names that `{hero}` and `{npc}` become |
+
+A word it does not understand is named and nothing starts. Nothing a test-play does is written anywhere: not the level, not a save, not the `.dlg`, and it is not a step of Undo. Forcing the result of random rolls (haggling, persuading) is not offered yet: the dialogue language has no roll to force.
+
+**New and Tidy.** Type a name (lower-case letters, digits and hyphens) in the *name* field of the bar and press **New** to start a file in the shown kind: a conversation with a start node, a line and a way out, or (under **Rules**) an interaction with an actor, a verb and a target. It exists only on screen until you press Save; a name that is taken is refused. **Tidy** puts the cards in rows again as one step of Undo.

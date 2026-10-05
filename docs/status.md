@@ -182,14 +182,14 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-255 | US-255 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
 | S-US-257 | US-257 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
 | X-M8e | - | M8e | Done | docs/gates/M8e.md; Debug and Release 27/27, zero warnings |
-| K-M9 | - | M9 | To do |  |
-| S-US-170 | US-170 | M9 | To do |  |
-| S-US-171 | US-171 | M9 | To do |  |
-| S-US-172 | US-172 | M9 | To do |  |
-| S-US-175 | US-175 | M9 | To do |  |
-| S-US-173 | US-173 | M9 | To do |  |
-| S-US-174 | US-174 | M9 | To do |  |
-| X-M9 | - | M9 | To do |  |
+| K-M9 | - | M9 | Done | Owner answers 2026-10-05 (D-56), docs/plans/M9-graph-editor-design.md |
+| S-US-170 | US-170 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
+| S-US-171 | US-171 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
+| S-US-172 | US-172 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
+| S-US-175 | US-175 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
+| S-US-173 | US-173 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
+| S-US-174 | US-174 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
+| X-M9 | - | M9 | Done | docs/gates/M9.md; Debug and Release 27/27, zero warnings |
 | K-M10 | - | M10 | To do |  |
 | S-US-180 | US-180 | M10 | To do |  |
 | S-US-181 | US-181 | M10 | To do |  |

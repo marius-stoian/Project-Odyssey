@@ -109,12 +109,22 @@ struct PlacedPickup {
     friend bool operator==(const PlacedPickup&, const PlacedPickup&) = default;
 };
 
+// One value of an interaction changed for one placed thing (US-173, D-56 Q14): only this bush regrows in 60 s. `field` is "duration" or "delay" (the wait of
+// every `after` effect), `valueMilli` is in thousandths of a second. Saved in the thing's own `overrides` list; a thing with none writes none.
+struct ThingOverride {
+    std::string interaction;
+    std::string field;
+    int valueMilli = 0;
+    friend bool operator==(const ThingOverride&, const ThingOverride&) = default;
+};
+
 // A plant growing in the level (US-136). Ids come from the same counter as the characters and pickups.
 // The feet are the middle of its bottom edge: the cell they are in is the one a big plant blocks.
 struct PlacedPlant {
     int id = 0;
     std::string kind;     // a name from plants.json
     PixelPoint feet;      // world pixels
+    std::vector<ThingOverride> overrides; // values of interactions changed for this plant (US-173)
     friend bool operator==(const PlacedPlant&, const PlacedPlant&) = default;
 };
 

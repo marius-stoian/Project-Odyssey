@@ -1941,3 +1941,63 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Raise `shelterWarmthPercent` to 100 in `needs.json` and see the difference vanish.
 
 **Check yourself.** Why does the world not save the housed list?
+
+## US-170: a graph is a list of boxes and a list of lines (M9)
+
+**Idea.** A node graph is two lists: the nodes (with their places) and the wires (which output port joins which input port). The canvas only converts between graph units and screen pixels by one zoom number and one pan offset. Because the whole graph is a plain value, an edit can keep a copy from before and after, which is exactly what a Command needs for Ctrl+Z.
+
+**Where to look.** `NodeGraphView::handle` (the drag state machine: pan, move nodes, box, wire), `NodeGraphView::setZoom` (why the point under the cursor stays put), `GraphEditCommand`.
+
+**Try it.** Change `kGraphZoomMax` in `node_graph.h` to 800 and see which test names the limit.
+
+**Check yourself.** Why do hit tests look at the last node first?
+
+## US-171: a view is not the truth (M9)
+
+**Idea.** The conversation file stays the one truth. The graph is built from it by the parser, and saved back by the same writer the tests already trust, so a note you wrote by hand cannot be lost by a drag. The final judge of every save is the real loader: the editor writes the text in memory, reads it back, and only then touches the disk.
+
+**Where to look.** `dialogueToGraph` and `graphToDialogue` in `dialogue_graph.cpp` (the two directions), `GraphEditor::save` (the order of checks).
+
+**Try it.** In Notepad add a `# note` above a choice, open the file in the graph, move a card and save: the note is still there.
+
+**Check yourself.** Why does Save write a temporary file first and then rename it?
+
+## US-172: one editor, two kinds of file (M9)
+
+**Idea.** The graph editor does not care what a card means; it only knows cards, ports and wires. What a card means lives in two small converters, one for conversations and one for interactions. Adding the second kind meant adding a converter and a few buttons, not rewriting the canvas. A panel that rebuilds itself must not do it from inside its own button: the button would be destroyed while it is still running, so the rebuild waits for the next tick.
+
+**Where to look.** `GraphEditor::rebuild_` and the start of `GraphEditor::update`, `partsOf` in `interaction_graph.cpp` (how the verb finds its cards).
+
+**Try it.** Open `gather` in the Rules graph and unplug the target wire: Save names the problem instead of writing a broken file.
+
+**Check yourself.** Why does Save keep the `//` lines at the top of an interaction file but not the ones inside the braces?
+
+## US-175: a check that does not know the screen (M9)
+
+**Idea.** The check lives in the Simulation layer and only reads scripts and interactions, so tests can run it over every shipped file without opening a window. The Editor only shows what the check found. The check also asks "does this exist?" against a catalog the game fills in, which is why an empty catalog means "skip": a test can check one thing at a time.
+
+**Where to look.** `checkDialogue` in `graph_check.cpp` (the breadth-first walk from `start`), `GraphEditor::recheck` (when it runs again).
+
+**Try it.** Add a node nobody leads to: it shows as a warning, and the file still loads in the game.
+
+**Check yourself.** Why is an unreachable node a warning but a dead end an error?
+
+## US-173: a change that belongs to one thing (M9)
+
+**Idea.** A shared file says how every bush behaves; the level says what is different about this one bush. The runner does not know about bushes: it asks a function "is this interaction different for this target?" and uses the answer. That keeps the sim layer free of the game and lets a later story give the same power to other things.
+
+**Where to look.** `ActionRunner::setAdjuster` and its two call sites, `applyPatch` in `interaction.cpp`, the `overrides` reading in `level.cpp`.
+
+**Try it.** Put `gather.delay=5` on one bush and watch it ripen long before its neighbours.
+
+**Check yourself.** Why does the adjuster get asked again when the action ends, and not only when it starts?
+
+## US-174: a world made to be thrown away (M9)
+
+**Idea.** Test-play needs the same questions answered as the real game ("what does she think of the hero?") but must never touch the real game. So it has its own small world that answers the questions from a table of values, and carries out effects on that table. The conversation runner does not know the difference: it asks a `RuleContext`, and either world will do. That is why nothing needs to be saved or undone afterwards.
+
+**Where to look.** `TestWorld::call` (the answers), `TestWorld::apply` (the effects), `TestPlay::TestPlay` (starting at any node).
+
+**Try it.** Type `opinion=25 item.berries=1` and play `elder-fire`: the berry choice appears and the log shows what it did.
+
+**Check yourself.** Why is it safe that test-play uses the graph on screen, even with mistakes in it?

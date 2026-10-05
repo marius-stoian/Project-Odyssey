@@ -91,6 +91,20 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
+    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }); // Save in the graph editor reads the data again, like F5 (M9)
+    // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
+    actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
+        if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
+        const int index = plantIndexById(target.id);
+        if (index < 0) return std::nullopt;
+        std::optional<sim::rules::Interaction> changed;
+        for (const ThingOverride& change : plants_[static_cast<std::size_t>(index)].overrides) {
+            if (change.interaction != base.id) continue;
+            if (!changed) changed = base;
+            sim::rules::applyPatch(*changed, {change.field, change.valueMilli});
+        }
+        return changed;
+    });
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -743,6 +757,19 @@ void OdysseyGame::syncEditorActions() {
     editor_.setActionIds(std::move(ids));
 }
 
+// What the graph editor's check may name (US-175): the game's items, built-in actions, conversations, interactions and tags.
+void OdysseyGame::syncGraphCatalog() {
+    sim::rules::GraphCatalog catalog;
+    if (heroData_) {
+        for (const sim::Item& item : heroData_->items) catalog.items.insert(item.id);
+    }
+    catalog.builtins.insert(builtInActionNames().begin(), builtInActionNames().end());
+    for (const sim::rules::DlgScript& script : dialogues_.all()) catalog.dialogues.insert(script.name);
+    for (const sim::rules::Interaction& interaction : interactions_.all()) catalog.interactions.insert(interaction.id);
+    catalog.tags = knownTags();
+    editor_.graphs().setCatalog(std::move(catalog));
+}
+
 void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
@@ -754,6 +781,7 @@ void OdysseyGame::loadInteractions() {
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     smalltalk_ = loadSmalltalk(dialogueReport);
     syncEditorActions();
+    syncGraphCatalog();
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
@@ -790,6 +818,7 @@ bool OdysseyGame::reloadInteractions() {
     syncEditorActions();
     dialogues_ = std::move(freshDialogue);
     smalltalk_ = std::move(freshSmalltalk);
+    syncGraphCatalog();
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
 }
@@ -1449,6 +1478,7 @@ void OdysseyGame::populatePlants() {
         const PlantDef* def = catalogs_.plant(placed.kind);
         if (def == nullptr) continue; // the level names a plant the catalog lost: skipped
         plants_.push_back({placed.id, placed.kind, def, placed.feet, true, 0, def->states.empty() ? std::string() : def->states.front()});
+        plants_.back().overrides = placed.overrides; // this plant's own interaction values (US-173)
         if (const double height = plantObstacleHeight(*def); height > 0.0) {
             const PixelPoint cell = plantCell(placed.feet);
             map_.setObstacle(cell.x, cell.y, height);

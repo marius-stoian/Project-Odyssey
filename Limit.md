@@ -1,5 +1,19 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, X-M9):** X-M9 DONE (Milestone-124.md, AP-125): one verify green, Debug and Release 27/27, zero warnings. qa merged into main, tag m9-done. Next: K-M10 is the next Codex milestone, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-014, CI-015.
+
+**Resume update (2026-10-05, US-174):** S-US-174 DONE (Milestone-123.md, AP-124); all six M9 stories written, each with its own cases run alone. Next: X-M9: the one full verify (verify.ps1 -Story X-M9 -Config Both), docs/gates/M9.md, merge qa into main, tag m9-done, CI on main.
+
+**Resume update (2026-10-05, US-173):** S-US-173 DONE (Milestone-122.md, AP-123), own cases run alone. Next: S-US-174 (Test-play: a panel that runs the dialogue runtime on a throwaway copy with chosen opinion, needs, items, flags, time, season, forced rolls; Play from here), then X-M9.
+
+**Resume update (2026-10-05, US-175):** S-US-175 DONE (Milestone-121.md, AP-122), own cases run alone. Next: S-US-173 (attach to placed things; M9a already has a dialogue per NPC and partner: reuse it, add per-thing overrides), then US-174 (Test-play), X-M9.
+
+**Resume update (2026-10-05, US-172):** S-US-172 DONE (Milestone-120.md, AP-121), own cases run alone. Next: S-US-175 (graph validation: list of problems, clickable, live), then US-173 (attach), US-174 (Test-play), X-M9.
+
+**Resume update (2026-10-05, US-171):** S-US-171 DONE (Milestone-119.md, AP-120), own cases run alone. Open CI-014 for Anima (sub-call card missing). Next: S-US-172 (interaction graph editor, new files src/game/interaction_graph.*, same GraphEditor), then US-175, US-173, US-174, X-M9.
+
+**Resume update (2026-10-05, US-170):** K-M9 Done (D-56, 24 owner answers, docs/plans/M9-graph-editor-design.md). S-US-170 DONE (Milestone-118.md, AP-119), written with its own cases run alone (owner rule: one full verify at X-M9). Next: S-US-171 (dialogue graph editor), then US-172, US-175, US-173, US-174, X-M9. Another session may leave level-5.json untracked in assets/levels; it is not M9.
+
 **Resume update (2026-10-05, X-M9bc):** X-M9b and X-M9c DONE (Milestone-115.md, AP-116): one verify green, Debug and Release 27/27. Soak skipped by owner. Next: merge qa into main, tags m9b-done and m9c-done, CI on main.
 
 **Resume update (2026-10-05, US-294):** S-US-294 DONE (Milestone-114.md, AP-115), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: X-M9bc: the one full verify of M9b and M9c (verify.ps1 -Story X-M9bc -Config Both), fix, gates, merge into main, tags, CI.

@@ -104,3 +104,9 @@ If you have unsaved changes, **New** and **Open** ask first: **Save** them, **Di
 ## Good to know
 - The tests play their own copy, `assets/levels/demo.json`; your `valley.json` is yours to change.
 - A level is a readable JSON file: you can open it in any text editor.
+
+## A conversation for a character, own values for a plant (US-173)
+
+**Conversation.** Select a placed NPC: in its NPC panel the row *Talks with* names a partner type and the *Script* field the `.dlg` file used with that partner (type a name like `elder-fire.dlg`, or press **Pick** to go to the next conversation of the dialogue folder). **Graph** opens that conversation in the graph editor. Talking to the character in the game starts it. The pick is saved in the level (`dialogues`) as before; only a difference from its classes and kind is kept.
+
+**Own values for one plant.** Select a placed plant with the Select tool: its panel has one field, *Own*, with values of an interaction changed for this plant only, as `gather.delay=60 gather.duration=2.5` (seconds). `delay` is the wait of every `after` effect of that interaction (the regrow time of a berry bush: `gather.delay=60` makes this bush ripe again 60 s after it was picked, while the other bushes keep their 15 s); `duration` is how long the job takes. A mistake (an interaction that does not exist, a field other than `delay` or `duration`, a value that is not a number of seconds) is said in the status line and changes nothing. Each change is one step of Undo. In the level file a plant carries `"overrides": [ { "interaction": "gather", "field": "delay", "value": 60 } ]`; a plant with none has no `overrides` key, so a level saved before this feature is saved exactly as it was. An unknown field or a value out of range stops the level from loading and names `plants[n].overrides[m].field` or `.value`.

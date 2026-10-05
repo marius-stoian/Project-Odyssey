@@ -165,6 +165,7 @@ add_library(luna_engine STATIC
     src/luna/engine/chunk_streamer.cpp
     src/luna/engine/image_io.cpp
     src/luna/engine/ui.cpp
+    src/luna/engine/node_graph.cpp
     src/luna/engine/effects.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 # PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
@@ -225,7 +226,9 @@ add_library(odysseus_sim STATIC
     src/sim/hero_life.cpp
     src/sim/building_data.cpp
     src/sim/building_store.cpp
-    src/sim/building_life.cpp)
+    src/sim/building_life.cpp
+    src/sim/graph_check.cpp
+    src/sim/test_play.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -278,7 +281,10 @@ add_library(odysseus_game STATIC
     src/game/npc_people.cpp
     src/game/building_layer.cpp
     src/game/building_editor.cpp
-    src/game/editor_history.cpp)
+    src/game/editor_history.cpp
+    src/game/dialogue_graph.cpp
+    src/game/graph_editor.cpp
+    src/game/interaction_graph.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -362,6 +368,7 @@ add_executable(luna_tests
     tests/luna/tile_map_test.cpp
     tests/luna/collision_test.cpp
     tests/luna/ui_test.cpp
+    tests/luna/node_graph_test.cpp
     tests/luna/effects_test.cpp
     tests/luna/zoom_test.cpp
     tests/luna/normals_test.cpp)
@@ -463,6 +470,11 @@ add_executable(odysseus_game_tests
     tests/game/greeting_test.cpp
     tests/game/exchange_test.cpp
     tests/game/renderer_test.cpp
+    tests/game/graph_command_test.cpp
+    tests/game/dialogue_graph_test.cpp
+    tests/game/graph_editor_test.cpp
+    tests/game/interaction_graph_test.cpp
+    tests/game/thing_overrides_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
     tests/game/building_editor_test.cpp)
@@ -530,7 +542,9 @@ add_executable(odysseus_sim_tests
     tests/sim/memory_talk_test.cpp
     tests/sim/building_data_test.cpp
     tests/sim/building_store_test.cpp
-    tests/sim/building_life_test.cpp)
+    tests/sim/building_life_test.cpp
+    tests/sim/graph_check_test.cpp
+    tests/sim/test_play_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
