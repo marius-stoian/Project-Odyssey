@@ -1,0 +1,33 @@
+{
+  "id": "river-crossing",
+  "order": 4,
+  "title": "The river crossing",
+  "text": "The river is high. Across it, a herd grazes; behind you, the clan is hungry.",
+  "minAge": 14,
+  "maxAge": 25,
+  "role": "elder",
+  "requires": {
+    "affinity": "hunter",
+    "min": 12
+  },
+  "options": [
+    {
+      "text": "Swim across and stalk the herd.",
+      "affinity": {
+        "hunter": 8
+      },
+      "opinion": 6,
+      "trait": "brave",
+      "note": "{hero} swam the high river to hunt, and {other} watched from the bank."
+    },
+    {
+      "text": "Wait for the water to fall.",
+      "affinity": {
+        "gatherer": 3,
+        "trade": 2
+      },
+      "opinion": 3,
+      "note": "{hero} waited out the river with {other}."
+    }
+  ]
+}

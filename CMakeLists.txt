@@ -256,6 +256,7 @@ add_library(odysseus_game STATIC
     src/game/game_rules.cpp
     src/game/quest_ui.cpp
     src/game/quest_graph.cpp
+    src/game/story_event_editor.cpp
     src/game/quest_debug.cpp
     src/game/object_art.cpp
     src/game/npc_life.cpp
@@ -481,6 +482,7 @@ add_executable(odysseus_game_tests
     tests/game/graph_editor_test.cpp
     tests/game/interaction_graph_test.cpp
     tests/game/quest_graph_test.cpp
+    tests/game/story_event_test.cpp
     tests/game/thing_overrides_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp

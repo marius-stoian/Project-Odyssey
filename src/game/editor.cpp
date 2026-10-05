@@ -67,6 +67,7 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
       map_(buildTileMap(level, definitions)), camera_(viewWidth, viewHeight, map_.pixelWidth(), map_.pixelHeight()) {
     buildingEditor_ = std::make_unique<BuildingEditor>(level_, viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { run(std::move(command)); }, [this](const std::string& message) { say(message); });
     graphEditor_ = std::make_unique<GraphEditor>(viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { history_.record(std::move(command)); }, [this](const std::string& message) { say(message); });
+    storyEvents_ = std::make_unique<StoryEventEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
     buildPanels();
 }
 
@@ -105,6 +106,7 @@ void Editor::buildPanels() {
     button("Class", "NPC Classes: create, edit and delete the kinds of people of your world", [this] { showClasses(!classesShown_); });
     button("Talk", "Dialogue: open a conversation as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Dialogue); });
     button("Rules", "Interactions: open who may do what to what as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Interaction); });
+    button("Events", "Story events: edit the crossroads events of the hero's youth as forms (Esc comes back)", [this] { storyEvents_->show(true); });
     button("Quests", "Quests: open a quest as a graph of steps, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Quest); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
@@ -1973,6 +1975,14 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
 
 void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
+    if (storyEvents_->shown()) { // the Story events list takes the whole screen too
+        storyEvents_->update(intents);
+        if (!storyEvents_->typing()) {
+            if (intents.pressed(Intent::OpenMenu)) storyEvents_->show(false);
+            if (intents.pressed(Intent::Save)) storyEvents_->save();
+        }
+        return;
+    }
     if (graphEditor_->shown()) { // the graph editor takes the whole screen; the map waits behind it
         graphEditor_->update(intents);
         if (!graphEditor_->typing()) {
@@ -2295,6 +2305,11 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         question_->draw(painter);
         openList_->drawOverlay(painter);
         question_->drawOverlay(painter);
+    }
+    if (storyEvents_->shown()) { // the Story events list covers the map
+        storyEvents_->draw(painter);
+        storyEvents_->drawOverlay(painter);
+        return;
     }
     if (graphEditor_->shown()) { // the graph editor covers the map
         graphEditor_->draw(painter);

@@ -1,0 +1,29 @@
+{
+  "id": "market-day",
+  "order": 7,
+  "title": "Market day",
+  "text": "Traders from the other clan camp at the ford with furs and worked stone. They will deal with anyone who is bold enough.",
+  "minAge": 15,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Haggle for a good price on the clan's behalf.",
+      "affinity": {
+        "trade": 8
+      },
+      "opinion": 5,
+      "trait": "talkative",
+      "note": "{hero} haggled with the traders and came home with a good price, and {other} was pleased."
+    },
+    {
+      "text": "Watch and learn how they trade.",
+      "affinity": {
+        "trade": 4,
+        "knapper": 2
+      },
+      "opinion": 2,
+      "note": "{hero} watched the traders with {other}."
+    }
+  ]
+}

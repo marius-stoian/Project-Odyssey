@@ -2058,3 +2058,14 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Make step c lead to c: the editor calls it a dead end.
 
 **Check yourself.** Why does `not quest(d) == done` not count as d needing itself?
+
+
+## US-185: moving a feature into data (M10)
+
+**Idea.** The tutorial was a little program with its own script file. Now it is a quest like any other: the game sets a note when the player asks for the tutorial, and the quest, which waits for that note, does the rest. The old code could be left behind because the new path reuses things that already exist (events, steps, hints). The 12 crossroads events moved to one file each, with an `order` field so the yearly random draw stays exactly as it was.
+
+**Where to look.** `assets/data/quests/first-day.json`, `drawTutorial` in `odyssey_game.cpp`, `readEvent` in `src/sim/hero_data.cpp`.
+
+**Try it.** Give an event a trigger `flag(x)` and watch it vanish from the draw.
+
+**Check yourself.** Why does the draw depend on the order of the events?

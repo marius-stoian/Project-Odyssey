@@ -150,7 +150,6 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
     if (name == "gather-berries") {
         // The berries, the skill and the message; what happens to the plant is written in gather.json (it is picked, then ripens again).
         game.run().setMessage(hero->gatherBerries().message);
-        game.tutorial().notify("gather");
     } else if (name == "knap") {
         game.run().setMessage(hero->knapFlint().message);
         game.harvestPlant(plant);
@@ -176,10 +175,8 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         game.run().openCraft(args[0]);
     } else if (name == "eat-berries") {
         game.run().setMessage(hero->eatBerries().message);
-        game.tutorial().notify("eat");
     } else if (name == "tend-camp-fire") {
         game.run().setMessage(hero->tendCampFire().message);
-        game.tutorial().notify("tend");
     } else if (name == "tend-sacred-fire") {
         game.run().setMessage(hero->tendFire().message);
     } else if (name == "hold-ritual") {
@@ -524,7 +521,7 @@ void tickQuests(OdysseyGame& game) {
         core::logInfo(std::format("Quest {}: {}{}", change.quest, static_cast<int>(change.kind), change.step.empty() ? std::string() : " step " + change.step));
         using Kind = sim::rules::QuestChange::Kind;
         if (change.kind == Kind::Started) game.showMessage("New quest: " + quest->title);
-        else if (change.kind == Kind::Done) game.showMessage("Quest complete: " + quest->title);
+        else if (change.kind == Kind::Done) game.showMessage(quest->giver == "none" && !quest->turnIn.empty() ? quest->turnIn : "Quest complete: " + quest->title);
         else if (change.kind == Kind::Failed) game.showMessage("Quest failed: " + quest->title);
     }
 }

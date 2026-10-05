@@ -1,0 +1,36 @@
+{
+  "id": "the-quarrel",
+  "order": 10,
+  "title": "The quarrel at the store",
+  "text": "Two people shout over the last of the dried berries. Everyone looks at you.",
+  "minAge": 14,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Split the berries fairly.",
+      "affinity": {
+        "trade": 4,
+        "gatherer": 3
+      },
+      "opinion": 6,
+      "trait": "kind",
+      "note": "{hero} split the berries between quarrelling people, and {other} was grateful."
+    },
+    {
+      "text": "Take their side against the stronger.",
+      "affinity": {
+        "hunter": 3,
+        "religion": 2
+      },
+      "opinion": 4,
+      "note": "{hero} took {other}'s side in a quarrel at the store."
+    },
+    {
+      "text": "Walk away.",
+      "affinity": {},
+      "opinion": -3,
+      "note": "{hero} walked away from a quarrel at the store."
+    }
+  ]
+}

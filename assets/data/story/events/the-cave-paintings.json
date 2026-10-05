@@ -1,0 +1,38 @@
+{
+  "id": "the-cave-paintings",
+  "order": 9,
+  "title": "The cave paintings",
+  "text": "In a cave above the river you find old paintings of animals and hands, and a place where someone once kept a fire.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Add your own hand to the wall.",
+      "affinity": {
+        "religion": 6,
+        "shaman": 3
+      },
+      "opinion": 5,
+      "note": "{hero} left a hand on the cave wall, with {other} beside."
+    },
+    {
+      "text": "Gather the flint from the cave floor.",
+      "affinity": {
+        "knapper": 5,
+        "gatherer": 2
+      },
+      "opinion": 2,
+      "note": "{hero} took flint from the cave floor."
+    },
+    {
+      "text": "Leave, uneasy.",
+      "affinity": {
+        "hunter": 2
+      },
+      "opinion": 0,
+      "trait": "timid",
+      "note": "{hero} left the painted cave, uneasy."
+    }
+  ]
+}
