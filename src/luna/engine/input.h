@@ -42,6 +42,9 @@ enum class Intent {
     Journal,
     // QuestDebug (US-186): F10 opens the quest debugger panel (Debug builds). PlayHere: the key P in the Editor plays from the cursor.
     QuestDebug, PlayHere,
+    // Suggestion list (US-301, D-58): the arrow keys, Tab and Escape only (not W, S or Shift), for a field whose list is open. They are extra
+    // intents beside Move, SwitchWeapon and OpenMenu, so a letter typed in a field never moves the highlight.
+    ListUp, ListDown, ListTab, ListEscape,
     Count
 };
 
