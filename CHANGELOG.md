@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-301 Suggestion list widget (Mraw) - 2026-10-05
+
+**State:** On `story/US-301`, merged into `qa`. Debug verify: zero warnings, 27 of 27.
+
+- **New:** `SuggestList`, `suggest` and `listItems` on the fields, `UiPainter::screen()`, intents `ListUp`, `ListDown`, `ListTab`, `ListEscape` (`src/luna/engine/ui.*`, `input.*`); ten `US-301` test cases in `tests/luna/ui_test.cpp`; `docs/plans/US-301.md`; `Milestone-137.md` (AP-138); `docs/evidence/US-301/`.
+- **Changed:** `UiInput` carries up, down, tab and escape; learning journal, `docs/status.md`, `Limit.md`. No game field uses the list yet.
+
 ## US-300 Field tooltips from help.json (Mraw) - 2026-10-05
 
 **State:** On `story/US-300`, merged into `qa`. Debug verify: zero warnings, 27 of 27.

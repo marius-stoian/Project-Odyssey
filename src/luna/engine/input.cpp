@@ -147,6 +147,14 @@ void InputMap::handle(const platform::Event& event) {
         if (chord && !down) {
             setDigital(*chord, kKeyboardA, false);
         }
+        const std::optional<Intent> listKey = event.key == Key::Up ? std::optional(Intent::ListUp)
+                                              : event.key == Key::Down ? std::optional(Intent::ListDown)
+                                              : event.key == Key::Tab ? std::optional(Intent::ListTab)
+                                              : event.key == Key::Escape ? std::optional(Intent::ListEscape)
+                                                                         : std::nullopt;
+        if (listKey) {
+            setDigital(*listKey, kKeyboardA, down); // the arrows, Tab and Escape also drive an open suggestion list
+        }
         if (event.key == Key::Enter) {
             setDigital(Intent::Confirm, kKeyboardA, down); // Enter also confirms a text field (E does not)
         }

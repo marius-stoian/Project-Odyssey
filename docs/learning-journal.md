@@ -2087,3 +2087,23 @@ if (auto* field = dynamic_cast<TextField*>(child.get())) { /* it is a text field
 **Try it (10 minutes).** In a copy of the data folder, delete the `npc.sword` line from `help.json`, run the coverage test with `odysseus_game_tests --test-case="US-300 Coverage*"` and read how the failure names the field.
 
 **Check yourself.** Why does `find` return a pointer instead of the entry itself?
+
+## US-301: a reusable overlay widget, and who gets a key (M10b)
+
+**What we built.** A list of suggested values that opens under a text or number field, narrows as you type, and lets you pick with Up, Down and Tab, or with a click. It lives in the Luna engine and knows nothing about Odysseus, so any field in any game can use it.
+
+**The idea: giving each key to exactly one owner.** On every tick the field asks the list first: `list_.handle(input, accepted)`. The list returns `true` when it used the input (an arrow, Tab, Escape, a click on one of its rows) and `false` when it did not. A closed list always returns `false` straight away, so the field does what it always did. The return value is how C++ code passes "I took it" up a chain, and `std::optional<std::string> accepted` is how the list hands back a result only when there is one. Letters are different: W and S also walk the hero, so the arrows got their own intents (`ListUp`, `ListDown`) that only the arrow keys raise, and a "w" you type can never move the highlight.
+
+```cpp
+std::optional<std::string> accepted;                 // empty until a row is chosen
+if (list_.handle(input, accepted)) {                 // true: the list used this tick's input
+    if (accepted) { editing_ = *accepted; commit(); }
+    return true;                                     // nobody else sees it
+}
+```
+
+**Where to look.** `SuggestList` in `src/luna/engine/ui.cpp`, the four new intents in `src/luna/engine/input.h` and `input.cpp`, the `US-301` cases in `tests/luna/ui_test.cpp`.
+
+**Try it (10 minutes).** In `SuggestList::handle` change `input.confirm && navigated_` to `input.confirm` and run the Luna tests: which case fails, and why is that Enter rule needed?
+
+**Check yourself.** Why does the field ask the list before it reads the typed text?
