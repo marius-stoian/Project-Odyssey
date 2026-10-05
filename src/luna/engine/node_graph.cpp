@@ -235,6 +235,11 @@ void NodeGraphView::frameAll() {
     panY = (bounds.height - (y1 - y0) * zoom_ / 100) / 2 - y0 * zoom_ / 100;
 }
 
+void NodeGraphView::centerOn(int graphX, int graphY) {
+    panX = bounds.width / 2 - graphX * zoom_ / 100;
+    panY = bounds.height / 2 - graphY * zoom_ / 100;
+}
+
 bool NodeGraphView::handle(const UiInput& input) {
     if (!visible) return false;
     const Pointer& p = input.pointer;

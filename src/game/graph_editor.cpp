@@ -30,6 +30,7 @@ constexpr int kListWidth = 120;
 constexpr int kPanelWidth = 176;
 constexpr int kStatusHeight = 14;
 constexpr int kRow = 16;
+constexpr int kProblemsHeight = 56; // the list of findings under the canvas
 
 std::string readText(const fs::path& path) {
     std::ifstream in(path, std::ios::binary);
@@ -73,7 +74,10 @@ std::vector<std::string> splitWords(const std::string& text) {
 
 GraphEditor::GraphEditor(int viewWidth, int viewHeight, Record record, Say say)
     : viewWidth_(viewWidth), viewHeight_(viewHeight), record_(std::move(record)), say_(std::move(say)) {
-    canvas_ = {kListWidth + 4, kBarHeight + 4, viewWidth - kListWidth - kPanelWidth - 8, viewHeight - kBarHeight - kStatusHeight - 6};
+    canvas_ = {kListWidth + 4, kBarHeight + 4, viewWidth - kListWidth - kPanelWidth - 8, viewHeight - kBarHeight - kStatusHeight - 6 - kProblemsHeight};
+    problemList_ = std::make_unique<ListBox>(Rect{canvas_.x, canvas_.y + canvas_.height + 4, canvas_.width, kProblemsHeight - 4}, std::vector<std::string>{}, [this](int index) {
+        if (index >= 0) pickProblem(static_cast<std::size_t>(index));
+    });
     chrome_ = std::make_unique<Panel>(Rect{0, 0, viewWidth, kBarHeight});
     panel_ = std::make_unique<Panel>(Rect{viewWidth - kPanelWidth - 2, kBarHeight + 4, kPanelWidth, viewHeight - kBarHeight - kStatusHeight - 6});
 }
@@ -125,6 +129,7 @@ void GraphEditor::bindView() {
     view_ = std::make_unique<NodeGraphView>(canvas_, *current_->graph, [this](const std::string& what, const NodeGraph& before, const NodeGraph& after) {
         onViewEdit(what, before, after);
     });
+    checked_.reset();
     view_->frameAll();
     problems_.clear();
     overwriteArmed_ = false;
@@ -333,7 +338,8 @@ bool GraphEditor::saveDialogue() {
     overwriteArmed_ = false;
     int warnings = 0;
     for (const std::string& p : problems_) warnings += p.rfind("warning:", 0) == 0 ? 1 : 0;
-    say_("Saved " + doc.name + ".dlg" + (warnings > 0 ? " (" + std::to_string(warnings) + " card(s) not connected)" : ""));
+    recheck();
+    say_("Saved " + doc.name + ".dlg" + (warnings > 0 ? " (" + std::to_string(warnings) + " card(s) not connected)" : "") + errorsNote());
     if (saved_) saved_();
     return true;
 }
@@ -371,9 +377,59 @@ bool GraphEditor::saveInteraction() {
     overwriteArmed_ = false;
     int warnings = 0;
     for (const std::string& p : problems_) warnings += p.rfind("warning:", 0) == 0 ? 1 : 0;
-    say_("Saved " + doc.name + ".json" + (warnings > 0 ? " (" + std::to_string(warnings) + " card(s) not connected)" : ""));
+    recheck();
+    say_("Saved " + doc.name + ".json" + (warnings > 0 ? " (" + std::to_string(warnings) + " card(s) not connected)" : "") + errorsNote());
     if (saved_) saved_();
     return true;
+}
+
+void GraphEditor::recheck() {
+    findings_.clear();
+    if (current_ == nullptr) {
+        checked_.reset();
+        problemList_->items.clear();
+        return;
+    }
+    checked_ = *current_->graph;
+    std::vector<std::string> structural;
+    if (current_->kind == Kind::Dialogue) {
+        const DialogueGraph d{*current_->graph, current_->header};
+        const std::optional<sim::rules::DlgScript> script = graphToDialogue(d, structural);
+        for (const std::string& s : structural) findings_.push_back({s.rfind("error:", 0) == 0, std::string(), s});
+        if (script) {
+            for (const sim::rules::GraphFinding& f : sim::rules::checkDialogue(*script, catalog_)) findings_.push_back({f.error, f.key, f.message});
+        }
+    } else {
+        std::string json;
+        const std::optional<sim::rules::Interaction> interaction = graphToInteraction(*current_->graph, structural, json);
+        for (const std::string& s : structural) findings_.push_back({s.rfind("error:", 0) == 0, std::string(), s});
+        if (interaction) {
+            for (const sim::rules::GraphFinding& f : sim::rules::checkInteraction(*interaction, catalog_)) findings_.push_back({f.error, f.key, f.message});
+        }
+    }
+    problemList_->items.clear();
+    for (const Problem& p : findings_) problemList_->items.push_back((p.error ? "! " : "? ") + p.text);
+    problemList_->selected = -1;
+}
+
+bool GraphEditor::pickProblem(std::size_t index) {
+    if (current_ == nullptr || !view_ || index >= findings_.size() || findings_[index].key.empty()) return false;
+    const std::map<std::string, int> keys = current_->kind == Kind::Dialogue ? cardKeys(DialogueGraph{*current_->graph, current_->header})
+                                                                              : interactionCardKeys(*current_->graph);
+    const auto found = keys.find(findings_[index].key);
+    if (found == keys.end()) return false;
+    const GraphNode* card = current_->graph->find(found->second);
+    if (card == nullptr) return false;
+    view_->select(card->id);
+    view_->centerOn(card->x + luna::engine::kGraphNodeWidth / 2, card->y + card->height() / 2);
+    return true;
+}
+
+// "; 2 error(s) block shipping: see the list" after a save that went through with mistakes the check found (D-56 Q18: saving is allowed, shipping is not).
+std::string GraphEditor::errorsNote() const {
+    int errors = 0;
+    for (const Problem& p : findings_) errors += p.error ? 1 : 0;
+    return errors == 0 ? std::string() : "; " + std::to_string(errors) + " error(s) block shipping: see the list";
 }
 
 int GraphEditor::selectedCard() const {
@@ -535,8 +591,9 @@ void GraphEditor::update(const luna::engine::Intents& intents) {
         panelKey_ = key;
         buildPanel();
     }
+    if (current_ != nullptr && (!checked_ || !(*checked_ == *current_->graph))) recheck();
     const bool onChrome = chrome_->handle(input);
-    const bool onPanel = panel_->handle(input);
+    const bool onPanel = panel_->handle(input) || problemList_->handle(input);
     if (!onChrome && !onPanel && view_) view_->handle(input);
     if (!typing() && view_ && intents.pressed(Intent::Delete)) view_->deleteSelected();
 }
@@ -546,6 +603,8 @@ void GraphEditor::draw(UiPainter& painter) const {
     painter.fill({0, 0, viewWidth_, viewHeight_}, UiColor::Dark);
     if (view_) view_->draw(painter);
     chrome_->draw(painter);
+    painter.fill({problemList_->bounds.x, problemList_->bounds.y - 1, problemList_->bounds.width, problemList_->bounds.height + 2}, UiColor::Panel);
+    problemList_->draw(painter);
     panel_->draw(painter);
     painter.text(panel_->bounds.x + 4, panel_->bounds.y + 3, panelTitle_, UiColor::Gold);
     const Rect bar{0, viewHeight_ - kStatusHeight, viewWidth_, kStatusHeight};
@@ -553,6 +612,9 @@ void GraphEditor::draw(UiPainter& painter) const {
     const bool talk = kind_ == Kind::Dialogue;
     std::string line = current_ != nullptr ? std::string(talk ? "Dialogue: " : "Interaction: ") + current_->name + (talk ? ".dlg" : ".json") + (dirty() ? "  *unsaved" : "") : std::string(talk ? "Dialogue" : "Interaction") + ": no file";
     if (view_) line += "  zoom " + std::to_string(view_->zoomPercent()) + "%";
+    int errors = 0;
+    for (const Problem& p : findings_) errors += p.error ? 1 : 0;
+    if (!findings_.empty()) line += "  " + std::to_string(errors) + " error(s), " + std::to_string(findings_.size() - static_cast<std::size_t>(errors)) + " warning(s)";
     if (!problems_.empty()) line += "  " + problems_.front();
     painter.text(4, bar.y + 3, line.substr(0, static_cast<std::size_t>((viewWidth_ - 8) / luna::engine::kTextAdvance)), UiColor::Text);
 }

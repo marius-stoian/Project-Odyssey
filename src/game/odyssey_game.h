@@ -320,6 +320,7 @@ public:
     void drainNpcEvents();  // what the persons did to each other near the hero: words in bubbles, a death takes the figure out of the world (US-292)
     void removeDeadFigures(); // the figures of the persons the director says are dead leave the world (after a death, after a load)
     void syncEditorActions();
+    void syncGraphCatalog();
     void registerCreatures();
     void tickNpcPopulation();
     std::string loadNpcPopulation(); // the problem, or empty

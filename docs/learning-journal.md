@@ -1971,3 +1971,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Open `gather` in the Rules graph and unplug the target wire: Save names the problem instead of writing a broken file.
 
 **Check yourself.** Why does Save keep the `//` lines at the top of an interaction file but not the ones inside the braces?
+
+## US-175: a check that does not know the screen (M9)
+
+**Idea.** The check lives in the Simulation layer and only reads scripts and interactions, so tests can run it over every shipped file without opening a window. The Editor only shows what the check found. The check also asks "does this exist?" against a catalog the game fills in, which is why an empty catalog means "skip": a test can check one thing at a time.
+
+**Where to look.** `checkDialogue` in `graph_check.cpp` (the breadth-first walk from `start`), `GraphEditor::recheck` (when it runs again).
+
+**Try it.** Add a node nobody leads to: it shows as a warning, and the file still loads in the game.
+
+**Check yourself.** Why is an unreachable node a warning but a dead end an error?

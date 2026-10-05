@@ -186,7 +186,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-170 | US-170 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | S-US-171 | US-171 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | S-US-172 | US-172 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
-| S-US-175 | US-175 | M9 | To do |  |
+| S-US-175 | US-175 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | S-US-173 | US-173 | M9 | To do |  |
 | S-US-174 | US-174 | M9 | To do |  |
 | X-M9 | - | M9 | To do |  |

@@ -397,6 +397,12 @@ DialogueLayout layoutOf(const DialogueGraph& dialogue) {
     return layout;
 }
 
+std::map<std::string, int> cardKeys(const DialogueGraph& dialogue) {
+    std::map<std::string, int> keys;
+    for (const auto& [id, key] : walkGraph(dialogue).keys) keys[key] = id;
+    return keys;
+}
+
 std::string layoutToJson(const DialogueLayout& layout) {
     nlohmann::ordered_json cards = nlohmann::ordered_json::object();
     for (const auto& [key, place] : layout) cards[key] = nlohmann::ordered_json::array({place.first, place.second});
