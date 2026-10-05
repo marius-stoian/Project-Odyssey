@@ -2028,3 +2028,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Turn Quest markers off in Settings and watch the arrow vanish while the tracker stays.
 
 **Check yourself.** Why is the marker searched in `tickQuests` and not in the draw function?
+
+## US-186: a tool that asks the game why (M10)
+
+**Idea.** A debugger is mostly questions: "what does the game think right now?" The panel asks the same functions the game asks (`QuestBook::holds`, the rule context) and prints the answer next to the condition, so there is no second opinion that could drift.
+
+**Where to look.** `layoutQuestDebug` and `runQuestDebugAction` in `src/game/quest_debug.cpp`.
+
+**Try it.** Select a quest that needs a flag, press set, and watch `[no]` become `[yes]` without moving the hero.
+
+**Check yourself.** Why does the layout function build the buttons again for both drawing and clicking?

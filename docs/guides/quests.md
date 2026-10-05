@@ -109,3 +109,9 @@ Only what the hero does counts; clan members and other people doing the same thi
 - **Journal:** the key J (or the Journal tab of the Esc menu) lists Active, Done and Failed quests. An active quest shows its current step; a done quest shows its `journal` line.
 - **Tracker:** top right of the screen, the active quest whose objective moved last: title, step text, progress `2 / 3` and, after the hint time without progress, the hint.
 - **Markers:** a gold `v` over the target of the tracked step's `marker` (`tag:`, `object:`, `npc:`, `place:`; the nearest to the hero), or an arrow at the screen edge pointing the way. Settings -> Quest markers On/Off (`markers` in `settings.json`, 1 or 0, default 1).
+
+## Testing quests: Play here and the debugger (US-186)
+
+- **Play here:** in the Editor press P with the pointer over the map. The game starts with the hero at the pointer; Esc (or F2) returns to the Editor, which has not changed.
+- **Debugger (Debug builds):** F10 opens a panel top right. Pick a quest, then Start, Complete (gives the rewards), Fail, Reset, or step back and forward; toggle the flags and add the items the quest looks at; change the nearest NPC opinion of the hero by 10; jump an hour, a day or a season; teleport to the marker. The game reflects it at once.
+- **Why not?** The panel lists the conditions in the way of the next move (prerequisites, branches, failure rules), each with `[yes]` or `[no]` as of now, and the objective with its progress.

@@ -195,7 +195,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-181 | US-181 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | S-US-182 | US-182 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | S-US-183 | US-183 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
-| S-US-186 | US-186 | M10 | To do |  |
+| S-US-186 | US-186 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | S-US-184 | US-184 | M10 | To do |  |
 | S-US-187 | US-187 | M10 | To do |  |
 | S-US-185 | US-185 | M10 | To do |  |

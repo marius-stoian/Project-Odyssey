@@ -110,6 +110,8 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 void tickInteractions(OdysseyGame& game);
 // Moves the quests on (US-180): counts what happened, checks prerequisites, waits, failures, gives rewards.
 void tickQuests(OdysseyGame& game);
+// Completes a quest at once and gives its rewards (the debugger, US-186).
+bool completeQuest(OdysseyGame& game, const std::string& id);
 // Where a marker spec (tag:edible, object:clan-fire, npc:elder, place:stream) points, nearest to the hero; empty when nothing matches (US-183).
 std::optional<std::pair<double, double>> questMarkerPosition(const OdysseyGame& game, const std::string& spec);
 // The active quest the tracker and the marker follow: the one whose objective moved last.
