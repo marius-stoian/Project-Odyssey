@@ -201,7 +201,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-187 | US-187 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | S-US-185 | US-185 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | X-M10 | - | M10 | Done | docs/gates/M10.md; Debug and Release 27/27, zero warnings |
-| K-M10b | - | M10b | To do |  |
+| K-M10b | - | M10b | Done | 2026-10-05; D-59, docs/plans/M10b-editor-help-design.md |
 | S-US-300 | US-300 | M10b | To do |  |
 | S-US-301 | US-301 | M10b | To do |  |
 | S-US-302 | US-302 | M10b | To do |  |

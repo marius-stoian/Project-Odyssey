@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## P-013 and K-M10b (Mraw) - 2026-10-05
+
+**State:** On `qa`. Documentation only; no code, data or test changes.
+
+- **New:** `docs/plans/M10b-editor-help-design.md`, `docs/decision-requests/D-59.md`, D-59 row in `docs/decisions.md`, `Milestone-135.md` (AP-136), CI-020 in `docs/codex-issues.md`.
+- **Changed:** `CLAUDE.md` version references (Codex v2.13, requirements v2.12), D-15 chain (M10b), `docs/status.md` (P-013 Done, K-M10b Done, M10b stories To do), `Limit.md`.
+
 ## K-M10 kickoff (Dominus) - 2026-10-05
 
 **State:** On `qa`. Documentation only.
