@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-187):** S-US-187 DONE (Milestone-132.md, AP-133). Next: S-US-185 (tutorial.json -> assets/data/quests/first-day.json, Tutorial class leaves the HUD path; crossroads.json -> assets/data/story/events/*.json with a trigger, edited in the Editor; save migration), then X-M10 (one full verify, Debug and Release, docs/gates/M10.md, merge into main, tag m10-done).
+
 **Resume update (2026-10-05, US-184):** S-US-184 DONE (Milestone-131.md, AP-132). Next: S-US-187 (sim::checkQuest: unknown/unreachable step, loops, unknown giver/items/kinds/places/interactions; findings in the graph editor; a test over every shipped quest), then US-185 (tutorial as first-day quest, story events), X-M10.
 
 **Resume update (2026-10-05, US-186):** S-US-186 DONE (Milestone-130.md, AP-131). Next: S-US-184 (quest graph editor: new Editor tab on the NodeGraph widget, writeQuest saves, layout sidecar), then US-187 (validation), US-185 (tutorial and story events), X-M10.

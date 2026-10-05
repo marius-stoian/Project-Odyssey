@@ -119,3 +119,16 @@ Only what the hero does counts; clan members and other people doing the same thi
 ## The quest graph (US-184)
 
 Editor -> **Quests** opens the quests of `assets/data/quests/` as a graph: a **quest** card (id, title, giver, journal, offer, turn-in), a **step** card per step, and wires. The quest card's output leads to the first step; each step's output leads to the next step, or to an **end** card (the quest is finished). A **branch** card (`+If`) has two outputs: the first goes to the step it belongs to (its Branches port), the second to the step it leads to. **Needs**, **Fails** and **Rewards** cards hold one line each and wire into the quest card's three inputs. Save writes the file in canonical form (your `//` comments at the top are kept, comments inside are dropped) and the positions to `<id>.quest.layout.json`; a quest with a mistake is not written and the status bar says what and where. The id stays the file name. Undo is shared with the map edits.
+
+## The quest check (US-187)
+
+The Quests tab lists what looks wrong under the canvas, live as you edit; a click selects the card. The game logs the same list when it loads, and a test runs it on every shipped quest (errors fail the build).
+
+| Finding | Kind | Meaning |
+|---|---|---|
+| step never reached | warning | no step or branch leads to it; it loads fine |
+| dead end / no END | error | from here the quest can never finish (a loop with no way out, or no step leads to `END`) |
+| unknown item, interaction | error | an objective, reward or `has(...)` names something the game does not have |
+| unknown person, place, kind | warning | a person, place or creature the loaded level does not have (people of a generated region are made at run time) |
+| unknown quest | error | `quest(x)`, `step(x)` or a `quest ...` reward names a quest that does not exist |
+| quests need each other | error | quest A requires B done, B requires A: neither can start (a prerequisite under `not` does not count) |

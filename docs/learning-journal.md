@@ -2048,3 +2048,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Cut the wire out of a step and press Save: the message names the step.
 
 **Check yourself.** Why does a branch card have two outputs while a step has one?
+
+## US-187: finding a loop in a graph (M10)
+
+**Idea.** A cycle check asks: "starting at A and following the arrows, do I get back to A?" Depth-first search does it by walking as deep as it can, remembering the path it is on (`onPath`) and the places it has finished (`done`). Meeting a place that is on the current path means a loop. The same walk, run backwards from END, finds steps that can never finish.
+
+**Where to look.** `checkQuests` and `QuestChecker::reachability` in `src/sim/quest_check.cpp`.
+
+**Try it.** Make step c lead to c: the editor calls it a dead end.
+
+**Check yourself.** Why does `not quest(d) == done` not count as d needing itself?

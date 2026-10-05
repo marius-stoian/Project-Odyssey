@@ -776,6 +776,17 @@ void OdysseyGame::syncGraphCatalog() {
     for (const sim::rules::DlgScript& script : dialogues_.all()) catalog.dialogues.insert(script.name);
     for (const sim::rules::Interaction& interaction : interactions_.all()) catalog.interactions.insert(interaction.id);
     catalog.tags = knownTags();
+    // What a quest may name (US-187): the people, kinds and places of the loaded level, and the quests themselves.
+    if (!level_.characters.empty()) { // a generated region makes its people at run time: nothing to check them against
+        for (const PlacedCharacter& placed : level_.characters) {
+            catalog.people.insert(questWord(placed.name));
+            catalog.people.insert(questWord(placed.kind));
+            catalog.kinds.insert(questWord(placed.kind));
+        }
+        for (const PlacedPlace& place : level_.places) catalog.places.insert(questWord(place.name));
+    }
+    for (const sim::rules::Quest& quest : quests_.quests()) catalog.quests.insert(quest.id);
+    questCatalog_ = catalog;
     editor_.graphs().setCatalog(std::move(catalog));
 }
 
@@ -793,6 +804,7 @@ void OdysseyGame::loadInteractions() {
     quests_.replaceQuests(sim::rules::loadQuests(dataDirectory_ / "quests", questReport));
     syncEditorActions();
     syncGraphCatalog();
+    for (const sim::rules::GraphFinding& f : sim::rules::checkQuests(quests_.quests(), questCatalog_)) core::logWarning(std::string("Quests: ") + (f.error ? "error: " : "warning: ") + f.text());
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
