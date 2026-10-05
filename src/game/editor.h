@@ -257,6 +257,11 @@ public:
     // Saves to the level file (safely, with backups). Returns false and says why when it cannot.
     bool save();
     bool unsaved() const { return unsaved_; }
+    // The level file changed on disk outside the Editor (US-304): with no unsaved changes it is read again (the view stays where it is); with unsaved
+    // changes nothing is overwritten and the status line says the file changed. True when the file was read again.
+    bool levelChangedOnDisk();
+    // Told after the Editor writes the level file itself, so the watcher does not read it a second time.
+    void setWroteFile(std::function<void(const std::filesystem::path&)> wrote) { wrote_ = std::move(wrote); }
     const std::string& status() const { return status_; }
 
     // The map cell under a point of the screen (virtual pixels), if it is on the level.
@@ -401,6 +406,7 @@ private:
     NpcClassBook* classBook_ = nullptr;
     EditorHelp* help_ = nullptr;
     std::vector<MissingKind> missing_;
+    std::function<void(const std::filesystem::path&)> wrote_;
     void applyHelp();
     bool classesShown_ = false;
     bool classesStale_ = true;

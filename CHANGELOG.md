@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-304 File watch for outside edits (Mraw) - 2026-10-05
+
+**State:** On `story/US-304`, merged into `qa`. Debug verify: zero warnings, 27 of 27. Release watcher cost: average 0.164 ms a tick.
+
+- **New:** `FileWatcher` and `DataReload::changed(files)` (`src/game/data_reload.*`); `OdysseyGame::setWatching`, `pollFiles`, `ownReload`; `Editor::levelChangedOnDisk` and `setWroteFile`; `NpcClassBook::setWroteFile`; `--no-watch` in `apps/odysseus/main.cpp`; `tests/game/data_watch_test.cpp`; `docs/plans/US-304.md`; `Milestone-140.md` (AP-141); `docs/evidence/US-304/`.
+- **Changed:** the graph editors' Save, the level save, class and kind saves, story-event and prefab saves tell the watcher about their own writes; `docs/guides/editor.md`, `interaction-data.md`, `dialogue-format.md`, `editor-tutorial.md` (lesson 18), learning journal, `docs/status.md`, `Limit.md`.
+
 ## US-303 Live reload of every data file (Mraw) - 2026-10-05
 
 **State:** On `story/US-303`, merged into `qa`. Debug verify: zero warnings, 27 of 27. Release reload times 0.2 to 4.4 ms per set.

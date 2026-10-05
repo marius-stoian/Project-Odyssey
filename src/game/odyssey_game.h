@@ -172,6 +172,12 @@ public:
     // F5: every set (the ones that only apply at the next start are left alone).
     void reloadEverything() { reported(reloads_.reloadAll()); }
     const std::vector<MissingKind>& missingKinds() const { return missing_; }
+    // Watching (US-304): a file saved outside the game is read again by itself, within about a second. Off by default (tests, headless runs);
+    // the game turns it on unless `--no-watch` was given. `pollFiles` takes the time in seconds, so a test drives it with a clock of its own.
+    void setWatching(bool on);
+    bool watching() const { return watching_; }
+    std::vector<ReloadOutcome> pollFiles(double nowSeconds);
+    FileWatcher& watcher() { return watcher_; }
     const std::string& toast() const { return toast_; }
     int toastTicks() const { return toastTicks_; }
     static constexpr int kToastTicks = 40; // how long the toast stays: two seconds at 20 ticks a second (D-59 Q3)
@@ -353,6 +359,9 @@ public:
     ReloadResult reloadLights();
     ReloadResult reloadCatalog();
     ReloadResult reloadHelp();
+    void ownReload(const std::string& set); // an Editor save read the set itself: the watcher must not read it a second time
+    void levelChangedOutside();
+    void applyLevelFromDisk();
     void applyCatalog(Definitions fresh, Catalogs catalogs);
     void rebuildPlantArt();
     std::vector<std::string> findMissingKinds(); // returns the warnings that are new
@@ -502,6 +511,9 @@ private:
     sim::rules::SmallTalk loadSmalltalk(sim::rules::LoadReport& report) const; // at start: reads the interaction files; a file with mistakes is left out, the rest load
     double lastInteractionReloadMs_ = 0.0;
     DataReload reloads_;                                           // US-303
+    FileWatcher watcher_;                                          // US-304
+    bool watching_ = false;
+    bool levelReloadPending_ = false; // the level file changed while the game was playing: the Editor reads it when it opens
     std::map<std::string, std::vector<std::string>> reloadErrors_; // the mistakes of the sets other than the interactions
     std::vector<MissingKind> missing_;                             // things the level places whose kind is gone
     std::string toast_;                                            // "Reloaded lights" for two seconds (D-59 Q3)

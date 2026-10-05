@@ -3,7 +3,10 @@
 #include "boundary.h"
 
 #include <filesystem>
+#include <cstdint>
 #include <functional>
+#include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -45,6 +48,8 @@ public:
     std::vector<std::string> setsFor(const std::filesystem::path& file) const;
     // Reloads each set that watches the file, once.
     std::vector<ReloadOutcome> changed(const std::filesystem::path& file);
+    // Several files at once (the watcher): each set that watches any of them reloads once.
+    std::vector<ReloadOutcome> changed(const std::vector<std::filesystem::path>& files);
     // Reloads the named set; nothing when there is no such set.
     std::vector<ReloadOutcome> reload(const std::string& name);
     std::vector<ReloadOutcome> reloadAll();
@@ -57,6 +62,59 @@ private:
 
     std::vector<DataSet> sets_;
     std::vector<ReloadOutcome> last_;
+};
+
+// Notices files that changed outside the game (US-304): the owner saves a file in a text editor and the game reads it again by itself. It polls the
+// time and size of every file under the watched roots (std::filesystem, no thread, no library): the caller gives it the time, so a test drives it with
+// a clock of its own. A change is reported once it has been quiet for kDebounceSeconds (an editor often writes twice), so a saved change is live within
+// about 0.25 + 0.3 s plus the reload, inside the 1 s of D-58 Q8.
+class FileWatcher {
+public:
+    static constexpr double kPollSeconds = 0.25;  // a round of looks at every file starts at most this often
+    static constexpr int kFilesPerTick = 20;      // files looked at in one call: a tick stays cheap, a round of 200 files takes ten ticks
+    static constexpr double kDebounceSeconds = 0.3;
+
+    // A file, or a folder (everything under it counts).
+    void watch(const std::filesystem::path& root);
+    // Takes the times of every watched file as they are now: what is already there is not a change.
+    void snapshot();
+    // Call every tick with the time in seconds. The files that changed, appeared or went and have been quiet for the debounce time (each once).
+    std::vector<std::filesystem::path> poll(double nowSeconds);
+
+    // The game wrote this file itself (an Editor save): the change it made is ignored once.
+    void noteOwnWrite(const std::filesystem::path& file);
+    // The game read a root again after its own write (a reload it made): the times under it are taken as they are, and what waited there is dropped.
+    void resync(const std::filesystem::path& root);
+
+    std::size_t files() const { return known_.size(); }
+
+private:
+    struct Stamp {
+        std::filesystem::file_time_type time{};
+        std::uintmax_t size = 0;
+        friend bool operator==(const Stamp&, const Stamp&) = default;
+    };
+    struct Seen {
+        std::filesystem::path path;
+        Stamp stamp;
+    };
+    struct Waiting {
+        std::filesystem::path path;
+        double since = 0.0;
+    };
+    std::map<std::string, Seen> scan(const std::filesystem::path& root) const;
+    void look(double nowSeconds, int& budget);
+    void compare(const std::filesystem::path& root, const std::map<std::string, Seen>& current, double nowSeconds);
+
+    std::vector<std::filesystem::path> roots_;
+    std::map<std::string, Stamp> known_;
+    std::map<std::string, Stamp> own_;   // the stamp an own write left behind: a change to exactly this is not reported
+    std::map<std::string, Waiting> waiting_;
+    double roundStart_ = -1.0; // when the round of looks began
+    bool inRound_ = false;
+    std::size_t rootIndex_ = 0; // the root being looked at in this round
+    std::optional<std::filesystem::recursive_directory_iterator> dir_; // where the look at a folder stopped
+    std::map<std::string, Seen> partial_;                              // the files seen so far under that root
 };
 
 } // namespace odysseus::game

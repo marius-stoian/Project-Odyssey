@@ -69,6 +69,7 @@ std::optional<std::string> NpcClassBook::save(const sim::rules::NpcClass& npcCla
     }
     std::filesystem::rename(temporary, file, ec);
     if (ec) return std::format("{} cannot be replaced: {}", file.generic_string(), ec.message());
+    if (wrote_) wrote_(file); // the watcher must not read this file a second time (US-304)
     sim::rules::LoadReport report;
     catalog_ = sim::rules::NpcClassCatalog::load(folder_, report);
     report_ = report;
@@ -95,6 +96,7 @@ std::optional<std::string> NpcClassBook::saveKind(const sim::rules::NpcKind& kin
     }
     std::filesystem::rename(temporary, file, ec);
     if (ec) return std::format("{} cannot be replaced: {}", file.generic_string(), ec.message());
+    if (wrote_) wrote_(file); // the watcher must not read this file a second time (US-304)
     sim::rules::LoadReport report;
     kinds_ = sim::rules::NpcKindCatalog::load(kindsFolder_, report);
     return std::nullopt;

@@ -94,7 +94,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editorHelp_.setSources(suggestionSources()); // the lists of values read the data in use each time a field opens one (US-302)
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
-    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reported(reloads_.reload("interactions")); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
+    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { ownReload("interactions"); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
         if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
@@ -112,7 +112,9 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     actions_.setFinishObserver([this](const std::string& interaction, int actor, const sim::rules::ThingRef&) {
         if (actor == kHeroActor) questEvent(sim::rules::QuestObjective::Kind::Interact, interaction);
     });
-    editor_.storyEvents().setFolder(dataDirectory / "story" / "events"); // the events are read again when a new game starts (US-185)
+    editor_.storyEvents().setFolder(dataDirectory / "story" / "events", [this, dataDirectory] { watcher_.resync(dataDirectory / "story"); }); // the events are read when a new game starts (US-185)
+    editor_.setWroteFile([this](const std::filesystem::path& file) { watcher_.noteOwnWrite(file); });   // the Editor's own saves are not read a second time (US-304)
+    npcClasses_.setWroteFile([this](const std::filesystem::path& file) { watcher_.noteOwnWrite(file); });
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -156,6 +158,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         host.saved = [this](const sim::buildings::KindDef& kind) {
             if (std::find(definitions_.buildingKinds.begin(), definitions_.buildingKinds.end(), kind.id) == definitions_.buildingKinds.end()) definitions_.buildingKinds.push_back(kind.id);
             if (kind.known) buildings_.learn(kind.id); // a prefab marked known is buildable at once
+            watcher_.resync(dataDirectory_ / "buildings"); // the Editor wrote the file: the watcher does not report it (US-304)
         };
         editor_.buildings().setHost(std::move(host));
         if (!buildings_.notes().empty()) {
@@ -245,6 +248,7 @@ void OdysseyGame::switchMode(Mode mode) {
         const luna::engine::Rect view = camera_.view();
         editor_.enter(view.x + view.width / 2.0, view.y + view.height / 2.0); // looking where the game looked
         core::logInfo("Mode: Editor");
+        if (levelReloadPending_) applyLevelFromDisk(); // the level file changed on disk while the game was playing (US-304)
     } else {
         resetPlay();
         core::logInfo(std::format("Mode: Game (level \"{}\", hero at ({}, {}))", level_.name, level_.heroStart.x, level_.heroStart.y));
@@ -1922,6 +1926,10 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 
 void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (toastTicks_ > 0) --toastTicks_;
+    if (watching_) { // files saved outside the game (US-304)
+        static const auto started = std::chrono::steady_clock::now();
+        pollFiles(std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count());
+    }
     if (intents.pressed(luna::engine::Intent::Reload)) {
         reloadEverything(); // F5 reads every data set again (US-303): the interactions, the NPC classes, the lights, the catalogs, the help
     }
