@@ -207,7 +207,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-302 | US-302 | M10b | Done | 2026-10-05; Debug zero warnings, 27/27; docs/evidence/US-302/ |
 | S-US-303 | US-303 | M10b | Done | 2026-10-05; Debug zero warnings, 27/27; docs/evidence/US-303/; CI-021 |
 | S-US-304 | US-304 | M10b | Done | 2026-10-05; Debug zero warnings, 27/27; docs/evidence/US-304/ |
-| S-US-305 | US-305 | M10b | To do |  |
+| S-US-305 | US-305 | M10b | Done | 2026-10-06; Debug zero warnings; docs/evidence/US-305/ |
 | X-M10b | - | M10b | To do |  |
 | K-M11 | - | M11 | To do |  |
 | S-US-190 | US-190 | M11 | To do |  |

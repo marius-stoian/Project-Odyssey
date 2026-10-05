@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/level.h"
+#include "game/level_baseline.h"
 #include "luna/engine/image.h"
 #include "luna/engine/input.h"
 #include "luna/engine/renderer.h"
@@ -10,6 +11,7 @@
 #include "sim/building_store.h"
 
 #include <filesystem>
+#include <map>
 #include <set>
 #include <string>
 #include <utility>
@@ -35,6 +37,9 @@ public:
 
     // A level starts (or restarts): the store is made for its map, the buildings of the level stand, the walls block walking.
     void start(OdysseyGame& game);
+    // A loaded run meets the level as it is now (US-305): the buildings of the level that were removed or changed since the save leave the store, and the new and changed
+    // ones stand again as the level has them. What the clan built and what the level did not change is left alone.
+    void mergeLevel(OdysseyGame& game, const LevelChanges::Ids& changes);
     // One play tick (after the clan's tick): the Build menu and placing, drops picked up, fire, wear, obstacles.
     void tick(OdysseyGame& game, const luna::engine::Intents& world, const luna::engine::Intents& ui);
 
@@ -147,6 +152,8 @@ private:
     bool clanBuilds_ = true;
     std::vector<std::string> notes_;
     std::set<std::string> known_;
+    std::map<int, int> fromLevel_; // the id of a building of the level (PlacedBuildingSpec) -> its id in the store: the link that lets a level edit find it in a run (US-305)
+    int placeSpec(const PlacedBuildingSpec& spec); // the store id, or 0 when it was not placed
     std::vector<std::pair<int, int>> obstacleCells_; // the cells this layer put on the map, to take them off again
     std::uint64_t obstacleVersion_ = 0;
     bool menuOpen_ = false;

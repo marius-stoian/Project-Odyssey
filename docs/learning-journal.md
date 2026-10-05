@@ -2163,3 +2163,22 @@ waiting_[key] = {seen.path, nowSeconds};                           // a change: 
 **Try it (10 minutes).** Start the game, open `assets/data/interactions/gather.json` in Notepad, change `"range": 2` to 3 and save: the toast appears. Then start it with `--no-watch` and see that nothing happens until you press F5.
 
 **Check yourself.** Why does the watcher take the time as a parameter instead of calling `std::chrono::steady_clock::now()` itself?
+
+## US-305: a content hash as a baseline, merging by id, and save versions (M10b)
+
+**What we built.** When you edit a level and then load an older run save, the level now wins where you changed it and the run wins everywhere else. A bush you moved is fresh in its new place; the bushes you did not touch still remember being picked; a person you deleted is gone; the clan and the hero are exactly as saved.
+
+**The idea: remember a fingerprint, compare by id.** A *hash* turns any amount of text into one number, and the same text always gives the same number. When the game saves a run it also writes, for every placed thing, its id and the hash of its entry in the level file. When it loads, it hashes the level as it is now and compares id by id with a `std::map<int, std::uint64_t>`. Same id, same hash: the thing is untouched, keep the saved state. Same id, other hash: you edited it, take it fresh. An id that is only in the new level is new; one that is only in the baseline was deleted. The hash is taken over the same JSON text that `saveLevel` writes (the helper `entryText`), so a field added to the level file tomorrow counts as a change without anyone remembering to update a list.
+
+```cpp
+const auto old = before.find(id);
+if (old == before.end() || old->second != hash) changes.kinds[kind].updated.insert(id); // new, or its entry changed
+```
+
+**Save versions and migrations.** `things.json` is now version 3. A reader accepts 1, 2 and 3 and uses `if (version >= 3 && data.contains("baseline"))`: an old save has no baseline, so nothing is compared, it loads as it always did, and the next autosave writes version 3. That is a *migration*: old files keep working and are upgraded the next time they are written. The merge for people is done by making the people from the level as it is now and then copying the saved state onto the ones the level did not touch (`NpcPopulation::adopt`), which is simpler and safer than deleting people from the middle of arrays that other classes index by position.
+
+**Where to look.** `src/game/level_baseline.*`, `OdysseyGame::restoreThings` and `mergeNpcPopulation`, `BuildingLayer::mergeLevel`, `tests/game/level_merge_test.cpp`.
+
+**Try it (10 minutes).** Start a run on a hand-made level so it autosaves, close the game, move a bush in the Editor and save, start the game with `--load`: the status line says `The level updated 1 thing`.
+
+**Check yourself.** Why is the hash of the level entry compared, and not the position of the thing in the run? (Think of a person who walked away from where the level placed them.)

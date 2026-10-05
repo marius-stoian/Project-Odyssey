@@ -113,7 +113,10 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         if (actor == kHeroActor) questEvent(sim::rules::QuestObjective::Kind::Interact, interaction);
     });
     editor_.storyEvents().setFolder(dataDirectory / "story" / "events", [this, dataDirectory] { watcher_.resync(dataDirectory / "story"); }); // the events are read when a new game starts (US-185)
-    editor_.setWroteFile([this](const std::filesystem::path& file) { watcher_.noteOwnWrite(file); });   // the Editor's own saves are not read a second time (US-304)
+    editor_.setWroteFile([this](const std::filesystem::path& file) {
+        watcher_.noteOwnWrite(file);
+        if (runLoaded_) levelSavedSinceRun_ = true; // US-305: the level changed under a loaded run: Play loads the run again with the edits merged in
+    });   // the Editor's own saves are not read a second time (US-304)
     npcClasses_.setWroteFile([this](const std::filesystem::path& file) { watcher_.noteOwnWrite(file); });
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
@@ -251,6 +254,7 @@ void OdysseyGame::switchMode(Mode mode) {
         if (levelReloadPending_) applyLevelFromDisk(); // the level file changed on disk while the game was playing (US-304)
     } else {
         resetPlay();
+        if (runLoaded_ && levelSavedSinceRun_) loadAutosave(); // the run comes back from its save, the level edits win over it (US-305)
         core::logInfo(std::format("Mode: Game (level \"{}\", hero at ({}, {}))", level_.name, level_.heroStart.x, level_.heroStart.y));
     }
 }
@@ -1022,19 +1026,40 @@ std::string OdysseyGame::thingsText() const {
     for (const WorldPlant& plant : plants_) {
         if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
     }
-    return nlohmann::json{{"version", 2}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}, {"quests", nlohmann::json::parse(quests_.save(actionClock_))}}.dump(1);
+    nlohmann::json things{{"version", 3}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}, {"quests", nlohmann::json::parse(quests_.save(actionClock_))}};
+    // Version 3 (US-305): what the level looked like when the run was saved, so a later load can tell which things the owner has edited since. A generated region has no
+    // level file to edit: its level is made from the region seed, so it has no baseline.
+    if (!region_) things["baseline"] = nlohmann::json::parse(LevelBaseline::of(level_).toText());
+    return things.dump(1);
 }
 
 std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
     std::vector<std::string> notes;
     try {
         const nlohmann::json data = nlohmann::json::parse(text);
-        if (const int version = data.at("version").get<int>(); version != 1 && version != 2) return {"things.json was saved by another version and was not loaded"};
+        const int version = data.at("version").get<int>();
+        if (version < 1 || version > 3) return {"things.json was saved by another version and was not loaded"};
+        // A save from before M10b (version 1 or 2) has no baseline: it loads as before, and the next autosave writes one (US-305).
+        runChanges_ = {};
+        if (version >= 3 && data.contains("baseline") && !region_) runChanges_ = compareBaseline(LevelBaseline::fromText(data.at("baseline").dump()), level_);
         for (const auto& [id, state] : data.at("plants").items()) {
+            if (runChanges_.of(LevelBaseline::Plant).touches(std::stoi(id))) continue; // the level changed or removed this plant: it comes fresh from the level
             const int index = plantIndexById(std::stoi(id));
             if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
         }
-        notes = actions_.loadPending(data.at("timers").dump(), actionClock_);
+        nlohmann::json timers = data.at("timers");
+        if (runChanges_.any() && timers.contains("pending")) { // what was waiting for a plant or a person the level changed no longer applies
+            nlohmann::json kept = nlohmann::json::array();
+            for (const nlohmann::json& timer : timers.at("pending")) {
+                const int kind = timer.value("kind", -1);
+                const int target = timer.value("id", -1);
+                const bool plant = kind == static_cast<int>(Subject::Kind::Plant) && runChanges_.of(LevelBaseline::Plant).touches(target);
+                const bool person = kind == static_cast<int>(Subject::Kind::Npc) && runChanges_.of(LevelBaseline::Character).touches(target);
+                if (!plant && !person) kept.push_back(timer);
+            }
+            timers["pending"] = std::move(kept);
+        }
+        notes = actions_.loadPending(timers.dump(), actionClock_);
         if (data.contains("flags")) { // saves from before US-164 have none
             const std::vector<std::string> flagNotes = flags_.load(data.at("flags").dump());
             notes.insert(notes.end(), flagNotes.begin(), flagNotes.end());
@@ -1284,6 +1309,9 @@ bool OdysseyGame::loadAutosave() {
     const std::filesystem::path clanFile = saveDirectory_ / "clan.json";
     const std::filesystem::path regionFile = saveDirectory_ / "region.json";
     std::string notes;
+    runChanges_ = {};
+    runLoaded_ = false;
+    levelSavedSinceRun_ = false;
     try {
         if (std::filesystem::exists(regionFile) || std::filesystem::exists(regionFile.string() + ".bak1")) {
             sim::LoadedRegion loaded = sim::loadRegion(regionFile, sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json"));
@@ -1330,10 +1358,14 @@ bool OdysseyGame::loadAutosave() {
         if (std::ifstream built(saveDirectory_ / "buildings.json", std::ios::binary); built) {
             const std::string text((std::istreambuf_iterator<char>(built)), std::istreambuf_iterator<char>());
             for (const std::string& note : buildings_.loadText(text)) notes += (notes.empty() ? "" : "; ") + note;
+            if (runChanges_.of(LevelBaseline::Building).updated.size() + runChanges_.of(LevelBaseline::Building).removed.size() > 0) buildings_.mergeLevel(*this, runChanges_.of(LevelBaseline::Building));
             buildings_.syncObstacles(*this);
         }
         if (const std::string problem = loadNpcPopulation(); !problem.empty()) notes += (notes.empty() ? "" : "; ") + problem;
-        say(notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes);
+        runLoaded_ = true;
+        std::string line = notes.empty() ? std::format("Loaded {}: day {}", clanFile.filename().string(), clan_->date().day) : notes;
+        if (const std::string updated = levelChangesMessage(runChanges_); !updated.empty()) line += ". " + updated; // the level was edited since the save (US-305)
+        say(line);
         return true;
     } catch (const std::exception& error) {
         say(std::string("Could not load the save: ") + error.what());

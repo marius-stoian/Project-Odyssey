@@ -119,6 +119,11 @@ public:
     std::uint64_t hash() const;
     static constexpr int kSaveVersion = 1;
 
+    // A saved director meets the level as it is now (US-305): this one was just made from the level. `kept` pairs the index of a person here with the index of the same
+    // person in `saved`; those persons take over their mode and their hit points, and the events on the board come over too. Homes, schedules and profiles stay as the
+    // data of now makes them.
+    void adopt(const NpcDirector& saved, const std::vector<std::pair<int, int>>& kept);
+
 private:
     void ensure(std::size_t size);
     int internSchedule(const rules::Schedule& schedule);

@@ -686,6 +686,64 @@ LoadedLevel loadLevel(const std::filesystem::path& file, const Definitions& defi
     throw DataError(file, "(file)", problems.empty() ? "no level found" : "no level could be loaded:" + problems);
 }
 
+namespace {
+
+// One placed thing as the level file writes it. `saveLevel` and the level baseline of a run save (US-305) both use these, so "changed in the level" means
+// "its entry in the file changed", and a new field is counted the day it is written.
+json entryJson(const PlacedCharacter& c) {
+    json entry{{"id", c.id}, {"kind", c.kind}, {"x", c.feet.x}, {"y", c.feet.y}, {"facing", facingCode(c.facing)},
+               {"name", c.name}, {"hp", c.hp}, {"swordDamage", c.swordDamage}};
+    // Only what the NPC sets itself is written, so a level made before US-260 and US-261 is saved exactly as it was.
+    if (!c.classes.empty()) entry["classes"] = c.classes;
+    if (!c.attitude.empty()) entry["attitude"] = c.attitude;
+    if (!c.tags.empty()) entry["tags"] = c.tags;
+    if (c.family != 0) entry["family"] = c.family;
+    if (!c.dialogues.empty()) {
+        json dialogues = json::object();
+        for (const auto& [partner, dlg] : c.dialogues) dialogues[partner] = dlg;
+        entry["dialogues"] = dialogues;
+    }
+    if (!c.allow.empty() || !c.deny.empty()) {
+        json actions = json::object();
+        if (!c.allow.empty()) actions["allow"] = c.allow;
+        if (!c.deny.empty()) actions["deny"] = c.deny;
+        entry["actions"] = actions;
+    }
+    for (const auto& [name, fieldText] : sim::rules::extrasFieldTexts(c.extras)) entry[name] = json::parse(fieldText);
+    return entry;
+}
+
+json entryJson(const PlacedPickup& p) { return {{"id", p.id}, {"weapon", p.weapon}, {"x", p.at.x}, {"y", p.at.y}}; }
+
+json entryJson(const PlacedPlant& p) {
+    json entry = {{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}};
+    if (!p.overrides.empty()) entry["overrides"] = writeOverrides(p.overrides); // a plant with none writes none: old files save as they were
+    return entry;
+}
+
+json entryJson(const PlacedEffect& e) { return {{"id", e.id}, {"name", e.name}, {"x", e.at.x}, {"y", e.at.y}}; }
+
+json entryJson(const PlacedLight& l) { return {{"id", l.id}, {"kind", l.kind}, {"x", l.at.x}, {"y", l.at.y}}; }
+
+json entryJson(const PlacedBuildingSpec& b) {
+    json entry{{"id", b.id}, {"kind", b.kind}, {"x", b.x}, {"y", b.y}};
+    if (b.turns != 0) entry["turns"] = b.turns;
+    if (!b.finished) entry["finished"] = false;
+    if (b.owner >= 0) entry["owner"] = b.owner;
+    if (!b.interior.empty()) entry["interior"] = b.interior;
+    if (!b.interiorLevel.empty()) entry["interiorLevel"] = b.interiorLevel;
+    return entry;
+}
+
+} // namespace
+
+std::string entryText(const PlacedCharacter& thing) { return entryJson(thing).dump(); }
+std::string entryText(const PlacedPickup& thing) { return entryJson(thing).dump(); }
+std::string entryText(const PlacedPlant& thing) { return entryJson(thing).dump(); }
+std::string entryText(const PlacedEffect& thing) { return entryJson(thing).dump(); }
+std::string entryText(const PlacedLight& thing) { return entryJson(thing).dump(); }
+std::string entryText(const PlacedBuildingSpec& thing) { return entryJson(thing).dump(); }
+
 void saveLevel(const Level& level, const Definitions& definitions, const std::filesystem::path& file) {
     namespace fs = std::filesystem;
     json ground = json::array();
@@ -703,40 +761,15 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
         ground.push_back(row);
     }
     json characters = json::array();
-    for (const PlacedCharacter& c : level.characters) {
-        json entry{{"id", c.id}, {"kind", c.kind}, {"x", c.feet.x}, {"y", c.feet.y}, {"facing", facingCode(c.facing)},
-                   {"name", c.name}, {"hp", c.hp}, {"swordDamage", c.swordDamage}};
-        // Only what the NPC sets itself is written, so a level made before US-260 and US-261 is saved exactly as it was.
-        if (!c.classes.empty()) entry["classes"] = c.classes;
-        if (!c.attitude.empty()) entry["attitude"] = c.attitude;
-        if (!c.tags.empty()) entry["tags"] = c.tags;
-        if (c.family != 0) entry["family"] = c.family;
-        if (!c.dialogues.empty()) {
-            json dialogues = json::object();
-            for (const auto& [partner, dlg] : c.dialogues) dialogues[partner] = dlg;
-            entry["dialogues"] = dialogues;
-        }
-        if (!c.allow.empty() || !c.deny.empty()) {
-            json actions = json::object();
-            if (!c.allow.empty()) actions["allow"] = c.allow;
-            if (!c.deny.empty()) actions["deny"] = c.deny;
-            entry["actions"] = actions;
-        }
-        for (const auto& [name, fieldText] : sim::rules::extrasFieldTexts(c.extras)) entry[name] = json::parse(fieldText);
-        characters.push_back(entry);
-    }
+    for (const PlacedCharacter& c : level.characters) characters.push_back(entryJson(c));
     json pickups = json::array();
-    for (const PlacedPickup& p : level.pickups) pickups.push_back({{"id", p.id}, {"weapon", p.weapon}, {"x", p.at.x}, {"y", p.at.y}});
+    for (const PlacedPickup& p : level.pickups) pickups.push_back(entryJson(p));
     json plants = json::array();
-    for (const PlacedPlant& p : level.plants) {
-        json entry = {{"id", p.id}, {"kind", p.kind}, {"x", p.feet.x}, {"y", p.feet.y}};
-        if (!p.overrides.empty()) entry["overrides"] = writeOverrides(p.overrides); // a plant with none writes none: old files save as they were
-        plants.push_back(std::move(entry));
-    }
+    for (const PlacedPlant& p : level.plants) plants.push_back(entryJson(p));
     json effects = json::array();
-    for (const PlacedEffect& e : level.effects) effects.push_back({{"id", e.id}, {"name", e.name}, {"x", e.at.x}, {"y", e.at.y}});
+    for (const PlacedEffect& e : level.effects) effects.push_back(entryJson(e));
     json lights = json::array();
-    for (const PlacedLight& l : level.lights) lights.push_back({{"id", l.id}, {"kind", l.kind}, {"x", l.at.x}, {"y", l.at.y}});
+    for (const PlacedLight& l : level.lights) lights.push_back(entryJson(l));
     json targets = json::array();
     for (const PixelPoint& t : level.targets) targets.push_back({t.x, t.y});
     json data{{"levelVersion", kLevelVersion},
@@ -755,15 +788,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
                     {"ground", ground}};
     if (!level.buildings.empty()) { // level version 6 (US-250): only when there are some, so older levels save as they were
         json buildings = json::array();
-        for (const PlacedBuildingSpec& b : level.buildings) {
-            json entry{{"id", b.id}, {"kind", b.kind}, {"x", b.x}, {"y", b.y}};
-            if (b.turns != 0) entry["turns"] = b.turns;
-            if (!b.finished) entry["finished"] = false;
-            if (b.owner >= 0) entry["owner"] = b.owner;
-            if (!b.interior.empty()) entry["interior"] = b.interior;
-            if (!b.interiorLevel.empty()) entry["interiorLevel"] = b.interiorLevel;
-            buildings.push_back(entry);
-        }
+        for (const PlacedBuildingSpec& b : level.buildings) buildings.push_back(entryJson(b));
         data["buildings"] = buildings;
     }
     if (level.clan) data["clan"] = true;

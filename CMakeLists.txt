@@ -283,6 +283,7 @@ add_library(odysseus_game STATIC
     src/game/tutorial.cpp
     src/game/session_stats.cpp
     src/game/level.cpp
+    src/game/level_baseline.cpp
     src/game/editor.cpp
     src/game/npc_class_book.cpp
     src/game/npc_marker.cpp
@@ -464,6 +465,7 @@ add_executable(odysseus_game_tests
     tests/game/editor_suggest_test.cpp
     tests/game/data_reload_test.cpp
     tests/game/data_watch_test.cpp
+    tests/game/level_merge_test.cpp
     tests/game/trade_stock_test.cpp
     tests/game/trade_gate_test.cpp
     tests/game/trade_screen_test.cpp

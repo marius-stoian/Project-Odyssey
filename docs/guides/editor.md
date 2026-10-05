@@ -160,6 +160,16 @@ These files cannot be swapped while the game runs, because the play state holds 
 The **open level** is watched too. If its file changes outside the Editor and you have nothing unsaved, the Editor reads it again (your view stays where it is) and a toast says `Reloaded <file>`. If you have unsaved changes, nothing is overwritten: the status line says the file changed on disk, and you choose (save to overwrite it, or open it again to take the new one). While you play, the new level waits and is read when you open the Editor; a run keeps going on the level it started with.
 
 `odysseus.exe --no-watch` turns the watching off (the tests and the headless runs do not watch). F5 and the Editor's saves still reload.
+
+**Level edits and run saves (US-305).** A run save remembers what the level looked like when it was saved: for every placed thing (plants and objects, characters and people, pickups, effects, lights, buildings of the level) its id and a short fingerprint (hash) of its entry in the level file. When the run is loaded, each id is compared with the level as it is now:
+
+| In the level now | In the run |
+|---|---|
+| same fingerprint | the run keeps its state: a bush picked on the other side stays picked, a person keeps their age, needs and memories, a building keeps its damage |
+| changed (moved, renamed, other class, other kind) or new | it comes fresh from the level, and what was waiting for it (a regrow timer, a trade stock) is dropped |
+| gone (deleted in the Editor) | it is removed from the run |
+
+The clan, the hero, the flags, the quests and what the clan built itself are not in the level, so the level never touches them. The status line says how many things the level updated: `Loaded clan.json: day 12. The level updated 2 things`. If you save the level in the Editor while a run is loaded and then press **F1**, the run is loaded again from its save with the same merge (it is not started over). A save made before this feature has no fingerprints: it loads as it always did, once, and the next autosave writes them. A generated region has no level file to edit and is not merged.
 Catalogs: `npc-classes`, `npc-kinds` (characters and animals), `partner-types`, `interactions`, `interaction-fields` (`gather.delay`, `gather.duration`...), `light-kinds`, `objects`, `plants`, `characters`, `items`, `building-kinds`, `prefabs`, `quests`, `levels` (the files beside the open level), `tags`, `places` (of the open level) and `markers` (`tag:edible`, `npc:ossa`, `place:market`, `object:...` for a quest step's marker). `"list": true` on a field of words (**Tags**, **Allow**, **Deny**, **Does**, **Wants**) makes the list complete one word at a time. Every entry of `help.json` needs a `suggest` (write `none` for a field that offers nothing); an unknown source is a mistake of the file and the test of the coverage names it.
 ## A conversation for a character, own values for a plant (US-173)
 

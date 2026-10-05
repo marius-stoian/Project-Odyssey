@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-305 Level edits win over the run save (Mraw) - 2026-10-06
+
+**State:** On `story/US-305`, merged into `qa` after the Debug verify (zero warnings, every test group green).
+
+- **New:** `src/game/level_baseline.*` (`LevelBaseline`, `LevelChanges`, `compareBaseline`); `entryText` for every placed thing in `src/game/level.*` (the level file writer and the baseline share `entryJson`); `NpcPopulation::adopt`, `NpcDirector::adopt`, `TradeMarket::restoreState(text, skip)` in `src/sim/`; `BuildingLayer::mergeLevel` and `placeSpec`; `OdysseyGame::mergeNpcPopulation`, `runLoaded`, `runChanges`; `tests/game/level_merge_test.cpp` (11 cases); `docs/plans/US-305.md`; `Milestone-141.md` (AP-142).
+- **Changed:** `things.json` is version 3 and carries the level baseline (versions 1 and 2 still load, without a merge); `buildings.json` is version 2 and carries the level-building links (version 1 still loads); `restoreThings` skips the plants and timers the level changed; `loadAutosave` merges buildings and people and adds "The level updated N things" to the status line; Play after an Editor save under a loaded run loads the run again with the merge; `docs/guides/editor.md`, learning journal, `docs/status.md`, `Limit.md`.
+
 ## US-304 File watch for outside edits (Mraw) - 2026-10-05
 
 **State:** On `story/US-304`, merged into `qa`. Debug verify: zero warnings, 27 of 27. Release watcher cost: average 0.164 ms a tick.

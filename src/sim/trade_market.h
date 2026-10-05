@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -178,7 +179,8 @@ public:
     // The saved state (versioned JSON; the data of the profiles is read again at every start) and its reader: `restoreState` keeps the states until the traders are
     // registered with addTrader. A damaged text is a DataError.
     std::string toText() const;
-    void restoreState(std::string_view text);
+    // `skip` lists persons whose saved state is not wanted (the level changed or removed them: US-305).
+    void restoreState(std::string_view text, const std::set<int>& skip = {});
     std::uint64_t hash() const;
 
     static constexpr int kSaveVersion = 1;
