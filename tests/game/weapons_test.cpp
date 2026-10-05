@@ -162,7 +162,7 @@ TEST_CASE("US-133 Starter set") {
     const fs::path data = fs::temp_directory_path() / "odysseus-us133" / "data";
     fs::remove_all(data);
     fs::create_directories(data);
-    for (const auto& entry : fs::directory_iterator(ODYSSEUS_DATA_DIR)) fs::copy(entry.path(), data / entry.path().filename());
+    for (const auto& entry : fs::directory_iterator(ODYSSEUS_DATA_DIR)) fs::copy(entry.path(), data / entry.path().filename(), fs::copy_options::recursive);
     std::stringstream text;
     text << std::ifstream(data / "weapons.json").rdbuf();
     std::string json = text.str();

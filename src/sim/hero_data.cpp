@@ -1,6 +1,7 @@
 #include "hero_data.h"
 
 #include "json_data.h"
+#include "sim/rule_expr.h"
 
 #include <algorithm>
 #include <format>
@@ -84,6 +85,42 @@ int HeroData::professionIndex(const std::string& id) const {
 const Recipe* HeroData::recipe(const std::string& id) const {
     const auto found = std::find_if(recipes.begin(), recipes.end(), [&](const Recipe& r) { return r.id == id; });
     return found == recipes.end() ? nullptr : &*found;
+}
+
+// One story event from its JSON (the same shape in story/events/<id>.json and in the older crossroads.json).
+static CrossroadsEvent readEvent(const json& entry, const fs::path& eventsFile, const std::string& where) {
+    CrossroadsEvent event;
+    event.id = text(entry, eventsFile, where, "id");
+    event.title = text(entry, eventsFile, where, "title");
+    event.text = text(entry, eventsFile, where, "text");
+    event.minAge = number(entry, eventsFile, where, "minAge", 1, 80);
+    event.maxAge = number(entry, eventsFile, where, "maxAge", event.minAge, 80);
+    event.role = optionalText(entry, "role");
+    event.order = entry.value("order", 0);
+    event.trigger = optionalText(entry, "trigger");
+    if (!event.trigger.empty()) {
+        const rules::ParsedExpr parsed = rules::parseExpression(event.trigger);
+        if (parsed.problem) throw DataError(eventsFile, where + ".trigger", parsed.problem->message);
+    }
+    if (entry.contains("requires")) {
+        const auto affinity = affinityFromKey(text(entry.at("requires"), eventsFile, where + ".requires", "affinity"));
+        if (!affinity) throw DataError(eventsFile, where + ".requires.affinity", "is not an affinity");
+        event.needsAffinity = affinity;
+        event.needsMinimum = number(entry.at("requires"), eventsFile, where + ".requires", "min", 0, 100);
+    }
+    const json& options = list(entry, eventsFile, "options");
+    if (options.size() < 2 || options.size() > 3) throw DataError(eventsFile, where + ".options", "must have 2 or 3 options");
+    for (std::size_t o = 0; o < options.size(); ++o) {
+        const std::string optionWhere = std::format("{}.options[{}]", where, o);
+        CrossroadsOption option;
+        option.text = text(options.at(o), eventsFile, optionWhere, "text");
+        option.affinity = affinities(options.at(o).contains("affinity") ? options.at(o).at("affinity") : json(), eventsFile, optionWhere + ".affinity");
+        option.opinion = options.at(o).value("opinion", 0);
+        option.trait = optionalText(options.at(o), "trait");
+        option.note = text(options.at(o), eventsFile, optionWhere, "note");
+        event.options.push_back(option);
+    }
+    return event;
 }
 
 HeroData loadHeroData(const fs::path& dataDirectory) {
@@ -234,40 +271,82 @@ HeroData loadHeroData(const fs::path& dataDirectory) {
         data.activities.push_back(activity);
     }
 
-    // crossroads.json
-    const fs::path eventsFile = folder / "crossroads.json";
-    const json events = readJsonFile(eventsFile);
-    for (std::size_t i = 0; i < list(events, eventsFile, "events").size(); ++i) {
-        const json& entry = events.at("events").at(i);
-        const std::string where = std::format("events[{}]", i);
-        CrossroadsEvent event;
-        event.id = text(entry, eventsFile, where, "id");
-        event.title = text(entry, eventsFile, where, "title");
-        event.text = text(entry, eventsFile, where, "text");
-        event.minAge = number(entry, eventsFile, where, "minAge", 1, 80);
-        event.maxAge = number(entry, eventsFile, where, "maxAge", event.minAge, 80);
-        event.role = optionalText(entry, "role");
-        if (entry.contains("requires")) {
-            const auto affinity = affinityFromKey(text(entry.at("requires"), eventsFile, where + ".requires", "affinity"));
-            if (!affinity) throw DataError(eventsFile, where + ".requires.affinity", "is not an affinity");
-            event.needsAffinity = affinity;
-            event.needsMinimum = number(entry.at("requires"), eventsFile, where + ".requires", "min", 0, 100);
+    // The story events (US-185): one file each in story/events/, in the order of their "order" field; the older single crossroads.json is still read
+    // when that folder is missing.
+    const fs::path eventsFolder = folder.parent_path() / "story" / "events";
+    std::error_code eventsError;
+    if (fs::is_directory(eventsFolder, eventsError)) {
+        std::vector<fs::path> files;
+        for (const auto& entry : fs::directory_iterator(eventsFolder, eventsError)) {
+            const std::string name = entry.path().filename().string();
+            const bool layout = name.size() > 12 && name.compare(name.size() - 12, 12, ".layout.json") == 0;
+            if (entry.is_regular_file() && entry.path().extension() == ".json" && !layout) files.push_back(entry.path());
         }
-        const json& options = list(entry, eventsFile, "options");
-        if (options.size() < 2 || options.size() > 3) throw DataError(eventsFile, where + ".options", "must have 2 or 3 options");
-        for (std::size_t o = 0; o < options.size(); ++o) {
-            const std::string optionWhere = std::format("{}.options[{}]", where, o);
-            CrossroadsOption option;
-            option.text = text(options.at(o), eventsFile, optionWhere, "text");
-            option.affinity = affinities(options.at(o).contains("affinity") ? options.at(o).at("affinity") : json(), eventsFile, optionWhere + ".affinity");
-            option.opinion = options.at(o).value("opinion", 0);
-            option.trait = optionalText(options.at(o), "trait");
-            option.note = text(options.at(o), eventsFile, optionWhere, "note");
-            event.options.push_back(option);
+        std::sort(files.begin(), files.end());
+        std::vector<CrossroadsEvent> loaded;
+        for (const fs::path& file : files) {
+            const json entry = readJsonFile(file);
+            CrossroadsEvent event = readEvent(entry, file, "event");
+            if (event.id != file.stem().string()) throw DataError(file, "id", std::format("\"{}\" must match the file name \"{}\"", event.id, file.stem().string()));
+            loaded.push_back(std::move(event));
         }
-        data.events.push_back(event);
+        std::stable_sort(loaded.begin(), loaded.end(), [](const CrossroadsEvent& a, const CrossroadsEvent& b) { return a.order != b.order ? a.order < b.order : a.id < b.id; });
+        data.events = std::move(loaded);
+    } else {
+        const fs::path eventsFile = folder / "crossroads.json";
+        const json events = readJsonFile(eventsFile);
+        for (std::size_t i = 0; i < list(events, eventsFile, "events").size(); ++i) {
+            CrossroadsEvent event = readEvent(events.at("events").at(i), eventsFile, std::format("events[{}]", i));
+            event.order = static_cast<int>(i);
+            data.events.push_back(std::move(event));
+        }
     }
     return data;
+}
+
+} // namespace odysseus::sim
+
+namespace odysseus::sim {
+
+const char* affinityKey(Affinity affinity) { return kKeys.at(static_cast<std::size_t>(affinity)); }
+
+std::optional<CrossroadsEvent> parseStoryEvent(const std::string& jsonText, const std::string& name, std::string& problem) {
+    try {
+        const json entry = json::parse(jsonText, nullptr, true, true);
+        return readEvent(entry, fs::path(name), "event");
+    } catch (const std::exception& error) {
+        problem = error.what();
+        return std::nullopt;
+    }
+}
+
+std::string writeStoryEvent(const CrossroadsEvent& event) {
+    nlohmann::ordered_json out = nlohmann::ordered_json::object();
+    out["id"] = event.id;
+    out["order"] = event.order;
+    out["title"] = event.title;
+    out["text"] = event.text;
+    out["minAge"] = event.minAge;
+    out["maxAge"] = event.maxAge;
+    if (!event.role.empty()) out["role"] = event.role;
+    if (!event.trigger.empty()) out["trigger"] = event.trigger;
+    if (event.needsAffinity) out["requires"] = {{"affinity", affinityKey(*event.needsAffinity)}, {"min", event.needsMinimum}};
+    nlohmann::ordered_json options = nlohmann::ordered_json::array();
+    for (const CrossroadsOption& option : event.options) {
+        nlohmann::ordered_json o = nlohmann::ordered_json::object();
+        o["text"] = option.text;
+        nlohmann::ordered_json affinity = nlohmann::ordered_json::object();
+        for (std::size_t a = 0; a < kAffinityCount; ++a) {
+            if (option.affinity[a] != 0) affinity[affinityKey(static_cast<Affinity>(a))] = option.affinity[a];
+        }
+        o["affinity"] = affinity;
+        o["opinion"] = option.opinion;
+        if (!option.trait.empty()) o["trait"] = option.trait;
+        o["note"] = option.note;
+        options.push_back(o);
+    }
+    out["options"] = options;
+    return out.dump(2) + "\n";
 }
 
 } // namespace odysseus::sim

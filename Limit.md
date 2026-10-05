@@ -1,101 +1,109 @@
 # Limit.md: how to continue the assembly
 
-**Resume update (2026-10-05, X-M9):** X-M9 DONE (Milestone-124.md, AP-125): one verify green, Debug and Release 27/27, zero warnings. qa merged into main, tag m9-done. Next: K-M10 is the next Codex milestone, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-014, CI-015.
+**Resume update (2026-10-05, X-M10):** X-M10 DONE (Milestone-134.md, AP-135, docs/gates/M10.md): Debug and Release 27/27, zero warnings; qa merged into main, tag m10-done. Next: K-M11 is the next Codex milestone, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-017, CI-018, CI-019.
 
-**Resume update (2026-10-05, US-174):** S-US-174 DONE (Milestone-123.md, AP-124); all six M9 stories written, each with its own cases run alone. Next: X-M9: the one full verify (verify.ps1 -Story X-M9 -Config Both), docs/gates/M9.md, merge qa into main, tag m9-done, CI on main.
+**Resume update (2026-10-05, US-185):** S-US-185 DONE (Milestone-133.md, AP-134); all eight M10 stories are written. Next: X-M10 (pwsh tools/verify.ps1 -Story X-M10 -Config Both, fix failures, docs/gates/M10.md, merge qa into main, tag m10-done, CI on main, one rerun then stop). Open for Anima: CI-017, CI-018, CI-019.
 
-**Resume update (2026-10-05, US-173):** S-US-173 DONE (Milestone-122.md, AP-123), own cases run alone. Next: S-US-174 (Test-play: a panel that runs the dialogue runtime on a throwaway copy with chosen opinion, needs, items, flags, time, season, forced rolls; Play from here), then X-M9.
+**Resume update (2026-10-05, US-187):** S-US-187 DONE (Milestone-132.md, AP-133). Next: S-US-185 (tutorial.json -> assets/data/quests/first-day.json, Tutorial class leaves the HUD path; crossroads.json -> assets/data/story/events/*.json with a trigger, edited in the Editor; save migration), then X-M10 (one full verify, Debug and Release, docs/gates/M10.md, merge into main, tag m10-done).
 
-**Resume update (2026-10-05, US-175):** S-US-175 DONE (Milestone-121.md, AP-122), own cases run alone. Next: S-US-173 (attach to placed things; M9a already has a dialogue per NPC and partner: reuse it, add per-thing overrides), then US-174 (Test-play), X-M9.
+**Resume update (2026-10-05, US-184):** S-US-184 DONE (Milestone-131.md, AP-132). Next: S-US-187 (sim::checkQuest: unknown/unreachable step, loops, unknown giver/items/kinds/places/interactions; findings in the graph editor; a test over every shipped quest), then US-185 (tutorial as first-day quest, story events), X-M10.
 
-**Resume update (2026-10-05, US-172):** S-US-172 DONE (Milestone-120.md, AP-121), own cases run alone. Next: S-US-175 (graph validation: list of problems, clickable, live), then US-173 (attach), US-174 (Test-play), X-M9.
+**Resume update (2026-10-05, US-186):** S-US-186 DONE (Milestone-130.md, AP-131). Next: S-US-184 (quest graph editor: new Editor tab on the NodeGraph widget, writeQuest saves, layout sidecar), then US-187 (validation), US-185 (tutorial and story events), X-M10.
 
-**Resume update (2026-10-05, US-171):** S-US-171 DONE (Milestone-119.md, AP-120), own cases run alone. Open CI-014 for Anima (sub-call card missing). Next: S-US-172 (interaction graph editor, new files src/game/interaction_graph.*, same GraphEditor), then US-175, US-173, US-174, X-M9.
+**Resume update (2026-10-05, US-183):** S-US-183 DONE (Milestone-129.md, AP-130). Next: S-US-186 (debugger panel in the Editor on a throwaway copy of the quest book), then US-184, 187, 185, X-M10.
 
-**Resume update (2026-10-05, US-170):** K-M9 Done (D-56, 24 owner answers, docs/plans/M9-graph-editor-design.md). S-US-170 DONE (Milestone-118.md, AP-119), written with its own cases run alone (owner rule: one full verify at X-M9). Next: S-US-171 (dialogue graph editor), then US-172, US-175, US-173, US-174, X-M9. Another session may leave level-5.json untracked in assets/levels; it is not M9.
+**Resume update (2026-10-05, US-182):** S-US-182 DONE (Milestone-128.md, AP-129). Next: S-US-183 (journal tab, tracker, markers; systems.markers in Game Rules), then US-186, 184, 187, 185, X-M10. Open for Anima: CI-017, CI-018.
 
-**Resume update (2026-10-05, X-M9bc):** X-M9b and X-M9c DONE (Milestone-115.md, AP-116): one verify green, Debug and Release 27/27. Soak skipped by owner. Next: merge qa into main, tags m9b-done and m9c-done, CI on main.
+**Resume update (2026-10-05, US-181):** S-US-181 DONE (Milestone-127.md, AP-128), own cases pass, Debug zero warnings. Next: S-US-182 (giver, extra dialogue choice, the game runs the quest verb and answers quest(id)/step(id) in dialogue conditions, NPC action source quest), then US-183, 186, 184, 187, 185, X-M10.
 
-**Resume update (2026-10-05, US-294):** S-US-294 DONE (Milestone-114.md, AP-115), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: X-M9bc: the one full verify of M9b and M9c (verify.ps1 -Story X-M9bc -Config Both), fix, gates, merge into main, tags, CI.
-
-**Resume update (2026-10-05, US-293):** S-US-293 DONE (Milestone-113.md, AP-114), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.
-
-**Resume update (2026-10-05, US-292):** S-US-292 DONE (Milestone-112.md, AP-113), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-293 (default interactions by partner type: defaults files, animals, environment), US-294 (living test level and the 100,000-person 30-day soak), then the one full verify X-M9bc.
-
-**Resume update (2026-10-05, US-291):** S-US-291 DONE (Milestone-111.md, AP-112), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-292 (NPCs act on each other: talk, trade, gift, fight, confront; far persons by a daily roll), US-293 (partner defaults), US-294 (living test level and the 100,000-person 30-day soak), then the one full verify X-M9bc.
-
-**Resume update (2026-10-05, US-290):** S-US-290 DONE (Milestone-110.md, AP-111), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-291 (action sources: class, custom, event actions; no quest hook, D-54 Q11), US-292, US-293, US-294, then X-M9bc.
-
-**Resume update (2026-10-05, US-284):** S-US-284 DONE (Milestone-109.md, AP-110), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: K-M9c (kickoff notes already in D-54), then US-290 (schedules), US-291 (action sources), US-292 (NPCs act on each other), US-293 (partner defaults), US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.
-
-**Resume update (2026-10-05, US-283):** S-US-283 DONE (Milestone-108.md, AP-109), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-284 (Editor trade panel, the test level trader and wary hunter, the walk-through), then K-M9c and US-290..US-294, then the one full verify X-M9bc.
-
-**Resume update (2026-10-05, US-282):** S-US-282 DONE (Milestone-107.md, AP-108), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-283 (the trade screen for any trader, barter and currency, Haggle), US-284 (Editor trade panel), then K-M9c and US-290..US-294, then X-M9bc.
-
-**Resume update (2026-10-05, US-281):** S-US-281 DONE (Milestone-106.md, AP-107), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-282 (prices from base x stock curve x drift, reputation, gates), US-283 (the trade screen), US-284 (Editor trade panel), then K-M9c and US-290..US-294, then X-M9bc.
-
-**Resume update (2026-10-05, US-280):** S-US-280 DONE (Milestone-105.md, AP-106), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: S-US-281 (trader stock, restock, wants), then US-282..US-284, K-M9c, US-290..US-294 and X-M9bc.
-
-**Resume update (2026-10-05, X-M9a):** X-M9a DONE (Milestone-104.md, AP-105), main tagged m9a-done. Owner still to do: GPU screenshots (docs/gates/M9a.md row 7). Next: K-M9b, which asks the owner the open M9b questions in one chat round, then US-280..284.
-
-**Resume update (2026-10-04, US-270):** S-US-270 DONE (Milestone-103.md, AP-104). Next: X-M9a (the one full verify for M9a).
-
-**Resume update (2026-10-04, US-269):** S-US-269 DONE (Milestone-102.md, AP-103). Next: S-US-270 (test level npc-test.json), then X-M9a.
-
-**Resume update (2026-10-04, US-268):** S-US-268 DONE (Milestone-101.md, AP-102). Next: S-US-269 (kinds tab, map markers), then US-270 (test level npc-test.json) and X-M9a.
-
-**Resume update (2026-10-04, US-267):** S-US-267 DONE (Milestone-100.md, AP-101). Next: S-US-268 (Editor NPC panel), then US-269 (kinds tab and map markers), US-270 (test level) and X-M9a.
-
-**Resume update (2026-10-04, US-266):** S-US-266 DONE (Milestone-99.md, AP-100). Next: S-US-267 (Actions pop-up on key X), then US-268 (Editor NPC panel), US-269, US-270 and X-M9a.
-
-**Resume update (2026-10-04, US-265):** S-US-265 DONE (Milestone-98.md, AP-99). Next: S-US-266 (Confront, key C), then US-267 (actions and the Actions pop-up, key X), US-268..US-270 and X-M9a.
-
-**Resume update (2026-10-04, US-264):** S-US-264 DONE (Milestone-97.md, AP-98). Next: S-US-265 (talk with placed NPCs), then US-266 (confront) .. US-270 and X-M9a.
-
-**Resume update (2026-10-04, US-263):** S-US-263 DONE (Milestone-96.md, AP-97). Next: S-US-264 (attitudes and opinions), then US-265 (talk with placed NPCs) .. US-270 and X-M9a.
-
-**Resume update (2026-10-04, US-262):** S-US-262 DONE (Milestone-95.md, AP-96). Next: S-US-263 (spatial grid, detail by distance, ADR-022, 100,000-person load test), then US-264..US-270 and X-M9a.
-
-**Resume update (2026-10-04, US-261):** S-US-261 DONE (Milestone-94.md, AP-95). Next: S-US-262 (placed NPCs become full persons of the simulation), then US-263 (store, detail by distance, 100,000 load test, ADR-022) .. US-270, X-M9a.
-
-**Resume update (2026-10-04, US-260):** S-US-260 DONE (Milestone-93.md, AP-94). Next: S-US-261 (kind files assets/data/npcs/<kind>.json, placed-NPC overrides, precedence, F5), then US-262..US-270 and X-M9a (the one full verify for M9a, owner 2026-10-04).
-
-**Resume update (2026-10-04, X-M8c):** X-M8c DONE (Milestone-92.md, AP-093), main tagged m8c-done. Owner still to do: GPU frame times and screenshot sheet (docs/gates/M8c.md rows 7-8). Next: K-M9a, which stops on CI-012 until the requirements contain E17-E19 and US-260..294.
-
-**Resume update (2026-10-04, US-247):** S-US-247 DONE (Milestone-91.md, AP-92). Next: X-M8c (the one full verify for M8c, Debug and Release; owner 2026-10-04: no tests before it), then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
-
-**Resume update (2026-10-04, US-246):** S-US-246 DONE (Milestone-90.md, AP-91). Next: S-US-247 (Editor time-of-day slider, Light tool, lighting quality), then X-M8c (the one full verify for M8c, owner 2026-10-04); then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
-
-**Resume update (2026-10-04, US-245):** S-US-245 DONE (Milestone-89.md, AP-090). Next: S-US-246 (weather and light), US-247, X-M8c; then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
-
-**Resume update (2026-10-04, US-244):** S-US-244 DONE (Milestone-88.md, AP-089). Next: S-US-245 (shadows from fires), US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements contain E17-E19 and US-260..294.
-
-**Resume update (2026-10-04, P-012):** P-012 DONE (Milestone-87.md, AP-088): Codex v2.9 adopted (CLAUDE.md and agents regenerated, D-52 and D-15 in decisions.md, M9a-M9c in status.md, CI-012 raised: requirements lack E17-E19 and US-260..294). Next: S-US-244 (shadows from OdysseyGame::celestialLight()), US-245, US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements are updated.
-
-**Resume update (2026-10-04, US-248):** S-US-248 DONE (Milestone-86.md, AP-087). Next: S-US-244 (shadows drawn from OdysseyGame::celestialLight()), then US-245, US-246, US-247, X-M8c. GPU screenshots for US-248 are manual (docs/plans/US-248.md).
-
-**Resume update (2026-10-04, US-243):** S-US-243 DONE (Milestone-85.md, AP-086). Next: S-US-244 (sun and moon shadows), then US-245, US-246, US-247, X-M8c. Test tip: rerun only a failing case with the doctest filter on the exe (odysseus_game_tests.exe -tc="US-243*"), full verify once at the end.
-**Resume update (2026-10-02, US-242):** S-US-242 DONE (Milestone-84.md, AP-085). Next: S-US-243 (fires, torches and glowing effects: lights placed from lights.json), then US-244 (sun and moon shadows), US-245, US-246, US-247, X-M8c. CI note: the 64-light budget test is judged only off GitHub.
-
-**Resume update (2026-10-02, US-241):** S-US-241 DONE (Milestone-83.md, AP-084). Next: S-US-242 (day, night and seasons: sky.json, calendar day length, D-49 numbers), then US-243..US-247, X-M8c.
-
-**Resume update (2026-10-02, US-240):** S-US-240 DONE (Milestone-82.md, AP-083); K-M8c Done (D-49, docs/plans/M8c-lighting-design.md). Next: S-US-241 (generated normal maps), then US-242 (day, night, seasons), US-243, US-244, US-245, US-246, US-247, X-M8c.
-
-**Resume update (2026-10-01, US-234):** S-US-234 DONE (Milestone-80.md, AP-081). Next: X-M8b (exit review: qa into main, CI green on main, tag m8b-done), then K-M8c. Finding: the daily autosave stalls one frame (25 to 35 ms) with 500 people.
-
-**Resume update (2026-10-01, US-233):** S-US-233 DONE (Milestone-79.md, AP-080). Next: S-US-234 (frame budget at the new size; needs D-06), X-M8b. The owner reviews docs/evidence/US-233/contact-sheet.png.
-
-**Resume update (2026-10-01, US-232):** S-US-232 DONE (Milestone-78.md, AP-079). Next: S-US-233 (every screen at the new size), US-234, X-M8b. The owner said Mraw never asks for permission: commit, merge, pull, push and sync Drive on your own.
-
-**Resume update (2026-10-01, later):** S-US-231 DONE (Milestone-77.md, AP-078), merged into local `qa`, NOT pushed (push needs the owner's go). Next: push qa and check CI, sync the Drive requirements to v2.6, then S-US-232, US-233, US-234, X-M8b.
-
-**Resume update (2026-10-01):** D-44 is reflected in local requirements v2.6 and Anima's revised assembly prompts v2.4; CI-010 is resolved. S-US-231 remains Blocked while the authoritative Drive requirements copy is unsynced after automatic approval review rejected its replacement. Read `Handover.md` for exact resume instructions. No story was completed; leave the owner's two local files untouched.
+**Resume update (2026-10-05, US-180):** S-US-180 DONE (Milestone-126.md, AP-127), own cases pass, Debug zero warnings. Next: S-US-181 (the Game reports quest events: talk, goto, gather, give, craft, interact, defeat, flag), then US-182, 183, 186, 184, 187, 185, X-M10. Open for Anima: CI-017.
 
 This file is kept current after every story, so if a session stops (usage limit, crash, closed window), the next one knows exactly where to pick up. The newest progress snapshot is the highest-numbered Milestone-<n>.md.
 
-**Last updated:** 2026-10-01, S-US-230 DONE (Milestone-76.md, AP-077): Luna's SDL_GPU renderer (ADR-021), verified locally (27/27 Debug and Release, zero warnings). M8 is DONE and tagged `m8-done` (d058dfc); K-M8b is DONE (D-44, docs/plans/M8b-renderer-design.md). The full hand-over for any other AI agent is Handover.md at the repository root: read it first. To resume: (1) CI on `qa` is GREEN for the US-230 merge (9f51a9c, run 36892611637); (2) next is S-US-231 (960x540 virtual screen and window modes; uses the D-44 answers), then US-232, US-233, US-234, X-M8b, then K-M8c (M8c Lighting and shadows), M8d Buildings, M8e Building life, K-M9; M8-M9 and M8b-M8e keep D-35 (owner answers design questions at each kickoff); M10-M14 follow D-41. Open: codex issue CI-009 (for Anima); the owner reads docs/gates/M8-smalltalk.md and judges the greeting rule (kGreetingBubblesAtOnce = 2). Git tip: the Drive mirror docs/project/requirements/Project Odyssey - MVP Backlog - Copy.xlsx is kept open (locked) by Excel and the sync hook modifies it: never `git add docs` wholesale, add explicit paths, and leave that file and assets/levels/valley.json out. Screenshot tip: odysseus.exe --screenshot x.bmp --quit-after 3 (add --renderer gpu or sdl); a packaged copy of the game (odysseus.exe, SDL3.dll, the asan dll and assets/ in one folder) with --new-game, --type 7:1.2 (seed), --click 128:101:0.5 (privacy No), 264:56:1.0 (Off), 68:119:1.5 (Start), 67:147:3.0 (Begin) gives a seeded run; settings go to --save-dir.
+## Resume updates (newest first)
 
-## Where we are
+**2026-10-05, K-M10:** K-M10 Done (Milestone-125.md, AP-126, D-57, docs/plans/M10-quests-design.md). Next: S-US-180 (src/sim/quests/, assets/data/quests/, docs/guides/quests.md), then US-181, 182, 183, 186, 184, 187, 185, X-M10. Tests are written per story and run at X-M10 (D-41).
+
+**2026-10-05, beta plan:** Dominus wrote the owner's beta test plan for after M9: `docs/plans/Beta-test-after-M9.md` (smoke pass, about 150 feature checks in 15 sections, stress pass, bug sheet, exit rule). It adds no code and no Codex prompt. Order stays: X-M9 (one full verify, `docs/gates/M9.md`, merge qa into main, tag m9-done, CI on main), then the owner runs the beta plan on `main`, findings become fix stories, and only then K-M10. Open item for Anima: CI-016 (the Codex has no beta step).
+
+**2026-10-05, X-M9:** X-M9 DONE (Milestone-124.md, AP-125): one verify green, Debug and Release 27/27, zero warnings. qa merged into main, tag m9-done. Next: K-M10 is the next Codex milestone, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-014, CI-015.
+
+**2026-10-05, US-174:** S-US-174 DONE (Milestone-123.md, AP-124); all six M9 stories written, each with its own cases run alone. Next: X-M9: the one full verify (verify.ps1 -Story X-M9 -Config Both), docs/gates/M9.md, merge qa into main, tag m9-done, CI on main.
+
+**2026-10-05, US-173:** S-US-173 DONE (Milestone-122.md, AP-123), own cases run alone. Next: S-US-174 (Test-play: a panel that runs the dialogue runtime on a throwaway copy with chosen opinion, needs, items, flags, time, season, forced rolls; Play from here), then X-M9.
+
+**2026-10-05, US-175:** S-US-175 DONE (Milestone-121.md, AP-122), own cases run alone. Next: S-US-173 (attach to placed things; M9a already has a dialogue per NPC and partner: reuse it, add per-thing overrides), then US-174 (Test-play), X-M9.
+
+**2026-10-05, US-172:** S-US-172 DONE (Milestone-120.md, AP-121), own cases run alone. Next: S-US-175 (graph validation: list of problems, clickable, live), then US-173 (attach), US-174 (Test-play), X-M9.
+
+**2026-10-05, US-171:** S-US-171 DONE (Milestone-119.md, AP-120), own cases run alone. Open CI-014 for Anima (sub-call card missing). Next: S-US-172 (interaction graph editor, new files src/game/interaction_graph.*, same GraphEditor), then US-175, US-173, US-174, X-M9.
+
+**2026-10-05, US-170:** K-M9 Done (D-56, 24 owner answers, docs/plans/M9-graph-editor-design.md). S-US-170 DONE (Milestone-118.md, AP-119), written with its own cases run alone (owner rule: one full verify at X-M9). Next: S-US-171 (dialogue graph editor), then US-172, US-175, US-173, US-174, X-M9. Another session may leave level-5.json untracked in assets/levels; it is not M9.
+
+**2026-10-05, X-M9bc:** X-M9b and X-M9c DONE (Milestone-115.md, AP-116): one verify green, Debug and Release 27/27. Soak skipped by owner. Next: merge qa into main, tags m9b-done and m9c-done, CI on main.
+
+**M9b/M9c stories** (all written without running tests; owner rule: one full verify at X-M9bc after M9b and M9c):
+- 2026-10-05, US-294: S-US-294 DONE (Milestone-114.md, AP-115). Next: X-M9bc: the one full verify of M9b and M9c (verify.ps1 -Story X-M9bc -Config Both), fix, gates, merge into main, tags, CI.
+- US-293: DONE (Milestone-113.md, AP-114). Next: US-294 (living test level, 100,000-person 30-day soak), then X-M9bc.
+- US-292: DONE (Milestone-112.md, AP-113). Next: US-293 (default interactions by partner type: defaults files, animals, environment), US-294, then X-M9bc.
+- US-291: DONE (Milestone-111.md, AP-112). Next: US-292 (NPCs act on each other: talk, trade, gift, fight, confront; far persons by a daily roll), US-293, US-294, then X-M9bc.
+- US-290: DONE (Milestone-110.md, AP-111). Next: US-291 (action sources: class, custom, event actions; no quest hook, D-54 Q11), US-292, US-293, US-294, then X-M9bc.
+- US-284: DONE (Milestone-109.md, AP-110). Next: K-M9c (kickoff notes already in D-54), then US-290 (schedules), US-291 (action sources), US-292 (NPCs act on each other), US-293 (partner defaults), US-294 (living test level, 100,000-person 30-day soak), then X-M9bc.
+- US-283: DONE (Milestone-108.md, AP-109). Next: US-284 (Editor trade panel, the test level trader and wary hunter, the walk-through), then K-M9c and US-290..US-294, then X-M9bc.
+- US-282: DONE (Milestone-107.md, AP-108). Next: US-283 (the trade screen for any trader, barter and currency, Haggle), US-284, then K-M9c and US-290..US-294, then X-M9bc.
+- US-281: DONE (Milestone-106.md, AP-107). Next: US-282 (prices from base x stock curve x drift, reputation, gates), US-283, US-284, then K-M9c and US-290..US-294, then X-M9bc.
+- US-280: DONE (Milestone-105.md, AP-106). Next: S-US-281 (trader stock, restock, wants), then US-282..US-284, K-M9c, US-290..US-294 and X-M9bc.
+
+**2026-10-05, X-M9a:** X-M9a DONE (Milestone-104.md, AP-105), main tagged m9a-done. Owner still to do: GPU screenshots (docs/gates/M9a.md row 7). Next: K-M9b, which asks the owner the open M9b questions in one chat round, then US-280..284.
+
+**M9a stories** (2026-10-04):
+- US-270: S-US-270 DONE (Milestone-103.md, AP-104). Next: X-M9a (the one full verify for M9a).
+- US-269: DONE (Milestone-102.md, AP-103). Next: S-US-270 (test level npc-test.json), then X-M9a.
+- US-268: DONE (Milestone-101.md, AP-102). Next: S-US-269 (kinds tab, map markers), then US-270 and X-M9a.
+- US-267: DONE (Milestone-100.md, AP-101). Next: S-US-268 (Editor NPC panel), then US-269, US-270 and X-M9a.
+- US-266: DONE (Milestone-99.md, AP-100). Next: S-US-267 (Actions pop-up on key X), then US-268, US-269, US-270 and X-M9a.
+- US-265: DONE (Milestone-98.md, AP-99). Next: S-US-266 (Confront, key C), then US-267 (actions and the Actions pop-up, key X), US-268..US-270 and X-M9a.
+- US-264: DONE (Milestone-97.md, AP-98). Next: S-US-265 (talk with placed NPCs), then US-266 (confront) .. US-270 and X-M9a.
+- US-263: DONE (Milestone-96.md, AP-97). Next: S-US-264 (attitudes and opinions), then US-265 (talk with placed NPCs) .. US-270 and X-M9a.
+- US-262: DONE (Milestone-95.md, AP-96). Next: S-US-263 (spatial grid, detail by distance, ADR-022, 100,000-person load test), then US-264..US-270 and X-M9a.
+- US-261: DONE (Milestone-94.md, AP-95). Next: S-US-262 (placed NPCs become full persons of the simulation), then US-263 (store, detail by distance, 100,000 load test, ADR-022) .. US-270, X-M9a.
+- US-260: DONE (Milestone-93.md, AP-94). Next: S-US-261 (kind files assets/data/npcs/<kind>.json, placed-NPC overrides, precedence, F5), then US-262..US-270 and X-M9a (the one full verify for M9a, owner 2026-10-04).
+
+**M8c / P-012** (2026-10-04):
+- X-M8c DONE (Milestone-92.md, AP-093), main tagged m8c-done. Owner still to do: GPU frame times and screenshot sheet (docs/gates/M8c.md rows 7-8). Next: K-M9a, which stops on CI-012 until the requirements contain E17-E19 and US-260..294.
+- US-247: DONE (Milestone-91.md, AP-92). Next: X-M8c (the one full verify for M8c, Debug and Release; owner 2026-10-04: no tests before it), then K-M9a stops on CI-012 (as above).
+- US-246: DONE (Milestone-90.md, AP-91). Next: S-US-247 (Editor time-of-day slider, Light tool, lighting quality), then X-M8c; then K-M9a stops on CI-012.
+- US-245: DONE (Milestone-89.md, AP-090). Next: S-US-246 (weather and light), US-247, X-M8c; then K-M9a stops on CI-012.
+- US-244: DONE (Milestone-88.md, AP-089). Next: S-US-245 (shadows from fires), US-246, US-247, X-M8c; then K-M9a stops on CI-012.
+- P-012 DONE (Milestone-87.md, AP-088): Codex v2.9 adopted (CLAUDE.md and agents regenerated, D-52 and D-15 in decisions.md, M9a-M9c in status.md, CI-012 raised: requirements lack E17-E19 and US-260..294). Next: S-US-244 (shadows from OdysseyGame::celestialLight()), US-245, US-246, US-247, X-M8c; then K-M9a stops on CI-012 until the requirements are updated.
+- US-248: DONE (Milestone-86.md, AP-087). Next: S-US-244 (shadows drawn from OdysseyGame::celestialLight()), then US-245, US-246, US-247, X-M8c. GPU screenshots for US-248 are manual (docs/plans/stories-M8c.md#us-248).
+- US-243: DONE (Milestone-85.md, AP-086). Next: S-US-244 (sun and moon shadows), then US-245, US-246, US-247, X-M8c. Test tip: rerun only a failing case with the doctest filter on the exe (odysseus_game_tests.exe -tc="US-243*"), full verify once at the end.
+
+**M8c / M8b** (2026-10-02 and earlier):
+- 2026-10-02, US-242: DONE (Milestone-84.md, AP-085). Next: S-US-243 (fires, torches and glowing effects: lights placed from lights.json), then US-244 (sun and moon shadows), US-245, US-246, US-247, X-M8c. CI note: the 64-light budget test is judged only off GitHub.
+- 2026-10-02, US-241: DONE (Milestone-83.md, AP-084). Next: S-US-242 (day, night and seasons: sky.json, calendar day length, D-49 numbers), then US-243..US-247, X-M8c.
+- 2026-10-02, US-240: DONE (Milestone-82.md, AP-083); K-M8c Done (D-49, docs/plans/M8c-lighting-design.md). Next: S-US-241 (generated normal maps), then US-242 (day, night, seasons), US-243, US-244, US-245, US-246, US-247, X-M8c.
+- 2026-10-01, US-234: DONE (Milestone-80.md, AP-081). Next: X-M8b (exit review: qa into main, CI green on main, tag m8b-done), then K-M8c. Finding: the daily autosave stalls one frame (25 to 35 ms) with 500 people.
+- 2026-10-01, US-233: DONE (Milestone-79.md, AP-080). Next: S-US-234 (frame budget at the new size; needs D-06), X-M8b. The owner reviews docs/evidence/US-233/contact-sheet.png.
+- 2026-10-01, US-232: DONE (Milestone-78.md, AP-079). Next: S-US-233 (every screen at the new size), US-234, X-M8b. The owner said Mraw never asks for permission: commit, merge, pull, push and sync Drive on your own.
+- 2026-10-01 (later): S-US-231 DONE (Milestone-77.md, AP-078), merged into local `qa`, NOT pushed (push needs the owner's go). Next: push qa and check CI, sync the Drive requirements to v2.6, then S-US-232, US-233, US-234, X-M8b.
+- 2026-10-01: D-44 is reflected in local requirements v2.6 and Anima's revised assembly prompts v2.4; CI-010 is resolved. S-US-231 remained Blocked while the authoritative Drive requirements copy was unsynced after automatic approval review rejected its replacement. Read `Handover.md` for exact resume instructions. No story was completed; leave the owner's two local files untouched.
+
+## Snapshot at S-US-230 (2026-10-01)
+
+S-US-230 DONE (Milestone-76.md, AP-077): Luna's SDL_GPU renderer (ADR-021), verified locally (27/27 Debug and Release, zero warnings). M8 is DONE and tagged `m8-done` (d058dfc); K-M8b is DONE (D-44, docs/plans/M8b-renderer-design.md). The full hand-over for any other AI agent is Handover.md at the repository root: read it first.
+
+To resume then:
+1. CI on `qa` is GREEN for the US-230 merge (9f51a9c, run 36892611637).
+2. Next is S-US-231 (960x540 virtual screen and window modes; uses the D-44 answers), then US-232, US-233, US-234, X-M8b, then K-M8c (M8c Lighting and shadows), M8d Buildings, M8e Building life, K-M9. M8-M9 and M8b-M8e keep D-35 (owner answers design questions at each kickoff); M10-M14 follow D-41.
+
+Open: codex issue CI-009 (for Anima); the owner reads docs/gates/M8-smalltalk.md and judges the greeting rule (kGreetingBubblesAtOnce = 2).
+
+Tips:
+- Git: the Drive mirror docs/project/requirements/Project Odyssey - MVP Backlog - Copy.xlsx is kept open (locked) by Excel and the sync hook modifies it. Never `git add docs` wholesale; add explicit paths, and leave that file and assets/levels/valley.json out.
+- Screenshots: odysseus.exe --screenshot x.bmp --quit-after 3 (add --renderer gpu or sdl). A packaged copy of the game (odysseus.exe, SDL3.dll, the asan dll and assets/ in one folder) with --new-game, --type 7:1.2 (seed), --click 128:101:0.5 (privacy No), 264:56:1.0 (Off), 68:119:1.5 (Start), 67:147:3.0 (Begin) gives a seeded run; settings go to --save-dir.
+
+## Where we are (older notes, up to M2d)
 - Branch with the latest work: **`qa`** (CI green). `main` gets `qa` at each milestone exit.
 - Codex v1.6, requirements v1.6. Done: P-000..P-002, all of M0 (`m0-done`) and all of M1, the Luna engine (`m1-done`).
 - K-M2 and US-010 Done (M2 design: `docs/plans/M2-clan-design.md`; D-02 delegated).
@@ -106,7 +114,7 @@ This file is kept current after every story, so if a session stops (usage limit,
 - Requirements v1.6 (Drive, mirrored in docs/project/requirements/): STO-02, STO-03, SDC-02, milestone M2b, epic E11, US-110..US-115. **Codex v1.6** (Anima) adds P-005, K-M2b, S-US-110..S-US-115, X-M2b; CI-006 resolved.
 - P-005 Done (status, decisions, CI-006 fix: first frame 3 s in Release, 15 s in Debug).
 - **M2 and M2b are DONE** (tags `m2-done`, `m2b-done`). Codex v1.7 adds **M2c Level editor** (US-120..US-126, brief docs/plans/M2c-editor-brief.md). **M2c is DONE** (`m2c-done`). Codex v1.8 adds **M2d Content and combat** (US-130..US-138, brief docs/plans/M2d-content-brief.md; D-21). **Design decisions are the owner's (D-22): ask in chat, never delegate.** K-M2d, US-130..US-135, US-139, US-140 and US-141 Done (CI green). M2d is fully built (see docs/gates/M2d.md). **Next: K-M3**, after asking the owner its design questions; nothing pushed since 5125364 (no tests or CI until M4).
-- The M2 work stays on `qa`; `main` is still at `m1b-done` (M2 is not merged to main until the retry passes).
+- The M2 work stays on `qa`; `main` was still at `m1b-done` (M2 not merged to main until the retry passes).
 - Luna design for all of M1: `docs/plans/M1-luna-design.md`. Delegated decisions so far: D-16, D-17 (docs/decisions.md).
 
 ## How to continue

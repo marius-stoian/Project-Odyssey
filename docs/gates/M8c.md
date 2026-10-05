@@ -12,10 +12,10 @@ Codex v2.11 (X-M8c). Tests were run once for the whole milestone, at the exit (o
 | 4 | Sprites shaded with generated normal maps | Met | US-241; `normals_test` |
 | 5 | Shadows from sun, moon and nearby fires | Met | US-244, US-245; `shadow_test` |
 | 6 | Editor previews any time of day; places lights | Met | US-247; `lighting_editor_test` |
-| 7 | High lighting holds 60 FPS on the target PC | **Not measured** | needs the GPU frame-time run (`docs/plans/US-247.md` step 5); Low/High comparison table not yet recorded |
-| 8 | Time-lapse screenshot sheet (dawn, noon, dusk, night with fires, rain) | **Not produced** | GPU screenshots are manual (`docs/plans/US-246.md`, `US-247.md`) |
+| 7 | High lighting holds 60 FPS on the target PC | **Not measured** | needs the GPU frame-time run (`docs/plans/stories-M8c.md#us-247` step 5); Low/High comparison table not yet recorded |
+| 8 | Time-lapse screenshot sheet (dawn, noon, dusk, night with fires, rain) | **Not produced** | GPU screenshots are manual (`docs/plans/stories-M8c.md#us-246`, `US-247.md`) |
 
 ## For the owner
 - Rows 7 and 8 need your PC with the GPU renderer; the agents could not capture them headless. Please run the manual checks and judge the look.
-- Medium and High lighting are the same today; Low drops normal maps and fire shadows (Milestone-91.md).
+- Medium and High lighting are the same today; Low drops normal maps and fire shadows (docs/archive/milestones/Milestone-91.md).
 - Weather light was added to `weather.json` for rain, storms, snow, fog and dust; tune the numbers freely.

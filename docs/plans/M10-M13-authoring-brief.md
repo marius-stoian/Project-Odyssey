@@ -122,7 +122,7 @@ Stance rules (events and their stance changes), alliance and oath thresholds, tr
 Acceptance criteria (three Gherkin scenarios each) are in requirements v2.1, section 12.9, and in the backlog workbook. Estimates (opt / likely / pess weeks): M10 9/13/18, M11 9/13/18, M12 10/15/21, M13 9/13/18.
 
 ## 6. Architecture rules
-- Quest runtime, schemas and their validator, routines, region overrides and politics live in the **Simulation** layer (headless, deterministic, saved); forms, graphs, the region view and the debugger live in **Game**; any new widget (form fields, minimap) goes to **Luna Engine**, game-agnostic.
+- Quest runtime, schemas and their validator, routines, region overrides and politics live in the **Simulation** layer (headless, deterministic, saved). Forms, graphs, the region view and the debugger live in **Game**. Any new widget (form fields, minimap) goes to **Luna Engine**, game-agnostic.
 - One rule language (ADR-019) for quests, dialogue, interactions, story events, routines and politics.
 - One validator (ADR-020) used at load, in CI and in the Editor; errors name file, line and field; bad data never crashes the game.
 - Region edits are overrides on the seed (ADR-020, ADR-010): small files, regeneration keeps them, conflicts are listed.

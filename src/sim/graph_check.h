@@ -4,6 +4,7 @@
 
 #include "sim/dialogue_script.h"
 #include "sim/interaction.h"
+#include "sim/quest_data.h"
 
 #include <set>
 #include <string>
@@ -19,10 +20,14 @@ struct GraphCatalog {
     std::set<std::string> dialogues;    // `talk <name>`
     std::set<std::string> interactions; // `start <id>`
     std::set<std::string> tags;         // tag(target, x) and the target tags of an interaction
+    std::set<std::string> people;       // quest words for people: names, kinds, tags and roles (US-187)
+    std::set<std::string> places;       // quest words for the named places of the levels
+    std::set<std::string> kinds;        // kinds of creature a quest may ask the hero to defeat
+    std::set<std::string> quests;       // ids of the quests that exist
 };
 
 struct GraphFinding {
-    enum class Kind { Unreachable, DeadEnd, UnknownNode, UnknownItem, UnknownNeed, UnknownTag, UnknownVerb, UnknownBuiltin, UnknownDialogue, UnknownInteraction, BadEffect };
+    enum class Kind { Unreachable, DeadEnd, UnknownNode, UnknownItem, UnknownNeed, UnknownTag, UnknownVerb, UnknownBuiltin, UnknownDialogue, UnknownInteraction, BadEffect, UnknownPerson, UnknownPlace, UnknownKind, UnknownQuest, Cycle, CannotFinish };
     Kind kind = Kind::BadEffect;
     bool error = true;   // an error blocks shipping; a warning only says something looks wrong (unreachable nodes load fine)
     std::string file;    // "dialogue/elder-fire.dlg"
@@ -36,5 +41,11 @@ struct GraphFinding {
 std::vector<GraphFinding> checkDialogue(const DlgScript& script, const GraphCatalog& catalog);
 // The same for an interaction: its requirements, effects, NPC score and target tags.
 std::vector<GraphFinding> checkInteraction(const Interaction& interaction, const GraphCatalog& catalog);
+
+// A quest (US-187): steps nobody reaches, steps from which the quest can never end, an objective that names an item, person, place, interaction or kind the
+// catalog does not know, a prerequisite or reward that names a quest that does not exist. Keys are those of the graph editor ("step:gather", "quest").
+std::vector<GraphFinding> checkQuest(const Quest& quest, const GraphCatalog& catalog);
+// All quests: each one on its own, and the prerequisite cycles between them (quest A needs B done and B needs A done).
+std::vector<GraphFinding> checkQuests(const std::vector<Quest>& quests, const GraphCatalog& catalog);
 
 } // namespace odysseus::sim::rules

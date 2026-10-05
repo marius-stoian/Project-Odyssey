@@ -36,7 +36,11 @@ The owner takes **every design decision** personally, in interactive question ro
 | `Pixel Art Elemental VFX Grid.png` (1254x1254) | 100 single-frame elemental effects (sparks, projectiles, bursts, slashes, orbs, pillars) | 10x10 grid, dark cells |
 | `Pixel Weather Sprite Atlas.png` (1254x1254) | 100 weather types x 4 frames (rain, snow, fog, storm, sand, leaves, ash, aurora...) | 10x10 labelled cells, dark |
 
-Facts that shape the work: the grid sheets can be cut automatically; the labelled sheets need the **label strip excluded** and the **painted background removed** (gradients: flood fill with tolerance is not enough everywhere; a per-sheet background sample plus opaque-bounds trimming is needed). Some label numbers on the sheets are wrong or repeated (for example two "7." animals); the catalogs use **names**, not the printed numbers. Animals face one way (side view): the other side is mirrored, as for the hero's west view. Weather frames become **screen overlays** (scaled and tiled), not world sprites.
+Facts that shape the work:
+- The grid sheets can be cut automatically. The labelled sheets need the **label strip excluded** and the **painted background removed** (gradients: flood fill with tolerance is not enough everywhere; a per-sheet background sample plus opaque-bounds trimming is needed).
+- Some label numbers on the sheets are wrong or repeated (for example two "7." animals); the catalogs use **names**, not the printed numbers.
+- Animals face one way (side view): the other side is mirrored, as for the hero's west view.
+- Weather frames become **screen overlays** (scaled and tiled), not world sprites.
 
 ## Architecture rules that apply
 - Rule 7: weapons, plants, animals, effects and weather are **data** (`assets/data/weapons.json`, `plants.json`, `characters.json` extended, `effects.json`, `weather.json`), validated with errors naming file and field.

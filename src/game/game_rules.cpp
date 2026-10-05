@@ -493,6 +493,8 @@ Value GameRuleContext::call(const std::string& name, const std::vector<Value>& a
         if (who < 0 || static_cast<std::size_t>(who) >= game_.clan()->people().size()) return Value::ofText("neutral");
         return Value::ofText(sim::rules::moodWord(game_.clan()->opinion(who, game_.life()->personId()), game_.clan()->people()[static_cast<std::size_t>(who)].needs));
     }
+    if (name == "quest" && args.size() == 1 && args[0].isText) return Value::ofText(sim::rules::statusWord(game_.quests().status(args[0].text))); // US-182: quest(first-day) == done
+    if (name == "step" && args.size() == 1 && args[0].isText) return Value::ofText(game_.quests().activeStep(args[0].text));
     if (name == "flag" && args.size() == 1 && args[0].isText) {
         if (args[0].text == "sacred-fire") return Value::ofNumber(game_.life() != nullptr && game_.life()->fire().founded ? 1 : 0);
         return Value::ofNumber(game_.flags().get(args[0].text)); // set by `flag name` in a conversation or an interaction (US-164)

@@ -228,7 +228,10 @@ add_library(odysseus_sim STATIC
     src/sim/building_store.cpp
     src/sim/building_life.cpp
     src/sim/graph_check.cpp
-    src/sim/test_play.cpp)
+    src/sim/test_play.cpp
+    src/sim/quest_data.cpp
+    src/sim/quest_book.cpp
+    src/sim/quest_check.cpp)
 target_link_libraries(odysseus_sim PUBLIC odysseus_core luna_physics)
 # PRIVATE: JSON is how the simulation reads content; nobody above it sees JSON.
 target_link_libraries(odysseus_sim PRIVATE nlohmann_json::nlohmann_json)
@@ -251,6 +254,10 @@ add_library(odysseus_game STATIC
     src/game/catalogs.cpp
     src/game/tags.cpp
     src/game/game_rules.cpp
+    src/game/quest_ui.cpp
+    src/game/quest_graph.cpp
+    src/game/story_event_editor.cpp
+    src/game/quest_debug.cpp
     src/game/object_art.cpp
     src/game/npc_life.cpp
     src/game/builtin_actions.cpp
@@ -474,6 +481,8 @@ add_executable(odysseus_game_tests
     tests/game/dialogue_graph_test.cpp
     tests/game/graph_editor_test.cpp
     tests/game/interaction_graph_test.cpp
+    tests/game/quest_graph_test.cpp
+    tests/game/story_event_test.cpp
     tests/game/thing_overrides_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
@@ -536,6 +545,7 @@ add_executable(odysseus_sim_tests
     tests/sim/npc_scale_test.cpp
     tests/sim/runner_test.cpp
     tests/sim/dialogue_test.cpp
+    tests/sim/quest_test.cpp
     tests/sim/conversation_test.cpp
     tests/sim/selection_test.cpp
     tests/sim/smalltalk_test.cpp

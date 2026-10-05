@@ -1,0 +1,1232 @@
+X-M10 Windows ctest, release (2026-10-05). Build: see build logs.
+
+Test project C:/Users/Amek/.amek-ai/Odysseus/odysseus/build/windows-x64
+      Start  1: odysseus_tests
+ 1/27 Test  #1: odysseus_tests ..........................   Passed    0.05 sec
+      Start  2: US-003 Allowed use
+ 2/27 Test  #2: US-003 Allowed use ......................   Passed    7.76 sec
+      Start  3: US-003 Forbidden use
+ 3/27 Test  #3: US-003 Forbidden use ....................   Passed    5.31 sec
+      Start  4: US-003 Luna stays game-agnostic
+ 4/27 Test  #4: US-003 Luna stays game-agnostic .........   Passed    6.42 sec
+      Start  5: US-003 Guard completeness
+ 5/27 Test  #5: US-003 Guard completeness ...............   Passed   10.00 sec
+      Start  6: US-025 Physics layer rules
+ 6/27 Test  #6: US-025 Physics layer rules ..............   Passed   15.00 sec
+      Start  7: luna_physics_tests
+ 7/27 Test  #7: luna_physics_tests ......................   Passed    0.76 sec
+      Start  8: US-025 Physics uses no floating point
+ 8/27 Test  #8: US-025 Physics uses no floating point ...   Passed    0.02 sec
+      Start  9: luna_tests
+ 9/27 Test  #9: luna_tests ..............................   Passed    0.03 sec
+      Start 10: US-020 Open and close
+10/27 Test #10: US-020 Open and close ...................   Passed    3.80 sec
+      Start 11: luna_platform_tests
+11/27 Test #11: luna_platform_tests .....................   Passed    0.02 sec
+      Start 12: US-021 Game reads only intents
+12/27 Test #12: US-021 Game reads only intents ..........   Passed    0.03 sec
+      Start 13: luna_window_tests
+13/27 Test #13: luna_window_tests .......................   Passed    3.10 sec
+      Start 14: odysseus_game_tests_a
+14/27 Test #14: odysseus_game_tests_a ...................***Failed   18.69 sec
+[doctest] doctest version is "2.5.3"
+[doctest] run with "--help" for options
+2026-10-05 17:15:20.691Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\face\level.json
+2026-10-05 17:15:20.695Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:20.706Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:20.706Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:20.706Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:20.713Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:20.831Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\keys\level.json
+2026-10-05 17:15:20.835Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:20.845Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:20.845Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:20.845Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:20.851Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:20.970Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\ne-hit\level.json
+2026-10-05 17:15:20.974Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:20.983Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:20.983Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:20.983Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:20.990Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.096Z [INFO] iron sword (sword) swung toward -45 degrees, facing NorthEast: 1 hit
+2026-10-05 17:15:21.096Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:21.106Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\ne-miss\level.json
+2026-10-05 17:15:21.110Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.119Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.119Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.119Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.126Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.232Z [INFO] iron sword (sword) swung toward 135 degrees, facing SouthWest: 0 hit
+2026-10-05 17:15:21.242Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\angle\level.json
+2026-10-05 17:15:21.246Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.255Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.255Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.255Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.261Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.365Z [INFO] iron sword (sword) swung toward 20 degrees, facing SouthEast: 0 hit
+2026-10-05 17:15:21.375Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\keys\level.json
+2026-10-05 17:15:21.378Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.388Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.388Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.388Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.395Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.502Z [INFO] iron sword (sword) swung toward 90 degrees, facing South: 1 hit
+2026-10-05 17:15:21.502Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:21.512Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\keys-pointer\level.json
+2026-10-05 17:15:21.515Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.525Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.525Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.525Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.532Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.635Z [INFO] iron sword (sword) swung toward 90 degrees, facing South: 1 hit
+2026-10-05 17:15:21.635Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:21.645Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\empty-hands\level.json
+2026-10-05 17:15:21.649Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.659Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.659Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.659Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.666Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.781Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:21.784Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.794Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.794Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.794Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.800Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:21.913Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:21.916Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:21.925Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:21.925Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:21.925Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:21.932Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.045Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.049Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.058Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.058Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.058Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.064Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.178Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.181Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.191Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.191Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.191Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.198Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.311Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.315Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.325Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.325Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.325Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.331Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.444Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.447Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.455Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.456Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.456Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.462Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.575Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.579Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.587Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.587Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.587Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.593Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.707Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.710Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.719Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.719Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.719Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.726Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.840Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.843Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.852Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.852Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.852Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.859Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:22.971Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:22.974Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:22.983Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:22.983Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:22.983Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:22.989Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.103Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.106Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.115Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.115Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.115Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.121Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.234Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.237Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.245Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.245Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.245Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.252Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.363Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.366Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.375Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.375Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.375Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.381Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.494Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.497Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.506Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.506Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.506Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.512Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.626Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.629Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.638Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.638Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.638Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.645Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.758Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.761Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.770Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.770Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.770Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.776Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:23.888Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:23.892Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:23.901Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:23.901Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:23.901Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:23.907Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.021Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.024Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.033Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.033Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.033Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.040Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.154Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.158Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.167Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.167Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.167Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.173Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.289Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.292Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.302Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.302Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.302Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.309Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.420Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.423Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.432Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.432Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.432Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.438Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.550Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.553Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.561Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.561Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.561Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.568Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.681Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.685Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.693Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.694Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.694Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.700Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.812Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.816Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.825Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.825Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.825Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.831Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:24.946Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:24.950Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:24.959Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:24.959Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:24.959Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:24.966Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.077Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.081Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.089Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.089Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.089Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.096Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.208Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.211Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.219Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.219Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.219Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.226Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.337Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.340Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.348Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.348Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.348Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.355Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.469Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.472Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.481Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.481Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.481Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.488Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.601Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.605Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.614Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.614Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.614Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.620Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.734Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.738Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.747Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.747Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.747Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.753Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.866Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:25.869Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:25.878Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:25.878Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:25.878Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:25.885Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:25.999Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.002Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.011Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.011Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.011Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.018Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.129Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.132Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.141Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.141Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.141Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.147Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.259Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.262Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.271Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.271Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.271Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.278Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.391Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.395Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.404Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.404Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.404Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.410Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.522Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.525Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.534Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.534Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.534Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.540Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.655Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.659Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.668Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.668Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.668Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.674Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.784Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.788Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.797Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.797Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.797Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.803Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:26.914Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:26.917Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:26.925Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:26.925Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:26.925Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:26.932Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.044Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.047Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.055Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.055Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.055Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.062Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.171Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.174Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.183Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.183Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.183Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.189Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.299Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.302Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.311Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.311Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.311Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.317Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.427Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.430Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.439Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.439Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.439Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.445Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.554Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.557Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.566Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.566Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.566Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.571Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.681Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.684Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.693Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.693Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.693Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.699Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.809Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.813Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.821Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.821Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.821Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.828Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:27.937Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:27.940Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:27.949Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:27.949Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:27.949Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:27.955Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.064Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.067Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.076Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.076Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.076Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.082Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.193Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.196Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.205Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.205Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.205Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.211Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.322Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.325Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.333Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.333Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.333Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.339Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.448Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.452Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.461Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.461Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.461Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.467Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.576Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.579Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.588Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.589Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.589Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.594Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.705Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.708Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.717Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.717Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.717Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.723Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.832Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.835Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.844Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.844Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.844Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.850Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:28.958Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:28.961Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:28.969Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:28.969Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:28.969Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:28.975Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.085Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.088Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.096Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.096Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.096Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.103Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.211Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.215Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.223Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.223Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.223Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.229Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.342Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.345Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.354Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.354Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.354Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.360Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.469Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.473Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.481Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.481Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.481Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.487Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.598Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.601Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.610Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.610Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.610Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.616Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.726Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.729Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.738Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.738Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.738Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.744Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.853Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.856Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.865Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.865Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.865Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.871Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:29.981Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:29.984Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:29.993Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:29.993Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:29.993Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:29.999Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.108Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.112Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.120Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.120Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.120Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.126Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.237Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.240Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.249Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.249Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.249Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.255Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.364Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.368Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.376Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.376Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.376Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.382Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.490Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.494Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.502Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.502Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.502Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.508Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.619Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.622Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.631Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.631Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.631Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.636Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.747Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.751Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.759Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.759Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.759Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.766Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:30.875Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:30.878Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:30.887Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:30.887Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:30.887Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:30.893Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.002Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.006Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.014Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.014Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.014Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.021Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.130Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.134Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.142Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.142Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.142Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.148Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.257Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.261Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.269Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.269Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.269Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.276Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.386Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.389Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.398Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.398Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.398Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.403Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.512Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.515Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.523Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.523Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.523Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.530Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.641Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.644Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.653Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.653Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.653Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.659Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.767Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.771Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.779Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.779Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.779Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.785Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:31.894Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:31.898Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:31.906Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:31.906Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:31.906Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:31.913Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.021Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.025Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.033Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.033Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.033Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.039Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.149Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.152Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.161Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.161Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.161Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.167Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.277Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.281Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.289Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.289Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.289Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.295Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.405Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.408Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.416Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.416Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.416Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.423Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.532Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.535Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.543Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.543Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.543Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.550Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.664Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.668Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.676Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.676Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.676Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.683Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.791Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.795Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.803Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.803Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.803Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.809Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:32.919Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:32.922Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:32.931Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:32.931Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:32.931Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:32.937Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.046Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.050Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.059Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.059Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.059Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.065Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.176Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.179Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.188Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.188Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.188Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.194Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.303Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.306Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.315Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.315Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.315Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.320Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.430Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.433Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.442Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.442Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.442Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.449Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.559Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.562Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.571Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.571Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.571Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.577Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.687Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.690Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.699Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.699Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.699Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.705Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.814Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.818Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.826Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.826Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.826Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.832Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:33.942Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:33.946Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:33.954Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:33.954Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:33.954Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:33.960Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.069Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.072Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.081Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.081Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.081Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.086Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.196Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.199Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.208Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.208Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.208Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.214Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.323Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.326Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.335Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.335Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.335Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.341Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.449Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.452Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.461Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.461Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.461Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.467Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.576Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.579Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.588Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.588Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.588Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.594Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.704Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.708Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.716Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.716Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.716Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.723Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.832Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.835Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.844Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.844Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.844Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.849Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:34.960Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:34.963Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:34.972Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:34.972Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:34.972Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:34.978Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.088Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:35.091Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.100Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.100Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.100Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.106Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.215Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:35.219Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.228Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.228Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.228Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.233Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.344Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:35.347Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.356Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.356Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.356Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.362Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.472Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:35.475Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.484Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.484Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.484Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.489Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.599Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\flicker\level.json
+2026-10-05 17:15:35.602Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.611Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.611Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.611Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.617Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.727Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\zoom-hit\level.json
+2026-10-05 17:15:35.730Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.738Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.738Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.738Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.744Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.843Z [INFO] iron sword (sword) swung toward -45 degrees, facing East: 1 hit
+2026-10-05 17:15:35.843Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:35.853Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\zoom-hit\level.json
+2026-10-05 17:15:35.856Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.865Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.865Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.865Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.872Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:35.972Z [INFO] iron sword (sword) swung toward -45 degrees, facing East: 1 hit
+2026-10-05 17:15:35.972Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:35.981Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us139\zoom-keys\level.json
+2026-10-05 17:15:35.984Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:35.993Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:35.993Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:35.993Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:35.999Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.104Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:36.107Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.116Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.116Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.116Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.122Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.222Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.222Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.230Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us131\strike\level.json
+2026-10-05 17:15:36.233Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.242Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.242Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.242Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.247Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.347Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.347Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.347Z [INFO] Switched to Sword (slot 2)
+2026-10-05 17:15:36.347Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.347Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:36.347Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:36.347Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.347Z [INFO] Goblin took 5 damage, HP 90 / 100
+2026-10-05 17:15:36.347Z [INFO] Goblin struck the hero for 4, HP 92 / 100
+2026-10-05 17:15:36.357Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us131\dodge\level.json
+2026-10-05 17:15:36.360Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.369Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.369Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.369Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.375Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.475Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.475Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.475Z [INFO] Switched to Sword (slot 2)
+2026-10-05 17:15:36.475Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.475Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:36.476Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:36.485Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us131\fall\level.json
+2026-10-05 17:15:36.488Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.497Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.497Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.497Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.502Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.603Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.603Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.603Z [INFO] Switched to Sword (slot 2)
+2026-10-05 17:15:36.603Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.603Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:36.603Z [INFO] Goblin struck the hero for 150, HP 0 / 100
+2026-10-05 17:15:36.603Z [INFO] The hero fell
+2026-10-05 17:15:36.604Z [INFO] The hero is back at the start with 100 HP
+2026-10-05 17:15:36.614Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us131\win\level.json
+2026-10-05 17:15:36.617Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.625Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.625Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.625Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.631Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.731Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.731Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.731Z [INFO] Switched to Sword (slot 2)
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 99 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 90 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 98 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 85 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 97 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 80 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 96 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 75 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 95 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 70 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 94 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 65 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 93 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 60 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 92 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 55 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 91 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 50 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 90 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 45 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 89 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 40 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 88 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 35 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 87 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 30 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 86 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 25 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 85 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 20 / 100
+2026-10-05 17:15:36.731Z [INFO] Goblin struck the hero for 1, HP 84 / 100
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.731Z [INFO] Goblin took 5 damage, HP 15 / 100
+2026-10-05 17:15:36.732Z [INFO] Goblin struck the hero for 1, HP 83 / 100
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.732Z [INFO] Goblin took 5 damage, HP 10 / 100
+2026-10-05 17:15:36.732Z [INFO] Goblin struck the hero for 1, HP 82 / 100
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.732Z [INFO] Goblin took 5 damage, HP 5 / 100
+2026-10-05 17:15:36.732Z [INFO] Goblin struck the hero for 1, HP 81 / 100
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.732Z [INFO] Goblin took 5 damage, HP 0 / 100
+2026-10-05 17:15:36.732Z [INFO] Goblin was defeated
+2026-10-05 17:15:36.732Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.740Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us131\effects\level.json
+2026-10-05 17:15:36.743Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.752Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.752Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.752Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.758Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.857Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.857Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.857Z [INFO] Switched to Sword (slot 2)
+2026-10-05 17:15:36.857Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.857Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:36.857Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:36.857Z [INFO] Switched to Spear throw (slot 1)
+2026-10-05 17:15:36.857Z [INFO] Threw a flint spear facing East
+2026-10-05 17:15:36.858Z [INFO] Spear (flint) hit the ground at (45.35, 32.75, 0.00) m, 13.3 m/s, 0.0 damage
+2026-10-05 17:15:36.867Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:\Users\Amek\AppData\Local\Temp\odysseus-us131\smoke\level.json
+2026-10-05 17:15:36.870Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:36.878Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:36.878Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:36.878Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:36.884Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:36.984Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:36.984Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:36.984Z [INFO] Switched to Sword (slot 2)
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 90 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 85 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 80 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 75 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 70 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 65 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 60 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 55 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 50 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 45 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 40 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 35 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 30 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 25 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 20 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 15 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 10 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 5 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin struck the hero for 0, HP 100 / 100
+2026-10-05 17:15:36.984Z [INFO] Sword slash facing East
+2026-10-05 17:15:36.984Z [INFO] Goblin took 5 damage, HP 0 / 100
+2026-10-05 17:15:36.984Z [INFO] Goblin was defeated
+2026-10-05 17:15:36.988Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:36.991Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.000Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.000Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.000Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.006Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.107Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.110Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.119Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.119Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.119Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.124Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.225Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.225Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.225Z [INFO] iron sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:37.225Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:37.225Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:37.227Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.231Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.239Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.239Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.239Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.245Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.346Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.346Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.346Z [INFO] flame sword (sword) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:37.346Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:37.346Z [INFO] Goblin is burning for 3 s
+2026-10-05 17:15:37.346Z [INFO] Goblin took 1 damage, HP 94 / 100
+2026-10-05 17:15:37.346Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:37.349Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.352Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.360Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.360Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.360Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.366Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.466Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.466Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.466Z [INFO] steel battle axe (axe) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:37.466Z [INFO] Goblin took 9 damage, HP 91 / 100
+2026-10-05 17:15:37.466Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:37.469Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.472Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.480Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.480Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.480Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.486Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.586Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.586Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.586Z [INFO] frost axe (axe) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:37.586Z [INFO] Goblin took 9 damage, HP 91 / 100
+2026-10-05 17:15:37.586Z [INFO] Goblin is slowed for 2 s
+2026-10-05 17:15:37.589Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.592Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.601Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.601Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.601Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.607Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.708Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.708Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.709Z [INFO] iron spear (spear) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:37.709Z [INFO] Goblin took 6 damage, HP 94 / 100
+2026-10-05 17:15:37.709Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:37.711Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.714Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.723Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.723Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.723Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.729Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.829Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.829Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.829Z [INFO] lightning spear (spear) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:37.829Z [INFO] Goblin took 6 damage, HP 94 / 100
+2026-10-05 17:15:37.829Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:37.832Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.835Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.843Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.843Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.843Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.849Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:37.949Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:37.949Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:37.949Z [INFO] wooden longbow (bow) arced toward 0 degrees, 9.7 m away
+2026-10-05 17:15:37.949Z [INFO] wooden longbow hit an enemy at (34.2, 32.8) m, 1.47 m up
+2026-10-05 17:15:37.949Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:37.949Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:37.952Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:37.955Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:37.964Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:37.964Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:37.964Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:37.970Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.070Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.070Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.070Z [INFO] venom recurve (bow) arced toward 0 degrees, 9.7 m away
+2026-10-05 17:15:38.070Z [INFO] venom recurve hit an enemy at (34.2, 32.8) m, 1.47 m up
+2026-10-05 17:15:38.070Z [INFO] Goblin took 5 damage, HP 95 / 100
+2026-10-05 17:15:38.070Z [INFO] Goblin is poisoned for 5 s
+2026-10-05 17:15:38.070Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:38.072Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.076Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.084Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.084Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.084Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.090Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.190Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.190Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.190Z [INFO] throwing knives (thrown) arced toward 0 degrees, 1.5 m away
+2026-10-05 17:15:38.190Z [INFO] throwing knives hit an enemy at (34.2, 32.8) m, 0.30 m up
+2026-10-05 17:15:38.190Z [INFO] Goblin took 4 damage, HP 96 / 100
+2026-10-05 17:15:38.193Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.196Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.205Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.205Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.205Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.210Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.310Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.310Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.310Z [INFO] void chakram (thrown) arced toward 0 degrees, 1.5 m away
+2026-10-05 17:15:38.311Z [INFO] void chakram hit an enemy at (34.2, 32.8) m, 0.30 m up
+2026-10-05 17:15:38.311Z [INFO] Goblin took 4 damage, HP 96 / 100
+2026-10-05 17:15:38.311Z [INFO] The void drained 1 HP from Goblin: the hero has 100 / 100
+2026-10-05 17:15:38.314Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.317Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.326Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.326Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.326Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.332Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.434Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.434Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.434Z [INFO] fire whip (whip) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:38.434Z [INFO] Goblin took 4 damage, HP 96 / 100
+2026-10-05 17:15:38.434Z [INFO] Goblin is burning for 3 s
+2026-10-05 17:15:38.434Z [INFO] Goblin took 1 damage, HP 95 / 100
+2026-10-05 17:15:38.434Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:38.436Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.440Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.448Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.448Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.448Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.454Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.554Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.554Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.554Z [INFO] iron flail (whip) swung toward 0 degrees, facing East: 1 hit
+2026-10-05 17:15:38.554Z [INFO] Goblin took 4 damage, HP 96 / 100
+2026-10-05 17:15:38.554Z [INFO] Goblin struck the hero for 4, HP 96 / 100
+2026-10-05 17:15:38.556Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.560Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.568Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.568Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.568Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.574Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.675Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.675Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.675Z [INFO] nature staff (staff) shot toward 0 degrees, facing East
+2026-10-05 17:15:38.675Z [INFO] Goblin took 6 damage, HP 94 / 100
+2026-10-05 17:15:38.675Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:38.679Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.682Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.692Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.692Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.692Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.698Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.799Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.799Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.799Z [INFO] void staff (staff) shot toward 0 degrees, facing East
+2026-10-05 17:15:38.799Z [INFO] Goblin took 6 damage, HP 94 / 100
+2026-10-05 17:15:38.799Z [INFO] The void drained 2 HP from Goblin: the hero has 100 / 100
+2026-10-05 17:15:38.799Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:38.801Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.805Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.813Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.813Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.813Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.819Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:38.919Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:38.919Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:38.919Z [INFO] flintlock pistol (gun) shot toward 0 degrees, facing East
+2026-10-05 17:15:38.919Z [INFO] Goblin took 7 damage, HP 93 / 100
+2026-10-05 17:15:38.919Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:38.921Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:38.924Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:38.933Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:38.933Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:38.933Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:38.939Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:39.039Z [INFO] Picked up Spear throw (slot 2 of 9)
+2026-10-05 17:15:39.039Z [INFO] Picked up Sword (slot 3 of 9)
+2026-10-05 17:15:39.039Z [INFO] venom pistol (gun) shot toward 0 degrees, facing East
+2026-10-05 17:15:39.039Z [INFO] Goblin took 7 damage, HP 93 / 100
+2026-10-05 17:15:39.039Z [INFO] Goblin is poisoned for 5 s
+2026-10-05 17:15:39.039Z [INFO] Goblin struck back and missed
+2026-10-05 17:15:39.149Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:39.191Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\weapons_test.cpp(160):
+TEST CASE:  US-133 Starter set
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\game\weapons_test.cpp(160): ERROR: test case THREW exception: C:/Users/Amek/AppData/Local/Temp/odysseus-us133/data/hero/crossroads.json: (file): cannot be opened
+
+2026-10-05 17:15:39.211Z [INFO] Level "The Valley" (64x64 tiles, 1 characters) from C:/Users/Amek/.amek-ai/Odysseus/odysseus/assets/levels/demo.json
+2026-10-05 17:15:39.214Z [INFO] NPC classes: 68 loaded from 68 file(s), 0 error(s)
+2026-10-05 17:15:39.223Z [INFO] Quests: 1 loaded from 1 file(s), 0 error(s)
+2026-10-05 17:15:39.223Z [INFO] Dialogue: 10 conversation(s) loaded from 11 file(s)
+2026-10-05 17:15:39.223Z [INFO] Interactions: 63 loaded from 75 file(s), 0 error(s)
+2026-10-05 17:15:39.230Z [INFO] Art: the owner's atlas
+2026-10-05 17:15:39.331Z [INFO] Picked up Spear throw (slot 1 of 9)
+2026-10-05 17:15:39.331Z [INFO] Picked up Sword (slot 2 of 9)
+2026-10-05 17:15:39.331Z [INFO] Switched to iron sword (slot 3)
+===============================================================================
+[doctest] test cases:  22 |  21 passed | 1 failed | 363 skipped
+[doctest] assertions: 378 | 378 passed | 0 failed |
+[doctest] Status: FAILURE!
+
+      Start 15: odysseus_game_tests_b
+15/27 Test #15: odysseus_game_tests_b ...................   Passed    5.67 sec
+      Start 16: odysseus_game_tests_c
+16/27 Test #16: odysseus_game_tests_c ...................   Passed   53.64 sec
+      Start 17: US-024 Walk to the rock
+17/27 Test #17: US-024 Walk to the rock .................   Passed    4.77 sec
+      Start 18: US-029 Throw in the game
+18/27 Test #18: US-029 Throw in the game ................   Passed    5.10 sec
+      Start 19: odysseus_sim_tests
+19/27 Test #19: odysseus_sim_tests ......................   Passed    5.43 sec
+      Start 21: US-015 Run
+20/27 Test #21: US-015 Run ..............................   Passed    0.55 sec
+      Start 22: US-015 Bad input
+21/27 Test #22: US-015 Bad input ........................   Passed    0.06 sec
+      Start 23: US-110 Traceable
+22/27 Test #23: US-110 Traceable ........................   Passed    0.08 sec
+      Start 24: US-115 Both views
+23/27 Test #24: US-115 Both views .......................   Passed    0.59 sec
+      Start 25: US-123 Modes in the game
+24/27 Test #25: US-123 Modes in the game ................   Passed    5.22 sec
+      Start 26: US-124 Paint in the game
+25/27 Test #26: US-124 Paint in the game ................   Passed    2.43 sec
+      Start 27: US-125 Place in the game
+26/27 Test #27: US-125 Place in the game ................   Passed    3.58 sec
+      Start 28: X-M2c Two scripted presses
+27/27 Test #28: X-M2c Two scripted presses ..............   Passed    1.99 sec
+
+96% tests passed, 1 tests failed out of 27
+
+Label Time Summary:
+window    =  30.00 sec*proc (8 tests)
+
+Total Test time (real) = 160.13 sec
+
+The following tests FAILED:
+	 14 - odysseus_game_tests_a (Failed)
+Errors while running CTest

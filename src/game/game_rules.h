@@ -5,9 +5,11 @@
 #include "sim/action_runner.h"
 #include "sim/conversation.h"
 #include "sim/interaction.h"
+#include "sim/quest_book.h"
 #include "sim/rule_expr.h"
 
 #include <optional>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -106,6 +108,26 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 
 // One tick of the runner: effects waiting for their time happen, finished actions do their effects. Called by the game each play tick.
 void tickInteractions(OdysseyGame& game);
+// Moves the quests on (US-180): counts what happened, checks prerequisites, waits, failures, gives rewards.
+void tickQuests(OdysseyGame& game);
+// Completes a quest at once and gives its rewards (the debugger, US-186).
+bool completeQuest(OdysseyGame& game, const std::string& id);
+// Where a marker spec (tag:edible, object:clan-fire, npc:elder, place:stream) points, nearest to the hero; empty when nothing matches (US-183).
+std::optional<std::pair<double, double>> questMarkerPosition(const OdysseyGame& game, const std::string& spec);
+// The active quest the tracker and the marker follow: the one whose objective moved last.
+std::string trackedQuest(const sim::rules::QuestBook& book);
+// A name as quest files write it: lower case, words joined by - ("Old Tok" -> "old-tok").
+std::string questWord(const std::string& text);
+// The hero has started talking with `subject`: every name it goes by (its name, roles, kind) is reported to the quests as a talk event.
+void reportTalk(OdysseyGame& game, const Subject& subject);
+// Every name a subject goes by in quest files: its name, kind, tags and roles, in quest-word form.
+std::vector<std::string> subjectAliases(const OdysseyGame& game, const Subject& subject);
+// Adds the quest turn-in line and the "Do you have work for me?" choice to a copy of a script (US-182).
+void addQuestChoices(const OdysseyGame& game, sim::rules::DlgScript& script, const Subject& subject);
+// A person is a quest giver (Offer) or someone a quest wants the hero to talk to (HandIn); the game draws a sign over them (US-182).
+enum class QuestSign { None, Offer, HandIn };
+bool questGiverMatches(const std::string& giver, const std::vector<std::string>& aliases);
+QuestSign questSignFor(const OdysseyGame& game, const Subject& subject);
 
 // Talk (US-161): opens the conversation panel with the script that speaks for this clan member and pauses the world. False when no
 // script fits them (then the caller keeps to the plain talk).

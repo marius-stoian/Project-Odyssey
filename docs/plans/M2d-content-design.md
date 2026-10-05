@@ -29,7 +29,8 @@ As built (US-130): the M2d pages live in a second index, `content.json` with `co
 - The uneven sheets (sci-fi weapons, plants, animals, the labelled effect atlas) get plain rectangles, found with `odysseus_atlas --find` (blob search) and checked on the contact sheets.
 
 ### Backgrounds
-The M2c flood fill compares every pixel with one background colour, which fails on painted gradients. M2d adds a **smooth flood fill**: start at the rectangle's border pixels that are close to the sample, and spread to a neighbour when it is close *to the neighbour it came from* (local step under the tolerance) and not far from the sample (a looser global limit). Gradients go; outlines stop the fill because the step into a dark outline is large. Then `opaqueBounds` trims, and `fitInto` scales with the box filter.
+The M2c flood fill compares every pixel with one background colour, which fails on painted gradients. M2d adds a **smooth flood fill**: start at the rectangle's border pixels close to the sample, and spread to a neighbour when it is close *to the neighbour it came from* (local step under the tolerance) and not far from the sample (a looser global limit). Gradients go; outlines stop the fill because the step into a dark outline is large. Then `opaqueBounds` trims, and `fitInto` scales with the box filter.
+
 Effects and weather are light on dark: for them the cutter keeps the pixels and sets **alpha from brightness** over the local background (a luminance key), so glows fade out softly instead of leaving hard dark edges.
 
 ### Catalogs (assets/data)
@@ -38,6 +39,7 @@ Effects and weather are light on dark: for them the cutter keeps the pixels and 
 - `characters.json`: the 50 animals added with `frames`, `directions: 2` (side view east and its mirror west, a new value), `hp`, `enemy`, `strikeDamage`, `reach`. The M2c monster "wolf" keeps its name; the animal is "grey wolf".
 - `effects.json`: `name, frames (base name), count, ticksPerFrame, loop, anchor (centre|feet)`.
 - `weather.json`: `name, frames, count, ticksPerFrame, weight`; the entry "clear" has no frames and a third of the weight.
+
 Validation follows `level.cpp`: every problem is a `DataError` naming the file and the field; unknown frames are errors.
 
 ## 2. Luna additions (US-132, US-138)
@@ -51,7 +53,7 @@ The `Renderer` today draws a texture region at a point. M2d adds, in Luna Engine
 - Enemy strike-back is a state machine per enemy: `Idle -> WindUp (10 ticks = 0.5 s, the telegraph flash) -> Strike (one tick) -> Idle`. A hit while idle starts the wind-up; hits during the wind-up do not restart it. At the strike, the hero takes `strikeDamage` if the distance feet to feet is at most `reach`.
 - Hero at 0 HP: 20 ticks of fade, then respawn at the hero start with full HP; the level otherwise continues. Enemies at 0 HP: removed from the play copy (the level file is unchanged), with the death effect.
 - Weapons: an abstract `WeaponClass` with `attack(context)` returning hits or a projectile; one class per kind. Melee classes test an arc or a line in front of the hero (range in metres, angle per class); projectile classes spawn a `Projectile` (speed, range, sprite, trail effect) moved per tick with the existing tile collision. The M1b spear throw becomes the `thrown`/`spear` path and keeps its physics.
-- Elements: `StatusEffects` on each character (burn and poison: damage per second and time left; slow: factor and time left). Chain and drain are applied at the hit. All numbers per element in `weapons.json` under `elements`.
+- Elements: `StatusEffects` on each character (burn and poison: damage per second and time left; slow: factor and time left). Chain and drain are applied at the hit. All numbers per element are in `weapons.json` under `elements`.
 - Randomness: none needed for combat in M2d.
 
 ## 4. Pickups and hotbar (US-134)
@@ -72,7 +74,7 @@ The `Renderer` today draws a texture region at a point. M2d adds, in Luna Engine
 - Seed: `--seed` or the level's name hash when none is given, so tests are repeatable.
 
 ## 7. Tests
-Each story adds "US-13x ..." doctest cases headless, and the end-to-end scripts reuse `demo.json` (D-20) with new fixtures where a level needs pickups, plants or animals (`assets/levels/combat-demo.json`, a copy that tests never write).
+Each story adds "US-13x ..." doctest cases headless. The end-to-end scripts reuse `demo.json` (D-20), with new fixtures where a level needs pickups, plants or animals (`assets/levels/combat-demo.json`, a copy that tests never write).
 
 ## 8. Order and risks
-US-130 first (all later stories need the catalogs); US-131 in parallel is possible but stories go one at a time. The riskiest step is background removal on the painted sheets: the contact sheets are the check, and a cut may always fall back to a hand-set background and tolerance.
+US-130 comes first (all later stories need the catalogs); US-131 in parallel is possible, but stories go one at a time. The riskiest step is background removal on the painted sheets: the contact sheets are the check, and a cut may always fall back to a hand-set background and tolerance.

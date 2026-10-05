@@ -1,0 +1,38 @@
+{
+  "id": "rival-child",
+  "order": 5,
+  "title": "A stranger's child",
+  "text": "A child from another clan wanders into your camp, lost and hungry.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Feed the child and bring it home.",
+      "affinity": {
+        "religion": 4,
+        "trade": 4
+      },
+      "opinion": 8,
+      "trait": "kind",
+      "note": "{hero} fed a lost child of another clan and led it home."
+    },
+    {
+      "text": "Trade it for food and leave.",
+      "affinity": {
+        "trade": 5
+      },
+      "opinion": -10,
+      "trait": "greedy",
+      "note": "{hero} sent a lost child away for a meal, and {other} heard of it."
+    },
+    {
+      "text": "Take it to the elders.",
+      "affinity": {
+        "religion": 3
+      },
+      "opinion": 3,
+      "note": "{hero} brought a lost child to {other}."
+    }
+  ]
+}

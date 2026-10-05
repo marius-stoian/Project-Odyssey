@@ -216,6 +216,7 @@ TEST_CASE("US-150 Every effect verb has a working example") {
         {"take", "take hero berries 1"},
         {"set", "set target.state picked"},
         {"flag", "flag met-elder"},
+        {"quest", "quest start first-day"},
         {"opinion", "opinion npc hero +5"},
         {"remember", "remember npc \"shared berries\" 20"},
         {"start", "start inspect target"},

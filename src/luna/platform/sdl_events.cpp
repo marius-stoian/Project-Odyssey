@@ -40,6 +40,9 @@ Key toKey(SDL_Scancode scancode) {
     case SDL_SCANCODE_C: return Key::C;
     case SDL_SCANCODE_X: return Key::X;
     case SDL_SCANCODE_B: return Key::B;
+    case SDL_SCANCODE_J: return Key::J;
+    case SDL_SCANCODE_F10: return Key::F10;
+    case SDL_SCANCODE_P: return Key::P;
     case SDL_SCANCODE_R: return Key::R;
     case SDL_SCANCODE_1: return Key::Num1;
     case SDL_SCANCODE_2: return Key::Num2;

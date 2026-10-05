@@ -1,0 +1,39 @@
+{
+  "id": "wolf-at-the-fire",
+  "order": 0,
+  "title": "A wolf at the fire",
+  "text": "A lone wolf circles the camp at dusk, drawn by the smell of the store. The hunters are away.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "elder",
+  "options": [
+    {
+      "text": "Drive it off with a burning branch.",
+      "affinity": {
+        "fireKeeper": 6,
+        "hunter": 2
+      },
+      "opinion": 8,
+      "trait": "brave",
+      "note": "{hero} drove a wolf from the fire with a burning branch, and {other} saw it."
+    },
+    {
+      "text": "Wake the elders and stay behind them.",
+      "affinity": {
+        "trade": 2,
+        "religion": 2
+      },
+      "opinion": 5,
+      "note": "{hero} woke {other} when a wolf came to the fire."
+    },
+    {
+      "text": "Throw it a share of the store.",
+      "affinity": {
+        "gatherer": 3,
+        "trade": 4
+      },
+      "opinion": -5,
+      "note": "{hero} bought off a hungry wolf with the clan's food, and {other} did not approve."
+    }
+  ]
+}

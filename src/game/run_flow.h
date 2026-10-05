@@ -37,7 +37,7 @@ struct NpcTrader {
     int placedId = 0; // the placed character in the level
 };
 using TraderRef = std::variant<RivalTrader, NpcTrader>;
-enum class MenuTab { Bag, Skills, Dominion, Settings };
+enum class MenuTab { Bag, Skills, Dominion, Settings, Journal };
 
 class RunFlow {
 public:
@@ -50,6 +50,9 @@ public:
     bool tutorialOn() const { return tutorial_; }
     void setTutorialOn(bool on) { tutorial_ = on; }
     void openMenu();
+    void openJournal() { screen_ = Screen::Menu; tab_ = MenuTab::Journal; }
+    bool journalOpen() const { return screen_ == Screen::Menu && tab_ == MenuTab::Journal; }
+    void closeMenu() { screen_ = Screen::None; }
     void close() { screen_ = Screen::None; }
     void openMantle() { screen_ = Screen::Mantle; }
     void openEnded() { screen_ = Screen::Ended; }

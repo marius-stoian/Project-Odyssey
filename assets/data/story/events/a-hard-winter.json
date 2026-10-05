@@ -1,0 +1,38 @@
+{
+  "id": "a-hard-winter",
+  "order": 8,
+  "title": "A hard winter",
+  "text": "Snow has lain for weeks. The store is low and people are quiet.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Give up your own share for someone weaker.",
+      "affinity": {
+        "religion": 5,
+        "shaman": 3
+      },
+      "opinion": 12,
+      "trait": "kind",
+      "note": "{hero} gave up a share of food in a hard winter for {other}."
+    },
+    {
+      "text": "Go out and hunt in the snow.",
+      "affinity": {
+        "hunter": 7
+      },
+      "opinion": 6,
+      "trait": "brave",
+      "note": "{hero} hunted through the snow for the clan, with {other} waiting."
+    },
+    {
+      "text": "Keep your head down and save your strength.",
+      "affinity": {
+        "gatherer": 2
+      },
+      "opinion": -4,
+      "note": "{hero} kept to the furs through the hard winter."
+    }
+  ]
+}

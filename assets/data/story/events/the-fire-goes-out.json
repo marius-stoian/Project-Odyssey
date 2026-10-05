@@ -1,0 +1,42 @@
+{
+  "id": "the-fire-goes-out",
+  "order": 6,
+  "title": "The fire goes out",
+  "text": "You were to watch the fire. You slept, and in the grey morning the coals are cold.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "elder",
+  "requires": {
+    "affinity": "fireKeeper",
+    "min": 8
+  },
+  "options": [
+    {
+      "text": "Confess and rebuild it yourself.",
+      "affinity": {
+        "fireKeeper": 8,
+        "religion": 2
+      },
+      "opinion": 5,
+      "note": "{hero} let the fire go out, confessed to {other}, and lit it again."
+    },
+    {
+      "text": "Borrow fire from another camp before anyone wakes.",
+      "affinity": {
+        "trade": 4,
+        "fireKeeper": 2
+      },
+      "opinion": -3,
+      "note": "{hero} borrowed a flame in secret after the fire died."
+    },
+    {
+      "text": "Say it was the wind.",
+      "affinity": {
+        "trade": 2
+      },
+      "opinion": -12,
+      "trait": "greedy",
+      "note": "{hero} lied to {other} about the cold fire."
+    }
+  ]
+}

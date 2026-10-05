@@ -1,0 +1,30 @@
+{
+  "id": "sick-child",
+  "order": 2,
+  "title": "A sick child",
+  "text": "A small child burns with fever. The healer is far away, and someone must sit through the night.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Sit with the child all night.",
+      "affinity": {
+        "shaman": 7,
+        "religion": 3
+      },
+      "opinion": 10,
+      "trait": "kind",
+      "note": "{hero} sat through the night with a sick child, and {other} never forgot it."
+    },
+    {
+      "text": "Search the hills for herbs.",
+      "affinity": {
+        "gatherer": 5,
+        "shaman": 4
+      },
+      "opinion": 6,
+      "note": "{hero} went into the hills for herbs for a sick child, for {other}."
+    }
+  ]
+}

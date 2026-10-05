@@ -1,0 +1,32 @@
+{
+  "title": "Quest (assets/data/quests/<id>.json)",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "One word; must equal the file name without .json" },
+    "title": { "type": "string", "description": "The name in the journal and tracker" },
+    "giver": { "type": "string", "default": "none", "description": "A person id, role:<role>, or none" },
+    "requires": { "type": "array", "items": { "type": "string" }, "description": "Prerequisites in the rule language" },
+    "start": { "type": "string", "description": "The id of the first step" },
+    "steps": {
+      "type": "object",
+      "description": "One entry per step, keyed by step id",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "description": "What the tracker shows" },
+          "objective": { "type": "string", "description": "talk, goto, gather, give, craft, interact, defeat, wait or flag, with its words" },
+          "marker": { "type": "string", "description": "tag:<tag>, object:<id>, npc:<id> or place:<name>" },
+          "hint": { "type": "object", "properties": { "after": { "type": "string" }, "text": { "type": "string" } }, "description": "Shown after this long without progress" },
+          "next": { "type": "string", "description": "A step id or END" },
+          "branches": { "type": "array", "description": "[{ if, to }]: the first true one is taken instead of next" }
+        }
+      }
+    },
+    "fail": { "type": "array", "items": { "type": "string" }, "description": "When any holds, the quest fails for good" },
+    "rewards": { "type": "array", "items": { "type": "string" }, "description": "Effect lines run when the quest ends" },
+    "journal": { "type": "string", "description": "The line shown for a finished quest" },
+    "offer": { "type": "string", "description": "What the giver says when offering the quest" },
+    "turnIn": { "type": "string", "description": "What the giver says when the quest is handed in" },
+    "note": { "type": "string", "description": "The owner's own words" }
+  }
+}

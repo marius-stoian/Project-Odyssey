@@ -332,6 +332,8 @@ const std::vector<FunctionInfo>& knownFunctions() {
         {"mood", 1, 1, "one word for how someone feels about the hero (warm, friendly, neutral, wary, hostile, or hungry, tired, cold, lonely): mood(npc) == wary"},
         {"kin", 2, 2, "1 when the two are family: kin(npc, hero)"},
         {"flag", 1, 1, "a note the story has set (0 when never set): flag(met-elder)"},
+        {"quest", 1, 1, "where a quest stands, one word: locked, available, active, done or failed: quest(first-day) == done"},
+        {"step", 1, 1, "the step an active quest is on, empty when it is not active: step(first-day) == eat"},
         {"tag", 2, 2, "1 when a thing carries a tag: tag(target, edible)"},
     };
     return functions;

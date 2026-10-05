@@ -190,16 +190,16 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-173 | US-173 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | S-US-174 | US-174 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | X-M9 | - | M9 | Done | docs/gates/M9.md; Debug and Release 27/27, zero warnings |
-| K-M10 | - | M10 | To do |  |
-| S-US-180 | US-180 | M10 | To do |  |
-| S-US-181 | US-181 | M10 | To do |  |
-| S-US-182 | US-182 | M10 | To do |  |
-| S-US-183 | US-183 | M10 | To do |  |
-| S-US-186 | US-186 | M10 | To do |  |
-| S-US-184 | US-184 | M10 | To do |  |
-| S-US-187 | US-187 | M10 | To do |  |
-| S-US-185 | US-185 | M10 | To do |  |
-| X-M10 | - | M10 | To do |  |
+| K-M10 | - | M10 | Done | 2026-10-05; docs/plans/M10-quests-design.md, D-57 |
+| S-US-180 | US-180 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-181 | US-181 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-182 | US-182 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-183 | US-183 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-186 | US-186 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-184 | US-184 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-187 | US-187 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| S-US-185 | US-185 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
+| X-M10 | - | M10 | Done | docs/gates/M10.md; Debug and Release 27/27, zero warnings |
 | K-M11 | - | M11 | To do |  |
 | S-US-190 | US-190 | M11 | To do |  |
 | S-US-191 | US-191 | M11 | To do |  |
@@ -244,4 +244,4 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | X-M6 | - | M6 | Blocked | waits for X-M14 and the owner (D-GATE-M6) |
 
 
-US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Mraw on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/US-003.md) and [the report](reports/US-003-2026-09-30.md).
+US-003 was built by ChatGPT (blocked at Windows verification by a GitHub HTTP 403) and verified on Windows by Mraw on 2026-09-30 in branch `qa`: 5/5 tests pass in Debug and Release after a one-line test-harness fix, and GitHub CI on `qa` is green ([run 36635345962](https://github.com/marius-stoian/Project-Odyssey/actions/runs/36635345962)). Done under the owner's 2026-09-30 branch rule (stories integrate into `qa`). See [the plan](plans/stories-M0.md#us-003) and [the report](reports/US-003-2026-09-30.md).

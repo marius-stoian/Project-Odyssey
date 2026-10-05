@@ -8,10 +8,10 @@ Codex v1.6, prompt X-M2b, 2026-09-30. Exit criteria: the chronicle tells the cla
 `odysseus_headless --seed S --years 100 --story` prints at most 40 named episodes (each: beginning = the cause, turn, end, and the people), then the births, deaths, pairings and feuds with their reasons; `--chronicle` still prints every event. Tests: `US-115 Episode`, `US-115 Fewer, bigger`, `US-115 The story, then the lines with reasons`, and the command-line check `US-115 Both views` (evidence: [US-115](../evidence/US-115/headless-seed7-100years-story.txt)).
 
 ## 2. Every death and feud says why: **Met**
-Deaths name their cause and the event behind it (hunger after the failed harvest or a theft, a fight, wounds, sickness, childbirth, a mammoth hunt); feuds name the strongest grudge ("over stolen meat", "after a bitter quarrel", "over their love for X"); blame, revenge, exile, rejection, jealousy and parting all cite their causes, and `--why <id>` prints the chain (`US-110 Traceable`).
+Deaths name their cause and the event behind it (hunger after the failed harvest or a theft, a fight, wounds, sickness, childbirth, a mammoth hunt). Feuds name the strongest grudge ("over stolen meat", "after a bitter quarrel", "over their love for X"). Blame, revenge, exile, rejection, jealousy and parting all cite their causes, and `--why <id>` prints the chain (`US-110 Traceable`).
 
 ## 3. The 100-year soak runs without crashing; determinism holds: **Met**
-Your limit for this review was 10 seeds. Every run finished with exit code 0 and no extinction:
+At the owner's limit of 10 seeds, every run exited with code 0 and no extinction:
 
 | Seed | Alive after 100 years | Episodes told | World hash |
 |---|---|---|---|
@@ -32,6 +32,6 @@ Your limit for this review was 10 seeds. Every run finished with exit code 0 and
 Agents cannot measure this. Read [M2b-reader-packet.md](M2b-reader-packet.md) and answer in [D-GATE-M2b](../decision-requests/D-GATE-M2b.md).
 
 ## Team notes
-- What we see as weak: many episodes are hunts and hard winters; partings and rejections are rare; feud episodes can span years.
-- Balance checks used 10 seeds, not 100, at your request; the population is healthier than before M2b (29 to 51 alive; the low end was 9).
-- Also merged to `qa` at your request: the hero's sword, the enemy with HP and the red hit flash (a demo outside the Codex).
+- Weak points: many episodes are hunts and hard winters; partings and rejections are rare; feud episodes can span years.
+- Balance checks used 10 seeds, not 100, at the owner's request; the population is healthier than before M2b (29 to 51 alive; the low end was 9).
+- Also merged to `qa` at the owner's request: the hero's sword, the enemy with HP and the red hit flash (a demo outside the Codex).

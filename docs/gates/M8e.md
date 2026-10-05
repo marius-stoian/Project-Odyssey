@@ -14,7 +14,7 @@ No failures in this run, so no fixes were needed.
 
 | Criterion | Status |
 |---|---|
-| US-253: clan members bring materials and build blueprints; rival clans build by season | Met (`building_life_test`, `building_life_game_test`). Rival buildings are lists, not cells of the level (technical choice, `docs/plans/US-253.md`) |
+| US-253: clan members bring materials and build blueprints; rival clans build by season | Met (`building_life_test`, `building_life_game_test`). Rival buildings are lists, not cells of the level (technical choice, `docs/plans/stories-M8e.md#us-253`) |
 | US-254: roofs fade; a building with an interior level opens it; leaving restores the outside world | Met (`US-254` cases) |
 | US-255: raids by rivals at war, fire shots, repair, putting out fires, fire light | Met (`US-255` cases). The hero cannot hit rival buildings because they are not on the level |
 | US-257: owners at dawn, warmth for the housed, storage that halves spoilage, `store-food` | Met (`US-257` cases, sim and game) |

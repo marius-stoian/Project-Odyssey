@@ -1,6 +1,6 @@
 # Build brief: M7 World interactions, M8 Speak to NPCs, M9 Interaction and dialogue editor
 
-Mraw to Anima, 2026-10-01. Source of truth: requirements v2.0 (Round 13, D-34). Anima turns this brief into Codex v2.0 (K-M7..X-M9). The milestones are built **before** kill gate 2 (X-M6), which is held afterwards on the richer game.
+Mraw to Anima, 2026-10-01. Source of truth: requirements v2.0 (Round 13, D-34). Anima turns this brief into Codex v2.0 (K-M7..X-M9). These milestones are built **before** kill gate 2 (X-M6), which is held afterwards on the richer game.
 
 ## 1. Goal
 The owner wants game entities to interact with each other, to speak to NPCs and to interact with the world, and to configure every action, interaction and conversation **offline in human-readable files** and **inside the game Editor**.
@@ -15,7 +15,7 @@ Today every world action is hard-coded in C++ (`RunFlow::openContext` in `src/ga
 | Editor depth | **Full visual graph editor** (nodes and wires) for dialogue and interaction rules inside the game, plus hot reload of files edited offline. |
 | Order | **Build first, playtest after**: M7, M8, M9 now; kill gate 2 (X-M6) on the result. |
 
-Earlier open items now closed: D-08 (interactions interview, OPEN-09) is answered by D-34; INT-01 is defined.
+D-34 closes D-08 (interactions interview, OPEN-09) and defines INT-01.
 
 ## 3. Requirements added (v2.0)
 - **INT-01 Interactions**: every thing in the world offers actions; the player, NPCs and animals perform them through one system (smart objects: properties + verbs, GD-04).
@@ -87,7 +87,8 @@ Catalog entries (plants, animals, characters, items, new world objects) gain `"t
 
 ## 5. Milestones and stories
 
-### M7 World interactions (epic E14) — exit: every action in today's game comes from data; the player and the NPCs act on things with timed, visible, saved results; files edited offline reload with F5.
+### M7 World interactions (epic E14)
+Exit: every action in today's game comes from data; the player and the NPCs act on things with timed, visible, saved results; files edited offline reload with F5.
 | ID | Story | Size | Priority | Depends on |
 |---|---|---|---|---|
 | US-150 | Interaction data, the condition and effect language, validation and the reference guide | L | Must | US-060, D-34 |
@@ -98,7 +99,8 @@ Catalog entries (plants, animals, characters, items, new world objects) gain `"t
 | US-155 | New world objects for Age 1 (fire pit, knapping stone, store, shelter, flint nodule, water, sleeping furs) placeable in the Editor | M | Should | US-151 |
 | US-156 | Hot reload (F5) and the validation panel: errors with file:line, last good data kept | M | Must | US-150 |
 
-### M8 Speak to NPCs (epic E15) — exit: the player talks to any clan member; written conversations branch on the simulation; without a script NPCs make small talk from their memories; talk changes opinions, items and memories; NPCs talk to each other in bubbles.
+### M8 Speak to NPCs (epic E15)
+Exit: the player talks to any clan member; written conversations branch on the simulation; without a script NPCs make small talk from their memories; talk changes opinions, items and memories; NPCs talk to each other in bubbles.
 | ID | Story | Size | Priority | Depends on |
 |---|---|---|---|---|
 | US-160 | The `.dlg` format: parser with file:line errors, canonical writer, format guide | L | Must | US-150 |
@@ -108,7 +110,8 @@ Catalog entries (plants, animals, characters, items, new world objects) gain `"t
 | US-164 | Conversations are remembered: memories, gossip, chronicle lines, flags saved | M | Must | US-161 |
 | US-165 | NPCs talk to each other in speech bubbles; outcomes feed quarrels, courtship and sharing | M | Should | US-162, US-154 |
 
-### M9 Interaction and dialogue editor (epic E16) — exit: the owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it, saves it, and the file still reads well in a text editor.
+### M9 Interaction and dialogue editor (epic E16)
+Exit: the owner opens any dialogue or interaction in the Editor as a graph, edits it, test-plays it, saves it, and the file still reads well in a text editor.
 | ID | Story | Size | Priority | Depends on |
 |---|---|---|---|---|
 | US-170 | Node-graph widget for the Luna UI: pan, zoom, nodes, ports, wires, selection, undo | L | Must | US-121, US-126 |
@@ -121,7 +124,7 @@ Catalog entries (plants, animals, characters, items, new world objects) gain `"t
 Each milestone opens with K-M7/K-M8/K-M9 (design and test plan) and closes with X-M7/X-M8/X-M9 (exit review). Then X-M6, kill gate 2.
 
 ## 6. Architecture rules
-- The condition and effect language, the interaction registry and the dialogue runtime live in the **Simulation** layer (`src/sim/`), with no Engine or SDL includes (ADR-016); the panels and the graph editor live in **Game** (`src/game/`), the node-graph widget in **Luna Engine** (game-agnostic).
+- The condition and effect language, the interaction registry and the dialogue runtime live in the **Simulation** layer (`src/sim/`), with no Engine or SDL includes (ADR-016). The panels and the graph editor live in **Game** (`src/game/`); the node-graph widget in **Luna Engine** (game-agnostic).
 - Deterministic: NPC choices use the simulation's seeded random; same seed and inputs give the same world hash (existing CI test extended).
 - Things are referred to by id, never by pointer (as in the Editor, US-124).
 - Existing behaviour is the regression baseline: US-152 must pass every M5 and M6 test unchanged.

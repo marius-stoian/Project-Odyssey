@@ -91,7 +91,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
       range_(map_, loadMaterials(dataDirectory)), spritesDirectory_(dataDirectory.parent_path() / "sprites"),
       editor_(level_, definitions_, levelFile_, kVirtualWidth, kVirtualHeight), npcClasses_(dataDirectory / "npc-classes", dataDirectory / "npcs") {
     editor_.setNpcClasses(&npcClasses_);
-    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }); // Save in the graph editor reads the data again, like F5 (M9)
+    editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { reloadInteractions(); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
         if (target.kind != static_cast<int>(Subject::Kind::Plant)) return std::nullopt;
@@ -105,6 +105,11 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         }
         return changed;
     });
+    // What the hero finishes counts for quests (US-181); other people's interactions do not.
+    actions_.setFinishObserver([this](const std::string& interaction, int actor, const sim::rules::ThingRef&) {
+        if (actor == kHeroActor) questEvent(sim::rules::QuestObjective::Kind::Interact, interaction);
+    });
+    editor_.storyEvents().setFolder(dataDirectory / "story" / "events"); // the events are read again when a new game starts (US-185)
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -243,6 +248,7 @@ void OdysseyGame::resetPlay() {
     greetingCooldowns_.clear();
     smalltalk_.clear();
     flags_.clear();
+    quests_.clearStates();
     dialogueRng_ = core::Pcg32(1, 8);
     npcLife_.reset();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
@@ -259,6 +265,7 @@ void OdysseyGame::switchMode(Mode mode) {
         return;
     }
     mode_ = mode;
+    if (mode == Mode::Editor) playHere_ = false;
     if (mode == Mode::Editor) {
         const luna::engine::Rect view = camera_.view();
         editor_.enter(view.x + view.width / 2.0, view.y + view.height / 2.0); // looking where the game looked
@@ -399,6 +406,7 @@ void OdysseyGame::strike(Enemy& enemy, int damage, const WeaponDef* weapon) {
     const bool defeated = enemy.takeDamage(damage);
     playEffect("spark", enemy.feetX(), enemy.feetY() - kCharacterHeight / 2.0, 24); // US-132: where the blow lands
     if (defeated) {
+        if (!enemy.kindName.empty()) questEvent(sim::rules::QuestObjective::Kind::Defeat, questWord(enemy.kindName)); // the hero struck the blow (US-181)
         playEffect("smoke puff", enemy.feetX(), enemy.feetY() - kCharacterHeight / 3.0, 40);
     } else {
         enemy.provoke();
@@ -633,6 +641,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     if (useRegion) loadRegion(game.seed);
     clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
     life_ = std::make_unique<sim::HeroLife>(*heroData_, *clan_, game);
+    watchHeroItems();
     clanEnabled_ = true;
     clanView_ = ClanView(clanView_.camp());
     clanView_.setHidden(life_->personId());
@@ -641,17 +650,13 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     buildings_.forgetAll(); // a new run knows only the starting blueprints (D-55 Q2)
     // A new clan is a new story: what was said, remembered and flagged in the last one does not carry over (US-162..US-164).
     flags_.clear();
+    quests_.clearStates();
     bubbles_.clear();
     exchanges_.reset(clan_->chronicle().entries().size());
     greetingCooldowns_.clear();
     smalltalk_.clear();
     stats_.record("run-started", ticks_);
-    if (tutorial) {
-        if (tutorialScript_.steps.empty()) tutorialScript_ = loadTutorial(dataDirectory_ / "hero" / "tutorial.json");
-        tutorial_.start(tutorialScript_);
-    } else {
-        tutorial_.stop();
-    }
+    if (tutorial) flags_.set("tutorial", 1); // the first-day quest (assets/data/quests/first-day.json) starts by itself when this note is set (US-185)
     if (life_->phase() == sim::Phase::Growing) {
         runFlow_.openFocus();
     } else {
@@ -672,16 +677,21 @@ std::filesystem::path OdysseyGame::finishSession() {
     return stats_.finish(saveDirectory_ / "sessions", ticks_, sessionStamp());
 }
 
-// The elder speaks in a box at the bottom while the first day is taught (US-090).
+// The elder speaks in a box at the bottom while the first-day quest is under way (US-090, US-185): the words of the active step, the hint when the hero is stuck.
 void OdysseyGame::drawTutorial(luna::engine::Renderer& renderer) const {
-    if (!tutorial_.active() || runFlow_.modal()) return;
+    if (runFlow_.modal() || quests_.status("first-day") != sim::rules::QuestStatus::Active) return;
+    const sim::rules::Quest* quest = quests_.find("first-day");
+    const sim::rules::QuestState* state = quests_.state("first-day");
+    const sim::rules::QuestStep* step = quest != nullptr && state != nullptr ? quest->find(state->step) : nullptr;
+    if (step == nullptr) return;
+    const bool hinting = quests_.hintDue("first-day", actionClock_) && step->hint.has_value();
     luna::engine::UiPainter painter(renderer, uiSheet_);
-    const std::string line = tutorial_.elder() + ": " + tutorial_.text();
+    const std::string line = "Elder: " + (hinting ? step->hint->text : step->text);
     const int width = std::min(uiWidth() - 8, luna::engine::UiPainter::textWidth(line) + 8);
     const int chars = (width - 8) / luna::engine::kTextAdvance;
     const luna::engine::Rect box{(uiWidth() - width) / 2, uiHeight() - 2 * luna::engine::kGlyphHeight - 30, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
-    painter.outline(box, tutorial_.hinting() ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
+    painter.outline(box, hinting ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
     painter.text(box.x + 4, box.y + 3, line.substr(0, static_cast<std::size_t>(chars)), luna::engine::UiColor::Text);
 }
 
@@ -767,6 +777,17 @@ void OdysseyGame::syncGraphCatalog() {
     for (const sim::rules::DlgScript& script : dialogues_.all()) catalog.dialogues.insert(script.name);
     for (const sim::rules::Interaction& interaction : interactions_.all()) catalog.interactions.insert(interaction.id);
     catalog.tags = knownTags();
+    // What a quest may name (US-187): the people, kinds and places of the loaded level, and the quests themselves.
+    if (!level_.characters.empty()) { // a generated region makes its people at run time: nothing to check them against
+        for (const PlacedCharacter& placed : level_.characters) {
+            catalog.people.insert(questWord(placed.name));
+            catalog.people.insert(questWord(placed.kind));
+            catalog.kinds.insert(questWord(placed.kind));
+        }
+        for (const PlacedPlace& place : level_.places) catalog.places.insert(questWord(place.name));
+    }
+    for (const sim::rules::Quest& quest : quests_.quests()) catalog.quests.insert(quest.id);
+    questCatalog_ = catalog;
     editor_.graphs().setCatalog(std::move(catalog));
 }
 
@@ -780,11 +801,17 @@ void OdysseyGame::loadInteractions() {
     sim::rules::LoadReport dialogueReport;
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     smalltalk_ = loadSmalltalk(dialogueReport);
+    sim::rules::LoadReport questReport;
+    quests_.replaceQuests(sim::rules::loadQuests(dataDirectory_ / "quests", questReport));
     syncEditorActions();
     syncGraphCatalog();
+    for (const sim::rules::GraphFinding& f : sim::rules::checkQuests(quests_.quests(), questCatalog_)) core::logWarning(std::string("Quests: ") + (f.error ? "error: " : "warning: ") + f.text());
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
+    interactionReport_.errors.insert(interactionReport_.errors.end(), questReport.errors.begin(), questReport.errors.end());
+    interactionReport_.filesRead += questReport.filesRead;
+    core::logInfo(std::format("Quests: {} loaded from {} file(s), {} error(s)", questReport.loaded, questReport.filesRead, questReport.errors.size()));
     core::logInfo(std::format("Dialogue: {} conversation(s) loaded from {} file(s)", dialogueReport.loaded, dialogueReport.filesRead));
     for (const sim::rules::Diagnostic& d : interactionReport_.errors) core::logWarning("Interactions: " + d.text());
     for (const sim::rules::Diagnostic& d : interactionReport_.warnings) core::logWarning("Interactions: " + d.text());
@@ -803,6 +830,10 @@ bool OdysseyGame::reloadInteractions() {
     sim::rules::LoadReport dialogueReport;
     sim::rules::DialogueLibrary freshDialogue = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     sim::rules::SmallTalk freshSmalltalk = loadSmalltalk(dialogueReport);
+    sim::rules::LoadReport questReport;
+    std::vector<sim::rules::Quest> freshQuests = sim::rules::loadQuests(dataDirectory_ / "quests", questReport);
+    report.errors.insert(report.errors.end(), questReport.errors.begin(), questReport.errors.end());
+    report.filesRead += questReport.filesRead;
     report.errors.insert(report.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     report.warnings.insert(report.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     report.filesRead += dialogueReport.filesRead;
@@ -818,6 +849,7 @@ bool OdysseyGame::reloadInteractions() {
     syncEditorActions();
     dialogues_ = std::move(freshDialogue);
     smalltalk_ = std::move(freshSmalltalk);
+    quests_.replaceQuests(std::move(freshQuests));
     syncGraphCatalog();
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
@@ -945,14 +977,14 @@ std::string OdysseyGame::thingsText() const {
     for (const WorldPlant& plant : plants_) {
         if (plant.def != nullptr && !plant.def->states.empty() && plant.state != plant.def->states.front()) plants[std::to_string(plant.id)] = plant.state;
     }
-    return nlohmann::json{{"version", 1}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}}.dump(1);
+    return nlohmann::json{{"version", 2}, {"plants", plants}, {"timers", nlohmann::json::parse(actions_.savePending(actionClock_))}, {"flags", nlohmann::json::parse(flags_.save())}, {"quests", nlohmann::json::parse(quests_.save(actionClock_))}}.dump(1);
 }
 
 std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
     std::vector<std::string> notes;
     try {
         const nlohmann::json data = nlohmann::json::parse(text);
-        if (data.at("version").get<int>() != 1) return {"things.json was saved by another version and was not loaded"};
+        if (const int version = data.at("version").get<int>(); version != 1 && version != 2) return {"things.json was saved by another version and was not loaded"};
         for (const auto& [id, state] : data.at("plants").items()) {
             const int index = plantIndexById(std::stoi(id));
             if (index >= 0) plants_[static_cast<std::size_t>(index)].state = state.get<std::string>();
@@ -961,6 +993,10 @@ std::vector<std::string> OdysseyGame::restoreThings(const std::string& text) {
         if (data.contains("flags")) { // saves from before US-164 have none
             const std::vector<std::string> flagNotes = flags_.load(data.at("flags").dump());
             notes.insert(notes.end(), flagNotes.begin(), flagNotes.end());
+        }
+        if (data.contains("quests")) { // saves from before US-180 (version 1) have none: every quest starts locked
+            const std::vector<std::string> questNotes = quests_.load(data.at("quests").dump(), actionClock_);
+            notes.insert(notes.end(), questNotes.begin(), questNotes.end());
         }
     } catch (const std::exception& error) {
         notes.push_back(std::string("things.json could not be read: ") + error.what());
@@ -1238,6 +1274,7 @@ bool OdysseyGame::loadAutosave() {
         lastSavedDay_ = clan_->date().day;
         if (heroData_ && std::filesystem::exists(saveDirectory_ / "hero.json")) {
             life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
+            watchHeroItems();
             clanView_.setHidden(life_->personId());
             clanView_.update(*clan_, map_);
         }
@@ -1858,6 +1895,14 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         switchMode(Mode::Game);
     }
     if (mode_ == Mode::Editor) {
+        if (intents.pressed(luna::engine::Intent::PlayHere) && intents.pointer().inside()) { // Play here (US-186): the hero starts at the cursor; F2 returns to the Editor, which has not changed
+            const auto [wx, wy] = editor_.worldUnder(intents.pointer());
+            switchMode(Mode::Game);
+            hero_ = Hero(wx, wy);
+            playHere_ = true;
+            camera_.centreOn(hero_.feetX(), hero_.feetY());
+            return;
+        }
         editor_.update(intents); // the world stands still
         return;
     }
@@ -1868,6 +1913,12 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         privacyAsked_ = true;
         if (settings_.statistics == 0) runFlow_.openPrivacy();
     }
+    if (playHere_ && !runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) { // Esc ends a Play here session (US-186)
+        playHere_ = false;
+        switchMode(Mode::Editor);
+        return;
+    }
+    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::Journal)) runFlow_.openJournal();
     if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu) && !buildings_.escape()) runFlow_.openMenu(); // Esc first leaves placing and the Build menu
     // Two pictures, two pointers (US-232): the world is drawn zoomed and the interface scaled, so the pointer is
     // turned into the pixels of each one before anything reads it.
@@ -1875,6 +1926,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     worldIntents.setPointer(luna::engine::scaledPointer(intents.pointer(), settings_.cameraZoom));
     luna::engine::Intents uiIntents = intents;
     uiIntents.setPointer(luna::engine::scaledPointer(intents.pointer(), settings_.uiScale));
+    updateQuestDebug(uiIntents);
     if (runFlow_.modal()) {
         updateAim(worldIntents.pointer(), true, hero_.facing()); // keeps the pointer for drawing
         runFlow_.update(*this, uiIntents);
@@ -1883,7 +1935,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (!devToolsOpen_) updateZoom(intents);
     ++ticks_;
     tickActions(intents);
-    tutorial_.tick();
+    if (ticks_ % 10 == 0) tickQuests(*this);
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
     if (!insideBuilding()) tickNpcPopulation();
@@ -2399,12 +2451,16 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawRivals(renderer, view);
     drawRunWorld(renderer, view);
     drawClanDetails(renderer, view, alpha);
+    drawQuestSigns(renderer, view, alpha);
+    drawQuestMarker(renderer, view, alpha);
     drawHud(ui);
     buildings_.drawMenu(*this, ui, uiSheet_);
     drawClanHud(ui);
     drawRunHud(ui);
     drawDevTools(ui, view, alpha);
     drawTutorial(ui);
+    drawQuestTracker(ui);
+    drawQuestDebug(ui);
     runFlow_.draw(ui, uiSheet_);
     drawActionRing(renderer, view);
     drawOverlay(ui);
@@ -2519,6 +2575,20 @@ std::string OdysseyGame::leaveBuilding() {
     editor_.levelChanged();
     say("You step outside.");
     return {};
+}
+
+// What enters the hero bag is reported to the quests (US-181): crafted things count as crafting, everything else as gathering.
+void OdysseyGame::watchHeroItems() {
+    if (!life_) return;
+    life_->setEventTrigger([this](const std::string& condition) {
+        const sim::rules::ParsedExpr parsed = sim::rules::parseExpression(condition);
+        if (!parsed.root) return true;
+        const GameRuleContext context(*this, heroSubject(*this));
+        return sim::rules::isTrue(*parsed.root, context);
+    });
+    life_->setItemObserver([this](const std::string& item, int amount, bool crafted) {
+        questEvent(crafted ? sim::rules::QuestObjective::Kind::Craft : sim::rules::QuestObjective::Kind::Gather, item, amount);
+    });
 }
 
 } // namespace odysseus::game

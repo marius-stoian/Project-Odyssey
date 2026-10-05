@@ -22,6 +22,7 @@ inline constexpr std::size_t kAffinityCount = static_cast<std::size_t>(Affinity:
 inline constexpr std::size_t kProfessionCount = 5;
 const char* affinityName(Affinity affinity);          // "Hunter", "Trade", ...
 std::optional<Affinity> affinityFromKey(const std::string& key); // "hunter", "fireKeeper", ...
+const char* affinityKey(Affinity affinity);                      // the same key the other way round
 
 using AffinityValues = std::array<int, kAffinityCount>;
 using SkillValues = std::array<int, kProfessionCount>;
@@ -129,6 +130,8 @@ struct CrossroadsEvent {
     std::optional<Affinity> needsAffinity;
     int needsMinimum = 0;
     std::string role;         // "elder" or "friend": who in the clan the event involves
+    int order = 0;            // where it stands among the events (the draw of a year depends on the order, so it is part of the data)
+    std::string trigger;      // a condition in the rule language; empty: always possible (US-185)
     std::vector<CrossroadsOption> options;
 };
 
@@ -176,5 +179,9 @@ struct HeroData {
 // Reads every file of assets/data/hero/. Any problem is a DataError naming the file and the field (a profession that needs a
 // tool that no item describes names the profession and the tool).
 HeroData loadHeroData(const std::filesystem::path& dataDirectory);
+
+// One story event as the Editor reads and writes it (US-185): the text of story/events/<id>.json. A mistake comes back in `problem`.
+std::optional<CrossroadsEvent> parseStoryEvent(const std::string& jsonText, const std::string& name, std::string& problem);
+std::string writeStoryEvent(const CrossroadsEvent& event);
 
 } // namespace odysseus::sim
