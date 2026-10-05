@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "cards": {
+    "deal": [
+      0,
+      135
+    ],
+    "deal/choice0": [
+      232,
+      135
+    ],
+    "deal/choice0/do": [
+      232,
+      70
+    ],
+    "deal/choice0/if": [
+      232,
+      107
+    ],
+    "deal/line0": [
+      116,
+      135
+    ],
+    "start": [
+      0,
+      0
+    ],
+    "start/choice0": [
+      232,
+      0
+    ],
+    "start/choice1": [
+      348,
+      0
+    ],
+    "start/line0": [
+      116,
+      0
+    ]
+  }
+}

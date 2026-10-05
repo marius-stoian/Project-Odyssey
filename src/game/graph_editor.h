@@ -47,6 +47,9 @@ public:
     // Writes the open conversation and its layout. Refuses (and says why) with a card that cannot be written, and, once, when the file changed on
     // disk since it was opened (press Save again to overwrite).
     bool save();
+    // A new file in the shown kind (D-56 Q12, the exit review of M9): a conversation with a start node, a line and a way out, or an interaction with an actor, a verb
+    // and a target. It exists only here until Save writes it. The name is letters, digits and hyphens, and no file of that name exists yet.
+    bool createNew(const std::string& name);
     bool dirty() const;
     // The check (US-175, D-56 Q17): what the open file names that does not exist, nodes nobody reaches, dead ends. It runs again whenever the graph changed;
     // the list under the canvas shows it, and a click selects the card it points to. `catalog` is what the game knows (items, tags, built-in actions).
@@ -76,6 +79,7 @@ public:
     luna::engine::NodeGraphView* view() { return view_.get(); }
     int addCard(const std::string& type); // a new empty card in the middle of the canvas, selected; returns its id
     bool setCardField(int card, std::size_t index, const std::string& value);
+    void tidy();                          // the cards in rows again, as one step of Undo
     bool addCardField(int card);          // one more line in an effect or comment card
     bool removeCardField(int card);       // the last line of an effect or comment card
     sim::rules::DlgScript& header() { return current_->header; } // @who and the rest: kept with the file, not part of Undo
@@ -121,6 +125,7 @@ private:
     bool saveInteraction();
     void bindView();
     std::string errorsNote() const;
+    std::string newName_;
     std::string headerText(const sim::rules::DlgScript& script) const;
 
     int viewWidth_;

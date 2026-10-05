@@ -413,6 +413,8 @@ std::optional<Interaction> graphToInteraction(const NodeGraph& g, std::vector<st
     return parsed;
 }
 
+void arrangeInteraction(NodeGraph& graph) { layoutRow(graph); }
+
 std::map<std::string, int> interactionCardKeys(const NodeGraph& g) {
     std::map<std::string, int> keys;
     for (const auto& [id, key] : keysOf(partsOf(g, nullptr))) keys[key] = id;

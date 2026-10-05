@@ -1,0 +1,17 @@
+{
+  "id": "offer-berry",
+  "label": "Offer a berry",
+  "note": "Give one berry to someone; they think better of you.",
+  "actors": ["hero"],
+  "target": { "tags": ["person"] },
+  "range": 1.5,
+  "duration": 0,
+  "order": 100,
+  "requires": [
+    { "if": "has(berries, 1)", "else": "You have no berries" }
+  ],
+  "effects": [
+    "take actor berries 1",
+    "opinion target actor 5"
+  ]
+}

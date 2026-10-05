@@ -1,0 +1,8 @@
+=== start
+Elder: Hello, {hero}.
+-> Ask about the berries => deal
+-> Leave => END
+
+=== deal
+Trader: A fair price, {hero}.
+-> Pay one stone [if has(hero, stone, 1)] {take hero stone 1; give hero berries 2} => END

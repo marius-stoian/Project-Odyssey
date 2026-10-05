@@ -494,3 +494,139 @@ TEST_CASE("US-174 Draw: the Test-play card shows the lines, the numbered choices
     rig.editor.update(click);
     CHECK(rig.editor.testPlay()->nodeId() == "help");
 }
+
+namespace {
+
+void drawEditor(GraphEditor& editor, const std::string& pictureName) {
+    luna::engine::ImageRenderer renderer(960, 540);
+    renderer.clear({20, 20, 28, 255});
+    const luna::engine::Texture sheet = renderer.createTexture(luna::engine::makeUiSheet());
+    luna::engine::UiPainter painter(renderer, sheet);
+    painter.setScreen({0, 0, 960, 540});
+    luna::engine::Intents idle;
+    editor.update(idle);
+    editor.draw(painter);
+    editor.drawOverlay(painter);
+    const fs::path folder = fs::temp_directory_path() / "odysseus-xm9";
+    fs::create_directories(folder);
+    luna::engine::savePng(renderer.image(), folder / pictureName);
+}
+
+} // namespace
+
+TEST_CASE("X-M9 From scratch: a conversation and an interaction are built in the editor, test-played, saved, and read as text") {
+    const fs::path evidence = fs::temp_directory_path() / "odysseus-xm9";
+    fs::create_directories(evidence);
+
+    // ---- a conversation
+    Folder folder;
+    Rig rig(folder);
+    rig.editor.show(true);
+    REQUIRE(rig.editor.createNew("trader-greeting"));
+    CHECK(rig.editor.dirty());
+    CHECK_FALSE(fs::exists(folder.path / "trader-greeting.dlg")); // not written until Save
+    const int deal = rig.editor.addCard(dlg_card::kNode);
+    CHECK(rig.editor.setCardField(deal, 0, "deal"));
+    const int dealLine = rig.editor.addCard(dlg_card::kLine);
+    CHECK(rig.editor.setCardField(dealLine, 0, "Trader"));
+    CHECK(rig.editor.setCardField(dealLine, 1, "A fair price, {hero}."));
+    const int pay = rig.editor.addCard(dlg_card::kChoice);
+    CHECK(rig.editor.setCardField(pay, 0, "Pay one stone"));
+    const int need = rig.editor.addCard(dlg_card::kCondition);
+    CHECK(rig.editor.setCardField(need, 0, "has(hero, stone, 1)"));
+    const int effects = rig.editor.addCard(dlg_card::kEffect);
+    CHECK(rig.editor.setCardField(effects, 0, "take hero stone 1"));
+    CHECK(rig.editor.addCardField(effects));
+    CHECK(rig.editor.setCardField(effects, 1, "give hero berries 2"));
+    const int ask = rig.editor.addCard(dlg_card::kChoice);
+    CHECK(rig.editor.setCardField(ask, 0, "Ask about the berries"));
+    const int line = rig.card(dlg_card::kLine, "Elder");
+    const int leave = rig.card(dlg_card::kChoice, "Leave");
+    luna::engine::NodeGraph& g = *rig.editor.graph();
+    REQUIRE(g.connect(deal, 0, dealLine, 0));
+    REQUIRE(g.connect(dealLine, 0, pay, 0));
+    REQUIRE(g.connect(need, 0, pay, 1));
+    REQUIRE(g.connect(effects, 0, pay, 2));
+    REQUIRE(g.connect(line, 0, ask, 0));      // the start line leads on to the new choice...
+    REQUIRE(g.connect(ask, 0, leave, 0));     // ...which leads on to Leave
+    REQUIRE(g.connect(ask, 1, deal, 0));      // and "Ask about the berries" goes to the node "deal"
+    // Test-play with a stone in the bag.
+    rig.editor.setTestWords("item.stone=1");
+    REQUIRE(rig.editor.startTest(false));
+    REQUIRE(rig.editor.testPlay()->view().choices.size() == 2);
+    REQUIRE(rig.editor.testChoose(0));
+    CHECK(rig.editor.testPlay()->nodeId() == "deal");
+    REQUIRE(rig.editor.testChoose(0));
+    CHECK(rig.editor.testPlay()->finished());
+    CHECK(rig.editor.testPlay()->state().items.at("berries") == 2);
+    CHECK(rig.editor.testPlay()->state().items.count("stone") == 0);
+    rig.editor.tidy();
+    drawEditor(rig.editor, "conversation-graph.png");
+    rig.editor.showTest(true);
+    REQUIRE(rig.editor.startTest(false));
+    REQUIRE(rig.editor.testChoose(0));
+    drawEditor(rig.editor, "conversation-test-play.png");
+    rig.editor.showTest(false);
+    // Save and read it as text.
+    REQUIRE(rig.editor.save());
+    const std::string text = readFile(folder.path / "trader-greeting.dlg");
+    CHECK(text.find("=== deal\nTrader: A fair price, {hero}.\n-> Pay one stone [if has(hero, stone, 1)] {take hero stone 1; give hero berries 2} => END\n") != std::string::npos);
+    CHECK(text.find("-> Ask about the berries => deal") != std::string::npos);
+    CHECK(text.find("-> Leave => END") != std::string::npos);
+    CHECK(fs::exists(folder.path / "trader-greeting.dlg.layout.json"));
+    fs::copy_file(folder.path / "trader-greeting.dlg", evidence / "trader-greeting.dlg", fs::copy_options::overwrite_existing);
+    fs::copy_file(folder.path / "trader-greeting.dlg.layout.json", evidence / "trader-greeting.dlg.layout.json", fs::copy_options::overwrite_existing);
+
+    // ---- an interaction
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    const bool madeInteraction = rig.editor.createNew("offer-berry");
+    REQUIRE_MESSAGE(madeInteraction, rig.said.back());
+    luna::engine::NodeGraph& r = *rig.editor.graph();
+    int verb = 0;
+    int target = 0;
+    for (const auto& c : r.nodes()) {
+        if (c.type == rule_card::kVerb) verb = c.id;
+        if (c.type == rule_card::kTarget) target = c.id;
+    }
+    REQUIRE(verb != 0);
+    CHECK(rig.editor.setCardField(verb, 1, "Offer a berry"));
+    CHECK(rig.editor.setCardField(verb, 2, "Give one berry to someone; they think better of you."));
+    CHECK(rig.editor.setCardField(target, 0, "person"));
+    const int needs = rig.editor.addCard(rule_card::kRequirement);
+    CHECK(rig.editor.setCardField(needs, 0, "has(berries, 1)"));
+    CHECK(rig.editor.setCardField(needs, 1, "You have no berries"));
+    REQUIRE(r.connect(needs, 0, verb, 1));
+    int does = 0; // the new interaction starts with one Effects card, saying that there is nothing to do yet
+    for (const auto& c : r.nodes()) {
+        if (c.type == rule_card::kEffects) does = c.id;
+    }
+    REQUIRE(does != 0);
+    CHECK(rig.editor.setCardField(does, 0, "take actor berries 1"));
+    CHECK(rig.editor.addCardField(does));
+    CHECK(rig.editor.setCardField(does, 1, "opinion target actor 5"));
+    rig.editor.recheck();
+    for (const auto& finding : rig.editor.findings()) CHECK_MESSAGE(!finding.error, finding.text);
+    rig.editor.tidy();
+    drawEditor(rig.editor, "interaction-graph.png");
+    REQUIRE(rig.editor.save());
+    const std::string json = readFile(folder.path / "interactions" / "offer-berry.json");
+    CHECK(json.find("\"label\": \"Offer a berry\"") != std::string::npos);
+    CHECK(json.find("\"if\": \"has(berries, 1)\"") != std::string::npos);
+    CHECK(json.find("take actor berries 1") != std::string::npos);
+    fs::copy_file(folder.path / "interactions" / "offer-berry.json", evidence / "offer-berry.json", fs::copy_options::overwrite_existing);
+    // The saved file opens again as the same graph.
+    Rig again(folder);
+    again.editor.showKind(GraphEditor::Kind::Interaction);
+    REQUIRE(again.editor.open("offer-berry"));
+    CHECK(again.editor.graph()->nodes().size() == 5); // verb, actor, target, needs, effects
+}
+
+TEST_CASE("X-M9 New: a name is checked and an existing file is not overwritten") {
+    Folder folder;
+    Rig rig(folder);
+    CHECK_FALSE(rig.editor.createNew("Bad Name"));
+    CHECK_FALSE(rig.editor.createNew(""));
+    CHECK_FALSE(rig.editor.createNew("elder-fire")); // exists
+    CHECK(rig.editor.createNew("fresh"));
+    CHECK_FALSE(rig.editor.createNew("fresh")); // open already
+}

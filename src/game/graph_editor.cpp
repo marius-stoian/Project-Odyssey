@@ -3,6 +3,7 @@
 #include "game/graph_commands.h"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <sstream>
 
@@ -217,6 +218,51 @@ bool GraphEditor::openInteraction(const std::string& name) {
     return true;
 }
 
+bool GraphEditor::createNew(const std::string& name) {
+    const bool valid = !name.empty() && name.size() <= 40 &&
+                       std::all_of(name.begin(), name.end(), [](unsigned char c) { return std::islower(c) != 0 || std::isdigit(c) != 0 || c == '-'; });
+    if (!valid) {
+        say_("New: a name is lower-case letters, digits and hyphens (up to 40)");
+        return false;
+    }
+    std::error_code ec;
+    if (fs::exists(fileOf(name), ec) || docs_.count(docKey(kind_, name)) != 0) {
+        say_("New: " + name + " exists already");
+        return false;
+    }
+    sim::rules::LoadReport report;
+    Doc doc;
+    doc.name = name;
+    doc.kind = kind_;
+    if (kind_ == Kind::Dialogue) {
+        const auto script = sim::rules::parseDialogue("=== start\nElder: Hello, {hero}.\n-> Leave => END\n", name, "dialogue/" + name + ".dlg", report);
+        if (!script) {
+            say_("New: the starting conversation could not be made");
+            return false;
+        }
+        DialogueGraph d = dialogueToGraph(*script, {});
+        *doc.graph = std::move(d.graph);
+        doc.header = std::move(d.header);
+        doc.savedHeader = headerText(doc.header);
+    } else {
+        const std::string text = "{ \"id\": \"" + name + "\", \"label\": \"New action\", \"actors\": [\"hero\"], \"target\": { \"tags\": [\"edible\"] }, \"range\": 1.5, "
+                                 "\"duration\": 0, \"order\": 100, \"requires\": [], \"effects\": [ \"say \\\"Nothing to do yet\\\"\" ] }";
+        const auto interaction = sim::rules::InteractionRegistry::parse(text, "interactions/" + name + ".json", report, name);
+        if (!interaction) {
+            say_("New: the starting interaction could not be made" + (report.errors.empty() ? std::string() : ": " + report.errors.front().text()));
+            return false;
+        }
+        *doc.graph = interactionToGraph(*interaction, {});
+    }
+    // `saved` stays empty: a file nobody has written is unsaved by definition.
+    doc.existed = false;
+    Doc& kept = docs_[docKey(kind_, name)] = std::move(doc);
+    current_ = &kept;
+    bindView();
+    say_("New " + name + (kind_ == Kind::Dialogue ? ".dlg" : ".json") + ": not written until you press Save");
+    return true;
+}
+
 std::string GraphEditor::headerText(const sim::rules::DlgScript& script) const {
     sim::rules::DlgScript bare = script;
     bare.nodes.clear();
@@ -261,6 +307,15 @@ int GraphEditor::addCard(const std::string& type) {
     // Each new card goes a little lower and further right than the last, so a row of them can be told apart.
     const int step = static_cast<int>(current_->graph->nodes().size() % 8) * 10;
     return view_->addNodeAt(card, canvas_.x + canvas_.width / 3 + step, canvas_.y + canvas_.height / 3 + step);
+}
+
+void GraphEditor::tidy() {
+    const Kind kind = kind_;
+    edit("tidy", [kind](NodeGraph& g) {
+        if (kind == Kind::Dialogue) arrangeDialogue(g);
+        else arrangeInteraction(g);
+    });
+    if (view_) view_->frameAll();
 }
 
 bool GraphEditor::setCardField(int card, std::size_t index, const std::string& value) {
@@ -474,6 +529,7 @@ void GraphEditor::buildChrome() {
     button("Frame", "Show every card", [this] {
         if (view_) view_->frameAll();
     });
+    button("Tidy", "Put the cards in rows again", [this] { tidy(); });
     x += 6;
     {
         const bool talk = kind_ == Kind::Dialogue;
@@ -496,6 +552,10 @@ void GraphEditor::buildChrome() {
         button("+NPC", "The rule that makes clan members do this on their own", [this] { addCard(rule_card::kNpcRule); });
         button("+Chronicle", "A line for the chronicle when this happens", [this] { addCard(rule_card::kChronicle); });
     }
+    x += 6;
+    chrome_->add<TextField>(Rect{x, 2, 110, kBarHeight - 4}, "name: ", newName_, 40, [this](const std::string& v) { newName_ = v; });
+    x += 114;
+    button("New", "Make a new file of this name in the shown kind; it is written when you press Save", [this] { createNew(newName_); });
     const std::vector<std::string> names = files();
     ListBox& list = chrome_->add<ListBox>(Rect{2, kBarHeight + 4, kListWidth, viewHeight_ - kBarHeight - kStatusHeight - 6}, names, [this, names](int index) {
         if (index >= 0 && index < static_cast<int>(names.size())) open(names[static_cast<std::size_t>(index)]);

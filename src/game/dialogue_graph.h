@@ -55,6 +55,9 @@ std::string layoutToJson(const DialogueLayout& layout);
 // Reads the sidecar; a missing or damaged one gives an empty layout (the graph is laid out again, nothing is lost).
 DialogueLayout layoutFromJson(std::string_view text);
 
+// Puts the cards in rows again (one row per node, notes, conditions and effects above their card): the editor's Tidy button.
+void arrangeDialogue(luna::engine::NodeGraph& graph);
+
 // Every card the file holds by its key ("start", "start/choice1", "start/choice1/do"): where a finding from the check points to.
 std::map<std::string, int> cardKeys(const DialogueGraph& dialogue);
 
