@@ -3,6 +3,8 @@
 #include "game/graph_editor.h"
 #include "game/level.h"
 #include "game/quest_graph.h"
+#include "sim/graph_check.h"
+#include "sim/quest_book.h"
 
 #include <doctest/doctest.h>
 
@@ -191,4 +193,92 @@ TEST_CASE("US-184 A new quest is made in the editor and only written on Save; th
     CHECK_FALSE(rig.editor.save());
     CHECK(rig.said.back().find("must stay") != std::string::npos);
     CHECK_FALSE(rig.editor.createNew("first-day")); // exists already
+}
+
+// X-M10: the owner's loop, end to end. A quest is built in the graph editor, saved, test-played with the debugger's calls, loaded the way the game loads
+// it, handed out by a giver and played to its reward.
+namespace {
+
+class Recorder : public rules::EffectHost {
+public:
+    std::vector<std::string> log;
+    void setState(const rules::ThingRef&, const std::string& state) override { log.push_back("set " + state); }
+    void apply(const rules::Effect& effect, int actor, const rules::ThingRef&) override { log.push_back(effect.source + " by " + std::to_string(actor)); }
+    int ticksPerDay() const override { return 1000; }
+};
+
+class Quiet : public rules::RuleContext {
+public:
+    rules::Value path(const std::string&) const override { return rules::Value::ofNumber(0); }
+    rules::Value call(const std::string&, const std::vector<rules::Value>&) const override { return rules::Value::ofNumber(0); }
+};
+
+} // namespace
+
+TEST_CASE("X-M10 From scratch: build a quest in the graph, test-play it, save it, play it from a giver to the reward") {
+    Folder folder;
+    Rig rig(folder);
+    REQUIRE(rig.editor.createNew("fetch-water"));
+    const int header = rig.card(quest_card::kQuest);
+    REQUIRE(header != 0);
+    CHECK(rig.editor.setCardField(header, 1, "Fetch water"));
+    CHECK(rig.editor.setCardField(header, 2, "role:elder"));
+    CHECK(rig.editor.setCardField(header, 5, "The clan is thirsty. Will you fetch water?"));
+    CHECK(rig.editor.setCardField(header, 6, "Thank you, the clan drinks tonight."));
+    // The template has one step that leads to the end; add a second step in front of it and a reward.
+    const int first = rig.card(quest_card::kStep, "first");
+    REQUIRE(first != 0);
+    CHECK(rig.editor.setCardField(first, 1, "Drink at the stream to see it is clean."));
+    CHECK(rig.editor.setCardField(first, 2, "interact drink"));
+    const int back = rig.editor.addCard(quest_card::kStep);
+    CHECK(rig.editor.setCardField(back, 0, "return"));
+    CHECK(rig.editor.setCardField(back, 1, "Tell the elder."));
+    CHECK(rig.editor.setCardField(back, 2, "talk elder"));
+    const int end = rig.card(quest_card::kEnd);
+    REQUIRE(end != 0);
+    REQUIRE(rig.editor.graph()->connect(first, 0, back, 0));
+    REQUIRE(rig.editor.graph()->connect(back, 0, end, 0));
+    const int rewards = rig.editor.addCard(quest_card::kRewards);
+    CHECK(rig.editor.setCardField(rewards, 0, "give hero flint 2"));
+    REQUIRE(rig.editor.graph()->connect(rewards, 0, header, 2));
+    REQUIRE(rig.editor.save());
+
+    // Saved, and the game's loader reads it with no complaint; the check finds nothing wrong.
+    rules::LoadReport report;
+    const std::vector<rules::Quest> quests = rules::loadQuests(folder.path / "quests", report);
+    for (const auto& e : report.errors) MESSAGE(e.text());
+    REQUIRE(report.errors.empty());
+    const rules::Quest* made = nullptr;
+    for (const auto& q : quests) {
+        if (q.id == "fetch-water") made = &q;
+    }
+    REQUIRE(made != nullptr);
+    CHECK(made->steps.size() == 2);
+    CHECK(rules::checkQuest(*made, {}).empty());
+
+    // Test-play with the debugger's calls: jump to the second step and finish it.
+    rules::QuestBook book(quests);
+    rules::ActionRunner runner;
+    Recorder host;
+    Quiet world;
+    std::int64_t now = 100;
+    book.update(world, now, 1000, runner, host);
+    CHECK(book.status("fetch-water") == rules::QuestStatus::Available); // it waits for its giver
+    CHECK(book.jumpTo("fetch-water", "return", now));
+    CHECK(book.activeStep("fetch-water") == "return");
+    CHECK(book.reset("fetch-water"));
+
+    // Played as a player does: the giver hands it out, the hero drinks, tells the elder, and the reward arrives.
+    book.update(world, now, 1000, runner, host);
+    REQUIRE(book.start("fetch-water", now));
+    now += 20;
+    book.notify({rules::QuestObjective::Kind::Interact, "drink", 1, now});
+    book.update(world, now, 1000, runner, host);
+    CHECK(book.activeStep("fetch-water") == "return");
+    now += 20;
+    book.notify({rules::QuestObjective::Kind::Talk, "elder", 1, now});
+    book.update(world, now, 1000, runner, host);
+    CHECK(book.status("fetch-water") == rules::QuestStatus::Done);
+    REQUIRE(host.log.size() == 1);
+    CHECK(host.log[0] == "give hero flint 2 by 0");
 }
