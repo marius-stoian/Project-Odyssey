@@ -178,3 +178,19 @@ In the Editor, the **Talk** button opens every `.dlg` file of the dialogue folde
 A choice with no wire from its `to` port ends the conversation (`END`). The pointer: right button drag pans, the wheel zooms (25 to 400 percent) around the pointer, left button drags cards, draws wires from a yellow port to a white one, and selects with a box. **Delete** removes the selected cards, **Ctrl+Z** and **Ctrl+Y** walk back and forth through graph and map edits together, **Ctrl+S** (or Save) writes the file.
 
 The side panel edits the chosen card; with nothing chosen it edits the file's headers (`@who`, `@when`, `@priority`, `@bark`, `@pair`). Where each card sits is saved in `<name>.dlg.layout.json` beside the script (card places keyed by what the card is in the file, for example `start/choice1`); delete it and the graph is laid out again. A card nothing leads to is not in the text, and Save says so. Save refuses a graph the loader would refuse (the first mistake is named), asks once before overwriting a file that changed on disk since it was opened, keeps the previous text as `<name>.dlg.bak`, and reads the game's data again like F5.
+
+### The check (US-175)
+
+Under the canvas the graph editor lists what is wrong with the open file, live as you edit; a click on a line selects and shows the card it points to. **Errors** (`!`) block shipping, **warnings** (`?`) only say something looks wrong. Saving is always allowed, and says how many errors remain.
+
+| Finding | Kind | Meaning |
+|---|---|---|
+| node cannot be reached | warning | no choice leads to it from `start` (breadth-first); the file still loads |
+| dead end | error | a node with no choice and no `END` (not in a `@bark` or `@pair` script, which are one line by design) |
+| unknown node | error | a choice leads to a node that does not exist |
+| unknown item | error | `give`, `take` or `has(...)` names an item the hero data does not have |
+| unknown need | error | `need(x)` where x is not hunger, energy, warmth or social |
+| unknown built-in, conversation, interaction | error | `do x`, `talk x`, `start x` name something that is not there |
+| unknown tag | warning | `tag(target, x)` where no thing carries x |
+
+The same check runs over every shipped `.dlg` and interaction file in the tests (`US-175 Shipped`), so a mistake in a shipped file fails CI.

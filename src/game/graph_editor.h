@@ -5,6 +5,7 @@
 #include "game/dialogue_graph.h"
 #include "game/editor_history.h"
 #include "game/interaction_graph.h"
+#include "sim/graph_check.h"
 #include "luna/engine/input.h"
 #include "luna/engine/node_graph.h"
 #include "luna/engine/ui.h"
@@ -13,6 +14,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -44,6 +46,20 @@ public:
     // disk since it was opened (press Save again to overwrite).
     bool save();
     bool dirty() const;
+    // The check (US-175, D-56 Q17): what the open file names that does not exist, nodes nobody reaches, dead ends. It runs again whenever the graph changed;
+    // the list under the canvas shows it, and a click selects the card it points to. `catalog` is what the game knows (items, tags, built-in actions).
+    struct Problem {
+        bool error = false;
+        std::string key; // the card, by its key in the file; empty: the whole file
+        std::string text;
+    };
+    void setCatalog(sim::rules::GraphCatalog catalog) {
+        catalog_ = std::move(catalog);
+        checked_.reset();
+    }
+    const std::vector<Problem>& findings() const { return findings_; }
+    void recheck();
+    bool pickProblem(std::size_t index); // select (and show) the card the finding points to; false for a finding about the whole file
     // After Undo or Redo outside: selection and side panel are looked at again.
     void refresh();
 
@@ -63,6 +79,7 @@ public:
     sim::rules::DlgScript& header() { return current_->header; } // @who and the rest: kept with the file, not part of Undo
     const std::vector<std::string>& problems() const { return problems_; } // from the last save or check, "error: ..." and "warning: ..."
     luna::engine::Rect canvasBounds() const { return canvas_; }
+    luna::engine::Rect problemListBounds() const { return problemList_->bounds; }
 
 private:
     struct Doc {
@@ -89,6 +106,7 @@ private:
     bool saveDialogue();
     bool saveInteraction();
     void bindView();
+    std::string errorsNote() const;
     std::string headerText(const sim::rules::DlgScript& script) const;
 
     int viewWidth_;
@@ -109,6 +127,10 @@ private:
     std::unique_ptr<luna::engine::Panel> chrome_; // the bar and the file list
     std::unique_ptr<luna::engine::Panel> panel_;  // the side panel of the chosen card (or of the file)
     std::string panelKey_;
+    sim::rules::GraphCatalog catalog_;
+    std::vector<Problem> findings_;
+    std::optional<luna::engine::NodeGraph> checked_; // the graph the findings were made from
+    std::unique_ptr<luna::engine::ListBox> problemList_;
     std::string panelTitle_;
     std::vector<std::string> problems_;
     bool overwriteArmed_ = false;

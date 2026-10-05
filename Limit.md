@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, US-175):** S-US-175 DONE (Milestone-121.md, AP-122), own cases run alone. Next: S-US-173 (attach to placed things; M9a already has a dialogue per NPC and partner: reuse it, add per-thing overrides), then US-174 (Test-play), X-M9.
+
 **Resume update (2026-10-05, US-172):** S-US-172 DONE (Milestone-120.md, AP-121), own cases run alone. Next: S-US-175 (graph validation: list of problems, clickable, live), then US-173 (attach), US-174 (Test-play), X-M9.
 
 **Resume update (2026-10-05, US-171):** S-US-171 DONE (Milestone-119.md, AP-120), own cases run alone. Open CI-014 for Anima (sub-call card missing). Next: S-US-172 (interaction graph editor, new files src/game/interaction_graph.*, same GraphEditor), then US-175, US-173, US-174, X-M9.

@@ -276,3 +276,96 @@ TEST_CASE("US-172 Draw: the graph editor shows an interaction") {
     rig.editor.drawOverlay(painter);
     CHECK(luna::engine::savePng(renderer.image(), fs::temp_directory_path() / "odysseus-us172-interaction-graph.png"));
 }
+
+namespace {
+
+// One tick with the left button pressed at a point, as a click on a list row.
+luna::engine::Intents clickAt(int x, int y) {
+    luna::engine::Intents intents;
+    luna::engine::Pointer pointer;
+    pointer.x = x;
+    pointer.y = y;
+    pointer.pressed[0] = true;
+    pointer.held[0] = true;
+    intents.setPointer(pointer);
+    return intents;
+}
+
+} // namespace
+
+TEST_CASE("US-175 Unreachable: the editor lists a node no choice leads to, and clicking the finding selects that node") {
+    Folder folder;
+    writeFile(folder.path / "orphan.dlg", "=== start\nElder: Hi.\n-> Bye => END\n\n=== lost\nElder: Lonely.\n-> Back => start\n");
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("orphan"));
+    rig.editor.show(true);
+    luna::engine::Intents idle;
+    rig.editor.update(idle);
+    REQUIRE(rig.editor.findings().size() == 1);
+    CHECK_FALSE(rig.editor.findings()[0].error);
+    CHECK(rig.editor.findings()[0].text.find("\"lost\" cannot be reached") != std::string::npos);
+    // A click on the first row of the list.
+    const luna::engine::Rect list = rig.editor.problemListBounds();
+    rig.editor.update(clickAt(list.x + 10, list.y + 3));
+    const int lost = rig.card(dlg_card::kNode, "lost");
+    REQUIRE(lost != 0);
+    CHECK(rig.editor.view()->selection().count(lost) == 1);
+    CHECK(rig.editor.view()->selection().size() == 1);
+}
+
+TEST_CASE("US-175 Dead end: a node with no choice and no END is listed as an error") {
+    Folder folder;
+    writeFile(folder.path / "stuck.dlg", "=== start\nElder: Hi.\n-> On => stuck\n\n=== stuck\nElder: ...\n");
+    Rig rig(folder);
+    REQUIRE(rig.editor.open("stuck"));
+    rig.editor.recheck();
+    REQUIRE(rig.editor.findings().size() == 1);
+    CHECK(rig.editor.findings()[0].error);
+    CHECK(rig.editor.findings()[0].text.find("dead end") != std::string::npos);
+    CHECK(rig.editor.pickProblem(0));
+    CHECK(rig.editor.view()->selection().count(rig.card(dlg_card::kNode, "stuck")) == 1);
+}
+
+TEST_CASE("US-175 Unknown: an effect giving an unknown item names the item and the node; saving is allowed with a warning") {
+    Folder folder;
+    writeFile(folder.path / "gift.dlg", "=== start\nElder: Hi.\n-> Share {give hero glowstone 1} => END\n");
+    Rig rig(folder);
+    odysseus::sim::rules::GraphCatalog catalog;
+    catalog.items = {"berries"};
+    rig.editor.setCatalog(catalog);
+    REQUIRE(rig.editor.open("gift"));
+    rig.editor.recheck();
+    REQUIRE(rig.editor.findings().size() == 1);
+    CHECK(rig.editor.findings()[0].text == "start, choice 1: unknown item \"glowstone\"");
+    CHECK(rig.editor.pickProblem(0));
+    // The file can still be saved (D-56 Q18); the note says it will not ship.
+    CHECK(rig.editor.setCardField(rig.card(dlg_card::kChoice, "Share"), 0, "Share it"));
+    REQUIRE(rig.editor.save());
+    CHECK(rig.said.back().find("1 error(s) block shipping") != std::string::npos);
+    // Fixing the name clears the finding at once.
+    int effect = 0;
+    for (const auto& c : rig.editor.graph()->nodes()) {
+        if (c.type == dlg_card::kEffect) effect = c.id;
+    }
+    REQUIRE(effect != 0);
+    CHECK(rig.editor.setCardField(effect, 0, "give hero berries 1"));
+    rig.editor.recheck();
+    CHECK(rig.editor.findings().empty());
+}
+
+TEST_CASE("US-175 Unknown: the interaction graph is checked too") {
+    Folder folder;
+    Rig rig(folder);
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    odysseus::sim::rules::GraphCatalog catalog;
+    catalog.items = {"stick"};
+    catalog.tags = {"plant"};
+    rig.editor.setCatalog(catalog);
+    REQUIRE(rig.editor.open("gather"));
+    rig.editor.recheck();
+    // gather.json gives berries and aims at the tag "edible", neither in this small catalog.
+    bool target = false;
+    for (const auto& p : rig.editor.findings()) target = target || p.key == "target";
+    CHECK(target);
+    CHECK(rig.editor.pickProblem(0));
+}

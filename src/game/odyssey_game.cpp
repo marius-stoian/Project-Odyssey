@@ -744,6 +744,19 @@ void OdysseyGame::syncEditorActions() {
     editor_.setActionIds(std::move(ids));
 }
 
+// What the graph editor's check may name (US-175): the game's items, built-in actions, conversations, interactions and tags.
+void OdysseyGame::syncGraphCatalog() {
+    sim::rules::GraphCatalog catalog;
+    if (heroData_) {
+        for (const sim::Item& item : heroData_->items) catalog.items.insert(item.id);
+    }
+    catalog.builtins.insert(builtInActionNames().begin(), builtInActionNames().end());
+    for (const sim::rules::DlgScript& script : dialogues_.all()) catalog.dialogues.insert(script.name);
+    for (const sim::rules::Interaction& interaction : interactions_.all()) catalog.interactions.insert(interaction.id);
+    catalog.tags = knownTags();
+    editor_.graphs().setCatalog(std::move(catalog));
+}
+
 void OdysseyGame::loadInteractions() {
     // At start every file that reads cleanly loads; one with mistakes is left out and named in the log and the panel.
     sim::rules::LoadOptions options;
@@ -755,6 +768,7 @@ void OdysseyGame::loadInteractions() {
     dialogues_ = sim::rules::DialogueLibrary::load(dataDirectory_ / "dialogue", dialogueReport);
     smalltalk_ = loadSmalltalk(dialogueReport);
     syncEditorActions();
+    syncGraphCatalog();
     interactionReport_.errors.insert(interactionReport_.errors.end(), dialogueReport.errors.begin(), dialogueReport.errors.end());
     interactionReport_.warnings.insert(interactionReport_.warnings.end(), dialogueReport.warnings.begin(), dialogueReport.warnings.end());
     interactionReport_.filesRead += dialogueReport.filesRead;
@@ -791,6 +805,7 @@ bool OdysseyGame::reloadInteractions() {
     syncEditorActions();
     dialogues_ = std::move(freshDialogue);
     smalltalk_ = std::move(freshSmalltalk);
+    syncGraphCatalog();
     core::logInfo(std::format("Interactions reloaded: {} from {} file(s) in {:.1f} ms", report.loaded, report.filesRead, lastInteractionReloadMs_));
     return true;
 }

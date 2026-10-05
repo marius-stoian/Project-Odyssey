@@ -45,6 +45,9 @@ std::optional<sim::rules::Interaction> graphToInteraction(const luna::engine::No
 // Where each card of the graph sits, keyed by what the card is in the file ("verb", "requirement1"), for the `.json.layout.json` beside it.
 DialogueLayout interactionLayoutOf(const luna::engine::NodeGraph& graph);
 
+// Every card the file holds by its key ("verb", "requirement0", "effects0"): where a finding from the check points to.
+std::map<std::string, int> interactionCardKeys(const luna::engine::NodeGraph& graph);
+
 void describeRuleCard(luna::engine::GraphNode& card);
 luna::engine::GraphNode newRuleCard(const std::string& type);
 

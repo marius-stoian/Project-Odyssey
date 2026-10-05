@@ -99,6 +99,7 @@ public:
     void clearSelection() { selected_.clear(); }
     bool deleteSelected();               // the host calls it on the Delete key
     void frameAll();                     // pan and zoom so every node shows
+    void centerOn(int graphX, int graphY); // pan so the graph point (the middle of a card, say) is in the middle of the view; the zoom stays
     // Adds a node at a screen point; the host calls it from its "add" menu.
     int addNodeAt(GraphNode node, int screenX, int screenY);
 
