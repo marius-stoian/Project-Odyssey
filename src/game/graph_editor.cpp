@@ -548,7 +548,9 @@ void GraphEditor::recheck() {
         std::string json;
         const std::optional<sim::rules::Quest> quest = graphToQuest(*current_->graph, structural, json);
         for (const std::string& s : structural) findings_.push_back({s.rfind("error:", 0) == 0, std::string(), s});
-        (void)quest;
+        if (quest) {
+            for (const sim::rules::GraphFinding& f : sim::rules::checkQuest(*quest, catalog_)) findings_.push_back({f.error, f.key, f.message});
+        }
     } else {
         std::string json;
         const std::optional<sim::rules::Interaction> interaction = graphToInteraction(*current_->graph, structural, json);

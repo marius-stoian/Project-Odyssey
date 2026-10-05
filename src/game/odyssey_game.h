@@ -44,6 +44,7 @@
 #include "game/bubbles.h"
 #include "sim/dialogue_script.h"
 #include "sim/flag_store.h"
+#include "sim/graph_check.h"
 #include "sim/quest_book.h"
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
@@ -457,6 +458,7 @@ private:
     sim::rules::SmallTalk smalltalk_;
     sim::rules::FlagStore flags_;
     sim::rules::QuestBook quests_; // the authored quests and where each stands (US-180)
+    sim::rules::GraphCatalog questCatalog_; // what the quest check may name, kept from the last sync of the graph catalog (US-187)
     void watchHeroItems(); // tells the quests what enters the hero bag (US-181)
     struct QuestMarker { bool valid = false; double x = 0.0; double y = 0.0; } questMarker_; // where the tracked step points, found twice a second (US-183)
     Bubbles bubbles_;
