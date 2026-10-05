@@ -1,0 +1,31 @@
+// The elder's first lesson (US-185): the tutorial of the first ten minutes, as a quest. It starts by itself when a new game is begun with the tutorial on
+// (the flag "tutorial" is set then). The words are the ones the tutorial always had; the hint comes after two minutes without progress.
+{
+  "id": "first-day",
+  "title": "The First Day",
+  "giver": "none",
+  "requires": ["flag(tutorial)"],
+  "start": "gather",
+  "steps": {
+    "gather": {
+      "text": "Welcome, young one. First, food: right-click a berry bush and choose Gather.",
+      "objective": "gather berries 1",
+      "hint": { "after": "120s", "text": "Berry bushes are the small green plants near the camp. Walk close, then right-click one." },
+      "next": "eat"
+    },
+    "eat": {
+      "text": "Well done. Now eat: right-click the clan's fire and choose Eat berries.",
+      "objective": "interact eat-berries",
+      "hint": { "after": "120s", "text": "The clan's fire is in the middle of the camp. Stand near it before you right-click." },
+      "next": "tend"
+    },
+    "tend": {
+      "text": "Good. Last, keep us warm: right-click the fire again and choose Tend the fire.",
+      "objective": "interact tend-fire",
+      "hint": { "after": "120s", "text": "Same fire, other choice: Tend the fire. It keeps the whole clan warm." },
+      "next": "END"
+    }
+  },
+  "journal": "The elder taught me the first things a clan needs: food, and a fire.",
+  "turnIn": "You know the first day. The rest is your life: press Esc for your bag, skills and the dominion."
+}

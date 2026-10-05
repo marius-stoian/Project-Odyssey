@@ -1,0 +1,37 @@
+{
+  "id": "lost-flint",
+  "order": 1,
+  "title": "The lost flint",
+  "text": "You find a fine piece of flint in the riverbed that belongs to no one, or to whoever comes for it.",
+  "minAge": 12,
+  "maxAge": 25,
+  "role": "friend",
+  "options": [
+    {
+      "text": "Keep it and learn to work it.",
+      "affinity": {
+        "knapper": 7
+      },
+      "opinion": 0,
+      "note": "{hero} found a good piece of flint and kept it."
+    },
+    {
+      "text": "Trade it for a favour.",
+      "affinity": {
+        "trade": 7
+      },
+      "opinion": 6,
+      "note": "{hero} traded a piece of flint to {other} for a favour."
+    },
+    {
+      "text": "Give it to the clan's knapper.",
+      "affinity": {
+        "knapper": 3,
+        "religion": 2
+      },
+      "opinion": 8,
+      "trait": "kind",
+      "note": "{hero} gave a fine piece of flint away, and {other} was glad."
+    }
+  ]
+}

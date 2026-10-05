@@ -265,8 +265,6 @@ public:
     // useRegion false starts the run in the level already loaded (a hand-made camp) instead of a generated region.
     void startNewRun(const sim::NewGame& game, bool useRegion = true, bool tutorial = false);
     // The elder's first-day guidance (US-090) and the opt-in session statistics (US-092).
-    Tutorial& tutorial() { return tutorial_; }
-    const Tutorial& tutorial() const { return tutorial_; }
     SessionStats& stats() { return stats_; }
     void setStatistics(bool agreed);
     // Writes the session's statistics file (only when the player agreed); called when the game ends. Returns the file or empty.
@@ -508,8 +506,6 @@ private:
     std::optional<sim::HeroData> heroData_;
     std::unique_ptr<sim::HeroLife> life_;
     RunFlow runFlow_;
-    Tutorial tutorial_;
-    TutorialScript tutorialScript_;
     SessionStats stats_;
     bool privacyAsked_ = false;
     void drawTutorial(luna::engine::Renderer& renderer) const;

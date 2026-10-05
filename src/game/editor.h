@@ -19,6 +19,7 @@
 
 #include "game/npc_class_book.h"
 #include "game/npc_marker.h"
+#include "game/story_event_editor.h"
 
 #include <filesystem>
 #include <functional>
@@ -140,6 +141,7 @@ public:
     const BuildingEditor& buildings() const { return *buildingEditor_; }
     // The graph editor (M9, D-56): the Dialogue button opens it over the map; its edits are steps of this Editor's one Undo. `saved` is called after a file was written (the game reads its data again).
     GraphEditor& graphs() { return *graphEditor_; }
+    StoryEventEditor& storyEvents() { return *storyEvents_; }
     void setGraphFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved, std::filesystem::path questFolder = {}) { graphEditor_->setFolders(std::move(dialogueFolder), std::move(interactionFolder), std::move(saved), std::move(questFolder)); }
     // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
     // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
@@ -304,6 +306,7 @@ private:
     Level& level_;
     const Definitions& definitions_;
     std::unique_ptr<BuildingEditor> buildingEditor_;
+    std::unique_ptr<StoryEventEditor> storyEvents_; // the Story events list (US-185)
     std::unique_ptr<GraphEditor> graphEditor_; // the dialogue graph (M9)
     std::filesystem::path levelFile_;
     int viewWidth_;

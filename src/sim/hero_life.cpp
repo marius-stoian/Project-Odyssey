@@ -170,6 +170,7 @@ const CrossroadsEvent* HeroLife::liveYear() {
         const CrossroadsEvent& event = data_->events[i];
         if (age < event.minAge || age > event.maxAge) continue;
         if (event.needsAffinity && affinity_[static_cast<std::size_t>(*event.needsAffinity)] < event.needsMinimum) continue;
+        if (!event.trigger.empty() && eventTrigger_ && !eventTrigger_(event.trigger)) continue;
         matching.push_back(static_cast<int>(i));
         if (!seen_.contains(event.id)) fresh.push_back(static_cast<int>(i));
     }

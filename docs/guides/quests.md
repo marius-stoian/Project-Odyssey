@@ -132,3 +132,30 @@ The Quests tab lists what looks wrong under the canvas, live as you edit; a clic
 | unknown person, place, kind | warning | a person, place or creature the loaded level does not have (people of a generated region are made at run time) |
 | unknown quest | error | `quest(x)`, `step(x)` or a `quest ...` reward names a quest that does not exist |
 | quests need each other | error | quest A requires B done, B requires A: neither can start (a prerequisite under `not` does not count) |
+
+
+## The tutorial is a quest (US-185)
+
+`assets/data/quests/first-day.json` is the first-ten-minutes tutorial: gather berries, eat at the fire, tend the fire, with the elder's words and a hint after two minutes. New Game with Tutorial on sets the note `tutorial`; the quest requires it and starts by itself. Change the words in the file (or in the Quests tab) and press F5. The older `hero/tutorial.json` is no longer read by the game; it stays only for the tests of the first version of the tutorial.
+
+## Story events (US-185)
+
+The crossroads events of the hero's youth are one file each in `assets/data/story/events/<id>.json` (the id is the file name), edited in the Editor under **Events**:
+
+```jsonc
+{
+  "id": "lost-flint",
+  "order": 1,                         // where it stands in the list; the yearly draw depends on it
+  "title": "The lost flint",
+  "text": "You find a fine piece of flint in the riverbed...",
+  "minAge": 12, "maxAge": 25,
+  "role": "friend",                   // who it involves: elder or friend
+  "trigger": "flag(met-elder)",       // optional condition in the rule language; empty = always possible
+  "requires": { "affinity": "hunter", "min": 12 },   // optional
+  "options": [                        // two or three
+    { "text": "Keep it and learn to work it.", "affinity": { "knapper": 7 }, "opinion": 0, "trait": "brave", "note": "{hero} found a good piece of flint." }
+  ]
+}
+```
+
+In the form the affinities of an option are written `knapper=7 trade=2`. An event whose `trigger` does not hold is left out of the year's draw. The older single `hero/crossroads.json` is still read when the `story/events` folder is missing. The game reads the events when it starts, so a saved change shows from the next start.

@@ -1,0 +1,29 @@
+{
+  "title": "Story event (assets/data/story/events/<id>.json)",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "description": "One word; must equal the file name without .json" },
+    "order": { "type": "integer", "minimum": 0, "default": 0, "description": "Where the event stands in the list; the yearly draw depends on it" },
+    "title": { "type": "string", "description": "The heading of the event" },
+    "text": { "type": "string", "description": "What happens" },
+    "minAge": { "type": "integer", "minimum": 1, "maximum": 80, "description": "Youngest age" },
+    "maxAge": { "type": "integer", "minimum": 1, "maximum": 80, "description": "Oldest age" },
+    "role": { "type": "string", "enum": ["elder", "friend"], "description": "Who in the clan it involves" },
+    "trigger": { "type": "string", "description": "A condition in the rule language; empty means always possible" },
+    "requires": { "type": "object", "properties": { "affinity": { "type": "string" }, "min": { "type": "integer", "minimum": 0, "maximum": 100 } }, "description": "An affinity the hero must have reached" },
+    "options": {
+      "type": "array",
+      "description": "Two or three choices",
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string", "description": "What the player reads" },
+          "affinity": { "type": "object", "description": "hunter, gatherer, knapper, fireKeeper, shaman, trade, religion with a whole number" },
+          "opinion": { "type": "integer", "minimum": -100, "maximum": 100, "description": "What the other person thinks of the hero afterwards" },
+          "trait": { "type": "string", "description": "A trait the hero gains (brave, kind...)" },
+          "note": { "type": "string", "description": "The chronicle sentence, with {hero} and {other}" }
+        }
+      }
+    }
+  }
+}

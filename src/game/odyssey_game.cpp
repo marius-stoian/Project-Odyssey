@@ -109,6 +109,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     actions_.setFinishObserver([this](const std::string& interaction, int actor, const sim::rules::ThingRef&) {
         if (actor == kHeroActor) questEvent(sim::rules::QuestObjective::Kind::Interact, interaction);
     });
+    editor_.storyEvents().setFolder(dataDirectory / "story" / "events"); // the events are read again when a new game starts (US-185)
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
@@ -655,12 +656,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     greetingCooldowns_.clear();
     smalltalk_.clear();
     stats_.record("run-started", ticks_);
-    if (tutorial) {
-        if (tutorialScript_.steps.empty()) tutorialScript_ = loadTutorial(dataDirectory_ / "hero" / "tutorial.json");
-        tutorial_.start(tutorialScript_);
-    } else {
-        tutorial_.stop();
-    }
+    if (tutorial) flags_.set("tutorial", 1); // the first-day quest (assets/data/quests/first-day.json) starts by itself when this note is set (US-185)
     if (life_->phase() == sim::Phase::Growing) {
         runFlow_.openFocus();
     } else {
@@ -681,16 +677,21 @@ std::filesystem::path OdysseyGame::finishSession() {
     return stats_.finish(saveDirectory_ / "sessions", ticks_, sessionStamp());
 }
 
-// The elder speaks in a box at the bottom while the first day is taught (US-090).
+// The elder speaks in a box at the bottom while the first-day quest is under way (US-090, US-185): the words of the active step, the hint when the hero is stuck.
 void OdysseyGame::drawTutorial(luna::engine::Renderer& renderer) const {
-    if (!tutorial_.active() || runFlow_.modal()) return;
+    if (runFlow_.modal() || quests_.status("first-day") != sim::rules::QuestStatus::Active) return;
+    const sim::rules::Quest* quest = quests_.find("first-day");
+    const sim::rules::QuestState* state = quests_.state("first-day");
+    const sim::rules::QuestStep* step = quest != nullptr && state != nullptr ? quest->find(state->step) : nullptr;
+    if (step == nullptr) return;
+    const bool hinting = quests_.hintDue("first-day", actionClock_) && step->hint.has_value();
     luna::engine::UiPainter painter(renderer, uiSheet_);
-    const std::string line = tutorial_.elder() + ": " + tutorial_.text();
+    const std::string line = "Elder: " + (hinting ? step->hint->text : step->text);
     const int width = std::min(uiWidth() - 8, luna::engine::UiPainter::textWidth(line) + 8);
     const int chars = (width - 8) / luna::engine::kTextAdvance;
     const luna::engine::Rect box{(uiWidth() - width) / 2, uiHeight() - 2 * luna::engine::kGlyphHeight - 30, width, luna::engine::kGlyphHeight + 6};
     painter.fill(box, luna::engine::UiColor::Shade);
-    painter.outline(box, tutorial_.hinting() ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
+    painter.outline(box, hinting ? luna::engine::UiColor::Gold : luna::engine::UiColor::Text);
     painter.text(box.x + 4, box.y + 3, line.substr(0, static_cast<std::size_t>(chars)), luna::engine::UiColor::Text);
 }
 
@@ -1935,7 +1936,6 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     ++ticks_;
     tickActions(intents);
     if (ticks_ % 10 == 0) tickQuests(*this);
-    tutorial_.tick();
     const auto tickStarted = std::chrono::steady_clock::now();
     weather_.update();
     if (!insideBuilding()) tickNpcPopulation();
@@ -2580,6 +2580,12 @@ std::string OdysseyGame::leaveBuilding() {
 // What enters the hero bag is reported to the quests (US-181): crafted things count as crafting, everything else as gathering.
 void OdysseyGame::watchHeroItems() {
     if (!life_) return;
+    life_->setEventTrigger([this](const std::string& condition) {
+        const sim::rules::ParsedExpr parsed = sim::rules::parseExpression(condition);
+        if (!parsed.root) return true;
+        const GameRuleContext context(*this, heroSubject(*this));
+        return sim::rules::isTrue(*parsed.root, context);
+    });
     life_->setItemObserver([this](const std::string& item, int amount, bool crafted) {
         questEvent(crafted ? sim::rules::QuestObjective::Kind::Craft : sim::rules::QuestObjective::Kind::Gather, item, amount);
     });
