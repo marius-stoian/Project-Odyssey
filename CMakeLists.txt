@@ -281,7 +281,8 @@ add_library(odysseus_game STATIC
     src/game/building_editor.cpp
     src/game/editor_history.cpp
     src/game/dialogue_graph.cpp
-    src/game/graph_editor.cpp)
+    src/game/graph_editor.cpp
+    src/game/interaction_graph.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
 target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
@@ -470,6 +471,7 @@ add_executable(odysseus_game_tests
     tests/game/graph_command_test.cpp
     tests/game/dialogue_graph_test.cpp
     tests/game/graph_editor_test.cpp
+    tests/game/interaction_graph_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
     tests/game/building_editor_test.cpp)

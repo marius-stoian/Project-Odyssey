@@ -39,6 +39,8 @@ struct Folder {
         path = fs::temp_directory_path() / ("odysseus-us171-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
         fs::create_directories(path);
         fs::copy_file(fs::path(ODYSSEUS_DATA_DIR) / "dialogue" / "elder-fire.dlg", path / "elder-fire.dlg");
+        fs::create_directories(path / "interactions");
+        fs::copy_file(fs::path(ODYSSEUS_DATA_DIR) / "interactions" / "gather.json", path / "interactions" / "gather.json");
     }
     ~Folder() {
         std::error_code ec;
@@ -54,7 +56,7 @@ struct Rig {
     GraphEditor editor;
     explicit Rig(const Folder& folder)
         : editor(960, 540, [this](std::unique_ptr<Command> c) { history.record(std::move(c)); }, [this](const std::string& m) { said.push_back(m); }) {
-        editor.setFolders(folder.path, [this] { ++savedCalls; });
+        editor.setFolders(folder.path, folder.path / "interactions", [this] { ++savedCalls; });
     }
     int card(const char* type, const std::string& first) {
         for (const auto& c : editor.graph()->nodes()) {
@@ -202,4 +204,75 @@ TEST_CASE("US-171 Draw: the graph editor shows the open conversation") {
     CHECK(lit > 500);
     // For docs/evidence/US-171: the picture is also saved in the temp folder, from where it is copied by hand.
     CHECK(luna::engine::savePng(renderer.image(), fs::temp_directory_path() / "odysseus-us171-dialogue-graph.png"));
+}
+
+TEST_CASE("US-172 Open: the Rules side lists the interactions and opens gather as a graph") {
+    Folder folder;
+    Rig rig(folder);
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    CHECK(rig.editor.files() == std::vector<std::string>{"gather"});
+    REQUIRE(rig.editor.open("gather"));
+    CHECK(rig.editor.openName() == "gather");
+    CHECK(rig.editor.graph()->nodes().size() == 6);
+    // The folders of the two kinds do not mix: gather is not a conversation.
+    rig.editor.showKind(GraphEditor::Kind::Dialogue);
+    CHECK(rig.editor.files() == std::vector<std::string>{"elder-fire"});
+}
+
+TEST_CASE("US-172 Save: a changed range reaches the file, the comment on top stays, the layout is beside it") {
+    Folder folder;
+    Rig rig(folder);
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    REQUIRE(rig.editor.open("gather"));
+    int verb = 0;
+    for (const auto& c : rig.editor.graph()->nodes()) {
+        if (c.type == rule_card::kVerb) verb = c.id;
+    }
+    REQUIRE(verb != 0);
+    CHECK(rig.editor.setCardField(verb, 3, "1.5"));
+    CHECK(rig.editor.dirty());
+    REQUIRE(rig.editor.save());
+    const std::string text = readFile(folder.path / "interactions" / "gather.json");
+    CHECK(text.rfind("// Gather from a plant that is ripe", 0) == 0); // the leading comment
+    CHECK(text.find("\"range\": 1.5") != std::string::npos);
+    CHECK(fs::exists(folder.path / "interactions" / "gather.json.layout.json"));
+    CHECK(fs::exists(folder.path / "interactions" / "gather.json.bak"));
+    CHECK(rig.savedCalls == 1);
+    // The sidecar is not listed as an interaction.
+    CHECK(rig.editor.files() == std::vector<std::string>{"gather"});
+}
+
+TEST_CASE("US-172 Save: the verb id must stay the name of the file, and Undo walks back through the one History") {
+    Folder folder;
+    Rig rig(folder);
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    REQUIRE(rig.editor.open("gather"));
+    int verb = 0;
+    for (const auto& c : rig.editor.graph()->nodes()) {
+        if (c.type == rule_card::kVerb) verb = c.id;
+    }
+    const luna::engine::NodeGraph start = *rig.editor.graph();
+    CHECK(rig.editor.setCardField(verb, 0, "pick"));
+    CHECK_FALSE(rig.editor.save());
+    CHECK(rig.said.back().rfind("Not saved:", 0) == 0);
+    CHECK(rig.history.undo(rig.level));
+    CHECK(*rig.editor.graph() == start);
+}
+
+// The picture for docs/evidence/US-172, saved in the temp folder and copied by hand.
+TEST_CASE("US-172 Draw: the graph editor shows an interaction") {
+    Folder folder;
+    Rig rig(folder);
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    REQUIRE(rig.editor.open("gather"));
+    luna::engine::ImageRenderer renderer(960, 540);
+    renderer.clear({20, 20, 28, 255});
+    const luna::engine::Texture sheet = renderer.createTexture(luna::engine::makeUiSheet());
+    luna::engine::UiPainter painter(renderer, sheet);
+    painter.setScreen({0, 0, 960, 540});
+    luna::engine::Intents intents;
+    rig.editor.update(intents);
+    rig.editor.draw(painter);
+    rig.editor.drawOverlay(painter);
+    CHECK(luna::engine::savePng(renderer.image(), fs::temp_directory_path() / "odysseus-us172-interaction-graph.png"));
 }
