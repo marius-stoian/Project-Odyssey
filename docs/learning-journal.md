@@ -1941,3 +1941,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Raise `shelterWarmthPercent` to 100 in `needs.json` and see the difference vanish.
 
 **Check yourself.** Why does the world not save the housed list?
+
+## US-170: a graph is a list of boxes and a list of lines (M9)
+
+**Idea.** A node graph is two lists: the nodes (with their places) and the wires (which output port joins which input port). The canvas only converts between graph units and screen pixels by one zoom number and one pan offset. Because the whole graph is a plain value, an edit can keep a copy from before and after, which is exactly what a Command needs for Ctrl+Z.
+
+**Where to look.** `NodeGraphView::handle` (the drag state machine: pan, move nodes, box, wire), `NodeGraphView::setZoom` (why the point under the cursor stays put), `GraphEditCommand`.
+
+**Try it.** Change `kGraphZoomMax` in `node_graph.h` to 800 and see which test names the limit.
+
+**Check yourself.** Why do hit tests look at the last node first?

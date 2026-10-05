@@ -165,6 +165,7 @@ add_library(luna_engine STATIC
     src/luna/engine/chunk_streamer.cpp
     src/luna/engine/image_io.cpp
     src/luna/engine/ui.cpp
+    src/luna/engine/node_graph.cpp
     src/luna/engine/effects.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 # PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
@@ -362,6 +363,7 @@ add_executable(luna_tests
     tests/luna/tile_map_test.cpp
     tests/luna/collision_test.cpp
     tests/luna/ui_test.cpp
+    tests/luna/node_graph_test.cpp
     tests/luna/effects_test.cpp
     tests/luna/zoom_test.cpp
     tests/luna/normals_test.cpp)
@@ -463,6 +465,7 @@ add_executable(odysseus_game_tests
     tests/game/greeting_test.cpp
     tests/game/exchange_test.cpp
     tests/game/renderer_test.cpp
+    tests/game/graph_command_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
     tests/game/building_editor_test.cpp)
