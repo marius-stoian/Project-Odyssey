@@ -194,3 +194,20 @@ Under the canvas the graph editor lists what is wrong with the open file, live a
 | unknown tag | warning | `tag(target, x)` where no thing carries x |
 
 The same check runs over every shipped `.dlg` and interaction file in the tests (`US-175 Shipped`), so a mistake in a shipped file fails CI.
+
+### Test-play (US-174)
+
+The **Test** button of the graph editor opens a card over the canvas that plays the open conversation, with the edits you have not saved yet, on a world of its own. Type the values as words in the *state* field and press **Play**; **From here** starts at the node of the selected card; **Leave** walks away; **Stop** forgets the play. Click a numbered choice to take it. Choices whose `[if]` fails are greyed out with their `[else]` reason, as in the game. Under the choices a log lists each effect that ran (`gave 1 stone to hero`, `opinion of npc about hero +5`, `later (5 s): say "Thanks"`).
+
+| Words | Sets |
+|---|---|
+| `opinion=25` | what the NPC thinks of the hero, -100 to 100 |
+| `hunger=40` `energy=` `warmth=` `social=` | a need, 0 (empty) to 100 (full) |
+| `item.berries=2` | what the hero carries |
+| `skill.hunter=3` `trait.diligent` | the hero's skills and traits |
+| `flag.met-elder` or `flag.x=3` | a story note |
+| `tag.trader` `kin` | tags the NPC carries; the NPC is family |
+| `time=night` `season=winter` | the clock words (`morning`, `afternoon`, `evening`, `night`) and the season |
+| `hero=Joro` `npc=Ama` | the names that `{hero}` and `{npc}` become |
+
+A word it does not understand is named and nothing starts. Nothing a test-play does is written anywhere: not the level, not a save, not the `.dlg`, and it is not a step of Undo. Forcing the result of random rolls (haggling, persuading) is not offered yet: the dialogue language has no roll to force.

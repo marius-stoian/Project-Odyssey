@@ -4,7 +4,7 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
-## M9 Interaction and dialogue editor: K-M9, US-170, US-171, US-172, US-175, US-173 (Mraw) - 2026-10-05
+## M9 Interaction and dialogue editor: K-M9, US-170, US-171, US-172, US-175, US-173, US-174 (Mraw) - 2026-10-05
 
 **State:** On `qa`. K-M9 answered by the owner (D-56, 24 questions); design in `docs/plans/M9-graph-editor-design.md`.
 
@@ -13,6 +13,7 @@ its PR changes rather than leaving an outdated description.
 - **US-172 interaction graph editor:** `src/game/interaction_graph.h/.cpp` (an interaction file as Actor, Verb, Target, Needs, Effects, NPC rule and Chronicle cards and back; the real loader checks the result; `toJson` writes it; the `//` lines at the top of a file are kept), `GraphEditor` serves two kinds (`Kind::Dialogue`, `Kind::Interaction`) with a Talk/Rules switch, the Editor's **Rules** button. Guide: `docs/guides/interaction-data.md` (The graph editor). Evidence: `docs/evidence/US-172/interaction-graph.png`. Tests: `tests/game/interaction_graph_test.cpp` (8) and 3 more in `graph_editor_test.cpp`.
 - **US-175 graph validation:** `src/sim/graph_check.h/.cpp` (headless: unreachable nodes, dead ends, unknown nodes, items, needs, built-in actions, conversations, interactions, tags; `GraphCatalog`), the finding list under the canvas in the graph editor (live, click selects the card; errors block shipping, warnings do not; Save is allowed with errors and says so), `OdysseyGame::syncGraphCatalog`, `NodeGraphView::centerOn`. Guide: `docs/guides/dialogue-format.md` (The check). Tests: `tests/sim/graph_check_test.cpp` (7, with every shipped file) and 4 in `graph_editor_test.cpp`.
 - **US-173 attach to placed things:** Pick and Graph buttons on the NPC panel's *Script* row (a placed NPC's per-partner dialogue stands from M9a); own values for a placed plant (`overrides` in the level: `interaction`, `field` delay or duration, `value` in seconds; a plant with none writes none), `sim::applyPatch`, `ActionRunner::setAdjuster`, `Editor::setSelectedOverrides` and a plant panel. Guide: `docs/guides/editor.md`. Tests: `tests/game/thing_overrides_test.cpp` (6). Shared code touched: `level.h/.cpp`, `plants.h`, `editor.h/.cpp`, `odyssey_game.cpp`, `sim/interaction.*`, `sim/action_runner.*`, `tests/game/camp.h` (one optional field).
+- **US-174 test-play:** `src/sim/test_play.h/.cpp` (headless: `TestState` and `applyTestState` words, `TestWorld`, `TestPlay` over `Conversation`), `Conversation::jumpTo`, the **Test** card of the graph editor (values as words, Play, From here, Leave, Stop, numbered choices, effect log; plays the unsaved graph on a world of its own, nothing written, no Undo step). Guide: `docs/guides/dialogue-format.md` (Test-play). Evidence: `docs/evidence/US-174/test-play.png`. Tests: `tests/sim/test_play_test.cpp` (7) and 5 in `graph_editor_test.cpp`. Not built: forced rolls (none exists in the languages) and test-play of an interaction.
 - **Owner change to the Codex text:** zoom range 25-400% (Codex said 50-200%), D-56 Q7.
 
 ## M8e Building life: US-253, US-254, US-255, US-257 (Mraw) - 2026-10-05

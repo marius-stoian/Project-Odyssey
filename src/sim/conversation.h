@@ -53,6 +53,15 @@ public:
     // greyed out; nothing happens then.
     bool choose(int visibleIndex, const RuleContext& context, ActionRunner& runner, std::int64_t now, EffectHost& host);
 
+    // Begins at another node (Test-play's Play from here, US-174). False, and nothing changes, when there is no such node.
+    bool jumpTo(const std::string& id) {
+        if (script_.find(id) == nullptr) return false;
+        node_ = id;
+        finished_ = false;
+        spoken_.clear();
+        return true;
+    }
+
     // The player walks away (Esc): the talk ends, no effects.
     void leave() { finished_ = true; }
 

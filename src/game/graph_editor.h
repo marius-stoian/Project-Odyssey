@@ -6,6 +6,7 @@
 #include "game/editor_history.h"
 #include "game/interaction_graph.h"
 #include "sim/graph_check.h"
+#include "sim/test_play.h"
 #include "luna/engine/input.h"
 #include "luna/engine/node_graph.h"
 #include "luna/engine/ui.h"
@@ -79,6 +80,18 @@ public:
     bool removeCardField(int card);       // the last line of an effect or comment card
     sim::rules::DlgScript& header() { return current_->header; } // @who and the rest: kept with the file, not part of Undo
     const std::vector<std::string>& problems() const { return problems_; } // from the last save or check, "error: ..." and "warning: ..."
+    // Test-play (US-174, D-56 Q15 and Q16): the open conversation, with unsaved edits, played on a world of its own with the values typed as words
+    // (`opinion=25 item.berries=2 time=night`, see sim/test_play.h). `fromSelected` starts at the node of the selected card (Play from here). Nothing is
+    // written anywhere and nothing goes into Undo. False, and says why, when the conversation cannot be written or the words are wrong.
+    bool startTest(bool fromSelected);
+    void stopTest();
+    bool testing() const { return test_ != nullptr; }
+    sim::rules::TestPlay* testPlay() { return test_.get(); }
+    void setTestWords(std::string words) { testWords_ = std::move(words); }
+    const std::string& testWords() const { return testWords_; }
+    bool testChoose(int visibleIndex);
+    bool testShown() const { return testShown_; }
+    void showTest(bool shown);
     luna::engine::Rect canvasBounds() const { return canvas_; }
     luna::engine::Rect problemListBounds() const { return problemList_->bounds; }
 
@@ -128,6 +141,15 @@ private:
     std::unique_ptr<luna::engine::Panel> chrome_; // the bar and the file list
     std::unique_ptr<luna::engine::Panel> panel_;  // the side panel of the chosen card (or of the file)
     std::string panelKey_;
+    std::unique_ptr<sim::rules::TestPlay> test_;
+    std::string testWords_;
+    bool testShown_ = false;
+    bool testRebuild_ = false;
+    std::unique_ptr<luna::engine::Panel> testPanel_; // the Test-play card over the canvas
+    std::vector<std::string> testLines_;             // what the NPC says now, wrapped, for drawing
+    std::vector<std::string> testLog_;
+    void buildTestPanel();
+    std::string nodeOfSelection() const;
     sim::rules::GraphCatalog catalog_;
     std::vector<Problem> findings_;
     std::optional<luna::engine::NodeGraph> checked_; // the graph the findings were made from
