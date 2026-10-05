@@ -107,6 +107,8 @@ ctest --preset windows-x64-debug
 
 CI builds Debug and Release on Windows for `qa` and `main` and runs all tests ([.github/workflows/ci.yml](.github/workflows/ci.yml)). Keep `main` green.
 
+For hands-on testing of the whole game, follow the [beta test plan](docs/plans/Beta-test-after-M9.md).
+
 ## Debug in Visual Studio
 1. File > Open > Folder, choose this folder.
 2. Pick configuration `windows-x64-debug` and startup item `odysseus.exe`.

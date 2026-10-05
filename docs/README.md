@@ -9,7 +9,7 @@ Everything written about building Project Odyssey. The file and folder names bel
 | [decisions.md](decisions.md) | Owner decisions D-xx and the owner's answers | Owner (answers) |
 | [decision-requests/](decision-requests/) | Open questions for the owner, one file each | Any agent |
 | [codex-issues.md](codex-issues.md) | Problems with the Codex, for Anima | Any agent |
-| [plans/](plans/) | One plan per story: design, tests, manual checks, verification results | mraw-architect, mraw-tester |
+| [plans/](plans/) | One plan per story: design, tests, manual checks, verification results. Also the owner's [beta test plan after M9](plans/Beta-test-after-M9.md) | mraw-architect, mraw-tester |
 | [evidence/](evidence/) | Raw logs that prove a story's acceptance criteria | mraw-tester |
 | [reports/](reports/) | Assembly reports and checkpoints, one per session | mraw-orchestrator |
 | [gates/](gates/) | Milestone exit reviews | mraw-orchestrator |

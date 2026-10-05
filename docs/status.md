@@ -190,7 +190,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-173 | US-173 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | S-US-174 | US-174 | M9 | Done | Cases ran alone and pass; full verify at X-M9 |
 | X-M9 | - | M9 | Done | docs/gates/M9.md; Debug and Release 27/27, zero warnings |
-| K-M10 | - | M10 | To do |  |
+| K-M10 | - | M10 | Done | 2026-10-05; docs/plans/M10-quests-design.md, D-57 |
 | S-US-180 | US-180 | M10 | To do |  |
 | S-US-181 | US-181 | M10 | To do |  |
 | S-US-182 | US-182 | M10 | To do |  |

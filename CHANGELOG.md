@@ -4,6 +4,20 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## K-M10 kickoff (Dominus) - 2026-10-05
+
+**State:** On `qa`. Documentation only.
+
+- **New:** `docs/plans/M10-quests-design.md`, `docs/decision-requests/D-57.md` (14 delegated decisions), D-57 row in `docs/decisions.md`, K-M10 Done in `docs/status.md`, `Milestone-125.md` (AP-126).
+
+## Beta test plan after M9 (Dominus) - 2026-10-05
+
+**State:** On `qa`. Documentation only; no code, data or test changes.
+
+- **New:** `docs/plans/Beta-test-after-M9.md`, the owner's hands-on test plan for everything built through M9: preparation, a smoke pass, a feature walk of about 150 checks in 15 sections (settings, hero, combat, world, professions, clan simulation, lighting, interactions, dialogue, M9a NPCs, M9b trade, M9c NPC life, buildings, Level Editor, graph editor), a stress and soak pass, known gaps, a bug sheet with severities and an exit rule. It also lists the owner-only rows left open by the gates (M8c rows 7 and 8, M8d, M8e, M9a row 7, M9b row 6, M9c rows 6 and 7, M6 row 10).
+- **Indexed in:** `docs/README.md`, `README.md` (Test), `docs/plans/M9-graph-editor-design.md` (section 8), `Limit.md`, `Milestone-124.md` (AP-125).
+- **Codex:** `docs/codex-issues.md` CI-016 asks Anima for a beta step after X-M9 (the Codex has none).
+
 ## M9 Interaction and dialogue editor: K-M9, US-170, US-171, US-172, US-175, US-173, US-174 (Mraw) - 2026-10-05
 
 **State:** On `qa`. K-M9 answered by the owner (D-56, 24 questions); design in `docs/plans/M9-graph-editor-design.md`.

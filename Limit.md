@@ -1,5 +1,9 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, K-M10):** K-M10 Done (Milestone-125.md, AP-126, D-57, docs/plans/M10-quests-design.md). Next: S-US-180 (src/sim/quests/, assets/data/quests/, docs/guides/quests.md), then US-181, 182, 183, 186, 184, 187, 185, X-M10. Tests are written per story and run at X-M10 (D-41).
+
+**Resume update (2026-10-05, beta plan):** Dominus wrote the owner's beta test plan for after M9: `docs/plans/Beta-test-after-M9.md` (smoke pass, about 150 feature checks in 15 sections, stress pass, bug sheet, exit rule). It adds no code and no Codex prompt. Order stays: X-M9 (one full verify, `docs/gates/M9.md`, merge qa into main, tag m9-done, CI on main), then the owner runs the beta plan on `main`, findings become fix stories, and only then K-M10. Open item for Anima: CI-016 (the Codex has no beta step).
+
 **Resume update (2026-10-05, X-M9):** X-M9 DONE (Milestone-124.md, AP-125): one verify green, Debug and Release 27/27, zero warnings. qa merged into main, tag m9-done. Next: K-M10 is the next Codex milestone, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-014, CI-015.
 
 **Resume update (2026-10-05, US-174):** S-US-174 DONE (Milestone-123.md, AP-124); all six M9 stories written, each with its own cases run alone. Next: X-M9: the one full verify (verify.ps1 -Story X-M9 -Config Both), docs/gates/M9.md, merge qa into main, tag m9-done, CI on main.
