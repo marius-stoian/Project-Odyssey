@@ -208,8 +208,8 @@ ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, con
         for (const auto& [partner, file] : npcClass->dialogues) out.dialogues[partner] = file;
         applyActions(out.actions, npcClass->allow, npcClass->deny);
         mergeExtras(out.extras, npcClass->extras);
-        for (const std::string& id : npcClass->extras.does) {
-            if (std::find(out.classActions.begin(), out.classActions.end(), id) == out.classActions.end()) out.classActions.push_back(id);
+        for (const std::string& doId : npcClass->extras.does) {
+            if (std::find(out.classActions.begin(), out.classActions.end(), doId) == out.classActions.end()) out.classActions.push_back(doId);
         }
     }
     // Then the kind, then the placed NPC.

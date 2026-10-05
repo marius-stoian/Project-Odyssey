@@ -162,14 +162,14 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-282 | US-282 | M9b | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-283 | US-283 | M9b | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-284 | US-284 | M9b | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
-| X-M9b | - | M9b | To do |  |
+| X-M9b | - | M9b | Done | Verified Debug+Release 27/27; gate docs/gates/M9b.md |
 | K-M9c | - | M9c | Done | Owner answers 2026-10-05 (D-54), docs/plans/M9-npc-design.md |
 | S-US-290 | US-290 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-291 | US-291 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-292 | US-292 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-293 | US-293 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
 | S-US-294 | US-294 | M9c | Done | Tests deferred to X-M9bc (owner, 2026-10-05) |
-| X-M9c | - | M9c | To do |  |
+| X-M9c | - | M9c | Done | Verified Debug+Release 27/27 (soak skipped by owner); gate docs/gates/M9c.md |
 | K-M8d | - | M8d | To do |  |
 | S-US-250 | US-250 | M8d | To do |  |
 | S-US-251 | US-251 | M8d | To do |  |

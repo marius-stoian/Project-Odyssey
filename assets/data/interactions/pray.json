@@ -7,5 +7,5 @@
   "range": 2,
   "order": 740,
   "effects": [ "do walk-to", "do restore social 15" ],
-  "npc": { "score": "30 + need(social)", "cooldown": 60 }
+  "npc": { "score": "need(social) - 30", "cooldown": 60 }
 }

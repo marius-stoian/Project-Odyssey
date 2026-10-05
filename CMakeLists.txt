@@ -533,7 +533,7 @@ target_link_libraries(odysseus_sim_soak PRIVATE odysseus_sim doctest::doctest nl
 target_compile_definitions(odysseus_sim_soak PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_soak)
 add_test(NAME odysseus_sim_soak COMMAND odysseus_sim_soak)
-set_tests_properties(odysseus_sim_soak PROPERTIES TIMEOUT 3000)
+set_tests_properties(odysseus_sim_soak PROPERTIES TIMEOUT 3000 LABELS soak) # skipped by owner in verify and CI (D-54, 2026-10-05); run by hand: ctest -L soak
 
 # --- US-015: the headless runner from the command line (100 years; wrong input) ---
 add_test(NAME "US-015 Run"

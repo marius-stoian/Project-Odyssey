@@ -254,8 +254,8 @@
    "kind": "deer",
    "name": "Deer",
    "swordDamage": 0,
-   "x": 620,
-   "y": 450
+   "x": 1100,
+   "y": 700
   },
   {
    "facing": "S",

@@ -596,7 +596,7 @@ void RunFlow::buildTrade(OdysseyGame& game) {
     const auto name = [&](const std::string& item) { return data->item(item) != nullptr ? data->item(item)->name : item; };
     const auto price = [](long long milli) { return sim::rules::formatMilli(milli); };
 
-    title(std::format("TRADE with {}  ({})", placed->name, sim::attitudeName(attitude)));
+    title(std::format("TRADE with {} ({})", placed->name, sim::attitudeName(attitude)));
     if (market.refuses(attitude)) {
         paragraph(placed->name + " will not trade with you.", UiColor::Red);
         gap();
@@ -720,8 +720,8 @@ void RunFlow::actTrade(OdysseyGame& game, int id) {
             message_ = outcome.message;
             return;
         }
-        for (const auto& [item, count] : outcome.heroGave) hero->take(item, count);
-        for (const auto& [item, count] : outcome.heroGot) hero->give(item, count);
+        for (const auto& [goodName, goodCount] : outcome.heroGave) hero->take(goodName, goodCount);
+        for (const auto& [goodName, goodCount] : outcome.heroGot) hero->give(goodName, goodCount);
         game.npcPopulationMutable().event(traderId, sim::NpcPopulation::kHero, "trade"); // trading makes friends (D-52 Q-05)
         message_ = std::format("It is a deal: you gave {}, you got {}.", goodsLine(*data, outcome.heroGave), goodsLine(*data, outcome.heroGot));
         if (outcome.balancePaid > 0) message_ += std::format(" Paid {} from your balance.", outcome.balancePaid);

@@ -4,6 +4,12 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M9bc: exit of M9b and M9c (Mraw) - 2026-10-05
+
+- One full verify, Debug and Release, zero warnings, 27 of 27 each. Fixes: loaders of trade, schedule and events files, director default actions, `hunt` built-in name, place tags, empty class default, need-based environment scores, trade title, Editor Trade panel below the NPC panel.
+- The soak test is labelled `soak` and left out of verify and CI by the owner (D-54 follow-up).
+- Gates: `docs/gates/M9b.md`, `docs/gates/M9c.md`.
+
 ## US-294: living test level and the 100,000-person soak (Mraw) - 2026-10-05
 
 **State:** On `story/US-294`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.

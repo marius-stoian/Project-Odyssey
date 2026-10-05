@@ -108,7 +108,7 @@ TEST_CASE("US-293 Defaults: one defaults file per partner type loads; a mistake 
     REQUIRE(defaults.find("animal") != nullptr);
     CHECK(defaults.find("animal")->empty());
     REQUIRE(defaults.find("class") != nullptr);
-    CHECK(*defaults.find("class") == std::vector<std::string>{"npc-chat"});
+    CHECK(defaults.find("class")->empty()); // a bonus for every class would put chatting above a useful swap, so the shipped default is empty
     CHECK(shippedInteractions().find("defaults-environment") == nullptr);
     for (const char* id : {"forage", "rest-at-shelter", "fish", "pray", "hunt"}) CHECK_MESSAGE(shippedInteractions().find(id) != nullptr, id);
 

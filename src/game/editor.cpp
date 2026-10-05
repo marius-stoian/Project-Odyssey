@@ -807,11 +807,11 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
     buildNpcTradePanel(shown);
 }
 
-// The Trade section (US-284) of the NPC panel: what this NPC sells, beside the NPC panel. It shows the NPC's own values; the hint of the title says what it has in all.
+// The Trade section (US-284) of the NPC panel: what this NPC sells, below the NPC panel. It shows the NPC's own values; the hint of the title says what it has in all.
 void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
     constexpr int kWidth = 232;
     const Rect anchor = npcPanel_->bounds;
-    npcTrade_ = std::make_unique<Panel>(Rect{anchor.x - kWidth - 4, anchor.y, kWidth, 176});
+    npcTrade_ = std::make_unique<Panel>(Rect{viewWidth_ - kWidth - 2, anchor.y + anchor.height + 4, kWidth, 176}); // below the NPC panel: beside it would cover the figure being edited
     npcTrade_->visible = npcPanel_->visible;
     const Rect box = npcTrade_->bounds;
     const int left = box.x + 4;

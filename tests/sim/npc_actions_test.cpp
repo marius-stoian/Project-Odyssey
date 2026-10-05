@@ -1,6 +1,7 @@
 // US-291 Action sources: an idle NPC chooses among the actions of its class, its own custom actions and the events on offer, by the `npc` score of the interaction files;
 // there is no quest source yet (M10 adds one).
 #include "sim/data.h"
+#include "sim/npc_class.h"
 #include "sim/npc_director.h"
 
 #include <doctest/doctest.h>

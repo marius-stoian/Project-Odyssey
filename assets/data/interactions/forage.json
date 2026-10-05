@@ -8,5 +8,5 @@
   "range": 2,
   "order": 710,
   "effects": [ "do walk-to", "do restore hunger 25" ],
-  "npc": { "score": "40 + need(hunger)", "cooldown": 40 }
+  "npc": { "score": "need(hunger) - 30", "cooldown": 40 }
 }

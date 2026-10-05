@@ -318,7 +318,7 @@ The screen, top to bottom:
 
 ## Editor: the Trade section (US-284)
 
-An NPC panel (select a placed NPC with the Select tool) has a **Trade** section beside it, and the **Class** panel and the **Kinds** tab have the same six lines under **Deny**. Each line is plain text:
+An NPC panel (select a placed NPC with the Select tool) has a **Trade** section below it (so it never covers the figure you are editing), and the **Class** panel and the **Kinds** tab have the same six lines under **Deny**. Each line is plain text:
 
 | Line | Type | Example | Meaning |
 |---|---|---|---|
@@ -396,7 +396,7 @@ The schedule is looked at **on the hour** (every 100 ticks): persons near the he
 
 ### Editor: the Schedule form
 
-The Trade section beside the NPC panel has two more lines, **Day** and **Night**, and the Class panel and the Kinds tab have them under the trade lines. Type `06:00 work market; 21:00 sleep home` (time, activity, place; the place is optional and then `home`; separate blocks with `;`). Press Enter: the status line says `schedule day`; a mistake (`6am`, a missing activity, two blocks at one time) is said and changes nothing. For an NPC each line is one step of Undo and edits its **own** schedule (which replaces its kind's and its classes' whole); for a class or kind **Save** writes it. An empty **Night** means the day blocks hold at night.
+The Trade section below the NPC panel has two more lines, **Day** and **Night**, and the Class panel and the Kinds tab have them under the trade lines. Type `06:00 work market; 21:00 sleep home` (time, activity, place; the place is optional and then `home`; separate blocks with `;`). Press Enter: the status line says `schedule day`; a mistake (`6am`, a missing activity, two blocks at one time) is said and changes nothing. For an NPC each line is one step of Undo and edits its **own** schedule (which replaces its kind's and its classes' whole); for a class or kind **Save** writes it. An empty **Night** means the day blocks hold at night.
 
 ## Action sources: class, custom and event actions (US-291)
 
@@ -432,7 +432,7 @@ A fire lit within 12 m of a talker sends her to it **at once**; a fire that went
 
 ### Editor
 
-The **Does** line (under the Schedule lines of the Trade section beside the NPC panel, the Class panel and the Kinds tab) takes interaction ids separated by spaces: `patrol sing`. For an NPC it is its custom actions (one step of Undo); for a class its class actions, for a kind its custom actions (Save writes the file). A mistake (an id that is not lower-case words) is said and changes nothing.
+The **Does** line (under the Schedule lines of the Trade section below the NPC panel, the Class panel and the Kinds tab) takes interaction ids separated by spaces: `patrol sing`. For an NPC it is its custom actions (one step of Undo); for a class its class actions, for a kind its custom actions (Save writes the file). A mistake (an id that is not lower-case words) is said and changes nothing.
 
 ## NPCs act on each other (US-292, D-54 Q12, Q13)
 
@@ -476,7 +476,7 @@ One file per type: `defaults-class.json`, `defaults-animal.json`, `defaults-envi
 { "partnerType": "environment", "actions": ["forage", "rest-at-shelter", "fish", "pray"] }
 ```
 
-`class` is the default for meeting any NPC class (shipped: `npc-chat`); `animal` is empty (an NPC does nothing special with animals unless its class says so); `environment` lists the four environment actions below. A file with a mistake is left out and named in the log (`interactions/defaults-animal.json:2: partnerType "x" must match the file name "animal"`). The registry of interactions skips these files. **F5** reads them again.
+`class` is the default for meeting any NPC class (shipped: empty, because a bonus for every class would put chatting above a useful swap); `animal` is empty (an NPC does nothing special with animals unless its class says so); `environment` lists the four environment actions below. A file with a mistake is left out and named in the log (`interactions/defaults-animal.json:2: partnerType "x" must match the file name "animal"`). The registry of interactions skips these files. **F5** reads them again.
 
 ### `partnerActions`: a class, a kind or an NPC overrides
 
@@ -488,13 +488,13 @@ In a class file, a kind file or on a placed NPC. Keys are partner types (`class`
 
 ### What the chooser does with them
 
-- **Environment and animals.** The actions of the `environment` and `animal` lists are extra candidates of a free NPC, aimed at the places of the level (and the animals it can see within `dealings.lookRadius`, 12 m) and given the bonus `dealings.preferBonus` (40). Which place fits is the file's target tags: `forage.json` needs a place tagged `forage` (+25 Hunger, score `40 + need(hunger)`), `rest-at-shelter.json` a `shelter` (+20 Energy), `fish.json` `water` (+20 Hunger), `pray.json` a `shrine` (+15 Social). A hungry person goes foraging at a grove, a tired one rests in the hut. `hunt.json` needs an animal tagged `prey`: the hunter goes to it and `dealings.huntPercent` (50) decides whether it is killed; the game removes the animal from the world; the hunt gives Hunger back.
+- **Environment and animals.** The actions of the `environment` and `animal` lists are extra candidates of a free NPC, aimed at the places of the level (and the animals it can see within `dealings.lookRadius`, 12 m) and given the bonus `dealings.preferBonus` (40). Which place fits is the file's target tags: `forage.json` needs a place tagged `forage` (+25 Hunger, score `need(hunger) - 30`: only a hungry person goes), `rest-at-shelter.json` a `shelter` (+20 Energy), `fish.json` `water` (+20 Hunger), `pray.json` a `shrine` (+15 Social). A hungry person goes foraging at a grove, a tired one rests in the hut. `hunt.json` needs an animal tagged `prey`: the hunter goes to it and `dealings.huntPercent` (50) decides whether it is killed; the game removes the animal from the world; the hunt gives Hunger back.
 - **Partners that are persons.** When the neighbour is a person of a class that the NPC has a `partnerActions` list for, an interaction in that list gets the bonus; so an NPC that prefers `npc-chat` with talkers chats even when a swap would score higher.
 - The places are the `places` of the level (US-290); the animals are told to the director by the game as they move.
 
 ### Editor
 
-Under the **Does** line (Trade section beside the NPC panel, Class panel, Kinds tab) there is **Defaults with: animal** (a click goes to the next partner type, ending with `class`) and a **Does** line for that type: interaction ids separated by spaces. A type you added to `partner-types.json` is in the list the next time the game starts. An empty line removes the type from the NPC's own lists (the layer below shows again). For an NPC one step of Undo; **Save** writes the class or kind.
+Under the **Does** line (Trade section below the NPC panel, Class panel, Kinds tab) there is **Defaults with: animal** (a click goes to the next partner type, ending with `class`) and a **Does** line for that type: interaction ids separated by spaces. A type you added to `partner-types.json` is in the list the next time the game starts. An empty line removes the type from the NPC's own lists (the layer below shows again). For an NPC one step of Undo; **Save** writes the class or kind.
 
 ## The living test level and the soak (US-294, D-54 Q15)
 
@@ -512,7 +512,7 @@ Under the **Does** line (Trade section beside the NPC panel, Class panel, Kinds 
 | 20:00 | rests at the hut | at home | at the grove | at the market | at home |
 | 21:00-22:00 | sleeps at home | sleeps (the night variant) | sleeps at home | sleeps at home | sleeps at home |
 
-Harn also carries 2 berries now, so Tala (wants berries, has flint) and Harn (wants flint, has berries) can **swap** when they meet at the market between 08:00 and 12:00. Ossa and Vell chat when they meet; at 12:00 they all walk home to eat. The deer and the goblin have no schedule; the hunter Harn hunts the deer when he is idle. Because Tala may swap a flint for berries, her flint count is no longer "6 plus a restock" after a day.
+Harn also carries 2 berries now, so Tala (wants berries, has flint) and Harn (wants flint, has berries) can **swap** when they meet at the market between 08:00 and 12:00. Ossa and Vell chat when they meet; at 12:00 they all walk home to eat. The deer (far in the south-east, out of sight) and the goblin have no schedule; move the deer next to Harn to see him hunt it. Because Tala may swap a flint for berries, her flint count is no longer "6 plus a restock" after a day.
 
 **Walk-through of one day.**
 1. Start the level, **F1**, speed 4. At 06:00 Tala goes to the market, Ossa to the pond, Gur starts patrolling.

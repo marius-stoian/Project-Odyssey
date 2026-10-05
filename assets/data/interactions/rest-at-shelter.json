@@ -7,5 +7,5 @@
   "range": 2,
   "order": 720,
   "effects": [ "do walk-to", "do restore energy 20" ],
-  "npc": { "score": "30 + need(energy)", "cooldown": 40 }
+  "npc": { "score": "need(energy) - 30", "cooldown": 40 }
 }

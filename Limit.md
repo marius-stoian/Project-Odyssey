@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, X-M9bc):** X-M9b and X-M9c DONE (Milestone-115.md, AP-116): one verify green, Debug and Release 27/27. Soak skipped by owner. Next: merge qa into main, tags m9b-done and m9c-done, CI on main.
+
 **Resume update (2026-10-05, US-294):** S-US-294 DONE (Milestone-114.md, AP-115), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: X-M9bc: the one full verify of M9b and M9c (verify.ps1 -Story X-M9bc -Config Both), fix, gates, merge into main, tags, CI.
 
 **Resume update (2026-10-05, US-293):** S-US-293 DONE (Milestone-113.md, AP-114), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.

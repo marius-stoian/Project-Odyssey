@@ -308,7 +308,7 @@ bool NpcDirector::chooseAction(NpcPopulation& population, int index, int hour, b
 // The candidates of the sources against the places of the level, or the spot of their event.
 void NpcDirector::collectPlaceOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool eventsOnly, std::vector<Option>& options,
                                       std::vector<int>& scores) const {
-    if (own.classActions.empty() && own.customActions.empty() && board_.posted().empty()) return;
+    if (own.classActions.empty() && own.customActions.empty() && own.partnerActions.empty() && board_.posted().empty()) return;
     const SourceContext context{own, population.x(index), population.y(index), population.ticks(), &board_, &events_};
     std::vector<ActionCandidate> candidates = sources_.collect(context);
     if (eventsOnly) std::erase_if(candidates, [](const ActionCandidate& candidate) { return candidate.origin != ActionOrigin::Event; });

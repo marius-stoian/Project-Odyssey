@@ -59,7 +59,7 @@ PriceConfig loadPriceConfig(const std::filesystem::path& file) {
     };
     if (const json* stock = section("stock")) {
         const auto read = [&](const char* field, int& into, int low, int high) {
-            if (stock->contains(field)) into = requireInt(*stock, file, "stock", field, low, high);
+            if (stock->contains(field)) into = requireInt(data, file, "stock", field, low, high);
         };
         read("minimumCap", config.minimumCap, 1, 9999);
         read("capFactor", config.capFactor, 1, 100);
@@ -68,13 +68,13 @@ PriceConfig loadPriceConfig(const std::filesystem::path& file) {
         read("catchUpDays", config.catchUpDays, 1, 365);
     }
     if (const json* curve = section("curve")) {
-        if (curve->contains("minPercent")) config.curveMinPercent = requireInt(*curve, file, "curve", "minPercent", 1, 100);
-        if (curve->contains("maxPercent")) config.curveMaxPercent = requireInt(*curve, file, "curve", "maxPercent", 100, 1000);
+        if (curve->contains("minPercent")) config.curveMinPercent = requireInt(data, file, "curve", "minPercent", 1, 100);
+        if (curve->contains("maxPercent")) config.curveMaxPercent = requireInt(data, file, "curve", "maxPercent", 100, 1000);
     }
     if (const json* drift = section("drift")) {
-        if (drift->contains("percentPerTrade")) config.driftPerTrade = requireInt(*drift, file, "drift", "percentPerTrade", 0, 100);
-        if (drift->contains("maxPercent")) config.driftMaxPercent = requireInt(*drift, file, "drift", "maxPercent", 0, 500);
-        if (drift->contains("decayPercentPerDay")) config.driftDecayPercent = requireInt(*drift, file, "drift", "decayPercentPerDay", 0, 100);
+        if (drift->contains("percentPerTrade")) config.driftPerTrade = requireInt(data, file, "drift", "percentPerTrade", 0, 100);
+        if (drift->contains("maxPercent")) config.driftMaxPercent = requireInt(data, file, "drift", "maxPercent", 0, 500);
+        if (drift->contains("decayPercentPerDay")) config.driftDecayPercent = requireInt(data, file, "drift", "decayPercentPerDay", 0, 100);
     }
     if (const json* reputation = section("reputation")) {
         if (reputation->contains("percent")) {
@@ -97,12 +97,12 @@ PriceConfig loadPriceConfig(const std::filesystem::path& file) {
         }
     }
     if (const json* wants = section("wants")) {
-        if (wants->contains("wantPercent")) config.wantPercent = requireInt(*wants, file, "wants", "wantPercent", 1, 1000);
-        if (wants->contains("otherPercent")) config.otherPercent = requireInt(*wants, file, "wants", "otherPercent", 1, 1000);
+        if (wants->contains("wantPercent")) config.wantPercent = requireInt(data, file, "wants", "wantPercent", 1, 1000);
+        if (wants->contains("otherPercent")) config.otherPercent = requireInt(data, file, "wants", "otherPercent", 1, 1000);
     }
     if (const json* haggle = section("haggle")) {
         const auto read = [&](const char* field, int& into, int low, int high) {
-            if (haggle->contains(field)) into = requireInt(*haggle, file, "haggle", field, low, high);
+            if (haggle->contains(field)) into = requireInt(data, file, "haggle", field, low, high);
         };
         read("baseChance", config.haggleBase, 0, 100);
         read("opinionDivisor", config.haggleOpinionDivisor, 1, 100);
@@ -115,7 +115,7 @@ PriceConfig loadPriceConfig(const std::filesystem::path& file) {
     }
     if (const json* purse = section("purse")) {
         const auto read = [&](const char* field, int& into, int low, int high) {
-            if (purse->contains(field)) into = requireInt(*purse, file, "purse", field, low, high);
+            if (purse->contains(field)) into = requireInt(data, file, "purse", field, low, high);
         };
         read("start", config.startPurse, 0, 100000);
         read("restockPerDay", config.purseRestock, 0, 100000);

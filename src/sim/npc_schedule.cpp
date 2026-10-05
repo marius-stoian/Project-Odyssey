@@ -112,8 +112,8 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
     if (data.contains("eat")) {
         const json& eat = data.at("eat");
         if (!eat.is_object()) throw DataError(file, "eat", "must be an object");
-        if (eat.contains("below")) config.eatBelow = requireInt(eat, file, "eat", "below", 0, 100);
-        if (eat.contains("restore")) config.eatRestore = requireInt(eat, file, "eat", "restore", 1, 100);
+        if (eat.contains("below")) config.eatBelow = requireInt(data, file, "eat", "below", 0, 100);
+        if (eat.contains("restore")) config.eatRestore = requireInt(data, file, "eat", "restore", 1, 100);
         if (eat.contains("place")) {
             if (!eat.at("place").is_string()) throw DataError(file, "eat.place", "must be a place name");
             config.eatPlace = eat.at("place").get<std::string>();
@@ -129,7 +129,7 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
         const json& dealings = data.at("dealings");
         if (!dealings.is_object()) throw DataError(file, "dealings", "must be an object");
         const auto read = [&](const char* field, int& into, int low, int high) {
-            if (dealings.contains(field)) into = requireInt(dealings, file, "dealings", field, low, high);
+            if (dealings.contains(field)) into = requireInt(data, file, "dealings", field, low, high);
         };
         read("meetRadius", config.meetRadius, 8, 1024);
         read("fightRoundsPerHour", config.fightRoundsPerHour, 1, 100);

@@ -51,9 +51,9 @@ EventCatalog loadEventCatalog(const std::filesystem::path& file) {
                 def.classes.push_back(id.get<std::string>());
             }
         }
-        if (entry.contains("withinMetres")) def.withinMetres = requireInt(entry, file, where, "withinMetres", 1, 200);
-        if (entry.contains("forMinutes")) def.forMinutes = requireInt(entry, file, where, "forMinutes", 1, 1440);
-        if (entry.contains("bonus")) def.bonus = requireInt(entry, file, where, "bonus", 0, 1000);
+        if (entry.contains("withinMetres")) def.withinMetres = requireInt(entry, file, "withinMetres", 1, 200);
+        if (entry.contains("forMinutes")) def.forMinutes = requireInt(entry, file, "forMinutes", 1, 1440);
+        if (entry.contains("bonus")) def.bonus = requireInt(entry, file, "bonus", 0, 1000);
         if (catalog.find(def.id) != nullptr) throw DataError(file, where + ".id", "\"" + def.id + "\" is used twice");
         catalog.events.push_back(def);
     }

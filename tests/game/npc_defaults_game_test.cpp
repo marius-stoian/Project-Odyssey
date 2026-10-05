@@ -111,7 +111,7 @@ TEST_CASE("US-293 Defaults: every NPC has the environment defaults of defaults-e
     const sim::rules::ResolvedNpc resolved = studio.odyssey->npcClasses().resolve(studio.odyssey->level().characters[0]);
     CHECK(resolved.extras.partnerActions.at("environment") == std::vector<std::string>{"forage", "rest-at-shelter", "fish", "pray"});
     CHECK(resolved.extras.partnerActions.at("animal") == std::vector<std::string>{"hunt"}); // the class overrides the empty default
-    CHECK(resolved.extras.partnerActions.at("class") == std::vector<std::string>{"npc-chat"});
+    CHECK((resolved.extras.partnerActions.count("class") == 0 || resolved.extras.partnerActions.at("class").empty())); // the shipped class default is empty
     studio.toGame();
     const sim::NpcProfile* profile = studio.odyssey->npcDirector().profile(studio.index());
     REQUIRE(profile != nullptr);
