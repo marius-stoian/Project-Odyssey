@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, X-M10):** X-M10 DONE (Milestone-134.md, AP-135, docs/gates/M10.md): Debug and Release 27/27, zero warnings; qa merged into main, tag m10-done. Next: K-M11 is the next Codex milestone, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-017, CI-018, CI-019.
+
 **Resume update (2026-10-05, US-185):** S-US-185 DONE (Milestone-133.md, AP-134); all eight M10 stories are written. Next: X-M10 (pwsh tools/verify.ps1 -Story X-M10 -Config Both, fix failures, docs/gates/M10.md, merge qa into main, tag m10-done, CI on main, one rerun then stop). Open for Anima: CI-017, CI-018, CI-019.
 
 **Resume update (2026-10-05, US-187):** S-US-187 DONE (Milestone-132.md, AP-133). Next: S-US-185 (tutorial.json -> assets/data/quests/first-day.json, Tutorial class leaves the HUD path; crossroads.json -> assets/data/story/events/*.json with a trigger, edited in the Editor; save migration), then X-M10 (one full verify, Debug and Release, docs/gates/M10.md, merge into main, tag m10-done).
