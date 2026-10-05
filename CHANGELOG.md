@@ -4,12 +4,13 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
-## M9 Interaction and dialogue editor: K-M9, US-170, US-171 (Mraw) - 2026-10-05
+## M9 Interaction and dialogue editor: K-M9, US-170, US-171, US-172 (Mraw) - 2026-10-05
 
 **State:** On `qa`. K-M9 answered by the owner (D-56, 24 questions); design in `docs/plans/M9-graph-editor-design.md`.
 
 - **US-170 node-graph widget:** `src/luna/engine/node_graph.h/.cpp` (`NodeGraph` model, `NodeGraphView` canvas: right-drag pan, wheel zoom 25-400% around the cursor, drag, selection box, wire from output to input, delete, frame all, `layoutLayers`); `src/game/graph_commands.h` (`GraphEditCommand`, graph edits in the one Editor History). Tests: `tests/luna/node_graph_test.cpp` (9 cases), `tests/game/graph_command_test.cpp` (1 case). Only `CMakeLists.txt` of the existing code changed (three source lines). Verified: Debug build, zero warnings; the 10 US-170 cases pass alone; full verify at X-M9.
 - **US-171 dialogue graph editor:** `src/game/dialogue_graph.h/.cpp` (a `.dlg` as Node, Line, Choice, If, Do, Goto and Note cards and back through `parseDialogue` and `writeDialogue`, notes kept; rows layout; `<name>.dlg.layout.json` sidecar), `src/game/graph_editor.h/.cpp` (full-screen editor: file list, add bar, side panel, Save with a backup and an ask-once overwrite guard, Save reads the data like F5), `Editor`: **Talk** button, Esc/Ctrl+S/Ctrl+Z/Ctrl+Y inside the graph, graph edits in the one History. `NodeGraph` cards gained `fields`; wires route around when they run backwards. Guide: `docs/guides/dialogue-format.md` (The graph editor). Evidence: `docs/evidence/US-171/dialogue-graph.png`. Tests: `tests/game/dialogue_graph_test.cpp` (7), `tests/game/graph_editor_test.cpp` (7). Not built: the Sub-conversation call card (CI-014).
+- **US-172 interaction graph editor:** `src/game/interaction_graph.h/.cpp` (an interaction file as Actor, Verb, Target, Needs, Effects, NPC rule and Chronicle cards and back; the real loader checks the result; `toJson` writes it; the `//` lines at the top of a file are kept), `GraphEditor` serves two kinds (`Kind::Dialogue`, `Kind::Interaction`) with a Talk/Rules switch, the Editor's **Rules** button. Guide: `docs/guides/interaction-data.md` (The graph editor). Evidence: `docs/evidence/US-172/interaction-graph.png`. Tests: `tests/game/interaction_graph_test.cpp` (8) and 3 more in `graph_editor_test.cpp`.
 - **Owner change to the Codex text:** zoom range 25-400% (Codex said 50-200%), D-56 Q7.
 
 ## M8e Building life: US-253, US-254, US-255, US-257 (Mraw) - 2026-10-05

@@ -4,6 +4,7 @@
 
 #include "game/dialogue_graph.h"
 #include "game/editor_history.h"
+#include "game/interaction_graph.h"
 #include "luna/engine/input.h"
 #include "luna/engine/node_graph.h"
 #include "luna/engine/ui.h"
@@ -24,14 +25,17 @@ class GraphEditor {
 public:
     using Record = std::function<void(std::unique_ptr<Command>)>; // remember a command that is already applied
     using Say = std::function<void(const std::string&)>;          // a line for the Editor's status bar
+    enum class Kind { Dialogue, Interaction }; // what the editor shows: conversations (`.dlg`) or interactions (`.json`)
 
     GraphEditor(int viewWidth, int viewHeight, Record record, Say say);
 
     // The folders the files live in, and what to call after a file was written (the game reads the data again, like F5).
-    void setFolders(std::filesystem::path dialogueFolder, std::function<void()> saved);
+    void setFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved);
 
     bool shown() const { return shown_; }
     void show(bool shown);
+    void showKind(Kind kind); // opens the editor on conversations or on interactions
+    Kind kind() const { return kind_; }
     // Opens `assets/data/dialogue/<name>.dlg` with its layout sidecar. False (and says why) when the file has mistakes.
     bool open(const std::string& name);
     const std::string& openName() const { return current_ != nullptr ? current_->name : empty_; }
@@ -67,6 +71,8 @@ private:
         sim::rules::DlgScript header;
         luna::engine::NodeGraph saved; // the graph as loaded or last saved, to know whether it changed
         std::string savedHeader;
+        Kind kind = Kind::Dialogue;
+        std::string leading; // the comment lines at the top of an interaction file, kept
         std::filesystem::file_time_type loadedAt{};
         bool existed = false;
     };
@@ -76,19 +82,27 @@ private:
     int selectedCard() const; // the id of the one selected card, or 0
     void edit(const std::string& name, const std::function<void(luna::engine::NodeGraph&)>& change);
     void onViewEdit(const std::string& name, const luna::engine::NodeGraph& before, const luna::engine::NodeGraph& after);
-    std::filesystem::path fileOf(const std::string& name) const;
+    std::filesystem::path fileOf(const std::string& name) const; // in the folder of the shown kind
+    static std::string docKey(Kind kind, const std::string& name) { return (kind == Kind::Dialogue ? "d:" : "i:") + name; }
+    bool openDialogue(const std::string& name);
+    bool openInteraction(const std::string& name);
+    bool saveDialogue();
+    bool saveInteraction();
+    void bindView();
     std::string headerText(const sim::rules::DlgScript& script) const;
 
     int viewWidth_;
     int viewHeight_;
     Record record_;
     Say say_;
-    std::filesystem::path folder_;
+    std::filesystem::path folder_;            // dialogue
+    std::filesystem::path interactionFolder_;
     std::function<void()> saved_;
     bool shown_ = false;
     std::string empty_;
 
     std::map<std::string, Doc> docs_;
+    Kind kind_ = Kind::Dialogue;
     Doc* current_ = nullptr;
     std::unique_ptr<luna::engine::NodeGraphView> view_;
     luna::engine::Rect canvas_{};
@@ -99,6 +113,7 @@ private:
     std::vector<std::string> problems_;
     bool overwriteArmed_ = false;
     int nodeCounter_ = 1;
+    bool rebuild_ = false; // the bar, the list and the side panel are made again at the start of the next tick, never from inside one of their own buttons
 };
 
 } // namespace odysseus::game

@@ -1961,3 +1961,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** In Notepad add a `# note` above a choice, open the file in the graph, move a card and save: the note is still there.
 
 **Check yourself.** Why does Save write a temporary file first and then rename it?
+
+## US-172: one editor, two kinds of file (M9)
+
+**Idea.** The graph editor does not care what a card means; it only knows cards, ports and wires. What a card means lives in two small converters, one for conversations and one for interactions. Adding the second kind meant adding a converter and a few buttons, not rewriting the canvas. A panel that rebuilds itself must not do it from inside its own button: the button would be destroyed while it is still running, so the rebuild waits for the next tick.
+
+**Where to look.** `GraphEditor::rebuild_` and the start of `GraphEditor::update`, `partsOf` in `interaction_graph.cpp` (how the verb finds its cards).
+
+**Try it.** Open `gather` in the Rules graph and unplug the target wire: Save names the problem instead of writing a broken file.
+
+**Check yourself.** Why does Save keep the `//` lines at the top of an interaction file but not the ones inside the braces?
