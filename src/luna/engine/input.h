@@ -38,6 +38,8 @@ enum class Intent {
     Confront, Actions,
     // Build (US-251, D-55): the key B opens the Build menu: a list of the blueprints and pieces the hero knows.
     Build,
+    // Journal (US-183): the key J opens the journal of quests, or closes it.
+    Journal,
     Count
 };
 

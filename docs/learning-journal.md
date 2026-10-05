@@ -2018,3 +2018,13 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Give a quest `giver: "role:elder"` and watch the sign appear.
 
 **Check yourself.** Why is it safe to change the copy and not the script in the library?
+
+## US-183: showing what the data knows (M10)
+
+**Idea.** The journal, the tracker and the marker never keep their own copy of a quest. Each frame they ask the quest book "what is active, which step, how far?" and draw the answer, so they cannot disagree with the game. The one expensive question, "where is the nearest bush with the edible tag?", is asked only twice a second and the answer is kept.
+
+**Where to look.** `trackedQuest`, `questMarkerPosition` and `drawQuestTracker` in `src/game/quest_ui.cpp`; the Journal case in `RunFlow::buildMenu`.
+
+**Try it.** Turn Quest markers off in Settings and watch the arrow vanish while the tracker stays.
+
+**Check yourself.** Why is the marker searched in `tickQuests` and not in the draw function?

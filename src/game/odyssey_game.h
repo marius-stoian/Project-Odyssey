@@ -176,6 +176,7 @@ public:
     // Story notes set by conversations and interactions (`flag met-elder`), saved with the things (US-164).
     // Something the hero did that a quest may wait for (US-181); counted at the next quest update.
     void questEvent(sim::rules::QuestObjective::Kind kind, const std::string& subject, int amount = 1) { quests_.notify({kind, subject, amount, actionClock_}); }
+    void setQuestMarker(bool valid, double x, double y) { questMarker_ = {valid, x, y}; }
     sim::rules::QuestBook& quests() { return quests_; }
     const sim::rules::QuestBook& quests() const { return quests_; }
     sim::rules::FlagStore& flags() { return flags_; }
@@ -457,6 +458,7 @@ private:
     sim::rules::FlagStore flags_;
     sim::rules::QuestBook quests_; // the authored quests and where each stands (US-180)
     void watchHeroItems(); // tells the quests what enters the hero bag (US-181)
+    struct QuestMarker { bool valid = false; double x = 0.0; double y = 0.0; } questMarker_; // where the tracked step points, found twice a second (US-183)
     Bubbles bubbles_;
     Exchanges exchanges_;
     sim::rules::CooldownTable greetingCooldowns_;
@@ -588,6 +590,8 @@ private:
     void drawEmote(luna::engine::Renderer& renderer, Emote emote, int x, int y) const;
     void drawClanDetails(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawQuestSigns(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    void drawQuestTracker(luna::engine::Renderer& renderer) const;
+    void drawQuestMarker(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawClanHud(luna::engine::Renderer& renderer) const;
     EffectArt effectArt_;
     WeatherCycle weather_;

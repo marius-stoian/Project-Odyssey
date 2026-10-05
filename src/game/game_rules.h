@@ -5,9 +5,11 @@
 #include "sim/action_runner.h"
 #include "sim/conversation.h"
 #include "sim/interaction.h"
+#include "sim/quest_book.h"
 #include "sim/rule_expr.h"
 
 #include <optional>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -108,6 +110,10 @@ bool startInteractionFor(OdysseyGame& game, int actor, const std::string& intera
 void tickInteractions(OdysseyGame& game);
 // Moves the quests on (US-180): counts what happened, checks prerequisites, waits, failures, gives rewards.
 void tickQuests(OdysseyGame& game);
+// Where a marker spec (tag:edible, object:clan-fire, npc:elder, place:stream) points, nearest to the hero; empty when nothing matches (US-183).
+std::optional<std::pair<double, double>> questMarkerPosition(const OdysseyGame& game, const std::string& spec);
+// The active quest the tracker and the marker follow: the one whose objective moved last.
+std::string trackedQuest(const sim::rules::QuestBook& book);
 // A name as quest files write it: lower case, words joined by - ("Old Tok" -> "old-tok").
 std::string questWord(const std::string& text);
 // The hero has started talking with `subject`: every name it goes by (its name, roles, kind) is reported to the quests as a talk event.
