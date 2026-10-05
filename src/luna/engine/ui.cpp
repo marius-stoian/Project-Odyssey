@@ -1,5 +1,7 @@
 #include "luna/engine/ui.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -245,13 +247,6 @@ void ListBox::draw(UiPainter& painter) const {
 
 namespace {
 
-std::string lowered(std::string text) {
-    for (char& c : text) {
-        if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
-    }
-    return text;
-}
-
 bool inside(const Rect& area, int x, int y) { return x >= area.x && y >= area.y && x < area.x + area.width && y < area.y + area.height; }
 
 } // namespace
@@ -264,7 +259,7 @@ void SuggestList::open(std::vector<std::string> values) {
 
 void SuggestList::filter(const std::string& typed) {
     open_ = true;
-    const std::string needle = lowered(typed);
+    const std::string needle = odysseus::core::lowered(typed);
     rows_.clear();
     const auto add = [&](const std::string& value) {
         if (std::find(rows_.begin(), rows_.end(), value) == rows_.end()) rows_.push_back(value);
@@ -273,10 +268,10 @@ void SuggestList::filter(const std::string& typed) {
         for (const std::string& value : values_) add(value);
     } else {
         for (const std::string& value : values_) { // the ones that start with it first
-            if (lowered(value).rfind(needle, 0) == 0) add(value);
+            if (odysseus::core::lowered(value).rfind(needle, 0) == 0) add(value);
         }
         for (const std::string& value : values_) { // then the ones that contain it
-            if (lowered(value).find(needle) != std::string::npos) add(value);
+            if (odysseus::core::lowered(value).find(needle) != std::string::npos) add(value);
         }
     }
     highlight_ = 0;

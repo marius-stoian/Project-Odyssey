@@ -24,17 +24,6 @@ int professionIndex(const OdysseyGame& game, const std::string& id) {
     return -1;
 }
 
-// "energy" to the need, case does not matter.
-std::optional<sim::Need> needByName(std::string name) {
-    for (char& c : name) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-    for (std::size_t n = 0; n < sim::kNeedCount; ++n) {
-        std::string candidate = sim::needName(static_cast<sim::Need>(n));
-        for (char& c : candidate) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-        if (candidate == name) return static_cast<sim::Need>(n);
-    }
-    return std::nullopt;
-}
-
 // Runs the built-in action `name` on `subject`. False when the game has no action of that name.
 bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<std::string>& args, const Subject& subject) {
     // Buildings (US-251, US-255): bring materials, work on the site, cancel it, repair, put out a fire.
@@ -187,7 +176,7 @@ bool runBuiltin(OdysseyGame& game, const std::string& name, const std::vector<st
         return false; // for animals and clan members, never the hero
     } else if (name == "restore") {
         // restore energy 30: the hero's need rises (a bed, a shelter).
-        const std::optional<sim::Need> need = args.size() == 2 ? needByName(args[0]) : std::nullopt;
+        const std::optional<sim::Need> need = args.size() == 2 ? sim::needFromName(args[0]) : std::nullopt;
         if (!need) return false;
         game.helpPerson(hero->personId(), *need, std::atoi(args[1].c_str()));
         game.run().setMessage(std::format("You feel better: {} +{}.", args[0], args[1]));

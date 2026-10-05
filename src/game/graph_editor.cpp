@@ -1,11 +1,12 @@
 #include "game/graph_editor.h"
 
+#include "core/text.h"
+#include "sim/economy.h"
+
 #include "game/graph_commands.h"
 
 #include <algorithm>
 #include <cctype>
-#include <fstream>
-#include <sstream>
 
 namespace odysseus::game {
 
@@ -32,44 +33,6 @@ constexpr int kPanelWidth = 176;
 constexpr int kStatusHeight = 14;
 constexpr int kRow = 16;
 constexpr int kProblemsHeight = 56; // the list of findings under the canvas
-
-std::string readText(const fs::path& path) {
-    std::ifstream in(path, std::ios::binary);
-    std::stringstream buffer;
-    buffer << in.rdbuf();
-    return buffer.str();
-}
-
-// Written to a temporary file first and renamed over the real one, so a crash never leaves half a conversation (ADR-010).
-bool writeText(const fs::path& path, const std::string& text) {
-    const fs::path temp = fs::path(path).concat(".tmp");
-    {
-        std::ofstream out(temp, std::ios::binary | std::ios::trunc);
-        if (!out) return false;
-        out << text;
-        if (!out.good()) return false;
-    }
-    std::error_code ec;
-    fs::rename(temp, path, ec);
-    if (ec) {
-        fs::remove(temp, ec);
-        return false;
-    }
-    return true;
-}
-
-std::string joinWords(const std::vector<std::string>& words) {
-    std::string out;
-    for (const std::string& word : words) out += (out.empty() ? "" : " ") + word;
-    return out;
-}
-
-std::vector<std::string> splitWords(const std::string& text) {
-    std::vector<std::string> words;
-    std::istringstream in(text);
-    for (std::string word; in >> word;) words.push_back(word);
-    return words;
-}
 
 } // namespace
 
@@ -168,13 +131,13 @@ bool GraphEditor::openDialogue(const std::string& name) {
         return false;
     }
     sim::rules::LoadReport report;
-    const std::optional<sim::rules::DlgScript> script = sim::rules::parseDialogue(readText(file), name, "dialogue/" + name + ".dlg", report);
+    const std::optional<sim::rules::DlgScript> script = sim::rules::parseDialogue(core::readTextFile(file).value_or(""), name, "dialogue/" + name + ".dlg", report);
     if (!script) {
         say_("Dialogue: " + (report.errors.empty() ? name : report.errors.front().text()));
         return false;
     }
     const fs::path sidecar = fs::path(file).concat(".layout.json");
-    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(readText(sidecar)) : DialogueLayout{};
+    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(core::readTextFile(sidecar).value_or("")) : DialogueLayout{};
     DialogueGraph d = dialogueToGraph(*script, layout);
     Doc& doc = docs_[docKey(Kind::Dialogue, name)];
     doc.name = name;
@@ -197,7 +160,7 @@ bool GraphEditor::openInteraction(const std::string& name) {
         say_("Interaction: no file " + name + ".json");
         return false;
     }
-    const std::string text = readText(file);
+    const std::string text = core::readTextFile(file).value_or("");
     sim::rules::LoadReport report;
     const std::optional<sim::rules::Interaction> interaction = sim::rules::InteractionRegistry::parse(text, "interactions/" + name + ".json", report, name);
     if (!interaction) {
@@ -205,7 +168,7 @@ bool GraphEditor::openInteraction(const std::string& name) {
         return false;
     }
     const fs::path sidecar = fs::path(file).concat(".layout.json");
-    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(readText(sidecar)) : DialogueLayout{};
+    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(core::readTextFile(sidecar).value_or("")) : DialogueLayout{};
     Doc& doc = docs_[docKey(Kind::Interaction, name)];
     doc.name = name;
     doc.kind = Kind::Interaction;
@@ -226,7 +189,7 @@ bool GraphEditor::openQuest(const std::string& name) {
         say_("Quest: no file " + name + ".json");
         return false;
     }
-    const std::string text = readText(file);
+    const std::string text = core::readTextFile(file).value_or("");
     sim::rules::LoadReport report;
     const std::optional<sim::rules::Quest> quest = sim::rules::parseQuest(text, "quests/" + name + ".json", report, name);
     if (!quest) {
@@ -234,7 +197,7 @@ bool GraphEditor::openQuest(const std::string& name) {
         return false;
     }
     const fs::path sidecar = questFolder_ / (name + ".quest.layout.json");
-    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(readText(sidecar)) : DialogueLayout{};
+    const DialogueLayout layout = fs::is_regular_file(sidecar, ec) ? layoutFromJson(core::readTextFile(sidecar).value_or("")) : DialogueLayout{};
     Doc& doc = docs_[docKey(Kind::Quest, name)];
     doc.name = name;
     doc.kind = Kind::Quest;
@@ -249,8 +212,7 @@ bool GraphEditor::openQuest(const std::string& name) {
 }
 
 bool GraphEditor::createNew(const std::string& name) {
-    const bool valid = !name.empty() && name.size() <= 40 &&
-                       std::all_of(name.begin(), name.end(), [](unsigned char c) { return std::islower(c) != 0 || std::isdigit(c) != 0 || c == '-'; });
+    const bool valid = sim::validItemId(name, 40);
     if (!valid) {
         say_("New: a name is lower-case letters, digits and hyphens (up to 40)");
         return false;
@@ -433,7 +395,7 @@ bool GraphEditor::saveDialogue() {
         return false;
     }
     if (fs::is_regular_file(file, ec)) fs::copy_file(file, fs::path(file).concat(".bak"), fs::copy_options::overwrite_existing, ec);
-    if (!writeText(file, sim::rules::writeDialogue(*script)) || !writeText(fs::path(file).concat(".layout.json"), layoutToJson(layoutOf(d)))) {
+    if (core::writeTextFileSafely(file, sim::rules::writeDialogue(*script)) || core::writeTextFileSafely(fs::path(file).concat(".layout.json"), layoutToJson(layoutOf(d)))) {
         say_("Not saved: " + doc.name + ".dlg cannot be written");
         return false;
     }
@@ -473,7 +435,7 @@ bool GraphEditor::saveInteraction() {
         return false;
     }
     if (fs::is_regular_file(file, ec)) fs::copy_file(file, fs::path(file).concat(".bak"), fs::copy_options::overwrite_existing, ec);
-    if (!writeText(file, doc.leading + json) || !writeText(fs::path(file).concat(".layout.json"), layoutToJson(interactionLayoutOf(*doc.graph)))) {
+    if (core::writeTextFileSafely(file, doc.leading + json) || core::writeTextFileSafely(fs::path(file).concat(".layout.json"), layoutToJson(interactionLayoutOf(*doc.graph)))) {
         say_("Not saved: " + doc.name + ".json cannot be written");
         return false;
     }
@@ -512,7 +474,7 @@ bool GraphEditor::saveQuest() {
         return false;
     }
     if (fs::is_regular_file(file, ec)) fs::copy_file(file, fs::path(file).concat(".bak"), fs::copy_options::overwrite_existing, ec);
-    if (!writeText(file, doc.leading + json) || !writeText(questFolder_ / (doc.name + ".quest.layout.json"), layoutToJson(questLayoutOf(*doc.graph)))) {
+    if (core::writeTextFileSafely(file, doc.leading + json) || core::writeTextFileSafely(questFolder_ / (doc.name + ".quest.layout.json"), layoutToJson(questLayoutOf(*doc.graph)))) {
         say_("Not saved: " + doc.name + ".json cannot be written");
         return false;
     }
@@ -687,12 +649,12 @@ void GraphEditor::buildPanel() {
         panelTitle_ = current_->name + ".dlg";
         panelPrefix_ = "graph.header";
         sim::rules::DlgScript& h = current_->header;
-        field("who: ", joinWords(h.who), [&h](const std::string& v) { h.who = splitWords(v); });
+        field("who: ", core::joined(h.who, " "), [&h](const std::string& v) { h.who = core::splitWords(v); });
         field("when: ", h.whenSource, [&h](const std::string& v) { h.whenSource = v; });
         panel_->add<NumberField>(Rect{left, y, width, kRow - 2}, "priority: ", h.priority, -1000, 1000, [&h](int v) { h.priority = v; });
         y += kRow;
         field("bark: ", h.bark, [&h](const std::string& v) { h.bark = v; });
-        field("pair: ", joinWords(h.pair), [&h](const std::string& v) { h.pair = splitWords(v); });
+        field("pair: ", core::joined(h.pair, " "), [&h](const std::string& v) { h.pair = core::splitWords(v); });
         return;
     }
     panelTitle_ = card->type;

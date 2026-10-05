@@ -36,13 +36,11 @@ public:
     RigidBody(Fixed mass, Fixed bottom, Vec3 position, SurfaceMaterial surface);
 
     Fixed mass() const { return mass_; }
-    Fixed inverseMass() const { return inverseMass_; }
     Fixed bottom() const { return bottom_; }
     Vec3 position() const { return position_; }
     Vec3 velocity() const { return velocity_; }
     SurfaceMaterial surface() const { return surface_; }
     bool asleep() const { return asleep_; }
-    bool onGround() const { return onGround_; }
 
     // A sudden push (N s = kg m/s): the velocity changes at once by impulse / mass.
     void applyImpulse(Vec3 impulse);
@@ -59,7 +57,6 @@ private:
     void slideFor(Fixed seconds, Fixed frictionDeceleration, Vec3 pushAcceleration);
 
     Fixed mass_;
-    Fixed inverseMass_;
     Fixed bottom_;
     Vec3 position_;
     Vec3 velocity_;

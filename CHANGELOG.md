@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## Refactor: lean code, stronger Luna (Mraw) - 2026-10-06
+
+**State:** On `refactor/lean-luna` from `main` (`f0aa726`); not merged. Debug verify: zero warnings, 30 of 30 (`docs/evidence/REFACTOR-lean-luna/`). Full report: `docs/reports/Refactor-lean-luna-2026-10-06.md`.
+
+- **New:** `src/core/text.*` (`readTextFile`, `writeTextFileSafely`, `lowered`, `splitWords`, `joined`, `replaceAll`); Luna `TimeWindow<N>` (`frame_stats.h`) and `intentFromName` (`input.*`); `sim::needFromName`; `validItemId(id, maxLength)`; `tests/core/text_test.cpp` and two Luna test cases.
+- **Changed:** 52 hand-written copies of file reads, safe writes, lower-casing, id checks, need lookups and word helpers now call the shared ones; the GPU backend no longer allocates per lit batch; `OdysseyGame` timing uses `TimeWindow`; `apps/odysseus/main.cpp` uses `intentFromName` (every intent is scriptable); game tests run in six balanced shards and `tools/verify.ps1` runs headless tests with `-j 6` (964 s to 287 s).
+- **Removed:** 46 functions with no caller (for example `Window::setFullscreen`, `stepProjectileTick`, `OdysseyGame::plantThing`, `BuildingStore::footprintCells`) and two write-only members; `Sword::slash` lost its unused parameter.
+
 ## US-305 Level edits win over the run save (Mraw) - 2026-10-06
 
 **State:** On `story/US-305`, merged into `qa` after the Debug verify (zero warnings, every test group green).

@@ -1,10 +1,10 @@
 #include "game/npc_class_book.h"
 
 #include "core/log.h"
+#include "core/text.h"
 
 #include <algorithm>
 #include <format>
-#include <fstream>
 #include <system_error>
 
 namespace odysseus::game {
@@ -56,19 +56,8 @@ std::optional<std::string> NpcClassBook::save(const sim::rules::NpcClass& npcCla
     if (!sim::rules::NpcClassCatalog::parse(text, "npc-classes/" + npcClass.id + ".json", check, npcClass.id)) {
         return check.errors.empty() ? std::string("the class is not valid") : check.errors.front().text();
     }
-    std::error_code ec;
-    std::filesystem::create_directories(folder_, ec);
     const std::filesystem::path file = folder_ / (npcClass.id + ".json");
-    const std::filesystem::path temporary = std::filesystem::path(file.string() + ".tmp");
-    {
-        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
-        if (!out) return std::format("{} cannot be written", file.generic_string());
-        out << text;
-        out.flush();
-        if (!out) return std::format("{} could not be written completely (is the disk full?)", file.generic_string());
-    }
-    std::filesystem::rename(temporary, file, ec);
-    if (ec) return std::format("{} cannot be replaced: {}", file.generic_string(), ec.message());
+    if (auto problem = core::writeTextFileSafely(file, text)) return problem;
     if (wrote_) wrote_(file); // the watcher must not read this file a second time (US-304)
     sim::rules::LoadReport report;
     catalog_ = sim::rules::NpcClassCatalog::load(folder_, report);
@@ -83,19 +72,8 @@ std::optional<std::string> NpcClassBook::saveKind(const sim::rules::NpcKind& kin
     if (!sim::rules::NpcKindCatalog::parse(text, "npcs/" + kind.kind + ".json", check, kind.kind)) {
         return check.errors.empty() ? std::string("the kind is not valid") : check.errors.front().text();
     }
-    std::error_code ec;
-    std::filesystem::create_directories(kindsFolder_, ec);
     const std::filesystem::path file = kindsFolder_ / (kind.kind + ".json");
-    const std::filesystem::path temporary = std::filesystem::path(file.string() + ".tmp");
-    {
-        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
-        if (!out) return std::format("{} cannot be written", file.generic_string());
-        out << text;
-        out.flush();
-        if (!out) return std::format("{} could not be written completely (is the disk full?)", file.generic_string());
-    }
-    std::filesystem::rename(temporary, file, ec);
-    if (ec) return std::format("{} cannot be replaced: {}", file.generic_string(), ec.message());
+    if (auto problem = core::writeTextFileSafely(file, text)) return problem;
     if (wrote_) wrote_(file); // the watcher must not read this file a second time (US-304)
     sim::rules::LoadReport report;
     kinds_ = sim::rules::NpcKindCatalog::load(kindsFolder_, report);

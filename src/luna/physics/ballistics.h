@@ -41,9 +41,6 @@ Vec3 projectileAcceleration(const Projectile& projectile, const Air& air);
 // acceleration, then the position from the new velocity. Simple, stable and deterministic.
 void stepProjectile(Projectile& projectile, const Air& air, Fixed dt);
 
-// Advances by one simulation tick (1/20 s) in kProjectileSubsteps sub-steps.
-void stepProjectileTick(Projectile& projectile, const Air& air);
-
 // What a projectile hit during a tick: which obstacle (its index), and where.
 struct ProjectileHit {
     std::size_t obstacle = 0;

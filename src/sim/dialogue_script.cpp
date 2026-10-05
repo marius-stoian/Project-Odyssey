@@ -1,9 +1,10 @@
 #include "sim/dialogue_script.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <cctype>
 #include <format>
-#include <fstream>
 #include <iterator>
 #include <set>
 
@@ -427,13 +428,12 @@ DialogueLibrary DialogueLibrary::load(const std::filesystem::path& folder, LoadR
     for (const std::filesystem::path& path : files) {
         ++report.filesRead;
         const std::string file = folder.filename().generic_string() + "/" + path.filename().generic_string();
-        std::ifstream in(path, std::ios::binary);
-        if (!in) {
+        const std::optional<std::string> text = core::readTextFile(path);
+        if (!text) {
             report.errors.push_back({file, 0, "the file cannot be read"});
             continue;
         }
-        const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-        if (auto script = parseDialogue(text, path.stem().string(), file, report)) library.scripts_.push_back(std::move(*script));
+        if (auto script = parseDialogue(*text, path.stem().string(), file, report)) library.scripts_.push_back(std::move(*script));
     }
     report.loaded = static_cast<int>(library.scripts_.size());
     return library;

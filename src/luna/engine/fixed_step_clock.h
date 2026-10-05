@@ -19,8 +19,6 @@ public:
 
     // 0.0 = just after a tick, close to 1.0 = the next tick is due. For interpolation.
     double alpha() const;
-
-    std::uint64_t tickNanoseconds() const;
     std::uint64_t totalTicks() const;
 
     static constexpr int kMaxTicksPerFrame = 10;

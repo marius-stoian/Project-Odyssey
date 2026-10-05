@@ -27,10 +27,6 @@ double FixedStepClock::alpha() const {
     return static_cast<double>(accumulated_) / static_cast<double>(tickNanoseconds_);
 }
 
-std::uint64_t FixedStepClock::tickNanoseconds() const {
-    return tickNanoseconds_;
-}
-
 std::uint64_t FixedStepClock::totalTicks() const {
     return totalTicks_;
 }

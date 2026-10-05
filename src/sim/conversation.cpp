@@ -1,5 +1,7 @@
 #include "sim/conversation.h"
 
+#include "core/text.h"
+
 #include "sim/interaction.h"
 
 #include <format>
@@ -16,11 +18,6 @@ constexpr int kHostile = -40;
 // A need this low (of 100) is pressing enough to show instead of the feeling about the hero.
 constexpr int kPressing = 25;
 
-std::string replaceAll(std::string text, const std::string& from, const std::string& to) {
-    for (std::size_t at = text.find(from); at != std::string::npos; at = text.find(from, at + to.size())) text.replace(at, from.size(), to);
-    return text;
-}
-
 std::string textOf(const Value& value) { return value.isText ? value.text : std::format("{}", value.number); }
 
 bool holds(const ExprPtr& condition, const RuleContext& context) { return condition == nullptr || isTrue(*condition, context); }
@@ -33,8 +30,8 @@ Conversation::Conversation(DlgScript script, int actor, ThingRef target) : scrip
 }
 
 std::string fillDialogueTokens(const std::string& text, const RuleContext& context) {
-    std::string filled = replaceAll(text, "{hero}", textOf(context.path("hero.name")));
-    filled = replaceAll(filled, "{npc}", textOf(context.path("npc.name")));
+    std::string filled = core::replaceAll(text, "{hero}", textOf(context.path("hero.name")));
+    filled = core::replaceAll(filled, "{npc}", textOf(context.path("npc.name")));
     return fillTokens(filled, context);
 }
 

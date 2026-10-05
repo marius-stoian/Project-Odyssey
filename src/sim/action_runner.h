@@ -84,7 +84,6 @@ public:
     const RunningAction* running(int actor) const;
     // 0..100 for the ring over the target; -1 when the actor is not doing anything.
     int progress(int actor, std::int64_t now) const;
-    const std::vector<RunningAction>& allRunning() const { return running_; }
     const std::vector<PendingEffect>& pending() const { return pending_; }
 
     // Pending effects as JSON text, with their times relative to `now` so a saved game does not care what the clock said. Running

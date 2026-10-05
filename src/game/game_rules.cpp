@@ -1,9 +1,10 @@
 #include "game/game_rules.h"
 
+#include "core/text.h"
+
 #include "game/odyssey_game.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cmath>
 #include <format>
 
@@ -19,11 +20,6 @@ std::string timeOfDayWord(int hour) {
 }
 
 namespace {
-
-std::string lower(std::string text) {
-    std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return text;
-}
 
 bool hasTag(const std::vector<std::string>& tags, const std::string& tag) { return std::find(tags.begin(), tags.end(), tag) != tags.end(); }
 
@@ -281,15 +277,6 @@ ActorRef actorOfRunnerId(int runnerId) {
     return {ActorRef::Kind::Hero, -1};
 }
 
-int runnerIdOf(const ActorRef& actor) {
-    switch (actor.kind) {
-    case ActorRef::Kind::Hero: return kHeroActor;
-    case ActorRef::Kind::Person: return kPersonActorBase + actor.index;
-    case ActorRef::Kind::Animal: return kAnimalActorBase + actor.index;
-    }
-    return kHeroActor;
-}
-
 sim::rules::ThingInfo actorInfo(const OdysseyGame& game, const ActorRef& actor) {
     switch (actor.kind) {
     case ActorRef::Kind::Hero: return {"hero", {"hero", "person"}};
@@ -423,7 +410,7 @@ Value GameRuleContext::path(const std::string& dotted) const {
     if (dotted == "target.state") return Value::ofText(plant != nullptr ? plant->state : std::string());
     if (dotted == "target.inspect") return Value::ofText(plant != nullptr && plant->def != nullptr ? plant->def->inspect : std::string());
     if (dotted == "season") {
-        return Value::ofText(game_.clan() != nullptr ? lower(sim::seasonName(game_.clan()->date().season)) : std::string("summer"));
+        return Value::ofText(game_.clan() != nullptr ? core::lowered(sim::seasonName(game_.clan()->date().season)) : std::string("summer"));
     }
     if (dotted == "time") {
         int hour = 12;
@@ -447,16 +434,14 @@ Value GameRuleContext::call(const std::string& name, const std::vector<Value>& a
         // How much a need is missing, 0 (full) to 100 (desperate): the hungrier, the higher (the brief's `need(hunger) * 2`).
         if (actor_.kind != ActorRef::Kind::Person || game_.clan() == nullptr || actor_.index < 0 || static_cast<std::size_t>(actor_.index) >= game_.clan()->people().size()) return Value::ofNumber(0);
         const sim::Person& person = game_.clan()->people()[static_cast<std::size_t>(actor_.index)];
-        for (std::size_t n = 0; n < sim::kNeedCount; ++n) {
-            if (lower(sim::needName(static_cast<sim::Need>(n))) == lower(args[0].text)) return Value::ofNumber(100 - person.needs[static_cast<sim::Need>(n)]);
-        }
-        return Value::ofNumber(0);
+        const auto need = sim::needFromName(args[0].text);
+        return Value::ofNumber(need ? 100 - person.needs[*need] : 0);
     }
     if (name == "trait" && args.size() == 1 && args[0].isText) {
         if (actor_.kind != ActorRef::Kind::Person || game_.clan() == nullptr || actor_.index < 0 || static_cast<std::size_t>(actor_.index) >= game_.clan()->people().size()) return Value::ofNumber(0);
         const sim::Person& person = game_.clan()->people()[static_cast<std::size_t>(actor_.index)];
         for (std::size_t t = 0; t < sim::kTraitCount; ++t) {
-            if (lower(sim::traitName(static_cast<sim::Trait>(t))) == lower(args[0].text)) return Value::ofNumber((person.traits >> t) & 1);
+            if (core::lowered(sim::traitName(static_cast<sim::Trait>(t))) == core::lowered(args[0].text)) return Value::ofNumber((person.traits >> t) & 1);
         }
         return Value::ofNumber(0);
     }

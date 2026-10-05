@@ -66,33 +66,7 @@ struct Arguments {
 };
 
 luna::engine::Intent intentNamed(std::string_view name) {
-    using luna::engine::Intent;
-    if (name == "MoveUp") return Intent::MoveUp;
-    if (name == "MoveDown") return Intent::MoveDown;
-    if (name == "MoveLeft") return Intent::MoveLeft;
-    if (name == "MoveRight") return Intent::MoveRight;
-    if (name == "Interact") return Intent::Interact;
-    if (name == "OpenMenu") return Intent::OpenMenu;
-    if (name == "SwitchWeapon") return Intent::SwitchWeapon;
-    if (name == "ModeGame") return Intent::ModeGame;
-    if (name == "ModeEditor") return Intent::ModeEditor;
-    if (name == "Undo") return Intent::Undo;
-    if (name == "Redo") return Intent::Redo;
-    if (name == "Save") return Intent::Save;
-    if (name == "Delete") return Intent::Delete;
-    if (name == "ToggleGrid") return Intent::ToggleGrid;
-    if (name == "Rotate") return Intent::Rotate;
-    if (name == "Erase") return Intent::Erase;
-    if (name == "Confirm") return Intent::Confirm;
-    if (name == "Attack") return Intent::Attack;
-    if (name == "Inspect") return Intent::Inspect;
-    if (name == "DevTools") return Intent::DevTools;
-    if (name == "Overlay") return Intent::Overlay;
-    if (name == "ZoomIn") return Intent::ZoomIn;
-    if (name == "ZoomOut") return Intent::ZoomOut;
-    if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
-        return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
-    }
+    if (const auto intent = luna::engine::intentFromName(name)) return *intent;
     throw std::invalid_argument("unknown intent: " + std::string(name));
 }
 

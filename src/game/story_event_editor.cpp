@@ -1,7 +1,9 @@
 #include "game/story_event_editor.h"
 
+#include "core/text.h"
+#include "sim/economy.h"
+
 #include <algorithm>
-#include <fstream>
 #include <sstream>
 
 namespace odysseus::game {
@@ -22,30 +24,6 @@ namespace {
 constexpr int kBar = 18;
 constexpr int kListWidth = 120;
 constexpr int kRow = 15;
-
-std::string readText(const fs::path& path) {
-    std::ifstream in(path, std::ios::binary);
-    std::stringstream buffer;
-    buffer << in.rdbuf();
-    return buffer.str();
-}
-
-bool writeText(const fs::path& path, const std::string& text) {
-    const fs::path temp = fs::path(path).concat(".tmp");
-    {
-        std::ofstream out(temp, std::ios::binary | std::ios::trunc);
-        if (!out) return false;
-        out << text;
-        if (!out.good()) return false;
-    }
-    std::error_code ec;
-    fs::rename(temp, path, ec);
-    if (ec) {
-        fs::remove(temp, ec);
-        return false;
-    }
-    return true;
-}
 
 } // namespace
 
@@ -86,7 +64,7 @@ std::vector<std::string> StoryEventEditor::files() const {
         const std::string name = entry.path().filename().string();
         if (!entry.is_regular_file() || entry.path().extension() != ".json" || name.size() > 12 && name.compare(name.size() - 12, 12, ".layout.json") == 0) continue;
         std::string problem;
-        const auto event = sim::parseStoryEvent(readText(entry.path()), entry.path().string(), problem);
+        const auto event = sim::parseStoryEvent(core::readTextFile(entry.path()).value_or(""), entry.path().string(), problem);
         found.emplace_back(event ? event->order : 1000000, entry.path().stem().string());
     }
     std::sort(found.begin(), found.end());
@@ -122,7 +100,7 @@ bool StoryEventEditor::open(const std::string& id) {
         return false;
     }
     std::string problem;
-    const auto event = sim::parseStoryEvent(readText(fileOf(id)), fileOf(id).string(), problem);
+    const auto event = sim::parseStoryEvent(core::readTextFile(fileOf(id)).value_or(""), fileOf(id).string(), problem);
     if (!event) {
         say_("Story event " + id + ": " + problem);
         return false;
@@ -135,7 +113,7 @@ bool StoryEventEditor::open(const std::string& id) {
 }
 
 bool StoryEventEditor::createNew(const std::string& id) {
-    const bool valid = !id.empty() && id.size() <= 40 && std::all_of(id.begin(), id.end(), [](unsigned char c) { return std::islower(c) != 0 || std::isdigit(c) != 0 || c == '-'; });
+    const bool valid = sim::validItemId(id, 40);
     if (!valid) {
         say_("New: an id is lower-case letters, digits and hyphens (up to 40)");
         return false;
@@ -174,7 +152,7 @@ bool StoryEventEditor::save() {
     std::error_code ec;
     fs::create_directories(folder_, ec);
     if (fs::is_regular_file(fileOf(event_.id), ec)) fs::copy_file(fileOf(event_.id), fs::path(fileOf(event_.id)).concat(".bak"), fs::copy_options::overwrite_existing, ec);
-    if (!writeText(fileOf(event_.id), text)) {
+    if (core::writeTextFileSafely(fileOf(event_.id), text)) {
         say_("Not saved: " + event_.id + ".json cannot be written");
         return false;
     }

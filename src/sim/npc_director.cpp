@@ -1,5 +1,7 @@
 #include "sim/npc_director.h"
 
+#include "core/text.h"
+
 #include "core/random.h"
 #include "sim/data.h"
 
@@ -452,9 +454,7 @@ void NpcDirector::applyEffect(NpcPopulation& population, int actor, int partner,
         if (x != population.x(actor) || y != population.y(actor)) population.move(actor, x, y);
     } else if (name == "restore" && effect.args.size() == 3) {
         for (std::size_t n = 0; n < kNeedCount; ++n) {
-            std::string lower = needName(static_cast<Need>(n));
-            std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            if (lower == effect.args[1]->text) {
+            if (core::lowered(needName(static_cast<Need>(n))) == effect.args[1]->text) {
                 const int amount = static_cast<int>(std::clamp(rules::evaluate(*effect.args[2], rule).number, 0LL, 100LL));
                 population.setNeed(actor, static_cast<Need>(n), population.need(actor, static_cast<Need>(n)) + amount);
             }

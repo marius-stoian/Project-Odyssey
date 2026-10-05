@@ -110,8 +110,6 @@ public:
     const KindDef* kind(std::string_view id) const;
     const MaterialFire* material(std::string_view name) const;
     int maxRoomCells() const { return maxRoomCells_; }
-    // The kinds a new run's hero already knows, and the ones offered in the Build menu (known or not).
-    std::vector<const KindDef*> buildableKinds() const;
     // Adds a kind (a prefab the Editor just saved); replaces one of the same id.
     void addKind(KindDef kind);
 

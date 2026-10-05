@@ -63,7 +63,8 @@ add_library(odysseus_core STATIC
     src/core/log.cpp
     src/core/assertions.cpp
     src/core/presentation.cpp
-    src/core/random.cpp)
+    src/core/random.cpp
+    src/core/text.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
@@ -323,6 +324,7 @@ add_executable(odysseus_tests
     tests/core/version_test.cpp
     tests/core/log_test.cpp
     tests/core/presentation_test.cpp
+    tests/core/text_test.cpp
     tests/architecture/layer_rules_test.cpp)
 target_link_libraries(odysseus_tests PRIVATE odysseus_core doctest::doctest)
 target_compile_definitions(odysseus_tests PRIVATE
@@ -500,13 +502,20 @@ target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
-# The game tests are split into three runs so CTest can run them side by side (CI uses -j 4). The
-# files in A and B are named; C runs every other file, so a new test file is never left out.
-set(ODYSSEUS_SHARD_A "*aiming_test.cpp,*weapons_test.cpp,*combat_test.cpp")
-set(ODYSSEUS_SHARD_B "*plants_test.cpp,*ranged_test.cpp,*elements_test.cpp,*settings_test.cpp")
-add_test(NAME odysseus_game_tests_a COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_A}")
-add_test(NAME odysseus_game_tests_b COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_B}")
-add_test(NAME odysseus_game_tests_c COMMAND odysseus_game_tests "--source-file-exclude=${ODYSSEUS_SHARD_A},${ODYSSEUS_SHARD_B}")
+# The game tests are split into six runs so CTest can run them side by side (CI and verify.ps1 use -j). A to E name their files (balanced by
+# measured time, about two to three minutes each in Debug); F runs every other file, so a new test file is never left out. "*game?" anchors
+# the name at the folder, so level_test.cpp does not also pick living_level_test.cpp.
+set(ODYSSEUS_SHARD_A "*game?aiming_test.cpp,*game?weapons_test.cpp,*game?combat_test.cpp")
+set(ODYSSEUS_SHARD_B "*game?plants_test.cpp,*game?ranged_test.cpp,*game?elements_test.cpp,*game?settings_test.cpp")
+set(ODYSSEUS_SHARD_C "*game?shadow_test.cpp,*game?pickups_test.cpp,*game?world_lights_test.cpp,*game?paint_test.cpp,*game?celestial_test.cpp,*game?trade_editor_test.cpp,*game?thing_overrides_test.cpp,*game?lighting_editor_test.cpp,*game?npc_kind_test.cpp,*game?clan_test.cpp,*game?npc_class_editor_test.cpp,*game?npc_test_level_test.cpp,*game?arc_test.cpp,*game?interactions_test.cpp,*game?quest_graph_test.cpp,*game?presentation_settings_test.cpp,*game?hero_test.cpp,*game?dialogue_graph_test.cpp")
+set(ODYSSEUS_SHARD_D "*game?menu_test.cpp,*game?animals_test.cpp,*game?npc_test.cpp,*game?data_watch_test.cpp,*game?building_life_game_test.cpp,*game?weather_light_test.cpp,*game?trade_stock_test.cpp,*game?modes_test.cpp,*game?exchange_test.cpp,*game?npc_actions_test.cpp,*game?building_editor_test.cpp,*game?trade_gate_test.cpp,*game?npc_attitude_test.cpp,*game?graph_editor_test.cpp,*game?art_test.cpp")
+set(ODYSSEUS_SHARD_E "*game?normals_test.cpp,*game?conversation_test.cpp,*game?weather_test.cpp,*game?renderer_test.cpp,*game?trade_screen_test.cpp,*game?level_test.cpp,*game?schedule_editor_test.cpp,*game?npc_editor_test.cpp,*game?economy_editor_test.cpp,*game?greeting_test.cpp,*game?npc_kinds_tab_test.cpp,*game?npc_defaults_game_test.cpp,*game?living_level_test.cpp,*game?sky_test.cpp,*game?lighting_test.cpp,*game?interaction_graph_test.cpp")
+foreach(_shard A B C D E)
+    string(TOLOWER ${_shard} _name)
+    add_test(NAME odysseus_game_tests_${_name} COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_${_shard}}")
+endforeach()
+add_test(NAME odysseus_game_tests_f COMMAND odysseus_game_tests
+    "--source-file-exclude=${ODYSSEUS_SHARD_A},${ODYSSEUS_SHARD_B},${ODYSSEUS_SHARD_C},${ODYSSEUS_SHARD_D},${ODYSSEUS_SHARD_E}")
 
 # --- End-to-end: walk right into the boulder in the real window (US-024) ---
 add_test(NAME "US-024 Walk to the rock"

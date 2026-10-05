@@ -2,9 +2,9 @@
 
 #include "sim/json_data.h"
 
+#include "core/text.h"
+
 #include <format>
-#include <fstream>
-#include <sstream>
 #include <system_error>
 
 namespace odysseus::sim {
@@ -460,32 +460,8 @@ std::filesystem::path backupPath(const std::filesystem::path& file, int number) 
 }
 
 void writeSaveText(const std::filesystem::path& file, const std::string& text) {
-    namespace fs = std::filesystem;
-    if (file.has_parent_path()) fs::create_directories(file.parent_path());
-    const fs::path temporary = fs::path(file.string() + ".tmp");
-    {
-        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
-        if (!out) {
-            throw DataError(temporary, "(file)", "cannot be written");
-        }
-        out << text;
-        out.flush();
-        if (!out) {
-            throw DataError(temporary, "(file)", "could not be written completely (is the disk full?)");
-        }
-    } // the file is closed here, before it is renamed
-    // Keep the last complete saves: .bak3 is dropped, .bak2 -> .bak3, .bak1 -> .bak2, save -> .bak1.
-    std::error_code ignored;
-    fs::remove(backupPath(file, kSaveBackups), ignored);
-    for (int number = kSaveBackups - 1; number >= 1; --number) {
-        if (fs::exists(backupPath(file, number))) {
-            fs::rename(backupPath(file, number), backupPath(file, number + 1));
-        }
-    }
-    if (fs::exists(file)) {
-        fs::rename(file, backupPath(file, 1));
-    }
-    fs::rename(temporary, file); // the new save appears in one step
+    // Keeps the last complete saves: .bak3 is dropped, .bak2 -> .bak3, .bak1 -> .bak2, save -> .bak1.
+    if (const auto problem = core::writeTextFileSafely(file, text, kSaveBackups)) throw DataError(file, "(file)", *problem);
 }
 
 void saveWorld(const World& world, const std::filesystem::path& file) {

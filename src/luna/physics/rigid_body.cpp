@@ -25,7 +25,6 @@ RigidBody::RigidBody(Fixed mass, Fixed bottom, Vec3 position, SurfaceMaterial su
     ODYSSEUS_ASSERT(bottom >= kFixedZero, "the bottom distance cannot be negative");
     ODYSSEUS_ASSERT(surface.restitution >= kFixedZero && surface.restitution <= kFixedOne, "restitution is 0..1");
     ODYSSEUS_ASSERT(surface.friction >= kFixedZero, "friction cannot be negative");
-    inverseMass_ = kFixedOne / mass;
 }
 
 void RigidBody::wake() {

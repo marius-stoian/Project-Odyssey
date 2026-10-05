@@ -6,13 +6,12 @@ namespace odysseus::game {
 
 Sword::Sword(SwordConfig config) : config_(config) {}
 
-void Sword::slash(Facing facing) {
+void Sword::slash() {
     // Only slash if not on cooldown
     if (state_.cooldownTicks <= 0) {
         state_.state = SlashState::Slashing;
         state_.slashTicks = 0;
         state_.cooldownTicks = 0;
-        lastSlashFacing_ = facing;
         hasHitInThisSlash_ = false;
     }
 }

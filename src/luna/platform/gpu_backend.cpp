@@ -9,8 +9,10 @@
 #include <SDL3/SDL.h>
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <format>
+#include <iterator>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -157,12 +159,9 @@ public:
         const float v1 = (static_cast<float>(source.y + source.height) + kTexelNudge) / static_cast<float>(picture.height);
         const float a = static_cast<float>(alpha) / 255.0F;
         const auto first = static_cast<Uint32>(vertices_.size());
-        vertices_.push_back({x0, y0, u0, v0, 1.0F, 1.0F, 1.0F, a});
-        vertices_.push_back({x1, y0, u1, v0, 1.0F, 1.0F, 1.0F, a});
-        vertices_.push_back({x0, y1, u0, v1, 1.0F, 1.0F, 1.0F, a});
-        vertices_.push_back({x1, y0, u1, v0, 1.0F, 1.0F, 1.0F, a});
-        vertices_.push_back({x1, y1, u1, v1, 1.0F, 1.0F, 1.0F, a});
-        vertices_.push_back({x0, y1, u0, v1, 1.0F, 1.0F, 1.0F, a});
+        const Vertex quad[6] = {{x0, y0, u0, v0, 1.0F, 1.0F, 1.0F, a}, {x1, y0, u1, v0, 1.0F, 1.0F, 1.0F, a}, {x0, y1, u0, v1, 1.0F, 1.0F, 1.0F, a},
+                                {x1, y0, u1, v0, 1.0F, 1.0F, 1.0F, a}, {x1, y1, u1, v1, 1.0F, 1.0F, 1.0F, a}, {x0, y1, u0, v1, 1.0F, 1.0F, 1.0F, a}};
+        vertices_.insert(vertices_.end(), std::begin(quad), std::end(quad)); // one capacity check for the six corners, not six
         const int light = additive ? -1 : currentLight_; // glows and weather add light themselves: they are not lit
         if (!batches_.empty() && batches_.back().texture == texture && batches_.back().additive == additive && batches_.back().light == light) {
             batches_.back().count += 6;
@@ -523,9 +522,11 @@ private:
         SDL_EndGPURenderPass(pass);
     }
 
-    // The lighting state as the shader reads it: (ambient rgb, count), then two float4 per light.
-    static std::vector<float> pack(const LightingState& state) {
-        std::vector<float> data(4U + 8U * static_cast<std::size_t>(LightingState::kMaxLights), 0.0F);
+    // The lighting state as the shader reads it: (ambient rgb, count), then two float4 per light. A fixed array on the stack: this runs for
+    // every lit batch, and a heap allocation there would be one per batch per frame.
+    using PackedLights = std::array<float, 4U + 8U * static_cast<std::size_t>(LightingState::kMaxLights)>;
+    static PackedLights pack(const LightingState& state) {
+        PackedLights data{};
         data[0] = state.ambient[0];
         data[1] = state.ambient[1];
         data[2] = state.ambient[2];

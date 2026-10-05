@@ -9,28 +9,7 @@
 
 namespace odysseus::sim {
 
-const char* biomeName(Biome biome) {
-    switch (biome) {
-    case Biome::Steppe: return "steppe";
-    case Biome::Forest: return "forest";
-    case Biome::Water: return "water";
-    case Biome::Mountain: return "mountain";
-    case Biome::Cave: return "cave";
-    }
-    return "?";
-}
-
 bool walkable(Biome biome) { return biome == Biome::Steppe || biome == Biome::Forest || biome == Biome::Cave; }
-
-const char* resourceName(ResourceKind kind) {
-    switch (kind) {
-    case ResourceKind::Flint: return "flint";
-    case ResourceKind::Wood: return "wood";
-    case ResourceKind::Berries: return "berries";
-    case ResourceKind::Herd: return "herd";
-    }
-    return "?";
-}
 
 RegionConfig loadRegionConfig(const std::filesystem::path& file) {
     const nlohmann::json json = readJsonFile(file);

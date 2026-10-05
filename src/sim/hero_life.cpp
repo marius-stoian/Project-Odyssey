@@ -1,5 +1,7 @@
 #include "hero_life.h"
 
+#include "core/text.h"
+
 #include "json_data.h"
 #include "save.h"
 
@@ -26,11 +28,6 @@ std::optional<Trait> traitFromName(const std::string& name) {
     return std::nullopt;
 }
 
-std::string replaceAll(std::string text, const std::string& from, const std::string& to) {
-    for (std::size_t at = text.find(from); at != std::string::npos; at = text.find(from, at + to.size())) text.replace(at, from.size(), to);
-    return text;
-}
-
 std::string goodsText(const HeroData& data, const Goods& goods) {
     std::string out;
     for (const auto& [id, count] : goods) {
@@ -41,15 +38,6 @@ std::string goodsText(const HeroData& data, const Goods& goods) {
 }
 
 } // namespace
-
-const char* outcomeName(Outcome outcome) {
-    switch (outcome) {
-    case Outcome::Victory: return "victory";
-    case Outcome::Defeat: return "defeat";
-    case Outcome::Died: return "died";
-    default: return "none";
-    }
-}
 
 const char* qualityName(int quality) {
     static constexpr const char* kNames[] = {"crude", "fair", "fine", "masterwork"};
@@ -198,7 +186,7 @@ bool HeroLife::resolveEvent(int option) {
     if (const auto trait = traitFromName(chosen.trait)) {
         if (Person* hero = world_->personMutable(personId_)) hero->give(*trait);
     }
-    std::string line = replaceAll(replaceAll(chosen.note, "{hero}", name()), "{other}", other >= 0 ? world_->people()[static_cast<std::size_t>(other)].name : "someone");
+    std::string line = core::replaceAll(core::replaceAll(chosen.note, "{hero}", name()), "{other}", other >= 0 ? world_->people()[static_cast<std::size_t>(other)].name : "someone");
     world_->note(line, kImportanceHero, EventKind::Hero, personId_, other);
     lastNote_ = line;
     pendingEvent_ = -1;
