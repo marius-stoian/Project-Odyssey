@@ -103,3 +103,9 @@ Only what the hero does counts; clan members and other people doing the same thi
 | `interact <interaction>` | the hero finishes that interaction (a timed one counts when it ends, not when it is stopped) |
 | `defeat <kind> [n]` | the hero strikes the blow that defeats a character of that kind (the kind name of characters.json, lower case) |
 | `wait <time>`, `flag <name>` | no report needed: the clock and the story notes are looked at once a second |
+
+## Seeing quests: journal, tracker, markers (US-183)
+
+- **Journal:** the key J (or the Journal tab of the Esc menu) lists Active, Done and Failed quests. An active quest shows its current step; a done quest shows its `journal` line.
+- **Tracker:** top right of the screen, the active quest whose objective moved last: title, step text, progress `2 / 3` and, after the hint time without progress, the hint.
+- **Markers:** a gold `v` over the target of the tracked step's `marker` (`tag:`, `object:`, `npc:`, `place:`; the nearest to the hero), or an arrow at the screen edge pointing the way. Settings -> Quest markers On/Off (`markers` in `settings.json`, 1 or 0, default 1).

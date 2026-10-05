@@ -496,6 +496,15 @@ void tickQuests(OdysseyGame& game) {
         const double dy = game.hero().feetY(1.0) - place.at.y;
         if (dx * dx + dy * dy <= 96.0 * 96.0) game.questEvent(sim::rules::QuestObjective::Kind::Goto, questWord(place.name));
     }
+    {
+        // Where the tracked step points (US-183), found here twice a second rather than every frame.
+        const std::string tracked = trackedQuest(game.quests());
+        const sim::rules::Quest* quest = game.quests().find(tracked);
+        const sim::rules::QuestState* state = tracked.empty() ? nullptr : game.quests().state(tracked);
+        const sim::rules::QuestStep* step = quest != nullptr && state != nullptr ? quest->find(state->step) : nullptr;
+        const auto spot = step != nullptr && !step->marker.empty() ? questMarkerPosition(game, step->marker) : std::nullopt;
+        game.setQuestMarker(spot.has_value(), spot ? spot->first : 0.0, spot ? spot->second : 0.0);
+    }
     GameEffectHost host(game);
     const Subject hero = heroSubject(game);
     const GameRuleContext context(game, hero);

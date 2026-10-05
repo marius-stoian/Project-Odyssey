@@ -44,7 +44,7 @@ void saveSettings(const GameSettings& settings, const std::filesystem::path& fil
     const json data{{"version", 2}, {"resolution", {{"width", settings.resolution.width}, {"height", settings.resolution.height},
                     {"mode", modeName(settings.resolution.mode)}, {"scaling", scalingName(settings.resolution.scaling)}}},
                     {"cameraZoom", settings.cameraZoom}, {"uiScale", settings.uiScale}, {"lighting", settings.lighting},
-                    {"volume", settings.volume}, {"statistics", settings.statistics}};
+                    {"volume", settings.volume}, {"statistics", settings.statistics}, {"markers", settings.markers}};
     std::ofstream out(file, std::ios::binary | std::ios::trunc);
     out << data.dump(2) << '\n';
 }
@@ -100,6 +100,7 @@ GameSettings loadSettings(const std::filesystem::path& file, std::string* note) 
         }
         read.volume = boundedInteger(data, "volume", 0, 100);
         if (data.contains("statistics")) read.statistics = boundedInteger(data, "statistics", 0, 2);
+        if (data.contains("markers")) read.markers = boundedInteger(data, "markers", 0, 1);
         if (!data.contains("version")) saveSettings(read, file);
         return read;
     } catch (const std::exception& error) {

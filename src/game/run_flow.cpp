@@ -21,7 +21,7 @@ constexpr int kTalkWrap = 56; // characters of a line of speech in the conversat
 enum ScreenIds {
     kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
     kTabBase = 300, kResolutionBase = 320, kWindowed = 330, kVolumeDown = 331, kVolumeUp = 332, kBorderless = 333, kExclusive = 334,
-    kScalingWhole = 335, kScalingFill = 336, kZoomOut = 337, kZoomIn = 338, kUiSmall = 339, kUiLarge = 343, kFoundFire = 340, kRitual = 341, kTendFire = 342,
+    kScalingWhole = 335, kScalingFill = 336, kZoomOut = 337, kZoomIn = 338, kUiSmall = 339, kUiLarge = 343, kMarkersToggle = 344, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
     kAcceptCounter = 582, kPayDebtBase = 600, kActionBase = 700
 };
@@ -236,13 +236,13 @@ void RunFlow::buildMantle(OdysseyGame& game) {
 void RunFlow::buildMenu(OdysseyGame& game) {
     sim::HeroLife* hero = game.life();
     const sim::HeroData* data = game.heroData();
-    const char* tabs[] = {"Bag", "Skills", "Dominion", "Settings"};
-    for (int i = 0; i < 4; ++i) button(tabs[i], kTabBase + i, true, static_cast<int>(tab_) == i);
+    const char* tabs[] = {"Bag", "Skills", "Dominion", "Settings", "Journal"};
+    for (int i = 0; i < 5; ++i) button(tabs[i], kTabBase + i, true, static_cast<int>(tab_) == i);
     button("Close", kClose);
     newRow();
     cursorY_ += kRowHeight + 6;
     if (hero == nullptr || data == nullptr) {
-        if (tab_ != MenuTab::Settings) {
+        if (tab_ != MenuTab::Settings && tab_ != MenuTab::Journal) {
             line("No run is in progress. Start a new game.");
             button("New game", kNewGameButton, true, false, panel_.x + 8, 70);
             return;
@@ -300,6 +300,34 @@ void RunFlow::buildMenu(OdysseyGame& game) {
         }
         break;
     }
+    case MenuTab::Journal: {
+        title("Journal");
+        const sim::rules::QuestBook& book = game.quests();
+        const struct { sim::rules::QuestStatus status; const char* heading; } groups[] = {
+            {sim::rules::QuestStatus::Active, "Active"}, {sim::rules::QuestStatus::Done, "Done"}, {sim::rules::QuestStatus::Failed, "Failed"}};
+        int listed = 0;
+        for (const auto& group : groups) {
+            int count = 0;
+            for (const sim::rules::Quest& quest : book.quests()) count += book.status(quest.id) == group.status ? 1 : 0;
+            if (count == 0) continue;
+            line(std::format("{} ({})", group.heading, count), UiColor::Gold);
+            for (const sim::rules::Quest& quest : book.quests()) {
+                if (book.status(quest.id) != group.status) continue;
+                ++listed;
+                line(quest.title, UiColor::Text);
+                if (group.status == sim::rules::QuestStatus::Active) {
+                    if (const sim::rules::QuestStep* step = quest.find(book.activeStep(quest.id))) paragraph(step->text, UiColor::Dim, 66);
+                } else if (group.status == sim::rules::QuestStatus::Done) {
+                    paragraph(quest.journal.empty() ? "Finished." : quest.journal, UiColor::Dim, 66);
+                } else {
+                    paragraph("This quest failed.", UiColor::Dim, 66);
+                }
+            }
+            gap();
+        }
+        if (listed == 0) line("No quests yet.", UiColor::Dim);
+        break;
+    }
     case MenuTab::Settings: {
         const GameSettings& s = game.settings();
         title("Settings");
@@ -331,6 +359,11 @@ void RunFlow::buildMenu(OdysseyGame& game) {
         line(std::format("Volume: {}", s.volume), UiColor::Text);
         button("-", kVolumeDown, true, false, panel_.x + 8, 20);
         button("+", kVolumeUp, true, false, panel_.x + 32, 20);
+        newRow();
+        cursorY_ += kRowHeight + 4;
+        line("Quest markers:", UiColor::Dim);
+        button("On", kMarkersToggle, true, s.markers == 1, panel_.x + 8, 40);
+        button("Off", kMarkersToggle + 1000, true, s.markers == 0, panel_.x + 52, 40);
         break;
     }
     }
@@ -763,6 +796,12 @@ bool RunFlow::update(OdysseyGame& game, const luna::engine::Intents& intents) {
             }
         }
     }
+    if (screen_ == Screen::Menu && intents.pressed(luna::engine::Intent::Journal)) { // J opens the journal, or closes it (US-183)
+        if (journalOpen()) screen_ = Screen::None;
+        else tab_ = MenuTab::Journal;
+        if (screen_ == Screen::Menu) build(game);
+        return true;
+    }
     if ((screen_ == Screen::Menu || screen_ == Screen::Craft || screen_ == Screen::Barter || screen_ == Screen::Context) && intents.pressed(luna::engine::Intent::OpenMenu)) {
         if (screen_ == Screen::Barter) leaveTrade(game); // leaving the trade screen gives the balance back as coins
         screen_ = screen_ == Screen::Menu ? Screen::None : Screen::Menu;
@@ -865,7 +904,7 @@ void RunFlow::act(OdysseyGame& game, int id) {
         if (id == kBegin) screen_ = Screen::None;
         break;
     case Screen::Menu: {
-        if (id >= kTabBase && id < kTabBase + 4) tab_ = static_cast<MenuTab>(id - kTabBase);
+        if (id >= kTabBase && id < kTabBase + 5) tab_ = static_cast<MenuTab>(id - kTabBase);
         else if (id >= kApprenticeBase && id < kApprenticeBase + 5 && hero != nullptr) message_ = hero->askToApprentice(id - kApprenticeBase).message;
         else if (id == kFoundFire && hero != nullptr) {
             const PixelPoint spot{static_cast<int>(game.hero().feetX()), static_cast<int>(game.hero().feetY())};
@@ -895,6 +934,10 @@ void RunFlow::act(OdysseyGame& game, int id) {
             GameSettings s = game.settings();
             if (id == kZoomOut || id == kZoomIn) s.cameraZoom = id == kZoomIn ? 2 : 1;
             else s.uiScale = id == kUiLarge ? 2 : 1;
+            game.applySettings(s);
+        } else if (id == kMarkersToggle || id == kMarkersToggle + 1000) {
+            GameSettings s = game.settings();
+            s.markers = id == kMarkersToggle ? 1 : 0;
             game.applySettings(s);
         } else if (id == kVolumeDown || id == kVolumeUp) {
             GameSettings s = game.settings();

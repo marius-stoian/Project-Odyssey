@@ -1891,6 +1891,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         privacyAsked_ = true;
         if (settings_.statistics == 0) runFlow_.openPrivacy();
     }
+    if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::Journal) && life_) runFlow_.openJournal();
     if (!runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu) && !buildings_.escape()) runFlow_.openMenu(); // Esc first leaves placing and the Build menu
     // Two pictures, two pointers (US-232): the world is drawn zoomed and the interface scaled, so the pointer is
     // turned into the pixels of each one before anything reads it.
@@ -2424,12 +2425,14 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     drawRunWorld(renderer, view);
     drawClanDetails(renderer, view, alpha);
     drawQuestSigns(renderer, view, alpha);
+    drawQuestMarker(renderer, view, alpha);
     drawHud(ui);
     buildings_.drawMenu(*this, ui, uiSheet_);
     drawClanHud(ui);
     drawRunHud(ui);
     drawDevTools(ui, view, alpha);
     drawTutorial(ui);
+    drawQuestTracker(ui);
     runFlow_.draw(ui, uiSheet_);
     drawActionRing(renderer, view);
     drawOverlay(ui);
