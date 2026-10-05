@@ -181,7 +181,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-254 | US-254 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
 | S-US-255 | US-255 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
 | S-US-257 | US-257 | M8e | Done | Cases ran alone and pass; full verify at X-M8e |
-| X-M8e | - | M8e | To do |  |
+| X-M8e | - | M8e | Done | docs/gates/M8e.md; Debug and Release 27/27, zero warnings |
 | K-M9 | - | M9 | To do |  |
 | S-US-170 | US-170 | M9 | To do |  |
 | S-US-171 | US-171 | M9 | To do |  |
