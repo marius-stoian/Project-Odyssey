@@ -10,7 +10,7 @@ D-44 update (2026-10-01): local requirements and backlog are revised, but the Dr
 
 | File | What it is | Status |
 |---|---|---|
-| [Project Odyssey.docx](requirements/Project Odyssey.docx) | Requirements, architecture and MVP plan | Local v2.6 (D-44); Drive master remains v2.5 pending sync |
+| [Project Odyssey.docx](requirements/Project Odyssey.docx) | Requirements, architecture and MVP plan | Local v2.11 (progress update 2026-10-05); Drive master not updated, sync pending |
 | [Project Odyssey - MVP Backlog.xlsx](requirements/Project Odyssey - MVP Backlog.xlsx) | Working tracker: timeline with Gantt chart, dependencies, epics, stories with status | Generated from chapter 12 of the docx; the docx wins if they differ |
 
 ## codex/

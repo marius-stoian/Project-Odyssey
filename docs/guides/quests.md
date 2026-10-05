@@ -41,6 +41,8 @@ A quest is one JSON file in `assets/data/quests/`, named after its id: `first-da
 | `fail` | no | Conditions; when any one holds the quest fails for good | `["hero.dead"]` |
 | `rewards` | no | Effect lines run when the quest ends, aimed at the hero | `["give hero flint 2"]` |
 | `journal` | no | The line the journal shows for a finished quest | `"The elder taught me..."` |
+| `offer` | no | What the giver says when offering the quest; without it the game says the title and the first step | `"The clan is hungry. Will you help?"` |
+| `turnIn` | no | What the giver says when the quest is handed in (the last step is `talk <giver>`) | `"Well done. The clan eats tonight."` |
 | `note` | no | Your own words; kept when the Editor saves | `"tutorial"` |
 
 ### A step

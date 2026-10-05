@@ -112,6 +112,14 @@ void tickQuests(OdysseyGame& game);
 std::string questWord(const std::string& text);
 // The hero has started talking with `subject`: every name it goes by (its name, roles, kind) is reported to the quests as a talk event.
 void reportTalk(OdysseyGame& game, const Subject& subject);
+// Every name a subject goes by in quest files: its name, kind, tags and roles, in quest-word form.
+std::vector<std::string> subjectAliases(const OdysseyGame& game, const Subject& subject);
+// Adds the quest turn-in line and the "Do you have work for me?" choice to a copy of a script (US-182).
+void addQuestChoices(const OdysseyGame& game, sim::rules::DlgScript& script, const Subject& subject);
+// A person is a quest giver (Offer) or someone a quest wants the hero to talk to (HandIn); the game draws a sign over them (US-182).
+enum class QuestSign { None, Offer, HandIn };
+bool questGiverMatches(const std::string& giver, const std::vector<std::string>& aliases);
+QuestSign questSignFor(const OdysseyGame& game, const Subject& subject);
 
 // Talk (US-161): opens the conversation panel with the script that speaks for this clan member and pauses the world. False when no
 // script fits them (then the caller keeps to the plain talk).

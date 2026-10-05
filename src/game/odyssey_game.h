@@ -587,6 +587,7 @@ private:
     void drawClan(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha, bool behindHero);
     void drawEmote(luna::engine::Renderer& renderer, Emote emote, int x, int y) const;
     void drawClanDetails(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
+    void drawQuestSigns(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const;
     void drawClanHud(luna::engine::Renderer& renderer) const;
     EffectArt effectArt_;
     WeatherCycle weather_;

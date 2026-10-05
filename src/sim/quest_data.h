@@ -68,6 +68,8 @@ struct Quest {
     std::vector<QuestCondition> fail;
     std::vector<Effect> rewards;
     std::string journal;
+    std::string offer;  // what the giver says when offering the quest (empty: the title and the first step)
+    std::string turnIn; // what the giver says when the quest is handed in (empty: nothing extra)
     std::string file; // "quests/first-day.json"
 
     const QuestStep* find(std::string_view stepId) const;
