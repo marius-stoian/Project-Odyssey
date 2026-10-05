@@ -131,6 +131,24 @@ public:
     void draw(UiPainter& painter) const override;
 };
 
+// The tooltip of a field (D-58, D-59): its lines show once the pointer has rested on the field for kDelayTicks, and go when the pointer
+// moves, leaves, or the field is used. Game-agnostic: the game decides the text (purpose, range, example), one line each.
+class FieldHint {
+public:
+    static constexpr int kDelayTicks = 8;    // 0.4 s at 20 ticks a second (D-59)
+    static constexpr int kWrapColumns = 60;  // letters in a line of the tooltip before it breaks
+
+    std::string text; // lines separated by '\n'; empty: no tooltip
+    // Call once a tick: `resting` is true while the pointer is over the field and the field is not being typed in.
+    void track(bool resting, int x, int y);
+    bool showing() const { return !text.empty() && ticks_ >= kDelayTicks; }
+    void draw(UiPainter& painter) const;
+
+private:
+    int ticks_ = 0;
+    int x_ = 0;
+    int y_ = 0;
+};
 // A labelled whole number: click, type digits, Enter (or click elsewhere) to keep it; the wheel
 // steps it by one. The value always stays between minimum and maximum.
 class NumberField final : public Widget {
@@ -143,11 +161,14 @@ public:
     int minimum;
     int maximum;
     std::function<void(int)> onChange;
+    std::string helpId; // the field's entry in help.json (editor_help); empty: none
+    FieldHint tip;
 
     bool focused() const { return focused_; }
     bool typing() const override { return focused_; }
     bool handle(const UiInput& input) override;
     void draw(UiPainter& painter) const override;
+    void drawOverlay(UiPainter& painter) const override { if (visible) tip.draw(painter); }
 
 private:
     void commit();
@@ -165,11 +186,14 @@ public:
     std::string value;
     std::size_t maxLength;
     std::function<void(const std::string&)> onChange;
+    std::string helpId; // the field's entry in help.json (editor_help); empty: none
+    FieldHint tip;
 
     bool focused() const { return focused_; }
     bool typing() const override { return focused_; }
     bool handle(const UiInput& input) override;
     void draw(UiPainter& painter) const override;
+    void drawOverlay(UiPainter& painter) const override { if (visible) tip.draw(painter); }
 
 private:
     void commit();

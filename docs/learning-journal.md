@@ -2069,3 +2069,21 @@ If the text cannot be read back, it is never written, so the Editor can never cr
 **Try it.** Give an event a trigger `flag(x)` and watch it vanish from the draw.
 
 **Check yourself.** Why does the draw depend on the order of the events?
+
+## US-300: loading text data once and looking it up by key (M10b)
+
+**What we built.** Every field of the Editor now explains itself: rest the pointer on it for a moment and a small box shows what it is for, its range and an example. The words are not in the C++ code; they are in `assets/data/editor/help.json`, one line per field.
+
+**The idea: a map from key to value, and a test that walks every widget.** The game reads `help.json` once, at start, into a `std::map<std::string, Entry>`: the key is the field's id (`npc.sword`), the value a small struct of three strings. To show a tooltip it does one lookup, `find(id)`, which returns a pointer to the entry or `nullptr` when there is none. Checking for `nullptr` is how C++ says "not there", so a missing entry means no tooltip and never a crash. The id itself is made from the panel and the label on screen, so there is nothing to keep in step by hand. A test then opens every panel of every editor and asks each field "do you have an entry?"; this works because every field is a `TextField` or `NumberField`, and `dynamic_cast<TextField*>(widget)` answers "is this widget a TextField?" at run time.
+
+```cpp
+const Entry* entry = help.find("npc.sword");          // one lookup by key
+if (entry != nullptr) tip.text = entry->purpose;      // nullptr: nothing to show
+if (auto* field = dynamic_cast<TextField*>(child.get())) { /* it is a text field */ }
+```
+
+**Where to look.** `src/game/editor_help.cpp` (`load`, `fieldId`, `apply`), `src/luna/engine/ui.cpp` (`FieldHint`), `tests/game/editor_help_test.cpp` (the coverage test).
+
+**Try it (10 minutes).** In a copy of the data folder, delete the `npc.sword` line from `help.json`, run the coverage test with `odysseus_game_tests --test-case="US-300 Coverage*"` and read how the failure names the field.
+
+**Check yourself.** Why does `find` return a pointer instead of the entry itself?

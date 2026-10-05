@@ -160,6 +160,52 @@ void Button::drawOverlay(UiPainter& painter) const {
     painter.text(box.x + 3, box.y + 3, hint, UiColor::Text);
 }
 
+// --- FieldHint ---
+
+void FieldHint::track(bool resting, int x, int y) {
+    if (!resting) {
+        ticks_ = 0;
+        return;
+    }
+    if (x != x_ || y != y_) { // moving is not resting
+        x_ = x;
+        y_ = y;
+        ticks_ = 0;
+    } else if (ticks_ < kDelayTicks) {
+        ++ticks_;
+    }
+}
+
+void FieldHint::draw(UiPainter& painter) const {
+    if (!showing()) return;
+    // The text's lines, each broken at a space before kWrapColumns letters so a long purpose stays a readable box.
+    std::vector<std::string> lines;
+    std::string_view rest = text;
+    while (!rest.empty()) {
+        const std::size_t cut = rest.find('\n');
+        std::string_view line = rest.substr(0, cut);
+        rest = cut == std::string_view::npos ? std::string_view() : rest.substr(cut + 1);
+        while (static_cast<int>(line.size()) > kWrapColumns) {
+            std::size_t space = line.rfind(' ', kWrapColumns);
+            if (space == std::string_view::npos || space == 0) space = kWrapColumns;
+            lines.emplace_back(line.substr(0, space));
+            line.remove_prefix(std::min(line.size(), space + (line[space] == ' ' ? 1 : 0)));
+        }
+        lines.emplace_back(line);
+    }
+    if (lines.empty()) return;
+    int widest = 0;
+    for (const std::string& line : lines) widest = std::max(widest, UiPainter::textWidth(line));
+    const Rect box = painter.keepOnScreen({x_ + 8, y_ + 10, widest + 6, static_cast<int>(lines.size()) * kLineHeight + 5});
+    painter.fill(box, UiColor::Dark);
+    painter.outline(box, UiColor::Border);
+    int y = box.y + 3;
+    for (const std::string& line : lines) {
+        painter.text(box.x + 3, y, line, UiColor::Text);
+        y += kLineHeight;
+    }
+}
+
 // --- ListBox ---
 
 bool ListBox::handle(const UiInput& input) {
@@ -213,6 +259,7 @@ void NumberField::commit() {
 bool NumberField::handle(const UiInput& input) {
     if (!visible) return false;
     const bool over = contains(input.pointer.x, input.pointer.y);
+    tip.track(over && !focused_ && !input.pointer.wasPressed(PointerButton::Left), input.pointer.x, input.pointer.y);
     if (input.pointer.wasPressed(PointerButton::Left)) {
         if (over && !focused_) {
             focused_ = true;
@@ -261,6 +308,7 @@ void TextField::commit() {
 bool TextField::handle(const UiInput& input) {
     if (!visible) return false;
     const bool over = contains(input.pointer.x, input.pointer.y);
+    tip.track(over && !focused_ && !input.pointer.wasPressed(PointerButton::Left), input.pointer.x, input.pointer.y);
     if (input.pointer.wasPressed(PointerButton::Left)) {
         if (over && !focused_) {
             focused_ = true;

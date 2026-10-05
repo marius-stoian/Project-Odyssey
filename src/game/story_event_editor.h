@@ -2,6 +2,7 @@
 
 #include "boundary.h"
 
+#include "game/editor_help.h"
 #include "luna/engine/input.h"
 #include "luna/engine/ui.h"
 #include "sim/hero_data.h"
@@ -31,6 +32,8 @@ public:
     bool shown() const { return shown_; }
     void show(bool shown);
     bool typing() const;
+    // Gives the fields their help (US-300); call once a tick.
+    void applyHelp(EditorHelp& help);
     std::vector<std::string> files() const; // event ids, in file order of the folder
     bool open(const std::string& id);
     bool createNew(const std::string& id);

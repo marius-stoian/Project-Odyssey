@@ -401,6 +401,7 @@ public:
     // rebuilt from the level as edited (the hero at the hero start).
     void switchMode(Mode mode);
     Editor& editor() { return editor_; }
+    const EditorHelp& editorHelp() const { return editorHelp_; }
 
     // Where the demo's straw targets stand (US-029), in metres: one 8 tiles west of the
     // hero's start (the view is 15 tiles wide, so the whole throw fits on screen), one
@@ -429,6 +430,7 @@ private:
     std::vector<Enemy> enemies_;
     std::vector<PlacedCharacter> bystanders_; // placed characters the sword does not fight: they stand and are seen
     Editor editor_;
+    EditorHelp editorHelp_; // what every Editor field says about itself (US-300), from assets/data/editor/help.json
     NpcClassBook npcClasses_; // US-260
     sim::CalendarConfig npcCalendar_;
     sim::NeedsConfig npcNeeds_;

@@ -502,6 +502,11 @@ void BuildingEditor::buildPrefabPanel() {
 
 bool BuildingEditor::typing() const { return palette_->typing() || panel_->typing() || prefab_->typing(); }
 
+void BuildingEditor::applyHelp(EditorHelp& help) {
+    help.apply(*panel_, "building");
+    help.apply(*prefab_, "prefab");
+}
+
 bool BuildingEditor::handle(const luna::engine::UiInput& input, bool buildTool) {
     if (data() == nullptr) return false;
     if (stale_ && !typing()) {

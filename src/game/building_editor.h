@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/building_layer.h"
+#include "game/editor_help.h"
 #include "game/editor_history.h"
 #include "game/level.h"
 #include "luna/engine/input.h"
@@ -86,6 +87,8 @@ public:
     // Every tick: true when the pointer is over a panel of this class (so the map does not get the click).
     bool handle(const luna::engine::UiInput& input, bool buildTool);
     bool typing() const;
+    // Gives the fields of both panels their help (US-300); call once a tick.
+    void applyHelp(EditorHelp& help);
     void drawPanels(luna::engine::UiPainter& painter, luna::engine::Renderer& renderer, bool buildTool) const;
     void drawOverlay(luna::engine::UiPainter& painter, bool buildTool) const;
     // The placed buildings, the ghost of the Build tool and the selection, in the world (under the characters).

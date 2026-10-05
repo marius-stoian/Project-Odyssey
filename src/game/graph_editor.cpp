@@ -602,6 +602,12 @@ void GraphEditor::refresh() {
 
 bool GraphEditor::typing() const { return shown_ && ((panel_ && panel_->typing()) || (chrome_ && chrome_->typing()) || (testShown_ && testPanel_ && testPanel_->typing())); }
 
+void GraphEditor::applyHelp(EditorHelp& help) {
+    if (chrome_) help.apply(*chrome_, "graph.bar");
+    if (panel_) help.apply(*panel_, panelPrefix_.empty() ? "graph.header" : panelPrefix_);
+    if (testPanel_) help.apply(*testPanel_, "graph.test");
+}
+
 void GraphEditor::buildChrome() {
     chrome_ = std::make_unique<Panel>(Rect{0, 0, viewWidth_, kBarHeight}); // only the bar is the panel: the file list and the canvas are not under it
     int x = 2;
@@ -662,6 +668,7 @@ void GraphEditor::buildChrome() {
 void GraphEditor::buildPanel() {
     panel_ = std::make_unique<Panel>(Rect{viewWidth_ - kPanelWidth - 2, kBarHeight + 4, kPanelWidth, viewHeight_ - kBarHeight - kStatusHeight - 6});
     panelTitle_.clear();
+    panelPrefix_.clear();
     if (current_ == nullptr) return;
     const int left = panel_->bounds.x + 3;
     const int width = kPanelWidth - 6;
@@ -678,6 +685,7 @@ void GraphEditor::buildPanel() {
             return; // the verb card (or the quest card) holds the file's own values
         }
         panelTitle_ = current_->name + ".dlg";
+        panelPrefix_ = "graph.header";
         sim::rules::DlgScript& h = current_->header;
         field("who: ", joinWords(h.who), [&h](const std::string& v) { h.who = splitWords(v); });
         field("when: ", h.whenSource, [&h](const std::string& v) { h.whenSource = v; });
@@ -688,6 +696,7 @@ void GraphEditor::buildPanel() {
         return;
     }
     panelTitle_ = card->type;
+    panelPrefix_ = "graph." + card->type;
     const int cardId = card->id;
     const auto set = [this, cardId](std::size_t index) { return [this, cardId, index](const std::string& v) { setCardField(cardId, index, v); }; };
     const auto at = [&](std::size_t i) { return i < card->fields.size() ? card->fields[i] : std::string(); };

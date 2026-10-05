@@ -2,6 +2,13 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-300 Field tooltips from help.json (Mraw) - 2026-10-05
+
+**State:** On `story/US-300`, merged into `qa`. Debug verify: zero warnings, 27 of 27.
+
+- **New:** `FieldHint` and `helpId` on `TextField`/`NumberField` (`src/luna/engine/ui.*`); `EditorHelp` (`src/game/editor_help.*`); `assets/data/editor/help.json` (127 entries); tests `US-300 Field tooltip` and `tests/game/editor_help_test.cpp`; `docs/plans/US-300.md`; `Milestone-136.md` (AP-137); evidence in `docs/evidence/US-300/`.
+- **Changed:** all four editors call `applyHelp` each tick; the Editor shows a broken or missing help file in its status line; `OdysseyGame` loads the file; `docs/guides/editor.md` (Tooltips and suggestions), `docs/plans/M10b-editor-help-design.md` (ids from labels, 127 fields in four editors), learning journal, `docs/status.md`, `Limit.md`.
+
 ## P-013 and K-M10b (Mraw) - 2026-10-05
 
 **State:** On `qa`. Documentation only; no code, data or test changes.
