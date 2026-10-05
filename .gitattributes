@@ -7,3 +7,6 @@ docs/project/** -text
 *.dlg text eol=lf
 # The guides quote the shipped scripts and data files, and the tests check those quotes byte for byte.
 docs/guides/** text eol=lf
+
+# The tests compare shipped levels and data files byte for byte and search them for multi-line text, so every machine (Windows CI runs with core.autocrlf=true) must check them out with LF.
+assets/** text eol=lf
