@@ -183,6 +183,15 @@ add_library(odysseus_sim STATIC
     src/sim/interaction.cpp
     src/sim/npc_class.cpp
     src/sim/opinion.cpp
+    src/sim/economy.cpp
+    src/sim/npc_extras.cpp
+    src/sim/trade_market.cpp
+    src/sim/npc_schedule.cpp
+    src/sim/partner_types.cpp
+    src/sim/npc_events.cpp
+    src/sim/npc_context.cpp
+    src/sim/npc_actions.cpp
+    src/sim/npc_director.cpp
     src/sim/npc_kind.cpp
     src/sim/npc_population.cpp
     src/sim/action_runner.cpp
@@ -428,6 +437,16 @@ add_executable(odysseus_game_tests
     tests/game/npc_editor_test.cpp
     tests/game/npc_kinds_tab_test.cpp
     tests/game/npc_test_level_test.cpp
+    tests/game/economy_editor_test.cpp
+    tests/game/trade_stock_test.cpp
+    tests/game/trade_gate_test.cpp
+    tests/game/trade_screen_test.cpp
+    tests/game/trade_editor_test.cpp
+    tests/game/schedule_editor_test.cpp
+    tests/game/npc_life_game_test.cpp
+    tests/game/npc_dealings_game_test.cpp
+    tests/game/npc_defaults_game_test.cpp
+    tests/game/living_level_test.cpp
     tests/game/clan_test.cpp
     tests/game/m4_test.cpp
     tests/game/pickups_test.cpp
@@ -484,6 +503,14 @@ add_executable(odysseus_sim_tests
     tests/sim/rules_test.cpp
     tests/sim/npc_class_test.cpp
     tests/sim/opinion_test.cpp
+    tests/sim/economy_test.cpp
+    tests/sim/trade_market_test.cpp
+    tests/sim/trade_price_test.cpp
+    tests/sim/trade_deal_test.cpp
+    tests/sim/npc_schedule_test.cpp
+    tests/sim/npc_actions_test.cpp
+    tests/sim/npc_interact_test.cpp
+    tests/sim/npc_defaults_test.cpp
     tests/sim/npc_kind_test.cpp
     tests/sim/npc_population_test.cpp
     tests/sim/npc_scale_test.cpp
@@ -497,6 +524,16 @@ target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest n
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)
 add_test(NAME odysseus_sim_tests COMMAND odysseus_sim_tests)
+
+# --- US-294: the soak (100,000 persons, 30 in-game days, twice) in its own executable so the slow run stays apart from the quick tests ---
+add_executable(odysseus_sim_soak
+    tests/main.cpp
+    tests/sim/npc_soak_test.cpp)
+target_link_libraries(odysseus_sim_soak PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
+target_compile_definitions(odysseus_sim_soak PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
+odysseus_apply_settings(odysseus_sim_soak)
+add_test(NAME odysseus_sim_soak COMMAND odysseus_sim_soak)
+set_tests_properties(odysseus_sim_soak PROPERTIES TIMEOUT 3000 LABELS soak) # skipped by owner in verify and CI (D-54, 2026-10-05); run by hand: ctest -L soak
 
 # --- US-015: the headless runner from the command line (100 years; wrong input) ---
 add_test(NAME "US-015 Run"

@@ -49,13 +49,19 @@ std::int64_t NpcPopulation::cellKey(int x, int y) {
     return (static_cast<std::int64_t>(x >> 8) << 32) ^ static_cast<std::int64_t>(static_cast<std::uint32_t>(y >> 8));
 }
 
-void NpcPopulation::gridAdd(int index) { grid_[cellKey(xs_[at(index)], ys_[at(index)])].push_back(index); }
+// The members of a cell are kept sorted by index, so the cell is the same whatever order the persons moved in, and after a save and a load: whoever looks at its
+// members (neighbour) gets the same answer in both.
+void NpcPopulation::gridAdd(int index) {
+    std::vector<std::int32_t>& cell = grid_[cellKey(xs_[at(index)], ys_[at(index)])];
+    cell.insert(std::lower_bound(cell.begin(), cell.end(), index), index);
+}
 
 void NpcPopulation::gridRemove(int index) {
     auto found = grid_.find(cellKey(xs_[at(index)], ys_[at(index)]));
     if (found == grid_.end()) return;
     auto& cell = found->second;
-    cell.erase(std::remove(cell.begin(), cell.end(), index), cell.end());
+    const auto place = std::lower_bound(cell.begin(), cell.end(), index);
+    if (place != cell.end() && *place == index) cell.erase(place);
     if (cell.empty()) grid_.erase(found);
 }
 
@@ -80,10 +86,37 @@ int NpcPopulation::add(int id, std::string_view kind, int ageDays, int family, i
 }
 
 void NpcPopulation::move(int index, int x, int y) {
+    if (cellKey(xs_[at(index)], ys_[at(index)]) == cellKey(x, y)) { // the same cell: the grid does not change
+        xs_[at(index)] = x;
+        ys_[at(index)] = y;
+        return;
+    }
     gridRemove(index);
     xs_[at(index)] = x;
     ys_[at(index)] = y;
     gridAdd(index);
+}
+
+int NpcPopulation::neighbour(int index, int salt, int radius) const {
+    const auto cell = grid_.find(cellKey(xs_[at(index)], ys_[at(index)]));
+    if (cell == grid_.end() || cell->second.size() < 2) return -1;
+    const std::vector<std::int32_t>& members = cell->second;
+    const std::size_t count = members.size();
+    const std::size_t start = static_cast<std::size_t>(static_cast<std::uint32_t>(salt) % count);
+    const std::int64_t limit = static_cast<std::int64_t>(radius) * radius;
+    for (std::size_t step = 0; step < std::min<std::size_t>(count, 6); ++step) {
+        const int other = members[(start + step) % count];
+        if (other == index) continue;
+        const std::int64_t dx = xs_[at(other)] - xs_[at(index)];
+        const std::int64_t dy = ys_[at(other)] - ys_[at(index)];
+        if (dx * dx + dy * dy <= limit) return other;
+    }
+    return -1;
+}
+
+std::vector<int> NpcPopulation::nearFocus() const {
+    if (!focusSet_) return {};
+    return near(focusX_, focusY_, daily_.nearRadius);
 }
 
 int NpcPopulation::indexOf(int id) const {

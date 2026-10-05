@@ -3,6 +3,8 @@
 #include "boundary.h"
 
 #include "sim/interaction.h"
+#include "sim/npc_extras.h"
+#include "sim/partner_types.h"
 
 #include <filesystem>
 #include <optional>
@@ -24,6 +26,7 @@ struct NpcClass {
     std::vector<std::pair<std::string, std::string>> dialogues;
     std::vector<std::string> allow; // interaction ids this class may do
     std::vector<std::string> deny;  // interaction ids this class may never do (a deny always wins)
+    NpcExtras extras;               // what the class trades, and later its schedule and actions (M9b, M9c): the defaults of every NPC of this class
     std::string file;               // "npc-classes/trader.json"
     friend bool operator==(const NpcClass&, const NpcClass&) = default;
 };
@@ -31,8 +34,6 @@ struct NpcClass {
 // The built-in icon set a class picks from.
 const std::vector<std::string>& npcIconNames();
 
-// "player", "animal", "environment" or "class:<id>".
-bool validPartnerType(const std::string& type);
 
 // "#d9a441" -> 0xD9A441; nullopt when it is not # and six hex digits. And back.
 std::optional<int> parseColour(const std::string& text);

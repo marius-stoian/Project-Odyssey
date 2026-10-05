@@ -130,6 +130,16 @@ public:
     void setLevelSize(int width, int height);  // keeps painted cells; drops characters outside
     void setDefaultGround(int tile);
     void moveHeroStart(PixelPoint feet);
+    // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
+    // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
+    // line and changes nothing (the function returns false).
+    bool economyShown() const { return economyShown_; }
+    void showEconomy(bool shown);
+    bool setEconomyCurrencies(const std::string& text);
+    bool setEconomyPrices(const std::string& text);
+    bool setEconomyResources(const std::string& text);
+    // The named places of the level (US-290): "market=20,10 grove=30,12/forage/shelter" (tile numbers, tags after slashes), the Places line of the Economy panel; one step of Undo.
+    bool setPlaces(const std::string& text);
     // NPC Classes (US-260): the Class button opens a panel with the list of classes and a form for the chosen one. The book is the game's
     // catalog; every change is written to its file at once (Save), so the Editor never holds a class the disk does not.
     void setNpcClasses(NpcClassBook* book) { classBook_ = book; classesStale_ = true; }
@@ -168,6 +178,30 @@ public:
     void setSelectedDialogue(const std::string& partner, const std::string& file);
     void setSelectedActionDenied(const std::string& id, bool denied);
     void resetSelectedNpc();
+    // The Trade section (US-284, D-54 Q6): six text fields, stock, restock (per day), picks (weighted deliveries a day), weights, wants and rare, each "item=number ..." or a
+    // list. For the selected NPC they edit its own trade values (the class and the kind add theirs; a layer can add and change but not remove what a lower one gives, so set a
+    // stock or a restock to 0 instead); each change is one step of Undo. For a class draft and a kind draft they edit the draft that Save writes. A mistake is said in the
+    // status line, changes nothing and returns false.
+    bool setSelectedTrade(const std::string& field, const std::string& text);
+    bool setClassTrade(const std::string& field, const std::string& text);
+    bool setKindTrade(const std::string& field, const std::string& text);
+    // The Schedule form (US-290, D-54 Q9): two text lines, Day and Night, each "06:00 work market; 21:00 sleep home" (time, activity, place; the place is a place of the level or
+    // home). An empty Night means the day blocks hold at night too. For the selected NPC it edits its own schedule (one step of Undo per line; the schedule of the highest layer
+    // that has one wins, so an NPC's own replaces its kind's and its classes'); for a class or kind draft Save writes it. A mistake is said and changes nothing.
+    bool setSelectedSchedule(const std::string& field, const std::string& text);
+    bool setClassSchedule(const std::string& field, const std::string& text);
+    bool setKindSchedule(const std::string& field, const std::string& text);
+    // The Does line (US-291, D-54 Q11): interaction ids separated by spaces, "patrol sing". For a class they are its class actions, for a kind or an NPC its custom actions; an NPC
+    // that is idle on duty chooses among them (and the events on offer) by the `npc` score of their files. One step of Undo for an NPC; Save for a class or kind.
+    bool setSelectedDoes(const std::string& text);
+    bool setClassDoes(const std::string& text);
+    bool setKindDoes(const std::string& text);
+    // The default actions with each partner type (US-293, D-54 Q14): "Defaults with: animal" and the line "Does" under it name the interaction ids the NPC prefers when it meets that kind
+    // of partner (a hunter's animals: hunt). The partner types come from assets/data/sim/partner-types.json plus one class:<id> for every NPC class, so a type added to the file shows
+    // here. An empty line removes the type. For an NPC one step of Undo; for a class or kind Save writes it.
+    bool setSelectedPartnerActions(const std::string& partnerType, const std::string& text);
+    bool setClassPartnerActions(const std::string& partnerType, const std::string& text);
+    bool setKindPartnerActions(const std::string& partnerType, const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
     bool settingsShown() const { return settingsShown_; }
@@ -233,10 +267,19 @@ private:
     std::pair<int, int> toWorld(int screenX, int screenY) const;
     void changeLevel(const std::string& what, Level after);
     void buildSettings();
+    void buildEconomy();
+    bool changeEconomy(const std::string& what, const std::string& text, int minimum, int maximum, sim::ItemCounts sim::RegionEconomy::*table);
     void buildClassPanel();
     void buildKindForm(const luna::engine::Rect& box, int y);
     const luna::engine::Texture& markerTexture(luna::engine::Renderer& renderer, const NpcMarker& marker) const;
     void buildNpcPanel(const PlacedCharacter& shown);
+    void buildNpcTradePanel(const PlacedCharacter& shown);
+    void addTradeRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set);
+    void addScheduleRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::Schedule& shown, const std::function<bool(const std::string&, const std::string&)>& set);
+    void addDoesRow(luna::engine::Panel& panel, int left, int width, int& y, const std::vector<std::string>& shown, const std::function<bool(const std::string&)>& set);
+    // The two rows of the defaults with a partner type: the type (a click goes to the next) and its actions. `refresh` makes the owner's panel be built again.
+    void addPartnerRows(luna::engine::Panel& panel, int left, int width, int& y, const sim::rules::NpcExtras& shown, const std::function<bool(const std::string&, const std::string&)>& set,
+                        const std::function<void()>& refresh);
     void changeSelectedNpc(const std::string& what, const std::function<void(PlacedCharacter&)>& change);
     void buildOpenList();
     void buildQuestion();
@@ -318,7 +361,9 @@ private:
 
     std::vector<std::string> actionIds_;           // every interaction of the registry (US-268): the action checkboxes
     std::unique_ptr<luna::engine::Panel> npcPanel_;
+    std::unique_ptr<luna::engine::Panel> npcTrade_; // the Trade section of the NPC panel (US-284), beside it
     int partnerIndex_ = 0;                          // which partner type the dialogue row shows
+    int defaultsIndex_ = 0;                         // which partner type the defaults row shows (US-293)
     NpcClassBook* classBook_ = nullptr;
     bool classesShown_ = false;
     bool classesStale_ = true;
@@ -333,6 +378,9 @@ private:
     bool settingsShown_ = false;
     bool settingsStale_ = false;
     std::unique_ptr<luna::engine::Panel> settings_;
+    bool economyShown_ = false;
+    bool economyStale_ = true;
+    std::unique_ptr<luna::engine::Panel> economy_;
     std::unique_ptr<luna::engine::Panel> openList_;
     std::unique_ptr<luna::engine::Panel> question_;
     // What waits for an answer about unsaved changes: open this file (or, when empty, a new level).

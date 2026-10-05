@@ -1,0 +1,16 @@
+// A person gives a piece of its stock to somebody it is fond of (US-292); the receiver thinks the better of it (the gift event of opinions.json). The actor needs something to give: the
+// game gives it the tag has-goods.
+{
+  "id": "npc-gift",
+  "label": "Give a gift",
+  "actors": ["npc"],
+  "target": { "tags": ["npc"] },
+  "range": 3,
+  "order": 620,
+  "requires": [
+    { "if": "tag(actor, has-goods)", "else": "nothing to give" },
+    { "if": "opinion(actor, target) > 25", "else": "not fond enough" }
+  ],
+  "effects": [ "do gift" ],
+  "npc": { "score": "20 + opinion(actor, target)", "cooldown": 240 }
+}

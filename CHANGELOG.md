@@ -4,6 +4,125 @@ Record every pull request's full change set here before opening or updating it.
 Entries describe the final changes and their verification; update an entry when
 its PR changes rather than leaving an outdated description.
 
+## X-M9bc: exit of M9b and M9c (Mraw) - 2026-10-05
+
+- One full verify, Debug and Release, zero warnings, 27 of 27 each. Fixes: loaders of trade, schedule and events files, director default actions, `hunt` built-in name, place tags, empty class default, need-based environment scores, trade title, Editor Trade panel below the NPC panel.
+- The soak test is labelled `soak` and left out of verify and CI by the owner (D-54 follow-up).
+- Gates: `docs/gates/M9b.md`, `docs/gates/M9c.md`.
+
+## US-294: living test level and the 100,000-person soak (Mraw) - 2026-10-05
+
+**State:** On `story/US-294`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Data: `assets/levels/npc-test.json` gets five places (market, grove, hut, pond, shrine) and a schedule for Tala, Harn (with a night variant), Ossa, Vell and Gur; Ossa does `fish`, Vell does `pray`; Harn carries 2 berries so he and Tala can swap.
+- Tests (not yet run): `tests/sim/npc_soak_test.cpp` (new executable `odysseus_sim_soak`, ctest `odysseus_sim_soak`, timeout 3000 s): 100,000 persons, 1,000 traders, 30 in-game days, twice with one seed, the hash of the saved state of population, director and market must match; in Release the ADR-022 budget (day under 100 ms, worst tick under 8 ms); a different seed gives a different hash. `tests/game/living_level_test.cpp` (3 cases): one day of the level (swap, chat, met), the activity of each NPC at 11:00 and Tala at the market, the level loads clean. `tests/game/trade_editor_test.cpp`: the restock check now looks at Tala's delivery day (she can swap a flint away).
+- Docs: guide (walk-through of one day, the soak), `docs/plans/US-294.md`, learning journal.
+- Unfinished checks: build, tests and the soak timing at X-M9bc; the GPU screenshots of `docs/evidence/US-294/` are owner-only manual steps.
+
+## US-293: default interactions by partner type (Mraw) - 2026-10-05
+
+**State:** On `story/US-293`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
+
+- Simulation: `src/sim/partner_types.h/.cpp` (the partner types from `partner-types.json`, `validPartnerType` over them, the `defaults-<type>.json` loader); `NpcExtras::partnerActions` (read, written, merged: the highest layer's list for a type wins) with the Editor line; `resolveNpc` takes the defaults as the lowest layer; `DefaultActionSource` (a fourth action source) and the preference bonus; the director sees animals (`setAnimals`, `AnimalThing`), hunts them (`do hunt`, `dealings.huntPercent`, the `Hunted` event) and prefers the actions of the partner type it meets; `InteractionRegistry::load` skips `defaults-*.json`.
+- Game: partner types registered before anything is read, defaults loaded and reloaded with F5, the profile carries `partnerActions`, animals fed to the director, a hunted animal leaves the world.
+- Editor: **Defaults with: <type>** and its Does line in the NPC panel, the Class panel and the Kinds tab; the partner types of the data file are offered.
+- Data: `assets/data/sim/partner-types.json`, `interactions/defaults-{class,animal,environment}.json`, `hunt.json`, `forage.json`, `rest-at-shelter.json`, `fish.json`, `pray.json`; the hunter class hunts animals; `lookRadius` and `huntPercent` in `schedule.json`.
+- Docs: guide, `docs/plans/US-293.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_defaults_test.cpp` (7 cases), `tests/game/npc_defaults_game_test.cpp` (4 cases); the `sources.count()` checks of US-291 say 4.
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-292: NPCs act on each other (Mraw) - 2026-10-05
+
+**State:** On `story/US-292`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
+
+- Simulation: `NpcDirector` lets a free person near the hero choose among the interactions it can do to its close neighbour (`npc-chat`, `npc-swap`, `npc-gift`, `npc-confront`, `npc-fight`) as well as its place and event actions; the effects `opinion`, `remember`, `give`, `take` and the words `chat`, `swap`, `gift`, `fight`, `spread-opinion`, `restore`, `walk-to` are carried out in the simulation; fights with hit points and damage, deaths, witnesses and family; far persons deal once a day by a seeded roll (abstract, no events but deaths); events for the game (`NpcEvent`); the budget `maxPerHour` goes round; `NpcPopulation::neighbour` finds the partner in the grid cell; `NpcRuleContext` reads bare roots.
+- Game: the market is the director's stock book, the combat numbers come from the placed character, events drain every tick (bubbles over speakers, deaths take the figure out of the world, also after a load), the dead are no subject.
+- Data: five interaction files `npc-*.json`; `dealings` section of `assets/data/sim/schedule.json`; built-in words `chat`, `swap`, `gift`, `fight`; the tag `can-swap`.
+- Docs: guide (NPCs act on each other), `docs/plans/US-292.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_interact_test.cpp` (11 cases), `tests/game/npc_dealings_game_test.cpp` (4 cases); the US-291 sim tests load only patrol and help-with-fire so neighbouring persons do not chat there.
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-291: action sources (Mraw) - 2026-10-05
+
+**State:** On `story/US-291`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c. D-54 Q11: no quest-action source in M9c (Codex v2.12).
+
+- Simulation: `src/sim/npc_actions.h/.cpp` (`ActionSource` strategy objects: class, custom and event sources; `NpcProfile`; `ActionSources::standard()`); `src/sim/npc_events.h/.cpp` (event catalog from `events.json`, the board of events on offer); `src/sim/npc_context.h/.cpp` (the rule language for NPC actors); `NpcDirector` chooses an action for a free person each hour (score of the `npc` block, cooldowns, budget `maxPerHour` that goes round) and answers events at once (`postEvent`); `does` in `NpcExtras`, `ResolvedNpc::classActions` and `customActions`.
+- Game: the profile of every person, the registry and the events given to the director, the fire (a pit set to `burning`) posts the event `fire`; problems with `does` are logged.
+- Data: `assets/data/sim/events.json`, interactions `patrol.json` and `help-with-fire.json`, `does: ["patrol"]` in the guard class; `walk-to` among the built-in words; the tags `place`, `post`, `event`; `free` and `maxPerHour` in `schedule.json`.
+- Editor: the Does line (NPC panel, Class panel, Kinds tab).
+- Docs: guide (action sources, events.json), `docs/plans/US-291.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_actions_test.cpp` (9 cases), `tests/game/npc_life_game_test.cpp` (4 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-290: day and night schedules (Mraw) - 2026-10-05
+
+**State:** On `story/US-290`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc after M9c.
+
+- Simulation: `src/sim/npc_schedule.h/.cpp` (blocks of time, day and night variants, the Editor text, problems, `ScheduleConfig` and its loader); `src/sim/npc_director.h/.cpp` (`NpcDirector`: places, schedules, homes, modes; the persons near the hero follow their schedule on the hour and are interrupted by hunger and danger, the far ones are visited in slices of the day; run-length coded save `npc-life.json`); `NpcExtras` carries the `schedule` block (highest layer wins) and its Editor text fields; `NpcPopulation` gets `nearFocus`, `neighbour`, `setNeed`, hour and day accessors, a cheaper `move` and a grid whose cells are kept sorted.
+- Level format version 5: `places` (`PlacedPlace`, `placesText`, `parsePlacesText`); the NPC `schedule` block.
+- Editor: the Places line of the Economy panel, the Day and Night lines of the Schedule form in the NPC panel, the Class panel and the Kinds tab.
+- Game: the director runs with the placed people, the figures walk to where it sends them (with collision), danger from hostiles, F5 refresh, `npc-life.json` saved and loaded; the menu of a person is where its figure stands.
+- Data: `assets/data/sim/schedule.json`.
+- Docs: guide (places, schedules, interruptions, the form), `docs/plans/US-290.md`, learning journal.
+- Tests (not yet run): `tests/sim/npc_schedule_test.cpp` (13 cases), `tests/game/schedule_editor_test.cpp` (5 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-284: Editor trade panel (Mraw) - 2026-10-05
+
+**State:** On `story/US-284`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc, which now ends M9b and M9c together.
+
+- Simulation: `tradeFieldNames`, `tradeFieldText`, `setTradeField` in `src/sim/npc_extras.h/.cpp` (the six text fields of a profile and their mistakes); `trade.weights` may be 0 (switches an inherited weight off).
+- Editor: a Trade section beside the NPC panel (own values, one step of Undo per line), and the same six lines in the Class panel and the Kinds tab (`Editor::setSelectedTrade`, `setClassTrade`, `setKindTrade`, `addTradeRows`); the Class panel is taller.
+- Data: `assets/levels/npc-test.json` (written in the game's own format): shells as money, the region's berries and flint, Tala's stock and wants, Harn's furs and his rare spearhead.
+- Docs: the guide (Trade section and the extended walk-through), `docs/plans/US-284.md`, learning journal.
+- Tests (not yet run): `tests/game/trade_editor_test.cpp` (5 cases), `tests/sim/trade_market_test.cpp` (one more case).
+- Unfinished checks: build and tests at X-M9bc; screenshots are manual.
+
+## US-283: trade screen for any trader (Mraw) - 2026-10-05
+
+**State:** On `story/US-283`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Simulation: `TradeMarket` gains the deal rules (`Deal`, `quote`, `execute`: stock, prices, rare goods, balance, purse, surplus), the hero's balance and the traders' purses, Haggle (one seeded try a day, discount, opinion cost), all saved (`src/sim/trade_market.h/.cpp`); `purse` section in `assets/data/sim/trade.json`. On the paying side the stock curve is capped at 100 (ADR-023).
+- Game: `TraderRef` (`std::variant<RivalTrader, NpcTrader>`) and `RunFlow::openBarter(TraderRef)` (the old `openBarter(int)` stays); `Screen::Barter` shows the rival barter unchanged or the new NPC trade screen (`buildTrade`, `actTrade`, coins in and out of the balance); the action `trade` (`assets/data/interactions/trade.json`, `do open-trade`) and the tag `trades`.
+- Test fixes: the M9a Actions tests removed the shipped `trade.json` from their data copy (their stand-in `trade-test` action is about gating by attitude).
+- Docs: guide, ADR-023, `docs/plans/US-283.md`, learning journal.
+- Tests (not yet run): `tests/sim/trade_deal_test.cpp` (9 cases), `tests/game/trade_screen_test.cpp` (7 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-282: supply and demand, and reputation (Mraw) - 2026-10-05
+
+**State:** On `story/US-282`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Simulation: `TradeMarket` gains the price functions (`basePrice`, `stockRatioPercent`, `marketMilli`, `heroPaysMilli`, `traderPaysMilli`, in thousandths of a unit), the drift (`nudge`, daily decay), reputation (`reputationPercent`, `refuses`) and rare goods (`rareUnlocked`, `offeredGoods`, `lockedGoods`) (`src/sim/trade_market.h/.cpp`).
+- Game: the traders get the tags `has-rare-goods` and `rare-open`; the action `rare-goods` (`assets/data/interactions/rare-goods.json`, `do rare-goods`) and its reason in the Actions pop-up.
+- Docs: ADR-023 (the formula and the reasons), the guide, `docs/plans/US-282.md`, learning journal.
+- Tests (not yet run): `tests/sim/trade_price_test.cpp` (9 cases), `tests/game/trade_gate_test.cpp` (3 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-281: trader stock (Mraw) - 2026-10-05
+
+**State:** On `story/US-281`, merged into `qa`. Written without running anything (owner rule, 2026-10-05); the one full verify is X-M9bc.
+
+- Simulation: `src/sim/npc_extras.h/.cpp` (the `trade` block: `TradeProfile`, reading with line-numbered mistakes, writing, merging; `NpcExtras` is the one place later stories add schedules and actions); `src/sim/trade_market.h/.cpp` (`TradeMarket`: limited stock, the daily restock with fixed pieces and seeded weighted picks, wants, saved state; `PriceConfig` and its loader).
+- Classes, kinds, placed NPCs: `extras` in `NpcClass`, `NpcLayer`, `ResolvedNpc` and `PlacedCharacter`; a resolved NPC with a profile carries the tag `trader` (D-54 Q7); the level reader and writer carry the block.
+- Game: the traders are registered from the placed people, restocked once a day, saved as `trade.json`, refreshed by F5.
+- Data: `assets/data/sim/trade.json` (all trade numbers).
+- Docs: guide, `docs/plans/US-281.md`, learning journal.
+- Tests (not yet run): `tests/sim/trade_market_test.cpp` (8 cases), `tests/game/trade_stock_test.cpp` (5 cases).
+- Unfinished checks: build and tests at X-M9bc.
+
+## US-280: currencies per region (Mraw) - 2026-10-05
+
+**State:** On `story/US-280`, merged into `qa`. Written without running anything (owner rule, 2026-10-05: no tests or builds until M9b and M9c are both fully implemented); the one full verify is X-M9bc.
+
+- Simulation: `src/sim/economy.h/.cpp` (`RegionEconomy` with currencies, prices, resources; `parsePairs`/`formatPairs` for the Editor text; `coinValue`, `takeCoins`, `makeChange`), `src/sim/economy_json.h` (level JSON).
+- Level format version 5: an optional `economy` object (`src/game/level.h/.cpp`); the shipped `npc-test.json` is rewritten as version 5; tests that look for the version number say 5.
+- Editor: Economy panel (Level, Economy...) with Money, Prices, Goods; each table one step of Undo (`Editor::setEconomyCurrencies/Prices/Resources`).
+- Data: item `shells` (kind `currency`, value 1) in `assets/data/hero/items.json`; the rival barter screen does not list it.
+- Docs: `docs/guides/npc-data.md`, `docs/plans/US-280.md`, `docs/learning-journal.md`, D-54 and the M9b/M9c design notes (kickoff).
+- Tests (not yet run): `tests/sim/economy_test.cpp` (4 cases), `tests/game/economy_editor_test.cpp` (5 cases).
+- Unfinished checks: build and tests at X-M9bc; screenshots are manual (`docs/plans/US-280.md`).
+
 ## X-M9a: exit review of M9a NPC foundation (Mraw) - 2026-10-05
 
 **State:** On `qa`, merged into `main`. `tools/verify.ps1 -Story X-M9a -Config Both`: zero warnings, 27/27 test groups in Debug and in Release.

@@ -145,7 +145,7 @@ TEST_CASE("US-136 Level format") {
         REQUIRE(level.plants.size() == 2);
         CHECK(level.plants[0].kind == tree);
         CHECK(level.plants[0].feet == feetIn(34, 34));
-        CHECK(fileText(file).find("\"levelVersion\": 4") != std::string::npos);
+        CHECK(fileText(file).find("\"levelVersion\": 5") != std::string::npos);
     }
     SUBCASE("a level without plants still loads (the demo is older than plants)") {
         const game::Level level = game::loadLevel(ODYSSEUS_DEMO_LEVEL, definitions).level;

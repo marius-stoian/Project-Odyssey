@@ -1,0 +1,4 @@
+{
+  "partnerType": "environment",
+  "actions": ["forage", "rest-at-shelter", "fish", "pray"]
+}

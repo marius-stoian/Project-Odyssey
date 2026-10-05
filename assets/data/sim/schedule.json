@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "nightFromHour": 21,
+  "nightToHour": 6,
+  "eat": { "below": 20, "restore": 40, "place": "home" },
+  "dangerPlace": "home",
+  "scatterPixels": 48,
+  "activities": {
+    "sleep": { "energy": 12 },
+    "rest": { "energy": 4 },
+    "eat": { "hunger": 25 },
+    "work": {},
+    "idle": {},
+    "go": {},
+    "patrol": {}
+  },
+  "free": ["idle", "work", "go", "patrol"],
+  "maxPerHour": 64,
+  "dealings": {
+    "meetRadius": 96,
+    "fightRoundsPerHour": 6,
+    "farFightRounds": 12,
+    "witnessOpinion": 6,
+    "griefOpinion": 30,
+    "farPercent": 5,
+    "preferBonus": 40,
+    "defaultHp": 100,
+    "defaultDamage": 5,
+    "chatSocial": 10,
+    "chatter": ["Fine day.", "Have you eaten?", "The nights are getting cold.", "Mind the wolves.", "Did you see the smoke?"]
+  }
+}

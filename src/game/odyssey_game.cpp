@@ -65,6 +65,12 @@ std::filesystem::path chosenLevel(const std::filesystem::path& dataDirectory, co
     return levelFile.empty() ? dataDirectory.parent_path() / "levels" / "valley.json" : levelFile;
 }
 
+// The partner types of assets/data/sim/partner-types.json (US-293) are told to the data readers before anything that names one is read (the NPC classes, the kinds, the level).
+Definitions loadDefinitionsAndPartnerTypes(const std::filesystem::path& dataDirectory) {
+    sim::rules::setPartnerTypes(sim::rules::loadPartnerTypes(dataDirectory / "sim" / "partner-types.json"));
+    return loadDefinitions(dataDirectory);
+}
+
 Level loadAndReport(const std::filesystem::path& file, const Definitions& definitions) {
     LoadedLevel loaded = loadLevel(file, definitions);
     for (const std::string& note : loaded.notes) {
@@ -78,7 +84,7 @@ Level loadAndReport(const std::filesystem::path& file, const Definitions& defini
 } // namespace
 
 OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::filesystem::path& levelFile)
-    : definitions_(loadDefinitions(dataDirectory)), levelFile_(chosenLevel(dataDirectory, levelFile)),
+    : definitions_(loadDefinitionsAndPartnerTypes(dataDirectory)), levelFile_(chosenLevel(dataDirectory, levelFile)),
       level_(loadAndReport(levelFile_, definitions_)), map_(buildTileMap(level_, definitions_)),
       camera_(kVirtualWidth / GameSettings{}.cameraZoom, kVirtualHeight / GameSettings{}.cameraZoom, map_.pixelWidth(), map_.pixelHeight()),
       hero_(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y)),
@@ -88,6 +94,11 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     npcCalendar_ = sim::loadCalendarConfig(dataDirectory / "sim" / "calendar.json");
     npcNeeds_ = sim::loadNeedsConfig(dataDirectory / "sim" / "needs.json");
     npcOpinions_ = sim::loadOpinionConfig(dataDirectory / "sim" / "opinions.json");
+    tradeConfig_ = sim::loadPriceConfig(dataDirectory / "sim" / "trade.json");
+    scheduleConfig_ = sim::rules::loadScheduleConfig(dataDirectory / "sim" / "schedule.json");
+    eventCatalog_ = sim::loadEventCatalog(dataDirectory / "sim" / "events.json");
+    dataDirectory_ = dataDirectory; // (set again below; the defaults of the partner types need it now)
+    reloadPartnerDefaults();
     editor_.setLightPreview([this](double hour, const luna::engine::Rect& view) { return editorLightFrame(hour, view); });
     sky_ = loadSky(dataDirectory / "light" / "sky.json", dataDirectory / "sim" / "calendar.json");
     lighting_ = loadLighting(dataDirectory / "light" / "lights.json"); // a bad file stops the game with its name, like the other content
@@ -805,7 +816,9 @@ std::vector<sim::rules::Offer> OdysseyGame::offersFor(const Subject& subject) co
 }
 
 void OdysseyGame::setPlantState(std::size_t index, const std::string& state) {
-    if (index < plants_.size()) plants_[index].state = state;
+    if (index >= plants_.size()) return;
+    plants_[index].state = state;
+    if (state == "burning") postWorldEvent("fire", plants_[index].feet.x, plants_[index].feet.y); // a fire has started: the people near it may go to help (US-291)
 }
 
 bool OdysseyGame::helpPerson(int personId, sim::Need need, int amount) {
@@ -1771,7 +1784,12 @@ void OdysseyGame::drawHud(luna::engine::Renderer& renderer) const {
 void OdysseyGame::update(const luna::engine::Intents& intents) {
     if (intents.pressed(luna::engine::Intent::Reload)) {
         reloadInteractions();
-        if (npcClasses_.reload()) editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
+        if (npcClasses_.reload()) {
+            editor_.classesChanged(); // F5 also reads the NPC Classes again (US-260)
+            refreshTraders();         // and the trade profiles that came with them (US-281)
+            reloadPartnerDefaults();  // and the default actions of the partner types (US-293)
+            refreshLife();            // and the schedules (US-290)
+        }
     }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
         switchMode(Mode::Editor);
@@ -2217,6 +2235,20 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
             }
             renderer.draw(charactersAtlas_, art_.frame(kind->frames, kind->directions, placed.facing, 0),
                           screen(placed.feet.x - kCharacterWidth / 2.0, placed.feet.y - kCharacterHeight));
+        }
+    }
+
+    // Words over the heads of the placed people who are talking to each other (US-292).
+    for (const auto& [id, said] : npcBubbles_) {
+        for (const PlacedCharacter& placed : bystanders_) {
+            if (placed.id != id) continue;
+            luna::engine::UiPainter painter(renderer, uiSheet_);
+            const luna::engine::Point head = screen(placed.feet.x, placed.feet.y - kCharacterHeight);
+            const int w = luna::engine::UiPainter::textWidth(said.first) + 8;
+            const luna::engine::Rect box{static_cast<int>(head.x) - w / 2, static_cast<int>(head.y) - 16, w, 14};
+            painter.fill(box, luna::engine::UiColor::Shade);
+            painter.outline(box, luna::engine::UiColor::Border);
+            painter.text(box.x + 4, box.y + 4, said.first, luna::engine::UiColor::Text);
         }
     }
 

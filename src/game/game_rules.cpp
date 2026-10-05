@@ -43,18 +43,27 @@ static void applyActionLists(const OdysseyGame& game, const PlacedCharacter& pla
 std::optional<Subject> npcSubject(const OdysseyGame& game, int placedId) {
     const PlacedCharacter* placed = game.placedCharacter(placedId);
     if (placed == nullptr || game.npcPopulation().indexOf(placedId) < 0) return std::nullopt;
+    if (game.npcDirector().mode(game.npcPopulation().indexOf(placedId)) == sim::NpcDirector::Mode::Dead) return std::nullopt; // the dead are not there to talk to
     const sim::rules::ResolvedNpc resolved = game.npcClasses().resolve(*placed);
     Subject subject;
     subject.kind = Subject::Kind::Npc;
     subject.index = placedId;
     subject.name = placed->name;
     subject.title = placed->name + " (" + game.attitudeWordOf(placedId) + ")"; // the attitude word shows in the menu title (US-264)
-    subject.x = placed->feet.x;
-    subject.y = placed->feet.y;
+    const PixelPoint feet = game.npcPosition(placedId); // where its figure stands now: it walks where its schedule sends it
+    subject.x = feet.x;
+    subject.y = feet.y;
     subject.info.kind = placed->kind;
     subject.info.tags = resolved.tags;
     subject.info.tags.push_back("npc");
     if (game.npcDialogueFor(placedId) != nullptr) subject.info.tags.push_back("speaks"); // no dialogue for the player, no Talk (D-52 Q-11)
+    if (game.tradeMarket().isTrader(placedId)) subject.info.tags.push_back("trades"); // it has a profile and a stock: the Trade action works (US-283)
+    // A trader that keeps rare goods back (US-282): has-rare-goods, and rare-open when the hero stands high enough for every one it has in stock.
+    if (const sim::TradeMarket::Trader* trader = game.tradeMarket().find(placedId); trader != nullptr && !trader->profile.rare.empty()) {
+        subject.info.tags.push_back("has-rare-goods");
+        const int opinion = game.npcPopulation().opinion(placedId, sim::NpcPopulation::kHero);
+        if (game.tradeMarket().lockedGoods(placedId, opinion, game.npcOpinions()).empty()) subject.info.tags.push_back("rare-open");
+    }
     applyActionLists(game, *placed, subject.info);
     return subject;
 }
@@ -131,18 +140,19 @@ std::optional<Subject> subjectAt(const OdysseyGame& game, double wx, double wy) 
     {
         int best = -1;
         double bestDistance = 1e9;
-        for (const int index : game.npcPopulation().near(static_cast<int>(wx), static_cast<int>(wy), 60)) {
-            const double px = game.npcPopulation().x(index);
-            const double py = game.npcPopulation().y(index);
+        for (const PlacedCharacter& figure : game.bystanders()) {
+            if (game.npcPopulation().indexOf(figure.id) < 0) continue; // only the placed people (their figures are where they walk to)
+            const double px = figure.feet.x;
+            const double py = figure.feet.y;
             if (std::abs(wx - px) > 14.0 || wy < py - 46.0 || wy > py + 6.0) continue;
             const double distance = std::hypot(wx - px, wy - py);
             if (distance < bestDistance) {
                 bestDistance = distance;
-                best = index;
+                best = figure.id;
             }
         }
         if (best >= 0) {
-            if (auto npc = npcSubject(game, game.npcPopulation().id(best))) return npc;
+            if (auto npc = npcSubject(game, best)) return npc;
         }
     }
     // A creature that is an NPC (an enemy or an animal with a kind file): it can be confronted (US-266).
@@ -325,7 +335,8 @@ std::optional<Subject> subjectFor(const OdysseyGame& game, const sim::rules::Thi
     return std::nullopt;
 }
 std::vector<std::string> builtInThingTags(const OdysseyGame& game) {
-    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving"};
+    std::vector<std::string> tags = {"person", "clan", "npc", "speaks", "trader", "trades", "has-rare-goods", "rare-open", "place", "post", "event", "can-swap", "workstation", "knapping-stone", "camp-fire", "fire", "sacred-fire", "camp", "rival", "hero", "armed", "moving", "forage", "shelter", "water", "shrine", "market", "prey", "animal"};
+    for (const PlacedPlace& place : game.level().places) tags.insert(tags.end(), place.tags.begin(), place.tags.end()); // the purposes the owner gave the places of this level
     if (const sim::HeroData* data = game.heroData()) {
         for (const auto& profession : data->professions) tags.push_back("teaches-" + profession.id);
     }

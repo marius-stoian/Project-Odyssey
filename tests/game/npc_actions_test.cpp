@@ -39,6 +39,7 @@ struct Studio {
 
     Studio(const std::string& name, const std::function<void(game::Level&)>& changeLevel) : data(dataCopy(name)) {
         writeText(data / "interactions" / "trade-test.json", kTrade);
+        fs::remove(data / "interactions" / "trade.json"); // the shipped Trade action of M9b would add a second Trade to these menus: this test is about the gating by attitude
         const game::Definitions definitions = game::loadDefinitions(data);
         game::Level level = game::loadLevel(ODYSSEUS_DEMO_LEVEL, definitions).level;
         level.characters.clear();
@@ -195,5 +196,6 @@ TEST_CASE("US-267 Too far: an action that is only out of range stays in the menu
     game::PlacedCharacter* placed = const_cast<game::PlacedCharacter*>(studio.odyssey->placedCharacter(far));
     placed->feet.x = studio.odyssey->level().heroStart.x + 32 * 12;
     studio.odyssey->npcPopulationMutable().move(studio.odyssey->npcPopulation().indexOf(far), placed->feet.x, placed->feet.y); // the grid follows
+    for (int tick = 0; tick < 400; ++tick) studio.odyssey->update({}); // the figure walks to where the population put her (the people are drawn where the director put them)
     CHECK(has(studio.menuOf(far), "Trade | Too far away"));
 }

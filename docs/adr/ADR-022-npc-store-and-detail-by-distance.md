@@ -28,3 +28,13 @@ The budgets leave a margin of three or more over the measurement for the D-06 PC
 - A person that moves must call `move` so the grid follows (schedules, M9c).
 - Persons do not die in M9a (no food model); ageing past old age and births belong to later stories.
 - Autosave size grows with the crowd (47 bytes a person); a binary format or a background write is the answer if a real region ever needs more than the 100 ms budget.
+
+## Addendum (M9c, 2026-10-05): NPC life by distance
+
+`sim::NpcDirector` (`src/sim/npc_director.*`, US-290) gives the persons of the population a schedule, a home and interruptions, and from US-291 and US-292 their own actions and their dealings with each other. It follows the same rules as the population:
+
+1. **Near persons, by the hour.** On every hour mark the persons within the near radius of the focus (found through the grid) take up the schedule block of that hour, or are interrupted by hunger, danger or a fight. Their needs get back what the activity restores.
+2. **Far persons, in slices.** Every person is visited exactly once a day, at the tick of the day that is their index modulo the length of the day (`ticksPerDay`, 2,400): a tick visits at most `population / 2,400` persons (42 for 100,000), never the whole store, and what a far person does is the schedule block of the hour of their slot. Far persons never walk: their position changes at once; the game only draws figures for the placed people.
+3. **Interactions are bounded.** At most `maxPerHour` interactions between near persons are resolved on an hour mark, and a far person resolves at most one, abstractly, once a day by a seeded roll (US-292); the partner is found by `NpcPopulation::neighbour` in the grid cell of the person, which looks at a few places of the cell, so a crowded cell costs no more than an empty one. The cells are kept sorted by index so the answer is the same after a save and a load.
+4. **Persistence.** `npc-life.json`: the schedules, and per person the schedule, mode and home, run-length coded (a crowd with one schedule is a few runs plus two numbers of home each).
+5. **Budgets** (D-06 PC, Release), for 100,000 persons with schedules and interactions: one in-game day costs at most 100 ms of CPU time in all, and no single tick more than 8 ms (the figures of the day above, plus the director). The soak of US-294 (100,000 persons, 30 game days, the same save hash on two runs) measures them; a miss goes to the owner as a decision request.

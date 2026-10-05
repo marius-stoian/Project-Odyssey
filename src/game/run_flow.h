@@ -8,11 +8,13 @@
 #include "luna/engine/ui.h"
 #include "sim/conversation.h"
 #include "sim/hero_life.h"
+#include "sim/trade_market.h"
 
 #include <functional>
 #include <map>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace odysseus::game {
@@ -25,6 +27,16 @@ class OdysseyGame;
 // never show anything stale; a click on a button changes the run through the simulation layer's own functions. While a screen
 // is open the world stands still.
 enum class Screen { None, NewGame, Focus, Event, Mantle, Menu, Craft, Barter, Context, Talk, Ended, Privacy };
+
+// Somebody the hero can trade with (US-283): a rival camp (the barter of M5, with its counter-offer and pay-later) or a placed NPC with a trade profile (stock, prices,
+// the balance of a currency region, Haggle). One screen, `Screen::Barter`, shows whichever the trader reference holds.
+struct RivalTrader {
+    int index = 0; // the rival clan
+};
+struct NpcTrader {
+    int placedId = 0; // the placed character in the level
+};
+using TraderRef = std::variant<RivalTrader, NpcTrader>;
 enum class MenuTab { Bag, Skills, Dominion, Settings };
 
 class RunFlow {
@@ -42,7 +54,22 @@ public:
     void openMantle() { screen_ = Screen::Mantle; }
     void openEnded() { screen_ = Screen::Ended; }
     void openCraft(const std::string& station);
-    void openBarter(int rival);
+    void openBarter(const TraderRef& trader);
+    void openBarter(int rival) { openBarter(TraderRef{RivalTrader{rival}}); }
+    const TraderRef& currentTrader() const { return trader_; }
+    // The deal of the NPC trade screen as it stands now (for tests and scripted play).
+    const sim::TradeMarket::Deal& deal() const { return deal_; }
+    // Widget ids of the NPC trade screen: the n-th item of the hero's bag to give, of the trader's goods to take (with a - button each), the balance and the buttons.
+    static constexpr int kTradeGive = 2000;
+    static constexpr int kTradeGiveLess = 2100;
+    static constexpr int kTradeGet = 2200;
+    static constexpr int kTradeGetLess = 2300;
+    static constexpr int kTradePayLess5 = 2400;
+    static constexpr int kTradePayLess1 = 2401;
+    static constexpr int kTradePayMore1 = 2402;
+    static constexpr int kTradePayMore5 = 2403;
+    static constexpr int kTradeDeal = 2404;
+    static constexpr int kTradeHaggle = 2405;
     // A conversation with a clan member (US-161): the panel shows their name, mood, words and numbered choices; the world waits.
     void openTalk(sim::rules::Conversation conversation, Subject subject);
     const sim::rules::Conversation* conversation() const { return conversation_ ? &*conversation_ : nullptr; }
@@ -125,6 +152,10 @@ private:
     void buildMenu(OdysseyGame& game);
     void buildCraft(OdysseyGame& game);
     void buildBarter(OdysseyGame& game);
+    void buildTrade(OdysseyGame& game);
+    void actTrade(OdysseyGame& game, int id);
+    void enterTrade(OdysseyGame& game); // the coins of the bag become the balance (D-54 Q1)
+    void leaveTrade(OdysseyGame& game); // the balance goes back as coins, highest value first
     void buildContext();
     void buildTalk(OdysseyGame& game);
     void buildEnded(OdysseyGame& game);
@@ -163,6 +194,11 @@ private:
     std::vector<int> picked_;
     // Craft and barter
     std::string station_;
+    TraderRef trader_ = RivalTrader{0};
+    bool tradeEntered_ = false;
+    sim::TradeMarket::Deal deal_;
+    std::vector<std::string> tradeGive_; // the items of the buttons shown now
+    std::vector<std::string> tradeGet_;
     int rival_ = 0;
     sim::BarterOffer offer_;
     std::map<std::string, int> give_;

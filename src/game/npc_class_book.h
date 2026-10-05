@@ -27,6 +27,9 @@ public:
     const sim::rules::NpcKindCatalog& kinds() const { return kinds_; }
     // What a placed NPC is after its classes, its kind file and its own fields are applied (US-261).
     sim::rules::ResolvedNpc resolve(const PlacedCharacter& placed) const;
+    // The default actions with each partner type (US-293): the defaults-<type>.json files, the lowest layer of what an NPC does with that kind of partner.
+    void setPartnerDefaults(sim::rules::PartnerDefaults defaults) { partnerDefaults_ = std::move(defaults); }
+    const sim::rules::PartnerDefaults& partnerDefaults() const { return partnerDefaults_; }
     const sim::rules::LoadReport& report() const { return report_; }
     const std::filesystem::path& folder() const { return folder_; }
 
@@ -50,6 +53,7 @@ private:
     sim::rules::NpcClassCatalog catalog_;
     sim::rules::NpcKindCatalog kinds_;
     sim::rules::LoadReport report_;
+    sim::rules::PartnerDefaults partnerDefaults_;
 };
 
 } // namespace odysseus::game

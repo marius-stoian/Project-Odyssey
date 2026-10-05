@@ -1,0 +1,11 @@
+// An NPC prays at a place tagged shrine (US-293, D-54 Q16, pray and ritual at a place): it goes there and feels less alone.
+{
+  "id": "pray",
+  "label": "Pray at the shrine",
+  "actors": ["npc"],
+  "target": { "tags": ["place", "shrine"] },
+  "range": 2,
+  "order": 740,
+  "effects": [ "do walk-to", "do restore social 15" ],
+  "npc": { "score": "need(social) - 30", "cooldown": 60 }
+}

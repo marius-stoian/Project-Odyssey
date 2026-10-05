@@ -131,7 +131,7 @@ TEST_CASE("US-260 Level: placed NPCs keep their classes (level version 4); older
     level.characters.push_back({level.nextId++, "goblin", {140, 100}, game::Facing::South, "Plain", 60, 4, {}});
     game::saveLevel(level, definitions, data / "classes.json");
     const std::string text = readText(data / "classes.json");
-    CHECK(text.find("\"levelVersion\": 4") != std::string::npos);
+    CHECK(text.find("\"levelVersion\": 5") != std::string::npos);
     CHECK(game::readLevelFile(data / "classes.json", definitions) == level);
     CHECK(game::readLevelFile(data / "classes.json", definitions).characters[0].classes == std::vector<std::string>{"trader", "elder"});
     // Only NPCs with classes write the field.

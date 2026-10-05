@@ -1,0 +1,12 @@
+// A hunter hunts a prey animal it sees (US-293): it goes to it and the chance in `dealings.huntPercent` of schedule.json decides whether it is killed; the hunt feeds the hunter.
+// It is the default action with animals of the hunter class (`partnerActions` in npc-classes/hunter.json); the game tells the director which animals are near.
+{
+  "id": "hunt",
+  "label": "Hunt",
+  "actors": ["npc"],
+  "target": { "tags": ["animal", "prey"] },
+  "range": 2,
+  "order": 700,
+  "effects": [ "do walk-to", "do hunt", "do restore hunger 30" ],
+  "npc": { "score": "50", "cooldown": 30 }
+}

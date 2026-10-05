@@ -222,3 +222,308 @@ Example: a goblin with `"classes": ["monster"]` shows a red ring and a skull; a 
 | Goblin | kind `goblin`, `monster`, **hostile** | none | It attacks you. Set the `goblin` kind to neutral in the Editor (**Class**, **Kinds**) and press F1: it does not. |
 
 In the Editor (F2) every NPC with a class has its ring and icon under its feet, and a click on one opens its NPC panel. Every shipped file of this level is checked by `tests/game/npc_test_level_test.cpp`: it loads with no mistake, and loading, saving and loading again gives the same text.
+
+## Region economy: currencies, prices and goods (US-280, level version 5)
+
+A level may carry an `economy` object. It is written only when something is set, so a level made before US-280 loads and saves unchanged apart from its version number (5). A level with no currency trades by **barter only** (US-283).
+
+| Field | Values | Meaning |
+|---|---|---|
+| `currencies` | `{ item id: value }`, value 1 to 100000 | the items that are money in this region, each worth its value (in value units); any currency item is worth its value anywhere |
+| `prices` | `{ item id: price }`, 1 to 100000 | the market's base price of a good; without an entry the item's own `value` (`assets/data/hero/items.json`) is the base |
+| `resources` | `{ item id: weight }`, 1 to 1000 | goods the region delivers: added to every trader's own weights at the daily restock (US-281) |
+
+```json
+"economy": { "currencies": { "shells": 1 }, "prices": { "flint": 4 }, "resources": { "berries": 5, "flint": 3 } }
+```
+
+Item ids are lower-case letters, digits and `-`. Money is a whole number everywhere: there is no cent. The shipped item `shells` (kind `currency`, value 1) is the example currency; any item of `items.json` can be marked as money.
+
+### Editor: the Economy panel
+
+**Level** opens the level settings; its **Economy...** button opens the Economy panel with three lines, each `item=number item=number`:
+
+| Line | Edits |
+|---|---|
+| **Money** | `currencies`, for example `shells=1 gold=10` |
+| **Prices** | `prices`, for example `flint=4` |
+| **Goods** | `resources`, for example `berries=5 flint=3` |
+
+A line is read when you press Enter or click elsewhere. A mistake (a name that is not an item id, a number out of range, a missing `=`) is said in the status line and changes nothing. Every table is one step of **Undo**; an empty line clears the table (no money: barter only); typing the same table again is no step.
+
+## Trade: the `trade` block and the daily restock (US-281, level version 5)
+
+Any NPC with a trade profile is a trader (D-54 Q7); the **Trader** class is only a default profile. The `trade` block can be written in a class file, in a kind file and on a placed NPC. The layers merge: class, then kind, then the placed NPC; the tables merge per key (the later layer wins), `wants` is the union, `deliveries` is the last one set. Every field is optional; fields are written in this order.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `stock` | `{ item: count }`, 0 to 9999 | the stock at the start, and the **target** the price curve measures against (US-282); `0` = the shelf starts empty |
+| `restockPerDay` | `{ item: count }`, 0 to 999 | pieces delivered every day, as written |
+| `deliveries` | 0 to 20 | weighted random picks a day; each pick adds `deliveryAmount` (1) piece |
+| `weights` | `{ item: weight }`, 0 to 1000 | the picks are drawn from these weights plus the region's `economy.resources` (0 switches an inherited weight off) |
+| `wants` | list of item ids | bought at full value; any other good at half (D-52 Q-17) |
+| `rare` | `{ item: band word }` | goods offered only at an opinion at least as high as the word (US-282): hostile, wary, suspicious, neutral, friendly, enchanted, lovingly |
+
+```json
+"trade": { "stock": { "flint": 6, "fur": 2 }, "restockPerDay": { "flint": 2 }, "deliveries": 1, "weights": { "fur": 3 }, "wants": ["berries"], "rare": { "obsidian": "friendly" } }
+```
+
+**Limited stock.** A restock never brings a good above its cap: `max(starting stock x capFactor, minimumCap)` (2 and 10 in `assets/data/sim/trade.json`). A good the trader does not stock has a cap of 10. A trade may leave a trader with more than its cap (it keeps what you sell it); only deliveries stop at the cap.
+
+**Daily restock.** When a new in-game day begins, every trader gets its fixed `restockPerDay` pieces and then `deliveries` weighted random picks. The random stream depends only on the world seed (the level name, or `--seed`), the day and the trader, so the same day always brings the same goods. A trader far from the hero is restocked in the same one pass (the cost is the number of traders); after a long absence at most 7 days of deliveries arrive at once (`catchUpDays`).
+
+**Saved.** The stock, the price drift and the haggle day of every trader are in `trade.json` next to `npcs.json` (versioned JSON). The profiles are data and are read again at every start; the saved stock is then put back. F5 reads class and kind files again and gives every trader its new profile without touching its stock.
+
+A trader of a class whose file has a mistake in `trade` is skipped like any class file with a mistake (`npc-classes/trader.json:7: trade.stock.Flint ...`). A level with a mistake in a placed NPC's `trade` is refused with the file, the character (`characters[0]`) and the problem.
+
+## Trade: prices and reputation (US-282, ADR-023)
+
+A price is the region's base price for the good, times the **stock curve**, times the **drift**, with the trader's **attitude** to the hero applied last. All whole numbers, in thousandths of a value unit; the formula and the reasons are in `docs/adr/ADR-023-trade-prices.md`. Every number is in `assets/data/sim/trade.json`:
+
+| Section | Fields | Meaning |
+|---|---|---|
+| `stock` | `minimumCap`, `capFactor`, `defaultTarget`, `deliveryAmount`, `catchUpDays` | restock caps and the target of a good the trader does not stock (US-281) |
+| `curve` | `minPercent`, `maxPercent` | the stock curve is `100 x target / stock`, clamped to these (50 and 200) |
+| `drift` | `percentPerTrade`, `maxPercent`, `decayPercentPerDay` | each piece bought or sold nudges the price (3), up to a cap (40); it decays back daily (a quarter of itself) |
+| `reputation` | `percent` (by attitude word), `refuse` (list of words) | the percent added to what the hero pays: friendly -10, neutral 0, wary and suspicious +25, enchanted and lovingly -20; a word in `refuse` (hostile) will not trade |
+| `wants` | `wantPercent`, `otherPercent` | what the trader pays for the hero's goods: its wants at 100%, any other good at 50% |
+| `haggle` | `baseChance`, `opinionDivisor`, `perPersuasion`, `minChance`, `maxChance`, `discountPercent`, `failureOpinion` | the Haggle button of the trade screen (US-283) |
+| `purse` | `start`, `restockPerDay`, `cap` | the money a trader can pay out in a currency region, in value units (US-283) |
+
+**Reputation bands** use the same attitude word the title of the NPC menu shows (opinion bands of `opinions.json`): a friendly trader is cheaper than a suspicious one; a devoted one (`enchanted`, `lovingly`) unlocks rare stock.
+
+**Rare goods.** A trade profile's `rare` table names goods and the lowest band word that unlocks each (for example `"obsidian": "friendly"`, opinion 10 or more). Below it the good is not offered. The action **Ask about rare goods** (`assets/data/interactions/rare-goods.json`) appears for a trader with a `rare` table; when the hero does not stand high enough for everything it keeps back, the Actions pop-up (key **X**) lists it greyed out with the reason `Rare goods are kept for people they like better`. Its tags are given by the game: `has-rare-goods` (a rare table) and `rare-open` (nothing is kept back from this hero).
+
+Currency items are never repriced: shells worth 1 cost 1 from a friendly trader and from a suspicious one.
+
+## Trade: the trade screen (US-283)
+
+**Trade** (`assets/data/interactions/trade.json`, tag `trader`, range 3 m) opens the trade screen of a placed NPC that has a trade profile; a rival camp keeps its own **Barter** with its counter-offer and pay-later. The action is hidden for a trader that has nothing to trade and for a hostile one; the Actions pop-up (**X**) lists it with the reason (`They have nothing to trade`, `They will not trade with you: they are hostile`).
+
+The screen, top to bottom:
+
+| Part | What it shows |
+|---|---|
+| Title | `TRADE with Tala (friendly)`: the attitude word decides the prices (ADR-023) |
+| Money line | in a currency region your **balance**, the trader's **purse** and the money here (`Shells = 1`); in a region with no currency `This region has no money: barter only.` |
+| **You give** | your bag (coins are in the balance) with, on each button, how many you put on the table of how many you have, and `@` what the trader pays for one piece (a `-` button takes one back) |
+| **You take** | the trader's stock with how many you take of how many it has and `@` what you pay for one piece; a `*` marks a good the trader wants; rare goods you do not stand high enough for are not listed (`They keep back: ... (needs friendly)`) |
+| Pay from balance | `-5 -1 +1 +5`: units of your balance paid into the deal (currency regions only) |
+| Balance bar | `They receive X   They give Y   [####....]`, live: received is your goods at what the trader pays plus the balance you pay; given is its goods at what you pay. **Deal** is available when received is at least given; otherwise the line says what is missing (`They want 0.45 more in value.`) |
+| **Haggle (n%)** | one try per trader per in-game day: the chance from opinion and persuasion (your Trade affinity / 10), a seeded roll; a win is 10% off for the rest of the day, a loss costs 5 opinion; the roll and the chance are shown |
+
+**Money.** When the screen opens, every coin item of the region's currencies in your bag becomes your balance; when it closes (Close, or the menu key) the balance goes back as coin, highest value first; a remainder that no coin can make waits in the balance for the next visit (`trade.json` keeps it). Any currency item is worth its value anywhere and is never repriced. In a currency region, what you gave beyond what you took is paid back to your balance from the trader's purse, up to what the purse holds (30 at the start, +5 a day, at most 60: `purse` in `trade.json`); where there is no currency nothing is paid back, so ask for goods.
+
+**After a deal** the goods move between your bag and the trader's stock, the prices drift (ADR-023), and the trader's opinion of you rises by the `trade` event of `opinions.json` (+5).
+
+## Editor: the Trade section (US-284)
+
+An NPC panel (select a placed NPC with the Select tool) has a **Trade** section below it (so it never covers the figure you are editing), and the **Class** panel and the **Kinds** tab have the same six lines under **Deny**. Each line is plain text:
+
+| Line | Type | Example | Meaning |
+|---|---|---|---|
+| **Stock** | `item=number ...` | `flint=6 fur=2` | the stock at the start and the target of the price curve; `flint=0` is an empty shelf |
+| **Restock/day** | `item=number ...` | `flint=1` | pieces delivered every day |
+| **Picks/day** | a number 0 to 20, or empty | `2` | weighted random deliveries a day |
+| **Weights** | `item=number ...` | `fur=3` | how likely each good is in the random deliveries (0 to 1000; the region's **Goods** from the Economy panel add theirs) |
+| **Wants** | items separated by spaces or commas | `berries fur` | goods the trader buys at full value (the rest at half) |
+| **Rare** | `item=band ...` | `obsidian=friendly` | goods kept for people it likes: hostile, wary, suspicious, neutral, friendly, enchanted, lovingly |
+
+A line is read when you press Enter or click elsewhere. A mistake is said in the status line and changes nothing (`trade stock: "fur": the number after = must be whole`).
+
+- **NPC panel**: the section shows and edits the NPC's **own** values; the class and the kind add theirs (the title says what the NPC trades in all, in its hint). A layer can add or change an entry but not remove one a lower layer gives: set a stock or a restock to `0`, or a weight to `0`, to switch an inherited one off. Every line is one step of **Undo**; typing the same text again is none.
+- **Class panel and Kinds tab**: the lines edit the draft; **Save** writes the file (`"trade": {...}` in the order of the table of US-281) and every NPC of the class or kind that does not set the value itself follows it, in the Editor and in play (F1).
+
+## The test level: the trader and the wary hunter (US-284)
+
+`assets/levels/npc-test.json` is now a small market: the region has `shells` for money (value 1) and delivers berries (weight 3) and flint (weight 2) to its traders. **Tala** (trader, neutral) has flint 6, fur 2 and berries 4, restocks a flint a day, makes one random delivery a day (fur, or the region's berries and flint) and wants berries. **Harn** (hunter, **wary**) has fur 4 and a spearhead, restocks a fur a day, wants flint and keeps the spearhead for people who are friendly. Walk-through of the trade steps (added to the table of the US-270 walk-through):
+
+| Step | Do | Expect |
+|---|---|---|
+| 1 | Right-click Tala: **Trade** | the screen: your bag, her stock with prices, the balance bar; `Money here: Shells = 1` |
+| 2 | Give berries (she wants them: full value), take flint | the bar fills, **Deal** works, the goods move |
+| 3 | Pick up some shells, trade again, pay from the balance, **Close** | the change comes back as shells |
+| 4 | Press **X** next to Harn | **Ask about rare goods** is greyed out: `Rare goods are kept for people they like better` |
+| 5 | Trade with Harn: **Haggle** once | a chance and a roll; a second try today is greyed out |
+| 6 | Talk kindly to Harn until he is friendly, press **X** again | **Ask about rare goods** is offered; its message names the spearhead; the trade screen lists it |
+| 7 | Wait one in-game day, trade with Tala again | one more flint than yesterday (plus the random delivery) |
+
+## Places and schedules (US-290, level version 5)
+
+### Places: the `places` of a level
+
+A level may name spots of its map (written only when there are some). Schedules send people to them, and the environment interactions of M9c use their tags.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `name` | lower-case letters, digits, `-`; not `home` | what schedules say in `at` |
+| `x`, `y` | world pixels, inside the level | where it is |
+| `tags` | list of words | what is there: `forage`, `shelter`, `water`, `shrine`, anything you want to target |
+
+```json
+"places": [ { "name": "market", "x": 656, "y": 336 }, { "name": "grove", "x": 976, "y": 400, "tags": ["forage", "shelter"] } ]
+```
+
+`home` is built in: the spot where the NPC was placed. In the Editor the **Places** line of the Economy panel (**Level**, **Economy...**) is `market=20,10 grove=30,12/forage/shelter`: tile numbers (the place is the middle of the tile) and tags after slashes. A mistake (no `=`, `home`, a name twice, a spot outside the level) is said and changes nothing; the line is one step of Undo.
+
+### Schedules: the `schedule` block
+
+A `schedule` can be written in a class file, a kind file and on a placed NPC. The layers do **not** merge: the schedule of the highest layer that has one wins (the NPC, else its kind, else its classes in order), as a whole.
+
+```json
+"schedule": [ { "from": "06:00", "do": "work", "at": "market" }, { "from": "21:00", "do": "sleep", "at": "home" } ]
+```
+
+or, when the night differs, `"schedule": { "day": [ ... ], "night": [ ... ] }`.
+
+| Field | Values | Meaning |
+|---|---|---|
+| `from` | `"HH:MM"` | when the block begins; blocks are sorted by it, two cannot begin together |
+| `do` | an activity word, or the id of an interaction | what the person does |
+| `at` | a place name or `home` (default) | where |
+
+A block lasts until the next block begins and the day wraps round midnight, so the last block of the day holds until the first one. The night variant is used between `nightFromHour` and `nightToHour` of `assets/data/sim/schedule.json` (21 and 6); with no night blocks the day blocks hold at night too.
+
+**Activity words** are the keys of `activities` in `schedule.json`: `sleep` (+12 Energy an hour), `rest` (+4 Energy), `eat` (+25 Hunger), `work`, `idle`, `go`, `patrol` (nothing back). Add your own word with the needs it restores. An interaction id is also an activity. A place or activity that is not known is logged with the name of the NPC when the level loads (`Schedule of Tala: 12:00: "square" is not a place of this level`) and the person stays at home for it.
+
+### How it runs
+
+The schedule is looked at **on the hour** (every 100 ticks): persons near the hero (the near radius of ADR-022) go to the place of the block and get back what the activity restores; persons far from the hero follow it in their daily summary: each one is visited once a day, at the tick of the day that is their index, so no tick visits the whole crowd (ADR-022 addendum). In play the figure of a person walks 2 pixels a tick to where its schedule sends it, round what is in the way (after ten seconds without progress it is put at its goal); its menu is where it stands.
+
+**Interruptions** (D-54 Q10): a person near the hero whose Hunger is below `eat.below` (20) goes to `eat.place` (home) and eats (`eat.restore`, +40 an hour) until it is no longer hungry; danger (a hostile creature within 6 m) sends it to `dangerPlace` (home) until it is gone; a fight (US-292) keeps it fighting. The next hour after an interruption the person simply follows its schedule again: it goes back to the market.
+
+`npc-life.json` next to `npcs.json` keeps the schedules, homes and modes (run-length coded, so a crowd with one schedule saves in a few hundred bytes plus two numbers of home per person).
+
+### Editor: the Schedule form
+
+The Trade section below the NPC panel has two more lines, **Day** and **Night**, and the Class panel and the Kinds tab have them under the trade lines. Type `06:00 work market; 21:00 sleep home` (time, activity, place; the place is optional and then `home`; separate blocks with `;`). Press Enter: the status line says `schedule day`; a mistake (`6am`, a missing activity, two blocks at one time) is said and changes nothing. For an NPC each line is one step of Undo and edits its **own** schedule (which replaces its kind's and its classes' whole); for a class or kind **Save** writes it. An empty **Night** means the day blocks hold at night.
+
+## Action sources: class, custom and event actions (US-291)
+
+An NPC that is **free** (idle, or on a block of `work`, `go`, `patrol`; the list is `free` in `schedule.json`) chooses something to do on its own, once an hour (and at once when an event concerns it). It takes its candidates from three sources (D-54 Q11; there is **no quest source** in M9c: M10 adds one and changes this schema):
+
+| Source | Where it is set | Meaning |
+|---|---|---|
+| **Class actions** | `"does": ["patrol"]` in a class file | what every NPC of the class does when free |
+| **Custom actions** | `"does"` in a kind file or on a placed NPC | the NPC's own list; layers add up (a class's, then the kind's, then the NPC's) |
+| **Event actions** | `assets/data/sim/events.json` | an event of the world offers an action to the NPCs it concerns |
+
+`does` is a list of interaction ids; an id that is no interaction, or has no `npc` block, is logged with the NPC's name when the level loads and never chosen. An NPC's own `deny` list (US-267) also keeps it from doing an action itself.
+
+**The choice** uses the same interaction files as the hero: the `npc` block of a file gives its `score` (the rule language; `need(hunger)`, `opinion(actor, target)`, `tag(target, post)`...) and its `cooldown` in seconds. Every candidate is scored against everything it could be done to (the places of the level, or the spot of an event); the best score wins, a tie by a roll of the world seed; below 30 nobody gets up for it. An event candidate gets the `bonus` of its event added. At most `maxPerHour` (64, `schedule.json`) persons choose on one hour mark, and the turn goes round so nobody is left out. The files an NPC acts with have `"actors": ["npc"]`: `patrol.json` (target: a place tagged `post`, effect `do walk-to`) and `help-with-fire.json` (target: the event). The word `walk-to` takes the person to the thing.
+
+### events.json
+
+```json
+{ "version": 1, "events": [ { "id": "fire-help", "label": "Help put out the fire", "trigger": "fire", "action": "help-with-fire",
+    "classes": ["talker", "elder", "trader", "hunter"], "withinMetres": 12, "forMinutes": 30, "bonus": 30 } ] }
+```
+
+| Field | Meaning |
+|---|---|
+| `trigger` | the event of the world: `fire` is posted when a fire pit is lit |
+| `action` | the interaction it offers |
+| `classes` | the classes it concerns (none listed: every NPC) |
+| `withinMetres` | how near the NPC must be (1 to 200) |
+| `forMinutes` | how long it is on offer, in game minutes |
+| `bonus` | added to the score of the action |
+
+A fire lit within 12 m of a talker sends her to it **at once**; a fire that went out more than 30 game minutes ago is no longer on offer at the next hour mark.
+
+### Editor
+
+The **Does** line (under the Schedule lines of the Trade section below the NPC panel, the Class panel and the Kinds tab) takes interaction ids separated by spaces: `patrol sing`. For an NPC it is its custom actions (one step of Undo); for a class its class actions, for a kind its custom actions (Save writes the file). A mistake (an id that is not lower-case words) is said and changes nothing.
+
+## NPCs act on each other (US-292, D-54 Q12, Q13)
+
+A person who is free (see US-291) looks at the neighbour who stands close and may do to them what the interaction files allow. The files are the same kind as the hero's: the `actors` word is `npc`, the target is a person (`"target": { "tags": ["npc"] }`), and the `npc` block gives the score and the cooldown. The shipped ones:
+
+| File | When | What it does |
+|---|---|---|
+| `npc-chat.json` | always (score `30 + need(social)`, so lonelier persons chat more) | `do chat`: a roll of the quality of the talk (-2 to 2) changes both opinions as `opinions.json` says, both get a little Social back, and near the hero the words show in a bubble |
+| `npc-swap.json` | each has a piece of what the other wants (the game gives the target the tag `can-swap`) | `do swap`: one piece each way between their stocks (US-281), both think better of the other (the `trade` event) |
+| `npc-gift.json` | the actor has goods (tag `has-goods`) and likes the target (opinion over 25) | `do gift`: one piece of its stock to the other, who thinks better of it (the `gift` event) |
+| `npc-confront.json` | the actor dislikes the target (opinion under -20) but is not hostile | the numbers of the hero's taunt: the target thinks 10 less of the actor, the actor 2 less of the target, the target remembers it, those who can hear and know the target think 2 less of the actor |
+| `npc-fight.json` | the actor is hostile to the target (`mood(actor) == hostile`) | `do fight`: strike and strike back with the hit points and sword damage of the two (the placed character's `hp` and `swordDamage`; `dealings.defaultHp` and `defaultDamage` for any other person), `dealings.fightRoundsPerHour` rounds an hour near the hero |
+
+**Consequences.** When a fight begins, the persons who can hear it (the `hearingTiles` of `opinions.json`) and know the victim think `dealings.witnessOpinion` (6) less of the attacker. A **death is final**: the person is dead for the simulation, their figure leaves the world, nobody can talk to them or trade with them, and their family near the place think `dealings.griefOpinion` (30) less of the killer. If neither falls, they break off, each thinking 3 less of the other, and the fight goes on the next hour while they are hostile.
+
+**The same rules, far away (D-54 Q13).** A person far from the hero is visited once a day (US-290); with the chance `dealings.farPercent` (5) a day it has a dealing with a neighbour who is far too, chosen by the same scores and carried out with the same effects, settled at once (a far fight runs `farFightRounds` rounds), with no animation and no bubble. A seeded roll of the world seed, the day and the person decides, so the same world always lives the same way. Deaths anywhere are reported to the game.
+
+**Bounded work.** At most `maxPerHour` persons begin a dealing or an action on one hour mark, and the turn goes round so nobody is left out; the neighbour is found through the grid cell of the person (a few places of the cell are looked at, never the crowd). The 100,000-person soak of US-294 measures the cost.
+
+**Effects an NPC carries out** in the files: `opinion who whom n`, `remember who "text" feeling` (with `{actor.name}` and `{target.name}`), `give who item n` and `take who item n` (the stock of a trader), and `do` with `walk-to`, `restore <need> <amount>`, `chat`, `swap`, `gift`, `fight` and `spread-opinion n`. `who` is `actor`, `target` or `hero`.
+
+**`dealings` in `schedule.json`** holds every number: `meetRadius` (96 pixels), `fightRoundsPerHour`, `farFightRounds`, `witnessOpinion`, `griefOpinion`, `farPercent`, `preferBonus` (US-293), `defaultHp`, `defaultDamage`, `chatSocial` and the `chatter` sentences.
+
+## Default interactions by partner type (US-293, D-54 Q14, Q16)
+
+An NPC meets different kinds of partner: the player, other NPCs (by class), animals, the environment (places), and any kind you add. For each kind it can have default **dialogues** (US-265) and default **actions**: the interactions it prefers when that partner is the target.
+
+### Partner types: `assets/data/sim/partner-types.json`
+
+```json
+{ "version": 1, "types": ["player", "animal", "environment", "buildings"] }
+```
+
+`player`, `animal` and `environment` are always there; add your own words to the list and they are valid everywhere a partner type is named (the dialogues of classes, kinds and NPCs, `partnerActions`) and appear in the Editor. `class:<id>` is always a type, one for every NPC class. A file that lists `class` is refused (`class` is the key for "every NPC class", below).
+
+### Defaults: `assets/data/interactions/defaults-<type>.json`
+
+One file per type: `defaults-class.json`, `defaults-animal.json`, `defaults-environment.json`. The file name says the type.
+
+```json
+{ "partnerType": "environment", "actions": ["forage", "rest-at-shelter", "fish", "pray"] }
+```
+
+`class` is the default for meeting any NPC class (shipped: empty, because a bonus for every class would put chatting above a useful swap); `animal` is empty (an NPC does nothing special with animals unless its class says so); `environment` lists the four environment actions below. A file with a mistake is left out and named in the log (`interactions/defaults-animal.json:2: partnerType "x" must match the file name "animal"`). The registry of interactions skips these files. **F5** reads them again.
+
+### `partnerActions`: a class, a kind or an NPC overrides
+
+```json
+"partnerActions": { "animal": ["hunt"], "class:guard": ["npc-chat"] }
+```
+
+In a class file, a kind file or on a placed NPC. Keys are partner types (`class` means every NPC class, `class:<id>` one class). The **list of the highest layer that has the type replaces** the lower layers' list for that type as a whole: defaults, then the classes, then the kind, then the NPC. An empty list (`"environment": []`) means "nothing special with that partner". The shipped hunter class has `"animal": ["hunt"]`.
+
+### What the chooser does with them
+
+- **Environment and animals.** The actions of the `environment` and `animal` lists are extra candidates of a free NPC, aimed at the places of the level (and the animals it can see within `dealings.lookRadius`, 12 m) and given the bonus `dealings.preferBonus` (40). Which place fits is the file's target tags: `forage.json` needs a place tagged `forage` (+25 Hunger, score `need(hunger) - 30`: only a hungry person goes), `rest-at-shelter.json` a `shelter` (+20 Energy), `fish.json` `water` (+20 Hunger), `pray.json` a `shrine` (+15 Social). A hungry person goes foraging at a grove, a tired one rests in the hut. `hunt.json` needs an animal tagged `prey`: the hunter goes to it and `dealings.huntPercent` (50) decides whether it is killed; the game removes the animal from the world; the hunt gives Hunger back.
+- **Partners that are persons.** When the neighbour is a person of a class that the NPC has a `partnerActions` list for, an interaction in that list gets the bonus; so an NPC that prefers `npc-chat` with talkers chats even when a swap would score higher.
+- The places are the `places` of the level (US-290); the animals are told to the director by the game as they move.
+
+### Editor
+
+Under the **Does** line (Trade section below the NPC panel, Class panel, Kinds tab) there is **Defaults with: animal** (a click goes to the next partner type, ending with `class`) and a **Does** line for that type: interaction ids separated by spaces. A type you added to `partner-types.json` is in the list the next time the game starts. An empty line removes the type from the NPC's own lists (the layer below shows again). For an NPC one step of Undo; **Save** writes the class or kind.
+
+## The living test level and the soak (US-294, D-54 Q15)
+
+`assets/levels/npc-test.json` now shows a day of NPC life. Five **places** (market 320,390 `market`; grove 700,180 `forage`; hut 160,640 `shelter`; pond 1100,620 `water`; shrine 900,220 `shrine`) and a schedule for each of the five people. A game day is two minutes; press **F1** (game mode) and the speed keys, and watch.
+
+| Time | Tala (trader) | Harn (hunter, wary) | Ossa (talker, does `fish`) | Vell (elder, does `pray`) | Gur (guard) |
+|---|---|---|---|---|---|
+| 06:00 | works at the market | at home | works at the pond | at home | patrols the market |
+| 08:00 | at the market | works at the market | at the pond | at home | patrols |
+| 10:00 | at the market | at the market | at the pond | goes to the shrine | patrols |
+| 12:00 | eats at home | eats at home | eats at home | eats at home | patrols |
+| 13:00 | works at the market | at home | works at the grove | at home | patrols |
+| 15:00 | at the market | at home | at the grove | goes to the market | patrols |
+| 18:00 | at the market | at home | at the grove | at the market | at home |
+| 20:00 | rests at the hut | at home | at the grove | at the market | at home |
+| 21:00-22:00 | sleeps at home | sleeps (the night variant) | sleeps at home | sleeps at home | sleeps at home |
+
+Harn also carries 2 berries now, so Tala (wants berries, has flint) and Harn (wants flint, has berries) can **swap** when they meet at the market between 08:00 and 12:00. Ossa and Vell chat when they meet; at 12:00 they all walk home to eat. The deer (far in the south-east, out of sight) and the goblin have no schedule; move the deer next to Harn to see him hunt it. Because Tala may swap a flint for berries, her flint count is no longer "6 plus a restock" after a day.
+
+**Walk-through of one day.**
+1. Start the level, **F1**, speed 4. At 06:00 Tala goes to the market, Ossa to the pond, Gur starts patrolling.
+2. Around 08:00 to 12:00 Tala and Harn stand at the market and swap (their last action is `npc-swap`); open the trade screen with Tala: berries have gone up, flint down.
+3. At 12:00 everybody goes home and eats (hunger goes back up).
+4. At 10:00 Vell goes to the shrine, at 15:00 to the market, where she and Tala chat; a bubble with a few words shows.
+5. At 21:00 everybody sleeps at home. Harn has a night variant in the Schedule form of the Editor (21:00 sleep).
+6. Leave the level for a day (stand far away with the Editor camera): near persons are simulated by the hour, far ones in the daily pass; both land on the same schedule when you return.
+
+### The soak (`odysseus_sim_soak`)
+
+`tests/sim/npc_soak_test.cpp` builds 100,000 persons (three schedules, 1,000 traders, three places) with the shipped interaction files, runs **30 in-game days** headless and hashes the saved state (population, director and market). It runs twice with the same seed: the two hashes must be identical. In Release it also checks the ADR-022 budget: no day above 100 ms of CPU time in all, no single tick above 8 ms. In Debug (with AddressSanitizer) only the repeatable hash is checked, because Debug is many times slower. The second case shows that a different seed gives a different hash, so the hash really covers the run.
+
+Run only the soak: `ctest --preset windows-x64-release -R odysseus_sim_soak` (it takes minutes in Debug).

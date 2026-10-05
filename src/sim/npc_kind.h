@@ -4,6 +4,7 @@
 
 #include "sim/interaction.h"
 #include "sim/npc_class.h"
+#include "sim/npc_extras.h"
 #include "sim/opinion.h"
 
 #include <filesystem>
@@ -28,6 +29,7 @@ struct NpcLayer {
     std::vector<std::pair<std::string, std::string>> dialogues; // partner type -> .dlg; replaces that partner type of the layers below
     std::vector<std::string> allow;
     std::vector<std::string> deny;
+    NpcExtras extras;                                // trade now; schedule, actions and partner defaults later (M9b, M9c)
     friend bool operator==(const NpcLayer&, const NpcLayer&) = default;
 };
 
@@ -65,6 +67,9 @@ struct ResolvedNpc {
     std::vector<std::string> tags;              // sorted, no duplicates
     std::map<std::string, std::string> dialogues; // partner type -> .dlg
     std::map<std::string, ActionState> actions;   // only ids some layer mentioned
+    NpcExtras extras;                             // the merge of every layer: classes, then the kind, then the placed NPC
+    std::vector<std::string> classActions;        // `does` of its classes (US-291)
+    std::vector<std::string> customActions;       // `does` of its kind and of itself
 
     ActionState action(const std::string& id) const;
     bool denied(const std::string& id) const { return action(id) == ActionState::Denied; }
@@ -73,6 +78,7 @@ struct ResolvedNpc {
 // Layers, lowest first: the default classes (the NpcClass of every class of the NPC, in order), the kind, the placed NPC. Per layer the allow list is
 // read first, then the deny list, and a later layer overrides an earlier one: so a placed NPC that denies what its class allows is denied, and a deny
 // inside one layer wins over an allow in the same layer. `kind` may be null (a kind without a file).
-ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, const NpcLayer& placed);
+// `defaults` (US-293) are the lowest layer of the default actions with each partner type: the defaults-<type>.json files; any layer's own list for a type replaces them.
+ResolvedNpc resolveNpc(const NpcClassCatalog& classes, const NpcLayer* kind, const NpcLayer& placed, const PartnerDefaults* defaults = nullptr);
 
 } // namespace odysseus::sim::rules

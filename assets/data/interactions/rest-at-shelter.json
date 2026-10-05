@@ -1,0 +1,11 @@
+// An NPC rests at a place tagged shelter (US-293, D-54 Q16, shelter and rest): it goes there and gets some Energy back.
+{
+  "id": "rest-at-shelter",
+  "label": "Rest at the shelter",
+  "actors": ["npc"],
+  "target": { "tags": ["place", "shelter"] },
+  "range": 2,
+  "order": 720,
+  "effects": [ "do walk-to", "do restore energy 20" ],
+  "npc": { "score": "need(energy) - 30", "cooldown": 40 }
+}

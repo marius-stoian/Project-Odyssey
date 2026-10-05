@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "stock": { "minimumCap": 10, "capFactor": 2, "defaultTarget": 6, "deliveryAmount": 1, "catchUpDays": 7 },
+  "curve": { "minPercent": 50, "maxPercent": 200 },
+  "drift": { "percentPerTrade": 3, "maxPercent": 40, "decayPercentPerDay": 25 },
+  "reputation": {
+    "percent": { "friendly": -10, "neutral": 0, "wary": 25, "scared": 10, "suspicious": 25, "enchanted": -20, "lovingly": -20, "enviously": 10 },
+    "refuse": ["hostile"]
+  },
+  "wants": { "wantPercent": 100, "otherPercent": 50 },
+  "haggle": { "baseChance": 20, "opinionDivisor": 4, "perPersuasion": 3, "minChance": 5, "maxChance": 85, "discountPercent": 10, "failureOpinion": 5 },
+  "purse": { "start": 30, "restockPerDay": 5, "cap": 60 }
+}

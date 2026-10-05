@@ -46,7 +46,9 @@
 #include "sim/npc_chooser.h"
 #include "sim/smalltalk.h"
 #include "game/npc_class_book.h"
+#include "sim/npc_director.h"
 #include "sim/npc_population.h"
+#include "sim/trade_market.h"
 #include "sim/interaction.h"
 #include "sim/region.h"
 #include "sim/region_save.h"
@@ -125,6 +127,18 @@ public:
     std::string attitudeWordOf(int placedId) const;
     const sim::OpinionConfig& npcOpinions() const { return npcOpinions_; }
     bool saveNpcPopulation() const;
+    // The stock of the traders (US-281): placed NPCs with a trade profile. Restocked once a day, saved with the placed people (trade.json).
+    const sim::TradeMarket& tradeMarket() const { return tradeMarket_; }
+    sim::TradeMarket& tradeMarketMutable() { return tradeMarket_; }
+    // The base value of every item of the hero's data (the price book of the traders, in value units).
+    sim::ItemCounts itemValues() const;
+    // The life of the placed people (US-290): schedules, homes, interruptions (the places of the level are its places).
+    const sim::NpcDirector& npcDirector() const { return npcDirector_; }
+    sim::NpcDirector& npcDirectorMutable() { return npcDirector_; }
+    // A world event happens at (x, y), world pixels (a fire starts): the people it concerns near it answer (US-291).
+    void postWorldEvent(const std::string& trigger, int x, int y);
+    // Where a placed person stands now, world pixels: its figure walks to where its schedule sends it; a person without a figure stands where it was placed.
+    PixelPoint npcPosition(int placedId) const;
     NpcClassBook& npcClasses() { return npcClasses_; }
     const NpcClassBook& npcClasses() const { return npcClasses_; }
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
@@ -285,6 +299,15 @@ public:
     std::vector<LightSource> levelLightSources() const; // the lights the level holds: effects with a light and the Light tool's lights (US-247)
     std::vector<luna::engine::PointLight> pointLights(const std::vector<LightSource>& sources, const luna::engine::Rect& view, double seconds, double darkness) const;
     void buildNpcPopulation();
+    void refreshTraders(); // registers the traders of the level again with their data of now (F5, a new class file), keeping the stock they have
+    void refreshLife();    // gives every placed person the schedule its classes, kind and own fields say now (F5, the Editor), and logs what it names that is not there
+    void reloadPartnerDefaults(); // reads assets/data/interactions/defaults-<type>.json again (US-293)
+    void feedNpcAnimals();        // tells the director which animals are near the persons (US-293)
+    void removeAnimal(int id);    // a hunted animal leaves the world
+    void walkNpcPeople();  // the figures of the placed people walk to where the director sent them (US-290)
+    void updateNpcDanger(); // a hostile within reach of a person sends them home (D-54 Q10)
+    void drainNpcEvents();  // what the persons did to each other near the hero: words in bubbles, a death takes the figure out of the world (US-292)
+    void removeDeadFigures(); // the figures of the persons the director says are dead leave the world (after a death, after a load)
     void syncEditorActions();
     void registerCreatures();
     void tickNpcPopulation();
@@ -394,6 +417,14 @@ private:
     sim::NeedsConfig npcNeeds_;
     sim::OpinionConfig npcOpinions_;   // US-264
     sim::NpcPopulation npcPopulation_; // US-262
+    sim::PriceConfig tradeConfig_;     // assets/data/sim/trade.json (US-281)
+    sim::TradeMarket tradeMarket_;     // the stock of the traders (US-281)
+    std::int64_t tradeDay_ = 0;        // the day the traders were last restocked
+    sim::rules::ScheduleConfig scheduleConfig_; // assets/data/sim/schedule.json (US-290)
+    sim::EventCatalog eventCatalog_;   // assets/data/sim/events.json (US-291)
+    sim::NpcDirector npcDirector_;     // the life of the placed people (US-290)
+    std::unordered_map<int, int> npcStuck_; // placed id -> ticks a walking figure has made no progress (it is put at its goal after a while)
+    std::map<int, std::pair<std::string, int>> npcBubbles_; // placed id -> the words over its head and the ticks they stay (US-292)
     std::unordered_map<int, std::int64_t> npcMetDay_; // person id -> the day they last met the hero
     Mode mode_ = Mode::Game;
     luna::engine::Texture uiSheet_;

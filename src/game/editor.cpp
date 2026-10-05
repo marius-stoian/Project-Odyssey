@@ -165,6 +165,7 @@ void Editor::buildPanels() {
     }
     buildProperties();
     buildSettings();
+    buildEconomy();
     buildClassPanel();
     buildOpenList();
     buildQuestion();
@@ -274,7 +275,7 @@ bool Editor::deleteClass() {
 // The NPC Classes panel (US-260): the classes on top, then the form of the draft, then the buttons.
 void Editor::buildClassPanel() {
     classesStale_ = false;
-    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 232 : 200});
+    classes_ = std::make_unique<Panel>(Rect{viewWidth_ - 232, kToolbarHeight + 4, 230, kindsTab_ ? 386 : 354});
     classes_->visible = classesShown_;
     const Rect box = classes_->bounds;
     const int left = box.x + 4;
@@ -338,7 +339,12 @@ void Editor::buildClassPanel() {
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(classDraft_.allow), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
     y += 14;
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
-    y += 18;
+    y += 14;
+    addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
+    addScheduleRows(*classes_, left, width, y, classDraft_.extras.schedule, [this](const std::string& field, const std::string& text) { return setClassSchedule(field, text); });
+    addDoesRow(*classes_, left, width, y, classDraft_.extras.does, [this](const std::string& text) { return setClassDoes(text); });
+    addPartnerRows(*classes_, left, width, y, classDraft_.extras, [this](const std::string& type, const std::string& text) { return setClassPartnerActions(type, text); }, [this] { classesStale_ = true; });
+    y += 4;
     classes_->add<Button>(Rect{left, y, 52, 14}, "New", [this] { newClass(); }).hint = "Start a new class";
     classes_->add<Button>(Rect{left + 56, y, 52, 14}, "Save", [this] { saveClass(); }).hint = "Write the class to its file";
     classes_->add<Button>(Rect{left + 112, y, 56, 14}, "Delete", [this] { deleteClass(); }).hint = "Delete the class (refused while NPCs use it)";
@@ -448,6 +454,11 @@ void Editor::buildKindForm(const Rect& box, int y) {
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(kindDraft_.layer.allow), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
         y += 14;
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(kindDraft_.layer.deny), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
+        y += 14;
+        addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
+        addScheduleRows(*classes_, left, width, y, kindDraft_.layer.extras.schedule, [this](const std::string& field, const std::string& text) { return setKindSchedule(field, text); });
+        addDoesRow(*classes_, left, width, y, kindDraft_.layer.extras.does, [this](const std::string& text) { return setKindDoes(text); });
+        addPartnerRows(*classes_, left, width, y, kindDraft_.layer.extras, [this](const std::string& type, const std::string& text) { return setKindPartnerActions(type, text); }, [this] { classesStale_ = true; });
     }
     const int bottom = box.y + box.height - 18;
     classes_->add<Button>(Rect{left, bottom, 80, 14}, "Save", [this] { saveKind(); }).hint = "Write the kind's file: every NPC of this kind that sets nothing itself follows it";
@@ -714,6 +725,8 @@ void Editor::buildProperties() {
     properties_->visible = false;
     npcPanel_ = std::make_unique<Panel>(Rect{0, 0, 0, 0}); // replaced when an NPC is selected
     npcPanel_->visible = false;
+    npcTrade_ = std::make_unique<Panel>(Rect{0, 0, 0, 0});
+    npcTrade_->visible = false;
     propertiesFor_ = -1;
     propertiesStale_ = false;
     const PlacedCharacter* shown = selected_ ? find(*selected_) : nullptr;
@@ -791,6 +804,204 @@ void Editor::buildNpcPanel(const PlacedCharacter& shown) {
     y += listHeight + 3;
     Button& reset = npcPanel_->add<Button>(Rect{left, y, width, 11}, "Reset to defaults", [this] { resetSelectedNpc(); });
     reset.hint = "Forget everything this NPC sets itself: it is what its kind says again";
+    buildNpcTradePanel(shown);
+}
+
+// The Trade section (US-284) of the NPC panel: what this NPC sells, below the NPC panel. It shows the NPC's own values; the hint of the title says what it has in all.
+void Editor::buildNpcTradePanel(const PlacedCharacter& shown) {
+    constexpr int kWidth = 232;
+    const Rect anchor = npcPanel_->bounds;
+    npcTrade_ = std::make_unique<Panel>(Rect{viewWidth_ - kWidth - 2, anchor.y + anchor.height + 4, kWidth, 176}); // below the NPC panel: beside it would cover the figure being edited
+    npcTrade_->visible = npcPanel_->visible;
+    const Rect box = npcTrade_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    int y = box.y + 4;
+    const sim::rules::ResolvedNpc resolved = classBook_->resolve(shown);
+    Button& title = npcTrade_->add<Button>(Rect{left, y, width, 11}, resolved.extras.trade.empty() ? "Trade: none (type stock to start)" : "Trade: this NPC trades", [] {});
+    title.hint = "In all (class, kind and own): stock " + sim::rules::tradeFieldText(resolved.extras.trade, "stock") + "; wants " + sim::rules::tradeFieldText(resolved.extras.trade, "wants");
+    y += 13;
+    addTradeRows(*npcTrade_, left, width, y, shown.extras.trade, [this](const std::string& field, const std::string& text) { return setSelectedTrade(field, text); });
+    addScheduleRows(*npcTrade_, left, width, y, shown.extras.schedule, [this](const std::string& field, const std::string& text) { return setSelectedSchedule(field, text); });
+    addDoesRow(*npcTrade_, left, width, y, shown.extras.does, [this](const std::string& text) { return setSelectedDoes(text); });
+    addPartnerRows(*npcTrade_, left, width, y, shown.extras, [this](const std::string& type, const std::string& text) { return setSelectedPartnerActions(type, text); }, [this] { propertiesStale_ = true; });
+}
+
+void Editor::addPartnerRows(Panel& panel, int left, int width, int& y, const sim::rules::NpcExtras& shown, const std::function<bool(const std::string&, const std::string&)>& set,
+                            const std::function<void()>& refresh) {
+    std::vector<std::string> types = partnerTypes();
+    types.push_back("class"); // the default for every NPC class (defaults-class.json)
+    defaultsIndex_ = std::clamp(defaultsIndex_, 0, static_cast<int>(types.size()) - 1);
+    const std::string type = types[static_cast<std::size_t>(defaultsIndex_)];
+    Button& button = panel.add<Button>(Rect{left, y, width, 11}, "Defaults with: " + type, [this, count = types.size(), refresh] {
+        defaultsIndex_ = (defaultsIndex_ + 1) % static_cast<int>(count);
+        refresh();
+    });
+    button.hint = "Click: the next partner type (the player, animals, the environment, an NPC class, or a type you added to partner-types.json)";
+    y += 13;
+    panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, "  Does", sim::rules::partnerActionsText(shown, type), 90, [set, type](const std::string& text) { set(type, text); });
+    y += 14;
+}
+
+bool Editor::setSelectedPartnerActions(const std::string& partnerType, const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    sim::rules::NpcExtras own = find(*selected_)->extras;
+    std::string problem;
+    if (!sim::rules::setPartnerActions(own, partnerType, text, problem)) {
+        say("defaults with " + partnerType + ": " + problem);
+        propertiesStale_ = true;
+        return false;
+    }
+    changeSelectedNpc("defaults with " + partnerType, [&](PlacedCharacter& placed) { placed.extras.partnerActions = own.partnerActions; });
+    return true;
+}
+
+bool Editor::setClassPartnerActions(const std::string& partnerType, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setPartnerActions(classDraft_.extras, partnerType, text, problem)) {
+        say("defaults with " + partnerType + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindPartnerActions(const std::string& partnerType, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setPartnerActions(kindDraft_.layer.extras, partnerType, text, problem)) {
+        say("defaults with " + partnerType + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+// The Does line: the actions an NPC does on its own, interaction ids separated by spaces.
+void Editor::addDoesRow(Panel& panel, int left, int width, int& y, const std::vector<std::string>& shown, const std::function<bool(const std::string&)>& set) {
+    panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, "Does", sim::rules::doesText(shown), 90, [set](const std::string& text) { set(text); });
+    y += 14;
+}
+
+bool Editor::setSelectedDoes(const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    std::vector<std::string> own = find(*selected_)->extras.does;
+    std::string problem;
+    if (!sim::rules::setDoes(own, text, problem)) {
+        say("does: " + problem);
+        propertiesStale_ = true;
+        return false;
+    }
+    changeSelectedNpc("does", [&](PlacedCharacter& placed) { placed.extras.does = own; });
+    return true;
+}
+
+bool Editor::setClassDoes(const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setDoes(classDraft_.extras.does, text, problem)) {
+        say("does: " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindDoes(const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setDoes(kindDraft_.layer.extras.does, text, problem)) {
+        say("does: " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+// The two lines of the schedule form: Day and Night, "06:00 work market; 21:00 sleep home".
+void Editor::addScheduleRows(Panel& panel, int left, int width, int& y, const sim::rules::Schedule& shown, const std::function<bool(const std::string&, const std::string&)>& set) {
+    static const char* const kLabels[] = {"Day", "Night"};
+    const std::vector<std::string>& fields = sim::rules::scheduleFieldNames();
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const std::string field = fields[i];
+        panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, kLabels[i], sim::rules::scheduleFieldText(shown, field), 150, [set, field](const std::string& text) { set(field, text); });
+        y += 14;
+    }
+}
+
+bool Editor::setSelectedSchedule(const std::string& field, const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    sim::rules::Schedule own = find(*selected_)->extras.schedule;
+    std::string problem;
+    if (!sim::rules::setScheduleField(own, field, text, problem)) {
+        say("schedule " + field + ": " + problem);
+        propertiesStale_ = true;
+        return false;
+    }
+    changeSelectedNpc("schedule " + field, [&](PlacedCharacter& placed) { placed.extras.schedule = own; });
+    return true;
+}
+
+bool Editor::setClassSchedule(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setScheduleField(classDraft_.extras.schedule, field, text, problem)) {
+        say("schedule " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindSchedule(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setScheduleField(kindDraft_.layer.extras.schedule, field, text, problem)) {
+        say("schedule " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+// One text field for each of the six trade fields; `set` is told the field and the text the owner typed.
+void Editor::addTradeRows(Panel& panel, int left, int width, int& y, const sim::rules::TradeProfile& shown, const std::function<bool(const std::string&, const std::string&)>& set) {
+    // The labels say what each line is: stock and restock are item=number (flint=6), picks a number, weights item=number, wants a list of items, rare item=band (obsidian=friendly).
+    static const char* const kLabels[] = {"Stock", "Restock/day", "Picks/day", "Weights", "Wants", "Rare"};
+    const std::vector<std::string>& fields = sim::rules::tradeFieldNames();
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const std::string field = fields[i];
+        panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, kLabels[i], sim::rules::tradeFieldText(shown, field), 90, [set, field](const std::string& text) { set(field, text); });
+        y += 14;
+    }
+}
+
+bool Editor::setSelectedTrade(const std::string& field, const std::string& text) {
+    if (classBook_ == nullptr || !selected_ || find(*selected_) == nullptr) return false;
+    sim::rules::TradeProfile own = find(*selected_)->extras.trade;
+    std::string problem;
+    if (!sim::rules::setTradeField(own, field, text, problem)) {
+        say("trade " + field + ": " + problem);
+        propertiesStale_ = true; // show the values again
+        return false;
+    }
+    changeSelectedNpc("trade " + field, [&](PlacedCharacter& placed) { placed.extras.trade = own; });
+    return true;
+}
+
+bool Editor::setClassTrade(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setTradeField(classDraft_.extras.trade, field, text, problem)) {
+        say("trade " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
+}
+
+bool Editor::setKindTrade(const std::string& field, const std::string& text) {
+    std::string problem;
+    if (!sim::rules::setTradeField(kindDraft_.layer.extras.trade, field, text, problem)) {
+        say("trade " + field + ": " + problem);
+        classesStale_ = true;
+        return false;
+    }
+    return true;
 }
 
 PlacedCharacter* Editor::find(int id) {
@@ -851,7 +1062,7 @@ void Editor::changeSelectedNpc(const std::string& what, const std::function<void
 }
 
 std::vector<std::string> Editor::partnerTypes() const {
-    std::vector<std::string> types = {"player", "animal", "environment"};
+    std::vector<std::string> types = sim::rules::partnerTypeNames(); // player, animal, environment and the types the owner added to partner-types.json (US-293)
     if (classBook_ != nullptr) {
         for (const std::string& id : classBook_->catalog().ids()) types.push_back("class:" + id);
     }
@@ -951,6 +1162,7 @@ std::pair<int, int> Editor::toWorld(int screenX, int screenY) const {
 void Editor::changeLevel(const std::string& what, Level after) {
     run(std::make_unique<LevelCommand>(what, level_, std::move(after)));
     settingsStale_ = true;
+    economyStale_ = true;
     select(selected_); // the selected character may be gone after a resize
 }
 
@@ -990,7 +1202,7 @@ void Editor::showSettings(bool shown) {
 
 void Editor::buildSettings() {
     settingsStale_ = false;
-    settings_ = std::make_unique<Panel>(Rect{viewWidth_ - 152, kToolbarHeight + 4, 150, 138});
+    settings_ = std::make_unique<Panel>(Rect{viewWidth_ - 152, kToolbarHeight + 4, 150, 154});
     settings_->visible = settingsShown_;
     const Rect box = settings_->bounds;
     const int left = box.x + 4;
@@ -1015,6 +1227,66 @@ void Editor::buildSettings() {
     });
     open.hint = "Open another level of this folder";
     settings_->add<Button>(Rect{left + 96, box.y + 112, 42, 14}, "Close", [this] { showSettings(false); });
+    Button& economy = settings_->add<Button>(Rect{left, box.y + 130, width, 14}, economyShown_ ? "Economy: shown" : "Economy...", [this] { showEconomy(!economyShown_); });
+    economy.hint = "Currencies, market prices and delivery weights of this region";
+}
+
+void Editor::showEconomy(bool shown) {
+    economyShown_ = shown;
+    economyStale_ = true;
+    settingsStale_ = true; // the button of the Level panel shows whether the Economy panel is open
+}
+
+// One table of the economy from the text of its field. A mistake is said and nothing changes.
+bool Editor::changeEconomy(const std::string& what, const std::string& text, int minimum, int maximum, sim::ItemCounts sim::RegionEconomy::*table) {
+    std::string problem;
+    const std::optional<sim::ItemCounts> parsed = sim::parsePairs(text, minimum, maximum, &problem);
+    if (!parsed) {
+        say(what + ": " + problem);
+        economyStale_ = true; // show the values again
+        return false;
+    }
+    if (level_.economy.*table == *parsed) return true; // no change: no step of Undo
+    Level after = level_;
+    after.economy.*table = *parsed;
+    changeLevel(what + ": " + (parsed->empty() ? std::string("none") : sim::formatPairs(*parsed)), std::move(after));
+    return true;
+}
+
+bool Editor::setEconomyCurrencies(const std::string& text) { return changeEconomy("currencies", text, 1, sim::RegionEconomy::kMaxValue, &sim::RegionEconomy::currencies); }
+bool Editor::setEconomyPrices(const std::string& text) { return changeEconomy("prices", text, 1, sim::RegionEconomy::kMaxValue, &sim::RegionEconomy::prices); }
+bool Editor::setEconomyResources(const std::string& text) { return changeEconomy("resources", text, 1, 1000, &sim::RegionEconomy::resources); }
+
+bool Editor::setPlaces(const std::string& text) {
+    std::string problem;
+    const std::optional<std::vector<PlacedPlace>> parsed = parsePlacesText(text, level_, problem);
+    if (!parsed) {
+        say("places: " + problem);
+        economyStale_ = true; // show the values again
+        return false;
+    }
+    if (level_.places == *parsed) return true;
+    Level after = level_;
+    after.places = *parsed;
+    changeLevel("places: " + (parsed->empty() ? std::string("none") : placesText(*parsed)), std::move(after));
+    return true;
+}
+
+void Editor::buildEconomy() {
+    economyStale_ = false;
+    economy_ = std::make_unique<Panel>(Rect{viewWidth_ - 152 - 262, kToolbarHeight + 4, 260, 104});
+    economy_->visible = economyShown_;
+    const Rect box = economy_->bounds;
+    const int left = box.x + 4;
+    const int width = box.width - 8;
+    economy_->add<Button>(Rect{left, box.y + 4, width, 11}, "Region: economy (item=number) and places", [] {});
+    luna::engine::TextField& currencies = economy_->add<luna::engine::TextField>(Rect{left, box.y + 18, width, 11}, "Money", sim::formatPairs(level_.economy.currencies), 90,
+                                                                                 [this](const std::string& text) { setEconomyCurrencies(text); });
+    currencies.label = "Money";
+    economy_->add<luna::engine::TextField>(Rect{left, box.y + 32, width, 11}, "Prices", sim::formatPairs(level_.economy.prices), 90, [this](const std::string& text) { setEconomyPrices(text); });
+    economy_->add<luna::engine::TextField>(Rect{left, box.y + 46, width, 11}, "Goods", sim::formatPairs(level_.economy.resources), 90, [this](const std::string& text) { setEconomyResources(text); });
+    economy_->add<luna::engine::TextField>(Rect{left, box.y + 60, width, 11}, "Places", placesText(level_.places), 120, [this](const std::string& text) { setPlaces(text); });
+    economy_->add<Button>(Rect{left, box.y + 78, 52, 14}, "Close", [this] { showEconomy(false); });
 }
 
 std::vector<std::filesystem::path> Editor::levelFiles() const {
@@ -1104,6 +1376,7 @@ void Editor::replaceLevel(Level level, std::filesystem::path file, const std::st
     selected_.reset();
     buildProperties();
     settingsStale_ = true;
+    economyStale_ = true;
     centreX_ = level_.heroStart.x;
     centreY_ = level_.heroStart.y;
     levelChanged();
@@ -1274,7 +1547,7 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     effectPalette_->visible = tool_ == EditorTool::Effect;
     lightPalette_->visible = tool_ == EditorTool::Light;
     characterPalette_->visible = !paints(tool_) && tool_ != EditorTool::Weapon && tool_ != EditorTool::Plant && tool_ != EditorTool::Effect && tool_ != EditorTool::Light;
-    if (propertiesStale_ && !properties_->typing() && !npcPanel_->typing()) {
+    if (propertiesStale_ && !properties_->typing() && !npcPanel_->typing() && !npcTrade_->typing()) {
         select(selected_); // show the character's values again (after an undo, or a change elsewhere)
     }
     // A question about unsaved changes, or the list of levels, takes all input until answered.
@@ -1290,11 +1563,14 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     if (settingsStale_ && !settings_->typing()) {
         buildSettings(); // show the level's values again (after an undo, a resize, another level)
     }
+    if (economyStale_ && !economy_->typing()) buildEconomy();
+    economy_->visible = economyShown_;
     if (classesStale_ && !classes_->typing()) buildClassPanel();
     classes_->visible = classesShown_;
     settings_->visible = settingsShown_;
     properties_->visible = propertiesFor_ >= 0 && selected_.has_value() && !settingsShown_;
     npcPanel_->visible = npcPanel_->visible && properties_->visible && !classesShown_;
+    npcTrade_->visible = npcPanel_->visible;
     // The time-of-day slider (US-247): press on it and drag; the hour follows the pointer until the button is let go.
     bool onSlider = false;
     if (previewHour_) {
@@ -1308,10 +1584,11 @@ bool Editor::handlePanels(const luna::engine::UiInput& input) {
     }
     const bool onToolbar = toolbar_->handle(input) || onSlider;
     const bool onPalette = palette_->handle(input) || characterPalette_->handle(input) || weaponPalette_->handle(input) || plantPalette_->handle(input) || effectPalette_->handle(input) || lightPalette_->handle(input);
-    const bool onProperties = properties_->handle(input) || npcPanel_->handle(input);
+    const bool onProperties = properties_->handle(input) || npcPanel_->handle(input) || npcTrade_->handle(input);
     const bool onSettings = settings_->handle(input);
     const bool onClasses = classes_->handle(input);
-    return onToolbar || onPalette || onProperties || onSettings || onClasses;
+    const bool onEconomy = economy_->handle(input);
+    return onToolbar || onPalette || onProperties || onSettings || onClasses || onEconomy;
 }
 
 void Editor::usePlaceOrSelect(const luna::engine::Pointer& pointer, bool pressed, bool held, bool released) {
@@ -1595,7 +1872,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     const luna::engine::UiInput input = luna::engine::UiInput::from(intents);
     const bool overPanel = handlePanels(input);
-    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || settings_->typing() || classes_->typing();
+    const bool typing = toolbar_->typing() || palette_->typing() || properties_->typing() || npcPanel_->typing() || npcTrade_->typing() || settings_->typing() || classes_->typing() || economy_->typing();
     if (!typing) {
         if (intents.pressed(Intent::Undo)) undo();
         if (intents.pressed(Intent::Redo)) redo();
@@ -1828,7 +2105,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
     }
     properties_->draw(painter);
     npcPanel_->draw(painter);
+    npcTrade_->draw(painter);
     settings_->draw(painter);
+    economy_->draw(painter);
     classes_->draw(painter);
     // The status line: tool, what it uses, cell, and the last thing done.
     std::string what;
@@ -1877,7 +2156,9 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         lightPalette_->drawOverlay(painter);
         properties_->drawOverlay(painter);
         npcPanel_->drawOverlay(painter);
+        npcTrade_->drawOverlay(painter);
         settings_->drawOverlay(painter);
+        economy_->drawOverlay(painter);
         classes_->drawOverlay(painter);
     }
     // Dialogs last, over everything, with the world dimmed behind them.

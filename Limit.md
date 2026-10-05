@@ -1,5 +1,27 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-05, X-M9bc):** X-M9b and X-M9c DONE (Milestone-115.md, AP-116): one verify green, Debug and Release 27/27. Soak skipped by owner. Next: merge qa into main, tags m9b-done and m9c-done, CI on main.
+
+**Resume update (2026-10-05, US-294):** S-US-294 DONE (Milestone-114.md, AP-115), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: X-M9bc: the one full verify of M9b and M9c (verify.ps1 -Story X-M9bc -Config Both), fix, gates, merge into main, tags, CI.
+
+**Resume update (2026-10-05, US-293):** S-US-293 DONE (Milestone-113.md, AP-114), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.
+
+**Resume update (2026-10-05, US-292):** S-US-292 DONE (Milestone-112.md, AP-113), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-293 (default interactions by partner type: defaults files, animals, environment), US-294 (living test level and the 100,000-person 30-day soak), then the one full verify X-M9bc.
+
+**Resume update (2026-10-05, US-291):** S-US-291 DONE (Milestone-111.md, AP-112), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-292 (NPCs act on each other: talk, trade, gift, fight, confront; far persons by a daily roll), US-293 (partner defaults), US-294 (living test level and the 100,000-person 30-day soak), then the one full verify X-M9bc.
+
+**Resume update (2026-10-05, US-290):** S-US-290 DONE (Milestone-110.md, AP-111), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-291 (action sources: class, custom, event actions; no quest hook, D-54 Q11), US-292, US-293, US-294, then X-M9bc.
+
+**Resume update (2026-10-05, US-284):** S-US-284 DONE (Milestone-109.md, AP-110), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: K-M9c (kickoff notes already in D-54), then US-290 (schedules), US-291 (action sources), US-292 (NPCs act on each other), US-293 (partner defaults), US-294 (living test level, 100,000-person 30-day soak), then the one full verify X-M9bc.
+
+**Resume update (2026-10-05, US-283):** S-US-283 DONE (Milestone-108.md, AP-109), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-284 (Editor trade panel, the test level trader and wary hunter, the walk-through), then K-M9c and US-290..US-294, then the one full verify X-M9bc.
+
+**Resume update (2026-10-05, US-282):** S-US-282 DONE (Milestone-107.md, AP-108), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-283 (the trade screen for any trader, barter and currency, Haggle), US-284 (Editor trade panel), then K-M9c and US-290..US-294, then X-M9bc.
+
+**Resume update (2026-10-05, US-281):** S-US-281 DONE (Milestone-106.md, AP-107), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: US-282 (prices from base x stock curve x drift, reputation, gates), US-283 (the trade screen), US-284 (Editor trade panel), then K-M9c and US-290..US-294, then X-M9bc.
+
+**Resume update (2026-10-05, US-280):** S-US-280 DONE (Milestone-105.md, AP-106), written without running tests (owner rule: one full verify at X-M9bc after M9b and M9c). Next: S-US-281 (trader stock, restock, wants), then US-282..US-284, K-M9c, US-290..US-294 and X-M9bc.
+
 **Resume update (2026-10-05, X-M9a):** X-M9a DONE (Milestone-104.md, AP-105), main tagged m9a-done. Owner still to do: GPU screenshots (docs/gates/M9a.md row 7). Next: K-M9b, which asks the owner the open M9b questions in one chat round, then US-280..284.
 
 **Resume update (2026-10-04, US-270):** S-US-270 DONE (Milestone-103.md, AP-104). Next: X-M9a (the one full verify for M9a).

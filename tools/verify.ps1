@@ -41,7 +41,7 @@ foreach ($config in $configs) {
 
 foreach ($config in $configs) {
     $log = Join-Path $logs "ctest-$config.log"
-    ctest --preset "windows-x64-$config" --timeout 600 *> $log
+    ctest --preset "windows-x64-$config" --timeout 600 -LE soak *> $log
     $result = $LASTEXITCODE
     Write-Output "ctest $config exit $result"
     Get-Content $log | Select-String 'tests passed|\*\*\*' | ForEach-Object { '  ' + $_.Line.Trim() }

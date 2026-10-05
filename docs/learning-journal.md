@@ -1624,3 +1624,206 @@ The level file itself was written by the game's own `saveLevel` (not by hand), w
 **Try it (15 minutes).** Misspell a class in `npc-test.json` (`"traderr"`) and run the first test: the message names the NPC and the class.
 
 **Check yourself.** Why is the byte-for-byte round trip a stronger check than loading the file and looking at a few fields?
+
+## US-280 Currencies per region: why money is an integer
+
+**What we built.** A region can say which items are money (`shells=1`), what the market asks for goods and which goods it delivers. The owner edits it in the Editor's Economy panel; the level file keeps it.
+
+**The C++ idea: value types and whole-number money.** `RegionEconomy` is a *value type*: a plain struct you can copy, compare and store with no pointers and no owners to worry about. `friend bool operator==(const RegionEconomy&, const RegionEconomy&) = default;` asks the compiler to write the comparison for us, which is how the test checks that a level written and read back is the same:
+
+```cpp
+CHECK(reread.economy == editor.level().economy);
+```
+
+Money is an `int` of value units, never a `double`. Computers store 0.1 in binary as a number that is very slightly wrong, and when thousands of trades add up (and when two computers must agree on the same save file, the determinism rule) those tiny errors show. With whole numbers, `3 + 4` is always exactly `7`. The one place where whole numbers need care is division: `makeChange(13)` with a 5-value coin gives two coins and a *remainder* of 3, and the code keeps that remainder instead of rounding it away, so nothing is ever lost.
+
+**Where to look.** `src/sim/economy.h`, `src/sim/economy.cpp`, `tests/sim/economy_test.cpp`, `tests/game/economy_editor_test.cpp`, and the Economy panel in `src/game/editor.cpp` (`buildEconomy`).
+
+**Try it (15 minutes).** In `economy_test.cpp` change the coarse coin to value 4 and the amount to 13: predict the coins and the remainder before you run the test.
+
+**Check yourself.** Why does `parsePairs` sort its output (a `std::map`) instead of keeping the order you typed?
+
+## US-281 Trader stock: integer arithmetic and the rules written down
+
+**What we built.** A trader (any NPC with a `trade` profile) has a limited stock, gets a delivery every day, wants some goods more than others, and the stock is saved.
+
+**The C++ idea: integer arithmetic with rounding rules written down.** Computers divide whole numbers by throwing the remainder away: `7 / 2` is `3`. That is fine as long as you decide it on purpose and write it down. Here, the cap of a good is `max(start * capFactor, minimumCap)`, and a restock adds `clamp(count, 0, room)` where `room = cap - stock`; `std::clamp` keeps a number inside two limits, so a delivery can never push the shelf past the cap:
+
+```cpp
+const int room = cap(id, item) - stock(id, item);
+const int added = std::clamp(count, 0, std::max(0, room));
+```
+
+The random picks use a *seeded* generator. `core::Pcg32 random(seed + day * K, id * 2 + 1)` is created fresh for each (world seed, day, trader), so a day always brings the same goods whenever and wherever it is computed: the far trader and the near one, today or after loading a save. There is no global random state to get out of step.
+
+**Where to look.** `src/sim/trade_market.cpp` (`deliver`, `dailyUpdate`), `src/sim/npc_extras.cpp` (reading and merging the profile), `tests/sim/trade_market_test.cpp`, `tests/game/trade_stock_test.cpp`.
+
+**Try it (15 minutes).** In `trade_market_test.cpp` change `catchUpDays` expectations: set `PriceConfig::catchUpDays` to 3 and predict how much fur a trader has after `dailyUpdate(100)`.
+
+**Check yourself.** Why does `addTrader` for an id that already exists keep its stock but take the new profile?
+
+## US-282 Supply and demand: fixed-point formulas, clamping, tuning through data
+
+**What we built.** The price of a good now follows how much of it the trader has (scarce means dear), each trade nudges it, and the trader's feelings for the hero decide a final discount or surcharge. All the numbers live in `assets/data/sim/trade.json`.
+
+**The C++ idea: fixed-point arithmetic and clamping.** There is no `double` anywhere. A price is kept in *thousandths* of a unit in a `long long`, and every percent is a whole number multiplied in before one division at the end, so the rounding happens once:
+
+```cpp
+const long long numerator = 1000LL * base * ratioPercent * (100 + drift) * (100 + reputation);
+return (numerator + 500000) / 1000000;   // + half the divisor: rounds half up
+```
+
+Adding half of the divisor before dividing turns "throw the rest away" into "round to nearest". `std::clamp(value, low, high)` keeps the stock ratio between 50 and 200 so a nearly empty shelf cannot make a price explode. And because the limits and percents are *data*, the owner can change the feel of the economy by editing a JSON file, with no recompile.
+
+**Where to look.** `src/sim/trade_market.cpp` (`marketMilli`, `heroPaysMilli`, `rareUnlocked`), `docs/adr/ADR-023-trade-prices.md`, `tests/sim/trade_price_test.cpp`.
+
+**Try it (15 minutes).** In `trade.json` set `"maxPercent": 400` under `curve` and, in `trade_price_test.cpp`, predict the new price of flint at stock 2 before running the test.
+
+**Check yourself.** Why do we multiply by 1000 first and divide last, rather than dividing after each percent?
+
+## US-283 The trade screen: one screen, two kinds of trader (std::variant)
+
+**What we built.** One trade screen that works for a rival camp *and* for any NPC with goods, with barter, the region's money, a live balance bar and a Haggle button.
+
+**The C++ idea: `std::variant` for "one of several kinds".** A trader is *either* a rival camp (known by its number) *or* a placed NPC (known by its id). Two different things, one slot. `std::variant` holds exactly one of a fixed list of types and always knows which:
+
+```cpp
+struct RivalTrader { int index = 0; };
+struct NpcTrader   { int placedId = 0; };
+using TraderRef = std::variant<RivalTrader, NpcTrader>;
+```
+
+The screen asks which one it has with `std::holds_alternative<NpcTrader>(trader_)` or reads it with `std::get_if<NpcTrader>(&trader_)` (a pointer that is null when it is the other kind). Compared with a base class and virtual functions, a variant has no heap, no pointers and cannot hold a kind nobody listed, so adding a third kind of trader later makes every place that must know about it easy to find. The old call `openBarter(3)` still works because a plain overload turns the number into a `RivalTrader`.
+
+**Where to look.** `src/game/run_flow.h` (`TraderRef`), `RunFlow::buildTrade` and `actTrade` in `src/game/run_flow.cpp`, the deal rules in `src/sim/trade_market.cpp` (`quote`, `execute`), `tests/game/trade_screen_test.cpp`.
+
+**Try it (15 minutes).** Add a third struct, `struct CaravanTrader { int id; };`, to the variant and read the compiler's errors: each place that handles the kinds is listed for you.
+
+**Check yourself.** Why does `execute` call `quote` first instead of checking the pieces again by itself?
+
+## US-284 Editor trade panel: text fields bound to maps
+
+**What we built.** The Editor can now set a trader's stock, daily restock, weighted deliveries, wants and rare goods in the NPC panel, the Class panel and the Kinds tab, and the test level has a trader (Tala) and a wary hunter (Harn) set up with it.
+
+**The C++ idea: a table widget bound to a map.** A trader's stock is a `std::map<std::string, int>`: item name to count. The Editor shows it as one line of text, `fur=3 flint=0`, and reads it back. Two small functions do all the work, and the test checks they are inverses (what you write is what you read):
+
+```cpp
+std::string formatPairs(const ItemCounts& pairs);                  // map  -> "flint=0 fur=3"
+std::optional<ItemCounts> parsePairs(std::string_view text, ...);  // text -> map, or nothing
+```
+
+`std::optional` says "a value, or nothing" without exceptions: a mistake in the text gives *nothing*, the Editor says why, and the map is untouched, so a typo can never half-change a trader. Because a `std::map` keeps its keys sorted, the written text is the same whatever order you typed: `fur=3 flint=0` is saved and shown as `flint=0 fur=3`. And every edit goes through the same `changeSelectedNpc` that makes one step of Undo, so the Editor never has a second way to change the level.
+
+**Where to look.** `Editor::setSelectedTrade` and `addTradeRows` in `src/game/editor.cpp`, `setTradeField` in `src/sim/npc_extras.cpp`, `tests/game/trade_editor_test.cpp`.
+
+**Try it (15 minutes).** In the Editor select Tala, type `fur=3 flint=` into **Stock** and read the status line; then type `flint=0 fur=3` and press Ctrl+Z.
+
+**Check yourself.** Why does the Trade section of the NPC panel show only the NPC's own values, and not what it inherits from its class?
+
+## US-290 Day and night schedules: a state machine over time, with interruptions
+
+**What we built.** Every NPC can have a daily schedule (`06:00 work at the market, 21:00 sleep at home`), with a night variant. Near the hero people follow it hour by hour; far away they follow it once a day. Hunger and danger interrupt it, and afterwards the person simply goes back to what the schedule says.
+
+**The C++ idea: a time-based state machine.** A person is always in exactly one *mode*: `Scheduled`, `Eating`, `Fleeing`, `Fighting` or `Dead`. An `enum class` names them, and the director moves each person between modes once an hour:
+
+```cpp
+enum class Mode : std::uint8_t { Scheduled, Eating, Fleeing, Fighting, Dead };
+```
+
+The trick that makes *resuming* easy is that the schedule is **not remembered**: nobody stores "I was going to the market". Each hour the person asks "what does my schedule say for this hour?" (`activeBlock(schedule, minute, night)`) and goes there. When the interruption (hunger, danger) is over, the mode is simply `Scheduled` again and the next hour's question gives the right answer. State that can be *recomputed* never goes out of date; that is why interruptions cost a few lines.
+
+The other idea is cost. Looking at 100,000 people every tick would be far too slow, so the persons far from the hero are visited in *slices*: person *i* only at the tick of the day that is *i modulo the length of the day*. Every person is visited exactly once a day, and a tick touches about 100,000 / 2,400 = 42 of them.
+
+**Where to look.** `src/sim/npc_director.cpp` (`stepNear`, `stepFar`, `farSlice`), `src/sim/npc_schedule.cpp` (`activeBlock`), `tests/sim/npc_schedule_test.cpp` (Follow, Interrupt, Danger, Far).
+
+**Try it (15 minutes).** In `npc_schedule_test.cpp` change the hunger set in the Interrupt test from 5 to 35 and predict whether the NPC still goes home to eat; then run the test.
+
+**Check yourself.** Why is it safe that a person who is hungry at 10:00 and a person who is not both read the same schedule at 11:00?
+
+## US-291 Action sources: strategy objects as extension points
+
+**What we built.** An NPC that is free (idle, or on duty at work) now picks something to do from three places: the actions of its class, its own custom actions, and the events of the world (a fire starts: go and help). It scores each option with the same interaction files the hero uses, and does the best one.
+
+**The C++ idea: strategy objects.** The chooser must not know *where* options come from, or adding the quests of M10 would mean editing it. So each source is a small class with one function, and the chooser only walks a list of them:
+
+```cpp
+class ActionSource {
+public:
+    virtual ~ActionSource() = default;
+    virtual void collect(const SourceContext& context, std::vector<ActionCandidate>& out) const = 0;
+};
+
+ActionSources sources = ActionSources::standard();   // class, custom, event
+auto candidates = sources.collect(context);
+```
+
+`= 0` makes `collect` *pure virtual*: `ActionSource` cannot be built on its own, only its children can, and each child (`ClassActionSource`, `CustomActionSource`, `EventActionSource`) says what it offers. The list holds `std::unique_ptr<ActionSource>`, so the list owns them and they are destroyed with it. A quest source is one new class and one `add(...)` line: that is what *extension point* means. The test `US-291 Sources` pins the list at three, so a quest source cannot appear by accident before M10 decides its schema.
+
+**Where to look.** `src/sim/npc_actions.h` (the sources), `NpcDirector::chooseAction` in `src/sim/npc_director.cpp`, `tests/sim/npc_actions_test.cpp`.
+
+**Try it (15 minutes).** Write a fourth source `class WeatherActionSource` that offers `"shelter"` when it rains, add it with `sources.add(...)` in a test, and see the candidate appear without touching any other file.
+
+**Check yourself.** Why does `ActionSources` hold `unique_ptr<ActionSource>` rather than `ActionSource` objects directly?
+
+## US-292 NPCs act on each other: symmetric actor and target, and a budget per tick
+
+**What we built.** The same interaction files the hero uses now also work with a person as the actor and another person as the target: two traders swap goods, friends give gifts, two enemies fight and one can die. Far from the hero it all happens once a day by a seeded roll, with the same effects and nothing to draw.
+
+**The C++ idea: a symmetric actor and target.** The hero's interaction only ever had `actor = hero`. The trick of this story is that nothing in the *files* changed shape: `"actors": ["npc"]` and a target tagged `npc` are enough, because the matching code (`InteractionRegistry::offered`) only compares tags, and the rule language reaches the two sides through one interface:
+
+```cpp
+class RuleContext {                       // sim/rule_expr.h
+    virtual Value path(const std::string& dotted) const = 0;
+    virtual Value call(const std::string& name, const std::vector<Value>& args) const = 0;
+};
+class NpcRuleContext final : public rules::RuleContext { ... };   // facts about two persons
+```
+
+The game answers `opinion(npc, hero)` over the hero, `NpcRuleContext` answers `opinion(actor, target)` over two persons; the expression evaluator cannot tell the difference. Changing *who acts* meant adding one class, not rewriting the rules.
+
+The second idea is the **budget per tick**. 100,000 persons cannot all look for a partner on every tick. Three rules keep the cost flat: only persons near the hero act each hour, and at most `maxPerHour` of them (the turn goes round, so nobody starves); a far person is visited once a day in a slice of the day fixed by its index; and the partner is found by looking at a few places of one grid cell (`NpcPopulation::neighbour`), never by scanning everybody. Work per tick is a constant, whatever the size of the crowd.
+
+**Where to look.** `NpcDirector::chooseAction`, `collectPartnerOptions`, `doFight` in `src/sim/npc_director.cpp`; `src/sim/npc_context.cpp`; `tests/sim/npc_interact_test.cpp`.
+
+**Try it (15 minutes).** In `npc_interact_test.cpp` make Brek stronger (`setCombat(b, 200, 10)` in the Fight test) and predict who dies.
+
+**Check yourself.** Why does a far fight use `farFightRounds` in one go, but a near fight only `fightRoundsPerHour` a visit?
+
+## US-293 Default interactions by partner type: data-driven enumerations
+
+**What we built.** Every kind of partner an NPC can meet (the player, animals, the environment, each NPC class) now has default actions that come from data, and the *list of kinds itself* is data: add the word `buildings` to a JSON file and the Editor offers defaults for buildings.
+
+**The C++ idea: a data-driven enumeration.** An `enum class` (like `Attitude` or `Mode`) is fixed when the program is compiled: adding a value means editing code and rebuilding. That is right for things the program must switch on. But the owner wants to *extend* the list of partner types without a programmer, so it cannot be an `enum`. It is a list of words read from a file, with one function that says whether a word is valid:
+
+```cpp
+void setPartnerTypes(const std::vector<std::string>& types);   // the file's list, plus the three built-in ones
+bool validPartnerType(const std::string& type);                // registered, or class:<id>
+```
+
+The price of leaving the compiler's safety net is that *we* must check: every reader of a data file calls `validPartnerType` and names the file and field when a word is wrong (`unknown partner type "robot"`), and the tests pin each case. The rule of thumb: use an `enum class` when code branches on the value, a list from data when only the owner gives it meaning. The same file also shows layering: the defaults are the lowest layer, and each layer above it replaces the list for a type with `partnerActions[type] = ids`: a `std::map` makes "replace this key" one line.
+
+**Where to look.** `src/sim/partner_types.cpp`, `NpcExtras::partnerActions` in `src/sim/npc_extras.cpp`, `DefaultActionSource` in `src/sim/npc_actions.cpp`, `tests/sim/npc_defaults_test.cpp`.
+
+**Try it (15 minutes).** Copy `assets/data/sim/partner-types.json`, add `"ghosts"`, start the game with that data folder and look for `Defaults with: ghosts` in the NPC panel.
+
+**Check yourself.** Why is `class` refused as a partner type while `class:guard` is always allowed?
+
+## US-294 Living test level: soak tests and what they catch
+
+**What we built.** The test level now shows a whole day of life (schedules, a swap, a chat, a hunt) and a headless **soak test**: 100,000 persons live 30 days, twice, and the two runs must end with the same saved state.
+
+**The C++ idea: soak tests.** A unit test checks one small thing for a moment. A *soak* test runs a lot of the system for a long time, and looks for the faults that only grow slowly: a counter that overflows after a million steps, a list that never gets emptied (see the `takeEvents()` call in the soak: the game drains the events, so the soak must too), a cache that grows without end, a tick that gets slower every day, and the worst one for us: **non-determinism** that hides for a day or two. Our check is simple: run the same world twice and compare one number, the hash of everything that would be saved. If anything depended on a pointer address, the order of an `unordered_map`, the clock or uninitialised memory, the numbers differ and the test fails; AddressSanitizer in Debug adds a check for memory that was never set.
+
+```cpp
+const Soak first = run(100000, 30, 7);
+const Soak second = run(100000, 30, 7);
+CHECK(first.saveHash == second.saveHash);
+```
+
+Two details worth learning. First, a second test runs with *another seed* and expects a *different* hash: a check that can never fail proves nothing, so we also prove that it can. Second, timing is only checked in Release (`#ifdef NDEBUG`): Debug is meant for finding mistakes, not for speed, and a speed rule there would only fail for the wrong reason.
+
+**Where to look.** `tests/sim/npc_soak_test.cpp` (the soak), `tests/game/living_level_test.cpp` (the day), `assets/levels/npc-test.json`.
+
+**Try it (15 minutes).** In `npc_soak_test.cpp` change `run(100000, 30, 7)` to `run(100000, 3, 7)` and see how much faster it is; then add a `rand()` call somewhere in the director on a scratch copy and watch the two hashes differ.
+
+**Check yourself.** Why does the soak call `director.takeEvents()` now and then, and what would the real game do with them?
