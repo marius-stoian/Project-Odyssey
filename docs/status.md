@@ -17,6 +17,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | P-010 | - | - | Done | 2026-10-01 |
 | P-011 | - | - | Done | 2026-10-01 |
 | P-012 | - | - | Done | 2026-10-04 |
+| P-013 | - | - | Done | 2026-10-05 |
 | K-M0 | - | M0 | Done | 2026-09-29 |
 | S-US-001 | US-001 | M0 | Done | 2026-09-29 |
 | S-US-002 | US-002 | M0 | Done | 2026-09-29 |
@@ -200,6 +201,14 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-187 | US-187 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | S-US-185 | US-185 | M10 | Done | 2026-10-05; Debug build zero warnings, own cases pass; full verify at X-M10 |
 | X-M10 | - | M10 | Done | docs/gates/M10.md; Debug and Release 27/27, zero warnings |
+| K-M10b | - | M10b | To do |  |
+| S-US-300 | US-300 | M10b | To do |  |
+| S-US-301 | US-301 | M10b | To do |  |
+| S-US-302 | US-302 | M10b | To do |  |
+| S-US-303 | US-303 | M10b | To do |  |
+| S-US-304 | US-304 | M10b | To do |  |
+| S-US-305 | US-305 | M10b | To do |  |
+| X-M10b | - | M10b | To do |  |
 | K-M11 | - | M11 | To do |  |
 | S-US-190 | US-190 | M11 | To do |  |
 | S-US-191 | US-191 | M11 | To do |  |
