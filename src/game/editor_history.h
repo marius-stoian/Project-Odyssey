@@ -171,7 +171,6 @@ public:
     bool undo(Level& level);
     bool redo(Level& level);
     bool canUndo() const { return !done_.empty(); }
-    bool canRedo() const { return !undone_.empty(); }
     std::size_t size() const { return done_.size(); }
     void clear();
 

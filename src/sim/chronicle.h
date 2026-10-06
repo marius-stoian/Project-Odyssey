@@ -61,8 +61,6 @@ enum class EventKind {
     Count
 };
 
-const char* eventKindName(EventKind kind);
-
 // "Tok", "Tok and Brak", "Tok, Brak and Ura".
 std::string joinNames(const std::vector<std::string>& names);
 

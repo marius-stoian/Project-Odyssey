@@ -1,5 +1,6 @@
 #include "game/level.h"
 
+#include "core/text.h"
 #include "game/lighting.h"
 #include "game/tags.h"
 #include "sim/building_data.h"
@@ -14,7 +15,6 @@
 
 #include <algorithm>
 #include <format>
-#include <fstream>
 #include <stdexcept>
 #include <system_error>
 
@@ -647,6 +647,10 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.targets.push_back(point(data.at("targets").at(i), file, std::format("targets[{}]", i), level));
         }
     }
+    if (data.contains("rules")) { // level version 7 (US-195)
+        if (!data.at("rules").is_string()) throw DataError(file, "rules", "must be the name of a file of assets/data/rules/ in quotes");
+        level.rules = data.at("rules").get<std::string>();
+    }
     if (data.contains("economy")) level.economy = sim::economyFromJson(data.at("economy"), file, "economy"); // level version 5 (US-280)
     if (data.contains("places")) { // level version 5 (US-290)
         if (!data.at("places").is_array()) throw DataError(file, "places", "must be a list");
@@ -792,6 +796,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
         data["buildings"] = buildings;
     }
     if (level.clan) data["clan"] = true;
+    if (!level.rules.empty()) data["rules"] = level.rules;
     if (!level.economy.empty()) data["economy"] = sim::economyToJson(level.economy); // only when the owner set something, so older levels save as they were
     if (!level.places.empty()) {
         json places = json::array();
@@ -802,23 +807,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
         }
         data["places"] = places;
     }
-    fs::create_directories(file.parent_path());
-    const fs::path temporary = fs::path(file.string() + ".tmp");
-    {
-        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
-        if (!out) throw DataError(temporary, "(file)", "cannot be written");
-        out << data.dump(1) << '\n';
-        out.flush();
-        if (!out) throw DataError(temporary, "(file)", "could not be written completely (is the disk full?)");
-    }
-    auto backup = [&](int number) { return fs::path(file.string() + ".bak" + std::to_string(number)); };
-    std::error_code ignored;
-    fs::remove(backup(kLevelBackups), ignored);
-    for (int number = kLevelBackups - 1; number >= 1; --number) {
-        if (fs::exists(backup(number))) fs::rename(backup(number), backup(number + 1));
-    }
-    if (fs::exists(file)) fs::rename(file, backup(1));
-    fs::rename(temporary, file);
+    if (const auto problem = core::writeTextFileSafely(file, data.dump(1) + '\n', kLevelBackups)) throw DataError(file, "(file)", *problem);
 }
 
 } // namespace odysseus::game

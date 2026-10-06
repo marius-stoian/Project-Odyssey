@@ -63,7 +63,8 @@ add_library(odysseus_core STATIC
     src/core/log.cpp
     src/core/assertions.cpp
     src/core/presentation.cpp
-    src/core/random.cpp)
+    src/core/random.cpp
+    src/core/text.cpp)
 odysseus_register_layer(odysseus_core core core)
 target_compile_definitions(odysseus_core PRIVATE ODYSSEUS_VERSION="${PROJECT_VERSION}")
 odysseus_apply_settings(odysseus_core)
@@ -178,6 +179,15 @@ add_library(odysseus_sim STATIC
     src/sim/calendar.cpp
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
+    src/sim/json_text.cpp
+    src/sim/json_patch.cpp
+    src/sim/data_document.cpp
+    src/sim/data_form.cpp
+    src/sim/data_refs.cpp
+    src/sim/quick_check.cpp
+    src/sim/play_rules.cpp
+    src/sim/schema.cpp
+    src/sim/schema_index.cpp
     src/sim/rule_json.cpp
     src/sim/rule_expr.cpp
     src/sim/rule_effect.cpp
@@ -295,10 +305,14 @@ add_library(odysseus_game STATIC
     src/game/editor_history.cpp
     src/game/dialogue_graph.cpp
     src/game/graph_editor.cpp
+    src/game/data_editor.cpp
+    src/game/timeline_view.cpp
+    src/game/atlas_cuts.cpp
+    src/game/picture_tool.cpp
     src/game/interaction_graph.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
-# PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
-target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
+# PUBLIC since the Data tab (US-191): the Editor's header holds a data document, which is JSON, so the programs that include the Editor need the library's headers.
+target_link_libraries(odysseus_game PUBLIC nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
 
@@ -323,6 +337,7 @@ add_executable(odysseus_tests
     tests/core/version_test.cpp
     tests/core/log_test.cpp
     tests/core/presentation_test.cpp
+    tests/core/text_test.cpp
     tests/architecture/layer_rules_test.cpp)
 target_link_libraries(odysseus_tests PRIVATE odysseus_core doctest::doctest)
 target_compile_definitions(odysseus_tests PRIVATE
@@ -495,18 +510,29 @@ add_executable(odysseus_game_tests
     tests/game/thing_overrides_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
-    tests/game/building_editor_test.cpp)
-target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
+    tests/game/building_editor_test.cpp
+    tests/game/schema_game_test.cpp
+    tests/game/data_editor_test.cpp
+    tests/game/picture_tool_test.cpp
+    tests/game/live_catalog_test.cpp)
+target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
-# The game tests are split into three runs so CTest can run them side by side (CI uses -j 4). The
-# files in A and B are named; C runs every other file, so a new test file is never left out.
-set(ODYSSEUS_SHARD_A "*aiming_test.cpp,*weapons_test.cpp,*combat_test.cpp")
-set(ODYSSEUS_SHARD_B "*plants_test.cpp,*ranged_test.cpp,*elements_test.cpp,*settings_test.cpp")
-add_test(NAME odysseus_game_tests_a COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_A}")
-add_test(NAME odysseus_game_tests_b COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_B}")
-add_test(NAME odysseus_game_tests_c COMMAND odysseus_game_tests "--source-file-exclude=${ODYSSEUS_SHARD_A},${ODYSSEUS_SHARD_B}")
+# The game tests are split into six runs so CTest can run them side by side (CI and verify.ps1 use -j). A to E name their files (balanced by
+# measured time, about two to three minutes each in Debug); F runs every other file, so a new test file is never left out. "*game?" anchors
+# the name at the folder, so level_test.cpp does not also pick living_level_test.cpp.
+set(ODYSSEUS_SHARD_A "*game?aiming_test.cpp,*game?weapons_test.cpp,*game?combat_test.cpp")
+set(ODYSSEUS_SHARD_B "*game?plants_test.cpp,*game?ranged_test.cpp,*game?elements_test.cpp,*game?settings_test.cpp")
+set(ODYSSEUS_SHARD_C "*game?shadow_test.cpp,*game?pickups_test.cpp,*game?world_lights_test.cpp,*game?paint_test.cpp,*game?celestial_test.cpp,*game?trade_editor_test.cpp,*game?thing_overrides_test.cpp,*game?lighting_editor_test.cpp,*game?npc_kind_test.cpp,*game?clan_test.cpp,*game?npc_class_editor_test.cpp,*game?npc_test_level_test.cpp,*game?arc_test.cpp,*game?interactions_test.cpp,*game?quest_graph_test.cpp,*game?presentation_settings_test.cpp,*game?hero_test.cpp,*game?dialogue_graph_test.cpp")
+set(ODYSSEUS_SHARD_D "*game?menu_test.cpp,*game?animals_test.cpp,*game?npc_test.cpp,*game?data_watch_test.cpp,*game?building_life_game_test.cpp,*game?weather_light_test.cpp,*game?trade_stock_test.cpp,*game?modes_test.cpp,*game?exchange_test.cpp,*game?npc_actions_test.cpp,*game?building_editor_test.cpp,*game?trade_gate_test.cpp,*game?npc_attitude_test.cpp,*game?graph_editor_test.cpp,*game?art_test.cpp")
+set(ODYSSEUS_SHARD_E "*game?normals_test.cpp,*game?conversation_test.cpp,*game?weather_test.cpp,*game?renderer_test.cpp,*game?trade_screen_test.cpp,*game?level_test.cpp,*game?schedule_editor_test.cpp,*game?npc_editor_test.cpp,*game?economy_editor_test.cpp,*game?greeting_test.cpp,*game?npc_kinds_tab_test.cpp,*game?npc_defaults_game_test.cpp,*game?living_level_test.cpp,*game?sky_test.cpp,*game?lighting_test.cpp,*game?interaction_graph_test.cpp")
+foreach(_shard A B C D E)
+    string(TOLOWER ${_shard} _name)
+    add_test(NAME odysseus_game_tests_${_name} COMMAND odysseus_game_tests "--source-file=${ODYSSEUS_SHARD_${_shard}}")
+endforeach()
+add_test(NAME odysseus_game_tests_f COMMAND odysseus_game_tests
+    "--source-file-exclude=${ODYSSEUS_SHARD_A},${ODYSSEUS_SHARD_B},${ODYSSEUS_SHARD_C},${ODYSSEUS_SHARD_D},${ODYSSEUS_SHARD_E}")
 
 # --- End-to-end: walk right into the boulder in the real window (US-024) ---
 add_test(NAME "US-024 Walk to the rock"
@@ -563,7 +589,15 @@ add_executable(odysseus_sim_tests
     tests/sim/building_store_test.cpp
     tests/sim/building_life_test.cpp
     tests/sim/graph_check_test.cpp
-    tests/sim/test_play_test.cpp)
+    tests/sim/test_play_test.cpp
+    tests/sim/schema_test.cpp
+    tests/sim/json_patch_test.cpp
+    tests/sim/data_document_test.cpp
+    tests/sim/data_form_test.cpp
+    tests/sim/data_refs_test.cpp
+    tests/sim/quick_check_test.cpp
+    tests/sim/play_rules_test.cpp
+    tests/sim/routine_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

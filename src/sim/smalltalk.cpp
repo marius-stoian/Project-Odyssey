@@ -1,11 +1,11 @@
 #include "sim/smalltalk.h"
 
+#include "core/text.h"
+
 #include "sim/conversation.h"
 #include "sim/rule_json.h"
 
 #include <algorithm>
-#include <cctype>
-#include <fstream>
 #include <format>
 #include <iterator>
 #include <set>
@@ -53,16 +53,6 @@ bool tokenAllowedIn(const std::string& topic, const std::string& token) {
     return false;
 }
 
-std::string lowered(std::string text) {
-    for (char& c : text) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-    return text;
-}
-
-std::string replaceAll(std::string text, const std::string& from, const std::string& to) {
-    for (std::size_t at = text.find(from); at != std::string::npos; at = text.find(from, at + to.size())) text.replace(at, from.size(), to);
-    return text;
-}
-
 } // namespace
 
 const std::vector<std::string>& requiredSmalltalkTopics() {
@@ -87,6 +77,10 @@ std::optional<SmalltalkData> SmalltalkData::parse(std::string_view text, const s
     const JsonParseResult parsed = parseJson(text);
     if (!parsed.value) {
         fail(parsed.errorLine, parsed.error);
+        return std::nullopt;
+    }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(shownName, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
         return std::nullopt;
     }
     const JsonValue& root = *parsed.value;
@@ -169,13 +163,12 @@ std::optional<SmalltalkData> SmalltalkData::parse(std::string_view text, const s
 }
 
 std::optional<SmalltalkData> SmalltalkData::load(const std::filesystem::path& file, const std::string& shownName, LoadReport& report) {
-    std::ifstream in(file, std::ios::binary);
-    if (!in) {
+    const std::optional<std::string> text = core::readTextFile(file);
+    if (!text) {
         report.errors.push_back({shownName, 0, "the file cannot be read"});
         return std::nullopt;
     }
-    const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
-    return parse(text, shownName, report);
+    return parse(*text, shownName, report);
 }
 
 const std::vector<SmalltalkTemplate>* SmalltalkData::topic(const std::string& name) const {
@@ -330,7 +323,7 @@ std::optional<SaidLine> SmallTalk::say(const World& world, int npc, int hero, co
 
     // The facts of the line.
     std::map<std::string, std::string> tokens;
-    tokens["season"] = lowered(seasonName(world.date().season));
+    tokens["season"] = core::lowered(seasonName(world.date().season));
     tokens["hero"] = hero >= 0 && static_cast<std::size_t>(hero) < world.people().size() ? world.people()[static_cast<std::size_t>(hero)].name : "you";
     tokens["npc"] = person.name;
     tokens["npc.name"] = person.name;
@@ -352,7 +345,7 @@ std::optional<SaidLine> SmallTalk::say(const World& world, int npc, int hero, co
     }
     const auto fill = [&](const SmalltalkTemplate& entry) {
         std::string text = entry.text;
-        for (const auto& [name, value] : tokens) text = replaceAll(text, "{" + name + "}", value);
+        for (const auto& [name, value] : tokens) text = core::replaceAll(text, "{" + name + "}", value);
         return text;
     };
     const std::deque<std::string>& mine = lastByPerson_[npc];

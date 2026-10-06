@@ -1,0 +1,66 @@
+{
+  "title": "assets/data/animals.json",
+  "type": "object",
+  "properties": {
+    "animals": {
+      "type": "array",
+      "description": "Every kind of animal the world can hold",
+      "items": {
+        "type": "object",
+        "description": "One entry of animals",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the kind; levels and rules use it", "example": "grey wolf"},
+          "frame": {
+            "type": "string",
+            "description": "The picture of the content atlas this uses (a frame name)",
+            "example": "grey wolf",
+            "format": "frame"
+          },
+          "hp": {
+            "type": "integer",
+            "description": "Hit points: how much damage it takes to kill one",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": "80"
+          },
+          "enemy": {
+            "type": "boolean",
+            "description": "true: it can be hit and strikes back (predators and boars)",
+            "default": false
+          },
+          "strikeDamage": {
+            "type": "integer",
+            "description": "Damage of one strike back (0 for a harmless animal)",
+            "minimum": 0,
+            "maximum": 1000,
+            "example": "10"
+          },
+          "reach": {
+            "type": "number",
+            "description": "How far its strike back reaches, in metres",
+            "minimum": 0.5,
+            "maximum": 10,
+            "default": 1.5,
+            "example": "1.5"
+          },
+          "height": {
+            "type": "number",
+            "description": "Height in metres, for its shadow",
+            "minimum": 0.1,
+            "maximum": 100,
+            "example": "1.0"
+          },
+          "shadow": {"type": "boolean", "description": "false: casts no shadow"}
+        },
+        "required": ["name", "frame", "hp", "enemy", "strikeDamage", "reach"]
+      }
+    }
+  },
+  "provides": [
+    {"catalog": "animals", "at": "animals[].name"},
+    {"catalog": "characters", "at": "animals[].name"},
+    {"catalog": "kinds", "at": "animals[].name"},
+    {"catalog": "tags", "at": "animals[].tags[]"}
+  ],
+  "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp", "src/game/level.cpp#loadDefinitions"]
+}

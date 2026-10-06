@@ -1,5 +1,7 @@
 #include "sim/npc_context.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -46,9 +48,7 @@ rules::Value NpcRuleContext::call(const std::string& name, const std::vector<rul
     if (name == "need" && args.size() == 1) {
         // How much of a need is missing: 0 (full) to 100 (desperate).
         for (std::size_t n = 0; n < kNeedCount; ++n) {
-            std::string lower = needName(static_cast<Need>(n));
-            std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            if (lower == text(0)) return Value::ofNumber(population_.needsConfig().maximum - population_.need(actorIndex_, static_cast<Need>(n)));
+            if (core::lowered(needName(static_cast<Need>(n))) == text(0)) return Value::ofNumber(population_.needsConfig().maximum - population_.need(actorIndex_, static_cast<Need>(n)));
         }
         return Value::ofNumber(0);
     }

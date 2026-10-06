@@ -1,0 +1,51 @@
+{
+  "title": "assets/data/hero/activities.json",
+  "type": "object",
+  "properties": {
+    "activities": {
+      "type": "array",
+      "description": "The ways to spend a year of youth",
+      "items": {
+        "type": "object",
+        "description": "One entry of activities",
+        "properties": {
+          "id": {"type": "string", "description": "One word: the name of the activity", "example": "hunt"},
+          "name": {"type": "string", "description": "The name shown to the player", "example": "Hunt with the elders"},
+          "text": {
+            "type": "string",
+            "description": "What the player reads about the year",
+            "example": "You follow the hunters into the cold grass before dawn."
+          },
+          "affinity": {
+            "type": "object",
+            "description": "Affinity points the year gives, before the imprint multiplier",
+            "properties": {
+              "hunter": {"type": "integer", "description": "Points for the hunter affinity", "example": "6"},
+              "trade": {"type": "integer", "description": "Points for the trade affinity", "example": "1"},
+              "gatherer": {"type": "integer", "description": "Points for the gatherer affinity", "example": "6"},
+              "knapper": {"type": "integer", "description": "Points for the flint-knapper affinity", "example": "6"},
+              "fireKeeper": {"type": "integer", "description": "Points for the fire-keeper affinity", "example": "6"},
+              "religion": {"type": "integer", "description": "Points for the religion affinity", "example": "4"},
+              "shaman": {"type": "integer", "description": "Points for the shaman-healer affinity", "example": "6"}
+            }
+          },
+          "skill": {
+            "type": "object",
+            "description": "Skill points the year gives, before the imprint multiplier",
+            "properties": {
+              "hunter": {"type": "integer", "description": "Points for the hunter skill", "example": "5"},
+              "gatherer": {"type": "integer", "description": "Points for the gatherer skill", "example": "5"},
+              "knapper": {"type": "integer", "description": "Points for the flint-knapper skill", "example": "5"},
+              "fireKeeper": {"type": "integer", "description": "Points for the fire-keeper skill", "example": "5"},
+              "shaman": {"type": "integer", "description": "Points for the shaman-healer skill", "example": "5"}
+            }
+          }
+        },
+        "required": ["id", "name", "text"]
+      }
+    }
+  },
+  "provides": [{"catalog": "activities", "at": "activities[].id"}],
+  "loaders": ["src/sim/hero_data.cpp#loadHeroData"],
+  "externalFields": ["hunter", "gatherer", "knapper", "fireKeeper", "shaman", "trade", "religion"]
+}

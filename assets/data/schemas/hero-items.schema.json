@@ -1,0 +1,33 @@
+{
+  "title": "assets/data/hero/items.json",
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "Every item in the game",
+      "items": {
+        "type": "object",
+        "description": "One entry of items",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "One word: the name of the item; recipes, trade and rules use it",
+            "example": "flint"
+          },
+          "name": {"type": "string", "description": "The name shown to the player", "example": "Flint"},
+          "kind": {"type": "string", "description": "material, tool, good or food", "example": "material"},
+          "value": {
+            "type": "integer",
+            "description": "What the item is worth in trade",
+            "minimum": 1,
+            "maximum": 10000,
+            "example": "3"
+          }
+        },
+        "required": ["id", "name", "kind", "value"]
+      }
+    }
+  },
+  "provides": [{"catalog": "items", "at": "items[].id"}],
+  "loaders": ["src/sim/hero_data.cpp#loadHeroData"]
+}

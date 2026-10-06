@@ -98,8 +98,6 @@ public:
     };
     // finished: true places it complete (the Editor, rival camps at the start); false places a blueprint.
     Placed place(const std::string& kind, int x, int y, int turns, int faction, bool finished, const Blocked& blocked);
-    // The cells a kind would cover from (x, y) after the turns: every layout cell, for the ghost.
-    std::vector<std::pair<int, int>> footprintCells(const std::string& kind, int x, int y, int turns) const;
     // The pieces a kind would have from (x, y) after the turns, not built yet (the ghost), and the cells among them that would close walking.
     std::vector<PieceState> layoutPieces(const std::string& kind, int x, int y, int turns) const;
     std::vector<std::pair<int, int>> blockingCells(const std::string& kind, int x, int y, int turns) const;

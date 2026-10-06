@@ -1,0 +1,39 @@
+{
+  "title": "assets/data/editor/help.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "example": "1"},
+    "fields": {
+      "type": "object",
+      "description": "One entry per field id: the id is the panel and the label of the field in lower case",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One entry, named by its key",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "description": "What the field is for, shown first in the tooltip",
+            "example": "The level this building's door leads into, when its interior is a map; empty follows the kind"
+          },
+          "range": {
+            "type": "string",
+            "description": "Empty on a number field: made from the field's minimum and maximum",
+            "example": "a level file without .json"
+          },
+          "example": {"type": "string", "description": "An example value, shown in the tooltip", "example": "hut-inside"},
+          "suggest": {
+            "type": "string",
+            "description": "How the field offers values: number, none, values:a|b, files:folder/glob, catalog:name",
+            "example": "catalog:levels"
+          },
+          "list": {
+            "type": "boolean",
+            "description": "Comma separated: the suggestion completes the item after the last comma",
+            "default": false
+          }
+        }
+      }
+    }
+  },
+  "loaders": ["src/game/editor_help.cpp"]
+}

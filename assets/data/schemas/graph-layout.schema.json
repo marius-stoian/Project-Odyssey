@@ -1,0 +1,22 @@
+{
+  "title": "assets/data/<folder>/<file>.layout.json",
+  "type": "object",
+  "required": ["version", "cards"],
+  "properties": {
+    "version": {"type": "integer", "minimum": 1, "maximum": 1, "description": "The version of this file format", "example": "1"},
+    "cards": {
+      "type": "object",
+      "description": "Where each card of the graph editor stands on the canvas, by card id; the editor writes it, a card it does not know is ignored",
+      "additionalProperties": {
+        "type": "array",
+        "description": "The x and y of the card on the canvas",
+        "example": "[61, 5]",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {"type": "number", "description": "One coordinate"}
+      }
+    }
+  },
+  "loaders": ["src/game/dialogue_graph.cpp#layoutFromJson,layoutToJson"],
+  "externalFields": ["version"]
+}

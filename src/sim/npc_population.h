@@ -59,7 +59,6 @@ public:
     bool isNear(int index) const;
     // The persons within the near radius of the focus, in ascending order (empty until the focus is set).
     std::vector<int> nearFocus() const;
-    bool hasFocus() const { return focusSet_; }
     // The indices of every person within `radius` pixels of a point, in ascending order. Costs the cells it touches, not the size of the store.
     std::vector<int> near(int x, int y, int radius) const;
     std::size_t nearCount() const { return nearNow_; } // how many persons had their hour simulated at the last hour mark
@@ -119,7 +118,6 @@ public:
     // A creature (an animal or a monster, US-262) is not a person but has an attitude to the hero like one: it is registered by the id of its placed
     // character with its starting attitude, and then holds opinions of the hero like a person does (US-266). It has no needs, memories or age.
     void addCreature(int id, Attitude attitude) { creatures_[id] = static_cast<std::uint8_t>(attitude); }
-    std::size_t creatureCount() const { return creatures_.size(); }
     // Whether the id is a person or a creature, so it has an opinion of the hero.
     bool hasOpinions(int holderId) const { return indexOf(holderId) >= 0 || creatures_.count(holderId) != 0; }
     // Whether the holder knows the target: they have met, or they are of the same family.

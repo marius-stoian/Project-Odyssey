@@ -238,6 +238,7 @@ public:
     // Empty: no list.
     std::function<std::vector<std::string>(const std::string& typed)> suggest;
     bool listItems = false; // a list of words (separated by commas or spaces): the suggestion completes the word after the last separator and keeps what is before it
+    bool invalid = false;   // the value breaks a rule: the frame is red (a form shows the rule next to it)
 
     bool focused() const { return focused_; }
     bool typing() const override { return focused_; }
@@ -253,6 +254,38 @@ private:
     bool focused_ = false;
     std::string editing_;
     SuggestList list_;
+};
+
+// A line of text that does nothing: the label of a form row, a heading, a note.
+class Label final : public Widget {
+public:
+    Label(Rect bounds, std::string text, UiColor color = UiColor::Dim) : Widget(bounds), text(std::move(text)), color(color) {}
+
+    std::string text;
+    UiColor color;
+
+    void draw(UiPainter& painter) const override;
+};
+
+// A labelled yes or no: a click flips it. It looks like a text field (the label, then a box that says yes or no), so a form lines up.
+class Toggle final : public Widget {
+public:
+    Toggle(Rect bounds, std::string label, bool value, std::function<void(bool)> onChange)
+        : Widget(bounds), label(std::move(label)), value(value), onChange(std::move(onChange)) {}
+
+    std::string label;
+    bool value;
+    std::function<void(bool)> onChange;
+    std::string helpId; // the field's entry in help.json (editor_help); empty: none
+    FieldHint tip;
+    bool invalid = false;
+
+    bool handle(const UiInput& input) override;
+    void draw(UiPainter& painter) const override;
+    void drawOverlay(UiPainter& painter) const override;
+
+private:
+    Rect box() const;
 };
 
 // A background with widgets on it. It owns them (std::unique_ptr): when the panel goes, so do

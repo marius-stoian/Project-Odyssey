@@ -113,16 +113,6 @@ std::vector<PieceState> BuildingStore::makePieces(const std::string& kind, int x
     return pieces;
 }
 
-std::vector<std::pair<int, int>> BuildingStore::footprintCells(const std::string& kind, int x, int y, int turns) const {
-    int w = 1;
-    int h = 1;
-    std::vector<std::pair<int, int>> cells;
-    for (const PieceState& piece : makePieces(kind, x, y, turns, w, h, false)) cells.emplace_back(piece.x, piece.y);
-    std::sort(cells.begin(), cells.end());
-    cells.erase(std::unique(cells.begin(), cells.end()), cells.end());
-    return cells;
-}
-
 std::vector<PieceState> BuildingStore::layoutPieces(const std::string& kind, int x, int y, int turns) const {
     int w = 1;
     int h = 1;

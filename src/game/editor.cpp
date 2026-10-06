@@ -1,4 +1,7 @@
 #include "game/editor.h"
+#include "game/timeline_view.h"
+
+#include "core/text.h"
 
 #include "core/log.h"
 #include "sim/data.h"
@@ -68,6 +71,12 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
     buildingEditor_ = std::make_unique<BuildingEditor>(level_, viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { run(std::move(command)); }, [this](const std::string& message) { say(message); });
     graphEditor_ = std::make_unique<GraphEditor>(viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { history_.record(std::move(command)); }, [this](const std::string& message) { say(message); });
     storyEvents_ = std::make_unique<StoryEventEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
+    dataEditor_ = std::make_unique<DataEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
+    dataEditor_->setOpenInteraction([this](const std::string& id) { // the Interactions button of the Data tab: the interaction graph, on that interaction when there is one
+        dataEditor_->show(false);
+        graphEditor_->showKind(GraphEditor::Kind::Interaction);
+        if (!id.empty()) graphEditor_->open(id);
+    });
     buildPanels();
 }
 
@@ -108,6 +117,7 @@ void Editor::buildPanels() {
     button("Rules", "Interactions: open who may do what to what as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Interaction); });
     button("Events", "Story events: edit the crossroads events of the hero's youth as forms (Esc comes back)", [this] { storyEvents_->show(true); });
     button("Quests", "Quests: open a quest as a graph of steps, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Quest); });
+    button("Data", "Data: open any data file of the game as forms (weapons, plants, needs, rules...), edit it and save it (Esc comes back)", [this] { dataEditor_->show(true); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -184,12 +194,6 @@ void Editor::buildPanels() {
 }
 
 namespace {
-
-std::string joinNames(const std::vector<std::string>& names) {
-    std::string out;
-    for (const std::string& name : names) out += (out.empty() ? "" : ", ") + name;
-    return out;
-}
 
 std::vector<std::string> splitNames(const std::string& text) {
     std::vector<std::string> out;
@@ -342,16 +346,16 @@ void Editor::buildClassPanel() {
     });
     icon.hint = "Click: the next icon of the built-in set";
     y += 14;
-    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(classDraft_.tags), 60, [this](const std::string& v) { classDraft_.tags = splitNames(v); });
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", core::joined(classDraft_.tags, ", "), 60, [this](const std::string& v) { classDraft_.tags = splitNames(v); });
     y += 14;
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", formatDialogues(classDraft_.dialogues), 90, [this](const std::string& v) {
         if (const auto parsed = parseDialogues(v)) classDraft_.dialogues = *parsed;
         else say("talk is partner=file.dlg, for example player=greet.dlg");
     });
     y += 14;
-    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(classDraft_.allow), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", core::joined(classDraft_.allow, ", "), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
     y += 14;
-    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", core::joined(classDraft_.deny, ", "), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
     y += 14;
     addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
     addScheduleRows(*classes_, left, width, y, classDraft_.extras.schedule, [this](const std::string& field, const std::string& text) { return setClassSchedule(field, text); });
@@ -457,16 +461,16 @@ void Editor::buildKindForm(const Rect& box, int y) {
         });
         attitude.hint = "Click: the next attitude word, then none. NPCs of this kind start like this unless they set their own";
         y += 14;
-        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(kindDraft_.layer.tags), 60, [this](const std::string& v) { kindDraft_.layer.tags = splitNames(v); });
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", core::joined(kindDraft_.layer.tags, ", "), 60, [this](const std::string& v) { kindDraft_.layer.tags = splitNames(v); });
         y += 14;
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", formatDialogues(kindDraft_.layer.dialogues), 90, [this](const std::string& v) {
             if (const auto parsed = parseDialogues(v)) kindDraft_.layer.dialogues = *parsed;
             else say("talk is partner=file.dlg, for example player=greet.dlg");
         });
         y += 14;
-        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(kindDraft_.layer.allow), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", core::joined(kindDraft_.layer.allow, ", "), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
         y += 14;
-        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(kindDraft_.layer.deny), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", core::joined(kindDraft_.layer.deny, ", "), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
         y += 14;
         addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
         addScheduleRows(*classes_, left, width, y, kindDraft_.layer.extras.schedule, [this](const std::string& field, const std::string& text) { return setKindSchedule(field, text); });
@@ -971,6 +975,20 @@ void Editor::addScheduleRows(Panel& panel, int left, int width, int& y, const si
         const std::string field = fields[i];
         panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, kLabels[i], sim::rules::scheduleFieldText(shown, field), 150, [set, field](const std::string& text) { set(field, text); });
         y += 14;
+    }
+    // The 24 hours as bars (US-196): dragging the start of a block writes the schedule text the form above holds, through the same setter.
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const std::string field = fields[i];
+        const std::vector<sim::rules::ScheduleBlock>& blocks = field == "day" ? shown.day : shown.night;
+        if (blocks.empty()) continue;
+        std::vector<TimelineView::Block> bars;
+        for (const sim::rules::ScheduleBlock& block : blocks) bars.push_back({block.minute, block.activity, block.place});
+        panel.add<TimelineView>(Rect{left, y, width, TimelineView::kHeight}, kLabels[i], std::move(bars), [set, field, blocks](std::size_t index, int minute) {
+            std::vector<sim::rules::ScheduleBlock> moved = blocks;
+            moved[index].minute = minute;
+            set(field, sim::rules::scheduleText(moved));
+        });
+        y += TimelineView::kHeight + 4;
     }
 }
 
@@ -1524,6 +1542,7 @@ void Editor::panTo(double x, double y) {
 
 void Editor::setHelp(EditorHelp* help) {
     help_ = help;
+    dataEditor_->setHelp(help); // the Data tab's fields get their help from the schemas
     if (help_ != nullptr && !help_->problem().empty()) say(help_->problem());
 }
 
@@ -2034,6 +2053,10 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
 void Editor::update(const Intents& intents) {
     applyHelp();
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
+    if (dataEditor_->shown()) { // the Data tab takes the whole screen; the map waits behind it (it handles Ctrl+S, Ctrl+Z, Ctrl+Y and Esc itself)
+        dataEditor_->update(intents);
+        return;
+    }
     if (storyEvents_->shown()) { // the Story events list takes the whole screen too
         storyEvents_->update(intents);
         if (!storyEvents_->typing()) {
@@ -2365,6 +2388,11 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         question_->draw(painter);
         openList_->drawOverlay(painter);
         question_->drawOverlay(painter);
+    }
+    if (dataEditor_->shown()) { // the Data tab covers the map
+        dataEditor_->draw(painter);
+        dataEditor_->drawOverlay(painter);
+        return;
     }
     if (storyEvents_->shown()) { // the Story events list covers the map
         storyEvents_->draw(painter);

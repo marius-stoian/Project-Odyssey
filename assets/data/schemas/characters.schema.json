@@ -1,0 +1,66 @@
+{
+  "title": "assets/data/characters.json",
+  "type": "object",
+  "properties": {
+    "characters": {
+      "type": "array",
+      "description": "The people kinds the Editor can place (the hero and others)",
+      "items": {
+        "type": "object",
+        "description": "One entry of characters",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the kind; levels and rules use it", "example": "hero"},
+          "frames": {
+            "type": "string",
+            "description": "The atlas frame, or the frame set of an 8-direction figure",
+            "example": "hero"
+          },
+          "directions": {
+            "type": "integer",
+            "description": "8: frames \"<frames>.S.0\" and so on; 1: a single front view",
+            "minimum": 1,
+            "maximum": 8,
+            "default": 1,
+            "example": "8"
+          },
+          "hp": {"type": "integer", "description": "Hit points", "minimum": 1, "maximum": 9999, "example": "100"},
+          "swordDamage": {
+            "type": "integer",
+            "description": "Damage of one strike with the sword",
+            "minimum": 0,
+            "maximum": 999,
+            "example": "5"
+          },
+          "enemy": {"type": "boolean", "description": "true: the hero's sword can hit it", "default": true},
+          "reach": {
+            "type": "number",
+            "description": "How far its strike back reaches, in metres",
+            "minimum": 0.5,
+            "maximum": 10,
+            "example": "1.5"
+          },
+          "height": {
+            "type": "number",
+            "description": "Height in metres, for its shadow",
+            "minimum": 0.1,
+            "maximum": 100,
+            "example": "1.0"
+          },
+          "shadow": {"type": "boolean", "description": "false: casts no shadow"},
+          "tags": {
+            "type": "array",
+            "description": "Tags the thing carries; they say what rules may do to it",
+            "items": {"type": "string", "description": "One tag"}
+          }
+        },
+        "required": ["name", "frames", "directions", "hp", "swordDamage"]
+      }
+    }
+  },
+  "provides": [
+    {"catalog": "characters", "at": "characters[].name"},
+    {"catalog": "kinds", "at": "characters[].name"},
+    {"catalog": "tags", "at": "characters[].tags[]"}
+  ],
+  "loaders": ["src/game/level.cpp#loadDefinitions", "src/game/tags.cpp"]
+}

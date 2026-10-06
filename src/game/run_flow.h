@@ -47,8 +47,6 @@ public:
     void openNewGame();
     void openFocus();
     void openPrivacy() { screen_ = Screen::Privacy; }
-    bool tutorialOn() const { return tutorial_; }
-    void setTutorialOn(bool on) { tutorial_ = on; }
     void openMenu();
     void openJournal() { screen_ = Screen::Menu; tab_ = MenuTab::Journal; }
     bool journalOpen() const { return screen_ == Screen::Menu && tab_ == MenuTab::Journal; }
@@ -192,6 +190,7 @@ private:
     std::string seedText_;
     int preset_ = 0;
     int comfort_ = 1;
+    std::string rules_; // the rules file picked on the New Game screen ("" = standard)
     bool tutorial_ = true;
     // Focus
     std::vector<int> picked_;

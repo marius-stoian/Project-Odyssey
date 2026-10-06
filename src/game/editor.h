@@ -5,6 +5,7 @@
 #include "game/animals.h"
 #include "game/art.h"
 #include "game/building_editor.h"
+#include "game/data_editor.h"
 #include "game/effect_art.h"
 #include "game/graph_editor.h"
 #include "game/editor_help.h"
@@ -23,6 +24,7 @@
 #include "game/npc_marker.h"
 #include "game/story_event_editor.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <functional>
 #include <map>
@@ -144,6 +146,8 @@ public:
     // The graph editor (M9, D-56): the Dialogue button opens it over the map; its edits are steps of this Editor's one Undo. `saved` is called after a file was written (the game reads its data again).
     GraphEditor& graphs() { return *graphEditor_; }
     StoryEventEditor& storyEvents() { return *storyEvents_; }
+    // The Data tab (M11, US-191): any data file as forms built from its schema. Esc comes back.
+    DataEditor& data() { return *dataEditor_; }
     void setGraphFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved, std::filesystem::path questFolder = {}) { graphEditor_->setFolders(std::move(dialogueFolder), std::move(interactionFolder), std::move(saved), std::move(questFolder)); }
     // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
     // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
@@ -165,6 +169,8 @@ public:
     void classesChanged() { classesStale_ = true; } // the catalog was read again (F5)
     // The data of the game was reloaded (US-303): the palettes of plants, objects, lights and characters are built again from the definitions.
     void dataChanged() {
+        effect_ = std::clamp(effect_, 0, std::max(0, static_cast<int>(definitions_.loopingEffects.size()) - 1)); // a list may have got shorter
+        weapon_ = std::clamp(weapon_, 0, std::max(0, static_cast<int>(weaponNames_.size()) - 1));
         buildPanels();
         classesStale_ = true;
         propertiesStale_ = true;
@@ -235,7 +241,6 @@ public:
     bool setKindPartnerActions(const std::string& partnerType, const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
-    bool settingsShown() const { return settingsShown_; }
     void showSettings(bool shown);
 
     // Levels on disk: the file being edited, the other levels next to it, and switching.
@@ -326,6 +331,7 @@ private:
     const Definitions& definitions_;
     std::unique_ptr<BuildingEditor> buildingEditor_;
     std::unique_ptr<StoryEventEditor> storyEvents_; // the Story events list (US-185)
+    std::unique_ptr<DataEditor> dataEditor_;        // the Data tab (US-191)
     std::unique_ptr<GraphEditor> graphEditor_; // the dialogue graph (M9)
     std::filesystem::path levelFile_;
     int viewWidth_;

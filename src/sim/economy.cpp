@@ -46,8 +46,8 @@ int RegionEconomy::currencyValue(const std::string& item) const {
     return found == currencies.end() ? 0 : found->second;
 }
 
-bool validItemId(std::string_view id) {
-    if (id.empty() || id.size() > 32) return false;
+bool validItemId(std::string_view id, std::size_t maxLength) {
+    if (id.empty() || id.size() > maxLength) return false;
     return std::all_of(id.begin(), id.end(), [](unsigned char c) { return (std::islower(c) != 0) || (std::isdigit(c) != 0) || c == '-'; });
 }
 

@@ -1,5 +1,7 @@
 #include "hero_life.h"
 
+#include "core/text.h"
+
 #include "json_data.h"
 #include "save.h"
 
@@ -26,11 +28,6 @@ std::optional<Trait> traitFromName(const std::string& name) {
     return std::nullopt;
 }
 
-std::string replaceAll(std::string text, const std::string& from, const std::string& to) {
-    for (std::size_t at = text.find(from); at != std::string::npos; at = text.find(from, at + to.size())) text.replace(at, from.size(), to);
-    return text;
-}
-
 std::string goodsText(const HeroData& data, const Goods& goods) {
     std::string out;
     for (const auto& [id, count] : goods) {
@@ -42,15 +39,6 @@ std::string goodsText(const HeroData& data, const Goods& goods) {
 
 } // namespace
 
-const char* outcomeName(Outcome outcome) {
-    switch (outcome) {
-    case Outcome::Victory: return "victory";
-    case Outcome::Defeat: return "defeat";
-    case Outcome::Died: return "died";
-    default: return "none";
-    }
-}
-
 const char* qualityName(int quality) {
     static constexpr const char* kNames[] = {"crude", "fair", "fine", "masterwork"};
     return kNames[std::clamp(quality, 0, 3)];
@@ -61,6 +49,9 @@ SimConfig configForComfort(const HeroData& data, SimConfig base, int comfort) {
     for (int& decay : base.needs.dailyDecay) decay = std::max(1, decay * level.needsPercent / 100);
     base.needs.winterWarmthDecay = std::max(1, base.needs.winterWarmthDecay * level.needsPercent / 100);
     base.clan.startingFood = std::max(0, base.clan.startingFood * level.foodPercent / 100);
+    for (const Profession& profession : data.professions) { // the clan's people take the routine of their profession (US-196)
+        if (!profession.schedule.empty()) base.routines[profession.id] = profession.schedule;
+    }
     return base;
 }
 
@@ -198,7 +189,7 @@ bool HeroLife::resolveEvent(int option) {
     if (const auto trait = traitFromName(chosen.trait)) {
         if (Person* hero = world_->personMutable(personId_)) hero->give(*trait);
     }
-    std::string line = replaceAll(replaceAll(chosen.note, "{hero}", name()), "{other}", other >= 0 ? world_->people()[static_cast<std::size_t>(other)].name : "someone");
+    std::string line = core::replaceAll(core::replaceAll(chosen.note, "{hero}", name()), "{other}", other >= 0 ? world_->people()[static_cast<std::size_t>(other)].name : "someone");
     world_->note(line, kImportanceHero, EventKind::Hero, personId_, other);
     lastNote_ = line;
     pendingEvent_ = -1;
@@ -720,8 +711,8 @@ void HeroLife::save(const std::filesystem::path& file) const {
     for (const Debt& d : debts_) debts.push_back({{"rival", d.rival}, {"owe", goodsJson(d.owe)}, {"value", d.value}, {"dueDay", d.dueDay}, {"settled", d.settled}, {"defaulted", d.defaulted}});
     json faith = json::array();
     for (const auto& [who, value] : faith_) faith.push_back({who, value});
-    const json data{{"version", 1},
-                    {"seed", game_.seed}, {"preset", game_.preset}, {"comfort", game_.comfort},
+    const json data{{"version", 2}, // version 2 (US-195) adds the rules the run plays under
+                    {"seed", game_.seed}, {"preset", game_.preset}, {"comfort", game_.comfort}, {"rules", game_.rules},
                     {"rng", {{"state", rng_.state()}, {"increment", rng_.increment()}}},
                     {"person", personId_}, {"origin", origin_}, {"phase", static_cast<int>(phase_)}, {"outcome", static_cast<int>(outcome_)}, {"reason", reason_},
                     {"affinity", affinity_}, {"skill", skill_}, {"focus", {focusFirst_, focusSecond_}}, {"pendingEvent", pendingEvent_}, {"pendingAge", pendingAge_},
@@ -732,11 +723,20 @@ void HeroLife::save(const std::filesystem::path& file) const {
     writeSaveText(file, data.dump(1));
 }
 
+std::string HeroLife::savedRules(const std::filesystem::path& file) {
+    try {
+        const json j = readJsonFile(file);
+        return j.value("rules", std::string());
+    } catch (const std::exception&) {
+        return {};
+    }
+}
+
 HeroLife HeroLife::load(const HeroData& data, World& world, const std::filesystem::path& file) {
     const json j = readJsonFile(file);
     HeroLife life(data, world, RestoreTag{});
     try {
-        life.game_ = {j.at("seed").get<std::uint64_t>(), j.at("preset").get<int>(), j.at("comfort").get<int>()};
+        life.game_ = {j.at("seed").get<std::uint64_t>(), j.at("preset").get<int>(), j.at("comfort").get<int>(), j.value("rules", std::string())}; // a version 1 save has no rules: standard
         life.rng_.restore(j.at("rng").at("state").get<std::uint64_t>(), j.at("rng").at("increment").get<std::uint64_t>());
         life.personId_ = j.at("person").get<int>();
         life.origin_ = j.at("origin").get<std::string>();

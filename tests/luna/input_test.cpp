@@ -153,3 +153,10 @@ TEST_CASE("US-021 Gamepad") {
         CHECK(input.nextTick().moveX() == 0);
     }
 }
+
+TEST_CASE("Refactor: every intent has a name scripts can use") {
+    CHECK(luna::engine::intentFromName("MoveUp") == Intent::MoveUp);
+    CHECK(luna::engine::intentFromName("Slot3") == Intent::Slot3);
+    CHECK(luna::engine::intentFromName("ListEscape") == Intent::ListEscape);
+    CHECK_FALSE(luna::engine::intentFromName("moveup").has_value());
+}

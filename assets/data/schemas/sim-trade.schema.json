@@ -1,0 +1,228 @@
+{
+  "title": "assets/data/sim/trade.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "minimum": 1, "maximum": 1, "example": "1"},
+    "stock": {
+      "type": "object",
+      "description": "How much of each good a trader keeps",
+      "properties": {
+        "minimumCap": {
+          "type": "integer",
+          "description": "A trader never restocks a good beyond max(its starting stock * capFactor, this)",
+          "minimum": 1,
+          "maximum": 9999,
+          "default": 10,
+          "example": "10"
+        },
+        "capFactor": {
+          "type": "integer",
+          "description": "The cap on a stock is its target times this, in percent",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "2"
+        },
+        "defaultTarget": {
+          "type": "integer",
+          "description": "The target of a good the trader's profile does not stock",
+          "minimum": 1,
+          "maximum": 9999,
+          "default": 6,
+          "example": "6"
+        },
+        "deliveryAmount": {
+          "type": "integer",
+          "description": "Pieces one weighted pick delivers",
+          "minimum": 1,
+          "maximum": 999,
+          "default": 1,
+          "example": "1"
+        },
+        "catchUpDays": {
+          "type": "integer",
+          "description": "After a long absence at most this many days of deliveries arrive at once",
+          "minimum": 1,
+          "maximum": 365,
+          "default": 7,
+          "example": "7"
+        }
+      }
+    },
+    "curve": {
+      "type": "object",
+      "description": "How the price follows the stock: the price at an empty and a full store",
+      "properties": {
+        "minPercent": {
+          "type": "integer",
+          "description": "The price at a full store, in percent of the base price",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "50"
+        },
+        "maxPercent": {
+          "type": "integer",
+          "description": "The price at an empty store, in percent of the base price",
+          "minimum": 100,
+          "maximum": 1000,
+          "example": "200"
+        }
+      }
+    },
+    "drift": {
+      "type": "object",
+      "description": "US-282: item -> percent, signed",
+      "properties": {
+        "percentPerTrade": {
+          "type": "integer",
+          "description": "How far one trade moves the price, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "3"
+        },
+        "maxPercent": {
+          "type": "integer",
+          "description": "The most a price can drift from its base, in percent",
+          "minimum": 0,
+          "maximum": 500,
+          "example": "40"
+        },
+        "decayPercentPerDay": {
+          "type": "integer",
+          "description": "How much of a price drift fades each day, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "25"
+        }
+      }
+    },
+    "reputation": {
+      "type": "object",
+      "description": "How a trader treats people by what it thinks of them",
+      "properties": {
+        "percent": {
+          "type": "object",
+          "description": "The price a trader asks, in percent, by attitude",
+          "properties": {
+            "friendly": {"type": "integer", "description": "Price in percent for a friend", "example": "-10"},
+            "neutral": {"type": "integer", "description": "Price in percent for a stranger", "example": "0"},
+            "wary": {"type": "integer", "description": "Price in percent for someone it is wary of", "example": "25"},
+            "scared": {"type": "integer", "description": "Price in percent for someone it fears", "example": "10"},
+            "suspicious": {"type": "integer", "description": "Price in percent for someone it distrusts", "example": "25"},
+            "enchanted": {"type": "integer", "description": "Price in percent for someone it is enchanted by", "example": "-20"},
+            "lovingly": {"type": "integer", "description": "Price in percent for someone it loves", "example": "-20"},
+            "enviously": {"type": "integer", "description": "Price in percent for someone it envies", "example": "10"}
+          }
+        },
+        "refuse": {
+          "type": "array",
+          "description": "The attitudes a trader will not deal with at all",
+          "items": {"type": "string", "description": "One entry of refuse", "example": "hostile"}
+        }
+      }
+    },
+    "wants": {
+      "type": "object",
+      "description": "How strongly a trader wants what it lacks",
+      "properties": {
+        "wantPercent": {
+          "type": "integer",
+          "description": "The price in percent for goods it wants",
+          "minimum": 1,
+          "maximum": 1000,
+          "example": "100"
+        },
+        "otherPercent": {
+          "type": "integer",
+          "description": "The price in percent for goods it does not want",
+          "minimum": 1,
+          "maximum": 1000,
+          "example": "50"
+        }
+      }
+    },
+    "haggle": {
+      "type": "object",
+      "description": "Haggle (D-54 Q5): one try per trader per in-game day, a seeded roll of the world seed, the trader and the day; a win is a discount for the rest of the day, a loss costs opinion. `persuasion` is the hero's Trade affinity divided by 10.",
+      "properties": {
+        "baseChance": {
+          "type": "integer",
+          "description": "Base chance in percent that haggling works",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "20"
+        },
+        "opinionDivisor": {
+          "type": "integer",
+          "description": "Opinion is divided by this to add to the chance",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "4"
+        },
+        "perPersuasion": {
+          "type": "integer",
+          "description": "Chance gained for each point of persuasion, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "3"
+        },
+        "minChance": {
+          "type": "integer",
+          "description": "The worst chance haggling can have, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "5"
+        },
+        "maxChance": {
+          "type": "integer",
+          "description": "The best chance haggling can reach, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "85"
+        },
+        "discountPercent": {
+          "type": "integer",
+          "description": "The discount a successful haggle gives, in percent",
+          "minimum": 0,
+          "maximum": 90,
+          "example": "10"
+        },
+        "failureOpinion": {
+          "type": "integer",
+          "description": "Opinion lost when haggling fails",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "5"
+        }
+      }
+    },
+    "purse": {
+      "type": "object",
+      "description": "US-283: what it can pay out in a currency region, in value units",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "description": "The money a trader starts with",
+          "minimum": 0,
+          "maximum": 100000,
+          "example": "30"
+        },
+        "restockPerDay": {
+          "type": "integer",
+          "description": "Money a trader gains each day",
+          "minimum": 0,
+          "maximum": 100000,
+          "example": "5"
+        },
+        "cap": {
+          "type": "integer",
+          "description": "The most money a trader holds",
+          "minimum": 0,
+          "maximum": 1000000,
+          "example": "60"
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/trade_market.cpp#loadPriceConfig"],
+  "externalFields": ["friendly", "neutral", "wary", "scared", "suspicious", "enchanted", "lovingly", "enviously"]
+}

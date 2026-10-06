@@ -1,0 +1,104 @@
+{
+  "title": "assets/data/interactions/<id>.json",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "One word: the interaction's name; it must equal the file name without .json",
+      "example": "actions"
+    },
+    "label": {
+      "type": "string",
+      "description": "The name shown in the menu; {target.name} fills in the target",
+      "example": "Actions..."
+    },
+    "actors": {
+      "type": "array",
+      "description": "Who can do it: hero, person, animal or the name of a kind",
+      "items": {"type": "string", "description": "One entry of actors", "example": "hero"}
+    },
+    "target": {
+      "type": "object",
+      "description": "What the interaction can be done to",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "description": "Tags the target must carry (edible, plant, hero, animal...)",
+          "items": {"type": "string", "description": "One entry of tags", "example": "npc"}
+        },
+        "kinds": {
+          "type": "array",
+          "description": "Kinds of thing it applies to (bush, person, deer...)",
+          "items": {"type": "string", "description": "One entry of kinds", "example": "moss", "ref": "catalog:kinds"}
+        }
+      }
+    },
+    "range": {"type": "number", "description": "How near the actor must be, in metres", "minimum": 0, "example": "20"},
+    "order": {"type": "integer", "description": "Its place in a menu: lower comes first", "default": 100, "example": "95"},
+    "effects": {
+      "type": "array",
+      "description": "What happens, one effect line each, in order",
+      "items": {"type": "string", "description": "One entry of effects", "example": "do actions", "format": "effect"}
+    },
+    "menu": {
+      "type": "string",
+      "description": "Empty for the ordinary menu of a thing; confront for the Confront menu of an NPC",
+      "example": "confront"
+    },
+    "note": {
+      "type": "string",
+      "description": "The owner's own words; they are kept when the file is saved",
+      "example": "Reach 2.5 m. Moving or attacking before the ring is full stops the job and gives nothing. Four seconds of work each time (do build-work 4)."
+    },
+    "duration": {
+      "type": "number",
+      "description": "Seconds the job takes, with a ring that fills over the target; 0 is instant",
+      "minimum": 0,
+      "maximum": 10,
+      "example": "4"
+    },
+    "requires": {
+      "type": "array",
+      "description": "Conditions that must hold, each with the reason shown when it does not",
+      "items": {
+        "type": "object",
+        "description": "One entry of requires",
+        "properties": {
+          "if": {
+            "type": "string",
+            "description": "The condition, in the rule language",
+            "example": "target.state == ready",
+            "format": "rule"
+          },
+          "else": {
+            "type": "string",
+            "description": "The reason shown when the condition is false",
+            "example": "Bring the materials first"
+          }
+        }
+      }
+    },
+    "npc": {
+      "type": "object",
+      "description": "How clan members and animals decide to do it on their own",
+      "properties": {
+        "score": {
+          "type": "string",
+          "description": "How much an NPC wants to do it now (a rule-language number)",
+          "example": "40 + trait(diligent) * 10",
+          "format": "rule"
+        },
+        "cooldown": {"type": "integer", "description": "Seconds an NPC waits before choosing it again", "example": "5"}
+      }
+    },
+    "chronicle": {
+      "type": "string",
+      "description": "The chronicle sentence written when it is done, with the usual {tokens}",
+      "example": "{actor.name} lit the fire."
+    }
+  },
+  "required": ["id", "label"],
+  "provides": [{"catalog": "interactions", "at": "id"}],
+  "loaders": ["src/sim/interaction.cpp"],
+  "externalFields": ["metres", "seconds"]
+}

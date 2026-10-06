@@ -190,3 +190,27 @@ TEST_CASE("US-290 Danger: a hostile within 6 m of a person sends them home at th
     CHECK(studio.odyssey->npcDirector().mode(studio.index()) == sim::NpcDirector::Mode::Fleeing);
     CHECK(studio.odyssey->npcPopulation().x(studio.index()) == studio.odyssey->level().characters[0].feet.x); // home
 }
+
+TEST_CASE("US-196 Form: the weights of a block are typed after the place, saved with the level, and the timeline writes the same text") {
+    Studio studio("schedule-prefer");
+    studio.toEditor();
+    game::Editor& editor = studio.editor();
+    editor.select(studio.tala);
+    REQUIRE(editor.selectedIsNpc());
+    CHECK(editor.setSelectedSchedule("day", "06:00 work market prefer animal=300,edible=150; 21:00 sleep home"));
+    const sim::rules::Schedule& schedule = editor.level().characters[0].extras.schedule;
+    REQUIRE(schedule.day.size() == 2);
+    CHECK(schedule.day[0].prefer == std::map<std::string, int>{{"animal", 300}, {"edible", 150}});
+    REQUIRE(editor.save());
+    const std::string saved = readText(studio.file);
+    CHECK(saved.find("\"prefer\"") != std::string::npos);
+    const game::Level reloaded = game::loadLevel(studio.file, studio.odyssey->definitions()).level;
+    CHECK(reloaded == editor.level()); // the weights survive the file: one format
+    // What the bar does when a block is dragged is this: the text of the moved blocks through the same setter, weights included.
+    std::vector<sim::rules::ScheduleBlock> moved = schedule.day;
+    moved[1].minute = 20 * 60;
+    CHECK(editor.setSelectedSchedule("day", sim::rules::scheduleText(moved)));
+    CHECK(editor.level().characters[0].extras.schedule.day[1].minute == 20 * 60);
+    CHECK(editor.level().characters[0].extras.schedule.day[0].prefer == std::map<std::string, int>{{"animal", 300}, {"edible", 150}});
+    CHECK_FALSE(editor.setSelectedSchedule("day", "06:00 work market prefer animal=900")); // a weight over 500 is refused
+}

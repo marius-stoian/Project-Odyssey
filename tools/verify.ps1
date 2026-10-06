@@ -41,8 +41,11 @@ foreach ($config in $configs) {
 
 foreach ($config in $configs) {
     $log = Join-Path $logs "ctest-$config.log"
-    ctest --preset "windows-x64-$config" --timeout 600 -LE soak *> $log
+    # Like CI: the headless tests side by side (the game tests are split into shards for this), the window tests one at a time.
+    ctest --preset "windows-x64-$config" --timeout 600 -LE "window|soak" -j 6 *> $log
     $result = $LASTEXITCODE
+    ctest --preset "windows-x64-$config" --timeout 600 -L window *>> $log
+    if ($LASTEXITCODE -ne 0) { $result = $LASTEXITCODE }
     Write-Output "ctest $config exit $result"
     Get-Content $log | Select-String 'tests passed|\*\*\*' | ForEach-Object { '  ' + $_.Line.Trim() }
     if ($result -ne 0) { $ok = $false }

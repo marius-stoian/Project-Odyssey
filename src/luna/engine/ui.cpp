@@ -1,5 +1,7 @@
 #include "luna/engine/ui.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -248,13 +250,6 @@ void ListBox::draw(UiPainter& painter) const {
 
 namespace {
 
-std::string lowered(std::string text) {
-    for (char& c : text) {
-        if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
-    }
-    return text;
-}
-
 bool inside(const Rect& area, int x, int y) { return x >= area.x && y >= area.y && x < area.x + area.width && y < area.y + area.height; }
 
 } // namespace
@@ -267,7 +262,7 @@ void SuggestList::open(std::vector<std::string> values) {
 
 void SuggestList::filter(const std::string& typed) {
     open_ = true;
-    const std::string needle = lowered(typed);
+    const std::string needle = odysseus::core::lowered(typed);
     rows_.clear();
     const auto add = [&](const std::string& value) {
         if (std::find(rows_.begin(), rows_.end(), value) == rows_.end()) rows_.push_back(value);
@@ -276,10 +271,10 @@ void SuggestList::filter(const std::string& typed) {
         for (const std::string& value : values_) add(value);
     } else {
         for (const std::string& value : values_) { // the ones that start with it first
-            if (lowered(value).rfind(needle, 0) == 0) add(value);
+            if (odysseus::core::lowered(value).rfind(needle, 0) == 0) add(value);
         }
         for (const std::string& value : values_) { // then the ones that contain it
-            if (lowered(value).find(needle) != std::string::npos) add(value);
+            if (odysseus::core::lowered(value).find(needle) != std::string::npos) add(value);
         }
     }
     highlight_ = 0;
@@ -499,7 +494,7 @@ void TextField::draw(UiPainter& painter) const {
     painter.text(bounds.x, bounds.y + 2, label, UiColor::Dim);
     const Rect inner = box();
     painter.fill(inner, UiColor::Dark);
-    painter.outline(inner, focused_ ? UiColor::Gold : UiColor::Border);
+    painter.outline(inner, invalid ? UiColor::Red : (focused_ ? UiColor::Gold : UiColor::Border));
     std::string shown = focused_ ? editing_ + "_" : value;
     const auto fits = static_cast<std::size_t>(std::max(3, (inner.width - 6) / kTextAdvance));
     if (shown.size() > fits) shown = focused_ ? shown.substr(shown.size() - fits) : shown.substr(0, fits - 2) + ".."; // the end while typing, ".." when it is cut
@@ -510,6 +505,38 @@ void TextField::drawOverlay(UiPainter& painter) const {
     if (!visible) return;
     tip.draw(painter);
     if (focused_) list_.draw(painter, box());
+}
+
+// --- Label and Toggle ---
+
+void Label::draw(UiPainter& painter) const { painter.text(bounds.x, bounds.y + 2, text, color); }
+
+Rect Toggle::box() const {
+    const int boxX = bounds.x + UiPainter::textWidth(label) + 4;
+    return {boxX, bounds.y, bounds.x + bounds.width - boxX, bounds.height};
+}
+
+bool Toggle::handle(const UiInput& input) {
+    if (!visible) return false;
+    const bool over = contains(input.pointer.x, input.pointer.y);
+    tip.track(over && !input.pointer.wasPressed(PointerButton::Left), input.pointer.x, input.pointer.y);
+    if (over && input.pointer.wasPressed(PointerButton::Left)) {
+        value = !value;
+        if (onChange) onChange(value);
+    }
+    return over && input.pointer.wasPressed(PointerButton::Left);
+}
+
+void Toggle::draw(UiPainter& painter) const {
+    painter.text(bounds.x, bounds.y + 2, label, UiColor::Dim);
+    const Rect inner = box();
+    painter.fill(inner, UiColor::Dark);
+    painter.outline(inner, invalid ? UiColor::Red : UiColor::Border);
+    painter.text(inner.x + 3, inner.y + (inner.height - kGlyphHeight) / 2, value ? "yes" : "no", value ? UiColor::Gold : UiColor::Text);
+}
+
+void Toggle::drawOverlay(UiPainter& painter) const {
+    if (visible) tip.draw(painter);
 }
 
 // --- Panel ---

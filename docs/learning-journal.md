@@ -2182,3 +2182,155 @@ if (old == before.end() || old->second != hash) changes.kinds[kind].updated.inse
 **Try it (10 minutes).** Start a run on a hand-made level so it autosaves, close the game, move a bush in the Editor and save, start the game with `--load`: the status line says `The level updated 1 thing`.
 
 **Check yourself.** Why is the hash of the level entry compared, and not the position of the thing in the run? (Think of a person who walked away from where the level placed them.)
+
+## US-190: describing data with data, a schema interpreter (M11)
+
+**What we built.** Every file under `assets/data/` now has a *schema*: a small JSON file that says what each field is (a whole number from 0 to 1000, one of `sword`, `axe`..., the name of an item that must exist) and what it is for. The game checks every file against its schema while it loads, and a mistake says `weapons.json:23: weapons[2].damage: must be between 0 and 1000 (is -4)` instead of failing somewhere later. The same schemas will build the forms of the Editor's Data tab (US-191) and give them their help text.
+
+**The idea: data that describes data.** Until now each loader had its own checks written in C++: `requireInt(json, file, "maximum", 10, 1000)`. A schema moves that knowledge out of the code into a file, and one function reads the file. That function is an *interpreter*: it takes two trees (the document and the schema) and walks them together, calling itself for every child.
+
+```cpp
+void node(const Node& schema, const nlohmann::json& value, const std::string& path) {
+    if (!typeMatches(schema.type, value)) { error(path, "must be ..."); return; }
+    if (value.is_number()) numberRange(schema, value, path);   // minimum, maximum
+    if (value.is_object()) object(schema, value, path);        // calls node() for each member
+    if (value.is_array()) array(schema, value, path);          // calls node() for each element
+}
+```
+
+A function that calls itself is *recursion*; it fits because a document is a tree and so is a schema. The `path` string (`weapons[2].damage`) is passed down so every message can say where it is.
+
+**Why a second reader for line numbers.** The parsed document (`nlohmann::json`) is a tree of values and has forgotten which line each came from. `JsonLines` reads the same text once more, only to remember "the member at `weapons[2].damage` starts on line 23". Two readers that each do one thing are simpler than one that does both.
+
+**Catching drift.** A schema can drift away from the code: someone adds `"flicker"` to the light loader and forgets the schema. The *drift test* reads the C++ of each loader as text, collects the names it reads (`.at("x")`, `.contains("x")`) and compares them with the schema. On its first run it found a dozen optional fields that no shipped file used yet, and they went into the schemas. A test that reads your own source is unusual, and it earns its place here because nothing else could notice.
+
+**Where to look.** `src/sim/schema.cpp` (`Checker::node`), `src/sim/json_text.cpp`, `src/sim/schema_index.cpp` (`buildIndex`, `checkDrift`), `assets/data/schemas/index.json`, `docs/guides/schemas.md`, `tests/sim/schema_test.cpp`.
+
+**Try it (5 minutes).** In `assets/data/sim/needs.json` change `"maximum": 100` to `5` and start the game: it stops with the file, the line, the field and `must be between 10 and 1000 (is 5)`. Put it back.
+
+**Check yourself.** Why does an unknown field only warn at load but fail the test? (Think about who types the file, and when each one finds out.)
+
+## US-191: patching text instead of printing it, and forms built from a description (M11)
+
+**What we built.** The Editor has a **Data** button. Any data file opens as forms made from its schema: a number box with its range, a word picker, a yes/no, a list of names from another catalog, groups that fold. A value that does not fit is refused with the reason. Ctrl+Z walks back through your edits, and Ctrl+S saves. After the save the running game reads the file again: change a weapon's damage and the sword in the hero's hand hits harder at once.
+
+**The idea: save by patching, not printing.** The obvious way to save is to print the whole edited document back as text. The trouble: every file would be reformatted the first time (the weapons are one object to a line with no space after the colon, the sim files have spaces), every comment inside a file would vanish, and a one-number change would show up as a hundred changed lines in the diff. So the saver does the opposite. It keeps the original text and a map of *where every value stands in it*, then walks the old and the edited document together. Where they are equal it copies the original bytes; where a number changed it writes the new number in the same spot; only a list that gained or lost entries is rebuilt, in the style the original used.
+
+```cpp
+if (sameJson(before, after)) return span(n.begin, n.end);            // untouched: the original bytes
+if (n.kind == Object && keysOf(before) == keysOf(after)) return inPlace(n, before, after); // same members: patch each in place
+```
+
+That is *recursion over two trees at once*, like the schema checker of US-190 but producing text. The proof is a test over every shipped data file: change every number, lengthen every string, add and remove list entries and members everywhere, patch, parse again, and compare with the edited document: 183 files, thousands of edits, all equal.
+
+**Undo as copies.** `DataDocument` keeps the document before each edit on a stack. Copying a 23 KB document is cheap, and a stack of copies cannot get out of step with the document the way a list of "undo functions" can.
+
+**Pointing at a thing by its name.** Making weapons reloadable meant finding everything that held a raw address of a weapon definition (a pointer): arrows in the air, the list of starter weapons. When the catalog is swapped those addresses die. The fix is the one the plants already used: before the swap remember each holder's *name*, after the swap look the name up again; a shot whose weapon is gone is dropped. Names stay true when the thing they name is replaced; addresses do not.
+
+**Where to look.** `src/sim/json_patch.cpp` (`Patcher::patched`), `src/sim/data_document.cpp`, `src/sim/data_form.cpp` (`Builder::addValue`), `src/game/data_editor.cpp`, `OdysseyGame::applyCatalog` in `src/game/odyssey_reload.cpp`, `tests/sim/json_patch_test.cpp`.
+
+**Try it (10 minutes).** F2, **Data**, `weapons.json`, the iron sword: type `9` into `damage`, Enter, Ctrl+S. Run `git diff assets/data/weapons.json`: one line. Press F1, hit an enemy with the sword.
+
+**Check yourself.** Why does the saver copy the original text between two values instead of rebuilding the text from the values? (Think of a comment, or of two spaces after a comma.)
+
+
+## US-193: renaming a thing everywhere it is named (M11)
+
+**What we built.** In the Data tab you can **Copy** an entry (a plant, an item, a weapon), **Rename** it and **Delete** it. Rename first shows every place that names it: other data files, rule texts, quests, the levels and the dialogue files. You confirm, and all of them change together. Delete of a used entry lists the same places and waits for "Delete anyway"; Ctrl+Z brings the entry back.
+
+**The idea: plan first, then write.** Finding the places and changing them are two separate steps. `planRename` reads everything and returns the *new text of every file that would change*, without writing a byte. The dialog shows that plan. Only `applyPlan` writes, each file through a temporary file, and if one write fails the files already written are put back. A rename is all or nothing, so the data can never be left half renamed.
+
+**Whole words, not substrings.** Renaming `berries` must not touch `eat-berries` or the sentence `"{hero} shared berries"`. `replaceWord` matches the name as a whole word (a hyphen ends a word) and skips quoted prose. The places themselves come from the schemas: a field that links to a catalog (`ref`), a map whose keys are catalog names (`keyRef`), and texts marked as rules, effects or objectives. The schemas that built the forms also tell the rename where to look.
+
+**Where to look.** `src/sim/data_refs.cpp` (`makePlan`, `replaceWord`), `DataEditor::beginRename` and `confirm` in `src/game/data_editor.cpp`, `tests/sim/data_refs_test.cpp`.
+
+**Try it (5 minutes).** F2, **Data**, `hero/items.json`, the `berries` entry, **Rename**, type `red-berries`. Read the list, then confirm and open `dialogue/elder-fire.dlg`: the conditions say `red-berries`, the quoted sentence still says berries.
+
+**Check yourself.** Why does the rename build the whole plan before it writes anything, instead of changing each file as it finds a place?
+
+
+## US-194: checking a change before you trust it, and swapping rules between ticks (M11)
+
+**What we built.** Every mechanics file (needs, life, calendar, trade, the hero's professions and recipes...) opens as forms, and a **Quick check** button in the Data tab runs the clan for 20 years on your saved data and shows what happened: the population at the end, the births, the deaths by cause, the episodes of the story, each next to the run before. Changing a hunger rate and pressing the button tells you in a second whether the clan still lives. A save also changes the *running* game: the clan reads the new numbers on its next step.
+
+**The idea: slice a long job, and never run it with a clock.** Twenty years is 560 simulated days: more than one frame can do, but far less than needing a second thread. So the check does 30 days per frame and the screen stays alive between slices. Because the simulation never reads the time, doing 30 days at a time, or all at once, gives the same world: a test runs it both ways and compares the world hash (one number that sums up the whole state).
+
+```cpp
+while (!check.done()) check.step(30);   // 19 slices, one per frame
+```
+
+**The idea: swap, but only what the world can take.** Replacing the rules of a clan that is alive is safe for a number like the value of a meal, and unsafe for the length of a day: everything already counted in days would change meaning. `World::configProblem` names the numbers that cannot change and the reload refuses the whole change with the reason; otherwise `replaceConfig` swaps the rules in one piece between two ticks (the reload runs between frames, never inside a tick), and a file with a mistake changes nothing.
+
+**Where to look.** `src/sim/quick_check.cpp`, `World::configProblem` in `src/sim/world.cpp`, `OdysseyGame::reloadMechanics` in `src/game/odyssey_reload.cpp`, `DataEditor::stepQuickCheck`.
+
+**Try it (5 minutes).** F2, **Data**, `sim/needs.json`, `dailyDecay` hunger 60, Ctrl+S, **Quick check**; then hunger back to 30, Ctrl+S, **Quick check** again: the second summary lists the first as `last run`.
+
+**Check yourself.** Why can the days per season not change while the clan lives, but the value of a meal can?
+
+
+## US-195: one place for how a game is played (M11)
+
+**What we built.** A folder `assets/data/rules/` with one file per set of game rules. A file says how a new game is set up (the Growing Periods and Comfort levels of the New Game screen), when it is won or lost, and which whole systems run: weather, combat, rival clans, the tutorial, the quest arrow, the chronicle. The New Game screen lets you pick a file, a level can name its own, and the Data tab edits them as forms with a one-line summary on top.
+
+**The idea: a layer of overrides, not a copy.** `standard.json` holds everything. A second file only names what it changes: `peaceful.json` turns combat and rivals off and lowers the win percent, and the rest (presets, comforts, the other switches) is standard's. The loader reads standard first and lays the named file over it, the same way a stylesheet overrides a default.
+
+```cpp
+applyRules(data.config, standard);                       // the base
+if (rulesName != "standard") applyRules(data.config, picked);  // what the picked file names
+```
+
+**The idea: a switch is tested where the system starts.** The weather, the enemies and the rival clans do not each get a new constructor argument. The game reads one `PlaySystems` value and each system asks one yes-or-no question at its own doorway: `if (rules_.systems.weather) weather_.update();`. Adding a switch is one line there and one field in the file. The simulation (the clan) has no switch in it, so the headless runner does not need to know.
+
+**Moving data without breaking old data.** The presets and thresholds used to be in `hero/hero.json`. Moving them could have broken every older data folder. So the loader still reads the old keys when the rules file does not have them, writes a warning, and the next version drops that. Saves and levels got a version number the same way: a level without `rules` and a hero save without `rules` both mean "standard".
+
+**Where to look.** `src/sim/play_rules.cpp`, `OdysseyGame::chooseRules` in `src/game/odyssey_game.cpp`, `RunFlow::buildNewGame`, `tests/sim/play_rules_test.cpp`.
+
+**Try it (5 minutes).** F2, **Data**, `rules/standard.json`, set `systems.weather` to no, Ctrl+S. The line on top says `weather off` and the sky of the running game clears. Put it back to yes.
+
+**Check yourself.** Why does a run keep the rules it began with, even when you change the pick on the New Game screen afterwards?
+
+
+## US-196: a routine guides, it does not command (M11)
+
+**What we built.** A day's routine is a list of time blocks: "06:00 work, 14:00 rest, 21:00 sleep". It already existed for placed characters (US-290). Now a block can also carry **weights**: `"prefer": { "animal": 300 }` means "while this block is in force, anything to do with animals is three times as attractive". A hunter in a work block then chooses animal things more often, but nothing forces them. Professions carry a routine in the same format, and the clan's people take the routine of their profession. Under each schedule there is a bar of 24 hours; drag the left edge of a block to move it.
+
+**The idea: weights over scores (a utility AI).** Every thing a person could do already has a *score* from the rules. A weight multiplies that score: 60 times 300 percent is 180, so the animal choice beats the 60 of a stroll. Because it is a multiplier, a block with no weights changes nothing, and a weight of 0 removes a choice.
+
+```cpp
+for (const std::string& tag : tags)               // each tag of the choice, once
+    if (weight = block->prefer.find(tag)) score = score * weight->second / 100;
+```
+
+**The idea: needs win by order, not by a bigger number.** Instead of making hunger's score big enough to beat any weight, the code asks about needs *first*: a hungry person is sent to eat before any choice is scored, and in the clan the weights are simply left aside while a need is below the danger level. A rule that is decided by the order of the questions is easier to trust than one that depends on numbers staying large enough.
+
+**The idea: one format, many places.** Class files, kind files, a placed character and now a profession all say `day` and `night` the same way, and one function reads them. The tempting alternative was a new `routines.json`; two formats would have meant two readers, two editors and two sets of mistakes.
+
+**The idea: a bar and a form edit one thing.** The timeline holds no data. Dropping a block calls the same function as typing the time into the field; the form then shows the new time, Undo works, and Save patches one line of the file. A view that only calls the existing writer cannot disagree with it.
+
+**Where to look.** `rules::weighted` in `src/sim/npc_schedule.cpp`, `NpcDirector::guided`, `World::routineOf`, `src/game/timeline_view.cpp`, `tests/sim/routine_test.cpp`.
+
+**Try it (5 minutes).** F2, **Data**, `hero/professions.json`, the hunter. Drag the second block of the bar from 14:00 to 12:00, Ctrl+S, then run `git diff assets/data/hero/professions.json`: one line changed.
+
+**Check yourself.** Why does a weight multiply a score instead of adding to it? (Think of a weight of 0.)
+
+
+## US-192: pictures instead of names, and cutting without the command line (M11)
+
+**What we built.** Three things in the Data tab. A field that names a picture (`frame`) has a **...** button that opens the atlas as a grid of pictures: click one and its name is written for you. An effect or an animal selected in the form plays its frames in a small box. And a **Cut tool**: pick one of your sheets, drag a rectangle round a new picture, name it, press Cut, and the cut is added to `cuts.json` or `content-cuts.json` and the atlas is cut again.
+
+**The idea: one cutter, two doors.** Until now only the command-line program `odysseus_atlas` could cut the atlas. The code it uses (`loadCuts`, `cutAtlas`, `saveAtlas`...) already lived in the game library, so the Cut tool does not start a program: it calls the same functions. Two doors into one room means the picture you cut in the Editor is exactly the picture the command line would have cut.
+
+```cpp
+const CutList cuts = loadCuts(sprites / "cuts.json");
+saveAtlas(cutAtlas(cuts, sprites), sprites / "atlas");   // the same three calls as odysseus_atlas
+```
+
+**The idea: add a line without rewriting the file.** The cuts file is the owner's, written by hand, one cut per line. The tool does not print the whole file again: it opens it as a document, adds one element and saves by *patching the text* (US-191), so the new line takes the style of its neighbours and nothing else changes. Before it writes, it checks everything it can: the sheet is there, the rectangle is inside it, the name is new. If cutting the atlas still fails afterwards, it puts the old file text back.
+
+**The idea: a screen that only reports.** The grid and the sheet viewer know nothing about files. The grid says "this name was clicked", the viewer says "this rectangle was dragged", and the Data tab decides what to do with them (write a field, remember a rectangle). That is why the same grid serves the picker and could serve any other list of pictures.
+
+**Where to look.** `addCut` in `src/game/atlas_cuts.cpp`, `PictureGrid::handle` and `SheetView::handle` in `src/game/picture_tool.cpp`, `DataEditor::refreshPreview`, `tests/game/picture_tool_test.cpp`.
+
+**Try it (10 minutes).** F2, **Data**, **Cut tool**: choose a sheet, target `icons`, drag round an icon, name it, **Cut**. Then open `weapons.json`, press **...** on the `frame` of a weapon and pick your new icon: it plays in the box.
+
+**Check yourself.** Why does the tool check the rectangle and the name before it writes anything, instead of writing and then looking at what the atlas says?

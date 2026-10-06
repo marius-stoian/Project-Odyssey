@@ -2,6 +2,7 @@
 #include "game/odyssey_game.h"
 
 #include "core/log.h"
+#include "core/text.h"
 #include "game/game_rules.h"
 #include "game/npc_life.h"
 #include "game/weapons.h"
@@ -12,7 +13,6 @@
 #include <algorithm>
 #include <cmath>
 #include <format>
-#include <fstream>
 #include <iterator>
 #include <set>
 
@@ -74,6 +74,7 @@ void OdysseyGame::registerCreatures() {
 }
 
 bool OdysseyGame::startFight(int placedId) {
+    if (!rules_.systems.combat) return false; // no fights under rules without combat (US-195)
     for (Enemy& enemy : enemies_) {
         if (enemy.id == placedId && enemy.isAlive()) {
             enemy.provoke();
@@ -407,13 +408,11 @@ void OdysseyGame::mergeNpcPopulation(const sim::NpcPopulation& saved) {
     tradeDay_ = npcPopulation_.day();
     std::set<int> skip = people.updated;
     skip.insert(people.removed.begin(), people.removed.end());
-    if (std::ifstream tradeIn(saveDirectory_ / "trade.json", std::ios::binary); tradeIn) {
-        const std::string tradeText((std::istreambuf_iterator<char>(tradeIn)), std::istreambuf_iterator<char>());
-        tradeMarket_.restoreState(tradeText, skip);
+    if (const std::optional<std::string> tradeText = core::readTextFile(saveDirectory_ / "trade.json")) {
+        tradeMarket_.restoreState(*tradeText, skip);
     }
-    if (std::ifstream lifeIn(saveDirectory_ / "npc-life.json", std::ios::binary); lifeIn) {
-        const std::string lifeText((std::istreambuf_iterator<char>(lifeIn)), std::istreambuf_iterator<char>());
-        const sim::NpcDirector savedDirector = sim::NpcDirector::fromText(lifeText, scheduleConfig_);
+    if (const std::optional<std::string> lifeText = core::readTextFile(saveDirectory_ / "npc-life.json")) {
+        const sim::NpcDirector savedDirector = sim::NpcDirector::fromText(*lifeText, scheduleConfig_);
         std::vector<std::pair<int, int>> kept; // the index here and the index in the save of every person both have
         for (std::size_t here = 0; here < npcPopulation_.size(); ++here) {
             const int id = npcPopulation_.id(static_cast<int>(here));
@@ -428,11 +427,10 @@ void OdysseyGame::mergeNpcPopulation(const sim::NpcPopulation& saved) {
 // Brings the saved persons back: those the level still has take their saved state; the rest of the level's people stay as freshly made.
 std::string OdysseyGame::loadNpcPopulation() {
     const std::filesystem::path file = saveDirectory_ / "npcs.json";
-    std::ifstream in(file, std::ios::binary);
-    if (!in) return {};
-    const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    const std::optional<std::string> text = core::readTextFile(file);
+    if (!text) return {};
     try {
-        sim::NpcPopulation saved = sim::NpcPopulation::fromText(text, npcCalendar_, npcNeeds_);
+        sim::NpcPopulation saved = sim::NpcPopulation::fromText(*text, npcCalendar_, npcNeeds_);
         saved.setOpinionConfig(npcOpinions_);
         const LevelChanges::Ids& people = runChanges_.of(LevelBaseline::Character);
         if (!people.updated.empty() || !people.removed.empty()) { // the level was edited since the save: the people are merged by id (US-305)
@@ -450,14 +448,12 @@ std::string OdysseyGame::loadNpcPopulation() {
         }
         registerCreatures(); // creatures the save did not know (the level gained them)
         tradeDay_ = npcPopulation_.day();
-        if (std::ifstream tradeIn(saveDirectory_ / "trade.json", std::ios::binary); tradeIn) {
-            const std::string tradeText((std::istreambuf_iterator<char>(tradeIn)), std::istreambuf_iterator<char>());
-            tradeMarket_.restoreState(tradeText);
+        if (const std::optional<std::string> tradeText = core::readTextFile(saveDirectory_ / "trade.json")) {
+            tradeMarket_.restoreState(*tradeText);
         }
-        if (std::ifstream lifeIn(saveDirectory_ / "npc-life.json", std::ios::binary); lifeIn) {
-            const std::string lifeText((std::istreambuf_iterator<char>(lifeIn)), std::istreambuf_iterator<char>());
+        if (const std::optional<std::string> lifeText = core::readTextFile(saveDirectory_ / "npc-life.json")) {
             std::vector<sim::Place> places = npcDirector_.places(); // the places of the level, not of the save
-            npcDirector_ = sim::NpcDirector::fromText(lifeText, scheduleConfig_);
+            npcDirector_ = sim::NpcDirector::fromText(*lifeText, scheduleConfig_);
             npcDirector_.setPlaces(std::move(places));
             refreshLife(); // the data of now wins over the schedules of the save; the homes and the modes stay
             npcDirector_.setMarket(&tradeMarket_);

@@ -142,6 +142,8 @@ private:
         const rules::Interaction* interaction;
         ActionTarget target;
     };
+    // The score of a choice times the weights of the person's active schedule block for the choice's tags (US-196).
+    long long guided(int index, int hour, const rules::Interaction& interaction, const ActionTarget& target, long long score) const;
     bool chooseAction(NpcPopulation& population, int index, int hour, bool eventsOnly, bool abstract);
     void collectPlaceOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool eventsOnly, std::vector<Option>& options, std::vector<int>& scores) const;
     void collectPartnerOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool abstract, std::vector<Option>& options, std::vector<int>& scores) const;

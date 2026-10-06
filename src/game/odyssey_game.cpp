@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "core/text.h"
+
 #include "sim/data.h"
 
 #include "luna/engine/scaled_renderer.h"
@@ -24,7 +26,6 @@
 #include <chrono>
 #include <cmath>
 #include <format>
-#include <fstream>
 #include <iterator>
 #include <cstdlib>
 #include <numbers>
@@ -94,6 +95,18 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editorHelp_.setSources(suggestionSources()); // the lists of values read the data in use each time a field opens one (US-302)
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
+    editor_.data().setFolder(dataDirectory, [this](const std::filesystem::path& file) { dataFileSaved(file); }); // Save in the Data tab reads the file again, like F5 (US-191)
+    editor_.data().setPictures(spritesDirectory_, [this](const luna::engine::Image& image) { // the picture pickers and the Cut tool draw with the renderer in play (US-192)
+        return renderer_ != nullptr ? renderer_->createTexture(image) : luna::engine::Texture{};
+    });
+    editor_.data().setQuickSeed([this] { return weatherSeed_; }); // the Quick check runs the clan on the seed of the level in play (US-194)
+    editor_.data().setTagsOf([this](const std::string& kind) -> std::vector<std::string> { // the Interactions button finds what targets a kind by its tags (US-193)
+        if (const PlantDef* plant = catalogs_.plant(kind)) return plant->tags;
+        if (const AnimalDef* animal = catalogs_.animal(kind)) return animal->tags;
+        if (const WeaponDef* weapon = catalogs_.weapon(kind)) return weapon->tags;
+        if (const CharacterKindDef* character = definitions_.character(kind)) return character->tags;
+        return {};
+    });
     editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { ownReload("interactions"); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
@@ -144,6 +157,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
+    if (std::filesystem::exists(dataDirectory / "rules" / "standard.json")) rules_ = sim::loadPlayRules(dataDirectory, "standard");
     {
         // The buildings of the data folder (US-250): a cost may only name an item the hero's data knows. A mistake leaves that file out and is shown.
         // Loaded before the interactions: the kinds give places their `blueprint-...` tags.
@@ -180,17 +194,8 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
-    std::vector<std::string> palette;
-    for (const WeaponDef& weapon : catalogs_.weapons) {
-        if (weapon.starter) {
-            starters_.push_back(&weapon);
-            palette.push_back(weapon.name);
-        }
-    }
-    // The Editor offers the starters, then the two demo weapons (D-23).
-    palette.push_back(kSpearThrowName);
-    palette.push_back(kSwordSlashName);
-    editor_.setWeaponPalette(std::move(palette));
+    chooseRules({}); // a level that names its rules is played under them
+    rebuildWeaponLists();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
     buildNpcPopulation(); // the placed people are persons from the first frame, not only after a restart (X-M9a)
@@ -199,7 +204,30 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     findMissingKinds();
 }
 
+// Which rules the game plays under (US-195): the level's own `rules`, else the player's pick, else "standard"; a run in play keeps the rules it began with. A set of
+// rules changes the hero's presets, comforts and thresholds of victory (the hero data is read again under it) and the switches of systems. A rules file with a
+// mistake is said and the rules in use stay.
+void OdysseyGame::chooseRules(const std::string& pick) {
+    std::string name = !level_.rules.empty() ? level_.rules : (pick.empty() ? std::string("standard") : pick);
+    if (life_ && !startingRun_) name = life_->game().rules.empty() ? std::string("standard") : life_->game().rules;
+    if (name != rulesName_) {
+        try {
+            sim::PlayRules fresh = sim::loadPlayRules(dataDirectory_, name);
+            std::optional<sim::HeroData> hero;
+            if (heroData_) hero = sim::loadHeroData(dataDirectory_, name);
+            rules_ = std::move(fresh);
+            if (hero) *heroData_ = std::move(*hero);
+            rulesName_ = name;
+        } catch (const std::exception& problem) {
+            core::logWarning(std::format("Rules: {}", problem.what()));
+            say(problem.what());
+        }
+    }
+    if (!rules_.systems.weather) weather_.force(0); // under no weather the sky is clear
+}
+
 void OdysseyGame::resetPlay() {
+    chooseRules(pickedRules_);
     map_ = buildTileMap(level_, definitions_);
     camera_ = luna::engine::Camera(viewWidth(), viewHeight(), map_.pixelWidth(), map_.pixelHeight());
     hero_ = Hero(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y));
@@ -212,8 +240,12 @@ void OdysseyGame::resetPlay() {
     respawnTicks_ = 0;
     effects_.clear();
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
+    // A restart ends the hero's run: its clan is made again below, and a run that kept pointing at the old one would read freed memory (found at X-M11: a run in play, the
+    // Editor and back to the game).
+    life_.reset();
+    runFlow_.close();
     if (clanEnabled_) startClan();
-    if (region_) {
+    if (region_ && rules_.systems.rivals) {
         rivals_ = std::make_unique<sim::Rivals>(*region_, region_->start(), region_->seed() ^ 0x5151ULL, sim::loadSimConfig(dataDirectory_));
     }
     projectiles_.clear();
@@ -284,7 +316,7 @@ void OdysseyGame::populate() {
     // Every placed character the sword can hit stands in the world (M2c: they stand still, D-19).
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
-        const bool fights = kind != nullptr && fightsHero(placed); // a kind file's attitude decides (US-264), else the old enemy switch
+        const bool fights = rules_.systems.combat && kind != nullptr && fightsHero(placed); // a kind file's attitude decides (US-264), else the old enemy switch; no fights when combat is off (US-195)
         if (kind != nullptr && !fights) {
             bystanders_.push_back(placed);
         }
@@ -619,9 +651,17 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
 }
 
 // Starts a run (US-050): the region of the seed, a clan made for the Comfort level, a hero of it at the preset's age.
-void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tutorial) {
+void OdysseyGame::startNewRun(const sim::NewGame& picked, bool useRegion, bool tutorial) {
     if (!heroData_) return;
+    // The rules of the run (US-195): the level's, else the pick of the New Game screen. The hero data is read again under them, so the preset and comfort numbers
+    // are the ones of that set.
+    pickedRules_ = picked.rules;
+    startingRun_ = true;
+    chooseRules(pickedRules_);
+    sim::NewGame game = picked;
+    game.rules = rulesName_;
     if (useRegion) loadRegion(game.seed);
+    startingRun_ = false;
     clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
     life_ = std::make_unique<sim::HeroLife>(*heroData_, *clan_, game);
     watchHeroItems();
@@ -639,7 +679,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     greetingCooldowns_.clear();
     smalltalk_.clear();
     stats_.record("run-started", ticks_);
-    if (tutorial) flags_.set("tutorial", 1); // the first-day quest (assets/data/quests/first-day.json) starts by itself when this note is set (US-185)
+    if (tutorial && rules_.systems.tutorial) flags_.set("tutorial", 1); // the first-day quest (assets/data/quests/first-day.json) starts by itself when this note is set (US-185)
     if (life_->phase() == sim::Phase::Growing) {
         runFlow_.openFocus();
     } else {
@@ -934,11 +974,6 @@ std::set<std::string> OdysseyGame::knownTags() const {
     return tags;
 }
 
-sim::rules::ThingInfo OdysseyGame::plantThing(std::size_t index) const {
-    const WorldPlant& plant = plants_.at(index);
-    return {plant.kind, plant.def != nullptr ? plant.def->tags : std::vector<std::string>{}};
-}
-
 std::vector<sim::rules::Offer> OdysseyGame::plantOffers(std::size_t index) const {
     return offersFor(plantSubject(*this, index));
 }
@@ -967,7 +1002,7 @@ bool OdysseyGame::rememberConversation(int holder, int other, const std::string&
 }
 
 void OdysseyGame::chronicleLine(const std::string& text, int who, int other) {
-    if (clan_) clan_->note(text, sim::kImportanceConversation, sim::EventKind::Note, who, other);
+    if (clan_ && rules_.systems.chronicle) clan_->note(text, sim::kImportanceConversation, sim::EventKind::Note, who, other);
 }
 
 void OdysseyGame::changeOpinion(int who, int about, int delta) {
@@ -1181,33 +1216,21 @@ void OdysseyGame::drawRunWorld(luna::engine::Renderer& renderer, const luna::eng
     }
 }
 
-double OdysseyGame::frameMilliseconds() const {
-    if (frameTimesFilled_ == 0) return 0.0;
-    double total = 0.0;
-    for (std::size_t i = 0; i < frameTimesFilled_; ++i) total += frameTimes_[i];
-    return total / static_cast<double>(frameTimesFilled_);
-}
+double OdysseyGame::frameMilliseconds() const { return frameTimes_.average(); }
 
 double OdysseyGame::framesPerSecond() const {
     const double ms = frameMilliseconds();
     return ms > 0.0 ? 1000.0 / ms : 0.0;
 }
 
-double OdysseyGame::drawMilliseconds() const {
-    if (drawTimesFilled_ == 0) return 0.0;
-    double total = 0.0;
-    for (std::size_t i = 0; i < drawTimesFilled_; ++i) total += drawTimes_[i];
-    return total / static_cast<double>(drawTimesFilled_);
-}
+double OdysseyGame::drawMilliseconds() const { return drawTimes_.average(); }
 
 // One drawn frame: the draw time, the card's time (when measured) and, in a performance run, the totals and a line a minute.
 void OdysseyGame::recordFrame(double drawMs, double gpuMs) {
-    drawTimes_[drawTimeAt_] = drawMs;
-    drawTimeAt_ = (drawTimeAt_ + 1) % drawTimes_.size();
-    drawTimesFilled_ = std::min(drawTimesFilled_ + 1, drawTimes_.size());
+    drawTimes_.add(drawMs);
     gpuMs_ = gpuMs;
-    if (!perfLog_ || frameTimesFilled_ == 0) return;
-    const double frameMs = frameTimes_[(frameTimeAt_ + frameTimes_.size() - 1) % frameTimes_.size()];
+    if (!perfLog_ || frameTimes_.empty()) return;
+    const double frameMs = frameTimes_.last();
     ++perf_.frames;
     if (frameMs > 20.0) ++perf_.over20;
     perf_.frameSum += frameMs;
@@ -1233,18 +1256,9 @@ void OdysseyGame::recordFrame(double drawMs, double gpuMs) {
     }
 }
 
-double OdysseyGame::tickMilliseconds() const {
-    if (tickTimesFilled_ == 0) return 0.0;
-    double total = 0.0;
-    for (std::size_t i = 0; i < tickTimesFilled_; ++i) total += tickTimes_[i];
-    return total / static_cast<double>(tickTimesFilled_);
-}
+double OdysseyGame::tickMilliseconds() const { return tickTimes_.average(); }
 
-double OdysseyGame::worstTickMilliseconds() const {
-    double worst = 0.0;
-    for (std::size_t i = 0; i < tickTimesFilled_; ++i) worst = std::max(worst, tickTimes_[i]);
-    return worst;
-}
+double OdysseyGame::worstTickMilliseconds() const { return tickTimes_.worst(); }
 
 // F3: the numbers a slow game shows first (US-082).
 void OdysseyGame::drawOverlay(luna::engine::Renderer& renderer) const {
@@ -1346,18 +1360,22 @@ bool OdysseyGame::loadAutosave() {
         clanView_.update(*clan_, map_);
         lastSavedDay_ = clan_->date().day;
         if (heroData_ && std::filesystem::exists(saveDirectory_ / "hero.json")) {
+            pickedRules_ = sim::HeroLife::savedRules(saveDirectory_ / "hero.json"); // the run plays under the rules it began with
+            life_.reset();
+            chooseRules(pickedRules_);
             life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
+            // The clan's rules of the run (its Comfort level and the routines of the professions) come from the hero's data, as when the run began (US-196).
+            sim::SimConfig runConfig = sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), life_->game().comfort);
+            if (clan_->configProblem(runConfig).empty()) clan_->replaceConfig(std::move(runConfig));
             watchHeroItems();
             clanView_.setHidden(life_->personId());
             clanView_.update(*clan_, map_);
         }
-        if (std::ifstream things(saveDirectory_ / "things.json", std::ios::binary); things) {
-            const std::string text((std::istreambuf_iterator<char>(things)), std::istreambuf_iterator<char>());
-            for (const std::string& note : restoreThings(text)) notes += (notes.empty() ? "" : "; ") + note;
+        if (const std::optional<std::string> text = core::readTextFile(saveDirectory_ / "things.json")) {
+            for (const std::string& note : restoreThings(*text)) notes += (notes.empty() ? "" : "; ") + note;
         }
-        if (std::ifstream built(saveDirectory_ / "buildings.json", std::ios::binary); built) {
-            const std::string text((std::istreambuf_iterator<char>(built)), std::istreambuf_iterator<char>());
-            for (const std::string& note : buildings_.loadText(text)) notes += (notes.empty() ? "" : "; ") + note;
+        if (const std::optional<std::string> text = core::readTextFile(saveDirectory_ / "buildings.json")) {
+            for (const std::string& note : buildings_.loadText(*text)) notes += (notes.empty() ? "" : "; ") + note;
             if (runChanges_.of(LevelBaseline::Building).updated.size() + runChanges_.of(LevelBaseline::Building).removed.size() > 0) buildings_.mergeLevel(*this, runChanges_.of(LevelBaseline::Building));
             buildings_.syncObstacles(*this);
         }
@@ -2013,7 +2031,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     tickActions(intents);
     if (ticks_ % 10 == 0) tickQuests(*this);
     const auto tickStarted = std::chrono::steady_clock::now();
-    weather_.update();
+    if (rules_.systems.weather) weather_.update();
     if (!insideBuilding()) tickNpcPopulation();
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();
@@ -2041,9 +2059,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         life_->update();
         if (life_->phase() == sim::Phase::Ended && runFlow_.screen() != Screen::Ended) runFlow_.openEnded();
     }
-    tickTimes_[tickTimeAt_] = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tickStarted).count();
-    tickTimeAt_ = (tickTimeAt_ + 1) % tickTimes_.size();
-    tickTimesFilled_ = std::min(tickTimesFilled_ + 1, tickTimes_.size());
+    tickTimes_.add(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tickStarted).count());
     if (messageTicks_ > 0 && --messageTicks_ == 0) message_.clear();
     updateDevTools(intents);
     // After a fall the hero waits out a short fade, then starts again at the hero start.
@@ -2111,7 +2127,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && !heldSlotName.empty()) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
-            sword_.slash(hero_.facing());
+            sword_.slash();
             core::logInfo(std::format("Sword slash facing {}", facingName(hero_.facing())));
         } else {
             // Throw spear (bow).
@@ -2304,16 +2320,8 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         weaponArt_.icons = iconsTexture_;
         if (const auto weather = content_.pictures.find("weather"); weather != content_.pictures.end()) {
             weatherTexture_ = renderer.createTexture(weather->second);
-            for (const WeatherDef& def : catalogs_.weather) {
-                for (int i = 0; i < def.frames; ++i) {
-                    if (const auto rect = content_.rect(content_.frameName(def.name, i))) weatherFrames_[def.name].push_back(*rect);
-                }
-            }
         }
         effectArt_.page = effectsTexture_;
-        for (const EffectDef& def : catalogs_.effects) {
-            if (const auto rect = content_.rect(content_.frameName(def.name, 0))) effectArt_.firstFrame[def.name] = *rect;
-        }
         for (const char* page : {"plants-small", "plants-tall", "trees"}) {
             if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) {
                 const auto normals = content_.normals.find(page);
@@ -2327,9 +2335,6 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             if (hasNormals) mirroredNormalPictures.push_back(luna::engine::mirroredNormals(animalNormals->second));
             animalArt_.mirrored = withNormals(luna::engine::mirrored(animals->second), hasNormals ? mirroredNormalPictures.back() : kNone);
             animalArt_.pageWidth = animals->second.width();
-            for (const AnimalDef& animal : catalogs_.animals) {
-                if (const auto rect = content_.rect(animal.frame)) animalArt_.sources[animal.name] = *rect;
-            }
         }
         for (const PlantDef& plant : catalogs_.plants) {
             const auto frame = content_.frames.find(plant.frame);
@@ -2350,9 +2355,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
                 for (const auto& [name, rect] : rects) plantArt_.sources[name] = {"objects", rect};
             }
         }
-        for (const WeaponDef& weapon : catalogs_.weapons) {
-            if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
-        }
+        rebuildCatalogArt(); // the frame of each weapon, animal, effect and weather in the atlas
         editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_, &effectArt_, &buildings_});
         startPlacedEffects(); // the content is loaded now: the effects placed in the level start
     } else {
@@ -2375,9 +2378,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     output.measureGpu(overlayOn_ || perfLog_);
     const auto renderStarted = std::chrono::steady_clock::now();
     if (lastRender_.time_since_epoch().count() != 0) {
-        frameTimes_[frameTimeAt_] = std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count();
-        frameTimeAt_ = (frameTimeAt_ + 1) % frameTimes_.size();
-        frameTimesFilled_ = std::min(frameTimesFilled_ + 1, frameTimes_.size());
+        frameTimes_.add(std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count());
     }
     lastRender_ = renderStarted;
     // The world is drawn zoomed and the interface scaled (US-232): each is laid out in its own small pixels.

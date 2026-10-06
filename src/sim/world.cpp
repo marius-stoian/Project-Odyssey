@@ -54,6 +54,13 @@ World::World(std::uint64_t seed, SimConfig config)
     decideAll(1);
 }
 
+std::string World::configProblem(const SimConfig& next) const {
+    if (next.calendar.ticksPerDay != config_.calendar.ticksPerDay) return "the calendar's ticks per day cannot change while a clan lives (it is " + std::to_string(config_.calendar.ticksPerDay) + ")";
+    if (next.calendar.daysPerSeason != config_.calendar.daysPerSeason) return "the calendar's days per season cannot change while a clan lives (it is " + std::to_string(config_.calendar.daysPerSeason) + ")";
+    if (next.needs.maximum != config_.needs.maximum) return "the top of the needs scale cannot change while a clan lives (it is " + std::to_string(config_.needs.maximum) + ")";
+    return {};
+}
+
 void World::tick() {
     ++ticks_;
     const auto ticksPerHour = static_cast<std::uint64_t>(calendar_.ticksPerHour());
@@ -129,7 +136,34 @@ Situation World::situationOf(const Person& person) const {
     situation.canGiveGift = situation.someoneToTalkTo && person.lastGiftDay != today();
     situation.unwell = person.health != Health::Well;
     situation.canSteal = food_ > 0 && (person.lastTheftDay < 0 || today() - person.lastTheftDay >= config_.social.theftCooldownDays);
+    routineOf(person, situation);
     return situation;
+}
+
+std::string World::professionOf(const Person& person) const {
+    if (person.ageYears(calendar_.daysPerYear()) < config_.actions.workAgeYears) return {}; // a child has no profession yet
+    return person.huntSkill > person.gatherSkill ? "hunter" : "gatherer";
+}
+
+// The weights of the active block of the person's profession routine (US-196). The needs win: while a need is in danger the routine is left aside, and the scores are
+// the ones of the needs alone.
+void World::routineOf(const Person& person, Situation& situation) const {
+    if (config_.routines.empty()) return;
+    const auto routine = config_.routines.find(professionOf(person));
+    if (routine == config_.routines.end()) return;
+    for (std::size_t n = 0; n < kNeedCount; ++n) {
+        if (person.needs.values[n] < config_.actions.routineDangerBelow) return;
+    }
+    const rules::ScheduleBlock* block = rules::activeBlock(routine->second, (hour_ - 1) * 60, isNight(config_.actions, hour_));
+    if (block == nullptr || block->prefer.empty()) return;
+    situation.routined = true;
+    for (std::size_t i = 0; i < kActionCount; ++i) {
+        int percent = 100;
+        for (const std::string& tag : actionTags(static_cast<Action>(i))) {
+            if (const auto weight = block->prefer.find(tag); weight != block->prefer.end()) percent = percent * weight->second / 100;
+        }
+        situation.routinePercent[i] = percent;
+    }
 }
 
 void World::decideAll(int nextHour) {

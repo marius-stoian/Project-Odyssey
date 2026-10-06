@@ -1,0 +1,48 @@
+{
+  "title": "assets/data/light/celestial-events.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "example": "1"},
+    "events": {
+      "type": "array",
+      "description": "Eclipses and other events of the sun or the moon",
+      "items": {
+        "type": "object",
+        "description": "One entry of events",
+        "properties": {
+          "body": {"type": "string", "description": "Which body the event happens to: sun or moon", "example": "sun"},
+          "startDay": {
+            "type": "integer",
+            "description": "The day of the game on which it starts, counted from 0",
+            "default": 0,
+            "example": "20"
+          },
+          "startHour": {
+            "type": "number",
+            "description": "The hour of that day at which it starts, 0 to 24",
+            "minimum": 0,
+            "maximum": 23.99,
+            "default": 12,
+            "example": "11.0"
+          },
+          "lengthHours": {
+            "type": "number",
+            "description": "How long the event lasts, in game hours",
+            "minimum": 0.1,
+            "maximum": 24,
+            "example": "2.0"
+          },
+          "depth": {
+            "type": "number",
+            "description": "How much of the light is lost at the darkest moment, 0 to 1",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "example": "0.7"
+          }
+        }
+      }
+    }
+  },
+  "loaders": ["src/game/celestial.cpp"]
+}

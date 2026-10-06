@@ -74,7 +74,6 @@ public:
     // The footprint's top-left cell when the pointer is on cell (x, y): the middle of the footprint is under the pointer.
     std::pair<int, int> anchorFor(const std::string& kind, int cellX, int cellY, int turns) const;
     std::vector<std::string> menuKinds(bool pieces) const; // what the list shows: known buildings, or every piece
-    bool piecesTab() const { return piecesTab_; }
     void setPiecesTab(bool pieces) { piecesTab_ = pieces; scroll_ = 0; }
 
     // ---- what the hero does with a building (US-251, US-255; the interactions of assets/data/interactions call these through built-in actions)
@@ -96,14 +95,12 @@ public:
     // The clan lends a hand with blueprints (US-253). Off: only the hero builds (tests of the hero's own work switch it off).
     void setClanBuilds(bool builds) { clanBuilds_ = builds; }
     bool clanBuilds() const { return clanBuilds_; }
-    const sim::buildings::RivalBuilders& rivalBuilders() const { return rivalBuilders_; }
     std::uint64_t hash() const { return store_.hash() ^ (rivalBuilders_.hash() * 31); }
     // Walking obstacles of the finished walls, posts and fences are put on the map again when the store says they changed.
     void syncObstacles(OdysseyGame& game);
 
     // ---- drawing (placeholder art until the owner adds sheets)
     void loadArt(luna::engine::Renderer& renderer);
-    bool hasArt() const { return art_.id >= 0; }
     bool artStale() const { return art_.id >= 0 && artKinds_ != data_.kinds().size(); }
     // Floors and the ground part of blueprints; under everything.
     void drawGround(luna::engine::Renderer& renderer, const luna::engine::Rect& view) const;
@@ -131,7 +128,6 @@ public:
     // Screenshots and tests: what the ghost is, and the rectangle of the panel.
     luna::engine::Rect panelRect(const OdysseyGame& game) const;
     int ghostCellX() const { return ghostX_; }
-    int ghostCellY() const { return ghostY_; }
     bool ghostValid() const { return ghostProblem_.empty(); }
     const std::string& ghostProblem() const { return ghostProblem_; }
     int itemIndexAt(const OdysseyGame& game, int uiX, int uiY) const; // the list row under an interface point, or -1

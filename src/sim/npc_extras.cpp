@@ -105,7 +105,7 @@ std::vector<ScheduleBlock> readBlocks(const JsonValue& list, const std::string& 
             continue;
         }
         for (std::size_t i = 0; i < entry.keys.size(); ++i) {
-            if (entry.keys[i] != "from" && entry.keys[i] != "do" && entry.keys[i] != "at") error(entry.keyLines[i], std::format("unknown field \"{}\" in a schedule block (from, do, at)", entry.keys[i]));
+            if (entry.keys[i] != "from" && entry.keys[i] != "do" && entry.keys[i] != "at" && entry.keys[i] != "prefer") error(entry.keyLines[i], std::format("unknown field \"{}\" in a schedule block (from, do, at, prefer)", entry.keys[i]));
         }
         const JsonValue* from = entry.find("from");
         const JsonValue* doing = entry.find("do");
@@ -123,7 +123,23 @@ std::vector<ScheduleBlock> readBlocks(const JsonValue& list, const std::string& 
             error(at->line, "\"at\" must be the name of a place of the level, or home");
             continue;
         }
-        out.push_back({*minute, doing->text, at != nullptr ? at->text : std::string("home")});
+        std::map<std::string, int> prefer;
+        if (const JsonValue* weights = entry.find("prefer")) {
+            if (!weights->isObject()) {
+                error(weights->line, "\"prefer\" must be weights by tag, for example { \"animal\": 300 }");
+                continue;
+            }
+            for (std::size_t w = 0; w < weights->keys.size(); ++w) {
+                const JsonValue& weight = weights->items[w];
+                const std::optional<long long> value = weight.isNumber() ? parseMilli(weight.text) : std::nullopt;
+                if (!validItemId(weights->keys[w]) || !value || *value % 1000 != 0 || *value < 0 || *value > static_cast<long long>(kMaxPreferWeight) * 1000) {
+                    error(weights->keyLines[w], std::format("\"prefer\": \"{}\" must be a tag (lower-case letters, digits, -) with a whole weight from 0 to {}", weights->keys[w], kMaxPreferWeight));
+                    continue;
+                }
+                prefer[weights->keys[w]] = static_cast<int>(*value / 1000);
+            }
+        }
+        out.push_back({*minute, doing->text, at != nullptr ? at->text : std::string("home"), prefer});
     }
     std::stable_sort(out.begin(), out.end(), [](const ScheduleBlock& a, const ScheduleBlock& b) { return a.minute < b.minute; });
     for (std::size_t i = 1; i < out.size(); ++i) {
@@ -151,7 +167,10 @@ Schedule readSchedule(const JsonValue& block, const ExtrasError& error) {
 std::string blocksText(const std::vector<ScheduleBlock>& blocks) {
     std::string out = "[";
     for (std::size_t i = 0; i < blocks.size(); ++i) {
-        out += std::format("{}{{ \"from\": \"{}\", \"do\": {}, \"at\": {} }}", i != 0 ? ", " : "", formatClock(blocks[i].minute), quoteJson(blocks[i].activity), quoteJson(blocks[i].place));
+        std::string weights;
+        for (const auto& [tag, weight] : blocks[i].prefer) weights += std::format("{}{}: {}", weights.empty() ? "" : ", ", quoteJson(tag), weight);
+        out += std::format("{}{{ \"from\": \"{}\", \"do\": {}, \"at\": {}{} }}", i != 0 ? ", " : "", formatClock(blocks[i].minute), quoteJson(blocks[i].activity), quoteJson(blocks[i].place),
+                           weights.empty() ? std::string() : ", \"prefer\": { " + weights + " }");
     }
     return out + "]";
 }
@@ -379,6 +398,15 @@ void mergeExtras(NpcExtras& base, const NpcExtras& over) {
 const std::vector<std::string>& extrasFieldNames() {
     static const std::vector<std::string> names = {"trade", "schedule", "does", "partnerActions"};
     return names;
+}
+
+Schedule scheduleFromJson(std::string_view jsonText, std::vector<std::string>& problems) {
+    const JsonParseResult parsed = parseJson(jsonText);
+    if (!parsed.value) {
+        problems.push_back(parsed.error);
+        return {};
+    }
+    return readSchedule(*parsed.value, [&problems](int line, const std::string& message) { problems.push_back(std::format("line {}: {}", line, message)); });
 }
 
 NpcExtras parseExtras(const JsonValue& root, const ExtrasError& error) {

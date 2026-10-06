@@ -1,12 +1,12 @@
 #include "game/editor_help.h"
 
+#include "core/text.h"
+
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <system_error>
 #include <format>
-#include <fstream>
-#include <iterator>
 
 namespace odysseus::game {
 
@@ -43,12 +43,12 @@ void EditorHelp::load(const std::filesystem::path& file) {
     entries_.clear();
     problems_.clear();
     const std::string name = file.filename().string();
-    std::ifstream in(file, std::ios::binary);
-    if (!in) {
+    const std::optional<std::string> read = core::readTextFile(file);
+    if (!read) {
         problems_.push_back(std::format("{}: not found; the Editor shows no tooltips", name));
         return;
     }
-    const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    const std::string& text = *read;
     nlohmann::json root;
     try {
         root = nlohmann::json::parse(text, nullptr, true, true); // comments allowed, like the other data files
@@ -93,7 +93,9 @@ std::vector<std::string> EditorHelp::reload(const std::filesystem::path& file) {
 
 const EditorHelp::Entry* EditorHelp::find(const std::string& id) const {
     const auto found = entries_.find(id);
-    return found == entries_.end() ? nullptr : &found->second;
+    if (found != entries_.end()) return &found->second;
+    const auto made = generated_.find(id);
+    return made == generated_.end() ? nullptr : &made->second;
 }
 
 std::string EditorHelp::fieldId(std::string_view panel, std::string_view label) {

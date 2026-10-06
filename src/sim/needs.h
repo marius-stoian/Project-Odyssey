@@ -5,6 +5,8 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
+#include <optional>
+#include <string_view>
 
 namespace odysseus::sim {
 
@@ -14,6 +16,7 @@ enum class Need { Hunger, Energy, Warmth, Social, Count };
 inline constexpr std::size_t kNeedCount = static_cast<std::size_t>(Need::Count);
 
 const char* needName(Need need);
+std::optional<Need> needFromName(std::string_view name); // any case: "hunger", "Hunger"
 
 // A person's needs: one whole number per need. Plain data (a "component").
 struct Needs {

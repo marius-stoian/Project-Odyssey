@@ -28,6 +28,7 @@
 #include "luna/engine/physics_view.h"
 #include "luna/platform/crash.h"
 #include "luna/platform/system.h"
+#include "sim/schema_install.h"
 #include "luna/platform/user_paths.h"
 
 #include <exception>
@@ -66,33 +67,7 @@ struct Arguments {
 };
 
 luna::engine::Intent intentNamed(std::string_view name) {
-    using luna::engine::Intent;
-    if (name == "MoveUp") return Intent::MoveUp;
-    if (name == "MoveDown") return Intent::MoveDown;
-    if (name == "MoveLeft") return Intent::MoveLeft;
-    if (name == "MoveRight") return Intent::MoveRight;
-    if (name == "Interact") return Intent::Interact;
-    if (name == "OpenMenu") return Intent::OpenMenu;
-    if (name == "SwitchWeapon") return Intent::SwitchWeapon;
-    if (name == "ModeGame") return Intent::ModeGame;
-    if (name == "ModeEditor") return Intent::ModeEditor;
-    if (name == "Undo") return Intent::Undo;
-    if (name == "Redo") return Intent::Redo;
-    if (name == "Save") return Intent::Save;
-    if (name == "Delete") return Intent::Delete;
-    if (name == "ToggleGrid") return Intent::ToggleGrid;
-    if (name == "Rotate") return Intent::Rotate;
-    if (name == "Erase") return Intent::Erase;
-    if (name == "Confirm") return Intent::Confirm;
-    if (name == "Attack") return Intent::Attack;
-    if (name == "Inspect") return Intent::Inspect;
-    if (name == "DevTools") return Intent::DevTools;
-    if (name == "Overlay") return Intent::Overlay;
-    if (name == "ZoomIn") return Intent::ZoomIn;
-    if (name == "ZoomOut") return Intent::ZoomOut;
-    if (name.size() == 5 && name.substr(0, 4) == "Slot" && name[4] >= '1' && name[4] <= '9') {
-        return static_cast<Intent>(static_cast<int>(Intent::Slot1) + (name[4] - '1'));
-    }
+    if (const auto intent = luna::engine::intentFromName(name)) return *intent;
     throw std::invalid_argument("unknown intent: " + std::string(name));
 }
 
@@ -212,7 +187,10 @@ int main(int argc, char* argv[]) {
         // build uses the source folder it was built from.
         const std::filesystem::path packaged = luna::platform::executableDirectory() / "assets" / "data";
         const bool isPackaged = std::filesystem::exists(packaged / "hero" / "hero.json");
-        odysseus::game::OdysseyGame game(isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR), arguments.level);
+        const std::filesystem::path dataFolder = isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR);
+        // Every data file is checked against its schema as it loads (US-190); a broken schema folder is said in the log and never stops the game.
+        if (const std::optional<std::string> problem = odysseus::sim::schema::installFromFolder(dataFolder)) odysseus::core::logWarning("Schemas: " + *problem);
+        odysseus::game::OdysseyGame game(dataFolder, arguments.level);
         if (arguments.watch) game.setWatching(true); // the files of the game are watched while it runs (US-304)
         if (!arguments.saveDirectory.empty()) {
             game.setSaveDirectory(arguments.saveDirectory);

@@ -1,5 +1,7 @@
 #include "game/bubbles.h"
 
+#include "core/text.h"
+
 #include "game/game_rules.h"
 #include "game/odyssey_game.h"
 
@@ -102,16 +104,6 @@ bool nearHero(const OdysseyGame& game, int person) {
     return std::hypot(figure.x - game.hero().feetX(), figure.y - game.hero().feetY()) <= kExchangeRangeMetres * static_cast<double>(kTileSize);
 }
 
-std::string lowerCase(std::string text) {
-    for (char& c : text) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-    return text;
-}
-
-std::string replaceAll(std::string text, const std::string& from, const std::string& to) {
-    for (std::size_t at = text.find(from); at != std::string::npos; at = text.find(from, at + to.size())) text.replace(at, from.size(), to);
-    return text;
-}
-
 sim::rules::WhoFacts whoIs(const OdysseyGame& game, const Subject& subject) {
     sim::rules::WhoFacts who;
     who.name = subject.name;
@@ -132,13 +124,13 @@ std::vector<ExchangeLine> makeExchange(OdysseyGame& game, const SocialEvent& eve
         const sim::rules::DlgNode* node = script->startNode();
         if (node == nullptr) return lines;
         for (const sim::rules::DlgLine& line : node->lines) {
-            const bool byFirst = lowerCase(line.speaker) == lowerCase(script->pair[0]);
-            const bool bySecond = lowerCase(line.speaker) == lowerCase(script->pair[1]);
+            const bool byFirst = core::lowered(line.speaker) == core::lowered(script->pair[0]);
+            const bool bySecond = core::lowered(line.speaker) == core::lowered(script->pair[1]);
             if (!byFirst && !bySecond) continue;
             const sim::rules::RuleContext& context = byFirst ? static_cast<const sim::rules::RuleContext&>(firstContext) : secondContext;
             if (line.condition != nullptr && !sim::rules::isTrue(*line.condition, context)) continue;
             // {partner} is the one spoken to, {npc} the speaker.
-            const std::string text = sim::rules::fillDialogueTokens(replaceAll(line.text, "{partner}", byFirst ? second->name : first->name), context);
+            const std::string text = sim::rules::fillDialogueTokens(core::replaceAll(line.text, "{partner}", byFirst ? second->name : first->name), context);
             lines.push_back({byFirst ? event.first : event.second, text});
             if (lines.size() >= kMostLines) break;
         }

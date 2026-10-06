@@ -1,0 +1,46 @@
+{
+  "title": "assets/data/effects.json",
+  "type": "object",
+  "properties": {
+    "effects": {
+      "type": "array",
+      "description": "Every visual effect: hit sparks, smoke, fire",
+      "items": {
+        "type": "object",
+        "description": "One entry of effects",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the effect; rules and weapons use it",
+            "example": "gold spark"
+          },
+          "frames": {
+            "type": "integer",
+            "description": "How many pictures the effect has (they must match the frames cut for it)",
+            "minimum": 0,
+            "maximum": 16,
+            "default": 4,
+            "example": "1"
+          },
+          "ticksPerFrame": {
+            "type": "integer",
+            "description": "Game ticks (20 a second) each picture stays on screen",
+            "minimum": 1,
+            "maximum": 60,
+            "example": "3"
+          },
+          "loop": {"type": "boolean", "description": "true: the effect plays again and again (a campfire); false: once"},
+          "light": {
+            "type": "string",
+            "description": "A kind of light of lights.json the effect gives while it plays",
+            "example": "campfire",
+            "ref": "catalog:lights"
+          }
+        },
+        "required": ["name", "frames", "ticksPerFrame", "loop"]
+      }
+    }
+  },
+  "provides": [{"catalog": "effects", "at": "effects[].name"}],
+  "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp", "src/game/level.cpp#loadDefinitions"]
+}

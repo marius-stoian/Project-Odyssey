@@ -18,12 +18,10 @@ namespace odysseus::sim {
 // somebody walks near it and always comes out the same; a saved game then needs only the seed and what changed.
 
 enum class Biome : std::uint8_t { Steppe, Forest, Water, Mountain, Cave };
-const char* biomeName(Biome biome);
 // People walk on steppe, in forest and into cave mouths; water and mountains stop them.
 bool walkable(Biome biome);
 
 enum class ResourceKind : std::uint8_t { Flint, Wood, Berries, Herd };
-const char* resourceName(ResourceKind kind);
 
 struct Tile {
     int x = 0;
@@ -85,7 +83,6 @@ public:
 
     // Chunks are made when first asked for and kept. `chunk` throws std::out_of_range outside the region.
     const Chunk& chunk(int cx, int cy);
-    bool chunkLoaded(int cx, int cy) const { return chunks_.contains(key(cx, cy)); }
     std::size_t loadedChunks() const { return chunks_.size(); }
     // The chunk a tile is in, as chunk coordinates.
     Tile chunkOf(int x, int y) const { return {x / config_.chunkSize, y / config_.chunkSize}; }

@@ -1,0 +1,431 @@
+// US-191 Live catalogs (CI-007, CI-021): weapons, animals, effects and weather are read again while the game runs. What the play state holds of a definition is held by
+// name and pointed at the new definition: a shot in the air, the starter weapons, the weather under way; a thing whose kind is gone is dropped or marked.
+#include "camp.h"
+
+#include "game/data_reload.h"
+
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <string>
+
+using namespace camp_support;
+
+namespace {
+
+using luna::engine::Intent;
+using luna::engine::Intents;
+using luna::engine::Pointer;
+
+// The text of the line of weapons.json that holds a weapon, replaced (or taken out when `with` is empty).
+std::string replaceLine(std::string text, const std::string& name, const std::string& with) {
+    const std::size_t at = text.find("{\"name\":\"" + name + "\"");
+    REQUIRE_MESSAGE(at != std::string::npos, name);
+    const std::size_t begin = text.rfind('\n', at) + 1;
+    const std::size_t end = text.find('\n', at) + 1;
+    return text.replace(begin, end - begin, with.empty() ? std::string() : with + "\n");
+}
+
+struct Studio {
+    fs::path data;
+    luna::engine::RecordingRenderer renderer;
+    std::unique_ptr<game::OdysseyGame> odyssey;
+
+    explicit Studio(const std::string& name, const std::string& rules = {}) : data(dataCopy(name)) {
+        writeText(data / "rules" / "calm.json", "{ \"systems\": { \"weather\": false } }"); // a set of rules for the tests of US-195: no weather
+        const game::Definitions definitions = game::loadDefinitions(data);
+        game::Level level = game::loadLevel(ODYSSEUS_DEMO_LEVEL, definitions).level;
+        const game::PlacedCharacter first = level.characters.at(0);
+        level.characters.clear();
+        level.pickups.clear();
+        game::PlacedCharacter goblin = first;
+        goblin.id = 1;
+        goblin.feet = {level.heroStart.x, level.heroStart.y + 4 * 32};
+        goblin.hp = 100;
+        goblin.swordDamage = 4;
+        level.characters.push_back(goblin);
+        level.rules = rules; // the rules file the level is played under (US-195)
+        game::saveLevel(level, definitions, data / "live-level.json");
+        odyssey = std::make_unique<game::OdysseyGame>(data, data / "live-level.json");
+        odyssey->setViewScales(1, 1);
+        odyssey->start(renderer);
+        tick(30); // the camera settles on the hero
+    }
+    void tick(int count = 1, Intents intents = {}) {
+        for (int i = 0; i < count; ++i) odyssey->update(intents);
+    }
+    void hold(const std::string& weapon) {
+        REQUIRE(odyssey->pickUp(weapon));
+        odyssey->selectSlot(static_cast<int>(std::find(odyssey->hotbar().begin(), odyssey->hotbar().end(), weapon) - odyssey->hotbar().begin()));
+    }
+    void shootAtGoblin() {
+        const game::Enemy& enemy = odyssey->enemies().at(0);
+        Pointer pointer;
+        const auto view = odyssey->cameraView();
+        pointer.x = static_cast<int>(std::lround(enemy.feetX())) - view.x;
+        pointer.y = static_cast<int>(std::lround(enemy.feetY())) - view.y;
+        Intents intents;
+        intents.set(Intent::Attack, true, true);
+        intents.setPointer(pointer);
+        tick(1, intents);
+    }
+    // What an Editor save or the watcher does: the file changed, the sets that watch it read it again.
+    std::vector<game::ReloadOutcome> changed(const std::string& relative) {
+        odyssey->fileChanged(data / relative);
+        std::vector<game::ReloadOutcome> outcomes;
+        for (const std::string& set : odyssey->dataReload().setsFor(data / relative)) {
+            if (const game::ReloadOutcome* last = odyssey->dataReload().last(set)) outcomes.push_back(*last);
+        }
+        return outcomes;
+    }
+    std::string read(const std::string& relative) const { return readText(data / relative); }
+    void write(const std::string& relative, const std::string& text) { writeText(data / relative, text); }
+};
+
+} // namespace
+
+TEST_CASE("US-191 A weapon's damage changes while the game runs") {
+    Studio studio("live-damage");
+    studio.hold("iron sword");
+    REQUIRE(studio.odyssey->heldWeapon() != nullptr);
+    CHECK(studio.odyssey->heldWeapon()->damage == 5);
+    std::string text = studio.read("weapons.json");
+    const std::size_t at = text.find("\"damage\":5");
+    REQUIRE(at != std::string::npos);
+    text.replace(at, 10, "\"damage\":9");
+    studio.write("weapons.json", text);
+    const std::vector<game::ReloadOutcome> outcomes = studio.changed("weapons.json");
+    REQUIRE(outcomes.size() == 1);
+    CHECK(outcomes.front().set == "catalog");
+    CHECK(outcomes.front().result.ok);
+    CHECK_FALSE(outcomes.front().result.atNextStart);
+    REQUIRE(studio.odyssey->heldWeapon() != nullptr); // the hotbar holds the name: the new definition is found at once
+    CHECK(studio.odyssey->heldWeapon()->damage == 9);
+    CHECK(studio.odyssey->catalogs().weapon("iron sword")->damage == 9);
+}
+
+TEST_CASE("US-191 A shot in the air follows the new definition") {
+    Studio studio("live-shot");
+    studio.hold("wooden longbow");
+    studio.shootAtGoblin();
+    REQUIRE_FALSE(studio.odyssey->arcShots().empty());
+    const int before = studio.odyssey->catalogs().weapon("wooden longbow")->damage;
+    std::string text = studio.read("weapons.json");
+    const std::size_t line = text.find("{\"name\":\"wooden longbow\"");
+    REQUIRE(line != std::string::npos);
+    const std::size_t at = text.find("\"damage\":", line);
+    const std::size_t end = text.find_first_of(",}", at);
+    text.replace(at, end - at, "\"damage\":" + std::to_string(before + 7));
+    studio.write("weapons.json", text);
+    REQUIRE(studio.changed("weapons.json").front().result.ok);
+    REQUIRE_FALSE(studio.odyssey->arcShots().empty());
+    CHECK(studio.odyssey->arcShots().front().weapon == studio.odyssey->catalogs().weapon("wooden longbow")); // pointed at the new definition by its name
+    CHECK(studio.odyssey->arcShots().front().weapon->damage == before + 7);
+    studio.tick(40);
+    CHECK(studio.odyssey->enemies().at(0).hp() <= 100 - (before + 7)); // the hit used the new number
+}
+
+TEST_CASE("US-191 A weapon that is gone takes its shots with it") {
+    Studio studio("live-gone");
+    studio.hold("throwing knives");
+    studio.shootAtGoblin();
+    REQUIRE_FALSE(studio.odyssey->arcShots().empty());
+    studio.write("weapons.json", replaceLine(studio.read("weapons.json"), "throwing knives", ""));
+    const std::vector<game::ReloadOutcome> outcomes = studio.changed("weapons.json");
+    REQUIRE(outcomes.size() == 1);
+    CHECK(outcomes.front().result.ok);
+    CHECK(studio.odyssey->arcShots().empty());                 // no shot holds a definition that is gone
+    CHECK(studio.odyssey->catalogs().weapon("throwing knives") == nullptr);
+    CHECK(studio.odyssey->heldWeapon() == nullptr);              // the hand is empty-handed: the name is not a weapon any more
+    studio.tick(60);                                             // and the game goes on without a crash
+}
+
+TEST_CASE("US-191 A new weapon is offered at once") {
+    Studio studio("live-new");
+    const std::vector<std::string> before = studio.odyssey->editor().weaponPalette();
+    CHECK(std::find(before.begin(), before.end(), "test blade") == before.end());
+    std::string text = studio.read("weapons.json");
+    const std::string line = "    {\"name\":\"iron sword\",";
+    const std::size_t at = text.find(line);
+    REQUIRE(at != std::string::npos);
+    const std::size_t end = text.find('\n', at) + 1;
+    std::string copy = text.substr(at, end - at);
+    copy.replace(copy.find("iron sword\",\"frame\""), 10, "test blade"); // the name only: the picture is the sword's
+    text.insert(end, copy);
+    studio.write("weapons.json", text);
+    REQUIRE(studio.changed("weapons.json").front().result.ok);
+    const game::WeaponDef* made = studio.odyssey->catalogs().weapon("test blade");
+    REQUIRE(made != nullptr);
+    const std::vector<std::string> after = studio.odyssey->editor().weaponPalette();
+    CHECK(std::find(after.begin(), after.end(), "test blade") != after.end()); // a starter: the Editor's palette lists it
+    CHECK(studio.odyssey->definitions().hasWeapon("test blade"));              // a level may place it
+    studio.hold("test blade");
+    CHECK(studio.odyssey->heldWeapon() == made);
+}
+
+TEST_CASE("US-191 A mistake keeps the old catalog") {
+    Studio studio("live-mistake");
+    std::string text = studio.read("weapons.json");
+    const std::size_t at = text.find("\"damage\":5");
+    REQUIRE(at != std::string::npos);
+    text.replace(at, 10, "\"damage\":-5"); // out of range
+    studio.write("weapons.json", text);
+    const std::vector<game::ReloadOutcome> outcomes = studio.changed("weapons.json");
+    REQUIRE(outcomes.size() == 1);
+    CHECK_FALSE(outcomes.front().result.ok);
+    CHECK(studio.odyssey->catalogs().weapon("iron sword")->damage == 5); // all or nothing: nothing was half applied
+}
+
+TEST_CASE("US-191 The weather goes on under the same name") {
+    Studio studio("live-weather");
+    const auto& weathers = studio.odyssey->catalogs().weather;
+    REQUIRE(weathers.size() > 2);
+    const std::string name = weathers.back().name;
+    // Make the last weather the current one, then change a number of weather.json (a new weight for the first weather).
+    REQUIRE(studio.odyssey->setWeatherNamed(name));
+    CHECK(studio.odyssey->catalogs().weather[static_cast<std::size_t>(studio.odyssey->weather().current())].name == name);
+    std::string text = studio.read("weather.json");
+    const std::size_t at = text.find("\"weight\":");
+    REQUIRE(at != std::string::npos);
+    const std::size_t end = text.find_first_of(",}", at);
+    text.replace(at, end - at, "\"weight\":" + std::to_string(40));
+    studio.write("weather.json", text);
+    REQUIRE(studio.changed("weather.json").front().result.ok);
+    CHECK(studio.odyssey->catalogs().weather[static_cast<std::size_t>(studio.odyssey->weather().current())].name == name);
+}
+
+TEST_CASE("US-193 A copied plant is a plant of the game at once") {
+    // The Data tab of the running game: copy the wheat, change its tags, save. The copy is in the catalog, in the Editor's list of plants, and its interactions are found.
+    Studio studio("live-copy");
+    game::DataEditor& tab = studio.odyssey->editor().data();
+    tab.show(true);
+    REQUIRE(tab.open("plants.json"));
+    const auto& entries = tab.entries();
+    const auto wheat = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "wheat"; });
+    REQUIRE(wheat != entries.end());
+    REQUIRE(tab.selectEntry(wheat->path));
+    const std::vector<std::string> original = tab.interactionsOfEntry();
+    CHECK(std::find(original.begin(), original.end(), "gather") != original.end()); // wheat is edible and a plant: it can be gathered
+    REQUIRE(tab.copyEntry());
+    REQUIRE(tab.setField(tab.entryPath() + ".inspect", "A copy of the wheat."));
+    REQUIRE(tab.save());
+    const game::PlantDef* made = studio.odyssey->catalogs().plant("wheat-copy");
+    REQUIRE(made != nullptr);
+    CHECK(made->inspect == "A copy of the wheat.");
+    CHECK(studio.odyssey->definitions().hasPlant("wheat-copy")); // a level may place it
+    const std::vector<std::string> copied = tab.interactionsOfEntry();
+    CHECK(copied == original); // the copy offers the same interactions: the same tags
+}
+
+// ---- US-194: the mechanics (sim/, hero/, story/) are live too
+
+namespace {
+
+// A run in play (a hero and a clan) on a data copy, and the edits an Editor save or the watcher would announce.
+struct Run {
+    Studio studio;
+    explicit Run(const std::string& name) : studio(name) { studio.odyssey->startNewRun({1, 2, 1}, false, false); }
+    std::string changeNumber(const std::string& file, const std::string& from, const std::string& to) {
+        std::string text = studio.read(file);
+        const std::size_t at = text.find(from);
+        REQUIRE_MESSAGE(at != std::string::npos, from);
+        text.replace(at, from.size(), to);
+        studio.write(file, text);
+        return file;
+    }
+};
+
+} // namespace
+
+TEST_CASE("US-194 A changed mechanic is in the running game at once") {
+    Run run("us194-live");
+    REQUIRE(run.studio.odyssey->clan() != nullptr);
+    CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 40);
+    const std::string file = run.changeNumber("sim/needs.json", "\"mealValue\": 40", "\"mealValue\": 55");
+    const auto outcomes = run.studio.changed(file);
+    const auto mechanics = std::find_if(outcomes.begin(), outcomes.end(), [](const game::ReloadOutcome& outcome) { return outcome.set == "mechanics"; });
+    REQUIRE(mechanics != outcomes.end());
+    CHECK(mechanics->result.ok);
+    CHECK_FALSE(mechanics->result.atNextStart);
+    CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 55); // the clan reads it on its next step
+    run.studio.tick(5);                                                  // and the game goes on
+    // The hero's data too: an item's value.
+    const std::string items = run.changeNumber("hero/items.json", "\"id\": \"flint\", \"name\": \"Flint\", \"kind\": \"material\", \"value\": 3", "\"id\": \"flint\", \"name\": \"Flint\", \"kind\": \"material\", \"value\": 9");
+    run.studio.changed(items);
+    REQUIRE(run.studio.odyssey->heroData()->item("flint") != nullptr);
+    CHECK(run.studio.odyssey->heroData()->item("flint")->value == 9);
+    run.studio.tick(5);
+}
+
+TEST_CASE("US-194 A mechanic the running clan cannot take is refused and the old rules stay") {
+    Run run("us194-refused");
+    const std::string file = run.changeNumber("sim/calendar.json", "\"daysPerSeason\": 7", "\"daysPerSeason\": 8");
+    const auto outcomes = run.studio.changed(file);
+    const auto mechanics = std::find_if(outcomes.begin(), outcomes.end(), [](const game::ReloadOutcome& outcome) { return outcome.set == "mechanics"; });
+    REQUIRE(mechanics != outcomes.end());
+    CHECK_FALSE(mechanics->result.ok);
+    REQUIRE_FALSE(mechanics->result.errors.empty());
+    CHECK(mechanics->result.errors[0].find("days per season") != std::string::npos);
+    CHECK(run.studio.odyssey->clan()->config().calendar.daysPerSeason == 7);
+    // A mistake in a file keeps the old rules too.
+    run.studio.write("sim/needs.json", "{ not json");
+    const auto broken = run.studio.changed("sim/needs.json");
+    const auto again = std::find_if(broken.begin(), broken.end(), [](const game::ReloadOutcome& outcome) { return outcome.set == "mechanics"; });
+    REQUIRE(again != broken.end());
+    CHECK_FALSE(again->result.ok);
+    CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 40);
+    run.studio.tick(5);
+}
+
+// ---- US-195: the switches and sets of the game rules
+
+TEST_CASE("US-195 Switches: weather off and no weather happens") {
+    Studio on("us195-weather-on");
+    on.tick(2600); // a weather lasts 60 to 120 seconds: 2400 ticks at the most
+    CHECK(on.odyssey->weather().changes() > 0);
+    Studio off("us195-weather-off", "calm"); // a level that names rules without weather
+    CHECK_FALSE(off.odyssey->rules().systems.weather);
+    off.tick(2600);
+    CHECK(off.odyssey->weather().changes() == 0);
+    // The pick of the New Game screen does the same, and the run keeps the rules it began with.
+    Studio picked("us195-weather-pick");
+    picked.odyssey->startNewRun({1, 2, 1, "calm"}, false, false);
+    CHECK_FALSE(picked.odyssey->rules().systems.weather);
+    CHECK(picked.odyssey->life()->game().rules == "calm");
+}
+
+TEST_CASE("US-195 Rules sets: a level that names its rules is played under them") {
+    Studio standard("us195-level-standard");
+    CHECK(standard.odyssey->enemies().size() == 1);
+    CHECK(standard.odyssey->rules().systems.combat);
+    Studio peaceful("us195-level-peaceful", "peaceful"); // combat off: the goblin stands there and fights nobody
+    CHECK_FALSE(peaceful.odyssey->rules().systems.combat);
+    CHECK(peaceful.odyssey->enemies().empty());
+    CHECK(peaceful.odyssey->bystanders().size() == 1);
+    CHECK_FALSE(peaceful.odyssey->startFight(peaceful.odyssey->bystanders()[0].id));
+    // The level's rules come before the player's pick.
+    peaceful.odyssey->startNewRun({1, 2, 1, "standard"}, false, false);
+    CHECK(peaceful.odyssey->life()->game().rules == "peaceful");
+    CHECK(peaceful.odyssey->heroData()->config.dominion.winPercent == 40); // the thresholds of that set
+}
+
+TEST_CASE("US-195 Rules sets: the pick of the New Game screen changes the hero's numbers and the systems") {
+    Studio studio("us195-pick");
+    studio.write("rules/short.json", "{ \"newGame\": { \"presets\": [ { \"name\": \"Quick\", \"startAge\": 18, \"mantleAge\": 24 } ] }, \"victory\": { \"winPercent\": 5, \"combinedWinPercent\": 5, \"loseBelowPeople\": 1, \"rivalFollowerPercent\": 10 }, \"systems\": { \"tutorial\": false, \"markers\": false, \"chronicle\": false } }");
+    studio.odyssey->startNewRun({1, 0, 1, "short"}, false, true);
+    REQUIRE(studio.odyssey->life() != nullptr);
+    CHECK(studio.odyssey->life()->preset().name == "Quick");
+    CHECK(studio.odyssey->heroData()->config.dominion.winPercent == 5);
+    CHECK(studio.odyssey->flags().get("tutorial") == 0); // the tutorial switch is off: the first-day quest does not start
+    const std::size_t entries = studio.odyssey->clan()->chronicle().entries().size();
+    studio.odyssey->chronicleLine("a word was said", 0, 1);
+    CHECK(studio.odyssey->clan()->chronicle().entries().size() == entries); // the chronicle switch is off
+    // A new game under the standard rules turns them back on.
+    studio.odyssey->startNewRun({1, 0, 1, "standard"}, false, true);
+    CHECK(studio.odyssey->life()->preset().name == "Full");
+    CHECK(studio.odyssey->flags().get("tutorial") == 1);
+    studio.odyssey->chronicleLine("a word was said", 0, 1);
+    CHECK(studio.odyssey->clan()->chronicle().entries().size() > entries - 1);
+}
+
+TEST_CASE("US-195 Rules in play are live: a saved change of the switches is taken at once") {
+    Studio studio("us195-live");
+    studio.odyssey->startNewRun({1, 2, 1}, false, false);
+    CHECK(studio.odyssey->rules().systems.markers);
+    studio.write("rules/standard.json", studio.read("rules/standard.json").replace(studio.read("rules/standard.json").find("\"markers\": true"), 15, "\"markers\": false"));
+    const auto outcomes = studio.changed("rules/standard.json");
+    REQUIRE_FALSE(outcomes.empty());
+    CHECK(outcomes[0].result.ok);
+    CHECK_FALSE(studio.odyssey->rules().systems.markers);
+}
+
+// ---- X-M11: the exit demonstration
+
+TEST_CASE("X-M11 Exit: a new plant kind and a changed mechanic are made in the Data tab only, saved, and seen in the running game") {
+    Run run("xm11-exit");
+    game::OdysseyGame& odyssey = *run.studio.odyssey;
+    game::DataEditor& tab = odyssey.editor().data();
+    tab.show(true);
+
+    // 1. A new plant kind: copy the wheat, name the copy, give it its own words, save.
+    REQUIRE(tab.open("plants.json"));
+    const auto& entries = tab.entries();
+    const auto wheat = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "wheat"; });
+    REQUIRE(wheat != entries.end());
+    REQUIRE(tab.selectEntry(wheat->path));
+    REQUIRE(tab.copyEntry());
+    REQUIRE(tab.setField(tab.entryPath() + ".name", "moss berry"));
+    REQUIRE(tab.setField(tab.entryPath() + ".inspect", "A moss that bears berries."));
+    CHECK(tab.dirty());
+    REQUIRE(tab.save());
+    CHECK_FALSE(tab.dirty());
+    const game::PlantDef* kind = odyssey.catalogs().plant("moss berry");
+    REQUIRE(kind != nullptr); // the running game has the new kind
+    CHECK(kind->inspect == "A moss that bears berries.");
+    const auto& names = odyssey.definitions().plants;
+    const auto at = std::find(names.begin(), names.end(), "moss berry");
+    REQUIRE(at != names.end()); // the Editor's plant palette offers it
+    // Place it with the Editor's own tool, then play: the plant stands in the running game.
+    odyssey.update(luna::engine::Intents{});
+    luna::engine::Intents toEditor;
+    toEditor.set(luna::engine::Intent::ModeEditor, true, true);
+    odyssey.update(toEditor);
+    tab.show(false);
+    game::Editor& editor = odyssey.editor();
+    editor.setTool(game::EditorTool::Plant);
+    editor.setPlant(static_cast<int>(at - names.begin()));
+    const auto view = editor.camera().view();
+    const auto click = [&](int x, int y, bool press, bool hold, bool release) {
+        luna::engine::Intents intents;
+        luna::engine::Pointer pointer;
+        pointer.x = x;
+        pointer.y = y;
+        const auto left = static_cast<std::size_t>(luna::engine::PointerButton::Left);
+        pointer.pressed[left] = press;
+        pointer.held[left] = hold;
+        pointer.released[left] = release;
+        intents.setPointer(pointer);
+        odyssey.update(intents);
+    };
+    click(200, 200, true, true, false);
+    click(200, 200, false, false, true);
+    (void)view;
+    REQUIRE_FALSE(editor.level().plants.empty());
+    CHECK(editor.level().plants.back().kind == "moss berry");
+    luna::engine::Intents toGame;
+    toGame.set(luna::engine::Intent::ModeGame, true, true);
+    odyssey.update(toGame);
+    const auto& plants = odyssey.plants();
+    CHECK(std::any_of(plants.begin(), plants.end(), [](const game::WorldPlant& plant) { return plant.def != nullptr && plant.def->name == "moss berry"; }));
+
+    // 2. A changed mechanic: hunger falls faster. Saved in the Data tab, it is in the running clan at once.
+    tab.show(true);
+    CHECK(odyssey.clan()->config().needs.dailyDecay[0] == 30);
+    REQUIRE(tab.open("sim/needs.json"));
+    REQUIRE(tab.selectEntry(""));
+    REQUIRE(tab.setField("dailyDecay.hunger", "55"));
+    REQUIRE(tab.save());
+    CHECK(odyssey.clan()->config().needs.dailyDecay[0] == 55);
+    for (int i = 0; i < 40; ++i) odyssey.update(luna::engine::Intents{}); // the game goes on under the new rule
+    // The Quick check shows what the change does to the clan: the summary comes next to the run before it.
+    REQUIRE(tab.startQuickCheck());
+    for (int i = 0; i < 100 && tab.quickRunning(); ++i) tab.update(luna::engine::Intents{});
+    REQUIRE_FALSE(tab.quickRunning());
+    CHECK(tab.question().kind == game::DataEditor::Question::Kind::Quick);
+    CHECK_FALSE(tab.question().lines.empty());
+}
+
+TEST_CASE("X-M11 Restart: the Editor and back to the game ends a run in play instead of leaving it on a clan that is gone") {
+    Run run("xm11-restart");
+    game::OdysseyGame& odyssey = *run.studio.odyssey;
+    REQUIRE(odyssey.life() != nullptr);
+    luna::engine::Intents toEditor;
+    toEditor.set(luna::engine::Intent::ModeEditor, true, true);
+    luna::engine::Intents toGame;
+    toGame.set(luna::engine::Intent::ModeGame, true, true);
+    odyssey.update(toEditor);
+    odyssey.update(toGame); // "Play here": the level starts again, with a new clan
+    CHECK(odyssey.life() == nullptr);
+    CHECK_FALSE(odyssey.run().modal()); // the run's screens (the mantle, the focus) went with it
+    for (int i = 0; i < 20; ++i) odyssey.update(luna::engine::Intents{}); // and the game plays on
+}

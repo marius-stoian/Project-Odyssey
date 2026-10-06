@@ -1,0 +1,69 @@
+{
+  "title": "assets/data/hero/professions.json",
+  "type": "object",
+  "properties": {
+    "professions": {
+      "type": "array",
+      "description": "The five professions of Age 1",
+      "items": {
+        "type": "object",
+        "description": "One entry of professions",
+        "properties": {
+          "id": {"type": "string", "description": "One word: the name of the profession", "example": "hunter"},
+          "name": {"type": "string", "description": "The name shown to the player", "example": "Hunter"},
+          "skill": {"type": "string", "description": "The name of the skill it trains", "example": "hunting"},
+          "tools": {
+            "type": "array",
+            "description": "Items needed to practise it (needed, not used up)",
+            "items": {"type": "string", "description": "One entry of tools", "example": "spear", "ref": "catalog:items"}
+          },
+          "actions": {
+            "type": "array",
+            "description": "Interactions the profession does",
+            "items": {"type": "string", "description": "One entry of actions", "example": "hunt"}
+          },
+          "pillar": {"type": "string", "description": "The pillar the profession feeds: trade or religion", "example": "trade"},
+          "day": {
+            "type": "array",
+            "description": "The routine of the day: blocks of time, activity and place in the schedule format of the NPC classes (US-290)",
+            "items": {
+              "type": "object",
+              "description": "One block",
+              "properties": {
+                "from": {"type": "string", "description": "The time the block starts, HH:MM", "format": "time", "example": "06:00"},
+                "do": {"type": "string", "description": "The activity: sleep, rest, eat, work, idle, go, patrol or a word the rules know", "example": "work"},
+                "at": {"type": "string", "description": "Where it happens: a named place of the level, or home", "example": "market"},
+                "prefer": {
+                  "type": "object",
+                  "description": "Weights for the tags of what a person could do while the block is in force, in whole percent (100 = neutral, 0 to 500): a clan member of this profession scores an action times the weight of each tag it carries (work, gather, hunt, sleep, warm, talk, gift, steal, rest, wander). A need in danger comes first",
+                  "additionalProperties": {"type": "integer", "description": "The weight of this tag, in percent", "minimum": 0, "maximum": 500, "example": "300"}
+                }
+              }
+            }
+          },
+          "night": {
+            "type": "array",
+            "description": "The routine of the night, when it differs from the day",
+            "items": {
+              "type": "object",
+              "description": "One block",
+              "properties": {
+                "from": {"type": "string", "description": "The time the block starts, HH:MM", "format": "time", "example": "06:00"},
+                "do": {"type": "string", "description": "The activity: sleep, rest, eat, work, idle, go, patrol or a word the rules know", "example": "work"},
+                "at": {"type": "string", "description": "Where it happens: a named place of the level, or home", "example": "market"},
+                "prefer": {
+                  "type": "object",
+                  "description": "Weights for the tags of what a person could do while the block is in force, in whole percent (100 = neutral, 0 to 500): a clan member of this profession scores an action times the weight of each tag it carries (work, gather, hunt, sleep, warm, talk, gift, steal, rest, wander). A need in danger comes first",
+                  "additionalProperties": {"type": "integer", "description": "The weight of this tag, in percent", "minimum": 0, "maximum": 500, "example": "300"}
+                }
+              }
+            }
+          }
+        },
+        "required": ["id", "name", "skill", "tools", "actions", "pillar"]
+      }
+    }
+  },
+  "provides": [{"catalog": "professions", "at": "professions[].id"}],
+  "loaders": ["src/sim/hero_data.cpp#loadHeroData", "src/sim/npc_extras.cpp"]
+}

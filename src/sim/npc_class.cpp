@@ -1,5 +1,7 @@
 #include "sim/npc_class.h"
 
+#include "sim/economy.h"
+
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -10,11 +12,6 @@
 namespace odysseus::sim::rules {
 
 namespace {
-
-bool validId(const std::string& id) {
-    if (id.empty() || id.size() > 32) return false;
-    return std::all_of(id.begin(), id.end(), [](unsigned char c) { return (std::islower(c) != 0) || (std::isdigit(c) != 0) || c == '-'; });
-}
 
 class ClassParser {
 public:
@@ -40,7 +37,7 @@ public:
             }
         }
         out.id = text("id", true);
-        if (!out.id.empty() && !validId(out.id)) error(line("id"), "id must be lower-case letters, digits and - (at most 32)");
+        if (!out.id.empty() && !validItemId(out.id)) error(line("id"), "id must be lower-case letters, digits and - (at most 32)");
         if (!expectedId.empty() && !out.id.empty() && out.id != expectedId) error(line("id"), std::format("id \"{}\" must match the file name \"{}\"", out.id, expectedId));
         out.label = text("label", true);
         if (const JsonValue* colour = root_.find("colour")) {
@@ -153,6 +150,10 @@ std::optional<NpcClass> NpcClassCatalog::parse(std::string_view text, const std:
     const JsonParseResult parsed = parseJson(text);
     if (!parsed.value) {
         report.errors.push_back({name, parsed.errorLine, parsed.error});
+        return std::nullopt;
+    }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
         return std::nullopt;
     }
     return ClassParser(*parsed.value, name, report).run(expectedId);

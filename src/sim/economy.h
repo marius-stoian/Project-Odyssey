@@ -2,6 +2,7 @@
 
 #include "boundary.h"
 
+#include <cstddef>
 #include <map>
 #include <optional>
 #include <string>
@@ -29,8 +30,8 @@ struct RegionEconomy {
     friend bool operator==(const RegionEconomy&, const RegionEconomy&) = default;
 };
 
-// An item id is lower-case letters, digits and "-" (at most 32), as in the item files.
-bool validItemId(std::string_view id);
+// An item id is lower-case letters, digits and "-" (at most 32, or `maxLength`), as in the item files. Editor file names use the same rule.
+bool validItemId(std::string_view id, std::size_t maxLength = 32);
 
 // "shells=1 gold=10" and back: the text the Editor shows and reads for a table of item and number. Every name is checked as an item id and every number to the
 // range. On a mistake nothing comes back and `problem` (when given) says what is wrong.

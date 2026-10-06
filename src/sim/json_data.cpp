@@ -1,7 +1,9 @@
 #include "sim/json_data.h"
 
+#include "core/text.h"
+#include "sim/schema.h"
+
 #include <format>
-#include <fstream>
 
 namespace odysseus::sim {
 
@@ -9,15 +11,18 @@ DataError::DataError(const std::filesystem::path& file, const std::string& field
     : std::runtime_error(std::format("{}: {}: {}", file.generic_string(), field, problem)) {}
 
 nlohmann::json readJsonFile(const std::filesystem::path& file) {
-    std::ifstream in(file);
-    if (!in) {
+    const std::optional<std::string> text = core::readTextFile(file);
+    if (!text) {
         throw DataError(file, "(file)", "cannot be opened");
     }
+    nlohmann::json data;
     try {
-        return nlohmann::json::parse(in);
+        data = nlohmann::json::parse(*text, nullptr, true, true); // comments allowed, like every data file
     } catch (const nlohmann::json::parse_error& error) {
         throw DataError(file, "(syntax)", error.what());
     }
+    schema::checkLoaded(file, data, *text); // US-190: type, range and choices, with file, line and field
+    return data;
 }
 
 int requireInt(const nlohmann::json& object, const std::filesystem::path& file, const std::string& field, int minimum,

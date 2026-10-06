@@ -1,0 +1,96 @@
+{
+  "title": "assets/data/objects.json",
+  "type": "object",
+  "properties": {
+    "objects": {
+      "type": "array",
+      "description": "World objects placed like plants: fires, shelters, the sun and the moon",
+      "items": {
+        "type": "object",
+        "description": "One entry of objects",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the object; levels and rules use it", "example": "fire pit"},
+          "frame": {"type": "string", "description": "The picture the game draws it with", "example": "fire-pit"},
+          "blocks": {"type": "boolean", "description": "true: it blocks walking like a rock", "default": false},
+          "inspect": {
+            "type": "string",
+            "description": "The text shown when the player looks at it",
+            "example": "A ring of stones around old ash."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags the object carries: what rules may do to it",
+            "items": {"type": "string", "description": "One entry of tags", "example": "object"}
+          },
+          "states": {
+            "type": "array",
+            "description": "The states it moves through; the first is where it starts",
+            "items": {"type": "string", "description": "One entry of states", "example": "cold"}
+          },
+          "light": {
+            "type": "string",
+            "description": "A kind of light of lights.json the object gives",
+            "example": "campfire",
+            "ref": "catalog:lights"
+          },
+          "lightState": {
+            "type": "string",
+            "description": "It gives its light only while it is in this state (a fire pit: burning); empty: always",
+            "example": "burning"
+          },
+          "celestial": {
+            "type": "object",
+            "description": "Makes the object a sun or a moon: its light, orbit and height",
+            "properties": {
+              "body": {"type": "string", "description": "sun or moon", "example": "sun", "enum": ["sun", "moon"]},
+              "light": {
+                "type": "string",
+                "description": "The kind of light of lights.json the sun or the moon gives",
+                "example": "sun",
+                "ref": "catalog:lights"
+              },
+              "follows": {
+                "type": "string",
+                "description": "clock: the body travels its orbit by the game clock; fixed: it stays where it is placed",
+                "example": "clock",
+                "enum": ["clock", "fixed"]
+              },
+              "orbitRadius": {
+                "type": "number",
+                "description": "How far away a clock body is, in metres",
+                "minimum": 10,
+                "maximum": 100000,
+                "default": 400,
+                "example": "400"
+              },
+              "tilt": {
+                "type": "number",
+                "description": "Degrees that turn the orbit round the vertical: the sun rises a little north or south of east",
+                "minimum": -90,
+                "maximum": 90,
+                "default": 0,
+                "example": "0"
+              },
+              "height": {
+                "type": "number",
+                "description": "Metres above the ground; a body that follows the clock takes its height from its orbit",
+                "minimum": 0,
+                "maximum": 100000,
+                "default": 50,
+                "example": "100"
+              }
+            }
+          },
+          "shadow": {"type": "boolean", "description": "false: casts no shadow whatever its height"}
+        },
+        "required": ["name", "frame", "blocks", "inspect"]
+      }
+    }
+  },
+  "provides": [
+    {"catalog": "objects", "at": "objects[].name"},
+    {"catalog": "kinds", "at": "objects[].name"},
+    {"catalog": "tags", "at": "objects[].tags[]"}
+  ],
+  "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp", "src/game/level.cpp#loadDefinitions"]
+}

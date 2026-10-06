@@ -2,6 +2,85 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## X-M11 Exit review M11 Data editors (Mraw) - 2026-10-06
+
+**State:** `qa` merged into `main`, tag `m11-done`. Gate: `docs/gates/M11.md`.
+
+- **Fixed:** a run in play, the Editor and back to the game read freed memory (`OdysseyGame::resetPlay` made a new clan under a run that still pointed at the old one; found by the exit demonstration under AddressSanitizer). A restart now ends the hero's run and closes its screens. Test `X-M11 Restart`.
+- **New:** `docs/gates/M11.md`, `docs/evidence/X-M11/`, `docs/plans/stories-M11.md` (the story plans of M11 merged, the separate `US-19x` plan files removed), the exit demonstration test `X-M11 Exit` (a new plant kind and a changed mechanic made in the Data tab only, seen in the running game), D-60 Q12 and Q14 to Q18.
+- **Verified:** `verify.ps1 -Story X-M11 -Config Both` in a clean worktree: zero warnings, Debug and Release 22 of 22 and the window group 8 of 8.
+
+## US-192 Picture pickers and cutting frames (Mraw) - 2026-10-06
+
+**State:** On `story/US-192`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (game 5).
+
+- **New:** `src/game/atlas_cuts.*` (`addCut`, `rebuildAtlases`, `cutSheets`, `cutTargets`: the cut and the library call of the atlas cutter), `src/game/picture_tool.*` (`PictureGrid`, `SheetView`, `PictureTool`: the picker and the Cut tool), `docs/plans/stories-M11.md#us-192`, `docs/evidence/US-192/`; tests `tests/game/picture_tool_test.cpp`.
+- **Changed:** the Data tab (`src/game/data_editor.*`): a **...** picker on every frame field, a **Cut tool** button, and the frames of the chosen entry playing beside its form; `OdysseyGame` gives the tab the sprites folder and the renderer's texture maker (`setPictures`); `CMakeLists.txt`; guide `docs/guides/data-editor.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-192*`: game 5 of 5.
+
+## US-196 Daily routines as data (Mraw) - 2026-10-06
+
+**State:** On `story/US-196`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 7, game 4).
+
+- **New:** `src/game/timeline_view.*` (the 24-hour bar), `docs/plans/stories-M11.md#us-196`, `docs/evidence/US-196/`; tests `tests/sim/routine_test.cpp`, cases in `tests/game/data_editor_test.cpp` and `tests/game/schedule_editor_test.cpp`.
+- **Changed:** a schedule block may carry `prefer` (weights by tag, 0 to 500 percent) in the one format: `src/sim/npc_schedule.*` (`weighted`, the text `... prefer tag=weight`), `npc_extras.*` (the one reader, now also `scheduleFromJson`), `npc_director.*` (the choice is multiplied by the active block's weights; save and hash); professions carry `day` and `night` in the same format (`hero/professions.json`, `loadHeroData`; `hunter` and `gatherer` ship with a routine); the clan's people take the routine of their profession (`SimConfig::routines` from `configForComfort`, `World::professionOf`, `Situation::routinePercent`, `actionTags`, the new `routineDangerBelow` of `sim/actions.json`: needs below it win); a saved run restores the clan's routines and comfort (`odyssey_game.cpp`); the timeline in the Editor's schedule form (`Editor::addScheduleRows`) and in the Data tab above a routine (`DataEditor::routinesShown`); schemas `npc-class`, `npc-kind`, `hero-professions`, `sim-actions`; `assets/levels/npc-test.json` is level version 7 (the round trip of US-270); guide `docs/guides/npc-data.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-196*`: sim 7 of 7, game 4 of 4; the whole Simulation run 393 of 394 (the one failure is the owner's uncommitted edit of `assets/data/npcs/wanderer.json`, which also breaks `US-290 Walk` in the game run).
+
+## US-195 Game Rules page (Mraw) - 2026-10-06
+
+**State:** On `story/US-195`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 6, game 5).
+
+- **New:** `src/sim/play_rules.*` (`PlayRules`, `loadPlayRules`, `playRuleNames`, `applyRules`, `describeRules`), `assets/data/rules/standard.json` and `peaceful.json`, `assets/data/schemas/rules.schema.json`, `docs/guides/game-rules.md`, `docs/plans/stories-M11.md#us-195`, `docs/evidence/US-195/`; tests `tests/sim/play_rules_test.cpp`, cases in `tests/game/live_catalog_test.cpp` and `tests/game/data_editor_test.cpp`.
+- **Changed:** the presets, comforts and thresholds of victory moved from `hero/hero.json` to the rules (`loadHeroData` takes the rules name; hero.json is still read for what a rules file leaves out, with a warning); switches of weather, combat, rivals, tutorial, markers, chronicle and politics (`OdysseyGame::chooseRules` and the systems); the New Game screen has a Rules row; a level may name `rules` (level version 7); the hero's save carries the rules (version 2); the data set `mechanics` also watches `rules/`; the Data tab shows the Game Rules heading and summary on a rules file; `docs/guides/editor.md`, `schemas.md`; the level tests expect version 7.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-195*`: sim 6 of 6, game 5 of 5; the whole Simulation run 386 of 387 (the one failure is the owner's uncommitted edit of `assets/data/npcs/wanderer.json`).
+
+## US-194 Mechanics and story tuning with a quick check (Mraw) - 2026-10-06
+
+**State:** On `story/US-194`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 4, game 5 and the US-303 reload cases).
+
+- **New:** `src/sim/quick_check.*` (`QuickCheck`, `runQuickCheck`, `formatQuickSummary`: the clan for N years on a data folder and a seed, a slice of days at a time, summary of population, births, deaths by cause, feuds, episodes and world hash beside the run before), `docs/plans/stories-M11.md#us-194`, `docs/evidence/US-194/`; tests `tests/sim/quick_check_test.cpp`, cases in `tests/game/data_editor_test.cpp` and `tests/game/live_catalog_test.cpp`.
+- **Changed:** the Data tab gets a **Quick check** button (`DataEditor::startQuickCheck`, `setQuickSeed`; progress and summary on the question screen, Esc stops); **`sim/`, `hero/` and `story/` are read again while the game runs** (data set `mechanics`, `OdysseyGame::reloadMechanics`, no longer in `next-start`): `World::configProblem` and `replaceConfig` swap the clan's rules between ticks and refuse a change of ticks per day, days per season or the top of the needs scale, the hero data is swapped in place and a hero file that drops the run's preset or comfort level is refused (CI-007 closed for mechanics); `CMakeLists.txt`; `tests/game/data_reload_test.cpp` (six sets); guides `data-editor.md` and `editor.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-194*`: sim 4 of 4, game 5 of 5; `US-191*` and `US-303*` still pass.
+
+## US-193 Entity editor (Mraw) - 2026-10-06
+
+**State:** On `story/US-193`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 6 test cases, game 7).
+
+- **New:** `src/sim/data_refs.*` (the reference engine: `usesOf`, `planRename`, `applyPlan`, `replaceWord`, `validEntryName`), `docs/plans/stories-M11.md#us-193`, `docs/evidence/US-193/`; tests `tests/sim/data_refs_test.cpp`, cases in `tests/game/data_editor_test.cpp` and `tests/game/live_catalog_test.cpp`.
+- **Changed:** the Data tab (`src/game/data_editor.*`) gets Copy, Rename, Delete and Interactions and a question dialog; the Editor opens the interaction graph from the tab (`setOpenInteraction`); the game tells the tab each kind's tags (`setTagsOf`); the form offers Remove only for optional fields (`src/sim/data_form.cpp`); `CMakeLists.txt`; guides `data-editor.md` and `schemas.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-19*`: sim 41 of 41, game 25 of 25.
+
+## US-191 Schema-driven form editor (Mraw) - 2026-10-06
+
+**State:** On `story/US-191`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 22 test cases, game 16, Luna 1); the results of the whole game and Simulation runs are in Milestone-145.md.
+
+- **New:** `src/sim/json_patch.*` (saves an edited document by patching the text it came from), `src/sim/data_document.*` (a file open for editing: edits, 200 steps of undo, safe save, `DocPath`), `src/sim/data_form.*` (entries and rows of a form from a schema; typed text becomes an edit or a refusal; defaults for new entries), `src/game/data_editor.*` (the Data tab), `assets/data/schemas/graph-layout.schema.json` and `required` lists on the 17 catalog and entry shapes, `docs/guides/data-editor.md`, `docs/plans/stories-M11.md#us-191`; tests `tests/sim/json_patch_test.cpp`, `data_document_test.cpp`, `data_form_test.cpp`, `tests/game/data_editor_test.cpp`, `live_catalog_test.cpp`, one case in `tests/luna/ui_test.cpp`.
+- **Changed:** the Editor has a **Data** button and gives it the screen like the graph editor (`src/game/editor.*`); Luna gains `Label`, `Toggle` and `TextField::invalid` (`src/luna/engine/ui.*`); `EditorHelp` takes entries generated from the schemas (`setGenerated`); **weapons, animals, effects and weather are read again while the game runs** (CI-007, CI-021): shots in the air, the starter weapons and palette, the weather cycle and the atlas places follow the new definitions by name (`OdysseyGame::applyCatalog`, `rebuildWeaponLists`, `rebuildCatalogArt`), `tiles.json` and `materials.json` stay at the next start; a save in the Data tab reads the sets that watch the file (`dataFileSaved`) and the watcher tells the tab about files changed outside; `JsonLines::childPath` quotes keys with dots; the schema index covers the graph editor's `.layout.json` sidecars; the schema subset gains `keyRef` (the keys of a map name catalog entries: the items of a recipe, a building's cost, a trader's stock) and the interaction `target.kinds` link to the kinds catalog; the game target links the JSON library publicly; the US-303 next-start test uses `tiles.json`; D-60 Q5 is revised (patching instead of a canonical writer).
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-191*`: sim 22 of 22, game 16 of 16, Luna 1 of 1; patching proved over all 183 shipped data files.
+
+## US-190 Schemas for every data file (Mraw) - 2026-10-06
+
+**State:** On `story/US-190`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (15 test cases, 104 assertions); the whole Simulation test run passes 348 of 349 (the one failure is the owner's own uncommitted edit of `assets/data/npcs/wanderer.json`, not touched).
+
+- **New:** `src/sim/json_text.*` (`JsonLines`: the line of every member of a JSON text), `src/sim/schema.*` (the schema subset, `check`, `SchemaSet`, `install`, `checkLoaded`, `issuesForText`), `src/sim/schema_index.*` (`buildIndex`: catalogs, uses of an entry, broken links, files without a schema; `checkDrift`: the member names each loader reads against the fields of its schema), `src/sim/schema_install.h`; `assets/data/schemas/index.json` and 43 schemas covering all 183 JSON files (every field has a description); `docs/guides/schemas.md`; `docs/plans/stories-M11.md#us-190`; tests `tests/sim/schema_test.cpp` and `tests/game/schema_game_test.cpp` ("US-190 ...").
+- **Changed:** `readJsonFile` reads comments and checks the file against its schema; the rule-file loaders (`interaction.cpp`, `npc_class.cpp`, `npc_kind.cpp`, `quest_data.cpp`, `smalltalk.cpp`, `partner_types.cpp`, `building_data.cpp`) and the tutorial report a schema mistake as `file:line: field: problem` and leave that file out; `apps/odysseus/main.cpp` and `apps/headless/main.cpp` install the schemas before anything is read; `quest.schema.json` and `story-event.schema.json` rewritten to the final subset; `CMakeLists.txt` (new sources and tests; the game tests link the JSON library).
+- **Verified:** Debug build of `odysseus`, `odysseus_headless`, `odysseus_game_tests`, `odysseus_sim_tests`: zero warning lines. `US-190*` cases: sim 13 of 13, game 2 of 2. Every shipped data file passes its schema, every link names an entry of a catalog, every loader reads what its schema describes.
+
+## K-M11 Kick off M11 Data editors (Mraw) - 2026-10-06
+
+**State:** On `qa`. Docs only; no code changed.
+
+- **New:** `docs/plans/M11-data-editors-design.md`; `docs/decision-requests/D-60.md`; D-60 in `docs/decisions.md` (Decided by Dominus, delegated under D-41); `Milestone-143.md` (AP-144).
+- **Changed:** `docs/status.md` (K-M11 Done); `Limit.md` (resume point).
+- **Verified:** D-40, D-41, D-58 Decided; X-M10 and X-M10b results present in `docs/gates/`; no build needed for a docs-only change.
+
+## Refactor: lean code, stronger Luna (Mraw) - 2026-10-06
+
+**State:** On `refactor/lean-luna` from `main` (`f0aa726`); not merged. Debug verify: zero warnings, 30 of 30 (`docs/evidence/REFACTOR-lean-luna/`). Full report: `docs/reports/Refactor-lean-luna-2026-10-06.md`.
+
+- **New:** `src/core/text.*` (`readTextFile`, `writeTextFileSafely`, `lowered`, `splitWords`, `joined`, `replaceAll`); Luna `TimeWindow<N>` (`frame_stats.h`) and `intentFromName` (`input.*`); `sim::needFromName`; `validItemId(id, maxLength)`; `tests/core/text_test.cpp` and two Luna test cases.
+- **Changed:** 52 hand-written copies of file reads, safe writes, lower-casing, id checks, need lookups and word helpers now call the shared ones; the GPU backend no longer allocates per lit batch; `OdysseyGame` timing uses `TimeWindow`; `apps/odysseus/main.cpp` uses `intentFromName` (every intent is scriptable); game tests run in six balanced shards and `tools/verify.ps1` runs headless tests with `-j 6` (964 s to 287 s).
+- **Removed:** 46 functions with no caller (for example `Window::setFullscreen`, `stepProjectileTick`, `OdysseyGame::plantThing`, `BuildingStore::footprintCells`) and two write-only members; `Sword::slash` lost its unused parameter.
 ## US-306 Graph editor: new files in one click, framed tabs, readable text (Mraw) - 2026-10-06
 
 **State:** On `fix/graph-editor-new`, merged into `qa` after the Debug verify. Owner request: the Talk, Rules and Quests lists could not be given new entries in practice, and text and tooltips were cut off.

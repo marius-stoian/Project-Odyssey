@@ -209,15 +209,15 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-304 | US-304 | M10b | Done | 2026-10-05; Debug zero warnings, 27/27; docs/evidence/US-304/ |
 | S-US-305 | US-305 | M10b | Done | 2026-10-06; Debug zero warnings; docs/evidence/US-305/ |
 | X-M10b | - | M10b | Done | 2026-10-06; Debug and Release 27/27, zero warnings; merged into main, CI green, tag m10b-done; owner walkthrough deferred, review pending (docs/gates/M10b-walkthrough.md) |
-| K-M11 | - | M11 | To do |  |
-| S-US-190 | US-190 | M11 | To do |  |
-| S-US-191 | US-191 | M11 | To do |  |
-| S-US-193 | US-193 | M11 | To do |  |
-| S-US-194 | US-194 | M11 | To do |  |
-| S-US-195 | US-195 | M11 | To do |  |
-| S-US-196 | US-196 | M11 | To do |  |
-| S-US-192 | US-192 | M11 | To do |  |
-| X-M11 | - | M11 | To do |  |
+| K-M11 | - | M11 | Done | 2026-10-06; D-60, docs/plans/M11-data-editors-design.md |
+| S-US-190 | US-190 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-190/ |
+| S-US-191 | US-191 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-191/; CI-007 and CI-021 resolved for weapons, animals, effects and weather |
+| S-US-193 | US-193 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-193/; Milestone-146 |
+| S-US-194 | US-194 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-194/; Milestone-147; mechanics (sim/, hero/, story/) now live |
+| S-US-195 | US-195 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-195/; Milestone-148 |
+| S-US-196 | US-196 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-196/; Milestone-149 |
+| S-US-192 | US-192 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-192/; Milestone-150 |
+| X-M11 | - | M11 | Done | 2026-10-06; Debug and Release 22/22 and window 8/8, zero warnings, clean worktree; merged into main, tag m11-done; docs/gates/M11.md; the on-screen manual checks are open for the owner |
 | K-M12 | - | M12 | To do |  |
 | S-US-200 | US-200 | M12 | To do |  |
 | S-US-201 | US-201 | M12 | To do |  |

@@ -24,8 +24,18 @@ struct ScheduleBlock {
     int minute = 0;        // when it begins, 0 to 1439
     std::string activity;  // work, eat, sleep, rest, idle, go, patrol, or the id of an interaction
     std::string place;     // the name of a place of the level, or "home" (where the NPC was placed)
+    // US-196: weights for the tags of what a person could do, in whole percent (100 = neutral, 0 to 500). While the block is in force the score of a choice is multiplied by the
+    // weight of each tag it carries: a hunter's morning block { "animal": 300 } makes everything to do with animals three times as attractive. A block guides choices;
+    // it does not name one. Left out, the block weighs nothing.
+    std::map<std::string, int> prefer;
     friend bool operator==(const ScheduleBlock&, const ScheduleBlock&) = default;
 };
+
+inline constexpr int kMaxPreferWeight = 500;
+
+// The score of a choice with these tags, multiplied by the weights the block gives them (each matching tag once), in whole numbers; a block with no weights, or none for
+// these tags, leaves the score as it was. Never below 0 or above 100000 (the scores of the director).
+long long weighted(const ScheduleBlock* block, const std::vector<std::string>& tags, long long score);
 
 // The day and, when the night differs, the night variant (D-54 Q9). With no night blocks the day blocks hold at night too.
 struct Schedule {
@@ -44,8 +54,9 @@ std::string formatClock(int minute);
 // midnight). At night the night blocks are used when there are any. Null for an empty schedule.
 const ScheduleBlock* activeBlock(const Schedule& schedule, int minuteOfDay, bool night);
 
-// The Editor's text of a list of blocks: "06:00 work market; 21:00 sleep home" (the place is optional: home), and back. Blocks come back sorted by time; two at the same
-// time, a bad time, or an activity or place that is no word is a mistake with the reason.
+// The Editor's text of a list of blocks: "06:00 work market; 21:00 sleep home" (the place is optional: home), and back. A block may end with its weights:
+// "06:00 work market prefer animal=300,edible=150" (US-196). Blocks come back sorted by time; two at the same time, a bad time, or an activity, place or tag that is no
+// word, or a weight outside 0 to 500, is a mistake with the reason.
 std::string scheduleText(const std::vector<ScheduleBlock>& blocks);
 std::optional<std::vector<ScheduleBlock>> parseScheduleText(std::string_view text, std::string& problem);
 

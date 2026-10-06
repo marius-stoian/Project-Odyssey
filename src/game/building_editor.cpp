@@ -1,12 +1,12 @@
 #include "game/building_editor.h"
 
+#include "core/text.h"
 #include "sim/economy.h"
 
 #include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <format>
-#include <fstream>
 #include <system_error>
 
 namespace odysseus::game {
@@ -27,11 +27,6 @@ constexpr int kRow = 14;
 constexpr int kPanelWidth = 140;
 constexpr int kPrefabWidth = 304;
 constexpr int kCanvasCell = 12;
-
-bool validId(const std::string& id) {
-    if (id.empty() || id.size() > 40) return false;
-    return std::all_of(id.begin(), id.end(), [](unsigned char c) { return std::islower(c) || std::isdigit(c) || c == '-'; });
-}
 
 } // namespace
 
@@ -339,7 +334,7 @@ bool BuildingEditor::savePrefab() {
         say_(why);
         return false;
     };
-    if (!validId(draft_.id)) return refuse("The id needs lower-case letters, digits and - (for example my-lodge).");
+    if (!sim::validItemId(draft_.id, 40)) return refuse("The id needs lower-case letters, digits and - (for example my-lodge).");
     if (const KindDef* clash = data()->kind(draft_.id); clash != nullptr && !clash->prefab) return refuse("\"" + draft_.id + "\" is a kind of kinds.json: choose another id.");
     if (draft_.layout.empty()) return refuse("Place at least one piece on the grid.");
     if (draft_.label.empty()) draft_.label = draft_.id;
@@ -357,18 +352,8 @@ bool BuildingEditor::savePrefab() {
     const std::string name = "buildings/prefabs/" + out.id + ".json";
     const auto parsed = data()->parseKind(sim::buildings::toJson(out), name, report, true, out.id);
     if (!parsed) return refuse(report.errors.empty() ? "The prefab has a mistake." : report.errors.front().text());
-    std::error_code error;
-    std::filesystem::create_directories(host_.prefabFolder, error);
     const std::filesystem::path file = host_.prefabFolder / (out.id + ".json");
-    const std::filesystem::path temporary = file.string() + ".tmp";
-    {
-        std::ofstream stream(temporary, std::ios::binary | std::ios::trunc);
-        stream << sim::buildings::toJson(out);
-        stream.flush();
-        if (!stream) return refuse("The prefab file could not be written.");
-    }
-    std::filesystem::rename(temporary, file, error);
-    if (error) return refuse("The prefab file could not be written: " + error.message());
+    if (const auto problem = core::writeTextFileSafely(file, sim::buildings::toJson(out))) return refuse("The prefab file could not be written: " + *problem);
     host_.data->addKind(*parsed);
     if (host_.saved) host_.saved(*parsed);
     draft_ = *parsed;

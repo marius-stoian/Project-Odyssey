@@ -1,5 +1,7 @@
 #include "sim/interaction.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -337,18 +339,15 @@ private:
     }
 };
 
-std::string readWholeFile(const std::filesystem::path& file, bool& ok) {
-    std::ifstream in(file, std::ios::binary);
-    ok = static_cast<bool>(in);
-    if (!ok) return {};
-    return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
-}
-
 std::optional<Interaction> parseText(std::string_view text, const std::string& name, LoadReport& report, const std::string& expectedId,
                                      std::vector<PendingStart>* pending, const LoadOptions* options) {
     const JsonParseResult json = parseJson(text);
     if (!json.value) {
         report.errors.push_back({name, json.errorLine, "not valid JSON: " + json.error});
+        return std::nullopt;
+    }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190): type, range and choice
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
         return std::nullopt;
     }
     return FileParser(*json.value, name, report, pending, options).run(expectedId);
@@ -397,13 +396,12 @@ InteractionRegistry InteractionRegistry::load(const std::filesystem::path& folde
     for (const std::filesystem::path& file : files) {
         ++report.filesRead;
         const std::string name = folder.filename().generic_string() + "/" + file.filename().generic_string();
-        bool ok = false;
-        const std::string text = readWholeFile(file, ok);
-        if (!ok) {
+        const std::optional<std::string> text = core::readTextFile(file);
+        if (!text) {
             report.errors.push_back({name, 0, "the file cannot be read"});
             continue;
         }
-        if (auto interaction = parseText(text, name, report, file.stem().string(), &pending, &options)) {
+        if (auto interaction = parseText(*text, name, report, file.stem().string(), &pending, &options)) {
             registry.interactions_.push_back(std::move(*interaction));
         }
     }

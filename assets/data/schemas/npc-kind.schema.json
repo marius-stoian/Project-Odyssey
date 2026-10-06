@@ -1,0 +1,178 @@
+{
+  "title": "assets/data/npcs/<kind>.json",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "The name of the kind; it is also the file name: a name of characters.json or animals.json",
+      "example": "alpaca",
+      "ref": "catalog:characters"
+    },
+    "classes": {
+      "type": "array",
+      "description": "The classes this kind belongs to; written here, they replace the classes of the layer below",
+      "items": {"type": "string", "description": "One entry of classes", "example": "animal", "ref": "catalog:npc-classes"}
+    },
+    "attitude": {
+      "type": "string",
+      "description": "How the kind meets the hero: hostile, wary, suspicious, neutral, friendly, enchanted or lovingly; written here, it replaces the layer below",
+      "example": "neutral"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags the thing carries; they say what rules may do to it",
+      "items": {"type": "string", "description": "One tag"}
+    },
+    "actions": {
+      "type": "object",
+      "description": "What it may or may never do",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "description": "Interactions it may do",
+          "items": {"type": "string", "description": "An interaction id", "ref": "catalog:interactions"}
+        },
+        "deny": {
+          "type": "array",
+          "description": "Interactions it may never do; a deny always wins",
+          "items": {"type": "string", "description": "An interaction id", "ref": "catalog:interactions"}
+        }
+      }
+    },
+    "dialogues": {
+      "type": "object",
+      "description": "Dialogue files by partner type (partner: file name)",
+      "additionalProperties": {"type": "string", "description": "A .dlg file of the dialogue folder", "ref": "catalog:dialogues"}
+    },
+    "does": {
+      "type": "array",
+      "description": "Interactions it chooses on its own when free",
+      "items": {"type": "string", "description": "An interaction id", "ref": "catalog:interactions"}
+    },
+    "partnerActions": {
+      "type": "object",
+      "description": "The actions it prefers with each kind of partner (type: interaction ids)",
+      "additionalProperties": {
+        "type": "array",
+        "description": "Interaction ids",
+        "items": {"type": "string", "description": "An interaction id", "ref": "catalog:interactions"}
+      }
+    },
+    "trade": {
+      "type": "object",
+      "description": "What a trader of this kind or class stocks, wants and sells",
+      "properties": {
+        "stock": {
+          "type": "object",
+          "description": "The items it starts with, each with how many",
+          "keyRef": "catalog:items",
+          "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 9999, "description": "How many it starts with"}
+        },
+        "restockPerDay": {
+          "type": "object",
+          "description": "The items it gains each day, each with how many",
+          "keyRef": "catalog:items",
+          "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 999, "description": "How many it gains a day"}
+        },
+        "deliveries": {
+          "type": "integer",
+          "description": "How many weighted deliveries the region makes to it each day",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "weights": {
+          "type": "object",
+          "description": "How likely each item is to be delivered (weights)",
+          "keyRef": "catalog:items",
+          "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "The weight of the item"}
+        },
+        "wants": {
+          "type": "array",
+          "description": "The items it pays more for",
+          "items": {"type": "string", "description": "An item id", "ref": "catalog:items"}
+        },
+        "rare": {
+          "type": "object",
+          "description": "Items it only sells to those it thinks this well of (item: band word)",
+          "keyRef": "catalog:items",
+          "additionalProperties": {
+            "type": "string",
+            "description": "The lowest opinion band that may buy it",
+            "enum": ["hostile", "wary", "suspicious", "neutral", "friendly", "enchanted", "lovingly"]
+          }
+        }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "description": "A daily routine: blocks of time, activity and place (the US-290 format)",
+      "properties": {
+        "day": {
+          "type": "array",
+          "description": "The blocks of the day: each says from when, what to do and where",
+          "items": {
+            "type": "object",
+            "description": "One block of the day",
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "The time the block starts, HH:MM",
+                "format": "time",
+                "example": "06:00"
+              },
+              "do": {
+                "type": "string",
+                "description": "The activity: sleep, rest, eat, work, idle, go, patrol or a word the rules know",
+                "example": "work"
+              },
+              "at": {
+                "type": "string",
+                "description": "Where it happens: a named place of the level, or home",
+                "example": "market"
+              },
+              "prefer": {
+                "type": "object",
+                "description": "Weights for the tags of what a person could do while the block is in force, in whole percent (100 = neutral, 0 to 500): the score of a choice is multiplied by the weight of each tag it carries. The tags are an interaction's id, the tags it asks of its target and the target's own tags",
+                "additionalProperties": {"type": "integer", "description": "The weight of this tag, in percent", "minimum": 0, "maximum": 500, "example": "300"}
+              }
+            }
+          }
+        },
+        "night": {
+          "type": "array",
+          "description": "The blocks of the night: each says from when, what to do and where",
+          "items": {
+            "type": "object",
+            "description": "One block of the night",
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "The time the block starts, HH:MM",
+                "format": "time",
+                "example": "06:00"
+              },
+              "do": {
+                "type": "string",
+                "description": "The activity: sleep, rest, eat, work, idle, go, patrol or a word the rules know",
+                "example": "work"
+              },
+              "at": {
+                "type": "string",
+                "description": "Where it happens: a named place of the level, or home",
+                "example": "market"
+              },
+              "prefer": {
+                "type": "object",
+                "description": "Weights for the tags of what a person could do while the block is in force, in whole percent (100 = neutral, 0 to 500): the score of a choice is multiplied by the weight of each tag it carries. The tags are an interaction's id, the tags it asks of its target and the target's own tags",
+                "additionalProperties": {"type": "integer", "description": "The weight of this tag, in percent", "minimum": 0, "maximum": 500, "example": "300"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["kind"],
+  "provides": [{"catalog": "npc-kinds", "at": "kind"}],
+  "loaders": ["src/sim/npc_kind.cpp", "src/sim/npc_extras.cpp"]
+}

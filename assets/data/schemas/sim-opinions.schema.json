@@ -1,0 +1,216 @@
+{
+  "title": "assets/data/sim/opinions.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "minimum": 1, "maximum": 1, "example": "1"},
+    "bands": {
+      "type": "object",
+      "description": "The opinion each named mood starts at (the lowest opinion that is still this mood)",
+      "properties": {
+        "hostile": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as hostile",
+          "example": "-100",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "wary": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as wary",
+          "example": "-59",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "suspicious": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as suspicious",
+          "example": "-29",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "neutral": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as neutral",
+          "example": "-9",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "friendly": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as friendly",
+          "example": "10",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "enchanted": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as enchanted",
+          "example": "40",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "lovingly": {
+          "type": "integer",
+          "description": "Lowest opinion that counts as loving",
+          "example": "70",
+          "minimum": -100,
+          "maximum": 100
+        }
+      }
+    },
+    "start": {
+      "type": "object",
+      "description": "The opinion an NPC starts with for each attitude",
+      "properties": {
+        "friendly": {
+          "type": "integer",
+          "description": "Opinion of a friendly NPC",
+          "example": "25",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "neutral": {
+          "type": "integer",
+          "description": "Opinion of a neutral NPC",
+          "example": "0",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "wary": {"type": "integer", "description": "Opinion of a wary NPC", "example": "-45", "minimum": -100, "maximum": 100},
+        "hostile": {
+          "type": "integer",
+          "description": "Opinion of a hostile NPC",
+          "example": "-80",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "scared": {
+          "type": "integer",
+          "description": "Opinion of a scared NPC",
+          "example": "-10",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "suspicious": {
+          "type": "integer",
+          "description": "Opinion of a suspicious NPC",
+          "example": "-20",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "enchanted": {
+          "type": "integer",
+          "description": "Opinion of an enchanted NPC",
+          "example": "55",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "lovingly": {
+          "type": "integer",
+          "description": "Opinion of a loving NPC",
+          "example": "80",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "enviously": {
+          "type": "integer",
+          "description": "Opinion of an envious NPC",
+          "example": "-15",
+          "minimum": -100,
+          "maximum": 100
+        }
+      }
+    },
+    "events": {
+      "type": "object",
+      "description": "How much an event changes what one person thinks of another",
+      "properties": {
+        "gift": {"type": "integer", "description": "A gift", "example": "15", "minimum": -100, "maximum": 100},
+        "trade": {"type": "integer", "description": "A fair trade", "example": "5", "minimum": -100, "maximum": 100},
+        "help": {"type": "integer", "description": "Help in need", "example": "20", "minimum": -100, "maximum": 100},
+        "marriage-in-family": {
+          "type": "integer",
+          "description": "A marriage in the family",
+          "example": "10",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "insult": {"type": "integer", "description": "An insult", "example": "-20", "minimum": -100, "maximum": 100},
+        "theft": {"type": "integer", "description": "A theft", "example": "-30", "minimum": -100, "maximum": 100}
+      }
+    },
+    "sameFamily": {
+      "type": "integer",
+      "description": "Two persons of the same family start with this opinion of each other",
+      "minimum": -200,
+      "maximum": 200,
+      "default": 20,
+      "example": "20"
+    },
+    "hearingTiles": {
+      "type": "integer",
+      "description": "How far a confrontation is heard: persons this close to the target who know it think of the hero too",
+      "minimum": 1,
+      "maximum": 60,
+      "default": 12,
+      "example": "12"
+    },
+    "talk": {
+      "type": "object",
+      "description": "How a conversation changes opinions",
+      "properties": {
+        "awful": {
+          "type": "integer",
+          "description": "Change after an awful talk",
+          "example": "-8",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "bad": {
+          "type": "integer",
+          "description": "Change after a bad talk",
+          "example": "-4",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "plain": {
+          "type": "integer",
+          "description": "Change after a plain talk",
+          "example": "0",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "good": {
+          "type": "integer",
+          "description": "Change after a good talk",
+          "example": "3",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "great": {
+          "type": "integer",
+          "description": "Change after a great talk",
+          "example": "6",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "frequencyBonus": {
+          "type": "integer",
+          "description": "Extra opinion for talking often",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "1"
+        },
+        "frequencyDays": {
+          "type": "integer",
+          "description": "Days between talks that count as often",
+          "minimum": 1,
+          "maximum": 365,
+          "example": "3"
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/opinion.cpp"],
+  "externalFields": ["gift", "trade", "help", "marriage-in-family", "insult", "theft"]
+}

@@ -1,0 +1,82 @@
+{
+  "title": "assets/data/weather.json",
+  "type": "object",
+  "properties": {
+    "weather": {
+      "type": "array",
+      "description": "The kinds of weather, picked by weight",
+      "items": {
+        "type": "object",
+        "description": "One entry of weather",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the weather", "example": "clear"},
+          "frames": {
+            "type": "integer",
+            "description": "How many pictures the weather has; 0 draws nothing (clear)",
+            "minimum": 0,
+            "maximum": 16,
+            "default": 4,
+            "example": "0"
+          },
+          "ticksPerFrame": {
+            "type": "integer",
+            "description": "Game ticks (20 a second) each picture stays on screen",
+            "minimum": 1,
+            "maximum": 60,
+            "example": "4"
+          },
+          "weight": {
+            "type": "integer",
+            "description": "How often it is picked, against the others",
+            "minimum": 0,
+            "maximum": 1000,
+            "default": 1,
+            "example": "50"
+          },
+          "blend": {
+            "type": "string",
+            "description": "add: light weather adds light; alpha: fog and clouds are drawn see-through",
+            "example": "alpha",
+            "enum": ["alpha", "add"]
+          },
+          "light": {
+            "type": "object",
+            "description": "How the weather changes the ambient light: dim and tint",
+            "properties": {
+              "dim": {
+                "type": "number",
+                "description": "The ambient light is multiplied by this (1 = unchanged, 0.6 = a dark storm)",
+                "minimum": 0.1,
+                "maximum": 1,
+                "example": "0.85"
+              },
+              "tint": {
+                "type": "array",
+                "description": "The colour the ambient light is multiplied by: red, green, blue, each 0 to 255",
+                "items": {"type": "integer", "description": "One entry of tint", "example": "205"}
+              }
+            }
+          },
+          "flash": {
+            "type": "number",
+            "description": "Lightning flashes of the whole scene per minute",
+            "minimum": 0,
+            "maximum": 60,
+            "example": "10"
+          },
+          "shadowFade": {
+            "type": "number",
+            "description": "How much of the shadows this weather takes away: 1 for fog and heavy cloud",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0,
+            "example": "1.0"
+          }
+        },
+        "required": ["name", "frames", "ticksPerFrame", "weight", "blend"]
+      }
+    }
+  },
+  "provides": [{"catalog": "weather", "at": "weather[].name"}],
+  "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp"]
+}

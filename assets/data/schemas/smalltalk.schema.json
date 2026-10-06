@@ -1,0 +1,20 @@
+{
+  "title": "assets/data/dialogue/smalltalk.json",
+  "type": "object",
+  "required": ["topics"],
+  "properties": {
+    "topics": {
+      "type": "object",
+      "description": "What a clan member says when no script was written for them, one list of sentences per topic",
+      "additionalProperties": {
+        "type": "array",
+        "description": "One topic: short plain sentences, each a quoted sentence or { \"text\": \"...\", \"mood\": [\"warm\"] } used only when the person feels one of those ways",
+        "example": "[\"The deer are thin this {season}.\"]",
+        "items": {"description": "A sentence, or an object with text and mood; {season} {hero} {npc} and the tokens of its topic can be used"}
+      }
+    }
+  },
+  "provides": [{"catalog": "smalltalk-topics", "at": "topics.*"}],
+  "loaders": ["src/sim/smalltalk.cpp"],
+  "externalFields": ["text", "mood", "hero", "npc", "season"]
+}

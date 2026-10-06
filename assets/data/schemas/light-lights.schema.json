@@ -1,0 +1,101 @@
+{
+  "title": "assets/data/light/lights.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "example": "1"},
+    "clanTorch": {
+      "type": "string",
+      "description": "The kind of light each clan member carries at night; empty: none",
+      "example": "torch"
+    },
+    "fireShadows": {
+      "type": "object",
+      "description": "Shadows thrown by fires and other lights",
+      "properties": {
+        "maxPerObject": {
+          "type": "number",
+          "description": "The most shadows one object casts from nearby lights",
+          "minimum": 0,
+          "maximum": 8,
+          "example": "2"
+        },
+        "strength": {
+          "type": "number",
+          "description": "How dark those shadows are (0 to 1)",
+          "minimum": 0,
+          "maximum": 1,
+          "example": "0.35"
+        }
+      }
+    },
+    "ambient": {
+      "type": "object",
+      "description": "The base light of the world",
+      "properties": {
+        "color": {
+          "type": "array",
+          "description": "Red, green and blue of the base light, each 0 to 255",
+          "items": {"type": "integer", "description": "One entry of color", "example": "255"}
+        },
+        "strength": {
+          "type": "number",
+          "description": "How strong the base light is",
+          "minimum": 0,
+          "maximum": 2,
+          "example": "1.0"
+        }
+      }
+    },
+    "lights": {
+      "type": "array",
+      "description": "The kinds of light a thing can give",
+      "items": {
+        "type": "object",
+        "description": "One entry of lights",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the kind of light; plants, weapons and effects use it",
+            "example": "campfire"
+          },
+          "color": {
+            "type": "array",
+            "description": "Red, green and blue of the light, each 0 to 255",
+            "items": {"type": "integer", "description": "One entry of color", "example": "255"}
+          },
+          "radiusTiles": {
+            "type": "number",
+            "description": "How far the light reaches, in tiles",
+            "minimum": 0.5,
+            "maximum": 30,
+            "example": "6.0"
+          },
+          "strength": {"type": "number", "description": "How bright the light is", "minimum": 0, "maximum": 4, "example": "0.9"},
+          "height": {
+            "type": "number",
+            "description": "How high above the ground it hangs, in pixels: a higher light is flatter on a surface",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 24,
+            "example": "24"
+          },
+          "shadows": {
+            "type": "boolean",
+            "description": "true: things near the light cast faint shadows away from it at night",
+            "default": false
+          },
+          "flicker": {
+            "type": "number",
+            "description": "How much the light flickers (0 steady to 1 wild)",
+            "minimum": 0,
+            "maximum": 1,
+            "example": "0.2"
+          }
+        },
+        "required": ["name", "color", "radiusTiles", "strength"]
+      }
+    }
+  },
+  "provides": [{"catalog": "lights", "at": "lights[].name"}],
+  "loaders": ["src/game/lighting.cpp"]
+}

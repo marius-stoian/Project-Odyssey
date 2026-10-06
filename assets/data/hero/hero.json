@@ -1,15 +1,5 @@
 {
   "imprint": { "startAge": 12, "peakPercent": 300, "midAge": 19, "midPercent": 175, "endAge": 26, "endPercent": 50, "settledPercent": 25 },
-  "presets": [
-    { "name": "Full", "startAge": 12, "mantleAge": 26 },
-    { "name": "Short", "startAge": 20, "mantleAge": 26 },
-    { "name": "Off", "startAge": 26, "mantleAge": 26 }
-  ],
-  "comforts": [
-    { "name": "Gentle", "needsPercent": 70, "foodPercent": 140 },
-    { "name": "Balanced", "needsPercent": 100, "foodPercent": 100 },
-    { "name": "Harsh", "needsPercent": 135, "foodPercent": 70 }
-  ],
   "aging": { "fromYears": 40, "startPercent": 10, "perYearPercent": 2 },
   "skillLevelPoints": 10,
   "masterBonusPercent": 100,
@@ -24,11 +14,7 @@
   "dominion": {
     "tradePerPerson": 3,
     "rivalTradePerPerson": 10,
-    "rivalTradeGrowthPerDay": 1,
-    "winPercent": 60,
-    "combinedWinPercent": 50,
-    "loseBelowPeople": 3,
-    "rivalFollowerPercent": 60
+    "rivalTradeGrowthPerDay": 1
   },
   "trade": {
     "dueDays": 14,

@@ -141,11 +141,6 @@ odysseus::core::Rect Window::presentationRect() const {
     return backend_->presentationRect();
 }
 
-void Window::setFullscreen(bool fullscreen) {
-    SDL_SetWindowFullscreen(window_.get(), fullscreen);
-    SDL_SyncWindow(window_.get());
-}
-
 bool Window::fullscreen() const {
     return (SDL_GetWindowFlags(window_.get()) & SDL_WINDOW_FULLSCREEN) != 0;
 }

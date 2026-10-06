@@ -1,5 +1,7 @@
 #include "game/interaction_graph.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <charconv>
 #include <cstdlib>
@@ -28,19 +30,6 @@ constexpr int kChronicleIn = 4;
 
 std::string clip(const std::string& text, std::size_t width) { return text.size() <= width ? text : text.substr(0, width - 2) + ".."; }
 std::string field(const GraphNode& card, std::size_t index) { return index < card.fields.size() ? card.fields[index] : std::string(); }
-
-std::string joinWords(const std::vector<std::string>& words) {
-    std::string out;
-    for (const std::string& word : words) out += (out.empty() ? "" : " ") + word;
-    return out;
-}
-
-std::vector<std::string> splitWords(const std::string& text) {
-    std::vector<std::string> words;
-    std::istringstream in(text);
-    for (std::string word; in >> word;) words.push_back(word);
-    return words;
-}
 
 const GraphNode* wireTarget(const NodeGraph& graph, int fromNode, int fromPort) {
     for (const GraphWire& wire : graph.wires()) {
@@ -298,9 +287,9 @@ NodeGraph interactionToGraph(const Interaction& i, const DialogueLayout& layout)
         return id;
     };
     const int verb = make(rule_card::kVerb, {i.id, i.label, i.note, milliToText(i.rangeMilli), milliToText(i.durationMilli), std::to_string(i.order), i.menu}, "verb");
-    const int actor = make(rule_card::kActor, {joinWords(i.actors)}, "actor");
+    const int actor = make(rule_card::kActor, {core::joined(i.actors, " ")}, "actor");
     g.connect(actor, kActorOut, verb, 0);
-    const int target = make(rule_card::kTarget, {joinWords(i.targetTags), joinWords(i.targetKinds)}, "target");
+    const int target = make(rule_card::kTarget, {core::joined(i.targetTags, " "), core::joined(i.targetKinds, " ")}, "target");
     g.connect(verb, kTargetOut, target, 0);
     for (std::size_t k = 0; k < i.requires_.size(); ++k) {
         g.connect(make(rule_card::kRequirement, {i.requires_[k].source, i.requires_[k].otherwise}, "requirement" + std::to_string(k)), 0, verb, kRequiresIn);
@@ -362,14 +351,14 @@ std::optional<Interaction> graphToInteraction(const NodeGraph& g, std::vector<st
         problems.push_back("error: the verb has no actor card");
         ok = false;
     } else {
-        i.actors = splitWords(field(*p.actor, 0));
+        i.actors = core::splitWords(field(*p.actor, 0));
     }
     if (p.target == nullptr) {
         problems.push_back("error: the verb leads to no target card");
         ok = false;
     } else {
-        i.targetTags = splitWords(field(*p.target, 0));
-        i.targetKinds = splitWords(field(*p.target, 1));
+        i.targetTags = core::splitWords(field(*p.target, 0));
+        i.targetKinds = core::splitWords(field(*p.target, 1));
     }
     for (const GraphNode* card : p.requirements) {
         Requirement r;

@@ -1,0 +1,66 @@
+// Which schema describes which data file (US-190, ADR-020). "match" is a path below assets/data/ where * stands for any run of letters but a slash; the
+// first entry that matches wins. A file with no entry fails the schema test; a text file (.dlg) is read by its own parser and needs no schema.
+// Read by the loaders, by tests/sim/schema_test.cpp and by the Editor's Data tab. Guide: docs/guides/schemas.md.
+{
+  "version": 1,
+  "files": [
+    // The graph editor's sidecars come first: the folder globs below would also match a name ending in .layout.json.
+    {"match": "dialogue/*.layout.json", "schema": "graph-layout"},
+    {"match": "interactions/*.layout.json", "schema": "graph-layout"},
+    {"match": "quests/*.layout.json", "schema": "graph-layout"},
+    {"match": "story/events/*.layout.json", "schema": "graph-layout"},
+
+    {"match": "weapons.json", "schema": "weapons"},
+    {"match": "plants.json", "schema": "plants"},
+    {"match": "objects.json", "schema": "objects"},
+    {"match": "animals.json", "schema": "animals"},
+    {"match": "effects.json", "schema": "effects"},
+    {"match": "weather.json", "schema": "weather"},
+    {"match": "characters.json", "schema": "characters"},
+    {"match": "tiles.json", "schema": "tiles"},
+    {"match": "materials.json", "schema": "materials"},
+
+    {"match": "sim/actions.json", "schema": "sim-actions"},
+    {"match": "sim/calendar.json", "schema": "sim-calendar"},
+    {"match": "sim/clan.json", "schema": "sim-clan"},
+    {"match": "sim/events.json", "schema": "sim-events"},
+    {"match": "sim/life.json", "schema": "sim-life"},
+    {"match": "sim/names.json", "schema": "sim-names"},
+    {"match": "sim/needs.json", "schema": "sim-needs"},
+    {"match": "sim/opinions.json", "schema": "sim-opinions"},
+    {"match": "sim/partner-types.json", "schema": "sim-partner-types"},
+    {"match": "sim/region.json", "schema": "sim-region"},
+    {"match": "sim/schedule.json", "schema": "sim-schedule"},
+    {"match": "sim/social.json", "schema": "sim-social"},
+    {"match": "sim/story.json", "schema": "sim-story"},
+    {"match": "sim/trade.json", "schema": "sim-trade"},
+
+    {"match": "hero/hero.json", "schema": "hero-hero"},
+    {"match": "rules/*.json", "schema": "rules"},
+    {"match": "hero/items.json", "schema": "hero-items"},
+    {"match": "hero/professions.json", "schema": "hero-professions"},
+    {"match": "hero/recipes.json", "schema": "hero-recipes"},
+    {"match": "hero/activities.json", "schema": "hero-activities"},
+    {"match": "hero/tutorial.json", "schema": "hero-tutorial"},
+
+    {"match": "light/lights.json", "schema": "light-lights"},
+    {"match": "light/sky.json", "schema": "light-sky"},
+    {"match": "light/celestial-events.json", "schema": "light-celestial-events"},
+
+    {"match": "buildings/kinds.json", "schema": "building-kinds"},
+    {"match": "buildings/pieces.json", "schema": "building-pieces"},
+    {"match": "buildings/prefabs/*.json", "schema": "building-prefab"},
+
+    {"match": "editor/help.json", "schema": "editor-help"},
+
+    {"match": "interactions/defaults-*.json", "schema": "interaction-defaults"},
+    {"match": "interactions/*.json", "schema": "interaction"},
+    {"match": "npc-classes/*.json", "schema": "npc-class"},
+    {"match": "npcs/*.json", "schema": "npc-kind"},
+    {"match": "quests/*.json", "schema": "quest"},
+    {"match": "story/events/*.json", "schema": "story-event"},
+
+    {"match": "dialogue/smalltalk.json", "schema": "smalltalk"},
+    {"match": "dialogue/*.dlg", "text": true}
+  ]
+}

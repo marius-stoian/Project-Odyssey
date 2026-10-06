@@ -84,7 +84,7 @@ TEST_CASE("US-250 Own list: buildings are saved in their own list (level version
     const fs::path file = data / "own-list.json";
     game::saveLevel(level, definitions, file);
     const std::string text = readText(file);
-    CHECK(text.find("\"levelVersion\": 6") != std::string::npos);
+    CHECK(text.find("\"levelVersion\": 7") != std::string::npos);
     CHECK(text.find("\"buildings\"") != std::string::npos);
     CHECK(text.find("\"hut\"") != std::string::npos);
     const game::Level loaded = game::loadLevel(file, definitions).level;

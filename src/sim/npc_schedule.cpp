@@ -1,5 +1,7 @@
 #include "sim/npc_schedule.h"
 
+#include "core/text.h"
+
 #include "sim/data.h"
 #include "sim/json_data.h"
 
@@ -39,9 +41,23 @@ const ScheduleBlock* activeBlock(const Schedule& schedule, int minuteOfDay, bool
     return found;
 }
 
+long long weighted(const ScheduleBlock* block, const std::vector<std::string>& tags, long long score) {
+    if (block == nullptr || block->prefer.empty()) return score;
+    for (const std::string& tag : tags) {
+        const auto weight = block->prefer.find(tag);
+        if (weight != block->prefer.end()) score = score * weight->second / 100;
+    }
+    return std::clamp<long long>(score, 0, 100000);
+}
+
 std::string scheduleText(const std::vector<ScheduleBlock>& blocks) {
     std::string out;
-    for (const ScheduleBlock& block : blocks) out += std::format("{}{} {} {}", out.empty() ? "" : "; ", formatClock(block.minute), block.activity, block.place.empty() ? "home" : block.place);
+    for (const ScheduleBlock& block : blocks) {
+        out += std::format("{}{} {} {}", out.empty() ? "" : "; ", formatClock(block.minute), block.activity, block.place.empty() ? "home" : block.place);
+        std::string weights;
+        for (const auto& [tag, weight] : block.prefer) weights += std::format("{}{}={}", weights.empty() ? "" : ",", tag, weight);
+        if (!weights.empty()) out += " prefer " + weights;
+    }
     return out;
 }
 
@@ -63,8 +79,29 @@ std::optional<std::vector<ScheduleBlock>> parseScheduleText(std::string_view tex
             w = stop;
         }
         if (words.empty()) continue;
+        // The weights come last: "prefer tag=weight tag=weight" (a comma between them reads as a space).
+        std::map<std::string, int> prefer;
+        for (std::size_t k = 2; k < words.size() && k <= 3; ++k) {
+            if (words[k] != "prefer") continue;
+            for (std::size_t j = k + 1; j < words.size(); ++j) {
+                const std::size_t equals = words[j].find('=');
+                int weight = -1;
+                if (equals != std::string::npos) {
+                    const std::string number = words[j].substr(equals + 1);
+                    const auto [stop, error] = std::from_chars(number.data(), number.data() + number.size(), weight);
+                    if (error != std::errc() || stop != number.data() + number.size()) weight = -1;
+                }
+                if (equals == std::string::npos || !validItemId(words[j].substr(0, equals)) || weight < 0 || weight > kMaxPreferWeight) {
+                    problem = std::format("\"{}\": a weight is tag=number from 0 to {}, for example prefer animal=300", words[j], kMaxPreferWeight);
+                    return std::nullopt;
+                }
+                prefer[words[j].substr(0, equals)] = weight;
+            }
+            words.resize(k);
+            break;
+        }
         if (words.size() < 2 || words.size() > 3) {
-            problem = std::format("\"{}\" must be time activity place, for example 06:00 work market", std::string(part));
+            problem = std::format("\"{}\" must be time activity place, for example 06:00 work market (and may end with prefer tag=weight)", std::string(part));
             return std::nullopt;
         }
         const std::optional<int> minute = parseClock(words[0]);
@@ -77,7 +114,7 @@ std::optional<std::vector<ScheduleBlock>> parseScheduleText(std::string_view tex
             problem = std::format("\"{}\": the activity and the place are words (lower-case letters, digits and -)", std::string(part));
             return std::nullopt;
         }
-        blocks.push_back({*minute, words[1], place});
+        blocks.push_back({*minute, words[1], place, prefer});
     }
     std::stable_sort(blocks.begin(), blocks.end(), [](const ScheduleBlock& a, const ScheduleBlock& b) { return a.minute < b.minute; });
     for (std::size_t i = 1; i < blocks.size(); ++i) {
@@ -169,9 +206,7 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
             for (const auto& [key, amount] : effects.items()) {
                 bool known = false;
                 for (std::size_t n = 0; n < kNeedCount; ++n) {
-                    std::string lower = needName(static_cast<Need>(n));
-                    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-                    if (lower == key) {
+                    if (core::lowered(needName(static_cast<Need>(n))) == key) {
                         known = true;
                         if (!amount.is_number_integer() || amount.get<int>() < 0 || amount.get<int>() > 100) throw DataError(file, "activities." + word + "." + key, "must be a whole number from 0 to 100");
                         restore[n] = amount.get<int>();

@@ -1,5 +1,7 @@
 #include "sim/npc_director.h"
 
+#include "core/text.h"
+
 #include "core/random.h"
 #include "sim/data.h"
 
@@ -77,7 +79,11 @@ NpcProfile profileFrom(const json& value) {
 
 json blocksJson(const std::vector<rules::ScheduleBlock>& blocks) {
     json out = json::array();
-    for (const rules::ScheduleBlock& block : blocks) out.push_back(json::array({block.minute, block.activity, block.place}));
+    for (const rules::ScheduleBlock& block : blocks) {
+        json entry = json::array({block.minute, block.activity, block.place});
+        if (!block.prefer.empty()) entry.push_back(block.prefer); // a fourth element, only when the block has weights (US-196)
+        out.push_back(std::move(entry));
+    }
     return out;
 }
 
@@ -85,10 +91,12 @@ std::vector<rules::ScheduleBlock> blocksFrom(const json& value) {
     std::vector<rules::ScheduleBlock> out;
     if (!value.is_array()) throw DataError("npc-life.json", "schedules", "must be lists of [minute, activity, place]");
     for (const json& entry : value) {
-        if (!entry.is_array() || entry.size() != 3 || !entry.at(0).is_number_integer() || !entry.at(1).is_string() || !entry.at(2).is_string()) {
-            throw DataError("npc-life.json", "schedules", "a block is [minute, activity, place]");
+        if (!entry.is_array() || (entry.size() != 3 && entry.size() != 4) || !entry.at(0).is_number_integer() || !entry.at(1).is_string() || !entry.at(2).is_string() || (entry.size() == 4 && !entry.at(3).is_object())) {
+            throw DataError("npc-life.json", "schedules", "a block is [minute, activity, place] or [minute, activity, place, {tag: weight}]");
         }
-        out.push_back({entry.at(0).get<int>(), entry.at(1).get<std::string>(), entry.at(2).get<std::string>()});
+        std::map<std::string, int> prefer;
+        if (entry.size() == 4) prefer = entry.at(3).get<std::map<std::string, int>>();
+        out.push_back({entry.at(0).get<int>(), entry.at(1).get<std::string>(), entry.at(2).get<std::string>(), prefer});
     }
     return out;
 }
@@ -305,6 +313,22 @@ bool NpcDirector::chooseAction(NpcPopulation& population, int index, int hour, b
     return true;
 }
 
+// What the active block of the person's schedule makes of a choice (US-196): its score times the weights the block gives the tags of the choice. The tags are the id of the
+// interaction, the tags the interaction asks of its target, and the tags of the target itself (a place, an animal, "edible"...). Needs are not weighed here: a hungry or
+// frightened person never gets this far (stepNear sends them to eat or home first).
+long long NpcDirector::guided(int index, int hour, const rules::Interaction& interaction, const ActionTarget& target, long long score) const {
+    const rules::Schedule* own = schedule(index);
+    if (own == nullptr) return score;
+    const rules::ScheduleBlock* block = rules::activeBlock(*own, hour * 60, config_.isNight(hour));
+    if (block == nullptr || block->prefer.empty()) return score;
+    std::vector<std::string> tags = target.tags;
+    tags.insert(tags.end(), interaction.targetTags.begin(), interaction.targetTags.end());
+    tags.push_back(interaction.id);
+    std::sort(tags.begin(), tags.end());
+    tags.erase(std::unique(tags.begin(), tags.end()), tags.end()); // a tag counts once
+    return rules::weighted(block, tags, score);
+}
+
 // The candidates of the sources against the places of the level, or the spot of their event.
 void NpcDirector::collectPlaceOptions(const NpcPopulation& population, int index, int hour, const NpcProfile& own, const rules::ThingInfo& actor, bool eventsOnly, std::vector<Option>& options,
                                       std::vector<int>& scores) const {
@@ -344,7 +368,7 @@ void NpcDirector::collectPlaceOptions(const NpcPopulation& population, int index
             const NpcRuleContext rule(population, index, actor.tags, target, hour);
             for (const rules::Offer& offer : interactions_->offered(actor, thing, 0, rule)) {
                 if (offer.interaction != interaction || !offer.enabled) continue;
-                const long long score = rules::evaluate(*interaction->npc->score, rule).number + candidate.bonus + (candidate.origin == ActionOrigin::Default ? config_.preferBonus : 0);
+                const long long score = guided(index, hour, *interaction, target, rules::evaluate(*interaction->npc->score, rule).number + candidate.bonus + (candidate.origin == ActionOrigin::Default ? config_.preferBonus : 0));
                 options.push_back({interaction, target});
                 scores.push_back(static_cast<int>(std::clamp<long long>(score, 0, 100000)));
                 break;
@@ -399,6 +423,7 @@ void NpcDirector::collectPartnerOptions(const NpcPopulation& population, int ind
                 break;
             }
         }
+        score = guided(index, hour, interaction, target, score);
         options.push_back({&interaction, target});
         scores.push_back(static_cast<int>(std::clamp<long long>(score, 0, 100000)));
     }
@@ -452,9 +477,7 @@ void NpcDirector::applyEffect(NpcPopulation& population, int actor, int partner,
         if (x != population.x(actor) || y != population.y(actor)) population.move(actor, x, y);
     } else if (name == "restore" && effect.args.size() == 3) {
         for (std::size_t n = 0; n < kNeedCount; ++n) {
-            std::string lower = needName(static_cast<Need>(n));
-            std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-            if (lower == effect.args[1]->text) {
+            if (core::lowered(needName(static_cast<Need>(n))) == effect.args[1]->text) {
                 const int amount = static_cast<int>(std::clamp(rules::evaluate(*effect.args[2], rule).number, 0LL, 100LL));
                 population.setNeed(actor, static_cast<Need>(n), population.need(actor, static_cast<Need>(n)) + amount);
             }
@@ -793,6 +816,10 @@ std::uint64_t NpcDirector::hash() const {
                 mix(h, static_cast<std::uint64_t>(block.minute));
                 for (const char c : block.activity) mix(h, static_cast<unsigned char>(c));
                 for (const char c : block.place) mix(h, static_cast<unsigned char>(c));
+                for (const auto& [tag, weight] : block.prefer) { // US-196: nothing is mixed for a block with no weights, so older worlds keep their hashes
+                    for (const char c : tag) mix(h, static_cast<unsigned char>(c));
+                    mix(h, static_cast<std::uint64_t>(weight));
+                }
             }
         }
     }

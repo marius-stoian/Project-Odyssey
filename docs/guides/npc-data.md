@@ -394,6 +394,25 @@ The schedule is checked **on the hour** (every 100 ticks): persons near the hero
 
 `npc-life.json` next to `npcs.json` keeps the schedules, homes and modes (run-length coded, so a crowd with one schedule saves in a few hundred bytes plus two numbers of home per person).
 
+### Routines: weights on a block and the routines of professions (US-196)
+A routine is a schedule. This story adds one key to a block, `prefer`, and one more place a schedule can live: a **profession**. There is no second format and no second scheduler.
+
+```json
+{ "from": "06:00", "do": "work", "at": "home", "prefer": { "animal": 300, "edible": 150 } }
+```
+`prefer` is a weight in whole percent for each **tag** of what a person could do (100 = neutral, 0 to 500). While the block is in force the score of every choice is multiplied by the weight of each tag it carries: a hunter's morning block with `"animal": 300` makes everything that has to do with animals three times as attractive, so hunters choose it more often in that block than at other times. A block guides choices; it does not name one. A weight of 0 takes it off the list. The tags of a choice are the **id of the interaction**, the **tags its file asks of its target** and the **tags of the target itself** (a place's tags, an animal's kind and tags, `place`, `animal`, `npc`...), each counted once. Needs come first: a hungry person goes to eat and danger sends them home before any choice is made (the interruption rule of US-290), so a starving hunter in a work block eats.
+
+In the Editor's text line the weights come last: `06:00 work market prefer animal=300,edible=150; 21:00 sleep home`. A weight over 500, a tag that is not a word or a missing number is refused with the reason.
+
+**Profession routines.** `hero/professions.json` entries may carry `day` and `night` in exactly the same block format (the same reader loads them as loads a class file):
+```json
+{ "id": "hunter", "name": "Hunter", ..., "day": [ { "from": "06:00", "do": "work", "prefer": { "hunt": 200 } }, { "from": "14:00", "do": "rest" }, { "from": "21:00", "do": "sleep" } ] }
+```
+The people of the **clan** have no schedule of their own: each takes the routine of their profession. A grown-up whose hunting is better than their gathering is a `hunter`, otherwise a `gatherer` (a child has none). In the clan the tags are the actions: `work` (gather and hunt), `gather`, `hunt`, `sleep`, `warm`, `talk`, `gift`, `steal`, `rest`, `wander`; the weights multiply the score of the action the clan's utility AI computes. The needs win here too: while any need is below `routineDangerBelow` (20, `sim/actions.json`) the weights are left aside. `hunter` and `gatherer` ship with a routine (work 06:00 to 14:00 weighted towards hunting or gathering, then rest and talk); a profession with no `day` or `night` changes nothing.
+
+### The timeline
+Under the Day and Night lines of the Schedule form (the NPC panel, the Class panel, the Kinds tab) and above the form of a routine in the Data tab (a profession's `day` and `night`, a class's `schedule.day`) a **bar of 24 hours** shows one block for each entry. Drag the **left edge** of a block: it moves in steps of a quarter hour and never past its neighbours; let go and the time is written. The bar writes through the same setter as the text line (the Data tab: the same edit as typing the time into the field), so the form shows the change at once, it is one step of Undo, and Save writes it in the file's own format (in the Data tab only the `from` line changes). Rest the pointer on a block for its time, activity and place.
+
 ### Editor: the Schedule form
 
 The Trade section below the NPC panel has two more lines, **Day** and **Night**, and the Class panel and the Kinds tab have them under the trade lines. Type `06:00 work market; 21:00 sleep home` (time, activity, place; the place is optional and then `home`; separate blocks with `;`). Press Enter: the status line says `schedule day`; a mistake (`6am`, a missing activity, two blocks at one time) is said and changes nothing. For an NPC each line is one Undo step and edits its **own** schedule (which replaces its kind's and its classes' whole); for a class or kind **Save** writes it. An empty **Night** means the day blocks hold at night.

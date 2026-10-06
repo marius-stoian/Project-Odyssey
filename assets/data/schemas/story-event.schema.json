@@ -1,29 +1,56 @@
 {
-  "title": "Story event (assets/data/story/events/<id>.json)",
+  "title": "assets/data/story/events/<id>.json",
   "type": "object",
+  "required": ["id", "title", "text", "minAge", "maxAge", "options"],
   "properties": {
-    "id": { "type": "string", "description": "One word; must equal the file name without .json" },
-    "order": { "type": "integer", "minimum": 0, "default": 0, "description": "Where the event stands in the list; the yearly draw depends on it" },
-    "title": { "type": "string", "description": "The heading of the event" },
-    "text": { "type": "string", "description": "What happens" },
-    "minAge": { "type": "integer", "minimum": 1, "maximum": 80, "description": "Youngest age" },
-    "maxAge": { "type": "integer", "minimum": 1, "maximum": 80, "description": "Oldest age" },
-    "role": { "type": "string", "enum": ["elder", "friend"], "description": "Who in the clan it involves" },
-    "trigger": { "type": "string", "description": "A condition in the rule language; empty means always possible" },
-    "requires": { "type": "object", "properties": { "affinity": { "type": "string" }, "min": { "type": "integer", "minimum": 0, "maximum": 100 } }, "description": "An affinity the hero must have reached" },
+    "id": {"type": "string", "description": "One word: the event's name; it must equal the file name without .json", "example": "the-quarrel", "maxLength": 32},
+    "order": {"type": "integer", "minimum": 0, "default": 0, "description": "Where the event stands in the list; the yearly draw depends on it", "example": "10"},
+    "title": {"type": "string", "description": "The heading of the event", "example": "The quarrel at the store"},
+    "text": {"type": "string", "description": "What happens, told to the player", "example": "Two people shout over the last of the dried berries."},
+    "minAge": {"type": "integer", "minimum": 1, "maximum": 80, "description": "The youngest age at which the hero can meet the event", "example": "14"},
+    "maxAge": {"type": "integer", "minimum": 1, "maximum": 80, "description": "The oldest age at which the hero can meet the event", "example": "25"},
+    "role": {"type": "string", "enum": ["elder", "friend"], "description": "Who in the clan the event involves", "example": "friend"},
+    "trigger": {"type": "string", "format": "rule", "description": "A condition in the rule language; empty means the event is always possible", "example": "season == winter"},
+    "requires": {
+      "type": "object",
+      "description": "An affinity the hero must have reached",
+      "properties": {
+        "affinity": {"type": "string", "enum": ["hunter", "gatherer", "knapper", "fireKeeper", "shaman", "trade", "religion"], "description": "Which affinity", "example": "hunter"},
+        "min": {"type": "integer", "minimum": 0, "maximum": 100, "description": "How much of it the hero needs", "example": "20"}
+      }
+    },
     "options": {
       "type": "array",
-      "description": "Two or three choices",
+      "description": "The choices the player is offered: two or three",
+      "minItems": 2,
+      "maxItems": 3,
       "items": {
         "type": "object",
+        "required": ["text", "note"],
+        "description": "One choice",
         "properties": {
-          "text": { "type": "string", "description": "What the player reads" },
-          "affinity": { "type": "object", "description": "hunter, gatherer, knapper, fireKeeper, shaman, trade, religion with a whole number" },
-          "opinion": { "type": "integer", "minimum": -100, "maximum": 100, "description": "What the other person thinks of the hero afterwards" },
-          "trait": { "type": "string", "description": "A trait the hero gains (brave, kind...)" },
-          "note": { "type": "string", "description": "The chronicle sentence, with {hero} and {other}" }
+          "text": {"type": "string", "description": "What the player reads on the button", "example": "Split the berries fairly."},
+          "affinity": {
+            "type": "object",
+            "description": "How the choice shapes the hero: points added to each affinity",
+            "properties": {
+              "hunter": {"type": "integer", "description": "Points for the hunter affinity", "example": "3"},
+              "gatherer": {"type": "integer", "description": "Points for the gatherer affinity", "example": "3"},
+              "knapper": {"type": "integer", "description": "Points for the flint-knapper affinity", "example": "3"},
+              "fireKeeper": {"type": "integer", "description": "Points for the fire-keeper affinity", "example": "3"},
+              "shaman": {"type": "integer", "description": "Points for the shaman-healer affinity", "example": "3"},
+              "trade": {"type": "integer", "description": "Points for the trade affinity", "example": "4"},
+              "religion": {"type": "integer", "description": "Points for the religion affinity", "example": "2"}
+            }
+          },
+          "opinion": {"type": "integer", "minimum": -100, "maximum": 100, "description": "What the other person thinks of the hero afterwards", "example": "6"},
+          "trait": {"type": "string", "description": "A trait the hero gains (brave, kind...)", "example": "kind"},
+          "note": {"type": "string", "description": "The chronicle sentence, with {hero} and {other}", "example": "{hero} split the berries between quarrelling people."}
         }
       }
     }
-  }
+  },
+  "provides": [{"catalog": "story-events", "at": "id"}],
+  "loaders": ["src/sim/hero_data.cpp#readEvent,affinities", "src/sim/hero_data.cpp#loadHeroData"],
+  "externalFields": ["event", "events", "hunter", "gatherer", "knapper", "fireKeeper", "shaman", "trade", "religion"]
 }

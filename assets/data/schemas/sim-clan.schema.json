@@ -1,0 +1,30 @@
+{
+  "title": "assets/data/sim/clan.json",
+  "type": "object",
+  "properties": {
+    "startingPeople": {
+      "type": "integer",
+      "description": "How many people a new clan starts with",
+      "minimum": 1,
+      "maximum": 200,
+      "example": "20"
+    },
+    "startingAgeYears": {
+      "type": "object",
+      "description": "The ages of the people a new clan starts with",
+      "properties": {
+        "minimum": {"type": "integer", "description": "The youngest starting age", "minimum": 0, "maximum": 80, "example": "2"},
+        "maximum": {"type": "integer", "description": "The oldest starting age", "example": "45"}
+      }
+    },
+    "startingFood": {
+      "type": "integer",
+      "description": "Meals in the clan's shared store",
+      "minimum": 0,
+      "maximum": 100000,
+      "default": 300,
+      "example": "300"
+    }
+  },
+  "loaders": ["src/sim/clan.cpp#loadClanConfig"]
+}

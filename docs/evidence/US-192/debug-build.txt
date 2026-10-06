@@ -1,0 +1,8 @@
+US-192 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_atlas, odysseus_game_tests, odysseus_sim_tests, luna_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_game_tests "-tc=US-192*": 5 test cases, all passed
+  (a rectangle becomes a cut of cuts.json and content-cuts.json and the atlas is cut again; what cannot be cut is said and changes nothing;
+   a cut that breaks the atlas is taken out again; the picker shows the frames as pictures and a click writes the name; the preview plays the frames of an effect;
+   the Cut tool: drag, name, Cut, file and atlas changed, the picker offers the new picture)

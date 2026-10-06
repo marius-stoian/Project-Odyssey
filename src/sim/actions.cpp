@@ -19,6 +19,21 @@ const char* actionName(Action action) {
     }
 }
 
+std::vector<std::string> actionTags(Action action) {
+    switch (action) {
+    case Action::Gather: return {"gather", "work"};
+    case Action::Hunt: return {"hunt", "work"};
+    case Action::Sleep: return {"sleep"};
+    case Action::WarmByFire: return {"warm"};
+    case Action::Talk: return {"talk"};
+    case Action::GiveGift: return {"gift"};
+    case Action::Steal: return {"steal"};
+    case Action::Rest: return {"rest"};
+    case Action::Wander: return {"wander"};
+    default: return {};
+    }
+}
+
 ActionConfig loadActionConfig(const std::filesystem::path& file) {
     const nlohmann::json json = readJsonFile(file);
     ActionConfig config;
@@ -56,6 +71,7 @@ ActionConfig loadActionConfig(const std::filesystem::path& file) {
     config.storePressureWeight = requireInt(json, file, "storePressureWeight", 0, 10);
     config.traitBonus = requireInt(json, file, "traitBonus", 0, 500);
     config.skillPerHours = requireInt(json, file, "skillPerHours", 1, 1000);
+    if (json.contains("routineDangerBelow")) config.routineDangerBelow = requireInt(json, file, "routineDangerBelow", 0, 100);
     return config;
 }
 

@@ -28,13 +28,13 @@ namespace odysseus::sim {
 
 enum class Phase { Growing, Free, Ended };
 enum class Outcome { None, Victory, Defeat, Died };
-const char* outcomeName(Outcome outcome);
 
 // Seed, Growing Period preset (index into the presets) and Comfort level (index into the comforts).
 struct NewGame {
     std::uint64_t seed = 1;
     int preset = 0;
     int comfort = 1;
+    std::string rules; // the rules file the run plays under (US-195); empty is "standard"
 };
 
 // The clan's world rules for a Comfort level: needs fall faster when harsh, the store starts smaller.
@@ -137,7 +137,6 @@ public:
     const std::vector<Activity>& activities() const { return data_->activities; }
     // Chooses this year's two activities (indexes into activities(), different); false when the choice is not valid.
     bool chooseFocus(int first, int second);
-    bool focusChosen() const { return focusFirst_ >= 0; }
     // Lives the year: the two activities teach (gains times the imprint of the age the year began at), the clan's world runs a
     // whole year, and one crossroads event may come up. Returns the event, or nullptr when none matches (or the hero died).
     const CrossroadsEvent* liveYear();
@@ -196,7 +195,6 @@ public:
     int religionPercent() const;
     int tradePoints() const { return tradePoints_; }
     int followers() const;
-    void setRelation(int rival, int value) { if (rival >= 0 && static_cast<std::size_t>(rival) < relations_.size()) relations_[static_cast<std::size_t>(rival)] = std::clamp(value, -100, 100); } // a story or a test sets how a rival feels
     int relation(int rival) const { return rival >= 0 && static_cast<std::size_t>(rival) < relations_.size() ? relations_[static_cast<std::size_t>(rival)] : 0; }
     // What each rival wants (the goods it pays more for).
     bool rivalNeeds(int rival, const std::string& item) const;
@@ -220,13 +218,14 @@ public:
     // The run's end so far: the outcome, and the summary for the end screen.
     RunSummary summary() const;
     const std::vector<std::string>& news() const { return news_; }
-    void clearNews() { news_.clear(); }
     // Extra Energy decay a hero of this age suffers, in percent (US-055).
     int agingPercent(int ageYears) const;
 
     // ---- saving the run (US-080): one JSON file next to the clan's world, written safely with backups
     void save(const std::filesystem::path& file) const;
     static HeroLife load(const HeroData& data, World& world, const std::filesystem::path& file);
+    // The rules a saved run plays under ("" for a save from before US-195, or one that cannot be read): the hero data must be read under them before the run is loaded.
+    static std::string savedRules(const std::filesystem::path& file);
 
 private:
     struct RestoreTag {};

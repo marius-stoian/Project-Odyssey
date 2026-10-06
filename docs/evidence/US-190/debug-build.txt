@@ -1,0 +1,13 @@
+US-190 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_game_tests, odysseus_sim_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_sim_tests "-tc=US-190*":   13 test cases, 93 assertions, all passed
+odysseus_game_tests "-tc=US-190*":   2 test cases, 11 assertions, all passed
+
+Cases: Lines, Subset, Provided, Globs, Coverage, Help text, Errors, Links, Loaders, Rule files, Drift, Function bodies, Names read by a loader (sim);
+       Game loaders, Game errors (game).
+
+Whole Simulation test run (odysseus_sim_tests, Debug, 349 cases): 348 passed, 1 failed. The failure is "US-261 Shipped kinds": it expects the shipped
+wanderer to have attitude "neutral", but the working tree holds the owner's own uncommitted edit of assets/data/npcs/wanderer.json (attitude
+"enchanted", classes talker and trader), which is not part of this story and was left alone. With the committed file the case passes.
