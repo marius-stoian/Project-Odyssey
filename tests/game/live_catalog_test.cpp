@@ -338,3 +338,94 @@ TEST_CASE("US-195 Rules in play are live: a saved change of the switches is take
     CHECK(outcomes[0].result.ok);
     CHECK_FALSE(studio.odyssey->rules().systems.markers);
 }
+
+// ---- X-M11: the exit demonstration
+
+TEST_CASE("X-M11 Exit: a new plant kind and a changed mechanic are made in the Data tab only, saved, and seen in the running game") {
+    Run run("xm11-exit");
+    game::OdysseyGame& odyssey = *run.studio.odyssey;
+    game::DataEditor& tab = odyssey.editor().data();
+    tab.show(true);
+
+    // 1. A new plant kind: copy the wheat, name the copy, give it its own words, save.
+    REQUIRE(tab.open("plants.json"));
+    const auto& entries = tab.entries();
+    const auto wheat = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "wheat"; });
+    REQUIRE(wheat != entries.end());
+    REQUIRE(tab.selectEntry(wheat->path));
+    REQUIRE(tab.copyEntry());
+    REQUIRE(tab.setField(tab.entryPath() + ".name", "moss berry"));
+    REQUIRE(tab.setField(tab.entryPath() + ".inspect", "A moss that bears berries."));
+    CHECK(tab.dirty());
+    REQUIRE(tab.save());
+    CHECK_FALSE(tab.dirty());
+    const game::PlantDef* kind = odyssey.catalogs().plant("moss berry");
+    REQUIRE(kind != nullptr); // the running game has the new kind
+    CHECK(kind->inspect == "A moss that bears berries.");
+    const auto& names = odyssey.definitions().plants;
+    const auto at = std::find(names.begin(), names.end(), "moss berry");
+    REQUIRE(at != names.end()); // the Editor's plant palette offers it
+    // Place it with the Editor's own tool, then play: the plant stands in the running game.
+    odyssey.update(luna::engine::Intents{});
+    luna::engine::Intents toEditor;
+    toEditor.set(luna::engine::Intent::ModeEditor, true, true);
+    odyssey.update(toEditor);
+    tab.show(false);
+    game::Editor& editor = odyssey.editor();
+    editor.setTool(game::EditorTool::Plant);
+    editor.setPlant(static_cast<int>(at - names.begin()));
+    const auto view = editor.camera().view();
+    const auto click = [&](int x, int y, bool press, bool hold, bool release) {
+        luna::engine::Intents intents;
+        luna::engine::Pointer pointer;
+        pointer.x = x;
+        pointer.y = y;
+        const auto left = static_cast<std::size_t>(luna::engine::PointerButton::Left);
+        pointer.pressed[left] = press;
+        pointer.held[left] = hold;
+        pointer.released[left] = release;
+        intents.setPointer(pointer);
+        odyssey.update(intents);
+    };
+    click(200, 200, true, true, false);
+    click(200, 200, false, false, true);
+    (void)view;
+    REQUIRE_FALSE(editor.level().plants.empty());
+    CHECK(editor.level().plants.back().kind == "moss berry");
+    luna::engine::Intents toGame;
+    toGame.set(luna::engine::Intent::ModeGame, true, true);
+    odyssey.update(toGame);
+    const auto& plants = odyssey.plants();
+    CHECK(std::any_of(plants.begin(), plants.end(), [](const game::WorldPlant& plant) { return plant.def != nullptr && plant.def->name == "moss berry"; }));
+
+    // 2. A changed mechanic: hunger falls faster. Saved in the Data tab, it is in the running clan at once.
+    tab.show(true);
+    CHECK(odyssey.clan()->config().needs.dailyDecay[0] == 30);
+    REQUIRE(tab.open("sim/needs.json"));
+    REQUIRE(tab.selectEntry(""));
+    REQUIRE(tab.setField("dailyDecay.hunger", "55"));
+    REQUIRE(tab.save());
+    CHECK(odyssey.clan()->config().needs.dailyDecay[0] == 55);
+    for (int i = 0; i < 40; ++i) odyssey.update(luna::engine::Intents{}); // the game goes on under the new rule
+    // The Quick check shows what the change does to the clan: the summary comes next to the run before it.
+    REQUIRE(tab.startQuickCheck());
+    for (int i = 0; i < 100 && tab.quickRunning(); ++i) tab.update(luna::engine::Intents{});
+    REQUIRE_FALSE(tab.quickRunning());
+    CHECK(tab.question().kind == game::DataEditor::Question::Kind::Quick);
+    CHECK_FALSE(tab.question().lines.empty());
+}
+
+TEST_CASE("X-M11 Restart: the Editor and back to the game ends a run in play instead of leaving it on a clan that is gone") {
+    Run run("xm11-restart");
+    game::OdysseyGame& odyssey = *run.studio.odyssey;
+    REQUIRE(odyssey.life() != nullptr);
+    luna::engine::Intents toEditor;
+    toEditor.set(luna::engine::Intent::ModeEditor, true, true);
+    luna::engine::Intents toGame;
+    toGame.set(luna::engine::Intent::ModeGame, true, true);
+    odyssey.update(toEditor);
+    odyssey.update(toGame); // "Play here": the level starts again, with a new clan
+    CHECK(odyssey.life() == nullptr);
+    CHECK_FALSE(odyssey.run().modal()); // the run's screens (the mantle, the focus) went with it
+    for (int i = 0; i < 20; ++i) odyssey.update(luna::engine::Intents{}); // and the game plays on
+}

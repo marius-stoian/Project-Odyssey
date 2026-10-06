@@ -240,6 +240,10 @@ void OdysseyGame::resetPlay() {
     respawnTicks_ = 0;
     effects_.clear();
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
+    // A restart ends the hero's run: its clan is made again below, and a run that kept pointing at the old one would read freed memory (found at X-M11: a run in play, the
+    // Editor and back to the game).
+    life_.reset();
+    runFlow_.close();
     if (clanEnabled_) startClan();
     if (region_ && rules_.systems.rivals) {
         rivals_ = std::make_unique<sim::Rivals>(*region_, region_->start(), region_->seed() ^ 0x5151ULL, sim::loadSimConfig(dataDirectory_));

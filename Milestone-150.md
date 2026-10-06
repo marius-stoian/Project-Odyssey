@@ -9,7 +9,7 @@ Codex v2.13, requirements v2.12.
 - Debug build of every program and test executable: zero warnings. Own cases: game 5 pass; full verification and CI at X-M11 (D-41).
 - Clean-worktree check of `qa` after US-196 (8dcf0a0), Debug: build zero warnings, ctest 22 of 22 passed.
 - **All stories of M11 are Done** (S-US-190, 191, 193, 194, 195, 196, 192). Next is the exit review X-M11.
-- Guide `docs/guides/data-editor.md` ("Pictures"), plan `docs/plans/US-192.md`, teach-back in `docs/learning-journal.md`, evidence `docs/evidence/US-192/`.
+- Guide `docs/guides/data-editor.md` ("Pictures"), plan `docs/plans/stories-M11.md#us-192`, teach-back in `docs/learning-journal.md`, evidence `docs/evidence/US-192/`.
 
 ### Decisions and Codex issues
 - Decided by Dominus (delegated, D-60 Q12): the atlas is cut again by a library call, not by running the tool; the Cut tool serves `cuts.json` and `content-cuts.json` (the frame fields of the data files name content frames); a new content cut is written with `"key": "flood"`; the running game reads the new atlas at its next start.
