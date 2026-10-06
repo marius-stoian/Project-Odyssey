@@ -1,0 +1,75 @@
+X-M11 Windows ctest, release (2026-10-06). Build: 0 warning lines.
+
+Test project C:/Users/Amek/.amek-ai/Odysseus/odysseus-verify/build/windows-x64
+      Start 19: odysseus_game_tests_f
+      Start 22: odysseus_sim_tests
+      Start 17: odysseus_game_tests_d
+      Start 18: odysseus_game_tests_e
+      Start 16: odysseus_game_tests_c
+      Start 14: odysseus_game_tests_a
+ 1/22 Test #22: odysseus_sim_tests ......................   Passed   12.95 sec
+      Start 15: odysseus_game_tests_b
+ 2/22 Test #15: odysseus_game_tests_b ...................   Passed    7.33 sec
+      Start 27: US-115 Both views
+ 3/22 Test #27: US-115 Both views .......................   Passed    0.73 sec
+      Start  6: US-025 Physics layer rules
+ 4/22 Test #14: odysseus_game_tests_a ...................   Passed   24.09 sec
+      Start 24: US-015 Run
+ 5/22 Test #24: US-015 Run ..............................   Passed    0.58 sec
+      Start  7: luna_physics_tests
+ 6/22 Test  #7: luna_physics_tests ......................   Passed    0.86 sec
+      Start 26: US-110 Traceable
+ 7/22 Test #26: US-110 Traceable ........................   Passed    0.21 sec
+      Start 25: US-015 Bad input
+ 8/22 Test #25: US-015 Bad input ........................   Passed    0.12 sec
+      Start  9: luna_tests
+ 9/22 Test  #9: luna_tests ..............................   Passed    0.06 sec
+      Start  1: odysseus_tests
+10/22 Test  #1: odysseus_tests ..........................   Passed    0.04 sec
+      Start 12: US-021 Game reads only intents
+11/22 Test #12: US-021 Game reads only intents ..........   Passed    0.05 sec
+      Start 11: luna_platform_tests
+12/22 Test #11: luna_platform_tests .....................   Passed    0.04 sec
+      Start  8: US-025 Physics uses no floating point
+13/22 Test  #8: US-025 Physics uses no floating point ...   Passed    0.04 sec
+14/22 Test #16: odysseus_game_tests_c ...................   Passed   27.43 sec
+15/22 Test #18: odysseus_game_tests_e ...................   Passed   29.44 sec
+16/22 Test #17: odysseus_game_tests_d ...................   Passed   32.89 sec
+17/22 Test  #6: US-025 Physics layer rules ..............   Passed   20.19 sec
+      Start  5: US-003 Guard completeness
+18/22 Test #19: odysseus_game_tests_f ...................   Passed   50.66 sec
+19/22 Test  #5: US-003 Guard completeness ...............   Passed   11.74 sec
+      Start  2: US-003 Allowed use
+20/22 Test  #2: US-003 Allowed use ......................   Passed    8.89 sec
+      Start  4: US-003 Luna stays game-agnostic
+21/22 Test  #4: US-003 Luna stays game-agnostic .........   Passed    7.52 sec
+      Start  3: US-003 Forbidden use
+22/22 Test  #3: US-003 Forbidden use ....................   Passed    6.20 sec
+
+100% tests passed out of 22
+
+Total Test time (real) =  75.62 sec
+Test project C:/Users/Amek/.amek-ai/Odysseus/odysseus-verify/build/windows-x64
+    Start 10: US-020 Open and close
+1/8 Test #10: US-020 Open and close ............   Passed    3.83 sec
+    Start 13: luna_window_tests
+2/8 Test #13: luna_window_tests ................   Passed    3.10 sec
+    Start 20: US-024 Walk to the rock
+3/8 Test #20: US-024 Walk to the rock ..........   Passed    4.81 sec
+    Start 21: US-029 Throw in the game
+4/8 Test #21: US-029 Throw in the game .........   Passed    5.17 sec
+    Start 28: US-123 Modes in the game
+5/8 Test #28: US-123 Modes in the game .........   Passed    5.22 sec
+    Start 29: US-124 Paint in the game
+6/8 Test #29: US-124 Paint in the game .........   Passed    2.43 sec
+    Start 30: US-125 Place in the game
+7/8 Test #30: US-125 Place in the game .........   Passed    3.61 sec
+    Start 31: X-M2c Two scripted presses
+8/8 Test #31: X-M2c Two scripted presses .......   Passed    2.02 sec
+
+100% tests passed out of 8
+
+Label Time Summary:
+window    =  30.20 sec*proc (8 tests)
+
+Total Test time (real) =  30.21 sec

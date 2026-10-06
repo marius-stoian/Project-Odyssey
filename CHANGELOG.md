@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## X-M11 Exit review M11 Data editors (Mraw) - 2026-10-06
+
+**State:** `qa` merged into `main`, tag `m11-done`. Gate: `docs/gates/M11.md`.
+
+- **Fixed:** a run in play, the Editor and back to the game read freed memory (`OdysseyGame::resetPlay` made a new clan under a run that still pointed at the old one; found by the exit demonstration under AddressSanitizer). A restart now ends the hero's run and closes its screens. Test `X-M11 Restart`.
+- **New:** `docs/gates/M11.md`, `docs/evidence/X-M11/`, `docs/plans/stories-M11.md` (the story plans of M11 merged, the separate `US-19x` plan files removed), the exit demonstration test `X-M11 Exit` (a new plant kind and a changed mechanic made in the Data tab only, seen in the running game), D-60 Q12 and Q14 to Q18.
+- **Verified:** `verify.ps1 -Story X-M11 -Config Both` in a clean worktree: zero warnings, Debug and Release 22 of 22 and the window group 8 of 8.
+
 ## US-192 Picture pickers and cutting frames (Mraw) - 2026-10-06
 
 **State:** On `story/US-192`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (game 5).
