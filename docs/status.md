@@ -216,7 +216,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-194 | US-194 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-194/; Milestone-147; mechanics (sim/, hero/, story/) now live |
 | S-US-195 | US-195 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-195/; Milestone-148 |
 | S-US-196 | US-196 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-196/; Milestone-149 |
-| S-US-192 | US-192 | M11 | To do |  |
+| S-US-192 | US-192 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-192/; Milestone-150 |
 | X-M11 | - | M11 | To do |  |
 | K-M12 | - | M12 | To do |  |
 | S-US-200 | US-200 | M12 | To do |  |

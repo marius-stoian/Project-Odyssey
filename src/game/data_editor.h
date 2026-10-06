@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/editor_help.h"
+#include "game/picture_tool.h"
 #include "game/timeline_view.h"
 #include "luna/engine/input.h"
 #include "luna/engine/ui.h"
@@ -39,6 +40,17 @@ public:
 
     // The data folder (assets/data) and what to do after a file was written. The schemas are read from `<folder>/schemas` unless the game installed them already.
     void setFolder(std::filesystem::path dataFolder, std::function<void(const std::filesystem::path&)> saved = {});
+    // The pictures (US-192): the sprites folder (assets/sprites) and how to make a texture of a picture with the renderer in use. A field that holds an atlas frame gets a
+    // picker, an effect, animal, weapon or plant shows its frames playing in the form, and the Cut tool takes new frames from the sheets.
+    void setPictures(std::filesystem::path sprites, PictureTool::MakeTexture makeTexture);
+    // The Cut tool (the top bar's Cut tool) and the picker of a frame field: whole-screen, Esc leaves.
+    bool openCutTool();
+    bool openPicker(const std::string& path);
+    const PictureTool* pictureTool() const { return tool_ && tool_->open() ? tool_.get() : nullptr; }
+    PictureTool* pictureToolMutable() { return tool_ && tool_->open() ? tool_.get() : nullptr; }
+    // The frames the chosen entry plays in the form (empty when it has no picture), and the frame shown at the moment.
+    const std::vector<PictureGrid::Cell>& previewFrames() const { return preview_; }
+    static constexpr int kPreviewWidth = 74; // the room the playing picture takes at the right of the form
     // The help the fields show; the entries made from the schemas are given to it.
     void setHelp(EditorHelp* help);
 
@@ -146,6 +158,10 @@ private:
     EntryInfo describeEntry() const;
     sim::refs::Roots roots() const { return {folder_, folder_.parent_path() / "levels"}; }
     void buildQuestion(luna::engine::Panel& panel);
+    void ensureTool();
+    void refreshPreview();
+    int previewWidth() const { return preview_.empty() ? 0 : kPreviewWidth; }
+
     void stepQuickCheck();
     void openRenameDialog();
 
@@ -178,6 +194,15 @@ private:
     Question question_;
     sim::refs::Plan plan_;                    // a rename that waits for its confirmation
     std::function<void(const std::string&)> openInteraction_;
+    std::filesystem::path sprites_;
+    PictureTool::MakeTexture makeTexture_;
+    std::unique_ptr<PictureTool> tool_;
+    std::optional<ContentAtlas> content_;                       // the atlas, read when a preview first needs it
+    std::map<std::string, luna::engine::Texture> pageTextures_; // its pages as textures
+    std::vector<PictureGrid::Cell> preview_;                    // the frames of the chosen entry
+    int previewTicksPerFrame_ = 3;
+    std::string previewKey_;                                    // what the frames were made for
+    int previewTick_ = 0;
     std::function<std::uint64_t()> quickSeed_; // the seed of the game in play (42 when the game gives none)
     std::optional<sim::QuickCheck> check_;      // the run that is going on
     std::optional<sim::QuickSummary> lastCheck_; // the run before
