@@ -99,9 +99,11 @@
           "cost": {
             "type": "object",
             "description": "What is brought to the site (item: count); the sum of the pieces unless written here",
+            "keyRef": "catalog:items",
             "additionalProperties": {"type": "integer", "description": "One entry, named by its key", "example": "3"}
           }
-        }
+        },
+        "required": ["id", "label", "footprint", "layout"]
       }
     }
   },

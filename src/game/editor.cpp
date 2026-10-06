@@ -70,6 +70,7 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
     buildingEditor_ = std::make_unique<BuildingEditor>(level_, viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { run(std::move(command)); }, [this](const std::string& message) { say(message); });
     graphEditor_ = std::make_unique<GraphEditor>(viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { history_.record(std::move(command)); }, [this](const std::string& message) { say(message); });
     storyEvents_ = std::make_unique<StoryEventEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
+    dataEditor_ = std::make_unique<DataEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
     buildPanels();
 }
 
@@ -110,6 +111,7 @@ void Editor::buildPanels() {
     button("Rules", "Interactions: open who may do what to what as a graph, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Interaction); });
     button("Events", "Story events: edit the crossroads events of the hero's youth as forms (Esc comes back)", [this] { storyEvents_->show(true); });
     button("Quests", "Quests: open a quest as a graph of steps, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Quest); });
+    button("Data", "Data: open any data file of the game as forms (weapons, plants, needs, rules...), edit it and save it (Esc comes back)", [this] { dataEditor_->show(true); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -1520,6 +1522,7 @@ void Editor::panTo(double x, double y) {
 
 void Editor::setHelp(EditorHelp* help) {
     help_ = help;
+    dataEditor_->setHelp(help); // the Data tab's fields get their help from the schemas
     if (help_ != nullptr && !help_->problem().empty()) say(help_->problem());
 }
 
@@ -2030,6 +2033,10 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
 void Editor::update(const Intents& intents) {
     applyHelp();
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
+    if (dataEditor_->shown()) { // the Data tab takes the whole screen; the map waits behind it (it handles Ctrl+S, Ctrl+Z, Ctrl+Y and Esc itself)
+        dataEditor_->update(intents);
+        return;
+    }
     if (storyEvents_->shown()) { // the Story events list takes the whole screen too
         storyEvents_->update(intents);
         if (!storyEvents_->typing()) {
@@ -2361,6 +2368,11 @@ void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
         question_->draw(painter);
         openList_->drawOverlay(painter);
         question_->drawOverlay(painter);
+    }
+    if (dataEditor_->shown()) { // the Data tab covers the map
+        dataEditor_->draw(painter);
+        dataEditor_->drawOverlay(painter);
+        return;
     }
     if (storyEvents_->shown()) { // the Story events list covers the map
         storyEvents_->draw(painter);

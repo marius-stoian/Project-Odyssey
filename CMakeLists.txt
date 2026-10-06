@@ -180,6 +180,9 @@ add_library(odysseus_sim STATIC
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
     src/sim/json_text.cpp
+    src/sim/json_patch.cpp
+    src/sim/data_document.cpp
+    src/sim/data_form.cpp
     src/sim/schema.cpp
     src/sim/schema_index.cpp
     src/sim/rule_json.cpp
@@ -299,10 +302,11 @@ add_library(odysseus_game STATIC
     src/game/editor_history.cpp
     src/game/dialogue_graph.cpp
     src/game/graph_editor.cpp
+    src/game/data_editor.cpp
     src/game/interaction_graph.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
-# PRIVATE: the Game reads its own content (materials.json) with the Simulation's JSON helpers.
-target_link_libraries(odysseus_game PRIVATE nlohmann_json::nlohmann_json)
+# PUBLIC since the Data tab (US-191): the Editor's header holds a data document, which is JSON, so the programs that include the Editor need the library's headers.
+target_link_libraries(odysseus_game PUBLIC nlohmann_json::nlohmann_json)
 odysseus_register_layer(odysseus_game game game)
 odysseus_apply_settings(odysseus_game)
 
@@ -501,7 +505,9 @@ add_executable(odysseus_game_tests
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
     tests/game/building_editor_test.cpp
-    tests/game/schema_game_test.cpp)
+    tests/game/schema_game_test.cpp
+    tests/game/data_editor_test.cpp
+    tests/game/live_catalog_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -577,7 +583,10 @@ add_executable(odysseus_sim_tests
     tests/sim/building_life_test.cpp
     tests/sim/graph_check_test.cpp
     tests/sim/test_play_test.cpp
-    tests/sim/schema_test.cpp)
+    tests/sim/schema_test.cpp
+    tests/sim/json_patch_test.cpp
+    tests/sim/data_document_test.cpp
+    tests/sim/data_form_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

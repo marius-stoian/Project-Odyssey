@@ -494,7 +494,7 @@ void TextField::draw(UiPainter& painter) const {
     painter.text(bounds.x, bounds.y + 2, label, UiColor::Dim);
     const Rect inner = box();
     painter.fill(inner, UiColor::Dark);
-    painter.outline(inner, focused_ ? UiColor::Gold : UiColor::Border);
+    painter.outline(inner, invalid ? UiColor::Red : (focused_ ? UiColor::Gold : UiColor::Border));
     std::string shown = focused_ ? editing_ + "_" : value;
     const auto fits = static_cast<std::size_t>(std::max(3, (inner.width - 6) / kTextAdvance));
     if (shown.size() > fits) shown = focused_ ? shown.substr(shown.size() - fits) : shown.substr(0, fits - 2) + ".."; // the end while typing, ".." when it is cut
@@ -505,6 +505,38 @@ void TextField::drawOverlay(UiPainter& painter) const {
     if (!visible) return;
     tip.draw(painter);
     if (focused_) list_.draw(painter, box());
+}
+
+// --- Label and Toggle ---
+
+void Label::draw(UiPainter& painter) const { painter.text(bounds.x, bounds.y + 2, text, color); }
+
+Rect Toggle::box() const {
+    const int boxX = bounds.x + UiPainter::textWidth(label) + 4;
+    return {boxX, bounds.y, bounds.x + bounds.width - boxX, bounds.height};
+}
+
+bool Toggle::handle(const UiInput& input) {
+    if (!visible) return false;
+    const bool over = contains(input.pointer.x, input.pointer.y);
+    tip.track(over && !input.pointer.wasPressed(PointerButton::Left), input.pointer.x, input.pointer.y);
+    if (over && input.pointer.wasPressed(PointerButton::Left)) {
+        value = !value;
+        if (onChange) onChange(value);
+    }
+    return over && input.pointer.wasPressed(PointerButton::Left);
+}
+
+void Toggle::draw(UiPainter& painter) const {
+    painter.text(bounds.x, bounds.y + 2, label, UiColor::Dim);
+    const Rect inner = box();
+    painter.fill(inner, UiColor::Dark);
+    painter.outline(inner, invalid ? UiColor::Red : UiColor::Border);
+    painter.text(inner.x + 3, inner.y + (inner.height - kGlyphHeight) / 2, value ? "yes" : "no", value ? UiColor::Gold : UiColor::Text);
+}
+
+void Toggle::drawOverlay(UiPainter& painter) const {
+    if (visible) tip.draw(painter);
 }
 
 // --- Panel ---

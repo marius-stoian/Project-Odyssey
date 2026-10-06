@@ -55,7 +55,8 @@
             "maximum": 1000,
             "example": "30"
           }
-        }
+        },
+        "required": ["id", "label", "trigger", "action"]
       }
     }
   },

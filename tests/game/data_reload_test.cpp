@@ -282,12 +282,12 @@ TEST_CASE("US-303 Missing light: a placed light whose kind left lights.json is m
 
 TEST_CASE("US-303 Next start: a file that cannot be swapped is reported, never half-applied; F5 leaves it alone") {
     Studio studio("us303-later");
-    studio.write("weather.json", studio.read("weather.json"));
-    const auto outcomes = studio.changed("weather.json");
+    studio.write("tiles.json", studio.read("tiles.json")); // a tile is a number in the map: it stays at the next start (weather.json is live since US-191)
+    const auto outcomes = studio.changed("tiles.json");
     REQUIRE(outcomes.size() == 1);
     CHECK(outcomes[0].set == "next-start");
     CHECK(outcomes[0].result.atNextStart);
-    CHECK(studio.game().toast() == "weather.json applies at the next start");
+    CHECK(studio.game().toast() == "tiles.json applies at the next start");
     studio.game().reloadEverything();
     CHECK(studio.game().toast().rfind("Reloaded", 0) == 0); // F5: the live sets
     CHECK(studio.game().toast().find("next-start") == std::string::npos);

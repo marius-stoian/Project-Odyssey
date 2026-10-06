@@ -291,7 +291,8 @@
             "description": "A kind of light of lights.json the weapon gives while it is held",
             "ref": "catalog:lights"
           }
-        }
+        },
+        "required": ["name", "frame", "class", "element", "era", "starter", "damage", "speed", "range"]
       }
     }
   },

@@ -95,6 +95,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editorHelp_.setSources(suggestionSources()); // the lists of values read the data in use each time a field opens one (US-302)
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
+    editor_.data().setFolder(dataDirectory, [this](const std::filesystem::path& file) { dataFileSaved(file); }); // Save in the Data tab reads the file again, like F5 (US-191)
     editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { ownReload("interactions"); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {
@@ -181,17 +182,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
-    std::vector<std::string> palette;
-    for (const WeaponDef& weapon : catalogs_.weapons) {
-        if (weapon.starter) {
-            starters_.push_back(&weapon);
-            palette.push_back(weapon.name);
-        }
-    }
-    // The Editor offers the starters, then the two demo weapons (D-23).
-    palette.push_back(kSpearThrowName);
-    palette.push_back(kSwordSlashName);
-    editor_.setWeaponPalette(std::move(palette));
+    rebuildWeaponLists();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
     buildNpcPopulation(); // the placed people are persons from the first frame, not only after a restart (X-M9a)
@@ -2275,16 +2266,8 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
         weaponArt_.icons = iconsTexture_;
         if (const auto weather = content_.pictures.find("weather"); weather != content_.pictures.end()) {
             weatherTexture_ = renderer.createTexture(weather->second);
-            for (const WeatherDef& def : catalogs_.weather) {
-                for (int i = 0; i < def.frames; ++i) {
-                    if (const auto rect = content_.rect(content_.frameName(def.name, i))) weatherFrames_[def.name].push_back(*rect);
-                }
-            }
         }
         effectArt_.page = effectsTexture_;
-        for (const EffectDef& def : catalogs_.effects) {
-            if (const auto rect = content_.rect(content_.frameName(def.name, 0))) effectArt_.firstFrame[def.name] = *rect;
-        }
         for (const char* page : {"plants-small", "plants-tall", "trees"}) {
             if (const auto found = content_.pictures.find(page); found != content_.pictures.end()) {
                 const auto normals = content_.normals.find(page);
@@ -2298,9 +2281,6 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
             if (hasNormals) mirroredNormalPictures.push_back(luna::engine::mirroredNormals(animalNormals->second));
             animalArt_.mirrored = withNormals(luna::engine::mirrored(animals->second), hasNormals ? mirroredNormalPictures.back() : kNone);
             animalArt_.pageWidth = animals->second.width();
-            for (const AnimalDef& animal : catalogs_.animals) {
-                if (const auto rect = content_.rect(animal.frame)) animalArt_.sources[animal.name] = *rect;
-            }
         }
         for (const PlantDef& plant : catalogs_.plants) {
             const auto frame = content_.frames.find(plant.frame);
@@ -2321,9 +2301,7 @@ void OdysseyGame::start(luna::engine::Renderer& renderer) {
                 for (const auto& [name, rect] : rects) plantArt_.sources[name] = {"objects", rect};
             }
         }
-        for (const WeaponDef& weapon : catalogs_.weapons) {
-            if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
-        }
+        rebuildCatalogArt(); // the frame of each weapon, animal, effect and weather in the atlas
         editor_.setTextures({tiles_, characters_, charactersAtlas_, props_, uiSheet_, &art_, &weaponArt_, &plantArt_, &animalArt_, &effectArt_, &buildings_});
         startPlacedEffects(); // the content is loaded now: the effects placed in the level start
     } else {

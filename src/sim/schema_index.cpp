@@ -89,7 +89,7 @@ DataIndex buildIndex(const fs::path& dataRoot, const SchemaSet& set, const std::
         const JsonLines lines = JsonLines::scan(*text);
         const Report report = check(*schema->root, data, &lines);
         for (const Issue& issue : report.issues) index.issues.push_back({relative, issue});
-        for (const RefUse& ref : report.refs) index.uses.push_back({relative, ref.path, ref.line, ref.catalog, ref.value});
+        for (const RefUse& ref : report.refs) index.uses.push_back({relative, ref.path, ref.line, ref.catalog, ref.value, ref.key});
         for (const Provide& provide : schema->provides) {
             for (const Provided& provided : collectProvided(data, provide.at)) index.catalogs[provide.catalog].insert(provided.value);
         }

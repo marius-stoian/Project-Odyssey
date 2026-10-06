@@ -49,6 +49,13 @@ public:
     // The first mistake, for the Editor's status line; empty when the file is clean.
     std::string problem() const { return problems_.empty() ? std::string() : problems_.front(); }
 
+    // Entries made from the schemas of the data files (US-191, K-M11: one help source): the Data tab's fields are named "data.<schema>.<path>" and their purpose and
+    // example are the schema's description and example. They stay when help.json is read again.
+    void setGenerated(std::map<std::string, Entry> entries) { generated_ = std::move(entries); }
+    const std::map<std::string, Entry>& generated() const { return generated_; }
+    // A field built by hand, not through apply(): it asks for its entry the same way, so the coverage test sees it.
+    void ask(const std::string& id) { asked_.insert(id); }
+
     const Entry* find(const std::string& id) const;
     const std::map<std::string, Entry>& entries() const { return entries_; }
 
@@ -68,6 +75,7 @@ public:
 
 private:
     std::map<std::string, Entry> entries_;
+    std::map<std::string, Entry> generated_; // from the schemas
     std::vector<std::string> problems_;
     std::set<std::string> asked_;
     std::set<std::string> wired_;

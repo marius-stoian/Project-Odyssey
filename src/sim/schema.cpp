@@ -116,6 +116,9 @@ NodePtr parseNode(const OrderedJson& json, const std::filesystem::path& file, co
         } else if (key == "ref") {
             node->ref = textOf(value, file, at);
             if (!node->ref.starts_with("catalog:") || node->ref.size() == 8) bad(file, at, "must read \"catalog:<name>\"");
+        } else if (key == "keyRef") {
+            node->keyRef = textOf(value, file, at);
+            if (!node->keyRef.starts_with("catalog:") || node->keyRef.size() == 8) bad(file, at, "must read \"catalog:<name>\"");
         } else if (key == "format") {
             node->format = textOf(value, file, at);
         } else if (isNoteKey(key) || key == "title") {
@@ -260,6 +263,7 @@ private:
             if (const Node* known = schema.property(key)) {
                 node(*known, member, at);
             } else if (schema.additional) {
+                if (schema.keyRef.starts_with("catalog:")) report_.refs.push_back({schema.keyRef.substr(8), key, at, lines_ != nullptr ? lines_->lineOf(at) : 0, true});
                 node(*schema.additional, member, at);
             } else if (!schema.anyMember && !isNoteKey(key) && !schema.properties.empty()) { // an object with no named fields is free-form
                 issue(true, at, "is not a field this file knows (a typo? a note field starts with note, comment or _)");

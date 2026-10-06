@@ -19,6 +19,7 @@ public:
     // The line (counting from 1) of the value at `path`; the line of its nearest known parent when the path is not known, 0 when there is none.
     int lineOf(const std::string& path) const;
 
+    // "weapons" and "damage" give "weapons.damage"; a key with a dot, bracket or quote in it gives weapons["a.b"] (see parsePath in data_document.h).
     static std::string childPath(const std::string& parent, const std::string& key);
     static std::string indexPath(const std::string& parent, std::size_t index);
 

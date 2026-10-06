@@ -164,7 +164,13 @@ int JsonLines::lineOf(const std::string& path) const {
     }
 }
 
-std::string JsonLines::childPath(const std::string& parent, const std::string& key) { return parent.empty() ? key : parent + "." + key; }
+std::string JsonLines::childPath(const std::string& parent, const std::string& key) {
+    if (key.find_first_of(".[]\"") == std::string::npos) return parent.empty() ? key : parent + "." + key;
+    // A key with a dot, a bracket or a quote in it (help.json names its fields "npc.sword") is written ["npc.sword"], so the path is unambiguous (data_document.h).
+    std::string quoted;
+    for (const char c : key) quoted += (c == '"' || c == '\\' ? "\\" : "") + std::string(1, c);
+    return parent + "[\"" + quoted + "\"]";
+}
 
 std::string JsonLines::indexPath(const std::string& parent, std::size_t index) { return parent + "[" + std::to_string(index) + "]"; }
 

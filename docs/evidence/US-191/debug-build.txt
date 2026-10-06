@@ -1,0 +1,10 @@
+US-191 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_game_tests, odysseus_sim_tests, luna_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_sim_tests "-tc=US-191*":   22 test cases, 42469 assertions, all passed
+  (Patch keeps the text: all 183 shipped files byte for byte; Patch every value of every file; lists that grow and shrink; objects that gain and lose members;
+   Every file has rows: every row of every file has a help id and typing a row's own text back is no edit)
+odysseus_game_tests "-tc=US-191*":  16 test cases, all passed (the Data tab, by hand, help for every field, live catalogs)
+luna_tests "-tc=US-191*":            1 test case, 14 assertions, all passed
+odysseus_sim_tests "-tc=US-190*":   13 test cases, 98 assertions, all passed (keyRef and the new links included)

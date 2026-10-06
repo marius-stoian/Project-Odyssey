@@ -52,7 +52,8 @@
             "description": "Tags the thing carries; they say what rules may do to it",
             "items": {"type": "string", "description": "One tag"}
           }
-        }
+        },
+        "required": ["name", "frames", "directions", "hp", "swordDamage"]
       }
     }
   },

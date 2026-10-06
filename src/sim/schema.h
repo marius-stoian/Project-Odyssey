@@ -22,7 +22,7 @@ namespace odysseus::sim::schema {
 //
 // Keys a schema node may use: type (object, array, string, number, integer, boolean), properties, additionalProperties (true, or a schema for every
 // member that is not named: a map keyed by id), items, required, minimum, maximum, minItems, maxItems, maxLength, enum, default, description,
-// example, ref ("catalog:items": the value is a name in that catalog), format (rule, effect, colour, frame, time). At the root also title, provides,
+// example, ref ("catalog:items": the value is a name in that catalog), keyRef (the keys of a map are names in that catalog), format (rule, effect, colour, frame, time). At the root also title, provides,
 // loaders and externalFields. A key starting with "_" or "//", and the keys "note" and "comment" of a data file, are always allowed (note fields).
 
 enum class Type { Any, Object, Array, String, Number, Integer, Boolean };
@@ -40,6 +40,7 @@ struct Node {
     std::string description; // the help text of the field: what it is for
     std::string example;     // one value written the way it would be typed
     std::string ref;         // "catalog:<name>": the value must be a name of that catalog
+    std::string keyRef;      // "catalog:<name>": on a map (additionalProperties), every key must be a name of that catalog (the items of a recipe: { "flint": 2 })
     std::string format;      // rule, effect, colour, frame or time: how the text is read (the forms pick a widget by it)
     std::string defaultText; // the default as JSON text, empty when there is none
     std::optional<double> minimum;
@@ -84,12 +85,13 @@ struct Issue {
     std::string text(const std::filesystem::path& file) const;
 };
 
-// A value that names an entry of a catalog (a field with "ref").
+// A value that names an entry of a catalog (a field with "ref", or a key of a map with "keyRef").
 struct RefUse {
     std::string catalog;
     std::string value;
-    std::string path;
+    std::string path;   // where the value stands; for a key, the path of the member the key names
     int line = 0;
+    bool key = false;   // `value` is the key of the member at `path`, not a value
 };
 
 struct Report {

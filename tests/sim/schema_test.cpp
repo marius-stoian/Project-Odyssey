@@ -95,7 +95,7 @@ TEST_CASE("US-190 Subset") {
         "kind": {"type": "string", "enum": ["a", "b"]},
         "colour": {"type": "string", "format": "colour"},
         "list": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"type": "string", "ref": "catalog:things"}},
-        "table": {"type": "object", "additionalProperties": {"type": "integer", "maximum": 3}}
+        "table": {"type": "object", "keyRef": "catalog:things", "additionalProperties": {"type": "integer", "maximum": 3}}
       }})");
     CHECK_FALSE(checkText(*root, R"({"name": "ok", "count": 5})").hasErrors());
     CHECK(says(checkText(*root, R"({"count": 5})"), "name: is missing"));
@@ -107,6 +107,13 @@ TEST_CASE("US-190 Subset") {
     CHECK(says(checkText(*root, R"({"name": "x", "colour": "red"})"), "colour: must be a colour such as #3a9a4c"));
     CHECK(says(checkText(*root, R"({"name": "x", "list": []})"), "list: needs at least 1 entries"));
     CHECK(says(checkText(*root, R"({"name": "x", "table": {"a": 1, "b": 7}})"), "table.b: must be at most 3 (is 7)"));
+    // The keys of a map can name catalog entries too (the items of a recipe): each key is a link, marked as a key.
+    const schema::Report keys = checkText(*root, "{\"name\": \"x\",\n \"table\": {\"flint\": 1, \"wood\": 2}}");
+    REQUIRE(keys.refs.size() == 2);
+    CHECK(keys.refs[0].key);
+    CHECK(keys.refs[0].catalog == "things");
+    CHECK(keys.refs[0].value == "flint");
+    CHECK(keys.refs[0].path == "table.flint");
     CHECK(says(checkText(*root, R"({"name": 5})"), "name: must be text (is a number)"));
 
     // A field the schema does not know is a warning (a typo), never an error; note fields are always welcome.

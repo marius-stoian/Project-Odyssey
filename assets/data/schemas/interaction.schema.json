@@ -29,7 +29,7 @@
         "kinds": {
           "type": "array",
           "description": "Kinds of thing it applies to (bush, person, deer...)",
-          "items": {"type": "string", "description": "One entry of kinds", "example": "moss"}
+          "items": {"type": "string", "description": "One entry of kinds", "example": "moss", "ref": "catalog:kinds"}
         }
       }
     },
@@ -97,6 +97,7 @@
       "example": "{actor.name} lit the fire."
     }
   },
+  "required": ["id", "label"],
   "provides": [{"catalog": "interactions", "at": "id"}],
   "loaders": ["src/sim/interaction.cpp"],
   "externalFields": ["metres", "seconds"]

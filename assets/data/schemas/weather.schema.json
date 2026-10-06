@@ -72,7 +72,8 @@
             "default": 0,
             "example": "1.0"
           }
-        }
+        },
+        "required": ["name", "frames", "ticksPerFrame", "weight", "blend"]
       }
     }
   },
