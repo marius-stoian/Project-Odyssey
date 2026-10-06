@@ -71,6 +71,11 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
     graphEditor_ = std::make_unique<GraphEditor>(viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { history_.record(std::move(command)); }, [this](const std::string& message) { say(message); });
     storyEvents_ = std::make_unique<StoryEventEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
     dataEditor_ = std::make_unique<DataEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
+    dataEditor_->setOpenInteraction([this](const std::string& id) { // the Interactions button of the Data tab: the interaction graph, on that interaction when there is one
+        dataEditor_->show(false);
+        graphEditor_->showKind(GraphEditor::Kind::Interaction);
+        if (!id.empty()) graphEditor_->open(id);
+    });
     buildPanels();
 }
 

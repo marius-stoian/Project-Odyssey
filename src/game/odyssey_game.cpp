@@ -96,6 +96,13 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
     editor_.data().setFolder(dataDirectory, [this](const std::filesystem::path& file) { dataFileSaved(file); }); // Save in the Data tab reads the file again, like F5 (US-191)
+    editor_.data().setTagsOf([this](const std::string& kind) -> std::vector<std::string> { // the Interactions button finds what targets a kind by its tags (US-193)
+        if (const PlantDef* plant = catalogs_.plant(kind)) return plant->tags;
+        if (const AnimalDef* animal = catalogs_.animal(kind)) return animal->tags;
+        if (const WeaponDef* weapon = catalogs_.weapon(kind)) return weapon->tags;
+        if (const CharacterKindDef* character = definitions_.character(kind)) return character->tags;
+        return {};
+    });
     editor_.setGraphFolders(dataDirectory / "dialogue", dataDirectory / "interactions", [this] { ownReload("interactions"); }, dataDirectory / "quests"); // Save in the graph editor reads the data again, like F5 (M9)
     // A placed plant may carry its own values for an interaction (US-173): the runner asks, when an action starts and when it ends.
     actions_.setAdjuster([this](const sim::rules::Interaction& base, const sim::rules::ThingRef& target) -> std::optional<sim::rules::Interaction> {

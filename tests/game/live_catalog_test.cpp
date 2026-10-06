@@ -191,3 +191,26 @@ TEST_CASE("US-191 The weather goes on under the same name") {
     REQUIRE(studio.changed("weather.json").front().result.ok);
     CHECK(studio.odyssey->catalogs().weather[static_cast<std::size_t>(studio.odyssey->weather().current())].name == name);
 }
+
+TEST_CASE("US-193 A copied plant is a plant of the game at once") {
+    // The Data tab of the running game: copy the wheat, change its tags, save. The copy is in the catalog, in the Editor's list of plants, and its interactions are found.
+    Studio studio("live-copy");
+    game::DataEditor& tab = studio.odyssey->editor().data();
+    tab.show(true);
+    REQUIRE(tab.open("plants.json"));
+    const auto& entries = tab.entries();
+    const auto wheat = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "wheat"; });
+    REQUIRE(wheat != entries.end());
+    REQUIRE(tab.selectEntry(wheat->path));
+    const std::vector<std::string> original = tab.interactionsOfEntry();
+    CHECK(std::find(original.begin(), original.end(), "gather") != original.end()); // wheat is edible and a plant: it can be gathered
+    REQUIRE(tab.copyEntry());
+    REQUIRE(tab.setField(tab.entryPath() + ".inspect", "A copy of the wheat."));
+    REQUIRE(tab.save());
+    const game::PlantDef* made = studio.odyssey->catalogs().plant("wheat-copy");
+    REQUIRE(made != nullptr);
+    CHECK(made->inspect == "A copy of the wheat.");
+    CHECK(studio.odyssey->definitions().hasPlant("wheat-copy")); // a level may place it
+    const std::vector<std::string> copied = tab.interactionsOfEntry();
+    CHECK(copied == original); // the copy offers the same interactions: the same tags
+}

@@ -131,11 +131,17 @@ private:
     // The named fields of an object in the schema's order (the ones the file leaves out too), then the members the schema does not know.
     void addMembers(const OrderedJson& object, const schema::Node* node, const std::string& path, int depth, const std::string& helpPath, const std::set<std::string>& skip) {
         if (node != nullptr) {
+            // A field can be taken out of the file only when the schema says which fields are required, and this one is not among them: a file of settings (no list)
+            // needs every number it has, and taking one out would stop the game from reading it.
+            const bool listed = !node->required.empty();
             for (const schema::Property& property : node->properties) {
                 if (skip.count(property.name) != 0) continue;
                 const bool present = object.contains(property.name);
+                const bool before = removable_;
+                removable_ = listed;
                 addValue(present ? &object.at(property.name) : nullptr, property.node.get(), JsonLines::childPath(path, property.name), property.name, depth, helpPath + "." + property.name,
                          node->isRequired(property.name));
+                removable_ = before;
             }
         }
         for (const auto& item : object.items()) {
@@ -160,7 +166,7 @@ private:
             FormRow row = base(scalarKind(node, value), node, path, label, depth, helpPath);
             row.present = value != nullptr;
             row.required = required;
-            row.canRemove = value != nullptr && !required;
+            row.canRemove = value != nullptr && !required && removable_;
             if (value != nullptr) row.value = valueText(*value);
             else if (node != nullptr && !node->defaultText.empty()) row.value = valueText(OrderedJson::parse(node->defaultText, nullptr, false));
             if (row.kind == RowKind::Choice && node != nullptr) {
@@ -178,7 +184,7 @@ private:
         heading.present = value != nullptr;
         heading.required = required;
         heading.canAdd = isMap || value == nullptr;
-        heading.canRemove = value != nullptr && !required;
+        heading.canRemove = value != nullptr && !required && removable_;
         heading.collapsed = value == nullptr || collapsedAt(path);
         rows_.push_back(heading);
         if (value == nullptr || heading.collapsed) return;
@@ -223,7 +229,7 @@ private:
             FormRow row = base(RowKind::Words, node, path, label, depth, helpPath);
             row.present = value != nullptr;
             row.required = required;
-            row.canRemove = value != nullptr && !required;
+            row.canRemove = value != nullptr && !required && removable_;
             if (value != nullptr) row.value = valueText(*value);
             if (node != nullptr && node->items && node->items->ref.starts_with("catalog:")) row.catalog = node->items->ref.substr(8);
             rows_.push_back(std::move(row));
@@ -269,6 +275,7 @@ private:
     const std::set<std::string>& collapsed_;
     std::map<std::string, std::string> errors_;
     std::vector<FormRow> rows_;
+    bool removable_ = true; // the fields being added can be taken out of the file (see addMembers)
 };
 
 } // namespace

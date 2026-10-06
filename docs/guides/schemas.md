@@ -39,6 +39,7 @@ A schema is JSON (comments allowed) with these keys on any node:
 | `description` | the help text: what the field is for (**every field needs one**) | `"description": "Hit points"` |
 | `example` | one value as it would be typed | `"example": "iron sword"` |
 | `ref` | `"catalog:<name>"`: the value is the name of an entry of that catalog; the form shows a picker and the test checks the link | `"ref": "catalog:items"` |
+| `keyRef` | on a map: `"catalog:<name>"`: every key of the map is the name of an entry of that catalog (the items of a recipe `{ "flint": 2 }`); the test checks the links and a rename changes the keys | `"keyRef": "catalog:items"` |
 | `format` | how a text is read: `rule` (a rule-language condition), `effect` (an effect line), `colour` (`#rrggbb`), `frame` (an atlas frame), `time` (`HH:MM`) | `"format": "colour"` |
 
 At the root of a schema also:

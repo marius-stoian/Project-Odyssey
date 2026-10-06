@@ -7,6 +7,7 @@
 #include "luna/engine/ui.h"
 #include "sim/data_document.h"
 #include "sim/data_form.h"
+#include "sim/data_refs.h"
 #include "sim/schema.h"
 #include "sim/schema_index.h"
 
@@ -59,6 +60,28 @@ public:
     bool save();
     // Adds a new entry to the list the open file keeps its entries in (a new weapon in weapons.json) and shows it; it is a step of undo like any edit.
     bool newEntry();
+    // Entity actions (US-193) on the chosen entry of a catalog. Copy makes a new entry beside it, named "<name> copy". Rename and Delete first ask: the places that use the
+    // entry are listed (`question()`), and nothing changes until `confirm()`; Esc or `cancel()` leaves everything as it was. A rename writes every file that names the
+    // entry at once (the data files, the levels, the dialogues) and is refused while the open file has unsaved changes; a delete is an edit of the open file, undone with
+    // Ctrl+Z, and waits for the confirmation only when the entry is still used.
+    struct Question {
+        enum class Kind { None, Rename, Delete };
+        Kind kind = Kind::None;
+        std::string title;
+        std::vector<std::string> lines; // "file:line: where"
+        std::string name;               // the new name (a rename)
+    };
+    bool copyEntry();
+    bool beginRename(const std::string& newName);
+    bool beginDelete();
+    bool confirm();
+    void cancel();
+    const Question& question() const { return question_; }
+    // The interactions that name the chosen entry's kind in their targets (the Interactions button opens the first one in the interaction graph).
+    std::vector<std::string> interactionsOfEntry() const;
+    void setOpenInteraction(std::function<void(const std::string&)> open) { openInteraction_ = std::move(open); }
+    // The tags a kind carries in the game, derived ones included (a plant that blocks walking is "solid"): the game knows them, the file may not write them.
+    void setTagsOf(std::function<std::vector<std::string>(const std::string&)> tagsOf) { tagsOf_ = std::move(tagsOf); }
     // The open file was changed on disk by something else: read it again unless it has unsaved edits (then it only says so). True when it was read again.
     bool changedOnDisk(const std::filesystem::path& file);
 
@@ -93,6 +116,18 @@ private:
     void refuse(const std::string& message);
     void markStale() { stale_ = true; }
     int visibleRows() const;
+    struct EntryInfo {
+        bool valid = false;
+        std::string group;
+        std::size_t index = 0;
+        std::string field; // the member that names the entry ("name", "id")
+        std::string name;
+        std::set<std::string> catalogs; // everything the entry is the name of (a plant is in plants and kinds)
+    };
+    EntryInfo describeEntry() const;
+    sim::refs::Roots roots() const { return {folder_, folder_.parent_path() / "levels"}; }
+    void buildQuestion(luna::engine::Panel& panel);
+    void openRenameDialog();
 
     int viewWidth_;
     int viewHeight_;
@@ -120,6 +155,10 @@ private:
     int problemTicks_ = 0;
     bool discardWarned_ = false;
     bool closeRequested_ = false;
+    Question question_;
+    sim::refs::Plan plan_;                    // a rename that waits for its confirmation
+    std::function<void(const std::string&)> openInteraction_;
+    std::function<std::vector<std::string>(const std::string&)> tagsOf_;
     sim::schema::DataIndex index_;
     std::unique_ptr<luna::engine::Panel> panel_;
 };
