@@ -2,6 +2,12 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-306 Graph editor: new files in one click, framed tabs, readable text (Mraw) - 2026-10-06
+
+**State:** On `fix/graph-editor-new`, merged into `qa` after the Debug verify. Owner request: the Talk, Rules and Quests lists could not be given new entries in practice, and text and tooltips were cut off.
+
+- **Changed:** the graph editor's **New** button works without typing a name (it makes `new-talk`, `new-rule` or `new-quest`, with `-2`, `-3`... when taken); the kind tabs and the name and New group each have a frame; the file list is 176 pixels wide so the longest names show whole (`src/game/graph_editor.*`). Luna: a button's hint wraps at 60 letters like a field tooltip, and a text field shows the end of a long value while typing and `..` when it is cut (`src/luna/engine/ui.cpp`). Tests: "Graph editor New with no name..." and a screenshot test (`docs/evidence/US-306/graph-editor-bar.png`).
+
 ## US-305 Level edits win over the run save (Mraw) - 2026-10-06
 
 **State:** On `story/US-305`, merged into `qa` after the Debug verify (zero warnings, every test group green).

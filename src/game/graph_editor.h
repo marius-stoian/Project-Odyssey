@@ -52,6 +52,7 @@ public:
     // A new file in the shown kind (D-56 Q12, the exit review of M9): a conversation with a start node, a line and a way out, or an interaction with an actor, a verb
     // and a target. It exists only here until Save writes it. The name is letters, digits and hyphens, and no file of that name exists yet.
     bool createNew(const std::string& name);
+    std::string freeName() const;
     bool dirty() const;
     // The check (US-175, D-56 Q17): what the open file names that does not exist, nodes nobody reaches, dead ends. It runs again whenever the graph changed;
     // the list under the canvas shows it, and a click selects the card it points to. `catalog` is what the game knows (items, tags, built-in actions).
@@ -132,6 +133,8 @@ private:
     void bindView();
     std::string errorsNote() const;
     std::string newName_;
+    luna::engine::Rect tabsBox_{};    // the frames drawn round the kind tabs and round the name and New (the bar)
+    luna::engine::Rect newBox_{};
     std::string headerText(const sim::rules::DlgScript& script) const;
 
     int viewWidth_;
