@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## K-M11 Kick off M11 Data editors (Mraw) - 2026-10-06
+
+**State:** On `qa`. Docs only; no code changed.
+
+- **New:** `docs/plans/M11-data-editors-design.md`; `docs/decision-requests/D-60.md`; D-60 in `docs/decisions.md` (Decided by Dominus, delegated under D-41); `Milestone-143.md` (AP-144).
+- **Changed:** `docs/status.md` (K-M11 Done); `Limit.md` (resume point).
+- **Verified:** D-40, D-41, D-58 Decided; X-M10 and X-M10b results present in `docs/gates/`; no build needed for a docs-only change.
+
 ## Refactor: lean code, stronger Luna (Mraw) - 2026-10-06
 
 **State:** On `refactor/lean-luna` from `main` (`f0aa726`); not merged. Debug verify: zero warnings, 30 of 30 (`docs/evidence/REFACTOR-lean-luna/`). Full report: `docs/reports/Refactor-lean-luna-2026-10-06.md`.

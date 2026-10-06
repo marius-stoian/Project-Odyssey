@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-06, K-M11):** K-M11 Done (Milestone-143.md, AP-144): design in docs/plans/M11-data-editors-design.md, decisions D-60 (delegated). Working branch qa (fast-forwarded to origin/qa, which holds the lean-luna refactor); the owner's uncommitted level edits (assets/data/npcs/wanderer.json, assets/levels/level-7.json, level-5.json) are NOT mine: never commit them. Next: S-US-190 (schemas and validator), then US-191, 193, 194, 195, 196, 192, X-M11. M10b walkthrough still pending the owner. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
+
 **Resume update (2026-10-06, US-306):** owner request done on qa: graph editor New works without a name, framed tabs, wider list, wrapped button hints, fitted field text (docs/evidence/US-306/). Walkthrough of M10b still pending the owner.
 
 **Resume update (2026-10-06, X-M10b merged):** X-M10b DONE on the owner instruction to merge and review later: qa merged into main, CI on main green, tag m10b-done. The owner walkthrough (docs/gates/M10b-walkthrough.md) is still to be run; a Fail becomes new stories in docs/codex-issues.md for Anima. Next: K-M11, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
