@@ -630,3 +630,16 @@ TEST_CASE("X-M9 New: a name is checked and an existing file is not overwritten")
     CHECK(rig.editor.createNew("fresh"));
     CHECK_FALSE(rig.editor.createNew("fresh")); // open already
 }
+
+TEST_CASE("Graph editor New with no name makes the next free new-talk, new-rule or new-quest") {
+    Folder folder;
+    Rig rig(folder);
+    CHECK(rig.editor.freeName() == "new-talk");
+    REQUIRE(rig.editor.createNew(rig.editor.freeName()));
+    CHECK(rig.editor.freeName() == "new-talk-2");
+    REQUIRE(rig.editor.createNew(rig.editor.freeName()));
+    rig.editor.showKind(GraphEditor::Kind::Interaction);
+    CHECK(rig.editor.freeName() == "new-rule");
+    rig.editor.showKind(GraphEditor::Kind::Quest);
+    CHECK(rig.editor.freeName() == "new-quest");
+}

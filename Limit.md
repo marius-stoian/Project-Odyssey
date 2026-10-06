@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-06, US-306):** owner request done on qa: graph editor New works without a name, framed tabs, wider list, wrapped button hints, fitted field text (docs/evidence/US-306/). Walkthrough of M10b still pending the owner.
+
 **Resume update (2026-10-06, X-M10b merged):** X-M10b DONE on the owner instruction to merge and review later: qa merged into main, CI on main green, tag m10b-done. The owner walkthrough (docs/gates/M10b-walkthrough.md) is still to be run; a Fail becomes new stories in docs/codex-issues.md for Anima. Next: K-M11, but X-M6 (kill gate 2) needs people; ask the owner. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
 
 **Resume update (2026-10-06, X-M10b at the gate, superseded):** X-M10b is at its only owner gate (Milestone-142.md, AP-143). Debug and Release verify on qa: zero warnings, 27/27 each; docs/gates/M10b.md (coverage 127 fields, NFR-09 timings) and docs/gates/M10b-walkthrough.md are written. Waiting for the owner Pass or Fail on the walkthrough. On Pass: record it in docs/gates/M10b.md, merge qa into main, push, confirm CI on main green (one rerun at most), tag m10b-done and push the tag, save a Milestone snapshot, mark X-M10b Done. On Fail: list what is missing as new stories in docs/codex-issues.md for Anima and stop. Then K-M11 (but X-M6 kill gate 2 needs people; ask the owner). Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
