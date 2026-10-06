@@ -214,7 +214,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-191 | US-191 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-191/; CI-007 and CI-021 resolved for weapons, animals, effects and weather |
 | S-US-193 | US-193 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-193/; Milestone-146 |
 | S-US-194 | US-194 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-194/; Milestone-147; mechanics (sim/, hero/, story/) now live |
-| S-US-195 | US-195 | M11 | To do |  |
+| S-US-195 | US-195 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-195/; Milestone-148 |
 | S-US-196 | US-196 | M11 | To do |  |
 | S-US-192 | US-192 | M11 | To do |  |
 | X-M11 | - | M11 | To do |  |

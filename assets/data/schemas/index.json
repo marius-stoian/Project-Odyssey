@@ -36,6 +36,7 @@
     {"match": "sim/trade.json", "schema": "sim-trade"},
 
     {"match": "hero/hero.json", "schema": "hero-hero"},
+    {"match": "rules/*.json", "schema": "rules"},
     {"match": "hero/items.json", "schema": "hero-items"},
     {"match": "hero/professions.json", "schema": "hero-professions"},
     {"match": "hero/recipes.json", "schema": "hero-recipes"},

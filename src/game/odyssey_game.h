@@ -45,6 +45,7 @@
 #include "core/random.h"
 
 #include "sim/hero_life.h"
+#include "sim/play_rules.h"
 #include "game/bubbles.h"
 #include "sim/dialogue_script.h"
 #include "sim/flag_store.h"
@@ -281,6 +282,8 @@ public:
     // screens of RunFlow. `--new-game` opens the New Game screen; Esc opens the menu.
     sim::HeroLife* life() { return life_.get(); }
     const sim::HeroLife* life() const { return life_.get(); }
+    const sim::PlayRules& rules() const { return rules_; }
+    const std::filesystem::path& dataDirectory() const { return dataDirectory_; }
     const sim::HeroData* heroData() const { return heroData_ ? &*heroData_ : nullptr; }
     RunFlow& run() { return runFlow_; }
     const RunFlow& run() const { return runFlow_; }
@@ -561,6 +564,13 @@ private:
     PlantArt plantArt_;
     std::filesystem::path dataDirectory_;
     std::optional<sim::HeroData> heroData_;
+    // The rules the game plays under (US-195): the level's own `rules`, else the player's pick from the New Game screen, else "standard"; a run keeps the rules it
+    // began with. The switches of systems are read from `rules_.systems` where each system starts or is drawn.
+    sim::PlayRules rules_;
+    std::string rulesName_ = "standard";
+    std::string pickedRules_;
+    bool startingRun_ = false;
+    void chooseRules(const std::string& pick);
     std::unique_ptr<sim::HeroLife> life_;
     RunFlow runFlow_;
     SessionStats stats_;

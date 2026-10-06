@@ -95,7 +95,8 @@ struct PlacedCharacter {
 // Version 6 (US-250) adds the buildings of the level (their own list, not plants: CI-008).
 // Version 2 (US-134, US-136, US-138) adds weapon pickups, plants and effects; version 3 (US-247) adds placed lights; version 4 (US-260) adds the
 // NPC Classes of placed characters; version 5 (US-280, M9b and M9c) adds the region economy (currencies, prices, resources), the NPC trade, schedule and action fields and the places. Older files still load, without them, and are written as version 5 the next time they are saved.
-inline constexpr int kLevelVersion = 6;
+// Version 7 (US-195) adds `rules`, the name of the rules file of assets/data/rules/ the level is played under; a level without it is played under the player's pick, then "standard".
+inline constexpr int kLevelVersion = 7;
 inline constexpr int kLevelBackups = 3;
 inline constexpr int kLevelMinSize = 8;
 inline constexpr int kLevelMaxSize = 256;
@@ -184,6 +185,7 @@ struct Level {
     sim::RegionEconomy economy;          // level version 5 (US-280): the currencies, market prices and resources of this region; written only when set
     std::vector<PlacedPlace> places;     // level version 5 (US-290): the named spots schedules refer to; written only when there are some
     bool clan = false;                   // the simulated clan lives here (US-032); written only when true
+    std::string rules;                   // level version 7 (US-195): the rules file this level is played under ("" = the player's pick, then standard); written only when set
     PixelPoint heroStart;
     std::vector<PixelPoint> targets;     // straw targets of the spear demo (US-029)
     int nextId = 1;

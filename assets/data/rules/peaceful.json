@@ -1,0 +1,13 @@
+{
+  "title": "Peaceful",
+  "victory": {
+    "winPercent": 40,
+    "combinedWinPercent": 35,
+    "loseBelowPeople": 2,
+    "rivalFollowerPercent": 60
+  },
+  "systems": {
+    "combat": false,
+    "rivals": false
+  }
+}

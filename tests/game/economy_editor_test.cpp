@@ -52,7 +52,7 @@ TEST_CASE("US-280 Set: the owner marks shells as currency with value 1, saves, a
     const std::string text = readText(studio.file);
     CHECK(text.find("\"economy\"") != std::string::npos);
     CHECK(text.find("\"shells\": 1") != std::string::npos);
-    CHECK(text.find("\"levelVersion\": 6") != std::string::npos);
+    CHECK(text.find("\"levelVersion\": 7") != std::string::npos);
     const game::Level reread = game::loadLevel(studio.file, studio.odyssey->definitions()).level;
     CHECK(reread.economy == editor.level().economy);
     CHECK(reread.economy.isCurrency("shells"));

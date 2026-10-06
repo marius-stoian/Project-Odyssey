@@ -19,7 +19,7 @@ constexpr int kRowHeight = 12;
 constexpr int kTalkWrap = 56; // characters of a line of speech in the conversation panel (the design of M8)
 
 enum ScreenIds {
-    kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kActivityBase = 100, kOptionBase = 200,
+    kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kRulesBase = 40, kActivityBase = 100, kOptionBase = 200,
     kTabBase = 300, kResolutionBase = 320, kWindowed = 330, kVolumeDown = 331, kVolumeUp = 332, kBorderless = 333, kExclusive = 334,
     kScalingWhole = 335, kScalingFill = 336, kZoomOut = 337, kZoomIn = 338, kUiSmall = 339, kUiLarge = 343, kMarkersToggle = 344, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
@@ -97,6 +97,19 @@ void RunFlow::openNewGame() {
     seedText_.clear();
     preset_ = 0;
     comfort_ = 1;
+    rules_.clear();
+}
+
+// The hero's numbers under a set of rules (US-195): the presets and comforts the New Game screen offers are the ones of the picked rules.
+static sim::HeroConfig configUnder(const OdysseyGame& game, const std::string& rules) {
+    sim::HeroConfig config = game.heroData()->config;
+    try {
+        sim::applyRules(config, sim::loadPlayRules(game.dataDirectory(), "standard"));
+        if (!rules.empty() && rules != "standard") sim::applyRules(config, sim::loadPlayRules(game.dataDirectory(), rules));
+    } catch (const std::exception&) {
+        // a broken rules file is said when the game starts under it; the screen shows what it has
+    }
+    return config;
 }
 
 void RunFlow::openFocus() {
@@ -153,19 +166,28 @@ void RunFlow::build(OdysseyGame& game) {
 }
 
 void RunFlow::buildNewGame(OdysseyGame& game) {
-    const sim::HeroData& data = *game.heroData();
+    const sim::HeroConfig config = configUnder(game, rules_);
     title("NEW GAME");
     line(std::format("Seed: {}{}   (type digits; empty = random)", seedText_.empty() ? "random" : seedText_, seedText_.size() < 18 ? "_" : ""));
     gap();
+    const std::vector<std::string> ruleNames = sim::playRuleNames(game.dataDirectory());
+    if (ruleNames.size() > 1) { // more than one set of rules: the player picks (a level that names its own rules overrides the pick)
+        line("Rules:", UiColor::Dim);
+        for (std::size_t i = 0; i < ruleNames.size(); ++i) {
+            button(ruleNames[i], kRulesBase + static_cast<int>(i), true, ruleNames[i] == (rules_.empty() ? "standard" : rules_));
+        }
+        newRow();
+        cursorY_ += kRowHeight + 6;
+    }
     line("Growing Period:", UiColor::Dim);
-    for (std::size_t i = 0; i < data.config.presets.size(); ++i) {
-        const sim::PresetConfig& p = data.config.presets[i];
+    for (std::size_t i = 0; i < config.presets.size(); ++i) {
+        const sim::PresetConfig& p = config.presets[i];
         button(std::format("{} (age {})", p.name, p.startAge), kPresetBase + static_cast<int>(i), true, static_cast<int>(i) == preset_);
     }
     newRow();
     cursorY_ += kRowHeight + 6;
     line("Comfort:", UiColor::Dim);
-    for (std::size_t i = 0; i < data.config.comforts.size(); ++i) button(data.config.comforts[i].name, kComfortBase + static_cast<int>(i), true, static_cast<int>(i) == comfort_);
+    for (std::size_t i = 0; i < config.comforts.size(); ++i) button(config.comforts[i].name, kComfortBase + static_cast<int>(i), true, static_cast<int>(i) == comfort_);
     newRow();
     cursorY_ += kRowHeight + 6;
     button(tutorial_ ? "Tutorial: on" : "Tutorial: off", kTutorialToggle, true, tutorial_, panel_.x + 8, 100);
@@ -864,11 +886,18 @@ void RunFlow::act(OdysseyGame& game, int id) {
         if (id == kTutorialToggle) tutorial_ = !tutorial_;
         else if (id >= kPresetBase && id < kPresetBase + 10) preset_ = id - kPresetBase;
         else if (id >= kComfortBase && id < kComfortBase + 10) comfort_ = id - kComfortBase;
-        else if (id == kStart) {
+        else if (id >= kRulesBase && id < kRulesBase + 10) {
+            const std::vector<std::string> names = sim::playRuleNames(game.dataDirectory());
+            if (static_cast<std::size_t>(id - kRulesBase) < names.size()) rules_ = names[static_cast<std::size_t>(id - kRulesBase)];
+            const sim::HeroConfig config = configUnder(game, rules_);
+            preset_ = std::min(preset_, static_cast<int>(config.presets.size()) - 1); // the new rules may offer fewer choices
+            comfort_ = std::min(comfort_, static_cast<int>(config.comforts.size()) - 1);
+        } else if (id == kStart) {
             sim::NewGame newGame;
             newGame.seed = seedText_.empty() ? randomSeed() : std::stoull(seedText_);
             newGame.preset = preset_;
             newGame.comfort = comfort_;
+            newGame.rules = rules_;
             game.startNewRun(newGame, true, tutorial_);
         }
         break;

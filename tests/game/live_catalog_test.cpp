@@ -31,7 +31,8 @@ struct Studio {
     luna::engine::RecordingRenderer renderer;
     std::unique_ptr<game::OdysseyGame> odyssey;
 
-    explicit Studio(const std::string& name) : data(dataCopy(name)) {
+    explicit Studio(const std::string& name, const std::string& rules = {}) : data(dataCopy(name)) {
+        writeText(data / "rules" / "calm.json", "{ \"systems\": { \"weather\": false } }"); // a set of rules for the tests of US-195: no weather
         const game::Definitions definitions = game::loadDefinitions(data);
         game::Level level = game::loadLevel(ODYSSEUS_DEMO_LEVEL, definitions).level;
         const game::PlacedCharacter first = level.characters.at(0);
@@ -43,6 +44,7 @@ struct Studio {
         goblin.hp = 100;
         goblin.swordDamage = 4;
         level.characters.push_back(goblin);
+        level.rules = rules; // the rules file the level is played under (US-195)
         game::saveLevel(level, definitions, data / "live-level.json");
         odyssey = std::make_unique<game::OdysseyGame>(data, data / "live-level.json");
         odyssey->setViewScales(1, 1);
@@ -273,4 +275,66 @@ TEST_CASE("US-194 A mechanic the running clan cannot take is refused and the old
     CHECK_FALSE(again->result.ok);
     CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 40);
     run.studio.tick(5);
+}
+
+// ---- US-195: the switches and sets of the game rules
+
+TEST_CASE("US-195 Switches: weather off and no weather happens") {
+    Studio on("us195-weather-on");
+    on.tick(2600); // a weather lasts 60 to 120 seconds: 2400 ticks at the most
+    CHECK(on.odyssey->weather().changes() > 0);
+    Studio off("us195-weather-off", "calm"); // a level that names rules without weather
+    CHECK_FALSE(off.odyssey->rules().systems.weather);
+    off.tick(2600);
+    CHECK(off.odyssey->weather().changes() == 0);
+    // The pick of the New Game screen does the same, and the run keeps the rules it began with.
+    Studio picked("us195-weather-pick");
+    picked.odyssey->startNewRun({1, 2, 1, "calm"}, false, false);
+    CHECK_FALSE(picked.odyssey->rules().systems.weather);
+    CHECK(picked.odyssey->life()->game().rules == "calm");
+}
+
+TEST_CASE("US-195 Rules sets: a level that names its rules is played under them") {
+    Studio standard("us195-level-standard");
+    CHECK(standard.odyssey->enemies().size() == 1);
+    CHECK(standard.odyssey->rules().systems.combat);
+    Studio peaceful("us195-level-peaceful", "peaceful"); // combat off: the goblin stands there and fights nobody
+    CHECK_FALSE(peaceful.odyssey->rules().systems.combat);
+    CHECK(peaceful.odyssey->enemies().empty());
+    CHECK(peaceful.odyssey->bystanders().size() == 1);
+    CHECK_FALSE(peaceful.odyssey->startFight(peaceful.odyssey->bystanders()[0].id));
+    // The level's rules come before the player's pick.
+    peaceful.odyssey->startNewRun({1, 2, 1, "standard"}, false, false);
+    CHECK(peaceful.odyssey->life()->game().rules == "peaceful");
+    CHECK(peaceful.odyssey->heroData()->config.dominion.winPercent == 40); // the thresholds of that set
+}
+
+TEST_CASE("US-195 Rules sets: the pick of the New Game screen changes the hero's numbers and the systems") {
+    Studio studio("us195-pick");
+    studio.write("rules/short.json", "{ \"newGame\": { \"presets\": [ { \"name\": \"Quick\", \"startAge\": 18, \"mantleAge\": 24 } ] }, \"victory\": { \"winPercent\": 5, \"combinedWinPercent\": 5, \"loseBelowPeople\": 1, \"rivalFollowerPercent\": 10 }, \"systems\": { \"tutorial\": false, \"markers\": false, \"chronicle\": false } }");
+    studio.odyssey->startNewRun({1, 0, 1, "short"}, false, true);
+    REQUIRE(studio.odyssey->life() != nullptr);
+    CHECK(studio.odyssey->life()->preset().name == "Quick");
+    CHECK(studio.odyssey->heroData()->config.dominion.winPercent == 5);
+    CHECK(studio.odyssey->flags().get("tutorial") == 0); // the tutorial switch is off: the first-day quest does not start
+    const std::size_t entries = studio.odyssey->clan()->chronicle().entries().size();
+    studio.odyssey->chronicleLine("a word was said", 0, 1);
+    CHECK(studio.odyssey->clan()->chronicle().entries().size() == entries); // the chronicle switch is off
+    // A new game under the standard rules turns them back on.
+    studio.odyssey->startNewRun({1, 0, 1, "standard"}, false, true);
+    CHECK(studio.odyssey->life()->preset().name == "Full");
+    CHECK(studio.odyssey->flags().get("tutorial") == 1);
+    studio.odyssey->chronicleLine("a word was said", 0, 1);
+    CHECK(studio.odyssey->clan()->chronicle().entries().size() > entries - 1);
+}
+
+TEST_CASE("US-195 Rules in play are live: a saved change of the switches is taken at once") {
+    Studio studio("us195-live");
+    studio.odyssey->startNewRun({1, 2, 1}, false, false);
+    CHECK(studio.odyssey->rules().systems.markers);
+    studio.write("rules/standard.json", studio.read("rules/standard.json").replace(studio.read("rules/standard.json").find("\"markers\": true"), 15, "\"markers\": false"));
+    const auto outcomes = studio.changed("rules/standard.json");
+    REQUIRE_FALSE(outcomes.empty());
+    CHECK(outcomes[0].result.ok);
+    CHECK_FALSE(studio.odyssey->rules().systems.markers);
 }

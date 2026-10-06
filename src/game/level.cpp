@@ -647,6 +647,10 @@ Level readLevelFile(const std::filesystem::path& file, const Definitions& defini
             level.targets.push_back(point(data.at("targets").at(i), file, std::format("targets[{}]", i), level));
         }
     }
+    if (data.contains("rules")) { // level version 7 (US-195)
+        if (!data.at("rules").is_string()) throw DataError(file, "rules", "must be the name of a file of assets/data/rules/ in quotes");
+        level.rules = data.at("rules").get<std::string>();
+    }
     if (data.contains("economy")) level.economy = sim::economyFromJson(data.at("economy"), file, "economy"); // level version 5 (US-280)
     if (data.contains("places")) { // level version 5 (US-290)
         if (!data.at("places").is_array()) throw DataError(file, "places", "must be a list");
@@ -792,6 +796,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
         data["buildings"] = buildings;
     }
     if (level.clan) data["clan"] = true;
+    if (!level.rules.empty()) data["rules"] = level.rules;
     if (!level.economy.empty()) data["economy"] = sim::economyToJson(level.economy); // only when the owner set something, so older levels save as they were
     if (!level.places.empty()) {
         json places = json::array();

@@ -2266,3 +2266,25 @@ while (!check.done()) check.step(30);   // 19 slices, one per frame
 **Try it (5 minutes).** F2, **Data**, `sim/needs.json`, `dailyDecay` hunger 60, Ctrl+S, **Quick check**; then hunger back to 30, Ctrl+S, **Quick check** again: the second summary lists the first as `last run`.
 
 **Check yourself.** Why can the days per season not change while the clan lives, but the value of a meal can?
+
+
+## US-195: one place for how a game is played (M11)
+
+**What we built.** A folder `assets/data/rules/` with one file per set of game rules. A file says how a new game is set up (the Growing Periods and Comfort levels of the New Game screen), when it is won or lost, and which whole systems run: weather, combat, rival clans, the tutorial, the quest arrow, the chronicle. The New Game screen lets you pick a file, a level can name its own, and the Data tab edits them as forms with a one-line summary on top.
+
+**The idea: a layer of overrides, not a copy.** `standard.json` holds everything. A second file only names what it changes: `peaceful.json` turns combat and rivals off and lowers the win percent, and the rest (presets, comforts, the other switches) is standard's. The loader reads standard first and lays the named file over it, the same way a stylesheet overrides a default.
+
+```cpp
+applyRules(data.config, standard);                       // the base
+if (rulesName != "standard") applyRules(data.config, picked);  // what the picked file names
+```
+
+**The idea: a switch is tested where the system starts.** The weather, the enemies and the rival clans do not each get a new constructor argument. The game reads one `PlaySystems` value and each system asks one yes-or-no question at its own doorway: `if (rules_.systems.weather) weather_.update();`. Adding a switch is one line there and one field in the file. The simulation (the clan) has no switch in it, so the headless runner does not need to know.
+
+**Moving data without breaking old data.** The presets and thresholds used to be in `hero/hero.json`. Moving them could have broken every older data folder. So the loader still reads the old keys when the rules file does not have them, writes a warning, and the next version drops that. Saves and levels got a version number the same way: a level without `rules` and a hero save without `rules` both mean "standard".
+
+**Where to look.** `src/sim/play_rules.cpp`, `OdysseyGame::chooseRules` in `src/game/odyssey_game.cpp`, `RunFlow::buildNewGame`, `tests/sim/play_rules_test.cpp`.
+
+**Try it (5 minutes).** F2, **Data**, `rules/standard.json`, set `systems.weather` to no, Ctrl+S. The line on top says `weather off` and the sky of the running game clears. Put it back to yes.
+
+**Check yourself.** Why does a run keep the rules it began with, even when you change the pick on the New Game screen afterwards?

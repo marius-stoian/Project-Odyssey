@@ -176,9 +176,9 @@ struct HeroData {
     const Recipe* recipe(const std::string& id) const;
 };
 
-// Reads every file of assets/data/hero/. Any problem is a DataError naming the file and the field (a profession that needs a
+// Reads every file of assets/data/hero/ and the rules file rules/<rulesName>.json (US-195). Any problem is a DataError naming the file and the field (a profession that needs a
 // tool that no item describes names the profession and the tool).
-HeroData loadHeroData(const std::filesystem::path& dataDirectory);
+HeroData loadHeroData(const std::filesystem::path& dataDirectory, const std::string& rulesName = "standard");
 
 // One story event as the Editor reads and writes it (US-185): the text of story/events/<id>.json. A mistake comes back in `problem`.
 std::optional<CrossroadsEvent> parseStoryEvent(const std::string& jsonText, const std::string& name, std::string& problem);

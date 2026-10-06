@@ -154,6 +154,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     dataDirectory_ = dataDirectory;
     saveDirectory_ = dataDirectory.parent_path() / "saves"; // next to the data and sprites; --save-dir chooses another folder
     if (std::filesystem::exists(dataDirectory / "hero")) heroData_ = sim::loadHeroData(dataDirectory); // a bad file stops the game with its name (US-060)
+    if (std::filesystem::exists(dataDirectory / "rules" / "standard.json")) rules_ = sim::loadPlayRules(dataDirectory, "standard");
     {
         // The buildings of the data folder (US-250): a cost may only name an item the hero's data knows. A mistake leaves that file out and is shown.
         // Loaded before the interactions: the kinds give places their `blueprint-...` tags.
@@ -190,6 +191,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     clanEnabled_ = level_.clan;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name); // a level plays under the same weathers every time, unless --seed says otherwise
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
+    chooseRules({}); // a level that names its rules is played under them
     rebuildWeaponLists();
     camera_.centreOn(hero_.feetX(), hero_.feetY());
     populate();
@@ -199,7 +201,30 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     findMissingKinds();
 }
 
+// Which rules the game plays under (US-195): the level's own `rules`, else the player's pick, else "standard"; a run in play keeps the rules it began with. A set of
+// rules changes the hero's presets, comforts and thresholds of victory (the hero data is read again under it) and the switches of systems. A rules file with a
+// mistake is said and the rules in use stay.
+void OdysseyGame::chooseRules(const std::string& pick) {
+    std::string name = !level_.rules.empty() ? level_.rules : (pick.empty() ? std::string("standard") : pick);
+    if (life_ && !startingRun_) name = life_->game().rules.empty() ? std::string("standard") : life_->game().rules;
+    if (name != rulesName_) {
+        try {
+            sim::PlayRules fresh = sim::loadPlayRules(dataDirectory_, name);
+            std::optional<sim::HeroData> hero;
+            if (heroData_) hero = sim::loadHeroData(dataDirectory_, name);
+            rules_ = std::move(fresh);
+            if (hero) *heroData_ = std::move(*hero);
+            rulesName_ = name;
+        } catch (const std::exception& problem) {
+            core::logWarning(std::format("Rules: {}", problem.what()));
+            say(problem.what());
+        }
+    }
+    if (!rules_.systems.weather) weather_.force(0); // under no weather the sky is clear
+}
+
 void OdysseyGame::resetPlay() {
+    chooseRules(pickedRules_);
     map_ = buildTileMap(level_, definitions_);
     camera_ = luna::engine::Camera(viewWidth(), viewHeight(), map_.pixelWidth(), map_.pixelHeight());
     hero_ = Hero(static_cast<double>(level_.heroStart.x), static_cast<double>(level_.heroStart.y));
@@ -213,7 +238,7 @@ void OdysseyGame::resetPlay() {
     effects_.clear();
     weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
     if (clanEnabled_) startClan();
-    if (region_) {
+    if (region_ && rules_.systems.rivals) {
         rivals_ = std::make_unique<sim::Rivals>(*region_, region_->start(), region_->seed() ^ 0x5151ULL, sim::loadSimConfig(dataDirectory_));
     }
     projectiles_.clear();
@@ -284,7 +309,7 @@ void OdysseyGame::populate() {
     // Every placed character the sword can hit stands in the world (M2c: they stand still, D-19).
     for (const PlacedCharacter& placed : level_.characters) {
         const CharacterKindDef* kind = definitions_.character(placed.kind);
-        const bool fights = kind != nullptr && fightsHero(placed); // a kind file's attitude decides (US-264), else the old enemy switch
+        const bool fights = rules_.systems.combat && kind != nullptr && fightsHero(placed); // a kind file's attitude decides (US-264), else the old enemy switch; no fights when combat is off (US-195)
         if (kind != nullptr && !fights) {
             bystanders_.push_back(placed);
         }
@@ -619,9 +644,17 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
 }
 
 // Starts a run (US-050): the region of the seed, a clan made for the Comfort level, a hero of it at the preset's age.
-void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tutorial) {
+void OdysseyGame::startNewRun(const sim::NewGame& picked, bool useRegion, bool tutorial) {
     if (!heroData_) return;
+    // The rules of the run (US-195): the level's, else the pick of the New Game screen. The hero data is read again under them, so the preset and comfort numbers
+    // are the ones of that set.
+    pickedRules_ = picked.rules;
+    startingRun_ = true;
+    chooseRules(pickedRules_);
+    sim::NewGame game = picked;
+    game.rules = rulesName_;
     if (useRegion) loadRegion(game.seed);
+    startingRun_ = false;
     clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
     life_ = std::make_unique<sim::HeroLife>(*heroData_, *clan_, game);
     watchHeroItems();
@@ -639,7 +672,7 @@ void OdysseyGame::startNewRun(const sim::NewGame& game, bool useRegion, bool tut
     greetingCooldowns_.clear();
     smalltalk_.clear();
     stats_.record("run-started", ticks_);
-    if (tutorial) flags_.set("tutorial", 1); // the first-day quest (assets/data/quests/first-day.json) starts by itself when this note is set (US-185)
+    if (tutorial && rules_.systems.tutorial) flags_.set("tutorial", 1); // the first-day quest (assets/data/quests/first-day.json) starts by itself when this note is set (US-185)
     if (life_->phase() == sim::Phase::Growing) {
         runFlow_.openFocus();
     } else {
@@ -962,7 +995,7 @@ bool OdysseyGame::rememberConversation(int holder, int other, const std::string&
 }
 
 void OdysseyGame::chronicleLine(const std::string& text, int who, int other) {
-    if (clan_) clan_->note(text, sim::kImportanceConversation, sim::EventKind::Note, who, other);
+    if (clan_ && rules_.systems.chronicle) clan_->note(text, sim::kImportanceConversation, sim::EventKind::Note, who, other);
 }
 
 void OdysseyGame::changeOpinion(int who, int about, int delta) {
@@ -1320,6 +1353,9 @@ bool OdysseyGame::loadAutosave() {
         clanView_.update(*clan_, map_);
         lastSavedDay_ = clan_->date().day;
         if (heroData_ && std::filesystem::exists(saveDirectory_ / "hero.json")) {
+            pickedRules_ = sim::HeroLife::savedRules(saveDirectory_ / "hero.json"); // the run plays under the rules it began with
+            life_.reset();
+            chooseRules(pickedRules_);
             life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
             watchHeroItems();
             clanView_.setHidden(life_->personId());
@@ -1985,7 +2021,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     tickActions(intents);
     if (ticks_ % 10 == 0) tickQuests(*this);
     const auto tickStarted = std::chrono::steady_clock::now();
-    weather_.update();
+    if (rules_.systems.weather) weather_.update();
     if (!insideBuilding()) tickNpcPopulation();
     if (clan_) {
         for (int i = 0; i < clanSpeed_; ++i) clan_->tick();

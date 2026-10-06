@@ -1,0 +1,10 @@
+US-195 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_game_tests, odysseus_sim_tests, luna_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_sim_tests "-tc=US-195*": 6 test cases, 44 assertions, all passed
+  (the shipped rules; the picked file's values are used and the rest is standard's, the old place still read; mistakes name file and field;
+   victory follows a changed threshold; the rules are in the hero's save; the data folder passes every schema)
+odysseus_sim_tests (all): 387 test cases, 386 passed; the one failure is npc_kind_test.cpp:41, the owner's uncommitted edit of assets/data/npcs/wanderer.json.
+odysseus_game_tests "-tc=US-195*,US-194*,US-193*": 17 test cases, all passed
+  (weather off: no weather; a level that names its rules; the pick of the New Game screen; markers, chronicle and tutorial switches; a saved change is live; the Game Rules page)

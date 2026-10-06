@@ -36,6 +36,7 @@ constexpr int kFoldersWidth = 92;
 constexpr int kFilesWidth = 132;
 constexpr int kEntriesWidth = 168;
 constexpr int kProblemTicks = 100; // five seconds
+constexpr int kRulesHeadingRows = 2; // the heading and the summary above the form of a rules file
 constexpr int kQuickYears = 20;    // the Quick check runs the clan this long
 constexpr int kQuickSliceDays = 30; // and this many days at every update
 
@@ -249,7 +250,19 @@ void DataEditor::refreshRows() {
     scroll_ = std::clamp(scroll_, 0, most);
 }
 
-int DataEditor::visibleRows() const { return std::max(1, (viewHeight_ - kStatus - kBar - 6) / kRow); }
+int DataEditor::visibleRows() const { return std::max(1, (viewHeight_ - kStatus - kBar - 6) / kRow - (gameRulesPage() ? kRulesHeadingRows : 0)); }
+
+// The Game Rules page (US-195) is the Data tab opened on a file of rules/: a heading and one line that says what the saved file switches on and off.
+bool DataEditor::gameRulesPage() const { return openFile_.starts_with("rules/") && document_.has_value(); }
+
+std::string DataEditor::gameRulesSummary() const {
+    if (!gameRulesPage()) return {};
+    try {
+        return sim::describeRules(sim::loadPlayRules(folder_, fs::path(openFile_).stem().string()));
+    } catch (const std::exception& problem) {
+        return std::string("the saved file cannot be read: ") + problem.what();
+    }
+}
 
 const form::FormRow* DataEditor::rowAt(const std::string& path) const {
     for (const form::FormRow& row : rows_) {
@@ -799,7 +812,13 @@ void DataEditor::addRow(Panel& panel, const form::FormRow& row, int x, int y, in
 void DataEditor::buildForm(Panel& panel) {
     const int left = kFoldersWidth + kFilesWidth + kEntriesWidth + 14;
     const int right = viewWidth_ - 6 - kActions;
-    const int top = kBar + 6;
+    int top = kBar + 6;
+    if (gameRulesPage()) {
+        panel.add<Label>(Rect{left, top, viewWidth_ - left - 6, kRow}, "GAME RULES: one page for the New Game choices, the thresholds of victory and the switches of whole systems", UiColor::Gold);
+        const std::string summary = gameRulesSummary(); // the saved file: Ctrl+S, then the line follows the form
+        panel.add<Label>(Rect{left, top + kRow, viewWidth_ - left - 6, kRow}, summary.substr(0, static_cast<std::size_t>((viewWidth_ - left - 6) / luna::engine::kTextAdvance)), UiColor::Dim);
+        top += kRulesHeadingRows * kRow;
+    }
     const int visible = visibleRows();
     const int first = std::clamp(scroll_, 0, std::max(0, static_cast<int>(rows_.size()) - visible));
     for (int i = first; i < std::min(static_cast<int>(rows_.size()), first + visible); ++i) {

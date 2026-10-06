@@ -8,6 +8,7 @@
 #include "sim/data_document.h"
 #include "sim/data_form.h"
 #include "sim/data_refs.h"
+#include "sim/play_rules.h"
 #include "sim/quick_check.h"
 #include "sim/schema.h"
 #include "sim/schema_index.h"
@@ -87,6 +88,8 @@ public:
     // The interactions that name the chosen entry's kind in their targets (the Interactions button opens the first one in the interaction graph).
     std::vector<std::string> interactionsOfEntry() const;
     void setOpenInteraction(std::function<void(const std::string&)> open) { openInteraction_ = std::move(open); }
+    // The Game Rules page (US-195): a file of rules/ shows a heading and, in one line, what the saved file switches on and off and where the game is won (empty on any other file).
+    std::string gameRulesSummary() const;
     // The tags a kind carries in the game, derived ones included (a plant that blocks walking is "solid"): the game knows them, the file may not write them.
     void setTagsOf(std::function<std::vector<std::string>(const std::string&)> tagsOf) { tagsOf_ = std::move(tagsOf); }
     // The open file was changed on disk by something else: read it again unless it has unsaved edits (then it only says so). True when it was read again.
@@ -123,6 +126,7 @@ private:
     void refuse(const std::string& message);
     void markStale() { stale_ = true; }
     int visibleRows() const;
+    bool gameRulesPage() const;
     struct EntryInfo {
         bool valid = false;
         std::string group;
