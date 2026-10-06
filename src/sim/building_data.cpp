@@ -299,6 +299,10 @@ void parsePieces(std::vector<PieceDef>& pieces, std::map<std::string, MaterialFi
         report.errors.push_back({name, parsed.errorLine, parsed.error});
         return;
     }
+    if (const std::vector<rules::Diagnostic> mistakes = rules::schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+        return;
+    }
     Parser p(name, report);
     const JsonValue& root = *parsed.value;
     if (!root.isObject()) {
@@ -349,6 +353,10 @@ void parseKinds(BuildingData& data, std::vector<KindDef>& kinds, std::string_vie
         report.errors.push_back({name, parsed.errorLine, parsed.error});
         return;
     }
+    if (const std::vector<rules::Diagnostic> mistakes = rules::schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+        return;
+    }
     const JsonValue* list = parsed.value->isObject() ? parsed.value->find("kinds") : nullptr;
     if (list == nullptr || !list->isArray()) {
         report.errors.push_back({name, parsed.value->line, "the file must be {\"kinds\": [ ... ]}"});
@@ -370,6 +378,12 @@ std::optional<KindDef> BuildingData::parseKind(std::string_view text, const std:
     if (!parsed.value) {
         report.errors.push_back({name, parsed.errorLine, parsed.error});
         return std::nullopt;
+    }
+    if (prefab) { // a prefab file has its own schema (US-190); a kind inside kinds.json is checked with the whole file
+        if (const std::vector<rules::Diagnostic> mistakes = rules::schemaDiagnostics(name, text); !mistakes.empty()) {
+            report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+            return std::nullopt;
+        }
     }
     return parseKindValue(*this, *parsed.value, name, report, prefab, expectedId, {});
 }
@@ -421,6 +435,10 @@ BuildingData BuildingData::load(const std::filesystem::path& folder, LoadReport&
         const rules::JsonParseResult parsed = parseJson(*text);
         if (!parsed.value) {
             report.errors.push_back({name, parsed.errorLine, parsed.error});
+            continue;
+        }
+        if (const std::vector<rules::Diagnostic> mistakes = rules::schemaDiagnostics(name, *text); !mistakes.empty()) { // the schema (US-190)
+            report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
             continue;
         }
         if (auto kind = parseKindValue(data, *parsed.value, name, report, true, file.stem().string(), knownItems)) {

@@ -1,0 +1,100 @@
+{
+  "title": "assets/data/materials.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "example": "1"},
+    "materials": {
+      "type": "object",
+      "description": "Everything in assets/data/materials.json (Charter rule 7: content is data).",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One entry, named by its key",
+        "properties": {
+          "density": {
+            "type": "integer",
+            "description": "Mass per volume, in kilograms per cubic metre",
+            "minimum": 1,
+            "maximum": 30000,
+            "example": "2600"
+          },
+          "hardness": {"type": "number", "description": "How hard it is (0 to 1)", "minimum": 1, "maximum": 10, "example": "7.0"},
+          "sharpness": {
+            "type": "number",
+            "description": "How sharp an edge of it is (0 to 1)",
+            "minimum": 0,
+            "maximum": 1,
+            "example": "0.9"
+          },
+          "restitution": {
+            "type": "number",
+            "description": "How much it bounces back (0 to 1)",
+            "minimum": 0,
+            "maximum": 1,
+            "example": "0.2"
+          },
+          "friction": {
+            "type": "number",
+            "description": "How much it grips when sliding",
+            "minimum": 0,
+            "maximum": 2,
+            "example": "0.5"
+          }
+        }
+      }
+    },
+    "damage": {
+      "type": "object",
+      "description": "How material hardness turns into damage",
+      "properties": {
+        "comment": {
+          "type": "string",
+          "description": "A note for the owner (not read by the game)",
+          "example": "damage = kinetic energy (J) x tip hardness / hardnessScale x tip sharpness"
+        },
+        "hardnessScale": {
+          "type": "integer",
+          "description": "How strongly hardness counts in a hit",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "10"
+        }
+      }
+    },
+    "spears": {
+      "type": "object",
+      "description": "The kinds of spear: shaft and tip materials and masses",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One entry, named by its key",
+        "properties": {
+          "shaft": {"type": "string", "description": "The material of the shaft", "example": "wood"},
+          "tip": {"type": "string", "description": "The material of the tip", "example": "flint"},
+          "shaftMass": {
+            "type": "number",
+            "description": "Mass of the shaft, in kilograms",
+            "minimum": 0.1,
+            "maximum": 20,
+            "example": "1.2"
+          },
+          "tipVolume": {
+            "type": "number",
+            "description": "Volume of the tip, in cubic metres",
+            "minimum": 1e-06,
+            "maximum": 0.01,
+            "example": "6e-05"
+          },
+          "throwSpeed": {
+            "type": "integer",
+            "description": "Metres per second when thrown",
+            "minimum": 1,
+            "maximum": 60,
+            "example": "13"
+          }
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "materials", "at": "materials.*"}],
+  "loaders": ["src/game/materials.cpp"],
+  "externalFields": ["comment", "version"]
+}

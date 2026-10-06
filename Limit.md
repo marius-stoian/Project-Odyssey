@@ -1,5 +1,7 @@
 # Limit.md: how to continue the assembly
 
+**Resume update (2026-10-06, US-190):** S-US-190 DONE (Milestone-144.md, AP-145): schemas for all data files, schema test, loader hooks, `docs/guides/schemas.md`. Own cases green, Debug zero warnings; full verify at X-M11. The owner's uncommitted level edits (wanderer.json, level-7.json, level-5.json) are still not mine. Next: S-US-191 (Data tab: `src/game/data_editor.*`, `data_form.*`, canonical writer in `src/sim/json_text.*`, undo stack, live reload through `DataReload`, catalogs by id for CI-007/CI-021). The schema drafter lived in the session scratchpad and is not kept: schemas are now edited by hand. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
+
 **Resume update (2026-10-06, K-M11):** K-M11 Done (Milestone-143.md, AP-144): design in docs/plans/M11-data-editors-design.md, decisions D-60 (delegated). Working branch qa (fast-forwarded to origin/qa, which holds the lean-luna refactor); the owner's uncommitted level edits (assets/data/npcs/wanderer.json, assets/levels/level-7.json, level-5.json) are NOT mine: never commit them. Next: S-US-190 (schemas and validator), then US-191, 193, 194, 195, 196, 192, X-M11. M10b walkthrough still pending the owner. Open for Anima: CI-011, CI-017, CI-018, CI-019, CI-020, CI-021.
 
 **Resume update (2026-10-06, US-306):** owner request done on qa: graph editor New works without a name, framed tabs, wider list, wrapped button hints, fitted field text (docs/evidence/US-306/). Walkthrough of M10b still pending the owner.

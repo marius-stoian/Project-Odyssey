@@ -415,6 +415,10 @@ std::optional<Quest> parseQuest(std::string_view text, const std::string& name, 
         report.errors.push_back({name, json.errorLine, "not valid JSON: " + json.error});
         return std::nullopt;
     }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+        return std::nullopt;
+    }
     return QuestParser(*json.value, name, report).run(expectedId);
 }
 

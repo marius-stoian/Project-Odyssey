@@ -79,6 +79,10 @@ std::optional<SmalltalkData> SmalltalkData::parse(std::string_view text, const s
         fail(parsed.errorLine, parsed.error);
         return std::nullopt;
     }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(shownName, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+        return std::nullopt;
+    }
     const JsonValue& root = *parsed.value;
     const JsonValue* topics = root.isObject() ? root.find("topics") : nullptr;
     if (topics == nullptr || !topics->isObject()) {

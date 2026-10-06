@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-190 Schemas for every data file (Mraw) - 2026-10-06
+
+**State:** On `story/US-190`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (15 test cases, 104 assertions); the whole Simulation test run passes 348 of 349 (the one failure is the owner's own uncommitted edit of `assets/data/npcs/wanderer.json`, not touched).
+
+- **New:** `src/sim/json_text.*` (`JsonLines`: the line of every member of a JSON text), `src/sim/schema.*` (the schema subset, `check`, `SchemaSet`, `install`, `checkLoaded`, `issuesForText`), `src/sim/schema_index.*` (`buildIndex`: catalogs, uses of an entry, broken links, files without a schema; `checkDrift`: the member names each loader reads against the fields of its schema), `src/sim/schema_install.h`; `assets/data/schemas/index.json` and 43 schemas covering all 183 JSON files (every field has a description); `docs/guides/schemas.md`; `docs/plans/US-190.md`; tests `tests/sim/schema_test.cpp` and `tests/game/schema_game_test.cpp` ("US-190 ...").
+- **Changed:** `readJsonFile` reads comments and checks the file against its schema; the rule-file loaders (`interaction.cpp`, `npc_class.cpp`, `npc_kind.cpp`, `quest_data.cpp`, `smalltalk.cpp`, `partner_types.cpp`, `building_data.cpp`) and the tutorial report a schema mistake as `file:line: field: problem` and leave that file out; `apps/odysseus/main.cpp` and `apps/headless/main.cpp` install the schemas before anything is read; `quest.schema.json` and `story-event.schema.json` rewritten to the final subset; `CMakeLists.txt` (new sources and tests; the game tests link the JSON library).
+- **Verified:** Debug build of `odysseus`, `odysseus_headless`, `odysseus_game_tests`, `odysseus_sim_tests`: zero warning lines. `US-190*` cases: sim 13 of 13, game 2 of 2. Every shipped data file passes its schema, every link names an entry of a catalog, every loader reads what its schema describes.
+
 ## K-M11 Kick off M11 Data editors (Mraw) - 2026-10-06
 
 **State:** On `qa`. Docs only; no code changed.

@@ -2182,3 +2182,30 @@ if (old == before.end() || old->second != hash) changes.kinds[kind].updated.inse
 **Try it (10 minutes).** Start a run on a hand-made level so it autosaves, close the game, move a bush in the Editor and save, start the game with `--load`: the status line says `The level updated 1 thing`.
 
 **Check yourself.** Why is the hash of the level entry compared, and not the position of the thing in the run? (Think of a person who walked away from where the level placed them.)
+
+## US-190: describing data with data, a schema interpreter (M11)
+
+**What we built.** Every file under `assets/data/` now has a *schema*: a small JSON file that says what each field is (a whole number from 0 to 1000, one of `sword`, `axe`..., the name of an item that must exist) and what it is for. The game checks every file against its schema while it loads, and a mistake says `weapons.json:23: weapons[2].damage: must be between 0 and 1000 (is -4)` instead of failing somewhere later. The same schemas will build the forms of the Editor's Data tab (US-191) and give them their help text.
+
+**The idea: data that describes data.** Until now each loader had its own checks written in C++: `requireInt(json, file, "maximum", 10, 1000)`. A schema moves that knowledge out of the code into a file, and one function reads the file. That function is an *interpreter*: it takes two trees (the document and the schema) and walks them together, calling itself for every child.
+
+```cpp
+void node(const Node& schema, const nlohmann::json& value, const std::string& path) {
+    if (!typeMatches(schema.type, value)) { error(path, "must be ..."); return; }
+    if (value.is_number()) numberRange(schema, value, path);   // minimum, maximum
+    if (value.is_object()) object(schema, value, path);        // calls node() for each member
+    if (value.is_array()) array(schema, value, path);          // calls node() for each element
+}
+```
+
+A function that calls itself is *recursion*; it fits because a document is a tree and so is a schema. The `path` string (`weapons[2].damage`) is passed down so every message can say where it is.
+
+**Why a second reader for line numbers.** The parsed document (`nlohmann::json`) is a tree of values and has forgotten which line each came from. `JsonLines` reads the same text once more, only to remember "the member at `weapons[2].damage` starts on line 23". Two readers that each do one thing are simpler than one that does both.
+
+**Catching drift.** A schema can drift away from the code: someone adds `"flicker"` to the light loader and forgets the schema. The *drift test* reads the C++ of each loader as text, collects the names it reads (`.at("x")`, `.contains("x")`) and compares them with the schema. On its first run it found a dozen optional fields that no shipped file used yet, and they went into the schemas. A test that reads your own source is unusual, and it earns its place here because nothing else could notice.
+
+**Where to look.** `src/sim/schema.cpp` (`Checker::node`), `src/sim/json_text.cpp`, `src/sim/schema_index.cpp` (`buildIndex`, `checkDrift`), `assets/data/schemas/index.json`, `docs/guides/schemas.md`, `tests/sim/schema_test.cpp`.
+
+**Try it (5 minutes).** In `assets/data/sim/needs.json` change `"maximum": 100` to `5` and start the game: it stops with the file, the line, the field and `must be between 10 and 1000 (is 5)`. Put it back.
+
+**Check yourself.** Why does an unknown field only warn at load but fail the test? (Think about who types the file, and when each one finds out.)

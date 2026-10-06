@@ -1,0 +1,62 @@
+{
+  "title": "assets/data/sim/calendar.json",
+  "type": "object",
+  "properties": {
+    "ticksPerDay": {
+      "type": "integer",
+      "description": "Game ticks in one day; 20 ticks make a game second, so 2400 is a two-minute day",
+      "minimum": 24,
+      "maximum": 1728000,
+      "default": 2400,
+      "example": "2400"
+    },
+    "daysPerSeason": {
+      "type": "integer",
+      "description": "Days in one season; four seasons make a year",
+      "minimum": 1,
+      "maximum": 90,
+      "default": 7,
+      "example": "7"
+    },
+    "daylight": {
+      "type": "object",
+      "description": "Sunrise and sunset by season, in hours of the day",
+      "properties": {
+        "Spring": {
+          "type": "object",
+          "description": "Sunrise and sunset in spring",
+          "properties": {
+            "sunrise": {"type": "number", "description": "Hour of the day at which the sun rises in spring", "example": "6.0"},
+            "sunset": {"type": "number", "description": "Hour of the day at which the sun sets in spring", "example": "18.0"}
+          }
+        },
+        "Summer": {
+          "type": "object",
+          "description": "Sunrise and sunset in summer",
+          "properties": {
+            "sunrise": {"type": "number", "description": "Hour of the day at which the sun rises in summer", "example": "5.0"},
+            "sunset": {"type": "number", "description": "Hour of the day at which the sun sets in summer", "example": "20.0"}
+          }
+        },
+        "Autumn": {
+          "type": "object",
+          "description": "Sunrise and sunset in autumn",
+          "properties": {
+            "sunrise": {"type": "number", "description": "Hour of the day at which the sun rises in autumn", "example": "6.5"},
+            "sunset": {"type": "number", "description": "Hour of the day at which the sun sets in autumn", "example": "17.5"}
+          }
+        },
+        "Winter": {
+          "type": "object",
+          "description": "Sunrise and sunset in winter",
+          "properties": {
+            "sunrise": {"type": "number", "description": "Hour of the day at which the sun rises in winter", "example": "8.0"},
+            "sunset": {"type": "number", "description": "Hour of the day at which the sun sets in winter", "example": "16.0"}
+          }
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/calendar.cpp"],
+  "externalFields": ["daylight", "sunrise", "sunset", "Spring", "Summer", "Autumn", "Winter"]
+}

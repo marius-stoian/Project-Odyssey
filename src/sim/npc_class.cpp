@@ -152,6 +152,10 @@ std::optional<NpcClass> NpcClassCatalog::parse(std::string_view text, const std:
         report.errors.push_back({name, parsed.errorLine, parsed.error});
         return std::nullopt;
     }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190)
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+        return std::nullopt;
+    }
     return ClassParser(*parsed.value, name, report).run(expectedId);
 }
 

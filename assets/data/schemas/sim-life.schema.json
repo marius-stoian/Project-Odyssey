@@ -1,0 +1,123 @@
+{
+  "title": "assets/data/sim/life.json",
+  "type": "object",
+  "properties": {
+    "adultAgeYears": {
+      "type": "integer",
+      "description": "The age at which a person counts as an adult",
+      "minimum": 10,
+      "maximum": 30,
+      "example": "16"
+    },
+    "pairOpinion": {
+      "type": "integer",
+      "description": "Two adults who like each other at least this much may become partners",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 60,
+      "example": "50"
+    },
+    "courtingBonus": {
+      "type": "integer",
+      "description": "How much more an unpaired adult wants to talk to a possible partner",
+      "minimum": 0,
+      "maximum": 200,
+      "default": 30,
+      "example": "30"
+    },
+    "pairPercent": {
+      "type": "integer",
+      "description": "The chance each morning that such a pair becomes partners",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 10,
+      "example": "10"
+    },
+    "fertileFromYears": {
+      "type": "integer",
+      "description": "The age at which a person can have children",
+      "minimum": 10,
+      "maximum": 60,
+      "example": "16"
+    },
+    "fertileToYears": {"type": "integer", "description": "The age after which a person can no longer have children", "example": "40"},
+    "conceptionPerMille": {
+      "type": "integer",
+      "description": "Chance per morning for a paired woman, in thousandths",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 25,
+      "example": "25"
+    },
+    "pregnancyDays": {
+      "type": "integer",
+      "description": "Days a pregnancy lasts (three seasons of a 28-day year is 84)",
+      "minimum": 1,
+      "maximum": 365,
+      "default": 21,
+      "example": "21"
+    },
+    "childbirthDeathPercent": {
+      "type": "integer",
+      "description": "Chance in percent that childbirth kills the mother",
+      "minimum": 0,
+      "maximum": 100,
+      "example": "3"
+    },
+    "birthSpacingYears": {
+      "type": "integer",
+      "description": "Years a mother nurses before the next child",
+      "minimum": 0,
+      "maximum": 20,
+      "default": 2,
+      "example": "1"
+    },
+    "famineStorePressure": {
+      "type": "integer",
+      "description": "No children are conceived while the store is this short (0 to 100)",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50,
+      "example": "80"
+    },
+    "oldAgeFromYears": {
+      "type": "integer",
+      "description": "The age from which old age can kill",
+      "minimum": 20,
+      "maximum": 120,
+      "example": "45"
+    },
+    "oldAgePerMillePerYear": {
+      "type": "integer",
+      "description": "Daily chance of dying of old age, per year past oldAgeFromYears",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 1,
+      "example": "1"
+    },
+    "feudOpinion": {
+      "type": "integer",
+      "description": "Two people who both think this badly of each other feud",
+      "minimum": -100,
+      "maximum": 0,
+      "default": -50,
+      "example": "-50"
+    },
+    "parentChildOpinion": {
+      "type": "integer",
+      "description": "The opinion a parent and a child start with of each other",
+      "minimum": 0,
+      "maximum": 100,
+      "example": "60"
+    },
+    "griefFeeling": {
+      "type": "integer",
+      "description": "The memory of losing close kin",
+      "minimum": -100,
+      "maximum": 0,
+      "default": -70,
+      "example": "-70"
+    }
+  },
+  "loaders": ["src/sim/life.cpp"]
+}

@@ -1,0 +1,64 @@
+{
+  "title": "assets/data/sim/events.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "minimum": 1, "maximum": 1, "example": "1"},
+    "events": {
+      "type": "array",
+      "description": "The events NPCs react to by choosing an action",
+      "items": {
+        "type": "object",
+        "description": "One entry of events",
+        "properties": {
+          "id": {"type": "string", "description": "One word: the name of the event", "example": "fire-help"},
+          "label": {"type": "string", "description": "What the owner reads about it", "example": "Help put out the fire"},
+          "trigger": {
+            "type": "string",
+            "description": "The name of the world event that offers the action (fire)",
+            "example": "fire",
+            "format": "rule"
+          },
+          "action": {
+            "type": "string",
+            "description": "The interaction it offers",
+            "example": "help-with-fire",
+            "ref": "catalog:interactions"
+          },
+          "classes": {
+            "type": "array",
+            "description": "The NPC classes that react",
+            "items": {
+              "type": "string",
+              "description": "One entry of classes",
+              "example": "talker",
+              "ref": "catalog:npc-classes"
+            }
+          },
+          "withinMetres": {
+            "type": "integer",
+            "description": "How near an NPC must be to react, in metres",
+            "minimum": 1,
+            "maximum": 200,
+            "example": "12"
+          },
+          "forMinutes": {
+            "type": "integer",
+            "description": "How many game minutes the event stays on offer",
+            "minimum": 1,
+            "maximum": 1440,
+            "example": "30"
+          },
+          "bonus": {
+            "type": "integer",
+            "description": "How much more an NPC wants the action while the event lasts",
+            "minimum": 0,
+            "maximum": 1000,
+            "example": "30"
+          }
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "npc-events", "at": "events[].id"}],
+  "loaders": ["src/sim/npc_events.cpp"]
+}

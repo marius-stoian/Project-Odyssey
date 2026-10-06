@@ -1,0 +1,17 @@
+{
+  "title": "assets/data/sim/names.json",
+  "type": "object",
+  "properties": {
+    "female": {
+      "type": "array",
+      "description": "Names given to girls and women, one is picked for each",
+      "items": {"type": "string", "description": "One entry of female", "example": "Ura"}
+    },
+    "male": {
+      "type": "array",
+      "description": "Names given to boys and men, one is picked for each",
+      "items": {"type": "string", "description": "One entry of male", "example": "Tok"}
+    }
+  },
+  "loaders": ["src/sim/clan.cpp#loadNameList"]
+}

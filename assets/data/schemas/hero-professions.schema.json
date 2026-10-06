@@ -1,0 +1,32 @@
+{
+  "title": "assets/data/hero/professions.json",
+  "type": "object",
+  "properties": {
+    "professions": {
+      "type": "array",
+      "description": "The five professions of Age 1",
+      "items": {
+        "type": "object",
+        "description": "One entry of professions",
+        "properties": {
+          "id": {"type": "string", "description": "One word: the name of the profession", "example": "hunter"},
+          "name": {"type": "string", "description": "The name shown to the player", "example": "Hunter"},
+          "skill": {"type": "string", "description": "The name of the skill it trains", "example": "hunting"},
+          "tools": {
+            "type": "array",
+            "description": "Items needed to practise it (needed, not used up)",
+            "items": {"type": "string", "description": "One entry of tools", "example": "spear", "ref": "catalog:items"}
+          },
+          "actions": {
+            "type": "array",
+            "description": "Interactions the profession does",
+            "items": {"type": "string", "description": "One entry of actions", "example": "hunt"}
+          },
+          "pillar": {"type": "string", "description": "The pillar the profession feeds: trade or religion", "example": "trade"}
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "professions", "at": "professions[].id"}],
+  "loaders": ["src/sim/hero_data.cpp#loadHeroData"]
+}

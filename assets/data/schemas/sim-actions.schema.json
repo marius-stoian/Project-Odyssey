@@ -1,0 +1,194 @@
+{
+  "title": "assets/data/sim/actions.json",
+  "type": "object",
+  "properties": {
+    "workAgeYears": {
+      "type": "integer",
+      "description": "People of this age and older gather and work",
+      "minimum": 1,
+      "maximum": 30,
+      "default": 12,
+      "example": "12"
+    },
+    "huntAgeYears": {"type": "integer", "description": "People of this age and older hunt", "default": 15, "example": "15"},
+    "nightStartHour": {
+      "type": "integer",
+      "description": "The hour (13 to 24) at which night starts",
+      "minimum": 13,
+      "maximum": 24,
+      "default": 22,
+      "example": "22"
+    },
+    "nightEndHour": {
+      "type": "integer",
+      "description": "The hour (1 to 12) at which night ends",
+      "minimum": 1,
+      "maximum": 12,
+      "example": "6"
+    },
+    "mealHour": {
+      "type": "integer",
+      "description": "The clan eats together at the end of this hour",
+      "minimum": 1,
+      "maximum": 24,
+      "default": 19,
+      "example": "19"
+    },
+    "reserveDays": {
+      "type": "integer",
+      "description": "The store feels \"low\" below this many days of meals",
+      "minimum": 0,
+      "maximum": 365,
+      "default": 10,
+      "example": "10"
+    },
+    "spoilPercent": {
+      "type": "integer",
+      "description": "Of the store lost each day",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 2,
+      "example": "2"
+    },
+    "gatherYield": {
+      "type": "object",
+      "description": "Food one gatherer brings home in a day, by season",
+      "properties": {
+        "spring": {"type": "integer", "description": "Food a day in spring", "minimum": 0, "maximum": 100000, "example": "2"},
+        "summer": {"type": "integer", "description": "Food a day in summer", "minimum": 0, "maximum": 100000, "example": "3"},
+        "autumn": {"type": "integer", "description": "Food a day in autumn", "minimum": 0, "maximum": 100000, "example": "2"},
+        "winter": {"type": "integer", "description": "Food a day in winter", "minimum": 0, "maximum": 100000, "example": "0"}
+      }
+    },
+    "forageDaily": {
+      "type": "object",
+      "description": "Food the land gives the clan each day by season, before spoilage",
+      "properties": {
+        "spring": {"type": "integer", "description": "Food a day in spring", "minimum": 0, "maximum": 100000, "example": "25"},
+        "summer": {"type": "integer", "description": "Food a day in summer", "minimum": 0, "maximum": 100000, "example": "40"},
+        "autumn": {"type": "integer", "description": "Food a day in autumn", "minimum": 0, "maximum": 100000, "example": "30"},
+        "winter": {"type": "integer", "description": "Food a day in winter", "minimum": 0, "maximum": 100000, "example": "0"}
+      }
+    },
+    "gatherSnack": {
+      "type": "integer",
+      "description": "Hunger a gatherer gains by nibbling",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 4,
+      "example": "4"
+    },
+    "huntSuccessPercent": {
+      "type": "integer",
+      "description": "Chance per hour of hunting to catch small game",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 30,
+      "example": "30"
+    },
+    "huntYield": {
+      "type": "integer",
+      "description": "Meals from small game",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 6,
+      "example": "6"
+    },
+    "gameDaily": {
+      "type": "integer",
+      "description": "Small game the valley offers per day",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 4,
+      "example": "3"
+    },
+    "mammothPerMille": {
+      "type": "integer",
+      "description": "Chance per hour of hunting to meet a mammoth, in thousandths",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 2,
+      "example": "1"
+    },
+    "mammothYield": {
+      "type": "integer",
+      "description": "Food a mammoth hunt brings home",
+      "minimum": 0,
+      "maximum": 10000,
+      "example": "120"
+    },
+    "mammothDeathPercent": {
+      "type": "integer",
+      "description": "Chance a mammoth kills the hunter",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 10,
+      "example": "10"
+    },
+    "sleepPerHour": {
+      "type": "integer",
+      "description": "Energy gained each hour of sleep",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 6,
+      "example": "6"
+    },
+    "firePerHour": {
+      "type": "integer",
+      "description": "Warmth gained each hour at the fire",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10,
+      "example": "10"
+    },
+    "talkPerHour": {
+      "type": "integer",
+      "description": "Social need met each hour of talk",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 8,
+      "example": "8"
+    },
+    "restPerHour": {
+      "type": "integer",
+      "description": "Energy gained each hour of rest",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 2,
+      "example": "2"
+    },
+    "nightSleepBonus": {
+      "type": "integer",
+      "description": "Added to Sleep's score at night",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 150,
+      "example": "150"
+    },
+    "storePressureWeight": {
+      "type": "integer",
+      "description": "How much a low store pushes people to work",
+      "minimum": 0,
+      "maximum": 10,
+      "default": 1,
+      "example": "1"
+    },
+    "traitBonus": {
+      "type": "integer",
+      "description": "Brave hunts, Diligent works, Talkative talks...",
+      "minimum": 0,
+      "maximum": 500,
+      "default": 30,
+      "example": "30"
+    },
+    "skillPerHours": {
+      "type": "integer",
+      "description": "One skill point per this many hours of practice",
+      "minimum": 1,
+      "maximum": 1000,
+      "default": 8,
+      "example": "8"
+    }
+  },
+  "loaders": ["src/sim/actions.cpp"]
+}

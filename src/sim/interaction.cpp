@@ -346,6 +346,10 @@ std::optional<Interaction> parseText(std::string_view text, const std::string& n
         report.errors.push_back({name, json.errorLine, "not valid JSON: " + json.error});
         return std::nullopt;
     }
+    if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(name, text); !mistakes.empty()) { // the schema (US-190): type, range and choice
+        report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+        return std::nullopt;
+    }
     return FileParser(*json.value, name, report, pending, options).run(expectedId);
 }
 

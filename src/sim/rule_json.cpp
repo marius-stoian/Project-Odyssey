@@ -1,5 +1,7 @@
 #include "sim/rule_json.h"
 
+#include "sim/schema.h"
+
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
@@ -9,6 +11,14 @@ namespace odysseus::sim::rules {
 
 std::string Diagnostic::text() const {
     return std::format("{}:{}: {}", file, line, message);
+}
+
+std::vector<Diagnostic> schemaDiagnostics(const std::string& name, std::string_view text) {
+    std::vector<Diagnostic> found;
+    for (const schema::Issue& issue : schema::issuesForText(name, text)) {
+        if (!issue.warning) found.push_back({name, issue.line, (issue.path.empty() ? std::string("(file)") : issue.path) + ": " + issue.message});
+    }
+    return found;
 }
 
 const JsonValue* JsonValue::find(std::string_view key) const {
