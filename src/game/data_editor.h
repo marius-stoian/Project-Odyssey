@@ -8,9 +8,11 @@
 #include "sim/data_document.h"
 #include "sim/data_form.h"
 #include "sim/data_refs.h"
+#include "sim/quick_check.h"
 #include "sim/schema.h"
 #include "sim/schema_index.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <map>
@@ -65,7 +67,7 @@ public:
     // entry at once (the data files, the levels, the dialogues) and is refused while the open file has unsaved changes; a delete is an edit of the open file, undone with
     // Ctrl+Z, and waits for the confirmation only when the entry is still used.
     struct Question {
-        enum class Kind { None, Rename, Delete };
+        enum class Kind { None, Rename, Delete, Quick };
         Kind kind = Kind::None;
         std::string title;
         std::vector<std::string> lines; // "file:line: where"
@@ -77,6 +79,11 @@ public:
     bool confirm();
     void cancel();
     const Question& question() const { return question_; }
+    // The Quick check (US-194): the clan simulation for 20 years on the saved data and the game's seed, a slice of days at every update so the screen stays alive.
+    // The summary (population, deaths by cause, episodes) shows beside the run before it, which is kept for this session only; Esc stops a run.
+    void setQuickSeed(std::function<std::uint64_t()> seed) { quickSeed_ = std::move(seed); }
+    bool startQuickCheck();
+    bool quickRunning() const { return check_.has_value(); }
     // The interactions that name the chosen entry's kind in their targets (the Interactions button opens the first one in the interaction graph).
     std::vector<std::string> interactionsOfEntry() const;
     void setOpenInteraction(std::function<void(const std::string&)> open) { openInteraction_ = std::move(open); }
@@ -127,6 +134,7 @@ private:
     EntryInfo describeEntry() const;
     sim::refs::Roots roots() const { return {folder_, folder_.parent_path() / "levels"}; }
     void buildQuestion(luna::engine::Panel& panel);
+    void stepQuickCheck();
     void openRenameDialog();
 
     int viewWidth_;
@@ -158,6 +166,9 @@ private:
     Question question_;
     sim::refs::Plan plan_;                    // a rename that waits for its confirmation
     std::function<void(const std::string&)> openInteraction_;
+    std::function<std::uint64_t()> quickSeed_; // the seed of the game in play (42 when the game gives none)
+    std::optional<sim::QuickCheck> check_;      // the run that is going on
+    std::optional<sim::QuickSummary> lastCheck_; // the run before
     std::function<std::vector<std::string>(const std::string&)> tagsOf_;
     sim::schema::DataIndex index_;
     std::unique_ptr<luna::engine::Panel> panel_;

@@ -214,3 +214,63 @@ TEST_CASE("US-193 A copied plant is a plant of the game at once") {
     const std::vector<std::string> copied = tab.interactionsOfEntry();
     CHECK(copied == original); // the copy offers the same interactions: the same tags
 }
+
+// ---- US-194: the mechanics (sim/, hero/, story/) are live too
+
+namespace {
+
+// A run in play (a hero and a clan) on a data copy, and the edits an Editor save or the watcher would announce.
+struct Run {
+    Studio studio;
+    explicit Run(const std::string& name) : studio(name) { studio.odyssey->startNewRun({1, 2, 1}, false, false); }
+    std::string changeNumber(const std::string& file, const std::string& from, const std::string& to) {
+        std::string text = studio.read(file);
+        const std::size_t at = text.find(from);
+        REQUIRE_MESSAGE(at != std::string::npos, from);
+        text.replace(at, from.size(), to);
+        studio.write(file, text);
+        return file;
+    }
+};
+
+} // namespace
+
+TEST_CASE("US-194 A changed mechanic is in the running game at once") {
+    Run run("us194-live");
+    REQUIRE(run.studio.odyssey->clan() != nullptr);
+    CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 40);
+    const std::string file = run.changeNumber("sim/needs.json", "\"mealValue\": 40", "\"mealValue\": 55");
+    const auto outcomes = run.studio.changed(file);
+    const auto mechanics = std::find_if(outcomes.begin(), outcomes.end(), [](const game::ReloadOutcome& outcome) { return outcome.set == "mechanics"; });
+    REQUIRE(mechanics != outcomes.end());
+    CHECK(mechanics->result.ok);
+    CHECK_FALSE(mechanics->result.atNextStart);
+    CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 55); // the clan reads it on its next step
+    run.studio.tick(5);                                                  // and the game goes on
+    // The hero's data too: an item's value.
+    const std::string items = run.changeNumber("hero/items.json", "\"id\": \"flint\", \"name\": \"Flint\", \"kind\": \"material\", \"value\": 3", "\"id\": \"flint\", \"name\": \"Flint\", \"kind\": \"material\", \"value\": 9");
+    run.studio.changed(items);
+    REQUIRE(run.studio.odyssey->heroData()->item("flint") != nullptr);
+    CHECK(run.studio.odyssey->heroData()->item("flint")->value == 9);
+    run.studio.tick(5);
+}
+
+TEST_CASE("US-194 A mechanic the running clan cannot take is refused and the old rules stay") {
+    Run run("us194-refused");
+    const std::string file = run.changeNumber("sim/calendar.json", "\"daysPerSeason\": 7", "\"daysPerSeason\": 8");
+    const auto outcomes = run.studio.changed(file);
+    const auto mechanics = std::find_if(outcomes.begin(), outcomes.end(), [](const game::ReloadOutcome& outcome) { return outcome.set == "mechanics"; });
+    REQUIRE(mechanics != outcomes.end());
+    CHECK_FALSE(mechanics->result.ok);
+    REQUIRE_FALSE(mechanics->result.errors.empty());
+    CHECK(mechanics->result.errors[0].find("days per season") != std::string::npos);
+    CHECK(run.studio.odyssey->clan()->config().calendar.daysPerSeason == 7);
+    // A mistake in a file keeps the old rules too.
+    run.studio.write("sim/needs.json", "{ not json");
+    const auto broken = run.studio.changed("sim/needs.json");
+    const auto again = std::find_if(broken.begin(), broken.end(), [](const game::ReloadOutcome& outcome) { return outcome.set == "mechanics"; });
+    REQUIRE(again != broken.end());
+    CHECK_FALSE(again->result.ok);
+    CHECK(run.studio.odyssey->clan()->config().needs.mealValue == 40);
+    run.studio.tick(5);
+}

@@ -184,6 +184,7 @@ add_library(odysseus_sim STATIC
     src/sim/data_document.cpp
     src/sim/data_form.cpp
     src/sim/data_refs.cpp
+    src/sim/quick_check.cpp
     src/sim/schema.cpp
     src/sim/schema_index.cpp
     src/sim/rule_json.cpp
@@ -588,7 +589,8 @@ add_executable(odysseus_sim_tests
     tests/sim/json_patch_test.cpp
     tests/sim/data_document_test.cpp
     tests/sim/data_form_test.cpp
-    tests/sim/data_refs_test.cpp)
+    tests/sim/data_refs_test.cpp
+    tests/sim/quick_check_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

@@ -96,6 +96,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     editorHelp_.load(dataDirectory / "editor" / "help.json"); // a missing or broken file leaves the Editor without tooltips and says why in its status line
     editor_.setHelp(&editorHelp_);
     editor_.data().setFolder(dataDirectory, [this](const std::filesystem::path& file) { dataFileSaved(file); }); // Save in the Data tab reads the file again, like F5 (US-191)
+    editor_.data().setQuickSeed([this] { return weatherSeed_; }); // the Quick check runs the clan on the seed of the level in play (US-194)
     editor_.data().setTagsOf([this](const std::string& kind) -> std::vector<std::string> { // the Interactions button finds what targets a kind by its tags (US-193)
         if (const PlantDef* plant = catalogs_.plant(kind)) return plant->tags;
         if (const AnimalDef* animal = catalogs_.animal(kind)) return animal->tags;

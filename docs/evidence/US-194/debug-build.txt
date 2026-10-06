@@ -1,0 +1,11 @@
+US-194 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_game_tests, odysseus_sim_tests, luna_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_sim_tests "-tc=US-194*":  4 test cases, 18 assertions, all passed
+  (same data and seed give the same summary; slices of days give the same hash as one run; a changed hunger rate shows next to the last run; a broken file is reported)
+odysseus_game_tests "-tc=US-194*,US-303*,US-191*": 33 test cases, 11524 assertions, all passed
+  (every mechanics and story file shows as forms; the Quick check by updates, its screen and Esc; a changed mealValue and an item value live in a run;
+   a changed days per season and a broken file refused with the old rules kept; reloadAll reloads six sets)
+
+Quick check on the shipped data, seed 42, 20 years (560 days): odysseus_headless reports 14 alive, 13 died; with dailyDecay hunger 95, 16 alive, 13 died and the average hunger of the living falls from 93 to 20.

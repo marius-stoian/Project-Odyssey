@@ -2247,3 +2247,22 @@ That is *recursion over two trees at once*, like the schema checker of US-190 bu
 **Try it (5 minutes).** F2, **Data**, `hero/items.json`, the `berries` entry, **Rename**, type `red-berries`. Read the list, then confirm and open `dialogue/elder-fire.dlg`: the conditions say `red-berries`, the quoted sentence still says berries.
 
 **Check yourself.** Why does the rename build the whole plan before it writes anything, instead of changing each file as it finds a place?
+
+
+## US-194: checking a change before you trust it, and swapping rules between ticks (M11)
+
+**What we built.** Every mechanics file (needs, life, calendar, trade, the hero's professions and recipes...) opens as forms, and a **Quick check** button in the Data tab runs the clan for 20 years on your saved data and shows what happened: the population at the end, the births, the deaths by cause, the episodes of the story, each next to the run before. Changing a hunger rate and pressing the button tells you in a second whether the clan still lives. A save also changes the *running* game: the clan reads the new numbers on its next step.
+
+**The idea: slice a long job, and never run it with a clock.** Twenty years is 560 simulated days: more than one frame can do, but far less than needing a second thread. So the check does 30 days per frame and the screen stays alive between slices. Because the simulation never reads the time, doing 30 days at a time, or all at once, gives the same world: a test runs it both ways and compares the world hash (one number that sums up the whole state).
+
+```cpp
+while (!check.done()) check.step(30);   // 19 slices, one per frame
+```
+
+**The idea: swap, but only what the world can take.** Replacing the rules of a clan that is alive is safe for a number like the value of a meal, and unsafe for the length of a day: everything already counted in days would change meaning. `World::configProblem` names the numbers that cannot change and the reload refuses the whole change with the reason; otherwise `replaceConfig` swaps the rules in one piece between two ticks (the reload runs between frames, never inside a tick), and a file with a mistake changes nothing.
+
+**Where to look.** `src/sim/quick_check.cpp`, `World::configProblem` in `src/sim/world.cpp`, `OdysseyGame::reloadMechanics` in `src/game/odyssey_reload.cpp`, `DataEditor::stepQuickCheck`.
+
+**Try it (5 minutes).** F2, **Data**, `sim/needs.json`, `dailyDecay` hunger 60, Ctrl+S, **Quick check**; then hunger back to 30, Ctrl+S, **Quick check** again: the second summary lists the first as `last run`.
+
+**Check yourself.** Why can the days per season not change while the clan lives, but the value of a meal can?

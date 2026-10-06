@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-194 Mechanics and story tuning with a quick check (Mraw) - 2026-10-06
+
+**State:** On `story/US-194`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 4, game 5 and the US-303 reload cases).
+
+- **New:** `src/sim/quick_check.*` (`QuickCheck`, `runQuickCheck`, `formatQuickSummary`: the clan for N years on a data folder and a seed, a slice of days at a time, summary of population, births, deaths by cause, feuds, episodes and world hash beside the run before), `docs/plans/US-194.md`, `docs/evidence/US-194/`; tests `tests/sim/quick_check_test.cpp`, cases in `tests/game/data_editor_test.cpp` and `tests/game/live_catalog_test.cpp`.
+- **Changed:** the Data tab gets a **Quick check** button (`DataEditor::startQuickCheck`, `setQuickSeed`; progress and summary on the question screen, Esc stops); **`sim/`, `hero/` and `story/` are read again while the game runs** (data set `mechanics`, `OdysseyGame::reloadMechanics`, no longer in `next-start`): `World::configProblem` and `replaceConfig` swap the clan's rules between ticks and refuse a change of ticks per day, days per season or the top of the needs scale, the hero data is swapped in place and a hero file that drops the run's preset or comfort level is refused (CI-007 closed for mechanics); `CMakeLists.txt`; `tests/game/data_reload_test.cpp` (six sets); guides `data-editor.md` and `editor.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-194*`: sim 4 of 4, game 5 of 5; `US-191*` and `US-303*` still pass.
+
 ## US-193 Entity editor (Mraw) - 2026-10-06
 
 **State:** On `story/US-193`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 6 test cases, game 7).

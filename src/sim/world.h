@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -48,6 +49,12 @@ public:
     // One fixed step: 1/20 of a game second (ADR-006).
     void tick();
     void runTicks(std::uint64_t count);
+
+    // The rules swapped while the clan lives (US-194): called between ticks, never inside one. A change the running clan cannot take (the length of a day or a
+    // season, the top of the needs scale: everything already counted in them would change meaning) is described by `configProblem` ("" when the new rules fit)
+    // and `replaceConfig` must not be called then. What only a new clan reads (its starting people and food) changes nothing for this one.
+    std::string configProblem(const SimConfig& next) const;
+    void replaceConfig(SimConfig next) { config_ = std::move(next); }
 
     std::uint64_t ticks() const { return ticks_; }
     Date date() const { return calendar_.dateAt(ticks_); }
