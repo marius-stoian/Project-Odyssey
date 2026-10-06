@@ -27,7 +27,7 @@ env:
 jobs:
   windows-x64:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 90 # the job grew with M11: Release build 18 min, Debug build 10, both test runs about 16 (X-M11: 45 cut the Debug tests short)
     steps:
       - name: Check out Odysseus
         uses: actions/checkout@v7
