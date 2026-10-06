@@ -492,3 +492,72 @@ TEST_CASE("US-193 The question has a screen") {
     CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::None);
     CHECK(rig.editor.shown());
 }
+
+TEST_CASE("US-194 Every mechanics and story file shows as forms") {
+    Rig rig;
+    std::size_t opened = 0;
+    for (const std::string& file : rig.editor.files()) {
+        if (!file.starts_with("sim/") && !file.starts_with("hero/")) continue;
+        REQUIRE(rig.editor.open(file));
+        CHECK_FALSE(rig.editor.rows().empty());
+        ++opened;
+    }
+    CHECK(opened >= 15); // the 15 of sim/ and the 6 of hero/ (the form of a file is made from its schema)
+}
+
+TEST_CASE("US-194 Quick check shows the summary beside the last run") {
+    Rig rig;
+    luna_ui::Intents idle;
+    const auto run = [&] {
+        REQUIRE(rig.editor.startQuickCheck());
+        for (int i = 0; i < 100 && rig.editor.quickRunning(); ++i) rig.editor.update(idle); // a slice of days at every update: the screen stays alive
+        REQUIRE_FALSE(rig.editor.quickRunning());
+        CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::Quick);
+    };
+    const auto text = [&] {
+        std::string all;
+        for (const std::string& line : rig.editor.question().lines) all += line + "\n";
+        return all;
+    };
+    run();
+    const std::string first = text();
+    CHECK(first.find("Population at the end") != std::string::npos);
+    CHECK(first.find("of starvation") != std::string::npos);
+    CHECK(first.find("Episodes") != std::string::npos);
+    CHECK(first.find("last run") == std::string::npos); // nothing before it
+    run();
+    CHECK(text().find("last run") != std::string::npos);
+    // Same data, same seed: the numbers of the two runs are the same, so every change reads "+0".
+    CHECK(text().find("+0") != std::string::npos);
+    CHECK(text().find("-") == std::string::npos);
+    // The question has a screen, and Esc closes it.
+    rig.editor.update(idle);
+    luna_ui::ImageRenderer renderer(960, 540);
+    renderer.clear({20, 20, 28, 255});
+    const luna_ui::Texture sheet = renderer.createTexture(luna_ui::makeUiSheet());
+    luna_ui::UiPainter painter(renderer, sheet);
+    painter.setScreen({0, 0, 960, 540});
+    rig.editor.draw(painter);
+    rig.editor.drawOverlay(painter);
+    luna_ui::Intents escape;
+    escape.set(luna_ui::Intent::OpenMenu, true, true);
+    rig.editor.update(escape);
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::None);
+}
+
+TEST_CASE("US-194 Quick check stops with Esc and reports a broken file") {
+    Rig rig;
+    luna_ui::Intents idle;
+    REQUIRE(rig.editor.startQuickCheck());
+    CHECK(rig.editor.quickRunning());
+    luna_ui::Intents escape;
+    escape.set(luna_ui::Intent::OpenMenu, true, true);
+    rig.editor.update(escape);
+    CHECK_FALSE(rig.editor.quickRunning());
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::None);
+    REQUIRE_FALSE(odysseus::core::writeTextFileSafely(rig.folder / "sim" / "needs.json", "{ not json").has_value());
+    REQUIRE(rig.editor.startQuickCheck());
+    rig.editor.update(idle);
+    CHECK_FALSE(rig.editor.quickRunning());
+    CHECK(rig.editor.question().title.find("cannot be read") != std::string::npos);
+}

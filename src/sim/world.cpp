@@ -54,6 +54,13 @@ World::World(std::uint64_t seed, SimConfig config)
     decideAll(1);
 }
 
+std::string World::configProblem(const SimConfig& next) const {
+    if (next.calendar.ticksPerDay != config_.calendar.ticksPerDay) return "the calendar's ticks per day cannot change while a clan lives (it is " + std::to_string(config_.calendar.ticksPerDay) + ")";
+    if (next.calendar.daysPerSeason != config_.calendar.daysPerSeason) return "the calendar's days per season cannot change while a clan lives (it is " + std::to_string(config_.calendar.daysPerSeason) + ")";
+    if (next.needs.maximum != config_.needs.maximum) return "the top of the needs scale cannot change while a clan lives (it is " + std::to_string(config_.needs.maximum) + ")";
+    return {};
+}
+
 void World::tick() {
     ++ticks_;
     const auto ticksPerHour = static_cast<std::uint64_t>(calendar_.ticksPerHour());

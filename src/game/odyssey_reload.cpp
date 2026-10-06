@@ -69,13 +69,14 @@ void OdysseyGame::registerDataSets() {
     reloads_.add({"catalog",
                   {data / "plants.json", data / "objects.json", data / "characters.json", data / "weapons.json", data / "animals.json", data / "effects.json", data / "weather.json"},
                   [this] { return reloadCatalog(); }});
+    reloads_.add({"mechanics", {data / "sim", data / "hero", data / "story"}, [this] { return reloadMechanics(); }});
     reloads_.add({"help", {data / "editor" / "help.json"}, [this] { return reloadHelp(); }});
-    // What cannot be swapped while a run is loaded (a tile is a number in the map, the hero and sim data and the buildings are held by the play state): the
+    // What cannot be swapped while a run is loaded (a tile is a number in the map and the buildings are held by the play state): the
     // change is reported, never half-applied, and takes effect at the next start. F5 leaves these alone. The catalogs of weapons, animals, effects and weather
     // moved out of this set in US-191: what holds them keeps a name and is pointed at the new definition by it (CI-007, CI-021).
     DataSet later{"next-start",
                   {data / "tiles.json", data / "materials.json", data / "buildings",
-                   data / "hero", data / "sim", data / "light" / "sky.json", data / "light" / "celestial-events.json", data / "story"},
+                   data / "light" / "sky.json", data / "light" / "celestial-events.json"},
                   [] {
                       ReloadResult result;
                       result.atNextStart = true;
@@ -123,6 +124,35 @@ ReloadResult OdysseyGame::reloadLights() {
         for (const LightKindDef& kind : lighting_.kinds) definitions_.lightKinds.push_back(kind.name);
         editor_.dataChanged(); // the Light palette
         for (const std::string& note : findMissingKinds()) result.warnings.push_back(note);
+    } catch (const std::exception& problem) {
+        result.ok = false;
+        result.errors.push_back(problem.what());
+    }
+    return result;
+}
+
+// The rules of the clan (sim/), the hero's life (hero/) and the story events (story/) are read whole on the side, checked against the run that is going on, and
+// swapped in one piece between two ticks: the clan and the hero's life read them from where they are held on their next step (US-194). A change the running
+// clan cannot take (the length of a day, the top of the needs scale) or a hero that would lose the preset or comfort level in play is refused with the reason and
+// the old rules stay.
+ReloadResult OdysseyGame::reloadMechanics() {
+    ReloadResult result;
+    try {
+        sim::SimConfig fresh = sim::loadSimConfig(dataDirectory_);
+        std::optional<sim::HeroData> hero;
+        if (heroData_) hero = sim::loadHeroData(dataDirectory_);
+        if (life_ && hero) {
+            const sim::NewGame& game = life_->game();
+            if (game.preset < 0 || static_cast<std::size_t>(game.preset) >= hero->config.presets.size() || game.comfort < 0 || static_cast<std::size_t>(game.comfort) >= hero->config.comforts.size()) {
+                throw sim::DataError(dataDirectory_ / "hero" / "hero.json", "presets or comforts", "no longer have the preset or the comfort level of the run in play");
+            }
+        }
+        if (clan_) {
+            sim::SimConfig applied = life_ && hero ? sim::configForComfort(*hero, fresh, life_->game().comfort) : std::move(fresh);
+            if (const std::string problem = clan_->configProblem(applied); !problem.empty()) throw sim::DataError(dataDirectory_ / "sim", "calendar or needs", problem);
+            clan_->replaceConfig(std::move(applied));
+        }
+        if (hero) *heroData_ = std::move(*hero);
     } catch (const std::exception& problem) {
         result.ok = false;
         result.errors.push_back(problem.what());

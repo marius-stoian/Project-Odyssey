@@ -36,6 +36,8 @@ constexpr int kFoldersWidth = 92;
 constexpr int kFilesWidth = 132;
 constexpr int kEntriesWidth = 168;
 constexpr int kProblemTicks = 100; // five seconds
+constexpr int kQuickYears = 20;    // the Quick check runs the clan this long
+constexpr int kQuickSliceDays = 30; // and this many days at every update
 
 std::string lowered(std::string text) {
     std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
@@ -562,7 +564,35 @@ bool DataEditor::confirm() {
     return true;
 }
 
+bool DataEditor::startQuickCheck() {
+    if (dirty()) say_("Data: the unsaved changes to " + openFile_ + " are not in the check, save them first (Ctrl+S)");
+    check_.emplace(folder_, quickSeed_ ? quickSeed_() : 42, kQuickYears);
+    question_ = {Question::Kind::Quick, std::string(), {}, std::string()};
+    stepQuickCheck();
+    return true;
+}
+
+void DataEditor::stepQuickCheck() {
+    if (!check_) return;
+    check_->step(kQuickSliceDays);
+    if (!check_->done()) {
+        question_.title = std::format("Quick check: running, day {} of {} (Esc stops it)", check_->daysDone(), check_->daysTotal());
+    } else if (!check_->error().empty()) {
+        question_.title = "Quick check: the data cannot be read";
+        question_.lines = {check_->error()};
+        check_.reset();
+    } else {
+        const sim::QuickSummary now = check_->summary();
+        question_.title = std::format("Quick check: {} years on seed {}", now.years, now.seed);
+        question_.lines = sim::formatQuickSummary(now, lastCheck_ ? &*lastCheck_ : nullptr);
+        lastCheck_ = now;
+        check_.reset();
+    }
+    markStale();
+}
+
 void DataEditor::cancel() {
+    check_.reset(); // Esc stops a Quick check that is still running
     question_ = {};
     plan_ = {};
     markStale();
@@ -809,10 +839,14 @@ void DataEditor::buildQuestion(Panel& panel) {
         });
         y += 18;
     }
-    const std::vector<std::string> lines = question_.lines.empty() ? std::vector<std::string>{"(nothing uses it)"} : question_.lines;
+    const std::vector<std::string> lines = question_.lines.empty() ? std::vector<std::string>{question_.kind == Question::Kind::Quick ? "" : "(nothing uses it)"} : question_.lines;
     const int rows = std::max(4, (viewHeight_ - y - 60) / luna::engine::kLineHeight);
     panel.add<ListBox>(Rect{left, y, width, rows * luna::engine::kLineHeight}, lines, [](int) {});
     y += rows * luna::engine::kLineHeight + 8;
+    if (question_.kind == Question::Kind::Quick) {
+        panel.add<Button>(Rect{left, y, 60, 14}, check_ ? "Stop" : "Close", [this] { cancel(); });
+        return;
+    }
     const std::string yes = question_.kind == Question::Kind::Rename ? "Rename" : "Delete anyway";
     panel.add<Button>(Rect{left, y, UiPainter::textWidth(yes) + 16, 14}, yes, [this] { confirm(); }).hint = "Do it (Esc leaves everything as it was)";
     panel.add<Button>(Rect{left + UiPainter::textWidth(yes) + 24, y, 60, 14}, "Cancel", [this] { cancel(); });
@@ -840,6 +874,7 @@ void DataEditor::rebuild() {
     button("Copy", "Copy the chosen entry as a new one beside it", [this] { copyEntry(); });
     button("Rename", "Rename the chosen entry everywhere it is used (data files, levels, rules, dialogues): the places are listed first", [this] { openRenameDialog(); });
     button("Delete", "Delete the chosen entry; when it is still used the places are listed and you confirm (Ctrl+Z brings it back)", [this] { beginDelete(); });
+    button("Quick check", "Run the clan for 20 years with the saved data and the game's seed and compare it with the run before", [this] { startQuickCheck(); });
     button("Interactions", "Open the interactions that target the chosen entry in the interaction graph", [this] {
         const std::vector<std::string> ids = interactionsOfEntry();
         if (ids.empty()) say_("Data: no interaction names this entry as its target kind; the list of interactions opens");
@@ -909,6 +944,7 @@ void DataEditor::update(const luna::engine::Intents& intents) {
     if (!shown_) return;
     if (problemTicks_ > 0 && --problemTicks_ == 0) problem_.clear();
     if (document_ && rowsFor_ != document_->version()) refreshRows();
+    stepQuickCheck();
     if (stale_ && !typing()) rebuild();
     UiInput input = UiInput::from(intents);
     const int formLeft = kFoldersWidth + kFilesWidth + kEntriesWidth + 14;

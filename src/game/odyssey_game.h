@@ -352,6 +352,7 @@ public:
     ReloadResult reloadInteractionSet();
     ReloadResult reloadNpcClassSet();
     ReloadResult reloadLights();
+    ReloadResult reloadMechanics(); // sim/, hero/ and story/: the rules of the clan and the hero, swapped between ticks (US-194)
     ReloadResult reloadCatalog();
     ReloadResult reloadHelp();
     void ownReload(const std::string& set); // an Editor save read the set itself: the watcher must not read it a second time

@@ -320,7 +320,7 @@ TEST_CASE("US-303 Timing: every data set reloads in well under 100 ms (NFR-09)")
 #endif
     for (int round = 0; round < 2; ++round) { // the second round: files in the operating system's cache, like a save during play
         const auto outcomes = studio.game().dataReload().reloadAll();
-        REQUIRE(outcomes.size() == 5);
+        REQUIRE(outcomes.size() == 6); // interactions, npc-classes, lights, catalog, mechanics, help
         for (const game::ReloadOutcome& outcome : outcomes) {
             CHECK_MESSAGE(outcome.result.ok, outcome.set);
             CHECK_MESSAGE(outcome.result.milliseconds < kBudget, outcome.set << " took " << outcome.result.milliseconds << " ms");
