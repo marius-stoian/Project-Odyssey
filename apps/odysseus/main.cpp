@@ -28,6 +28,7 @@
 #include "luna/engine/physics_view.h"
 #include "luna/platform/crash.h"
 #include "luna/platform/system.h"
+#include "sim/schema_install.h"
 #include "luna/platform/user_paths.h"
 
 #include <exception>
@@ -186,7 +187,10 @@ int main(int argc, char* argv[]) {
         // build uses the source folder it was built from.
         const std::filesystem::path packaged = luna::platform::executableDirectory() / "assets" / "data";
         const bool isPackaged = std::filesystem::exists(packaged / "hero" / "hero.json");
-        odysseus::game::OdysseyGame game(isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR), arguments.level);
+        const std::filesystem::path dataFolder = isPackaged ? packaged : std::filesystem::path(ODYSSEUS_DATA_DIR);
+        // Every data file is checked against its schema as it loads (US-190); a broken schema folder is said in the log and never stops the game.
+        if (const std::optional<std::string> problem = odysseus::sim::schema::installFromFolder(dataFolder)) odysseus::core::logWarning("Schemas: " + *problem);
+        odysseus::game::OdysseyGame game(dataFolder, arguments.level);
         if (arguments.watch) game.setWatching(true); // the files of the game are watched while it runs (US-304)
         if (!arguments.saveDirectory.empty()) {
             game.setSaveDirectory(arguments.saveDirectory);

@@ -1,0 +1,54 @@
+{
+  "title": "assets/data/sim/needs.json",
+  "type": "object",
+  "properties": {
+    "maximum": {
+      "type": "integer",
+      "description": "The top of every need (a full need is this)",
+      "minimum": 10,
+      "maximum": 1000,
+      "example": "100"
+    },
+    "dailyDecay": {
+      "type": "object",
+      "description": "How much each need falls in a day",
+      "properties": {
+        "hunger": {"type": "integer", "description": "Hunger gained each day", "minimum": 1, "maximum": 365, "example": "30"},
+        "energy": {"type": "integer", "description": "Energy lost each day", "example": "35"},
+        "warmth": {"type": "integer", "description": "Warmth lost each day", "minimum": 1, "maximum": 365, "example": "20"},
+        "social": {"type": "integer", "description": "Social need that builds each day", "example": "15"}
+      }
+    },
+    "winterWarmthDecay": {"type": "integer", "description": "Warmth lost each day in winter instead of the daily rate", "example": "45"},
+    "mealValue": {"type": "integer", "description": "Hunger gained from one meal", "default": 40, "example": "40"},
+    "shelterWarmthPercent": {
+      "type": "integer",
+      "description": "A housed person loses warmth at this percent of the normal rate",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 40,
+      "example": "40"
+    },
+    "daysAtZeroBeforeDeath": {
+      "type": "object",
+      "description": "Days a person can live with a need at zero",
+      "properties": {
+        "hunger": {
+          "type": "integer",
+          "description": "Days without food before death",
+          "minimum": 1,
+          "maximum": 365,
+          "example": "3"
+        },
+        "warmth": {
+          "type": "integer",
+          "description": "Days without warmth before death",
+          "minimum": 1,
+          "maximum": 365,
+          "example": "3"
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/needs.cpp"]
+}

@@ -77,6 +77,10 @@ PartnerDefaults loadPartnerDefaults(const std::filesystem::path& folder, LoadRep
             report.errors.push_back({name, parsed.value ? parsed.value->line : parsed.errorLine, parsed.value ? "the file must hold one {...} object" : parsed.error});
             continue;
         }
+        if (const std::vector<Diagnostic> mistakes = schemaDiagnostics(name, text.str()); !mistakes.empty()) { // the schema (US-190)
+            report.errors.insert(report.errors.end(), mistakes.begin(), mistakes.end());
+            continue;
+        }
         const JsonValue& root = *parsed.value;
         const std::size_t before = report.errors.size();
         for (std::size_t i = 0; i < root.keys.size(); ++i) {

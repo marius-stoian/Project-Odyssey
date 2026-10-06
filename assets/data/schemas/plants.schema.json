@@ -1,0 +1,55 @@
+{
+  "title": "assets/data/plants.json",
+  "type": "object",
+  "properties": {
+    "plants": {
+      "type": "array",
+      "description": "Every kind of plant",
+      "items": {
+        "type": "object",
+        "description": "One entry of plants",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the plant; levels and rules use it", "example": "grass"},
+          "frame": {
+            "type": "string",
+            "description": "The picture of the content atlas this uses (a frame name)",
+            "example": "grass",
+            "format": "frame"
+          },
+          "size": {
+            "type": "string",
+            "description": "small, tall or tree: it decides the default height of its shadow",
+            "example": "small",
+            "enum": ["small", "tall", "tree"]
+          },
+          "blocks": {"type": "boolean", "description": "true: it blocks walking like a rock", "default": false},
+          "edible": {"type": "boolean", "description": "true: it heals the hero when destroyed", "default": false},
+          "inspect": {
+            "type": "string",
+            "description": "The text shown when the player looks at it",
+            "example": "Green and quiet."
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags it carries; writing tags replaces the ones its fields give (plant, edible, solid, tree)",
+            "items": {"type": "string", "description": "One entry of tags", "example": "plant"}
+          },
+          "height": {
+            "type": "number",
+            "description": "Height in metres; the length of its shadow depends on it (0: no shadow)",
+            "minimum": 0,
+            "maximum": 100,
+            "example": "1.5"
+          },
+          "shadow": {"type": "boolean", "description": "false: casts no shadow whatever its height"}
+        }
+      }
+    }
+  },
+  "provides": [
+    {"catalog": "plants", "at": "plants[].name"},
+    {"catalog": "kinds", "at": "plants[].name"},
+    {"catalog": "tags", "at": "plants[].tags[]"}
+  ],
+  "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp", "src/game/level.cpp#loadDefinitions"]
+}

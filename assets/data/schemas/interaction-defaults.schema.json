@@ -1,0 +1,17 @@
+{
+  "title": "assets/data/interactions/defaults-<type>.json",
+  "type": "object",
+  "properties": {
+    "partnerType": {
+      "type": "string",
+      "description": "The partner type these actions are the defaults for: class, animal, environment or a type of partner-types.json",
+      "example": "animal"
+    },
+    "actions": {
+      "type": "array",
+      "description": "Partner type -> interaction ids",
+      "items": {"type": "string", "description": "One entry of actions", "example": "forage", "ref": "catalog:interactions"}
+    }
+  },
+  "loaders": ["src/sim/partner_types.cpp"]
+}

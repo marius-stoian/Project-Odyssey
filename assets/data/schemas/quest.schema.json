@@ -1,32 +1,53 @@
 {
-  "title": "Quest (assets/data/quests/<id>.json)",
+  "title": "assets/data/quests/<id>.json",
   "type": "object",
+  "required": ["id", "title", "start", "steps"],
   "properties": {
-    "id": { "type": "string", "description": "One word; must equal the file name without .json" },
-    "title": { "type": "string", "description": "The name in the journal and tracker" },
-    "giver": { "type": "string", "default": "none", "description": "A person id, role:<role>, or none" },
-    "requires": { "type": "array", "items": { "type": "string" }, "description": "Prerequisites in the rule language" },
-    "start": { "type": "string", "description": "The id of the first step" },
+    "id": {"type": "string", "description": "One word: the quest's name inside the game; it must equal the file name without .json", "example": "first-day", "maxLength": 32},
+    "title": {"type": "string", "description": "The name shown in the journal and the tracker", "example": "The First Day"},
+    "giver": {"type": "string", "default": "none", "description": "Who hands the quest out: a person id, role:<role>, or none to start by itself", "example": "role:elder"},
+    "requires": {"type": "array", "description": "Conditions in the rule language that must all hold before the quest can start", "items": {"type": "string", "format": "rule", "description": "One condition", "example": "flag(tutorial)"}},
+    "start": {"type": "string", "description": "The id of the first step", "example": "gather"},
     "steps": {
       "type": "object",
-      "description": "One entry per step, keyed by step id",
-      "items": {
+      "description": "The steps of the quest, one entry per step id",
+      "additionalProperties": {
         "type": "object",
+        "description": "One step",
         "properties": {
-          "text": { "type": "string", "description": "What the tracker shows" },
-          "objective": { "type": "string", "description": "talk, goto, gather, give, craft, interact, defeat, wait or flag, with its words" },
-          "marker": { "type": "string", "description": "tag:<tag>, object:<id>, npc:<id> or place:<name>" },
-          "hint": { "type": "object", "properties": { "after": { "type": "string" }, "text": { "type": "string" } }, "description": "Shown after this long without progress" },
-          "next": { "type": "string", "description": "A step id or END" },
-          "branches": { "type": "array", "description": "[{ if, to }]: the first true one is taken instead of next" }
+          "text": {"type": "string", "description": "What the tracker shows while this step is active", "example": "Gather one berry from a bush."},
+          "objective": {"type": "string", "description": "What finishes the step: talk, goto, gather, give, craft, interact, defeat, wait or flag, with its words", "example": "gather berries 1"},
+          "marker": {"type": "string", "description": "Where the map pin points: tag:<tag>, object:<id>, npc:<id> or place:<name>", "example": "tag:edible"},
+          "hint": {
+            "type": "object",
+            "description": "A hint shown when the player makes no progress for a while",
+            "properties": {
+              "after": {"type": "string", "description": "How long without progress before the hint shows", "example": "120s"},
+              "text": {"type": "string", "description": "The hint", "example": "Berry bushes are the small green plants near the camp."}
+            }
+          },
+          "next": {"type": "string", "description": "The step that follows, or END", "example": "eat"},
+          "branches": {
+            "type": "array",
+            "description": "Conditions that send the quest to another step instead of next; the first true one wins",
+            "items": {
+              "type": "object",
+              "description": "One branch",
+              "properties": {
+                "if": {"type": "string", "format": "rule", "description": "The condition", "example": "has(berries, 5)"},
+                "to": {"type": "string", "description": "The step to go to, or END", "example": "feast"}
+              }
+            }
+          }
         }
       }
     },
-    "fail": { "type": "array", "items": { "type": "string" }, "description": "When any holds, the quest fails for good" },
-    "rewards": { "type": "array", "items": { "type": "string" }, "description": "Effect lines run when the quest ends" },
-    "journal": { "type": "string", "description": "The line shown for a finished quest" },
-    "offer": { "type": "string", "description": "What the giver says when offering the quest" },
-    "turnIn": { "type": "string", "description": "What the giver says when the quest is handed in" },
-    "note": { "type": "string", "description": "The owner's own words" }
-  }
+    "fail": {"type": "array", "description": "Conditions that fail the quest for good when any of them holds", "items": {"type": "string", "format": "rule", "description": "One condition", "example": "flag(elder-dead)"}},
+    "rewards": {"type": "array", "description": "Effect lines run when the quest ends well", "items": {"type": "string", "format": "effect", "description": "One effect", "example": "give berries 3"}},
+    "journal": {"type": "string", "description": "The line the journal shows for a finished quest", "example": "The elder taught me the first things a clan needs."},
+    "offer": {"type": "string", "description": "What the giver says when offering the quest", "example": "I have work for you."},
+    "turnIn": {"type": "string", "description": "What the giver says when the quest is handed in", "example": "You know the first day."}
+  },
+  "provides": [{"catalog": "quests", "at": "id"}],
+  "loaders": ["src/sim/quest_data.cpp"]
 }

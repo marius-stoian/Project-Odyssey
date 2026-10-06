@@ -1,0 +1,110 @@
+{
+  "title": "assets/data/buildings/kinds.json",
+  "type": "object",
+  "properties": {
+    "kinds": {
+      "type": "array",
+      "description": "The kinds of buildings clans and the owner can build",
+      "items": {
+        "type": "object",
+        "description": "One entry of kinds",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "One word: the name of the kind; the Build menu and levels use it",
+            "example": "hut"
+          },
+          "label": {"type": "string", "description": "The name shown in the Build menu", "example": "Hut"},
+          "footprint": {
+            "type": "array",
+            "description": "Width and height of the building on the grid, in metres",
+            "items": {"type": "integer", "description": "One entry of footprint", "example": "3"}
+          },
+          "layout": {
+            "type": "array",
+            "description": "The pieces of the building on a grid of 1 m cells, x to the right and y down, before any turn",
+            "items": {
+              "type": "object",
+              "description": "One entry of layout",
+              "properties": {
+                "piece": {
+                  "type": "string",
+                  "description": "Which piece stands in this cell",
+                  "example": "wall-wood",
+                  "ref": "catalog:building-pieces"
+                },
+                "x": {
+                  "type": "number",
+                  "description": "Column of the cell, counted from the left of the footprint",
+                  "minimum": 0,
+                  "maximum": 31,
+                  "example": "0"
+                },
+                "y": {
+                  "type": "number",
+                  "description": "Row of the cell, counted from the top of the footprint",
+                  "minimum": 0,
+                  "maximum": 31,
+                  "example": "0"
+                }
+              }
+            }
+          },
+          "interior": {
+            "type": "string",
+            "description": "The name of the level file that is the building's inside; empty fades the roof instead",
+            "example": "fade"
+          },
+          "uses": {
+            "type": "array",
+            "description": "What the building is used for: sleep, store, fire, craft...",
+            "items": {"type": "string", "description": "One entry of uses", "example": "shelter"}
+          },
+          "owner": {
+            "type": "string",
+            "description": "Who owns it: none, clan or person",
+            "default": "clan",
+            "example": "person"
+          },
+          "light": {
+            "type": "string",
+            "description": "A kind of light of lights.json that shines from a finished building at night; empty: none",
+            "example": "torch",
+            "ref": "catalog:lights"
+          },
+          "wear": {
+            "type": "object",
+            "description": "Hit points each piece loses when a season ends, by season name in lower case",
+            "additionalProperties": {"type": "integer", "description": "One entry, named by its key", "example": "0"}
+          },
+          "known": {"type": "boolean", "description": "The hero knows the blueprint at the start of a run", "default": false},
+          "colour": {
+            "type": "string",
+            "description": "The colour of its icon in the Build menu: # and six hex digits",
+            "example": "#a98a62"
+          },
+          "note": {
+            "type": "string",
+            "description": "The owner's own words about this kind (not read by the game)",
+            "example": "A one-room hut: warm and sheltered once the walls, the door and the roof stand."
+          },
+          "capacity": {
+            "type": "number",
+            "description": "Storage kinds: meals of the clan's store it keeps at half the spoilage",
+            "minimum": 0,
+            "maximum": 1000,
+            "default": 0,
+            "example": "40"
+          },
+          "cost": {
+            "type": "object",
+            "description": "What is brought to the site (item: count); the sum of the pieces unless written here",
+            "additionalProperties": {"type": "integer", "description": "One entry, named by its key", "example": "3"}
+          }
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "building-kinds", "at": "kinds[].id"}],
+  "loaders": ["src/sim/building_data.cpp"]
+}

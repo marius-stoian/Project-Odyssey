@@ -1,0 +1,14 @@
+{
+  "title": "assets/data/sim/partner-types.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "minimum": 1, "maximum": 1, "example": "1"},
+    "types": {
+      "type": "array",
+      "description": "The kinds of partner an NPC deals with; class:<id> is always valid too",
+      "items": {"type": "string", "description": "One entry of types", "example": "player"}
+    }
+  },
+  "provides": [{"catalog": "partner-types", "at": "types[]"}],
+  "loaders": ["src/sim/partner_types.cpp"]
+}

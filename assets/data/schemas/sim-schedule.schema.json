@@ -1,0 +1,174 @@
+{
+  "title": "assets/data/sim/schedule.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "minimum": 1, "maximum": 1, "example": "1"},
+    "nightFromHour": {
+      "type": "integer",
+      "description": "The night is from this hour ...",
+      "minimum": 0,
+      "maximum": 23,
+      "default": 21,
+      "example": "21"
+    },
+    "nightToHour": {
+      "type": "integer",
+      "description": "... to this one, round midnight",
+      "minimum": 0,
+      "maximum": 23,
+      "default": 6,
+      "example": "6"
+    },
+    "eat": {
+      "type": "object",
+      "description": "When an NPC stops what it does to eat",
+      "properties": {
+        "below": {
+          "type": "integer",
+          "description": "Hunger below this sends an NPC to eat",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "20"
+        },
+        "restore": {
+          "type": "integer",
+          "description": "Hunger an NPC gains from a meal",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "40"
+        },
+        "place": {"type": "string", "description": "A named place of the level, or home", "example": "home"}
+      }
+    },
+    "dangerPlace": {
+      "type": "string",
+      "description": "Where a person goes when danger or fear strikes",
+      "default": "home",
+      "example": "home"
+    },
+    "scatterPixels": {
+      "type": "integer",
+      "description": "People at the same named place stand within this many pixels of it, not on one spot",
+      "minimum": 0,
+      "maximum": 512,
+      "default": 48,
+      "example": "48"
+    },
+    "activities": {
+      "type": "object",
+      "description": "What each activity does to the needs of an NPC",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One entry, named by its key",
+        "properties": {
+          "energy": {"type": "integer", "description": "Energy gained each hour of the activity", "example": "12"},
+          "hunger": {"type": "integer", "description": "Hunger restored each hour of the activity", "example": "25"}
+        }
+      }
+    },
+    "free": {
+      "type": "array",
+      "description": "The activities an NPC picks from when free",
+      "items": {"type": "string", "description": "One entry of free", "example": "idle"}
+    },
+    "maxPerHour": {
+      "type": "integer",
+      "description": "At most this many persons choose an action on one hour mark (the budget of ADR-022)",
+      "minimum": 1,
+      "maximum": 100000,
+      "default": 64,
+      "example": "64"
+    },
+    "dealings": {
+      "type": "object",
+      "description": "How NPCs deal with each other and with the hero",
+      "properties": {
+        "meetRadius": {
+          "type": "integer",
+          "description": "How near two NPCs must be to deal with each other, in pixels (96 is 3 m)",
+          "minimum": 8,
+          "maximum": 1024,
+          "default": 96,
+          "example": "96"
+        },
+        "fightRoundsPerHour": {
+          "type": "integer",
+          "description": "A fight near the hero: rounds of strike and strike back an hour",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 6,
+          "example": "6"
+        },
+        "farFightRounds": {
+          "type": "integer",
+          "description": "A far fight is settled at once, in this many rounds at most",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 12,
+          "example": "12"
+        },
+        "witnessOpinion": {
+          "type": "integer",
+          "description": "Witnesses who know the victim think this much less of the attacker",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 6,
+          "example": "6"
+        },
+        "griefOpinion": {
+          "type": "integer",
+          "description": "The family of the dead think this much less of the killer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "farPercent": {
+          "type": "integer",
+          "description": "The chance in a hundred that a far person has a dealing when it is visited (once a day)",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 5,
+          "example": "5"
+        },
+        "preferBonus": {
+          "type": "integer",
+          "description": "Added to the score of an action the NPC prefers for the kind of partner it meets",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 40,
+          "example": "40"
+        },
+        "defaultHp": {
+          "type": "integer",
+          "description": "Hit points of a fighter with none of its own",
+          "minimum": 1,
+          "maximum": 10000,
+          "example": "100"
+        },
+        "defaultDamage": {
+          "type": "integer",
+          "description": "Damage of a fighter with none of its own",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "5"
+        },
+        "chatSocial": {
+          "type": "integer",
+          "description": "The Social need a conversation gives back to both",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 10,
+          "example": "10"
+        },
+        "chatter": {
+          "type": "array",
+          "description": "Interaction ids NPCs do when they chat",
+          "items": {"type": "string", "description": "One entry of chatter", "example": "Fine day."}
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/npc_schedule.cpp"],
+  "externalFields": ["energy", "hunger"]
+}

@@ -1,0 +1,343 @@
+{
+  "title": "assets/data/hero/hero.json",
+  "type": "object",
+  "properties": {
+    "imprint": {
+      "type": "object",
+      "description": "How strongly youth shapes the hero: percent of the normal gain at the start, the middle and the end age",
+      "properties": {
+        "startAge": {"type": "integer", "description": "The age the hero starts at", "minimum": 1, "maximum": 60, "example": "12"},
+        "peakPercent": {
+          "type": "integer",
+          "description": "Imprint percent at the start age (the peak)",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "300"
+        },
+        "midAge": {
+          "type": "integer",
+          "description": "The age at which the imprint reaches its middle percent",
+          "example": "19",
+          "minimum": 1,
+          "maximum": 80
+        },
+        "midPercent": {
+          "type": "integer",
+          "description": "Imprint percent at the middle age",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "175"
+        },
+        "endAge": {
+          "type": "integer",
+          "description": "The age at which the imprint reaches its end percent",
+          "example": "26",
+          "minimum": 1,
+          "maximum": 80
+        },
+        "endPercent": {
+          "type": "integer",
+          "description": "Imprint percent at the end age",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "50"
+        },
+        "settledPercent": {
+          "type": "integer",
+          "description": "After the end age",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 25,
+          "example": "25"
+        }
+      }
+    },
+    "presets": {
+      "type": "array",
+      "description": "The Growing Period presets of a new game",
+      "items": {
+        "type": "object",
+        "description": "One entry of presets",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the preset", "example": "Full"},
+          "startAge": {
+            "type": "integer",
+            "description": "The age the hero starts at with this preset",
+            "minimum": 1,
+            "maximum": 60,
+            "example": "12"
+          },
+          "mantleAge": {
+            "type": "integer",
+            "description": "The age at which the hero takes the leader's mantle",
+            "example": "26",
+            "minimum": 1,
+            "maximum": 80
+          }
+        }
+      }
+    },
+    "comforts": {
+      "type": "array",
+      "description": "The comfort settings of a new game",
+      "items": {
+        "type": "object",
+        "description": "One entry of comforts",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the comfort", "example": "Gentle"},
+          "needsPercent": {
+            "type": "integer",
+            "description": "How fast needs fall",
+            "minimum": 10,
+            "maximum": 400,
+            "default": 100,
+            "example": "70"
+          },
+          "foodPercent": {
+            "type": "integer",
+            "description": "The starting store",
+            "minimum": 10,
+            "maximum": 400,
+            "default": 100,
+            "example": "140"
+          }
+        }
+      }
+    },
+    "aging": {
+      "type": "object",
+      "description": "How the hero slows with age",
+      "properties": {
+        "fromYears": {
+          "type": "integer",
+          "description": "The age at which ageing starts",
+          "minimum": 20,
+          "maximum": 100,
+          "example": "40"
+        },
+        "startPercent": {
+          "type": "integer",
+          "description": "Extra Energy decay at that age",
+          "minimum": 0,
+          "maximum": 500,
+          "default": 10,
+          "example": "10"
+        },
+        "perYearPercent": {
+          "type": "integer",
+          "description": "And each year after",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 2,
+          "example": "2"
+        }
+      }
+    },
+    "skillLevelPoints": {
+      "type": "integer",
+      "description": "Skill points that make one skill level",
+      "minimum": 1,
+      "maximum": 100,
+      "example": "10"
+    },
+    "masterBonusPercent": {
+      "type": "integer",
+      "description": "Extra skill gained, in percent, when learning from a master",
+      "minimum": 0,
+      "maximum": 1000,
+      "example": "100"
+    },
+    "trustOpinion": {
+      "type": "integer",
+      "description": "The opinion at which someone trusts the hero",
+      "minimum": -100,
+      "maximum": 100,
+      "example": "25"
+    },
+    "origins": {
+      "type": "array",
+      "description": "Where the hero comes from; each gives starting affinities",
+      "items": {
+        "type": "object",
+        "description": "One entry of origins",
+        "properties": {
+          "name": {"type": "string", "description": "The name shown to the player", "example": "a hunter's child"},
+          "affinity": {
+            "type": "object",
+            "description": "Starting affinity points",
+            "properties": {
+              "hunter": {"type": "integer", "description": "Starting points for the hunter affinity", "example": "40"},
+              "gatherer": {"type": "integer", "description": "Starting points for the gatherer affinity", "example": "15"},
+              "knapper": {"type": "integer", "description": "Starting points for the flint-knapper affinity", "example": "15"},
+              "fireKeeper": {"type": "integer", "description": "Starting points for the fire-keeper affinity", "example": "10"},
+              "shaman": {"type": "integer", "description": "Starting points for the shaman-healer affinity", "example": "10"},
+              "trade": {"type": "integer", "description": "Starting points for the trade affinity", "example": "10"},
+              "religion": {"type": "integer", "description": "Starting points for the religion affinity", "example": "10"}
+            }
+          }
+        }
+      }
+    },
+    "dominion": {
+      "type": "object",
+      "description": "What counts towards leading the region (the win rule)",
+      "properties": {
+        "tradePerPerson": {
+          "type": "integer",
+          "description": "Trade points the clan counts for each of its people",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "3"
+        },
+        "rivalTradePerPerson": {
+          "type": "integer",
+          "description": "Trade points a rival clan counts for each of its people",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "10"
+        },
+        "rivalTradeGrowthPerDay": {
+          "type": "integer",
+          "description": "Trade points a rival clan gains each day",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "1"
+        },
+        "winPercent": {
+          "type": "integer",
+          "description": "The share of one pillar that wins the region",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "60"
+        },
+        "combinedWinPercent": {
+          "type": "integer",
+          "description": "The average of the pillars the clan must reach to win by the combined rule",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "50"
+        },
+        "loseBelowPeople": {
+          "type": "integer",
+          "description": "The clan has lost when it has fewer people than this",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "3"
+        },
+        "rivalFollowerPercent": {
+          "type": "integer",
+          "description": "The share of a rival clan's people that counts as followers when it is won over",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "60"
+        }
+      }
+    },
+    "trade": {
+      "type": "object",
+      "description": "How trade debts work between the hero and others",
+      "properties": {
+        "dueDays": {"type": "integer", "description": "Days until a debt is due", "minimum": 1, "maximum": 365, "example": "14"},
+        "maxDebts": {
+          "type": "integer",
+          "description": "The most debts the hero may owe at once",
+          "minimum": 0,
+          "maximum": 50,
+          "example": "3"
+        },
+        "defaultRelationshipPenalty": {
+          "type": "integer",
+          "description": "Opinion lost when a debt is not paid on time",
+          "minimum": 0,
+          "maximum": 200,
+          "example": "30"
+        },
+        "defaultTradePenaltyPercent": {
+          "type": "integer",
+          "description": "Trade points lost, in percent, when a debt is not paid on time",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "50"
+        },
+        "relationshipPerDeal": {
+          "type": "integer",
+          "description": "Opinion gained from each fair deal",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "3"
+        },
+        "needPercent": {
+          "type": "integer",
+          "description": "How much of its real need, in percent, a trader asks for",
+          "minimum": 100,
+          "maximum": 500,
+          "example": "130"
+        }
+      }
+    },
+    "fire": {
+      "type": "object",
+      "description": "The sacred fire and its rituals",
+      "properties": {
+        "skillLevelToFound": {
+          "type": "integer",
+          "description": "The fire-keeping skill level needed to found a sacred fire",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "3"
+        },
+        "untendedDaysBeforeOut": {
+          "type": "integer",
+          "description": "Days a fire can burn without anyone tending it before it goes out",
+          "minimum": 1,
+          "maximum": 365,
+          "example": "5"
+        },
+        "ritualMinimumAttendees": {
+          "type": "integer",
+          "description": "The fewest people a ritual needs to count",
+          "minimum": 1,
+          "maximum": 100,
+          "example": "5"
+        },
+        "ritualFaith": {
+          "type": "integer",
+          "description": "Faith gained by everyone at a ritual",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "12"
+        },
+        "followerFaith": {
+          "type": "integer",
+          "description": "The faith a follower has when they join the fire",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "30"
+        },
+        "neglectFaithLoss": {
+          "type": "integer",
+          "description": "Faith lost when the fire is left untended",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "10"
+        },
+        "conversionPerMille": {
+          "type": "integer",
+          "description": "Chance in thousandths each day that a rival person follows the fire",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "120"
+        },
+        "ritualRadiusTiles": {
+          "type": "integer",
+          "description": "How near the fire a person must stand to take part in a ritual, in tiles",
+          "minimum": 1,
+          "maximum": 50,
+          "example": "4"
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/hero_data.cpp#loadHeroData"],
+  "externalFields": ["hunter", "gatherer", "knapper", "fireKeeper", "shaman", "trade", "religion"]
+}

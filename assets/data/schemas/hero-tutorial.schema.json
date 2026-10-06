@@ -1,0 +1,39 @@
+{
+  "title": "assets/data/hero/tutorial.json",
+  "type": "object",
+  "properties": {
+    "hintAfterSeconds": {"type": "integer", "description": "Seconds without progress before a hint shows", "example": "120"},
+    "elder": {"type": "string", "description": "The name of the elder who teaches", "example": "Elder"},
+    "steps": {
+      "type": "array",
+      "description": "The steps of the first lesson",
+      "items": {
+        "type": "object",
+        "description": "One entry of steps",
+        "properties": {
+          "goal": {
+            "type": "string",
+            "description": "What the player must do at this step: gather, eat or tend",
+            "example": "gather"
+          },
+          "say": {
+            "type": "string",
+            "description": "What the elder says at this step",
+            "example": "Welcome, young one. First, food: right-click a berry bush and choose Gather."
+          },
+          "hint": {
+            "type": "string",
+            "description": "A hint shown when the player is stuck",
+            "example": "Berry bushes are the small green plants near the camp. Walk close, then right-click one."
+          }
+        }
+      }
+    },
+    "done": {
+      "type": "string",
+      "description": "What the elder says when the lesson is done",
+      "example": "You know the first day. The rest is your life: press Esc for your bag, skills and the dominion."
+    }
+  },
+  "loaders": ["src/game/tutorial.cpp"]
+}

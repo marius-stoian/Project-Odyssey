@@ -1,0 +1,49 @@
+{
+  "title": "assets/data/hero/recipes.json",
+  "type": "object",
+  "properties": {
+    "recipes": {
+      "type": "array",
+      "description": "Everything that can be crafted",
+      "items": {
+        "type": "object",
+        "description": "One entry of recipes",
+        "properties": {
+          "id": {"type": "string", "description": "One word: the name of the recipe", "example": "hammerstone"},
+          "name": {"type": "string", "description": "The name shown to the player", "example": "Hammerstone"},
+          "station": {
+            "type": "string",
+            "description": "Where it is crafted: knapping-stone or fire",
+            "example": "knapping-stone"
+          },
+          "skill": {
+            "type": "string",
+            "description": "The profession whose skill the crafting uses",
+            "example": "flint-knapper",
+            "ref": "catalog:professions"
+          },
+          "inputs": {
+            "type": "object",
+            "description": "The items used up, each with how many (item id: count)",
+            "additionalProperties": {"type": "integer", "description": "One entry, named by its key", "example": "1"}
+          },
+          "tools": {
+            "type": "array",
+            "description": "Items needed to craft it (needed, not used up)",
+            "items": {"type": "string", "description": "One entry of tools", "example": "hammerstone", "ref": "catalog:items"}
+          },
+          "output": {"type": "string", "description": "The item made", "example": "hammerstone", "ref": "catalog:items"},
+          "count": {
+            "type": "integer",
+            "description": "How many of the output one crafting makes",
+            "minimum": 1,
+            "maximum": 100,
+            "example": "1"
+          }
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "recipes", "at": "recipes[].id"}],
+  "loaders": ["src/sim/hero_data.cpp#loadHeroData"]
+}

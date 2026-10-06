@@ -1,0 +1,75 @@
+{
+  "title": "assets/data/light/sky.json",
+  "type": "object",
+  "properties": {
+    "version": {"type": "integer", "description": "The version of this file format", "example": "1"},
+    "enabled": {
+      "type": "boolean",
+      "description": "false: the light does not follow the clock (always full day)",
+      "default": true
+    },
+    "keyframes": {
+      "type": "array",
+      "description": "The sky light at moments of the day, blended in time order and wrapping round midnight",
+      "items": {
+        "type": "object",
+        "description": "One entry of keyframes",
+        "properties": {
+          "anchor": {
+            "type": "string",
+            "description": "sunrise or sunset: the keyframe sits at that hour of the season plus the offset",
+            "example": "sunrise"
+          },
+          "offset": {
+            "type": "number",
+            "description": "Hours after the anchor (negative: before)",
+            "minimum": -6,
+            "maximum": 6,
+            "default": 0,
+            "example": "-1.0"
+          },
+          "color": {
+            "type": "array",
+            "description": "Red, green and blue of the sky light at this moment, each 0 to 255",
+            "items": {"type": "integer", "description": "One entry of color", "example": "191"}
+          },
+          "strength": {
+            "type": "number",
+            "description": "The ambient colour is multiplied by this",
+            "minimum": 0,
+            "maximum": 2,
+            "default": 1,
+            "example": "0.55"
+          },
+          "shadow": {
+            "type": "number",
+            "description": "How dark shadows are at that moment, 0 to 1",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.5,
+            "example": "0.35"
+          }
+        }
+      }
+    },
+    "sunPeakDegrees": {
+      "type": "object",
+      "description": "How high the sun climbs at noon in each season, in degrees",
+      "properties": {
+        "Spring": {"type": "integer", "description": "How high the sun climbs at noon in spring, in degrees", "example": "50"},
+        "Summer": {"type": "integer", "description": "How high the sun climbs at noon in summer, in degrees", "example": "65"},
+        "Autumn": {"type": "integer", "description": "How high the sun climbs at noon in autumn, in degrees", "example": "45"},
+        "Winter": {"type": "integer", "description": "How high the sun climbs at noon in winter, in degrees", "example": "28"}
+      }
+    },
+    "moonPeakDegrees": {
+      "type": "number",
+      "description": "How high the moon climbs, in degrees",
+      "minimum": 5,
+      "maximum": 90,
+      "example": "45"
+    }
+  },
+  "loaders": ["src/game/sky.cpp#loadSky"],
+  "externalFields": ["Spring", "Summer", "Autumn", "Winter", "daylight"]
+}

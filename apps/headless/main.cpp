@@ -18,6 +18,7 @@
 #include "sim/ai.h"
 #include "sim/report.h"
 #include "sim/save.h"
+#include "sim/schema_install.h"
 #include "sim/world.h"
 
 #include <charconv>
@@ -136,6 +137,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
+        if (const std::optional<std::string> problem = odysseus::sim::schema::installFromFolder(options.dataDirectory)) std::cerr << "Schemas: " << *problem << '\n';
         const odysseus::sim::SimConfig config = odysseus::sim::loadSimConfig(options.dataDirectory);
         odysseus::sim::World world(options.seed, config);
         if (!options.loadFile.empty()) {

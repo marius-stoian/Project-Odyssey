@@ -179,6 +179,9 @@ add_library(odysseus_sim STATIC
     src/sim/calendar.cpp
     src/sim/game_clock.cpp
     src/sim/json_data.cpp
+    src/sim/json_text.cpp
+    src/sim/schema.cpp
+    src/sim/schema_index.cpp
     src/sim/rule_json.cpp
     src/sim/rule_expr.cpp
     src/sim/rule_effect.cpp
@@ -497,8 +500,9 @@ add_executable(odysseus_game_tests
     tests/game/thing_overrides_test.cpp
     tests/game/building_game_test.cpp
     tests/game/building_life_game_test.cpp
-    tests/game/building_editor_test.cpp)
-target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest)
+    tests/game/building_editor_test.cpp
+    tests/game/schema_game_test.cpp)
+target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
 odysseus_apply_settings(odysseus_game_tests)
@@ -572,7 +576,8 @@ add_executable(odysseus_sim_tests
     tests/sim/building_store_test.cpp
     tests/sim/building_life_test.cpp
     tests/sim/graph_check_test.cpp
-    tests/sim/test_play_test.cpp)
+    tests/sim/test_play_test.cpp
+    tests/sim/schema_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

@@ -1,0 +1,21 @@
+{
+  "title": "assets/data/tiles.json",
+  "type": "object",
+  "properties": {
+    "tiles": {
+      "type": "array",
+      "description": "The kinds of ground a level is painted with",
+      "items": {
+        "type": "object",
+        "description": "One entry of tiles",
+        "properties": {
+          "name": {"type": "string", "description": "The name of the ground; levels use it", "example": "grass"},
+          "atlas": {"type": "string", "description": "Its picture in the art atlas", "example": "grass"},
+          "solid": {"type": "boolean", "description": "true: it blocks walking and spears", "default": false}
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "tiles", "at": "tiles[].name"}],
+  "loaders": ["src/game/level.cpp#loadDefinitions"]
+}

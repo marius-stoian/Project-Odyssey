@@ -1,6 +1,7 @@
 #include "game/tutorial.h"
 
 #include "sim/data.h"
+#include "sim/schema.h"
 
 #include <nlohmann/json.hpp>
 
@@ -32,10 +33,11 @@ TutorialScript loadTutorial(const std::filesystem::path& file) {
     text << in.rdbuf();
     json data;
     try {
-        data = json::parse(text.str());
+        data = json::parse(text.str(), nullptr, true, true);
     } catch (const json::exception& error) {
         throw sim::DataError(name, "", std::string("not valid JSON: ") + error.what());
     }
+    sim::schema::checkLoaded(file, data, text.str()); // US-190: type, range and choices, with file, line and field
     TutorialScript script;
     if (!data.contains("hintAfterSeconds") || !data.at("hintAfterSeconds").is_number_integer() || data.at("hintAfterSeconds").get<int>() < 1) {
         throw sim::DataError(name, "hintAfterSeconds", "must be a whole number of seconds, at least 1");

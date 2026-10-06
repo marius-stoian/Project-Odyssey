@@ -1,0 +1,106 @@
+{
+  "title": "assets/data/sim/region.json",
+  "type": "object",
+  "properties": {
+    "size": {
+      "type": "integer",
+      "description": "Tiles on each side (a multiple of chunkSize)",
+      "minimum": 64,
+      "maximum": 1024,
+      "default": 256,
+      "example": "256"
+    },
+    "chunkSize": {
+      "type": "integer",
+      "description": "Tiles along one side of a chunk of the region",
+      "minimum": 8,
+      "maximum": 128,
+      "example": "32"
+    },
+    "lakeLevel": {
+      "type": "integer",
+      "description": "Elevation (0..1023) below this is water",
+      "minimum": 0,
+      "maximum": 1023,
+      "default": 140,
+      "example": "140"
+    },
+    "mountainLevel": {"type": "integer", "description": "Above this, mountains", "default": 800, "example": "800"},
+    "riverBand": {
+      "type": "integer",
+      "description": "How wide the ridge of the river noise is, thousandths of the noise range",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 14,
+      "example": "14"
+    },
+    "forestMoisture": {
+      "type": "integer",
+      "description": "Wetter than this, forest (at middle heights)",
+      "minimum": 0,
+      "maximum": 1023,
+      "default": 560,
+      "example": "560"
+    },
+    "caveNoise": {
+      "type": "integer",
+      "description": "A mountain tile whose cave noise is above this is a cave mouth",
+      "minimum": 0,
+      "maximum": 1023,
+      "default": 900,
+      "example": "920"
+    },
+    "edgeWall": {
+      "type": "integer",
+      "description": "The outer tiles rise into mountains: a closed world",
+      "minimum": 0,
+      "maximum": 32,
+      "default": 8,
+      "example": "8"
+    },
+    "flintPerMille": {
+      "type": "integer",
+      "description": "Of the tiles near water or caves",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 25,
+      "example": "25"
+    },
+    "woodPerMille": {
+      "type": "integer",
+      "description": "Of forest tiles",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 160,
+      "example": "160"
+    },
+    "berriesPerMille": {
+      "type": "integer",
+      "description": "Of forest-edge tiles",
+      "minimum": 0,
+      "maximum": 1000,
+      "default": 220,
+      "example": "220"
+    },
+    "herdPerMille": {"type": "integer", "description": "Of steppe tiles", "minimum": 0, "maximum": 1000, "default": 3, "example": "3"},
+    "herdMinimum": {"type": "integer", "description": "The fewest animals in one herd", "minimum": 1, "maximum": 100, "example": "5"},
+    "herdMaximum": {"type": "integer", "description": "The most animals in one herd", "example": "12"},
+    "berryRegrowDays": {
+      "type": "integer",
+      "description": "A harvested berry bush bears again after this many days, in summer or autumn",
+      "minimum": 1,
+      "maximum": 365,
+      "default": 14,
+      "example": "14"
+    },
+    "startNeedWithin": {
+      "type": "integer",
+      "description": "Tiles: the start has water and food this close",
+      "minimum": 5,
+      "maximum": 60,
+      "default": 20,
+      "example": "20"
+    }
+  },
+  "loaders": ["src/sim/region.cpp"]
+}

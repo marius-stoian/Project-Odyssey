@@ -1,0 +1,979 @@
+{
+  "title": "assets/data/sim/story.json",
+  "type": "object",
+  "properties": {
+    "season": {
+      "type": "object",
+      "description": "A failed harvest now and then gives the clan a hard winter to live through.",
+      "properties": {
+        "leanAutumnPercent": {
+          "type": "integer",
+          "description": "Chance each autumn that the harvest fails",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "leanForagePercent": {
+          "type": "integer",
+          "description": "The land then gives this share of its usual autumn food",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 45,
+          "example": "45"
+        }
+      }
+    },
+    "causes": {
+      "type": "object",
+      "description": "How far back an event looks for its causes, and how much of it a person remembers.",
+      "properties": {
+        "theftWindowDays": {
+          "type": "integer",
+          "description": "Thefts this recent are blamed for an empty store",
+          "minimum": 1,
+          "maximum": 3650,
+          "default": 20,
+          "example": "20"
+        },
+        "starvationWindowDays": {
+          "type": "integer",
+          "description": "An empty store this recent is blamed for a death by hunger",
+          "minimum": 1,
+          "maximum": 3650,
+          "default": 60,
+          "example": "60"
+        },
+        "maxCauses": {
+          "type": "integer",
+          "description": "An event lists at most this many causes",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 4,
+          "example": "4"
+        },
+        "grudgeLimit": {
+          "type": "integer",
+          "description": "A person holds at most this many grudges",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 16,
+          "example": "16"
+        }
+      }
+    },
+    "quarrel": {
+      "type": "object",
+      "description": "Every morning each person meets someone; people who dislike each other may quarrel.",
+      "properties": {
+        "grudgeMeetPercent": {
+          "type": "integer",
+          "description": "Chance that the one they meet is someone they hold a grudge against",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 40,
+          "example": "40"
+        },
+        "dislikeOpinion": {
+          "type": "integer",
+          "description": "Both must think this badly of each other or worse",
+          "minimum": -100,
+          "maximum": 100,
+          "default": -10,
+          "example": "-10"
+        },
+        "irritableBelow": {
+          "type": "integer",
+          "description": "Hunger or Energy below this makes a person short-tempered",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60,
+          "example": "60"
+        },
+        "irritablePercent": {
+          "type": "integer",
+          "description": "Chance of a quarrel when short-tempered",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 40,
+          "example": "40"
+        },
+        "calmPercent": {
+          "type": "integer",
+          "description": "Chance of a quarrel otherwise",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 6,
+          "example": "6"
+        },
+        "opinionLoss": {
+          "type": "integer",
+          "description": "Each thinks this much less of the other",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 12,
+          "example": "12"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "How badly each remembers it",
+          "minimum": -100,
+          "maximum": 0,
+          "default": -40,
+          "example": "-40"
+        }
+      }
+    },
+    "blame": {
+      "type": "object",
+      "description": "Grief looks for someone to blame.",
+      "properties": {
+        "opinionLoss": {
+          "type": "integer",
+          "description": "The griever thinks this much less of the one blamed",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 40,
+          "example": "40"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "A memory kept for life",
+          "minimum": -100,
+          "maximum": 0,
+          "default": -70,
+          "example": "-70"
+        }
+      }
+    },
+    "revenge": {
+      "type": "object",
+      "description": "A feud that keeps worsening ends in a fight, or the clan drives the aggressor out.",
+      "properties": {
+        "minFeudDays": {
+          "type": "integer",
+          "description": "A feud must be at least this old before it can end in revenge",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 10,
+          "example": "10"
+        },
+        "revengeOpinion": {
+          "type": "integer",
+          "description": "One side must think this badly of the other, or worse",
+          "minimum": -100,
+          "maximum": 0,
+          "default": -60,
+          "example": "-60"
+        },
+        "percentPerDay": {
+          "type": "integer",
+          "description": "Chance per day that revenge is taken",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 8,
+          "example": "8"
+        },
+        "cooldownDays": {
+          "type": "integer",
+          "description": "Days before the same feud can lead to revenge again",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 60,
+          "example": "60"
+        },
+        "exileClanOpinion": {
+          "type": "integer",
+          "description": "The clan exiles an aggressor it thinks this badly of (on average)",
+          "minimum": -100,
+          "maximum": 100,
+          "default": -25,
+          "example": "-25"
+        },
+        "fightDeathPercent": {
+          "type": "integer",
+          "description": "Chance the loser of a fight dies",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "winnerHurtPercent": {
+          "type": "integer",
+          "description": "Chance the winner is hurt too",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "satisfaction": {
+          "type": "integer",
+          "description": "The aggressor thinks better of the victim after taking revenge",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "victimOpinionLoss": {
+          "type": "integer",
+          "description": "The victim thinks worse of the aggressor",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "The victim's memory of the attack",
+          "minimum": -100,
+          "maximum": 0,
+          "default": -80,
+          "example": "-80"
+        }
+      }
+    },
+    "health": {
+      "type": "object",
+      "description": "Wounds and, later, sickness.",
+      "properties": {
+        "woundDaysMin": {
+          "type": "integer",
+          "description": "An injury lasts at least this many days",
+          "minimum": 1,
+          "maximum": 365,
+          "default": 5,
+          "example": "5"
+        },
+        "woundDaysMax": {"type": "integer", "description": "An injury lasts at most this many days", "default": 12, "example": "12"},
+        "woundDeathPerMille": {
+          "type": "integer",
+          "description": "Chance per day, in thousandths, that a wound kills",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 10,
+          "example": "10"
+        }
+      }
+    },
+    "sickness": {
+      "type": "object",
+      "description": "Sickness strikes the weak. Wounds are told under HealthStory.",
+      "properties": {
+        "basePerMille": {
+          "type": "integer",
+          "description": "Chance a day, in thousandths, that anyone falls sick",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 1,
+          "example": "1"
+        },
+        "hungerBelow": {
+          "type": "integer",
+          "description": "Hunger this low weakens a person",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "example": "25"
+        },
+        "hungerPerMille": {
+          "type": "integer",
+          "description": "Added chance a day, in thousandths, when Hunger is that low",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 25,
+          "example": "25"
+        },
+        "coldBelow": {
+          "type": "integer",
+          "description": "Warmth this low weakens a person",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "example": "25"
+        },
+        "coldPerMille": {
+          "type": "integer",
+          "description": "Added chance in thousandths when Warmth is that low",
+          "minimum": 0,
+          "maximum": 1000,
+          "example": "25"
+        },
+        "daysMin": {
+          "type": "integer",
+          "description": "A sickness lasts at least this many days",
+          "minimum": 1,
+          "maximum": 365,
+          "default": 3,
+          "example": "3"
+        },
+        "daysMax": {"type": "integer", "description": "A sickness lasts at most this many days", "default": 9, "example": "9"},
+        "deathPerMille": {
+          "type": "integer",
+          "description": "Chance a day that a sickness kills",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 12,
+          "example": "12"
+        },
+        "huntWoundPerMille": {
+          "type": "integer",
+          "description": "Chance per hour of hunting that a hunter is hurt",
+          "minimum": 0,
+          "maximum": 1000,
+          "default": 1,
+          "example": "1"
+        }
+      }
+    },
+    "nursing": {
+      "type": "object",
+      "description": "A kind or close person nurses the sick and hurt.",
+      "properties": {
+        "minScore": {
+          "type": "integer",
+          "description": "Opinion + bonuses a carer needs to come forward",
+          "minimum": -100,
+          "maximum": 300,
+          "default": 30,
+          "example": "30"
+        },
+        "kinBonus": {
+          "type": "integer",
+          "description": "Bonus for a partner, parent, child, sibling or guardian",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 40,
+          "example": "40"
+        },
+        "kindBonus": {
+          "type": "integer",
+          "description": "Bonus for a carer who is Kind",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 30,
+          "example": "30"
+        },
+        "percent": {
+          "type": "integer",
+          "description": "Chance a day that the best carer comes",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80,
+          "example": "80"
+        },
+        "extraHealPerDay": {
+          "type": "integer",
+          "description": "A nursed patient mends this many days faster each day",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 1,
+          "example": "1"
+        },
+        "deathPercentWhenNursed": {
+          "type": "integer",
+          "description": "The death chance is only this share of the usual one",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 40,
+          "example": "40"
+        },
+        "opinionGain": {
+          "type": "integer",
+          "description": "The patient thinks this much better of the carer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "carerOpinionGain": {
+          "type": "integer",
+          "description": "The carer thinks this much better of the patient",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 5,
+          "example": "5"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "The patient's memory of it: gratitude",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60,
+          "example": "60"
+        }
+      }
+    },
+    "sharing": {
+      "type": "object",
+      "description": "Sharing food in a famine.",
+      "properties": {
+        "giverHungerMin": {
+          "type": "integer",
+          "description": "Only someone at least this well fed can spare food",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 40,
+          "example": "40"
+        },
+        "gapMin": {
+          "type": "integer",
+          "description": "Food is given only to someone at least this much hungrier",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "receiverHungerMax": {
+          "type": "integer",
+          "description": "Only someone this hungry is helped",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 35,
+          "example": "35"
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Hunger moved from giver to receiver",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 15,
+          "example": "15"
+        },
+        "repeatDays": {
+          "type": "integer",
+          "description": "The same giver feeding the same person again within this many days is not news",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 30,
+          "example": "30"
+        },
+        "minScore": {
+          "type": "integer",
+          "description": "Opinion + bonuses a giver needs",
+          "minimum": -100,
+          "maximum": 300,
+          "default": 20,
+          "example": "20"
+        },
+        "kinBonus": {
+          "type": "integer",
+          "description": "Bonus for a partner, parent, child, sibling or guardian",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 40,
+          "example": "30"
+        },
+        "kindBonus": {
+          "type": "integer",
+          "description": "Bonus for a giver who is Kind",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 30,
+          "example": "20"
+        },
+        "childBonus": {
+          "type": "integer",
+          "description": "Bonus for giving to a child who cannot work yet",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 30,
+          "example": "30"
+        },
+        "opinionGain": {
+          "type": "integer",
+          "description": "The one who is fed thinks this much better of the giver",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "15"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "The memory of being fed: gratitude",
+          "minimum": 0,
+          "maximum": 100,
+          "default": -40,
+          "example": "50"
+        }
+      }
+    },
+    "adoption": {
+      "type": "object",
+      "description": "Orphans are taken in.",
+      "properties": {
+        "minScore": {
+          "type": "integer",
+          "description": "Opinion + bonuses an adopter needs",
+          "minimum": -100,
+          "maximum": 300,
+          "default": 20,
+          "example": "20"
+        },
+        "kinBonus": {
+          "type": "integer",
+          "description": "Bonus for a brother or sister",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 50,
+          "example": "50"
+        },
+        "kindBonus": {
+          "type": "integer",
+          "description": "A Kind carer",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 30,
+          "example": "20"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Children a person takes in at most",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 2,
+          "example": "2"
+        },
+        "opinionGain": {
+          "type": "integer",
+          "description": "The child and the adopter think this much better of each other",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "The child's memory of being taken in",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80,
+          "example": "80"
+        }
+      }
+    },
+    "courtship": {
+      "type": "object",
+      "description": "An unpaired adult courts the one they like best.",
+      "properties": {
+        "favourOpinion": {
+          "type": "integer",
+          "description": "They court someone they like at least this much",
+          "minimum": -100,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "opinionPerDay": {
+          "type": "integer",
+          "description": "Gifts and time together: the loved one thinks this much better of the suitor each day",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 2,
+          "example": "2"
+        },
+        "suitorOpinionPerDay": {
+          "type": "integer",
+          "description": "The suitor thinks this much better of the loved one each day",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 1,
+          "example": "1"
+        },
+        "rejectBelow": {
+          "type": "integer",
+          "description": "A loved one who thinks worse of the suitor than this turns them down at once",
+          "minimum": -100,
+          "maximum": 100,
+          "default": 0,
+          "example": "0"
+        },
+        "giveUpDays": {
+          "type": "integer",
+          "description": "A suitor who has not won them by now gives up",
+          "minimum": 1,
+          "maximum": 3650,
+          "default": 40,
+          "example": "40"
+        },
+        "rejectionOpinionLoss": {
+          "type": "integer",
+          "description": "The turned-down suitor thinks this much less of the loved one",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 15,
+          "example": "15"
+        },
+        "rejectionFeeling": {
+          "type": "integer",
+          "description": "How badly the turned-down suitor remembers it",
+          "minimum": -100,
+          "maximum": 0,
+          "default": -50,
+          "example": "-50"
+        },
+        "pauseDays": {
+          "type": "integer",
+          "description": "A broken heart waits this long before courting again",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 30,
+          "example": "30"
+        }
+      }
+    },
+    "rivals": {
+      "type": "object",
+      "description": "The suitors who lose.",
+      "properties": {
+        "minCourtDays": {
+          "type": "integer",
+          "description": "A suitor who has courted this long is hurt when another wins",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 2,
+          "example": "2"
+        },
+        "opinionLoss": {
+          "type": "integer",
+          "description": "A passed-over suitor thinks this much worse of the winner",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "example": "25"
+        },
+        "feeling": {
+          "type": "integer",
+          "description": "How badly a passed-over suitor remembers it for life",
+          "minimum": -100,
+          "maximum": 0,
+          "default": -60,
+          "example": "-60"
+        },
+        "quarrelPercent": {
+          "type": "integer",
+          "description": "Chance that rival and winner quarrel at once",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50,
+          "example": "50"
+        },
+        "pauseDays": {
+          "type": "integer",
+          "description": "A broken heart waits this long before courting again",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 30,
+          "example": "30"
+        }
+      }
+    },
+    "parting": {
+      "type": "object",
+      "description": "Partners fall out of love.",
+      "properties": {
+        "partingOpinion": {
+          "type": "integer",
+          "description": "A partner who thinks less than this of the other leaves",
+          "minimum": -100,
+          "maximum": 100,
+          "default": -20,
+          "example": "-20"
+        },
+        "pauseDays": {
+          "type": "integer",
+          "description": "Both wait this long before courting again",
+          "minimum": 0,
+          "maximum": 3650,
+          "default": 30,
+          "example": "30"
+        }
+      }
+    },
+    "teaching": {
+      "type": "object",
+      "description": "Masters teach youths.",
+      "properties": {
+        "masterMinSkill": {
+          "type": "integer",
+          "description": "A master knows at least this much",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "skillGap": {
+          "type": "integer",
+          "description": "The master is at least this many points better than the youth",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 15,
+          "example": "15"
+        },
+        "takePercent": {
+          "type": "integer",
+          "description": "Chance a day that a master takes an apprentice",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "minOpinion": {
+          "type": "integer",
+          "description": "Master and youth think at least this well of each other",
+          "minimum": -100,
+          "maximum": 100,
+          "default": -10,
+          "example": "-10"
+        },
+        "kinBonus": {
+          "type": "integer",
+          "description": "A relative is likelier to be taught",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 40,
+          "example": "40"
+        },
+        "youthMaxYears": {
+          "type": "integer",
+          "description": "Youths from the working age (actions.json) up to this age are taught",
+          "minimum": 1,
+          "maximum": 40,
+          "default": 15,
+          "example": "15"
+        },
+        "skillPerDay": {
+          "type": "integer",
+          "description": "The apprentice's skill grows this much a day",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 1,
+          "example": "1"
+        },
+        "opinionPerDay": {
+          "type": "integer",
+          "description": "Master and apprentice think this much better of each other each day",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 2,
+          "example": "2"
+        },
+        "graduateGap": {
+          "type": "integer",
+          "description": "Graduation: within this many points of the master",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 5,
+          "example": "5"
+        }
+      }
+    },
+    "hunt": {
+      "type": "object",
+      "description": "Hunting parties, roles, danger and rescue.",
+      "properties": {
+        "minSize": {
+          "type": "integer",
+          "description": "Fewer hunters than this and the sighter hunts alone",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 3,
+          "example": "3"
+        },
+        "maxSize": {"type": "integer", "description": "The most hunters in one party", "example": "5"},
+        "joinPercent": {
+          "type": "integer",
+          "description": "Chance a hunter joins a party",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 70,
+          "example": "70"
+        },
+        "braveJoinBonus": {
+          "type": "integer",
+          "description": "Added to the join chance for a Brave hunter",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20,
+          "example": "20"
+        },
+        "timidJoinPenalty": {
+          "type": "integer",
+          "description": "Taken from the join chance for a Timid hunter",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30,
+          "example": "30"
+        },
+        "successBase": {
+          "type": "integer",
+          "description": "Percent chance of success before the party's strength is added",
+          "minimum": -1000,
+          "maximum": 1000,
+          "default": 20,
+          "example": "20"
+        },
+        "leaderBonus": {
+          "type": "integer",
+          "description": "Success gained from a leader on the hunt, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "10"
+        },
+        "heroBonus": {
+          "type": "integer",
+          "description": "Success gained from the hero on the hunt, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "15"
+        },
+        "cowardPenalty": {
+          "type": "integer",
+          "description": "Success lost to a coward on the hunt, in percent",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "15"
+        },
+        "heroCourage": {
+          "type": "integer",
+          "description": "The most courageous is the hero if at least this",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 55,
+          "example": "55"
+        },
+        "cowardCourage": {
+          "type": "integer",
+          "description": "The least courageous is the coward if at most this",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 30,
+          "example": "30"
+        },
+        "dangerPercent": {
+          "type": "integer",
+          "description": "Chance a member (not the coward) is in danger",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "example": "25"
+        },
+        "rescuePercent": {
+          "type": "integer",
+          "description": "Chance the best rescuer saves a member in danger",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 70,
+          "example": "70"
+        },
+        "braveRescueBonus": {
+          "type": "integer",
+          "description": "Added to the rescue chance for a Brave rescuer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 15,
+          "example": "15"
+        },
+        "rescuerHurtPercent": {
+          "type": "integer",
+          "description": "Chance in percent that a rescuer is hurt",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "30"
+        },
+        "dangerDeathPercent": {
+          "type": "integer",
+          "description": "An unsaved member dies with this chance, else is hurt",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60,
+          "example": "60"
+        },
+        "heroFeeling": {
+          "type": "integer",
+          "description": "How warmly the others feel about the hero of the hunt",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60,
+          "example": "60"
+        },
+        "heroOpinion": {
+          "type": "integer",
+          "description": "Opinion gained by a hero of the hunt",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "10"
+        },
+        "cowardFeeling": {
+          "type": "integer",
+          "description": "How badly others remember a coward",
+          "minimum": -100,
+          "maximum": 0,
+          "example": "-50"
+        },
+        "cowardOpinionLoss": {"type": "integer", "description": "Opinion lost for a coward", "minimum": 0, "maximum": 100, "example": "15"},
+        "rescueFeeling": {
+          "type": "integer",
+          "description": "The rescued one's gratitude",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 90,
+          "example": "90"
+        },
+        "rescueOpinion": {
+          "type": "integer",
+          "description": "Opinion gained by a rescuer",
+          "minimum": 0,
+          "maximum": 100,
+          "example": "40"
+        }
+      }
+    },
+    "episodes": {
+      "type": "object",
+      "description": "How the chronicle is told as episodes.",
+      "properties": {
+        "minEvents": {
+          "type": "integer",
+          "description": "An episode links at least this many events",
+          "minimum": 2,
+          "maximum": 100,
+          "default": 3,
+          "example": "3"
+        },
+        "minImportance": {
+          "type": "integer",
+          "description": "At least one event of an episode must be this important",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 60,
+          "example": "60"
+        },
+        "minEventImportance": {
+          "type": "integer",
+          "description": "Smaller events (gifts) are not part of any episode",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 25,
+          "example": "25"
+        },
+        "maxPerCentury": {
+          "type": "integer",
+          "description": "The best this many episodes per hundred years are told",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 40,
+          "example": "40"
+        },
+        "maxPeople": {
+          "type": "integer",
+          "description": "People named in an episode",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 4,
+          "example": "4"
+        }
+      }
+    }
+  },
+  "loaders": ["src/sim/story.cpp"]
+}

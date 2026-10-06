@@ -1,0 +1,78 @@
+{
+  "title": "assets/data/buildings/pieces.json",
+  "type": "object",
+  "properties": {
+    "materials": {
+      "type": "object",
+      "description": "How each material burns: flammability and burn seconds",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One entry, named by its key",
+        "properties": {
+          "flammability": {
+            "type": "number",
+            "description": "Percent chance per second that a burning neighbour sets it alight",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0,
+            "example": "60"
+          },
+          "burnSeconds": {
+            "type": "number",
+            "description": "How long a piece of it burns before it falls to rubble",
+            "minimum": 0,
+            "maximum": 100000,
+            "default": 0,
+            "example": "30"
+          }
+        }
+      }
+    },
+    "maxRoomCells": {
+      "type": "number",
+      "description": "The largest room, in cells, that still counts as one room",
+      "minimum": 1,
+      "maximum": 1024,
+      "example": "64"
+    },
+    "pieces": {
+      "type": "array",
+      "description": "Every wall, door, floor and roof piece a building is made of",
+      "items": {
+        "type": "object",
+        "description": "One entry of pieces",
+        "properties": {
+          "id": {"type": "string", "description": "One word: the name of the piece", "example": "floor-straw"},
+          "label": {"type": "string", "description": "The name shown in the Prefab tab", "example": "Straw floor"},
+          "type": {"type": "string", "description": "wall, door, floor or roof", "example": "floor"},
+          "material": {
+            "type": "string",
+            "description": "How it burns: a material of the materials table of this file",
+            "example": "straw"
+          },
+          "hp": {
+            "type": "number",
+            "description": "Hit points of the piece before it breaks",
+            "minimum": 1,
+            "maximum": 100000,
+            "example": "30"
+          },
+          "buildSeconds": {"type": "integer", "description": "Seconds of work to build one piece", "example": "1"},
+          "cost": {
+            "type": "object",
+            "description": "What one piece costs (item: count)",
+            "additionalProperties": {"type": "integer", "description": "One entry, named by its key", "example": "1"}
+          },
+          "colour": {
+            "type": "string",
+            "description": "The colour of its placeholder art: # and six hex digits",
+            "example": "#b9a35a"
+          },
+          "height": {"type": "number", "description": "Height in metres, for shadows and for walking behind", "example": "0"}
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "building-pieces", "at": "pieces[].id"}],
+  "loaders": ["src/sim/building_data.cpp"]
+}

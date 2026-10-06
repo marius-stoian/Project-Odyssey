@@ -1,0 +1,93 @@
+{
+  "title": "assets/data/sim/social.json",
+  "type": "object",
+  "properties": {
+    "giftFeeling": {
+      "type": "integer",
+      "description": "How warmly a gift is remembered",
+      "minimum": 0,
+      "maximum": 100,
+      "example": "40"
+    },
+    "giftOpinion": {
+      "type": "integer",
+      "description": "How much a gift raises the receiver's opinion of the giver",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 15,
+      "example": "15"
+    },
+    "theftFeeling": {
+      "type": "integer",
+      "description": "How badly a theft is remembered",
+      "minimum": -100,
+      "maximum": 0,
+      "example": "-60"
+    },
+    "theftOpinion": {"type": "integer", "description": "Opinion lost for a theft", "minimum": -100, "maximum": 0, "example": "-25"},
+    "theftMeals": {
+      "type": "integer",
+      "description": "Meals a thief takes from the store",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 2,
+      "example": "2"
+    },
+    "witnessPercent": {
+      "type": "integer",
+      "description": "Chance someone sees a theft",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50,
+      "example": "50"
+    },
+    "theftCooldownDays": {
+      "type": "integer",
+      "description": "A thief waits this long before stealing again",
+      "minimum": 1,
+      "maximum": 365,
+      "default": 5,
+      "example": "5"
+    },
+    "talkOpinion": {
+      "type": "integer",
+      "description": "A good talk warms two people to each other",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 2,
+      "example": "2"
+    },
+    "gossipPercent": {
+      "type": "integer",
+      "description": "Chance a talk passes on one memory",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50,
+      "example": "50"
+    },
+    "talkativeGossipPercent": {
+      "type": "integer",
+      "description": "Chance in percent that a talkative person passes a story on",
+      "minimum": 0,
+      "maximum": 100,
+      "example": "80"
+    },
+    "minorMemoryDays": {
+      "type": "integer",
+      "description": "Minor memories are forgotten after this many days",
+      "minimum": 1,
+      "maximum": 10000,
+      "default": 60,
+      "example": "60"
+    },
+    "memoryLimit": {
+      "type": "integer",
+      "description": "A person keeps at most this many memories",
+      "minimum": 1,
+      "maximum": 1000,
+      "default": 40,
+      "example": "40"
+    }
+  },
+  "loaders": ["src/sim/memory.cpp"]
+}

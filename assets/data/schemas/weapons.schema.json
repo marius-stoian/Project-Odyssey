@@ -1,0 +1,301 @@
+{
+  "title": "assets/data/weapons.json",
+  "type": "object",
+  "properties": {
+    "classes": {
+      "type": "object",
+      "description": "How fast each shooting class launches its shots",
+      "properties": {
+        "bow": {
+          "type": "object",
+          "description": "Bows and crossbows",
+          "properties": {
+            "launchSpeed": {
+              "type": "number",
+              "description": "How fast shots of bows and crossbows leave, in metres per second",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 0,
+              "example": "16"
+            }
+          }
+        },
+        "thrown": {
+          "type": "object",
+          "description": "Thrown weapons",
+          "properties": {
+            "launchSpeed": {
+              "type": "number",
+              "description": "How fast shots of thrown weapons leave, in metres per second",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 0,
+              "example": "10"
+            }
+          }
+        },
+        "staff": {
+          "type": "object",
+          "description": "Staffs",
+          "properties": {
+            "launchSpeed": {
+              "type": "number",
+              "description": "How fast shots of staffs leave, in metres per second",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 0,
+              "example": "12"
+            }
+          }
+        },
+        "gun": {
+          "type": "object",
+          "description": "Guns",
+          "properties": {
+            "launchSpeed": {
+              "type": "number",
+              "description": "How fast shots of guns leave, in metres per second",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 0,
+              "example": "24"
+            }
+          }
+        }
+      }
+    },
+    "elements": {
+      "type": "object",
+      "description": "What each element does to what it hits",
+      "properties": {
+        "fire": {
+          "type": "object",
+          "description": "Fire burns: damage every second for a while",
+          "properties": {
+            "perSecond": {
+              "type": "number",
+              "description": "Hit points lost every second while it burns",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 0,
+              "example": "2"
+            },
+            "seconds": {
+              "type": "number",
+              "description": "How long the burning lasts, in seconds",
+              "minimum": 0,
+              "maximum": 600,
+              "default": 0,
+              "example": "3"
+            },
+            "effect": {
+              "type": "string",
+              "description": "The effect shown on the target while it burns",
+              "example": "ember",
+              "ref": "catalog:effects"
+            },
+            "hitEffect": {
+              "type": "string",
+              "description": "The effect shown at the moment of the hit",
+              "example": "fire wisp",
+              "ref": "catalog:effects"
+            }
+          }
+        },
+        "ice": {
+          "type": "object",
+          "description": "Ice slows what it hits for a while",
+          "properties": {
+            "slowTo": {
+              "type": "number",
+              "description": "The speed that is left: 0.5 is half speed",
+              "minimum": 0.05,
+              "maximum": 1,
+              "default": 1,
+              "example": "0.5"
+            },
+            "seconds": {
+              "type": "number",
+              "description": "How long the slowing lasts, in seconds",
+              "minimum": 0,
+              "maximum": 600,
+              "default": 0,
+              "example": "2"
+            },
+            "effect": {
+              "type": "string",
+              "description": "The effect shown on the target while it is slowed",
+              "example": "ice shards",
+              "ref": "catalog:effects"
+            },
+            "hitEffect": {
+              "type": "string",
+              "description": "The effect shown at the moment of the hit",
+              "example": "frost nova",
+              "ref": "catalog:effects"
+            }
+          }
+        },
+        "lightning": {
+          "type": "object",
+          "description": "Lightning jumps from the target to others near it",
+          "properties": {
+            "chainMetres": {
+              "type": "number",
+              "description": "How far the lightning jumps, in metres",
+              "minimum": 0,
+              "maximum": 50,
+              "default": 0,
+              "example": "3"
+            },
+            "chainFraction": {
+              "type": "number",
+              "description": "The jump does this part of the damage",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 0,
+              "example": "0.5"
+            },
+            "hitEffect": {
+              "type": "string",
+              "description": "The effect shown at the target it jumps to",
+              "example": "chain lightning",
+              "ref": "catalog:effects"
+            }
+          }
+        },
+        "poison": {
+          "type": "object",
+          "description": "Poison drips damage every second for a while",
+          "properties": {
+            "perSecond": {
+              "type": "number",
+              "description": "Hit points lost every second while poisoned",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 0,
+              "example": "1"
+            },
+            "seconds": {
+              "type": "number",
+              "description": "How long the poison lasts, in seconds",
+              "minimum": 0,
+              "maximum": 600,
+              "default": 0,
+              "example": "5"
+            },
+            "effect": {
+              "type": "string",
+              "description": "The effect shown on the target while poisoned",
+              "example": "poison drip",
+              "ref": "catalog:effects"
+            },
+            "hitEffect": {
+              "type": "string",
+              "description": "The effect shown at the moment of the hit",
+              "example": "poison splash",
+              "ref": "catalog:effects"
+            }
+          }
+        },
+        "void": {
+          "type": "object",
+          "description": "Void drains: part of the damage heals the one who struck",
+          "properties": {
+            "drainFraction": {
+              "type": "number",
+              "description": "This part of the damage heals the one who struck",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0,
+              "example": "0.25"
+            },
+            "effect": {
+              "type": "string",
+              "description": "The effect shown on the target",
+              "example": "void orb",
+              "ref": "catalog:effects"
+            },
+            "hitEffect": {
+              "type": "string",
+              "description": "The effect shown at the moment of the hit",
+              "example": "life steal",
+              "ref": "catalog:effects"
+            },
+            "healEffect": {
+              "type": "string",
+              "description": "The effect shown on the hero when healed",
+              "example": "healing glow",
+              "ref": "catalog:effects"
+            }
+          }
+        }
+      }
+    },
+    "weapons": {
+      "type": "array",
+      "description": "Every weapon kind",
+      "items": {
+        "type": "object",
+        "description": "One entry of weapons",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the weapon; levels, the hotbar and rules use it",
+            "example": "iron sword"
+          },
+          "frame": {
+            "type": "string",
+            "description": "The picture of the content atlas this uses (a frame name)",
+            "example": "iron sword",
+            "format": "frame"
+          },
+          "class": {
+            "type": "string",
+            "description": "What it is: sword, axe, spear, bow, thrown, whip, staff or gun",
+            "example": "sword",
+            "enum": ["sword", "axe", "spear", "bow", "thrown", "whip", "staff", "gun"]
+          },
+          "element": {
+            "type": "string",
+            "description": "The element it carries: none, fire, ice, lightning, poison or void (see elements)",
+            "example": "none",
+            "enum": ["none", "fire", "ice", "lightning", "poison", "void"]
+          },
+          "era": {
+            "type": "string",
+            "description": "fantasy, or future for guns and energy weapons of later Ages",
+            "example": "fantasy",
+            "enum": ["fantasy", "future"]
+          },
+          "starter": {"type": "boolean", "description": "true: the hero may start with it", "default": false},
+          "damage": {"type": "integer", "description": "Damage of one hit", "minimum": 0, "maximum": 1000, "example": "5"},
+          "speed": {
+            "type": "number",
+            "description": "Attacks per second",
+            "minimum": 0.1,
+            "maximum": 20,
+            "default": 1,
+            "example": "2.0"
+          },
+          "range": {
+            "type": "number",
+            "description": "How far it reaches, in metres",
+            "minimum": 0.5,
+            "maximum": 50,
+            "default": 1.5,
+            "example": "1.5"
+          },
+          "light": {
+            "type": "string",
+            "description": "A kind of light of lights.json the weapon gives while it is held",
+            "ref": "catalog:lights"
+          }
+        }
+      }
+    }
+  },
+  "provides": [{"catalog": "weapons", "at": "weapons[].name"}, {"catalog": "tags", "at": "weapons[].tags[]"}],
+  "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp", "src/game/level.cpp#loadDefinitions"],
+  "externalFields": ["fire", "ice", "lightning", "poison", "void"]
+}

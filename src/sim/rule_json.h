@@ -18,6 +18,11 @@ struct Diagnostic {
     std::string text() const;
 };
 
+// What the schema of a data file (US-190) finds wrong in it: type, range and choice mistakes, as diagnostics with the line of the field. `name` is the file as
+// the owner knows it below assets/data ("interactions/gather.json"). Empty when no schemas are installed or the file has none. Warnings (an unknown field) are
+// left to the loader, which reads its own fields and says so itself.
+std::vector<Diagnostic> schemaDiagnostics(const std::string& name, std::string_view text);
+
 // A small JSON reader for the rule files. It does what nlohmann cannot: it remembers the line of every
 // value, so an error can say "gather.json:12". It also accepts // and /* */ comments, so the owner can
 // explain things inside the files. Numbers keep the text they were written with (no floating point).
