@@ -1357,6 +1357,9 @@ bool OdysseyGame::loadAutosave() {
             life_.reset();
             chooseRules(pickedRules_);
             life_ = std::make_unique<sim::HeroLife>(sim::HeroLife::load(*heroData_, *clan_, saveDirectory_ / "hero.json"));
+            // The clan's rules of the run (its Comfort level and the routines of the professions) come from the hero's data, as when the run began (US-196).
+            sim::SimConfig runConfig = sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), life_->game().comfort);
+            if (clan_->configProblem(runConfig).empty()) clan_->replaceConfig(std::move(runConfig));
             watchHeroItems();
             clanView_.setHidden(life_->personId());
             clanView_.update(*clan_, map_);

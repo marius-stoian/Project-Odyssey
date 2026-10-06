@@ -9,6 +9,7 @@
 #include "clan.h"
 #include "life.h"
 #include "needs.h"
+#include "npc_schedule.h"
 #include "person.h"
 #include "story.h"
 
@@ -32,6 +33,9 @@ struct SimConfig {
     SocialConfig social;
     LifeConfig life;
     StoryConfig story;
+    // The routines of the professions (US-196), by profession id, given by the hero's data (`configForComfort`): a clan member's profession is worked out from their skills
+    // (`professionOf`) and the active block of that routine weighs the actions they may choose. Empty: nobody has a routine, and nothing changes.
+    std::map<std::string, rules::Schedule> routines;
 };
 
 SimConfig loadSimConfig(const std::filesystem::path& dataDirectory);
@@ -174,6 +178,8 @@ private:
     void doAction(Person& person);
     void eatTogether();
     void decideAll(int nextHour);
+    std::string professionOf(const Person& person) const; // "hunter", "gatherer", or "" for a child (US-196)
+    void routineOf(const Person& person, Situation& situation) const;
     void practise(int& practice, int& skill);
     void changeOpinion(Person& who, int about, int change);
     Person* favouriteAwake(const Person& person, bool courting = false);

@@ -7,6 +7,8 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
+#include <string>
+#include <vector>
 
 namespace odysseus::sim {
 
@@ -17,6 +19,10 @@ enum class Action { Gather, Hunt, Sleep, WarmByFire, Talk, GiveGift, Steal, Rest
 inline constexpr std::size_t kActionCount = static_cast<std::size_t>(Action::Count);
 
 const char* actionName(Action action);
+
+// The tags a routine's `prefer` weights can name (US-196): the action's own word ("gather", "hunt", "sleep", "warm", "talk", "gift", "steal", "rest", "wander") and "work"
+// for the two that fill the store.
+std::vector<std::string> actionTags(Action action);
 
 // From assets/data/sim/actions.json: when people may do what, how much each hour of it
 // brings, and the weights of the scores. All whole numbers (Charter rule 6).
@@ -45,6 +51,7 @@ struct ActionConfig {
     int storePressureWeight = 1; // how much a low store pushes people to work
     int traitBonus = 30;         // Brave hunts, Diligent works, Talkative talks...
     int skillPerHours = 8;       // one skill point per this many hours of practice
+    int routineDangerBelow = 20; // US-196: a need under this is in danger, and the weights of a routine are left aside until it is met (the needs win)
 };
 
 ActionConfig loadActionConfig(const std::filesystem::path& file);

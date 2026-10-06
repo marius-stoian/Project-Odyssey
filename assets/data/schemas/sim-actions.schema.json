@@ -188,6 +188,14 @@
       "maximum": 1000,
       "default": 8,
       "example": "8"
+    },
+    "routineDangerBelow": {
+      "type": "integer",
+      "description": "A need below this is in danger: the weights of a profession's routine are left aside until it is met, so the needs win",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 20,
+      "example": "20"
     }
   },
   "loaders": ["src/sim/actions.cpp"]

@@ -60,6 +60,10 @@ const std::vector<std::string>& tradeFieldNames();
 std::string tradeFieldText(const TradeProfile& trade, const std::string& field);
 bool setTradeField(TradeProfile& trade, const std::string& field, std::string_view text, std::string& problem);
 
+// A schedule from the text of its JSON, { "day": [...], "night": [...] } or a list of day blocks: the one reader of the format, used by the class, kind and NPC files and
+// by the professions of hero/professions.json (US-196: a routine is a schedule). Mistakes are added to `problems` as "message" (the lines are those of `jsonText`).
+Schedule scheduleFromJson(std::string_view jsonText, std::vector<std::string>& problems);
+
 // The Editor's text fields of a schedule (US-290): "day" and "night", each "06:00 work market; 21:00 sleep home". Empty text clears the list. A mistake changes nothing.
 const std::vector<std::string>& scheduleFieldNames();
 std::string scheduleFieldText(const Schedule& schedule, const std::string& field);

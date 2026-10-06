@@ -306,6 +306,7 @@ add_library(odysseus_game STATIC
     src/game/dialogue_graph.cpp
     src/game/graph_editor.cpp
     src/game/data_editor.cpp
+    src/game/timeline_view.cpp
     src/game/interaction_graph.cpp)
 target_link_libraries(odysseus_game PUBLIC luna_engine odysseus_sim)
 # PUBLIC since the Data tab (US-191): the Editor's header holds a data document, which is JSON, so the programs that include the Editor need the library's headers.
@@ -592,7 +593,8 @@ add_executable(odysseus_sim_tests
     tests/sim/data_form_test.cpp
     tests/sim/data_refs_test.cpp
     tests/sim/quick_check_test.cpp
-    tests/sim/play_rules_test.cpp)
+    tests/sim/play_rules_test.cpp
+    tests/sim/routine_test.cpp)
 target_link_libraries(odysseus_sim_tests PRIVATE odysseus_sim doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_sim_tests PRIVATE ODYSSEUS_LAYER_SIM ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}")
 odysseus_apply_settings(odysseus_sim_tests)

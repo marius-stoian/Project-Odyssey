@@ -1,7 +1,9 @@
 {
   "professions": [
-    { "id": "hunter", "name": "Hunter", "skill": "hunting", "tools": ["spear"], "actions": ["hunt"], "pillar": "trade" },
-    { "id": "gatherer", "name": "Gatherer", "skill": "gathering", "tools": ["basket"], "actions": ["gather", "chop"], "pillar": "trade" },
+    { "id": "hunter", "name": "Hunter", "skill": "hunting", "tools": ["spear"], "actions": ["hunt"], "pillar": "trade",
+      "day": [ { "from": "06:00", "do": "work", "prefer": { "hunt": 200 } }, { "from": "14:00", "do": "rest", "prefer": { "rest": 150, "talk": 150 } }, { "from": "21:00", "do": "sleep" } ] },
+    { "id": "gatherer", "name": "Gatherer", "skill": "gathering", "tools": ["basket"], "actions": ["gather", "chop"], "pillar": "trade",
+      "day": [ { "from": "06:00", "do": "work", "prefer": { "gather": 200 } }, { "from": "14:00", "do": "rest", "prefer": { "rest": 150, "talk": 150 } }, { "from": "21:00", "do": "sleep" } ] },
     { "id": "flint-knapper", "name": "Flint-knapper", "skill": "knapping", "tools": ["hammerstone"], "actions": ["knap", "craft"], "pillar": "trade" },
     { "id": "fire-keeper", "name": "Fire-keeper", "skill": "fire-keeping", "tools": ["fire-drill"], "actions": ["tend", "cook"], "pillar": "religion" },
     { "id": "shaman-healer", "name": "Shaman-healer", "skill": "healing", "tools": ["medicine-bag"], "actions": ["heal", "ritual"], "pillar": "religion" }

@@ -2,6 +2,9 @@
 #include "core/text.h"
 #include "game/data_editor.h"
 #include "game/editor_help.h"
+#include "game/timeline_view.h"
+#include "sim/hero_data.h"
+#include "sim/npc_class.h"
 #include "luna/engine/image_io.h"
 #include "luna/engine/ui.h"
 #include "sim/schema.h"
@@ -590,4 +593,117 @@ TEST_CASE("US-195 The Game Rules page: a rules file shows as forms with a one-li
     luna_ui::UiPainter painter(renderer, sheet);
     painter.setScreen({0, 0, 960, 540});
     rig.editor.draw(painter);
+}
+
+// ---- US-196: the timeline of a routine
+
+namespace {
+
+luna_ui::Intents pointerAt(int x, int y, bool pressed, bool held, bool released) {
+    luna_ui::Intents intents;
+    luna_ui::Pointer pointer;
+    pointer.x = x;
+    pointer.y = y;
+    pointer.pressed[0] = pressed;
+    pointer.held[0] = held;
+    pointer.released[0] = released;
+    intents.setPointer(pointer);
+    return intents;
+}
+
+const game::TimelineView* timelineIn(const luna_ui::Panel& panel, const std::string& title) {
+    for (const auto& child : panel.children()) {
+        const auto* view = dynamic_cast<const game::TimelineView*>(child.get());
+        if (view != nullptr && view->bounds.width > 0 && view->title() == title) return view;
+    }
+    return nullptr;
+}
+
+} // namespace
+
+TEST_CASE("US-196 The timeline moves a block only in steps and never past a neighbour") {
+    const std::vector<game::TimelineView::Block> blocks{{6 * 60, "work", "home"}, {14 * 60, "rest", "home"}, {21 * 60, "sleep", "home"}};
+    CHECK(game::TimelineView::clampedStart(blocks, 1, 12 * 60 + 5) == 12 * 60);          // snapped to a quarter of an hour
+    CHECK(game::TimelineView::clampedStart(blocks, 1, 5 * 60) == 6 * 60 + 15);           // not before the block it follows
+    CHECK(game::TimelineView::clampedStart(blocks, 1, 23 * 60) == 21 * 60 - 15);         // not after the block that follows it
+    CHECK(game::TimelineView::clampedStart(blocks, 0, -50) == 0);                        // the first one may reach the start of the day
+    CHECK(game::TimelineView::clampedStart(blocks, 2, 24 * 60 + 60) == 24 * 60 - 15);    // the last one stays in the day
+    CHECK(game::TimelineView::minuteAt(game::TimelineView::pixelOf(14 * 60, 960), 960) == 14 * 60);
+}
+
+TEST_CASE("US-196 Edit: dragging a block of the hunters' routine saves the schedule in its own format, and the form shows the same change") {
+    Rig rig;
+    REQUIRE(rig.editor.open("hero/professions.json"));
+    REQUIRE(rig.editor.selectEntry("professions[0]")); // the hunter, work from 06:00
+    luna_ui::Intents idle;
+    rig.editor.update(idle);
+    const game::TimelineView* bar = timelineIn(rig.editor.panel(), "day");
+    REQUIRE(bar != nullptr);
+    REQUIRE(bar->blocks().size() == 3);
+    CHECK(bar->blocks()[1].minute == 14 * 60);
+    // Take the start of the second block (14:00) and drop it at 12:00.
+    const int width = bar->bounds.width;
+    const int y = bar->bounds.y + 14;
+    const int barLeft = bar->bounds.x;
+    const int from = barLeft + game::TimelineView::pixelOf(14 * 60, width);
+    const int to = barLeft + game::TimelineView::pixelOf(12 * 60, width);
+    rig.editor.update(pointerAt(from, y, true, true, false));
+    rig.editor.update(pointerAt(to, y, false, true, false));
+    rig.editor.update(pointerAt(to, y, false, false, true));
+    // The document has the new time in the form's own field, and the form shows it.
+    REQUIRE(rig.editor.document()->find("professions[0].day[1].from") != nullptr);
+    CHECK(rig.editor.document()->find("professions[0].day[1].from")->get<std::string>() == "12:00");
+    const odysseus::sim::form::FormRow* row = nullptr;
+    for (const odysseus::sim::form::FormRow& candidate : rig.editor.rows()) {
+        if (candidate.path == "professions[0].day[1].from") row = &candidate;
+    }
+    REQUIRE(row != nullptr);
+    CHECK(row->value == "12:00");
+    CHECK(rig.editor.dirty());
+    // Saved in the file's own style: the change is one line, the weights stay, and play reads it.
+    const std::string before = rig.text("hero/professions.json");
+    REQUIRE(rig.editor.save());
+    const std::string after = rig.text("hero/professions.json");
+    CHECK(differingLines(before, after) == 1);
+    CHECK(after.find("\"from\": \"12:00\"") != std::string::npos);
+    CHECK(after.find("\"prefer\": { \"hunt\": 200 }") != std::string::npos);
+    const odysseus::sim::HeroData data = odysseus::sim::loadHeroData(rig.folder);
+    REQUIRE(data.profession("hunter") != nullptr);
+    CHECK(data.profession("hunter")->schedule.day[1].minute == 12 * 60);
+    CHECK(data.profession("hunter")->schedule.day[0].prefer == std::map<std::string, int>{{"hunt", 200}});
+    // The change is a step of undo like any edit, and the bar follows.
+    REQUIRE(rig.editor.undo());
+    rig.editor.update(idle);
+    CHECK(timelineIn(rig.editor.panel(), "day")->blocks()[1].minute == 14 * 60);
+}
+
+TEST_CASE("US-196 One format: the same timeline serves an NPC class") {
+    Rig rig;
+    REQUIRE_FALSE(odysseus::core::writeTextFileSafely(rig.folder / "npc-classes" / "scout.json", R"({
+  "id": "scout", "label": "Scout", "colour": "#8a8fa3", "icon": "shield", "tags": ["scout"], "dialogues": {}, "actions": { "allow": [], "deny": [] }, "does": [],
+  "schedule": { "day": [ { "from": "06:00", "do": "work", "at": "home", "prefer": { "animal": 300 } }, { "from": "20:00", "do": "sleep", "at": "home" } ] }
+}
+)").has_value());
+    REQUIRE(rig.editor.open("npc-classes/scout.json"));
+    luna_ui::Intents idle;
+    rig.editor.update(idle);
+    const game::TimelineView* bar = timelineIn(rig.editor.panel(), "day");
+    REQUIRE(bar != nullptr); // the schedule of a class is `schedule.day`, the same blocks
+    CHECK(bar->blocks().size() == 2);
+    const int y = bar->bounds.y + 14;
+    const int from = bar->bounds.x + game::TimelineView::pixelOf(20 * 60, bar->bounds.width);
+    const int to = bar->bounds.x + game::TimelineView::pixelOf(22 * 60, bar->bounds.width);
+    rig.editor.update(pointerAt(from, y, true, true, false));
+    rig.editor.update(pointerAt(to, y, false, true, false));
+    rig.editor.update(pointerAt(to, y, false, false, true));
+    CHECK(rig.editor.document()->find("schedule.day[1].from")->get<std::string>() == "22:00");
+    REQUIRE(rig.editor.save());
+    CHECK(rig.text("npc-classes/scout.json").find("\"from\": \"22:00\"") != std::string::npos);
+    // The class loads through the same reader as before, with its weights.
+    odysseus::sim::rules::LoadReport report;
+    const auto scout = odysseus::sim::rules::NpcClassCatalog::parse(rig.text("npc-classes/scout.json"), "scout.json", report, "scout");
+    for (const auto& error : report.errors) FAIL(error.text());
+    REQUIRE(scout.has_value());
+    CHECK(scout->extras.schedule.day[1].minute == 22 * 60);
+    CHECK(scout->extras.schedule.day[0].prefer == std::map<std::string, int>{{"animal", 300}});
 }

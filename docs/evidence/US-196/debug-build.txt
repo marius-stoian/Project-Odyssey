@@ -1,0 +1,11 @@
+US-196 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_game_tests, odysseus_sim_tests, luna_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_sim_tests "-tc=US-196*": 7 test cases, all passed
+  (weights; hunters choose what the work block prefers; needs win; one format: text, class file, director save and hash, mistakes;
+   professions carry a routine; the clan takes the routine of its profession; needs win in the clan)
+odysseus_sim_tests (all): 394 test cases, 393 passed; the one failure is npc_kind_test.cpp:41, the owner's uncommitted edit of assets/data/npcs/wanderer.json.
+odysseus_game_tests "-tc=US-196*": 4 test cases, all passed
+  (the bar's steps and limits; dragging a block of the hunters' routine in the Data tab: field, form row, one changed line, weights kept, loadHeroData reads it, Undo;
+   the same bar for an NPC class; weights typed in the Editor's form and saved with the level)
