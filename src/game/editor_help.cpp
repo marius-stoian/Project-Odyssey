@@ -93,7 +93,9 @@ std::vector<std::string> EditorHelp::reload(const std::filesystem::path& file) {
 
 const EditorHelp::Entry* EditorHelp::find(const std::string& id) const {
     const auto found = entries_.find(id);
-    return found == entries_.end() ? nullptr : &found->second;
+    if (found != entries_.end()) return &found->second;
+    const auto made = generated_.find(id);
+    return made == generated_.end() ? nullptr : &made->second;
 }
 
 std::string EditorHelp::fieldId(std::string_view panel, std::string_view label) {

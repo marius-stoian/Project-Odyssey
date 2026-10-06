@@ -36,7 +36,8 @@
             "example": "campfire",
             "ref": "catalog:lights"
           }
-        }
+        },
+        "required": ["name", "frames", "ticksPerFrame", "loop"]
       }
     }
   },

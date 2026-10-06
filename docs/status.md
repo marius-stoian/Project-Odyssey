@@ -211,7 +211,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | X-M10b | - | M10b | Done | 2026-10-06; Debug and Release 27/27, zero warnings; merged into main, CI green, tag m10b-done; owner walkthrough deferred, review pending (docs/gates/M10b-walkthrough.md) |
 | K-M11 | - | M11 | Done | 2026-10-06; D-60, docs/plans/M11-data-editors-design.md |
 | S-US-190 | US-190 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-190/ |
-| S-US-191 | US-191 | M11 | To do |  |
+| S-US-191 | US-191 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-191/; CI-007 and CI-021 resolved for weapons, animals, effects and weather |
 | S-US-193 | US-193 | M11 | To do |  |
 | S-US-194 | US-194 | M11 | To do |  |
 | S-US-195 | US-195 | M11 | To do |  |

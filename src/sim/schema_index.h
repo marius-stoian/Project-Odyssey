@@ -26,6 +26,7 @@ struct CatalogUse {
     int line = 0;
     std::string catalog;
     std::string value;
+    bool key = false; // the value is the key of the member at `path`
 };
 
 // Everything the schemas can say about the whole data folder (US-190, US-193): the catalogs the files provide, every use of an entry (the links the

@@ -616,3 +616,61 @@ TEST_CASE("US-302 List items: words separated by spaces complete one word, keepi
     rig.panel.handle(tabKey());
     CHECK(rig.kept == "elder trader");
 }
+
+TEST_CASE("US-191 Toggle and Label") {
+    // A Toggle is a labelled yes or no: a click flips it and says so; the box lines up with a text field of the same label.
+    bool seen = true;
+    int changes = 0;
+    engine::Toggle toggle({10, 10, 200, 12}, "starter: ", true, [&](bool value) {
+        seen = value;
+        ++changes;
+    });
+    CHECK(toggle.value);
+    CHECK_FALSE(toggle.handle(at(300, 300, true))); // a click elsewhere is not its click
+    CHECK(changes == 0);
+    CHECK(toggle.handle(at(100, 14, true, true)));
+    CHECK_FALSE(toggle.value);
+    CHECK_FALSE(seen);
+    CHECK(toggle.handle(at(100, 14, true, true)));
+    CHECK(toggle.value);
+    CHECK(changes == 2);
+    // The tooltip shows after the pointer rests on it, like a field's.
+    toggle.tip.text = "What it is\nRange: yes or no";
+    for (int i = 0; i < engine::FieldHint::kDelayTicks + 2; ++i) toggle.handle(at(100, 14));
+    CHECK(toggle.tip.showing());
+    // Drawn into a picture: the "yes" is gold, the frame turns red when the value breaks a rule.
+    engine::ImageRenderer renderer(220, 30);
+    renderer.clear({0, 0, 0, 255});
+    const engine::Texture sheet = renderer.createTexture(engine::makeUiSheet());
+    engine::UiPainter painter(renderer, sheet);
+    toggle.invalid = true;
+    toggle.draw(painter);
+    const engine::Rect box{10 + engine::UiPainter::textWidth("starter: ") + 4, 10, 200 - engine::UiPainter::textWidth("starter: ") - 4, 12};
+    const engine::Color frame = renderer.image().get(box.x, box.y + 5); // the left edge of the box
+    CHECK(frame.red > frame.green); // red
+
+    engine::Label label({10, 20, 100, 10}, "A note", engine::UiColor::Gold);
+    engine::ImageRenderer second(120, 40);
+    second.clear({0, 0, 0, 255});
+    const engine::Texture secondSheet = second.createTexture(engine::makeUiSheet());
+    engine::UiPainter secondPainter(second, secondSheet);
+    label.draw(secondPainter);
+    int lit = 0;
+    for (int y = 20; y < 32; ++y) {
+        for (int x = 10; x < 70; ++x) lit += second.image().get(x, y).red > 100 ? 1 : 0;
+    }
+    CHECK(lit > 10);
+    CHECK_FALSE(label.handle(at(12, 22, true))); // a label does nothing
+
+    // A text field can show its value is wrong with a red frame.
+    std::string kept;
+    engine::TextField field({10, 10, 200, 12}, "damage: ", "5", 8, [&](const std::string& text) { kept = text; });
+    field.invalid = true;
+    engine::ImageRenderer third(220, 30);
+    third.clear({0, 0, 0, 255});
+    const engine::Texture thirdSheet = third.createTexture(engine::makeUiSheet());
+    engine::UiPainter thirdPainter(third, thirdSheet);
+    field.draw(thirdPainter);
+    const engine::Color edge = third.image().get(10 + engine::UiPainter::textWidth("damage: ") + 4, 15);
+    CHECK(edge.red > edge.green);
+}

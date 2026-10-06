@@ -40,7 +40,8 @@
               "shaman": {"type": "integer", "description": "Points for the shaman-healer skill", "example": "5"}
             }
           }
-        }
+        },
+        "required": ["id", "name", "text"]
       }
     }
   },

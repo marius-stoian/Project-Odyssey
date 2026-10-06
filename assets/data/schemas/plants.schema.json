@@ -42,7 +42,8 @@
             "example": "1.5"
           },
           "shadow": {"type": "boolean", "description": "false: casts no shadow whatever its height"}
-        }
+        },
+        "required": ["name", "frame", "size", "blocks", "edible", "inspect"]
       }
     }
   },

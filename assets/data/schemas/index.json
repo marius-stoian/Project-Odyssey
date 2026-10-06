@@ -4,6 +4,12 @@
 {
   "version": 1,
   "files": [
+    // The graph editor's sidecars come first: the folder globs below would also match a name ending in .layout.json.
+    {"match": "dialogue/*.layout.json", "schema": "graph-layout"},
+    {"match": "interactions/*.layout.json", "schema": "graph-layout"},
+    {"match": "quests/*.layout.json", "schema": "graph-layout"},
+    {"match": "story/events/*.layout.json", "schema": "graph-layout"},
+
     {"match": "weapons.json", "schema": "weapons"},
     {"match": "plants.json", "schema": "plants"},
     {"match": "objects.json", "schema": "objects"},

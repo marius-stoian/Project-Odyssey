@@ -51,13 +51,15 @@
             "example": "1.0"
           },
           "shadow": {"type": "boolean", "description": "false: casts no shadow"}
-        }
+        },
+        "required": ["name", "frame", "hp", "enemy", "strikeDamage", "reach"]
       }
     }
   },
   "provides": [
     {"catalog": "animals", "at": "animals[].name"},
     {"catalog": "characters", "at": "animals[].name"},
+    {"catalog": "kinds", "at": "animals[].name"},
     {"catalog": "tags", "at": "animals[].tags[]"}
   ],
   "loaders": ["src/game/catalogs.cpp#loadCatalogs,readList", "src/game/tags.cpp", "src/game/level.cpp#loadDefinitions"]

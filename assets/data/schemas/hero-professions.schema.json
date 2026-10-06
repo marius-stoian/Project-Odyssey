@@ -23,7 +23,8 @@
             "items": {"type": "string", "description": "One entry of actions", "example": "hunt"}
           },
           "pillar": {"type": "string", "description": "The pillar the profession feeds: trade or religion", "example": "trade"}
-        }
+        },
+        "required": ["id", "name", "skill", "tools", "actions", "pillar"]
       }
     }
   },

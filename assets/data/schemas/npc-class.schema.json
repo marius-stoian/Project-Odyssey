@@ -54,11 +54,13 @@
         "stock": {
           "type": "object",
           "description": "The items it starts with, each with how many",
+          "keyRef": "catalog:items",
           "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 9999, "description": "How many it starts with"}
         },
         "restockPerDay": {
           "type": "object",
           "description": "The items it gains each day, each with how many",
+          "keyRef": "catalog:items",
           "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 999, "description": "How many it gains a day"}
         },
         "deliveries": {
@@ -70,6 +72,7 @@
         "weights": {
           "type": "object",
           "description": "How likely each item is to be delivered (weights)",
+          "keyRef": "catalog:items",
           "additionalProperties": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "The weight of the item"}
         },
         "wants": {
@@ -80,6 +83,7 @@
         "rare": {
           "type": "object",
           "description": "Items it only sells to those it thinks this well of (item: band word)",
+          "keyRef": "catalog:items",
           "additionalProperties": {
             "type": "string",
             "description": "The lowest opinion band that may buy it",
@@ -147,6 +151,7 @@
       }
     }
   },
+  "required": ["id", "label"],
   "provides": [{"catalog": "npc-classes", "at": "id"}],
   "loaders": ["src/sim/npc_class.cpp", "src/sim/npc_extras.cpp"]
 }

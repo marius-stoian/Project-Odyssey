@@ -66,12 +66,15 @@ void OdysseyGame::registerDataSets() {
     reloads_.add({"interactions", {data / "interactions", data / "dialogue", data / "quests"}, [this] { return reloadInteractionSet(); }});
     reloads_.add({"npc-classes", {data / "npc-classes", data / "npcs", data / "sim" / "partner-types.json"}, [this] { return reloadNpcClassSet(); }});
     reloads_.add({"lights", {data / "light" / "lights.json"}, [this] { return reloadLights(); }});
-    reloads_.add({"catalog", {data / "plants.json", data / "objects.json", data / "characters.json"}, [this] { return reloadCatalog(); }});
+    reloads_.add({"catalog",
+                  {data / "plants.json", data / "objects.json", data / "characters.json", data / "weapons.json", data / "animals.json", data / "effects.json", data / "weather.json"},
+                  [this] { return reloadCatalog(); }});
     reloads_.add({"help", {data / "editor" / "help.json"}, [this] { return reloadHelp(); }});
-    // What cannot be swapped while a run is loaded (a weapon, an animal, a tile or an effect is held by pointers and numbers all over the play state): the
-    // change is reported, never half-applied, and takes effect at the next start. F5 leaves these alone.
+    // What cannot be swapped while a run is loaded (a tile is a number in the map, the hero and sim data and the buildings are held by the play state): the
+    // change is reported, never half-applied, and takes effect at the next start. F5 leaves these alone. The catalogs of weapons, animals, effects and weather
+    // moved out of this set in US-191: what holds them keeps a name and is pointed at the new definition by it (CI-007, CI-021).
     DataSet later{"next-start",
-                  {data / "weapons.json", data / "animals.json", data / "effects.json", data / "weather.json", data / "tiles.json", data / "materials.json", data / "buildings",
+                  {data / "tiles.json", data / "materials.json", data / "buildings",
                    data / "hero", data / "sim", data / "light" / "sky.json", data / "light" / "celestial-events.json", data / "story"},
                   [] {
                       ReloadResult result;
@@ -144,10 +147,38 @@ ReloadResult OdysseyGame::reloadCatalog() {
     return result;
 }
 
-// Takes a clean copy of the plant and object catalogs and the character kinds into use. The weapons, animals, effects and weather of that copy are
-// not taken: the play state holds pointers into them (they apply at the next start). The plants of the play state are pointed at the new catalog by
-// their kind's name, never by an address that is about to go (CI-007).
+// Takes a clean copy of the catalogs into use: plants and objects, weapons, animals, effects and weather, and the character kinds. What the play state holds
+// of a definition is held by the kind's name and pointed at the new definition by it, never by an address that is about to go (CI-007, CI-021): the plants
+// of the level, the shots in the air, the starter weapons, the weather that is under way. A thing whose kind is gone is dropped (a shot) or skipped and marked
+// with a red "?" (a placed plant). The hotbar, the effects, the lights and the animals of the level already hold names and look the definition up each time.
 void OdysseyGame::applyCatalog(Definitions fresh, Catalogs catalogs) {
+    // What is in the air names its weapon now, before the old definitions go.
+    std::vector<std::string> arcNames;
+    for (const ArcShot& shot : arcShots_) arcNames.push_back(shot.weapon != nullptr ? shot.weapon->name : std::string());
+    std::vector<std::string> projectileNames;
+    for (const Projectile& shot : projectiles_) projectileNames.push_back(shot.weapon != nullptr ? shot.weapon->name : std::string());
+    const int weatherNow = weather_.current();
+    const std::string weatherName = weatherNow >= 0 && weatherNow < static_cast<int>(catalogs_.weather.size()) ? catalogs_.weather[static_cast<std::size_t>(weatherNow)].name : std::string();
+
+    catalogs_.weapons = std::move(catalogs.weapons);
+    catalogs_.animals = std::move(catalogs.animals);
+    catalogs_.effects = std::move(catalogs.effects);
+    catalogs_.weather = std::move(catalogs.weather);
+    catalogs_.classes = catalogs.classes;
+    catalogs_.elements = catalogs.elements;
+    for (std::size_t i = 0; i < arcShots_.size(); ++i) arcShots_[i].weapon = arcNames[i].empty() ? nullptr : catalogs_.weapon(arcNames[i]);
+    std::erase_if(arcShots_, [](const ArcShot& shot) { return shot.weapon == nullptr; }); // a weapon that is gone takes its shots with it
+    for (std::size_t i = 0; i < projectiles_.size(); ++i) projectiles_[i].weapon = projectileNames[i].empty() ? nullptr : catalogs_.weapon(projectileNames[i]);
+    std::erase_if(projectiles_, [](const Projectile& shot) { return shot.weapon == nullptr; });
+    rebuildWeaponLists();
+    rebuildCatalogArt();
+    if (!weatherName.empty()) { // the cycle goes on under the weather it was in, when that weather is still there
+        weather_ = WeatherCycle(catalogs_.weather, weatherSeed_);
+        for (std::size_t i = 0; i < catalogs_.weather.size(); ++i) {
+            if (catalogs_.weather[i].name == weatherName) weather_.force(static_cast<int>(i));
+        }
+    }
+
     std::vector<double> heightBefore(plants_.size(), 0.0);
     for (std::size_t i = 0; i < plants_.size(); ++i) {
         if (plants_[i].alive && plants_[i].def != nullptr) heightBefore[i] = plantObstacleHeight(*plants_[i].def);
@@ -188,15 +219,10 @@ void OdysseyGame::applyCatalog(Definitions fresh, Catalogs catalogs) {
             map_.setObstacle(cell.x, cell.y, height);
         }
     }
-    // The names the Editor offers; the animals are not reloaded, so their kinds stay as they were.
-    std::vector<CharacterKindDef> kinds;
-    for (const CharacterKindDef& kind : fresh.characters) {
-        if (!kind.animal) kinds.push_back(kind);
-    }
-    for (const CharacterKindDef& kind : definitions_.characters) {
-        if (kind.animal) kinds.push_back(kind);
-    }
-    definitions_.characters = std::move(kinds);
+    // The names the Editor offers: the people and the animals.
+    definitions_.characters = std::move(fresh.characters);
+    definitions_.weapons = std::move(fresh.weapons);
+    definitions_.loopingEffects = std::move(fresh.loopingEffects);
     definitions_.plants = std::move(fresh.plants);
     definitions_.objects = std::move(fresh.objects);
     rebuildPlantArt();
@@ -223,6 +249,46 @@ void OdysseyGame::rebuildPlantArt() {
     plantArt_.pages["objects"] = renderer_->createTexture(objectPage);
     silhouettes_[plantArt_.pages["objects"].id] = renderer_->createTexture(luna::engine::silhouette(objectPage));
     for (const auto& [name, rect] : rects) plantArt_.sources[name] = {"objects", rect};
+}
+
+// The starter weapons of the catalog, and the weapons the Editor's palette offers: the starters, then the two demo weapons (D-23).
+void OdysseyGame::rebuildWeaponLists() {
+    starters_.clear();
+    std::vector<std::string> palette;
+    for (const WeaponDef& weapon : catalogs_.weapons) {
+        if (weapon.starter) {
+            starters_.push_back(&weapon);
+            palette.push_back(weapon.name);
+        }
+    }
+    palette.push_back(kSpearThrowName);
+    palette.push_back(kSwordSlashName);
+    editor_.setWeaponPalette(std::move(palette));
+}
+
+// The place of each weapon, animal, effect and weather in the atlas. The pictures themselves stay; a new entry that names a frame the atlas has is drawn.
+void OdysseyGame::rebuildCatalogArt() {
+    if (!contentLoaded_) return;
+    weatherFrames_.clear();
+    if (content_.pictures.find("weather") != content_.pictures.end()) {
+        for (const WeatherDef& def : catalogs_.weather) {
+            for (int i = 0; i < def.frames; ++i) {
+                if (const auto rect = content_.rect(content_.frameName(def.name, i))) weatherFrames_[def.name].push_back(*rect);
+            }
+        }
+    }
+    effectArt_.firstFrame.clear();
+    for (const EffectDef& def : catalogs_.effects) {
+        if (const auto rect = content_.rect(content_.frameName(def.name, 0))) effectArt_.firstFrame[def.name] = *rect;
+    }
+    animalArt_.sources.clear();
+    for (const AnimalDef& animal : catalogs_.animals) {
+        if (const auto rect = content_.rect(animal.frame)) animalArt_.sources[animal.name] = *rect;
+    }
+    weaponArt_.sources.clear();
+    for (const WeaponDef& weapon : catalogs_.weapons) {
+        if (const auto icon = content_.rect(weapon.frame)) weaponArt_.sources[weapon.name] = *icon;
+    }
 }
 
 ReloadResult OdysseyGame::reloadHelp() {
@@ -331,6 +397,7 @@ std::vector<ReloadOutcome> OdysseyGame::pollFiles(double nowSeconds) {
     if (!data.empty()) {
         outcomes = reloads_.changed(data);
         reported(outcomes);
+        for (const std::filesystem::path& file : data) editor_.data().changedOnDisk(file); // the Data tab shows the file it has open as it is on disk now (US-191)
     }
     if (level) levelChangedOutside();
     return outcomes;
@@ -343,6 +410,12 @@ void OdysseyGame::ownReload(const std::string& set) {
         if (entry.name != set) continue;
         for (const std::filesystem::path& root : entry.watch) watcher_.resync(root);
     }
+}
+
+// The Data tab wrote this file: the sets that watch it read it again now (each once), and the watcher does not report the same write a second time.
+void OdysseyGame::dataFileSaved(const std::filesystem::path& file) {
+    watcher_.noteOwnWrite(file);
+    for (const std::string& name : reloads_.setsFor(file)) ownReload(name);
 }
 
 void OdysseyGame::levelChangedOutside() {

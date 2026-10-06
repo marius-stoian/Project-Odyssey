@@ -16,7 +16,7 @@
         "description": "One step",
         "properties": {
           "text": {"type": "string", "description": "What the tracker shows while this step is active", "example": "Gather one berry from a bush."},
-          "objective": {"type": "string", "description": "What finishes the step: talk, goto, gather, give, craft, interact, defeat, wait or flag, with its words", "example": "gather berries 1"},
+          "objective": {"type": "string", "format": "objective", "description": "What finishes the step: talk, goto, gather, give, craft, interact, defeat, wait or flag, with its words", "example": "gather berries 1"},
           "marker": {"type": "string", "description": "Where the map pin points: tag:<tag>, object:<id>, npc:<id> or place:<name>", "example": "tag:edible"},
           "hint": {
             "type": "object",

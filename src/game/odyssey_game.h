@@ -355,10 +355,13 @@ public:
     ReloadResult reloadCatalog();
     ReloadResult reloadHelp();
     void ownReload(const std::string& set); // an Editor save read the set itself: the watcher must not read it a second time
+    void dataFileSaved(const std::filesystem::path& file); // the Data tab wrote a file: the sets that watch it read it again (US-191)
     void levelChangedOutside();
     void applyLevelFromDisk();
     void applyCatalog(Definitions fresh, Catalogs catalogs);
     void rebuildPlantArt();
+    void rebuildCatalogArt();   // the frame of each weapon, animal, effect and weather in the atlas (US-191: they can change while the game runs)
+    void rebuildWeaponLists();  // the starter weapons and the Editor's weapon palette
     std::vector<std::string> findMissingKinds(); // returns the warnings that are new
     void drawToast(luna::engine::Renderer& renderer) const;
     static void checkCatalogLights(const Catalogs& catalogs, const LightingData& lighting, const std::filesystem::path& dataDirectory);

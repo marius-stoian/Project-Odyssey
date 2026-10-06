@@ -32,6 +32,7 @@ Rest the pointer on any button to see what it does.
 | **Plant** | Put a plant on the map (see Plants). |
 | **Light** | Put a light on the map (see Lights and the time of day). |
 | **Select** | Pick a character, pickup, plant, effect, light or the hero's start, to move or change it. |
+| **Data** | Open any data file of the game (weapons, plants, needs, rules...) as forms built from its schema; see [data-editor.md](data-editor.md). **Esc** comes back. |
 | **Level** | Open the level settings (see Level settings). |
 | **#** | The Grid button: show or hide the cell lines (also **G**). |
 | **Fx** | Put a looping effect on the map (see Effects and weather). |
@@ -148,12 +149,12 @@ The game reads its data files again while it runs, **all or nothing**: the new f
 | `interactions` | `interactions/`, `dialogue/`, `quests/` | the Editor's action lists and the graph editors' catalog |
 | `npc-classes` | `npc-classes/`, `npcs/`, `sim/partner-types.json` | trade profiles, the partner defaults, schedules and the Class panel |
 | `lights` | `light/lights.json` | placed lights and objects that shine, at once; the Light palette |
-| `catalog` | `plants.json`, `objects.json`, `characters.json` | placed plants take the new values of their kind (by name, keeping their ids and states); a new object is on the object page of the palette; the character palette |
+| `catalog` | `plants.json`, `objects.json`, `characters.json`, `weapons.json`, `animals.json`, `effects.json`, `weather.json` | placed plants take the new values of their kind (by name, keeping their ids and states); a new object is on the object page of the palette; the character palette; a weapon you hold, a shot in the air, the starter weapons and the weapon palette follow the new weapons by their names (a weapon that is gone takes its shots with it); the weather goes on under the same name (US-191) |
 | `help` | `editor/help.json` | tooltips and suggestions |
 
 A placed thing whose kind is gone (a plant or object deleted from the catalog, a light kind that left `lights.json`, a character kind that left `characters.json`) is **skipped by play**, a red **?** stands where it was placed (in the Editor and in play) and a warning names the level entry: `level "The Valley": plant #12 "oak" has no kind in plants.json or objects.json`. Nothing is deleted from the level; the thing comes back by itself when the kind comes back.
 
-These files cannot be swapped while the game runs, because the play state holds them by address or number: `weapons.json`, `animals.json`, `effects.json`, `weather.json`, `tiles.json`, `materials.json`, `buildings/`, `hero/`, `sim/`, `light/sky.json`, `light/celestial-events.json` and `story/`. When you save one, the toast says `<file> applies at the next start`, nothing is half-applied, and F5 leaves them alone. Each set reloads in well under 100 ms (`docs/evidence/US-303/`).
+These files cannot be swapped while the game runs, because the play state holds them by number or in long-lived structures: `tiles.json` (a tile is a number in the map), `materials.json`, `buildings/`, `hero/`, `sim/`, `light/sky.json`, `light/celestial-events.json` and `story/`. A save or an outside change is **reported, never half-applied**: the toast says `<file> applies at the next start` and the new numbers are used when the game starts again. F5 leaves these alone. (`weapons.json`, `animals.json`, `effects.json` and `weather.json` were in this list until US-191.)
 
 **Files saved outside the game (US-304).** The game also watches its data files: save one in a text editor and, within about a second, it is read again by itself, with no F5. It looks at the files a few at a time (every file about four times a second), waits until the file has been quiet for 0.3 seconds (an editor often writes a file twice), and then reloads the set that reads it, all or nothing like F5. What the game writes itself (an Editor save) is not read a second time. Temporary and backup files (`.tmp`, `.swp`, `.bak`, `.bak1`...) and hidden files are ignored.
 

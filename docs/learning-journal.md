@@ -2209,3 +2209,26 @@ A function that calls itself is *recursion*; it fits because a document is a tre
 **Try it (5 minutes).** In `assets/data/sim/needs.json` change `"maximum": 100` to `5` and start the game: it stops with the file, the line, the field and `must be between 10 and 1000 (is 5)`. Put it back.
 
 **Check yourself.** Why does an unknown field only warn at load but fail the test? (Think about who types the file, and when each one finds out.)
+
+## US-191: patching text instead of printing it, and forms built from a description (M11)
+
+**What we built.** The Editor has a **Data** button. Any data file opens as forms made from its schema: a number box with its range, a word picker, a yes/no, a list of names from another catalog, groups that fold. A value that does not fit is refused with the reason. Ctrl+Z walks back through your edits, and Ctrl+S saves. After the save the running game reads the file again: change a weapon's damage and the sword in the hero's hand hits harder at once.
+
+**The idea: save by patching, not printing.** The obvious way to save is to print the whole edited document back as text. The trouble: every file would be reformatted the first time (the weapons are one object to a line with no space after the colon, the sim files have spaces), every comment inside a file would vanish, and a one-number change would show up as a hundred changed lines in the diff. So the saver does the opposite. It keeps the original text and a map of *where every value stands in it*, then walks the old and the edited document together. Where they are equal it copies the original bytes; where a number changed it writes the new number in the same spot; only a list that gained or lost entries is rebuilt, in the style the original used.
+
+```cpp
+if (sameJson(before, after)) return span(n.begin, n.end);            // untouched: the original bytes
+if (n.kind == Object && keysOf(before) == keysOf(after)) return inPlace(n, before, after); // same members: patch each in place
+```
+
+That is *recursion over two trees at once*, like the schema checker of US-190 but producing text. The proof is a test over every shipped data file: change every number, lengthen every string, add and remove list entries and members everywhere, patch, parse again, and compare with the edited document: 183 files, thousands of edits, all equal.
+
+**Undo as copies.** `DataDocument` keeps the document before each edit on a stack. Copying a 23 KB document is cheap, and a stack of copies cannot get out of step with the document the way a list of "undo functions" can.
+
+**Pointing at a thing by its name.** Making weapons reloadable meant finding everything that held a raw address of a weapon definition (a pointer): arrows in the air, the list of starter weapons. When the catalog is swapped those addresses die. The fix is the one the plants already used: before the swap remember each holder's *name*, after the swap look the name up again; a shot whose weapon is gone is dropped. Names stay true when the thing they name is replaced; addresses do not.
+
+**Where to look.** `src/sim/json_patch.cpp` (`Patcher::patched`), `src/sim/data_document.cpp`, `src/sim/data_form.cpp` (`Builder::addValue`), `src/game/data_editor.cpp`, `OdysseyGame::applyCatalog` in `src/game/odyssey_reload.cpp`, `tests/sim/json_patch_test.cpp`.
+
+**Try it (10 minutes).** F2, **Data**, `weapons.json`, the iron sword: type `9` into `damage`, Enter, Ctrl+S. Run `git diff assets/data/weapons.json`: one line. Press F1, hit an enemy with the sword.
+
+**Check yourself.** Why does the saver copy the original text between two values instead of rebuilding the text from the values? (Think of a comment, or of two spaces after a comma.)

@@ -61,6 +61,7 @@
           "cost": {
             "type": "object",
             "description": "What one piece costs (item: count)",
+            "keyRef": "catalog:items",
             "additionalProperties": {"type": "integer", "description": "One entry, named by its key", "example": "1"}
           },
           "colour": {
@@ -69,7 +70,8 @@
             "example": "#b9a35a"
           },
           "height": {"type": "number", "description": "Height in metres, for shadows and for walking behind", "example": "0"}
-        }
+        },
+        "required": ["id", "label", "type", "material", "hp"]
       }
     }
   },

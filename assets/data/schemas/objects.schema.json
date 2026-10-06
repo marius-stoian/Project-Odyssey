@@ -82,7 +82,8 @@
             }
           },
           "shadow": {"type": "boolean", "description": "false: casts no shadow whatever its height"}
-        }
+        },
+        "required": ["name", "frame", "blocks", "inspect"]
       }
     }
   },
