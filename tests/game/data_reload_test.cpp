@@ -316,7 +316,10 @@ TEST_CASE("US-303 Timing: every data set reloads in well under 100 ms (NFR-09)")
 #ifdef NDEBUG
     constexpr double kBudget = 100.0;
 #else
-    constexpr double kBudget = 1000.0; // a Debug build with AddressSanitizer is several times slower; the Release run checks 100
+    // A Debug build with AddressSanitizer is several times slower; the Release run checks 100. GitHub's shared runners are slower again (X-M11: 1340 ms there, well under
+    // 1000 on the owner's PC), so the Debug sanity limit is five times wider there.
+#pragma warning(suppress : 4996)
+    const double kBudget = std::getenv("GITHUB_ACTIONS") != nullptr ? 5000.0 : 1000.0;
 #endif
     for (int round = 0; round < 2; ++round) { // the second round: files in the operating system's cache, like a save during play
         const auto outcomes = studio.game().dataReload().reloadAll();
