@@ -276,8 +276,12 @@ TEST_CASE("US-304 Cost: the watcher costs a small part of a millisecond in a tic
                                            studio.game().watcher().files(), kTicks, static_cast<int>(kTick * 1000), average, p95, worst);
     MESSAGE(report);
 #ifdef NDEBUG
-    CHECK(average < 0.5);
-    CHECK(p95 < 1.5); // the tick that looks at twenty files: a tenth of the 16 ms of a frame at most
+    // GitHub's shared runners are a few times slower than the owner's PC and noisy (X-M11: 0.515 ms against 0.192 ms on the PC, same code): there the budget is three times as wide,
+    // the strict one is judged on the owner's PC (the gate records it), like the first-frame limit (D-47).
+#pragma warning(suppress : 4996)
+    const double widen = std::getenv("GITHUB_ACTIONS") != nullptr ? 3.0 : 1.0;
+    CHECK(average < 0.5 * widen);
+    CHECK(p95 < 1.5 * widen); // the tick that looks at twenty files: a tenth of the 16 ms of a frame at most
 #else
     CHECK(average < 20.0); // a Debug build with AddressSanitizer is many times slower; the Release run checks 0.5
 #endif
