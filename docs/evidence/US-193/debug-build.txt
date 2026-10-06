@@ -1,0 +1,12 @@
+US-193 Windows Debug build and own cases (2026-10-06).
+Build: odysseus, odysseus_headless, odysseus_game_tests, odysseus_sim_tests, luna_tests: exit 0, warning lines 0.
+Per D-41 the full verification (tools/verify.ps1) and CI run at X-M11.
+
+odysseus_sim_tests "-tc=US-19*":  41 test cases, 42641 assertions, all passed
+  (Words, Uses, Rename an item, Rename a plant, A rename that cannot be done, A plan that fails halfway is undone; the US-190 and US-191 cases still pass)
+odysseus_game_tests "-tc=US-19*": 25 test cases, 11409 assertions, all passed
+  (Copy an entry, Rename an entry everywhere it is used, A rename that cannot be done, Delete an entry that is still used,
+   Delete an entry nothing uses, The question has a screen, a copied plant is a plant of the game at once)
+
+Clean worktree check of qa at 2cbba96 (after US-191), Debug: build exit 0; ctest 22 of 22 passed, window group 8 of 8 passed.
+Screenshots of the Data tab: docs/evidence/US-191/data-tab-*.png

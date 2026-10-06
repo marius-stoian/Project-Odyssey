@@ -2232,3 +2232,18 @@ That is *recursion over two trees at once*, like the schema checker of US-190 bu
 **Try it (10 minutes).** F2, **Data**, `weapons.json`, the iron sword: type `9` into `damage`, Enter, Ctrl+S. Run `git diff assets/data/weapons.json`: one line. Press F1, hit an enemy with the sword.
 
 **Check yourself.** Why does the saver copy the original text between two values instead of rebuilding the text from the values? (Think of a comment, or of two spaces after a comma.)
+
+
+## US-193: renaming a thing everywhere it is named (M11)
+
+**What we built.** In the Data tab you can **Copy** an entry (a plant, an item, a weapon), **Rename** it and **Delete** it. Rename first shows every place that names it: other data files, rule texts, quests, the levels and the dialogue files. You confirm, and all of them change together. Delete of a used entry lists the same places and waits for "Delete anyway"; Ctrl+Z brings the entry back.
+
+**The idea: plan first, then write.** Finding the places and changing them are two separate steps. `planRename` reads everything and returns the *new text of every file that would change*, without writing a byte. The dialog shows that plan. Only `applyPlan` writes, each file through a temporary file, and if one write fails the files already written are put back. A rename is all or nothing, so the data can never be left half renamed.
+
+**Whole words, not substrings.** Renaming `berries` must not touch `eat-berries` or the sentence `"{hero} shared berries"`. `replaceWord` matches the name as a whole word (a hyphen ends a word) and skips quoted prose. The places themselves come from the schemas: a field that links to a catalog (`ref`), a map whose keys are catalog names (`keyRef`), and texts marked as rules, effects or objectives. The schemas that built the forms also tell the rename where to look.
+
+**Where to look.** `src/sim/data_refs.cpp` (`makePlan`, `replaceWord`), `DataEditor::beginRename` and `confirm` in `src/game/data_editor.cpp`, `tests/sim/data_refs_test.cpp`.
+
+**Try it (5 minutes).** F2, **Data**, `hero/items.json`, the `berries` entry, **Rename**, type `red-berries`. Read the list, then confirm and open `dialogue/elder-fire.dlg`: the conditions say `red-berries`, the quoted sentence still says berries.
+
+**Check yourself.** Why does the rename build the whole plan before it writes anything, instead of changing each file as it finds a place?

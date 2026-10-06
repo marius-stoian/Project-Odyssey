@@ -5,6 +5,7 @@
 #include "luna/engine/image_io.h"
 #include "luna/engine/ui.h"
 #include "sim/schema.h"
+#include "sim/schema_index.h"
 
 #include <doctest/doctest.h>
 
@@ -22,24 +23,28 @@ namespace luna_ui = luna::engine;
 namespace {
 
 struct Rig {
-    fs::path folder;
+    fs::path base;
+    fs::path folder; // the data folder
     std::vector<std::string> said;
     std::vector<fs::path> saves;
     game::DataEditor editor;
 
-    Rig()
-        : folder(fs::temp_directory_path() / ("odysseus-us191-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()))),
+    explicit Rig(bool withLevels = false)
+        : base(fs::temp_directory_path() / ("odysseus-us191-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()))),
+          folder(base / "data"),
           editor(960, 540, [this](const std::string& message) { said.push_back(message); }) {
         fs::create_directories(folder);
         fs::copy(ODYSSEUS_DATA_DIR, folder, fs::copy_options::recursive);
+        if (withLevels) fs::copy(fs::path(ODYSSEUS_DATA_DIR).parent_path() / "levels", base / "levels", fs::copy_options::recursive);
         editor.setFolder(folder, [this](const fs::path& file) { saves.push_back(file); });
         editor.show(true);
     }
     ~Rig() {
         std::error_code error;
-        fs::remove_all(folder, error);
+        fs::remove_all(base, error);
     }
     std::string text(const std::string& relative) const { return *odysseus::core::readTextFile(folder / relative); }
+    std::string levelText(const std::string& name) const { return *odysseus::core::readTextFile(base / "levels" / name); }
 };
 
 int differingLines(const std::string& a, const std::string& b) {
@@ -333,4 +338,157 @@ TEST_CASE("US-191 Data tab draws") {
         luna_ui::savePng(renderer.image(), fs::path(folder) / "data-tab-needs-refused.png");
     }
     std::free(folder);
+}
+
+TEST_CASE("US-193 Copy an entry") {
+    Rig rig;
+    REQUIRE(rig.editor.open("plants.json"));
+    REQUIRE(rig.editor.selectEntry("plants[2]"));
+    const std::string original = rig.editor.document()->root()["plants"][2]["name"].get<std::string>();
+    const std::size_t before = rig.editor.entries().size();
+    REQUIRE(rig.editor.copyEntry());
+    CHECK(rig.editor.entries().size() == before + 1);
+    CHECK(rig.editor.entryPath() == "plants[3]"); // beside the original, and chosen
+    CHECK(rig.editor.document()->root()["plants"][3]["name"].get<std::string>() == original + "-copy");
+    CHECK(rig.editor.document()->root()["plants"][3]["frame"] == rig.editor.document()->root()["plants"][2]["frame"]); // everything else is the same
+    // A copy of a copy gets a name of its own too, and a name with a space is copied as "<name> copy".
+    REQUIRE(rig.editor.copyEntry());
+    CHECK(rig.editor.document()->root()["plants"][4]["name"].get<std::string>() == original + "-copy-copy");
+    REQUIRE(rig.editor.open("weapons.json") == false); // unsaved: the file stays
+    REQUIRE(rig.editor.undo());
+    REQUIRE(rig.editor.undo());
+    REQUIRE(rig.editor.open("weapons.json"));
+    REQUIRE(rig.editor.selectEntry("weapons[0]"));
+    REQUIRE(rig.editor.copyEntry());
+    CHECK(rig.editor.document()->root()["weapons"][1]["name"] == "iron sword copy");
+}
+
+TEST_CASE("US-193 Rename an entry everywhere it is used") {
+    Rig rig(true);
+    REQUIRE(rig.editor.open("hero/items.json"));
+    const auto& entries = rig.editor.entries();
+    const auto berries = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "Berries"; });
+    REQUIRE(berries != entries.end());
+    REQUIRE(rig.editor.selectEntry(berries->path));
+    // The rename first lists what it would change; nothing is written yet.
+    REQUIRE(rig.editor.beginRename("red-berries"));
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::Rename);
+    CHECK(rig.editor.question().lines.size() > 8);
+    const auto mentions = [&](const std::string& file) {
+        return std::any_of(rig.editor.question().lines.begin(), rig.editor.question().lines.end(), [&](const std::string& line) { return line.starts_with(file + ":"); });
+    };
+    CHECK(mentions("hero/items.json"));
+    CHECK(mentions("quests/first-day.json"));
+    CHECK(mentions("dialogue/elder-fire.dlg"));
+    CHECK(mentions("interactions/give-berries.json"));
+    CHECK(mentions("levels/npc-test.json"));
+    CHECK(rig.text("hero/items.json").find("\"id\": \"berries\"") != std::string::npos);
+    // Esc (cancel) leaves everything as it was.
+    rig.editor.cancel();
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::None);
+    CHECK(rig.text("hero/items.json").find("\"id\": \"berries\"") != std::string::npos);
+    // Confirm writes every file at once, the game is told each data file, and the form shows the new name.
+    REQUIRE(rig.editor.beginRename("red-berries"));
+    REQUIRE(rig.editor.confirm());
+    CHECK(rig.text("hero/items.json").find("\"id\": \"red-berries\"") != std::string::npos);
+    CHECK(rig.text("quests/first-day.json").find("gather red-berries 1") != std::string::npos);
+    CHECK(rig.text("dialogue/elder-fire.dlg").find("has(hero, red-berries, 1)") != std::string::npos);
+    CHECK(rig.levelText("npc-test.json").find("\"red-berries\"") != std::string::npos);
+    CHECK(rig.saves.size() > 5);
+    CHECK(std::find(rig.saves.begin(), rig.saves.end(), rig.folder / "hero" / "items.json") != rig.saves.end());
+    CHECK_FALSE(rig.editor.dirty());
+    const auto& items = rig.editor.document()->root()["items"];
+    CHECK(std::any_of(items.begin(), items.end(), [](const auto& item) { return item["id"] == "red-berries"; }));
+    CHECK_FALSE(std::any_of(items.begin(), items.end(), [](const auto& item) { return item["id"] == "berries"; }));
+    // The data folder is still consistent.
+    const odysseus::sim::schema::SchemaSet set = odysseus::sim::schema::SchemaSet::load(rig.folder / "schemas");
+    CHECK(odysseus::sim::schema::buildIndex(rig.folder, set).clean());
+}
+
+TEST_CASE("US-193 A rename that cannot be done") {
+    Rig rig;
+    REQUIRE(rig.editor.open("hero/items.json"));
+    const auto& all = rig.editor.entries();
+    const auto berries = std::find_if(all.begin(), all.end(), [](const auto& entry) { return entry.label == "Berries"; });
+    REQUIRE(berries != all.end());
+    REQUIRE(rig.editor.selectEntry(berries->path));
+    CHECK_FALSE(rig.editor.beginRename("flint")); // an item of that name exists
+    CHECK(rig.editor.problem().find("already") != std::string::npos);
+    CHECK_FALSE(rig.editor.beginRename("bad\"name"));
+    // Unsaved changes in the open file: a rename writes files, so it asks for the save first.
+    REQUIRE(rig.editor.setField(rig.editor.entryPath() + ".value", "7"));
+    CHECK_FALSE(rig.editor.beginRename("fine-name"));
+    CHECK(rig.editor.problem().find("unsaved changes") != std::string::npos);
+    // The file's own entry is not an entry of a list: nothing to rename.
+    REQUIRE(rig.editor.undo());
+    REQUIRE(rig.editor.selectEntry(""));
+    CHECK_FALSE(rig.editor.beginRename("fine-name"));
+}
+
+TEST_CASE("US-193 Delete an entry that is still used") {
+    Rig rig(true);
+    REQUIRE(rig.editor.open("hero/items.json"));
+    const auto& entries = rig.editor.entries();
+    const auto berries = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "Berries"; });
+    REQUIRE(berries != entries.end());
+    REQUIRE(rig.editor.selectEntry(berries->path));
+    const std::size_t count = rig.editor.document()->root()["items"].size();
+    // Used: the places are listed and the delete waits.
+    REQUIRE(rig.editor.beginDelete());
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::Delete);
+    CHECK(rig.editor.question().lines.size() > 5);
+    CHECK(rig.editor.document()->root()["items"].size() == count);
+    rig.editor.cancel();
+    CHECK(rig.editor.document()->root()["items"].size() == count);
+    // Confirmed: it is gone from the open file (an edit that waits for Save), and Ctrl+Z brings it back.
+    REQUIRE(rig.editor.beginDelete());
+    REQUIRE(rig.editor.confirm());
+    CHECK(rig.editor.document()->root()["items"].size() == count - 1);
+    CHECK(rig.editor.dirty());
+    REQUIRE(rig.editor.undo());
+    CHECK(rig.editor.document()->root()["items"].size() == count);
+    CHECK_FALSE(rig.editor.dirty());
+}
+
+TEST_CASE("US-193 Delete an entry nothing uses") {
+    Rig rig(true);
+    REQUIRE(rig.editor.open("plants.json"));
+    REQUIRE(rig.editor.newEntry());
+    const std::size_t count = rig.editor.document()->root()["plants"].size();
+    REQUIRE(rig.editor.beginDelete()); // nothing names the new entry: no question
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::None);
+    CHECK(rig.editor.document()->root()["plants"].size() == count - 1);
+}
+
+TEST_CASE("US-193 The question has a screen") {
+    // The dialog is drawn and answered with the mouse and Esc.
+    Rig rig(true);
+    REQUIRE(rig.editor.open("hero/items.json"));
+    const auto& entries = rig.editor.entries();
+    const auto berries = std::find_if(entries.begin(), entries.end(), [](const auto& entry) { return entry.label == "Berries"; });
+    REQUIRE(berries != entries.end());
+    REQUIRE(rig.editor.selectEntry(berries->path));
+    luna_ui::Intents idle;
+    rig.editor.update(idle);
+    const luna_ui::Button* rename = nullptr;
+    for (const auto& child : rig.editor.panel().children()) {
+        if (const auto* button = dynamic_cast<const luna_ui::Button*>(child.get()); button != nullptr && button->label == "Rename") rename = button;
+    }
+    REQUIRE(rename != nullptr);
+    rig.editor.update(click(rename->bounds.x + 3, rename->bounds.y + 3));
+    REQUIRE(rig.editor.question().kind == game::DataEditor::Question::Kind::Rename);
+    rig.editor.update(idle); // the dialog is built
+    CHECK(fieldLabelled(rig.editor.panel(), "new name:") != nullptr);
+    luna_ui::ImageRenderer renderer(960, 540);
+    renderer.clear({20, 20, 28, 255});
+    const luna_ui::Texture sheet = renderer.createTexture(luna_ui::makeUiSheet());
+    luna_ui::UiPainter painter(renderer, sheet);
+    painter.setScreen({0, 0, 960, 540});
+    rig.editor.draw(painter);
+    rig.editor.drawOverlay(painter);
+    luna_ui::Intents escape; // Esc answers no
+    escape.set(luna_ui::Intent::OpenMenu, true, true);
+    rig.editor.update(escape);
+    CHECK(rig.editor.question().kind == game::DataEditor::Question::Kind::None);
+    CHECK(rig.editor.shown());
 }

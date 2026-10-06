@@ -1,6 +1,7 @@
 #include "game/data_editor.h"
 
 #include "core/text.h"
+#include "sim/json_text.h"
 
 #include <algorithm>
 #include <cctype>
@@ -11,6 +12,7 @@ namespace odysseus::game {
 namespace fs = std::filesystem;
 namespace form = sim::form;
 namespace schema = sim::schema;
+namespace refs = sim::refs;
 using luna::engine::Button;
 using luna::engine::Label;
 using luna::engine::ListBox;
@@ -408,6 +410,204 @@ bool DataEditor::save() {
     return true;
 }
 
+// ---- Entity actions (US-193)
+
+DataEditor::EntryInfo DataEditor::describeEntry() const {
+    EntryInfo info;
+    if (!document_ || schema_ == nullptr) return info;
+    const form::Entry* current = nullptr;
+    for (const form::Entry& entry : entries_) {
+        if (entry.path == entryPath_) current = &entry;
+    }
+    if (current == nullptr || !current->element) return info;
+    const std::optional<sim::DocPath> parsed = sim::parsePath(current->path);
+    if (!parsed || parsed->size() != 2 || (*parsed)[0].index || !(*parsed)[1].index) return info;
+    info.group = (*parsed)[0].key;
+    info.index = (*parsed)[1].position;
+    // What names the entry: the member that a "provides" of the schema takes the catalog's names from ("weapons[].name"); the entry is in each catalog that does.
+    const std::string prefix = info.group + "[].";
+    for (const schema::Provide& provide : schema_->provides) {
+        if (!provide.at.starts_with(prefix)) continue;
+        const std::string field = provide.at.substr(prefix.size());
+        if (field.empty() || field.find_first_of(".[]*") != std::string::npos) continue; // "tags[]" are tags, not the name
+        if (info.field.empty()) info.field = field;
+        if (field == info.field) info.catalogs.insert(provide.catalog);
+    }
+    const sim::OrderedJson* name = info.field.empty() ? nullptr : document_->find(current->path + "." + info.field);
+    if (name == nullptr || !name->is_string()) return info;
+    info.name = name->get<std::string>();
+    info.valid = !info.catalogs.empty();
+    return info;
+}
+
+bool DataEditor::copyEntry() {
+    const EntryInfo info = describeEntry();
+    if (!info.valid) {
+        refuse("choose an entry of a list first");
+        return false;
+    }
+    const sim::OrderedJson* list = document_->find(info.group);
+    sim::OrderedJson copy = (*list)[info.index];
+    std::set<std::string> taken;
+    for (const sim::OrderedJson& other : *list) {
+        if (other.is_object() && other.contains(info.field) && other[info.field].is_string()) taken.insert(other[info.field].get<std::string>());
+    }
+    const std::string name = form::uniqueName(info.name + (info.name.find(' ') != std::string::npos ? " copy" : "-copy"), taken);
+    copy[info.field] = name;
+    std::string reason;
+    if (!document_->insertElement(info.group, info.index + 1, std::move(copy), reason)) {
+        refuse(reason);
+        return false;
+    }
+    entryPath_ = sim::formatPath({{false, 0, info.group}, {true, info.index + 1, {}}});
+    scroll_ = 0;
+    refreshRows();
+    markStale();
+    say_("Data: copied " + info.name + " as " + name);
+    return true;
+}
+
+namespace {
+
+std::vector<std::string> useLines(const std::vector<refs::Use>& uses) {
+    std::vector<std::string> lines;
+    for (const refs::Use& use : uses) lines.push_back(std::format("{}:{}: {}{}", use.file, use.line, use.where, use.kind == "entry" ? " (the entry itself)" : ""));
+    return lines;
+}
+
+} // namespace
+
+bool DataEditor::beginRename(const std::string& newName) {
+    const EntryInfo info = describeEntry();
+    if (!info.valid) {
+        refuse("choose an entry of a list first");
+        return false;
+    }
+    if (dirty()) {
+        refuse("unsaved changes in " + openFile_ + ": save (Ctrl+S) or undo them first, a rename writes the files");
+        return false;
+    }
+    plan_ = refs::planRename(roots(), *set_, info.catalogs, info.name, newName);
+    if (!plan_.problem.empty()) {
+        refuse(plan_.problem);
+        return false;
+    }
+    std::set<std::string> files;
+    for (const refs::Use& use : plan_.uses) files.insert(use.file);
+    question_ = {Question::Kind::Rename, std::format("Rename {} to {}: {} places in {} files", info.name, newName, plan_.uses.size(), files.size()), useLines(plan_.uses), newName};
+    markStale();
+    return true;
+}
+
+bool DataEditor::beginDelete() {
+    const EntryInfo info = describeEntry();
+    if (!info.valid) {
+        refuse("choose an entry of a list first");
+        return false;
+    }
+    const std::vector<refs::Use> uses = refs::usesOf(roots(), *set_, info.catalogs, info.name);
+    question_ = {Question::Kind::Delete, std::format("Delete {}: still used in {} places", info.name, uses.size()), useLines(uses), std::string()};
+    if (uses.empty()) return confirm(); // nothing names it: no need to ask
+    markStale();
+    return true;
+}
+
+bool DataEditor::confirm() {
+    const EntryInfo info = describeEntry();
+    if (question_.kind == Question::Kind::None || !info.valid) return false;
+    if (question_.kind == Question::Kind::Delete) {
+        std::string reason;
+        if (!document_->removeElement(info.group, info.index, reason)) {
+            refuse(reason);
+            return false;
+        }
+        const std::size_t left = document_->find(info.group) != nullptr ? document_->find(info.group)->size() : 0;
+        entryPath_ = left == 0 ? std::string() : sim::formatPath({{false, 0, info.group}, {true, std::min(info.index, left - 1), {}}});
+        question_ = {};
+        scroll_ = 0;
+        refreshRows();
+        markStale();
+        say_("Data: deleted " + info.name + " (Ctrl+Z brings it back)");
+        return true;
+    }
+    // A rename: the plan for the name in the dialog (made now when the dialog was opened without one), written to every file it names.
+    if (plan_.texts.empty() && plan_.uses.empty()) plan_ = refs::planRename(roots(), *set_, info.catalogs, info.name, question_.name);
+    if (!plan_.problem.empty()) {
+        refuse(plan_.problem);
+        return false;
+    }
+    if (dirty()) {
+        refuse("unsaved changes in " + openFile_ + ": save (Ctrl+S) or undo them first");
+        return false;
+    }
+    if (const std::optional<std::string> problem = refs::applyPlan(plan_)) {
+        refuse("not renamed: " + *problem);
+        return false;
+    }
+    const std::size_t places = plan_.uses.size();
+    std::set<std::string> files;
+    for (const refs::Use& use : plan_.uses) files.insert(use.file);
+    std::string reason;
+    document_->reloadFromDisk(reason);
+    for (const auto& [path, text] : plan_.texts) {
+        (void)text;
+        if (saved_ && path.generic_string().starts_with(folder_.generic_string())) saved_(path); // the game reads the sets that watch the file again
+    }
+    say_(std::format("Data: renamed {} to {}: {} places in {} files", info.name, question_.name, places, files.size()));
+    plan_ = {};
+    question_ = {};
+    refreshIndex();
+    refreshRows();
+    markStale();
+    return true;
+}
+
+void DataEditor::cancel() {
+    question_ = {};
+    plan_ = {};
+    markStale();
+}
+
+std::vector<std::string> DataEditor::interactionsOfEntry() const {
+    std::vector<std::string> found;
+    const EntryInfo info = describeEntry();
+    if (!info.valid) return found;
+    std::set<std::string> tags; // the entry's own tags, when the file writes them
+    const form::Entry* current = nullptr;
+    for (const form::Entry& entry : entries_) {
+        if (entry.path == entryPath_) current = &entry;
+    }
+    if (const sim::OrderedJson* list = current != nullptr ? document_->find(current->path + ".tags") : nullptr; list != nullptr && list->is_array()) {
+        for (const sim::OrderedJson& tag : *list) {
+            if (tag.is_string()) tags.insert(tag.get<std::string>());
+        }
+    }
+    if (tagsOf_) {
+        for (const std::string& tag : tagsOf_(info.name)) tags.insert(tag);
+    }
+    std::error_code error;
+    for (const fs::directory_entry& file : fs::directory_iterator(folder_ / "interactions", error)) {
+        const std::string name = file.path().filename().string();
+        if (!file.is_regular_file() || file.path().extension() != ".json" || name.starts_with("defaults-") || name.find(".layout") != std::string::npos) continue;
+        const std::optional<std::string> text = core::readTextFile(file.path());
+        if (!text) continue;
+        const nlohmann::json data = nlohmann::json::parse(*text, nullptr, false, true);
+        if (data.is_discarded() || !data.contains("target") || !data.at("target").is_object()) continue;
+        const nlohmann::json& target = data.at("target");
+        bool matches = false;
+        if (target.contains("kinds") && target.at("kinds").is_array()) {
+            for (const nlohmann::json& kind : target.at("kinds")) matches = matches || (kind.is_string() && kind.get<std::string>() == info.name);
+        }
+        if (!matches && target.contains("tags") && target.at("tags").is_array() && !target.at("tags").empty() && !tags.empty()) {
+            matches = true;
+            for (const nlohmann::json& tag : target.at("tags")) matches = matches && tag.is_string() && tags.count(tag.get<std::string>()) != 0;
+        }
+        if (matches) found.push_back(file.path().stem().string());
+    }
+    std::sort(found.begin(), found.end());
+    return found;
+}
+
 bool DataEditor::changedOnDisk(const fs::path& file) {
     if (!document_) return false;
     std::error_code error;
@@ -579,10 +779,53 @@ void DataEditor::buildForm(Panel& panel) {
     if (rows_.empty()) panel.add<Label>(Rect{left, top, 300, kRow}, openFile_.empty() ? "Choose a file on the left." : "Nothing to show for this entry.");
 }
 
+// The dialog of a rename opens with the places that use the entry listed and the new name to type; Rename writes them all (confirm).
+void DataEditor::openRenameDialog() {
+    const EntryInfo info = describeEntry();
+    if (!info.valid) {
+        refuse("choose an entry of a list first");
+        return;
+    }
+    if (dirty()) {
+        refuse("unsaved changes in " + openFile_ + ": save (Ctrl+S) or undo them first, a rename writes the files");
+        return;
+    }
+    const std::vector<refs::Use> uses = refs::usesOf(roots(), *set_, info.catalogs, info.name);
+    plan_ = {};
+    question_ = {Question::Kind::Rename, std::format("Rename {}: used in {} places (type the new name)", info.name, uses.size()), useLines(uses), info.name};
+    markStale();
+}
+
+void DataEditor::buildQuestion(Panel& panel) {
+    const int width = std::min(viewWidth_ - 40, 640);
+    const int left = (viewWidth_ - width) / 2;
+    const int top = 30;
+    panel.add<Label>(Rect{left, top, width, 12}, question_.title, UiColor::Gold);
+    int y = top + 18;
+    if (question_.kind == Question::Kind::Rename) {
+        panel.add<TextField>(Rect{left, y, width, 12}, "new name: ", question_.name, 48, [this](const std::string& v) {
+            question_.name = v;
+            plan_ = {}; // another name: the plan is made again when it is confirmed
+        });
+        y += 18;
+    }
+    const std::vector<std::string> lines = question_.lines.empty() ? std::vector<std::string>{"(nothing uses it)"} : question_.lines;
+    const int rows = std::max(4, (viewHeight_ - y - 60) / luna::engine::kLineHeight);
+    panel.add<ListBox>(Rect{left, y, width, rows * luna::engine::kLineHeight}, lines, [](int) {});
+    y += rows * luna::engine::kLineHeight + 8;
+    const std::string yes = question_.kind == Question::Kind::Rename ? "Rename" : "Delete anyway";
+    panel.add<Button>(Rect{left, y, UiPainter::textWidth(yes) + 16, 14}, yes, [this] { confirm(); }).hint = "Do it (Esc leaves everything as it was)";
+    panel.add<Button>(Rect{left + UiPainter::textWidth(yes) + 24, y, 60, 14}, "Cancel", [this] { cancel(); });
+}
+
 void DataEditor::rebuild() {
     stale_ = false;
     panel_ = std::make_unique<Panel>(Rect{0, 0, viewWidth_, viewHeight_});
     Panel& panel = *panel_;
+    if (question_.kind != Question::Kind::None) { // a question has the whole screen until it is answered
+        buildQuestion(panel);
+        return;
+    }
     int x = 2;
     const auto button = [&](const std::string& label, const std::string& hint, std::function<void()> action) {
         const int width = UiPainter::textWidth(label) + 8;
@@ -594,6 +837,14 @@ void DataEditor::rebuild() {
     button("Undo", "Undo the last edit of this file (Ctrl+Z)", [this] { undo(); });
     button("Redo", "Redo it (Ctrl+Y)", [this] { redo(); });
     button("New entry", "Add a new entry to the list of this file", [this] { newEntry(); });
+    button("Copy", "Copy the chosen entry as a new one beside it", [this] { copyEntry(); });
+    button("Rename", "Rename the chosen entry everywhere it is used (data files, levels, rules, dialogues): the places are listed first", [this] { openRenameDialog(); });
+    button("Delete", "Delete the chosen entry; when it is still used the places are listed and you confirm (Ctrl+Z brings it back)", [this] { beginDelete(); });
+    button("Interactions", "Open the interactions that target the chosen entry in the interaction graph", [this] {
+        const std::vector<std::string> ids = interactionsOfEntry();
+        if (ids.empty()) say_("Data: no interaction names this entry as its target kind; the list of interactions opens");
+        if (openInteraction_) openInteraction_(ids.empty() ? std::string() : ids.front());
+    });
 
     const int listTop = kBar + 6;
     const int listHeight = viewHeight_ - kStatus - listTop - 4;
@@ -669,6 +920,10 @@ void DataEditor::update(const luna::engine::Intents& intents) {
     }
     panel_->handle(input);
     if (typing()) return;
+    if (question_.kind != Question::Kind::None) { // a question waits for its answer: only Esc (no) works besides the buttons
+        if (intents.pressed(luna::engine::Intent::OpenMenu)) cancel();
+        return;
+    }
     if (intents.pressed(luna::engine::Intent::Save)) save();
     if (intents.pressed(luna::engine::Intent::Undo)) undo();
     if (intents.pressed(luna::engine::Intent::Redo)) redo();

@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-193 Entity editor (Mraw) - 2026-10-06
+
+**State:** On `story/US-193`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 6 test cases, game 7).
+
+- **New:** `src/sim/data_refs.*` (the reference engine: `usesOf`, `planRename`, `applyPlan`, `replaceWord`, `validEntryName`), `docs/plans/US-193.md`, `docs/evidence/US-193/`; tests `tests/sim/data_refs_test.cpp`, cases in `tests/game/data_editor_test.cpp` and `tests/game/live_catalog_test.cpp`.
+- **Changed:** the Data tab (`src/game/data_editor.*`) gets Copy, Rename, Delete and Interactions and a question dialog; the Editor opens the interaction graph from the tab (`setOpenInteraction`); the game tells the tab each kind's tags (`setTagsOf`); the form offers Remove only for optional fields (`src/sim/data_form.cpp`); `CMakeLists.txt`; guides `data-editor.md` and `schemas.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-19*`: sim 41 of 41, game 25 of 25.
+
 ## US-191 Schema-driven form editor (Mraw) - 2026-10-06
 
 **State:** On `story/US-191`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 22 test cases, game 16, Luna 1); the results of the whole game and Simulation runs are in Milestone-145.md.
