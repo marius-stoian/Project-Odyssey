@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-192 Picture pickers and cutting frames (Mraw) - 2026-10-06
+
+**State:** On `story/US-192`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (game 5).
+
+- **New:** `src/game/atlas_cuts.*` (`addCut`, `rebuildAtlases`, `cutSheets`, `cutTargets`: the cut and the library call of the atlas cutter), `src/game/picture_tool.*` (`PictureGrid`, `SheetView`, `PictureTool`: the picker and the Cut tool), `docs/plans/US-192.md`, `docs/evidence/US-192/`; tests `tests/game/picture_tool_test.cpp`.
+- **Changed:** the Data tab (`src/game/data_editor.*`): a **...** picker on every frame field, a **Cut tool** button, and the frames of the chosen entry playing beside its form; `OdysseyGame` gives the tab the sprites folder and the renderer's texture maker (`setPictures`); `CMakeLists.txt`; guide `docs/guides/data-editor.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-192*`: game 5 of 5.
+
 ## US-196 Daily routines as data (Mraw) - 2026-10-06
 
 **State:** On `story/US-196`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 7, game 4).

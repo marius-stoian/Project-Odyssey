@@ -2312,3 +2312,25 @@ for (const std::string& tag : tags)               // each tag of the choice, onc
 **Try it (5 minutes).** F2, **Data**, `hero/professions.json`, the hunter. Drag the second block of the bar from 14:00 to 12:00, Ctrl+S, then run `git diff assets/data/hero/professions.json`: one line changed.
 
 **Check yourself.** Why does a weight multiply a score instead of adding to it? (Think of a weight of 0.)
+
+
+## US-192: pictures instead of names, and cutting without the command line (M11)
+
+**What we built.** Three things in the Data tab. A field that names a picture (`frame`) has a **...** button that opens the atlas as a grid of pictures: click one and its name is written for you. An effect or an animal selected in the form plays its frames in a small box. And a **Cut tool**: pick one of your sheets, drag a rectangle round a new picture, name it, press Cut, and the cut is added to `cuts.json` or `content-cuts.json` and the atlas is cut again.
+
+**The idea: one cutter, two doors.** Until now only the command-line program `odysseus_atlas` could cut the atlas. The code it uses (`loadCuts`, `cutAtlas`, `saveAtlas`...) already lived in the game library, so the Cut tool does not start a program: it calls the same functions. Two doors into one room means the picture you cut in the Editor is exactly the picture the command line would have cut.
+
+```cpp
+const CutList cuts = loadCuts(sprites / "cuts.json");
+saveAtlas(cutAtlas(cuts, sprites), sprites / "atlas");   // the same three calls as odysseus_atlas
+```
+
+**The idea: add a line without rewriting the file.** The cuts file is the owner's, written by hand, one cut per line. The tool does not print the whole file again: it opens it as a document, adds one element and saves by *patching the text* (US-191), so the new line takes the style of its neighbours and nothing else changes. Before it writes, it checks everything it can: the sheet is there, the rectangle is inside it, the name is new. If cutting the atlas still fails afterwards, it puts the old file text back.
+
+**The idea: a screen that only reports.** The grid and the sheet viewer know nothing about files. The grid says "this name was clicked", the viewer says "this rectangle was dragged", and the Data tab decides what to do with them (write a field, remember a rectangle). That is why the same grid serves the picker and could serve any other list of pictures.
+
+**Where to look.** `addCut` in `src/game/atlas_cuts.cpp`, `PictureGrid::handle` and `SheetView::handle` in `src/game/picture_tool.cpp`, `DataEditor::refreshPreview`, `tests/game/picture_tool_test.cpp`.
+
+**Try it (10 minutes).** F2, **Data**, **Cut tool**: choose a sheet, target `icons`, drag round an icon, name it, **Cut**. Then open `weapons.json`, press **...** on the `frame` of a weapon and pick your new icon: it plays in the box.
+
+**Check yourself.** Why does the tool check the rectangle and the name before it writes anything, instead of writing and then looking at what the atlas says?
