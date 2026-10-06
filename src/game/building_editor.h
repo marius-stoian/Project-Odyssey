@@ -47,13 +47,11 @@ public:
     bool placeAt(const luna::engine::TileMap& ground, int cellX, int cellY, bool blueprint = false);
     // Why the current kind cannot stand with its middle on cell (x, y): "" when it can.
     std::string whyNot(const luna::engine::TileMap& ground, int cellX, int cellY) const;
-    int placedTurns() const { return turns_; }
     void turnPlaced() { turns_ = (turns_ + 1) % 4; }
     // ---- a selected building
     bool selectAt(int worldX, int worldY);  // true when a building of the level is there (the topmost); it becomes the selection
     void clearSelection();
     bool hasSelection() const { return selected_ != 0; }
-    int selectedId() const { return selected_; }
     const PlacedBuildingSpec* selectedSpec() const;
     bool turnSelected();
     bool removeSelected();
@@ -80,8 +78,6 @@ public:
     bool setPrefabCost(const std::string& text);    // "wood=10 fur=2"; empty: the sum of the pieces
     void setPrefabSeconds(int seconds);             // 0: the sum of the pieces
     bool savePrefab();                              // checks the draft, writes assets/data/buildings/prefabs/<id>.json, adds it to the data and tells the game
-    const std::string& selectedPiece() const { return piece_; }
-    void selectPiece(const std::string& id) { piece_ = id; }
 
     // ---- the panels
     // Every tick: true when the pointer is over a panel of this class (so the map does not get the click).

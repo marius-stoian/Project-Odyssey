@@ -1,13 +1,13 @@
 #include "sim/building_data.h"
 
+#include "core/text.h"
+
 #include "sim/npc_class.h"
 #include "sim/rule_json.h"
 
 #include <algorithm>
 #include <format>
-#include <fstream>
 #include <set>
-#include <sstream>
 
 namespace odysseus::sim::buildings {
 
@@ -292,14 +292,6 @@ std::optional<KindDef> parseKindValue(const BuildingData& data, const JsonValue&
     return kind;
 }
 
-std::string readFile(const std::filesystem::path& file, bool& ok) {
-    std::ifstream in(file, std::ios::binary);
-    ok = static_cast<bool>(in);
-    std::stringstream text;
-    if (in) text << in.rdbuf();
-    return text.str();
-}
-
 void parsePieces(std::vector<PieceDef>& pieces, std::map<std::string, MaterialFire>& materials, int& maxRoomCells, std::string_view text, const std::string& name,
                  LoadReport& report, const std::set<std::string>& knownItems) {
     const rules::JsonParseResult parsed = parseJson(text);
@@ -397,20 +389,19 @@ BuildingData BuildingData::load(const std::filesystem::path& folder, LoadReport&
     BuildingData data;
     std::error_code ec;
     if (!std::filesystem::is_directory(folder, ec)) return data;
-    bool ok = false;
-    const std::string piecesText = readFile(folder / "pieces.json", ok);
+    const std::optional<std::string> piecesText = core::readTextFile(folder / "pieces.json");
     ++report.filesRead;
-    if (!ok) {
+    if (!piecesText) {
         report.errors.push_back({"buildings/pieces.json", 0, "the file cannot be read"});
         return data;
     }
-    parsePieces(data.pieces_, data.materials_, data.maxRoomCells_, piecesText, "buildings/pieces.json", report, knownItems);
+    parsePieces(data.pieces_, data.materials_, data.maxRoomCells_, *piecesText, "buildings/pieces.json", report, knownItems);
     std::sort(data.pieces_.begin(), data.pieces_.end(), [](const PieceDef& a, const PieceDef& b) { return a.id < b.id; });
-    const std::string kindsText = readFile(folder / "kinds.json", ok);
+    const std::optional<std::string> kindsText = core::readTextFile(folder / "kinds.json");
     ++report.filesRead;
     std::vector<KindDef> kinds;
-    if (!ok) report.errors.push_back({"buildings/kinds.json", 0, "the file cannot be read"});
-    else parseKinds(data, kinds, kindsText, report, knownItems);
+    if (!kindsText) report.errors.push_back({"buildings/kinds.json", 0, "the file cannot be read"});
+    else parseKinds(data, kinds, *kindsText, report, knownItems);
     std::set<std::string> seen;
     for (const KindDef& kind : kinds) seen.insert(kind.id);
     data.kinds_ = std::move(kinds);
@@ -422,12 +413,12 @@ BuildingData BuildingData::load(const std::filesystem::path& folder, LoadReport&
     for (const std::filesystem::path& file : prefabs) {
         ++report.filesRead;
         const std::string name = "buildings/prefabs/" + file.filename().generic_string();
-        const std::string text = readFile(file, ok);
-        if (!ok) {
+        const std::optional<std::string> text = core::readTextFile(file);
+        if (!text) {
             report.errors.push_back({name, 0, "the file cannot be read"});
             continue;
         }
-        const rules::JsonParseResult parsed = parseJson(text);
+        const rules::JsonParseResult parsed = parseJson(*text);
         if (!parsed.value) {
             report.errors.push_back({name, parsed.errorLine, parsed.error});
             continue;
@@ -456,14 +447,6 @@ const KindDef* BuildingData::kind(std::string_view id) const {
 const MaterialFire* BuildingData::material(std::string_view name) const {
     const auto found = materials_.find(std::string(name));
     return found == materials_.end() ? nullptr : &found->second;
-}
-
-std::vector<const KindDef*> BuildingData::buildableKinds() const {
-    std::vector<const KindDef*> out;
-    for (const KindDef& k : kinds_) {
-        if (k.buildable) out.push_back(&k);
-    }
-    return out;
 }
 
 void BuildingData::addKind(KindDef kind) {

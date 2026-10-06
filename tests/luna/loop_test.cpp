@@ -58,3 +58,13 @@ TEST_CASE("US-020 Steady") {
         CHECK(stats.averageFps() == doctest::Approx(60.0).epsilon(0.001));
     }
 }
+
+TEST_CASE("Refactor: a time window keeps the last N timings, their average and the worst") {
+    luna::engine::TimeWindow<3> window;
+    CHECK(window.empty());
+    CHECK(window.average() == 0.0);
+    for (const double ms : {1.0, 9.0, 2.0, 4.0}) window.add(ms); // the 1.0 falls out
+    CHECK(window.last() == 4.0);
+    CHECK(window.average() == doctest::Approx(5.0));
+    CHECK(window.worst() == 9.0);
+}

@@ -60,13 +60,6 @@ void stepProjectile(Projectile& projectile, const Air& air, Fixed dt) {
     projectile.position += projectile.velocity * dt;
 }
 
-void stepProjectileTick(Projectile& projectile, const Air& air) {
-    const Fixed dt = substepSeconds();
-    for (std::int64_t step = 0; step < kProjectileSubsteps; ++step) {
-        stepProjectile(projectile, air, dt);
-    }
-}
-
 std::optional<ProjectileHit> flyTick(Projectile& projectile, const Air& air, Fixed tipRadius,
                                      const std::vector<Shape>& obstacles) {
     const Fixed dt = substepSeconds();

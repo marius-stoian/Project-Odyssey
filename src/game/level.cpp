@@ -1,5 +1,6 @@
 #include "game/level.h"
 
+#include "core/text.h"
 #include "game/lighting.h"
 #include "game/tags.h"
 #include "sim/building_data.h"
@@ -14,7 +15,6 @@
 
 #include <algorithm>
 #include <format>
-#include <fstream>
 #include <stdexcept>
 #include <system_error>
 
@@ -802,23 +802,7 @@ void saveLevel(const Level& level, const Definitions& definitions, const std::fi
         }
         data["places"] = places;
     }
-    fs::create_directories(file.parent_path());
-    const fs::path temporary = fs::path(file.string() + ".tmp");
-    {
-        std::ofstream out(temporary, std::ios::binary | std::ios::trunc);
-        if (!out) throw DataError(temporary, "(file)", "cannot be written");
-        out << data.dump(1) << '\n';
-        out.flush();
-        if (!out) throw DataError(temporary, "(file)", "could not be written completely (is the disk full?)");
-    }
-    auto backup = [&](int number) { return fs::path(file.string() + ".bak" + std::to_string(number)); };
-    std::error_code ignored;
-    fs::remove(backup(kLevelBackups), ignored);
-    for (int number = kLevelBackups - 1; number >= 1; --number) {
-        if (fs::exists(backup(number))) fs::rename(backup(number), backup(number + 1));
-    }
-    if (fs::exists(file)) fs::rename(file, backup(1));
-    fs::rename(temporary, file);
+    if (const auto problem = core::writeTextFileSafely(file, data.dump(1) + '\n', kLevelBackups)) throw DataError(file, "(file)", *problem);
 }
 
 } // namespace odysseus::game

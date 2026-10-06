@@ -235,7 +235,6 @@ public:
     bool setKindPartnerActions(const std::string& partnerType, const std::string& text);
     // The partner types the dialogue row offers, from data: player, animal, environment and one class:<id> for every class.
     std::vector<std::string> partnerTypes() const;
-    bool settingsShown() const { return settingsShown_; }
     void showSettings(bool shown);
 
     // Levels on disk: the file being edited, the other levels next to it, and switching.

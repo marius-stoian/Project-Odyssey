@@ -97,9 +97,7 @@ public:
     bool testing() const { return test_ != nullptr; }
     sim::rules::TestPlay* testPlay() { return test_.get(); }
     void setTestWords(std::string words) { testWords_ = std::move(words); }
-    const std::string& testWords() const { return testWords_; }
     bool testChoose(int visibleIndex);
-    bool testShown() const { return testShown_; }
     void showTest(bool shown);
     luna::engine::Rect canvasBounds() const { return canvas_; }
     luna::engine::Rect problemListBounds() const { return problemList_->bounds; }

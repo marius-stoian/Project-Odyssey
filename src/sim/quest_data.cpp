@@ -1,5 +1,7 @@
 #include "sim/quest_data.h"
 
+#include "core/text.h"
+
 #include <algorithm>
 #include <cctype>
 #include <format>
@@ -14,18 +16,6 @@ namespace {
 bool isWord(const std::string& s) {
     if (s.empty()) return false;
     return std::all_of(s.begin(), s.end(), [](char c) { return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_' || c == '-'; });
-}
-
-std::vector<std::string> splitWords(std::string_view s) {
-    std::vector<std::string> words;
-    std::size_t i = 0;
-    while (i < s.size()) {
-        while (i < s.size() && (s[i] == ' ' || s[i] == '\t')) ++i;
-        const std::size_t start = i;
-        while (i < s.size() && s[i] != ' ' && s[i] != '\t') ++i;
-        if (i > start) words.emplace_back(s.substr(start, i - start));
-    }
-    return words;
 }
 
 // "30s", "2m", "1d": a length of time. Whole numbers only.
@@ -340,13 +330,6 @@ private:
     }
 };
 
-std::string readWholeFile(const std::filesystem::path& file, bool& ok) {
-    std::ifstream in(file, std::ios::binary);
-    ok = static_cast<bool>(in);
-    if (!ok) return {};
-    return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
-}
-
 std::string quoted(const std::string& text) { return quoteJson(text); }
 
 } // namespace
@@ -362,7 +345,7 @@ ParsedObjective parseObjective(std::string_view source) {
     ParsedObjective result;
     QuestObjective& o = result.objective;
     o.source = std::string(source);
-    const std::vector<std::string> words = splitWords(source);
+    const std::vector<std::string> words = core::splitWords(source);
     if (words.empty()) {
         result.problem = "the objective is empty (write for example \"gather berries 3\")";
         return result;
@@ -441,7 +424,7 @@ std::string objectiveText(const QuestObjective& o) {
     if (!o.source.empty()) {
         // Written back in the plain form: single spaces, same words.
         std::string text;
-        for (const std::string& w : splitWords(o.source)) text += (text.empty() ? "" : " ") + w;
+        for (const std::string& w : core::splitWords(o.source)) text += (text.empty() ? "" : " ") + w;
         return text;
     }
     std::string text = kindWord(o.kind);
@@ -506,13 +489,12 @@ std::vector<Quest> loadQuests(const std::filesystem::path& folder, LoadReport& r
     for (const std::filesystem::path& file : files) {
         ++report.filesRead;
         const std::string name = folder.filename().generic_string() + "/" + file.filename().generic_string();
-        bool ok = false;
-        const std::string text = readWholeFile(file, ok);
-        if (!ok) {
+        const std::optional<std::string> text = core::readTextFile(file);
+        if (!text) {
             report.errors.push_back({name, 0, "the file cannot be read"});
             continue;
         }
-        if (auto quest = parseQuest(text, name, report, file.stem().string())) quests.push_back(std::move(*quest));
+        if (auto quest = parseQuest(*text, name, report, file.stem().string())) quests.push_back(std::move(*quest));
     }
     std::sort(quests.begin(), quests.end(), [](const Quest& a, const Quest& b) { return a.id < b.id; });
     report.loaded += static_cast<int>(quests.size());

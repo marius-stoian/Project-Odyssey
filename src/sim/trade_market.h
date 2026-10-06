@@ -75,7 +75,6 @@ public:
     explicit TradeMarket(PriceConfig config = {}, std::uint64_t seed = 0) : config_(config), seed_(seed) {}
 
     const PriceConfig& config() const { return config_; }
-    void setConfig(const PriceConfig& config) { config_ = config; }
     void setSeed(std::uint64_t seed) { seed_ = seed; }
     std::uint64_t seed() const { return seed_; }
 

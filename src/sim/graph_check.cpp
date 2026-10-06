@@ -1,10 +1,11 @@
 #include "sim/graph_check.h"
 
+#include "core/text.h"
+
 #include "sim/needs.h"
 #include "sim/rule_effect.h"
 
 #include <algorithm>
-#include <cctype>
 #include <deque>
 #include <format>
 #include <functional>
@@ -14,17 +15,6 @@ namespace odysseus::sim::rules {
 namespace {
 
 using Kind = GraphFinding::Kind;
-
-bool isNeedName(const std::string& name) {
-    const auto lower = [](std::string s) {
-        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        return s;
-    };
-    for (std::size_t i = 0; i < kNeedCount; ++i) {
-        if (lower(name) == lower(needName(static_cast<Need>(i)))) return true; // the game reads need names in any case
-    }
-    return false;
-}
 
 struct Checker {
     const GraphCatalog& catalog;
@@ -42,7 +32,7 @@ struct Checker {
                 return i < e.args.size() && e.args[i] && e.args[i]->kind == Expr::Kind::Text ? e.args[i].get() : nullptr;
             };
             if (e.text == "need") {
-                if (const Expr* w = word(0); w != nullptr && !isNeedName(w->text)) add(Kind::UnknownNeed, true, key, std::format("{}: unknown need \"{}\"", where, w->text));
+                if (const Expr* w = word(0); w != nullptr && !needFromName(w->text)) add(Kind::UnknownNeed, true, key, std::format("{}: unknown need \"{}\"", where, w->text));
             } else if (e.text == "has") {
                 const Expr* w = word(e.args.size() == 3 ? 1 : 0);
                 if (w != nullptr && !catalog.items.empty() && catalog.items.count(w->text) == 0) {

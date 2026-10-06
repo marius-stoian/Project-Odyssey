@@ -65,7 +65,6 @@ public:
     // Every id apply() has met, and the ones of those without an entry.
     const std::set<std::string>& asked() const { return asked_; }
     std::vector<std::string> missing() const;
-    void forgetAsked() { asked_.clear(); }
 
 private:
     std::map<std::string, Entry> entries_;

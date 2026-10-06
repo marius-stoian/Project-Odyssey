@@ -29,14 +29,13 @@ class Sword {
 public:
     Sword(SwordConfig config = {});
 
-    // Start a slash attack in the given direction.
-    void slash(Facing facing);
+    // Start a slash attack; the game hits the nearest enemy in range (any direction).
+    void slash();
 
     // One simulation tick: update slash animation and cooldown.
     void update();
 
     const SwordSlash& state() const { return state_; }
-    Facing lastSlashFacing() const { return lastSlashFacing_; }
     SwordConfig config() const { return config_; }
 
     // Animation frame for the current state: 0-3 for slash, 0 for idle/cooldown.
@@ -52,7 +51,6 @@ public:
 private:
     SwordConfig config_;
     SwordSlash state_;
-    Facing lastSlashFacing_ = Facing::South;
     bool hasHitInThisSlash_ = false;
 };
 

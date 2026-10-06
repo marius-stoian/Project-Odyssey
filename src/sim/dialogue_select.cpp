@@ -1,9 +1,10 @@
 #include "sim/dialogue_select.h"
 
+#include "core/text.h"
+
 #include "sim/conversation.h"
 
 #include <algorithm>
-#include <cctype>
 
 namespace odysseus::sim::rules {
 
@@ -11,17 +12,12 @@ namespace {
 
 constexpr int kChildYears = 12;
 
-std::string lowered(std::string text) {
-    for (char& c : text) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-    return text;
-}
-
 // How well one word of `@who` names this NPC: 3 = their own name, 2 = a role they have, 1 = their kind, 0 = not them.
 int wordMatch(const std::string& word, const WhoFacts& who) {
-    const std::string w = lowered(word);
-    if (w == lowered(who.name)) return 3;
+    const std::string w = core::lowered(word);
+    if (w == core::lowered(who.name)) return 3;
     if (std::find(who.roles.begin(), who.roles.end(), w) != who.roles.end()) return 2;
-    if (w == lowered(who.kind)) return 1;
+    if (w == core::lowered(who.kind)) return 1;
     return 0;
 }
 

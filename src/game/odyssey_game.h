@@ -4,6 +4,7 @@
 
 #include "luna/engine/application.h"
 #include "luna/engine/camera.h"
+#include "luna/engine/frame_stats.h"
 #include "luna/engine/game.h"
 #include "luna/engine/renderer.h"
 #include "luna/engine/tile_map.h"
@@ -140,7 +141,6 @@ public:
     sim::ItemCounts itemValues() const;
     // The life of the placed people (US-290): schedules, homes, interruptions (the places of the level are its places).
     const sim::NpcDirector& npcDirector() const { return npcDirector_; }
-    sim::NpcDirector& npcDirectorMutable() { return npcDirector_; }
     // A world event happens at (x, y), world pixels (a fire starts): the people it concerns near it answer (US-291).
     void postWorldEvent(const std::string& trigger, int x, int y);
     // Where a placed person stands now, world pixels: its figure walks to where its schedule sends it; a person without a figure stands where it was placed.
@@ -150,9 +150,6 @@ public:
     // The conversations of assets/data/dialogue/ (US-160), read and reloaded together with the interaction files; their mistakes are in the
     // same report and panel (as "dialogue/<name>.dlg:<line>: message").
     const sim::rules::DialogueLibrary& dialogues() const { return dialogues_; }
-    // Smart objects (US-151): what a plant is to the rules (its kind and tags), and what the hero may do to it now, in menu order,
-    // with the reason when an item is disabled.
-    sim::rules::ThingInfo plantThing(std::size_t index) const;
     std::vector<sim::rules::Offer> plantOffers(std::size_t index) const;
     // The same for any Subject (a clan member, a fire, the stone, a rival camp, a plant): what the hero may do to it now, in menu order,
     // with the reason for a disabled item (US-152).
@@ -264,7 +261,6 @@ public:
     bool inspecting() const { return inspection_.ticks > 0; }
     const std::string& inspectedName() const { return inspection_.name; }
     const std::string& inspectedText() const { return inspection_.text; }
-    const PlantArt& plantArt() const { return plantArt_; }
     const LightingData& lighting() const { return lighting_; }
     // The simulated clan (US-032, D-30): on in levels marked "clan": true, or with `--clan`. It is the M2 simulation running
     // inside the game, one simulation tick per game tick, and the view puts each person somewhere and walks them there.
@@ -305,8 +301,6 @@ public:
     const GameSettings& settings() const { return settings_; }
     // The performance overlay (US-082): F3. Frame rate and frame time over the last second of frames, and the time one simulation
     // tick (the clan, the rivals and the run) takes: its average and its worst over the last 100 ticks.
-    bool overlayOn() const { return overlayOn_; }
-    void showOverlay(bool on) { overlayOn_ = on; }
     double framesPerSecond() const;
     double frameMilliseconds() const;
     double tickMilliseconds() const;
@@ -421,8 +415,6 @@ public:
     // Starts under the named weather (false when weather.json has none of that name).
     bool setWeatherNamed(const std::string& name);
     const WeatherCycle& weather() const { return weather_; }
-    const EffectArt& effectArt() const { return effectArt_; }
-    const AnimalArt& animalArt() const { return animalArt_; }
     // Arrows, bolts and thrown weapons in flight or stuck in the ground (US-140): physics arcs with height.
     const std::vector<ArcShot>& arcShots() const { return arcShots_; }
     // Mouse aiming (US-139): while a catalog weapon is held and the pointer is over the picture,
@@ -432,8 +424,6 @@ public:
     bool aiming() const { return aiming_; }
     double aimDirectionX() const { return aimDx_; } // unit vector from the hero's feet to the pointer
     double aimDirectionY() const { return aimDy_; }
-    double aimTargetX() const { return aimTargetX_; } // where the pointer is in the world, pixels
-    double aimTargetY() const { return aimTargetY_; }
     // Starts the named effect (effects.json) centred on a world point, `size` pixels across.
     // Does nothing when the content atlas or the effect is missing.
     void playEffect(const std::string& name, double x, double y, int size = 0);
@@ -575,9 +565,7 @@ private:
     bool overlayOn_ = false;
     bool perfLog_ = false;
     int startingPeople_ = 0; // 0: the data's number
-    std::array<double, 60> drawTimes_{};
-    std::size_t drawTimeAt_ = 0;
-    std::size_t drawTimesFilled_ = 0;
+    luna::engine::TimeWindow<60> drawTimes_;
     double gpuMs_ = -1.0;
     struct PerfTotals {
         std::uint64_t frames = 0;
@@ -587,12 +575,8 @@ private:
     } perf_;
     std::chrono::steady_clock::time_point perfLastLog_{};
     void recordFrame(double drawMs, double gpuMs);
-    std::array<double, 100> tickTimes_{};
-    std::array<double, 60> frameTimes_{};
-    std::size_t tickTimeAt_ = 0;
-    std::size_t frameTimeAt_ = 0;
-    std::size_t tickTimesFilled_ = 0;
-    std::size_t frameTimesFilled_ = 0;
+    luna::engine::TimeWindow<100> tickTimes_;
+    luna::engine::TimeWindow<60> frameTimes_;
     std::chrono::steady_clock::time_point lastRender_{};
     void drawOverlay(luna::engine::Renderer& renderer) const;
     GameSettings settings_;

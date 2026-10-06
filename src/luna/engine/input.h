@@ -8,7 +8,9 @@
 
 #include <array>
 #include <cstddef>
+#include <optional>
 #include <string>
+#include <string_view>
 
 namespace luna::engine {
 
@@ -49,6 +51,9 @@ enum class Intent {
 };
 
 inline constexpr std::size_t kIntentCount = static_cast<std::size_t>(Intent::Count);
+
+// The intent named as scripts write it ("MoveUp", "Slot3", "ZoomIn"): the enum name exactly. Nothing for an unknown name.
+std::optional<Intent> intentFromName(std::string_view name);
 
 enum class PointerButton { Left, Right, Middle, Count };
 

@@ -1,5 +1,7 @@
 #include "game/odyssey_game.h"
 
+#include "core/text.h"
+
 #include "sim/data.h"
 
 #include "luna/engine/scaled_renderer.h"
@@ -24,7 +26,6 @@
 #include <chrono>
 #include <cmath>
 #include <format>
-#include <fstream>
 #include <iterator>
 #include <cstdlib>
 #include <numbers>
@@ -934,11 +935,6 @@ std::set<std::string> OdysseyGame::knownTags() const {
     return tags;
 }
 
-sim::rules::ThingInfo OdysseyGame::plantThing(std::size_t index) const {
-    const WorldPlant& plant = plants_.at(index);
-    return {plant.kind, plant.def != nullptr ? plant.def->tags : std::vector<std::string>{}};
-}
-
 std::vector<sim::rules::Offer> OdysseyGame::plantOffers(std::size_t index) const {
     return offersFor(plantSubject(*this, index));
 }
@@ -1181,33 +1177,21 @@ void OdysseyGame::drawRunWorld(luna::engine::Renderer& renderer, const luna::eng
     }
 }
 
-double OdysseyGame::frameMilliseconds() const {
-    if (frameTimesFilled_ == 0) return 0.0;
-    double total = 0.0;
-    for (std::size_t i = 0; i < frameTimesFilled_; ++i) total += frameTimes_[i];
-    return total / static_cast<double>(frameTimesFilled_);
-}
+double OdysseyGame::frameMilliseconds() const { return frameTimes_.average(); }
 
 double OdysseyGame::framesPerSecond() const {
     const double ms = frameMilliseconds();
     return ms > 0.0 ? 1000.0 / ms : 0.0;
 }
 
-double OdysseyGame::drawMilliseconds() const {
-    if (drawTimesFilled_ == 0) return 0.0;
-    double total = 0.0;
-    for (std::size_t i = 0; i < drawTimesFilled_; ++i) total += drawTimes_[i];
-    return total / static_cast<double>(drawTimesFilled_);
-}
+double OdysseyGame::drawMilliseconds() const { return drawTimes_.average(); }
 
 // One drawn frame: the draw time, the card's time (when measured) and, in a performance run, the totals and a line a minute.
 void OdysseyGame::recordFrame(double drawMs, double gpuMs) {
-    drawTimes_[drawTimeAt_] = drawMs;
-    drawTimeAt_ = (drawTimeAt_ + 1) % drawTimes_.size();
-    drawTimesFilled_ = std::min(drawTimesFilled_ + 1, drawTimes_.size());
+    drawTimes_.add(drawMs);
     gpuMs_ = gpuMs;
-    if (!perfLog_ || frameTimesFilled_ == 0) return;
-    const double frameMs = frameTimes_[(frameTimeAt_ + frameTimes_.size() - 1) % frameTimes_.size()];
+    if (!perfLog_ || frameTimes_.empty()) return;
+    const double frameMs = frameTimes_.last();
     ++perf_.frames;
     if (frameMs > 20.0) ++perf_.over20;
     perf_.frameSum += frameMs;
@@ -1233,18 +1217,9 @@ void OdysseyGame::recordFrame(double drawMs, double gpuMs) {
     }
 }
 
-double OdysseyGame::tickMilliseconds() const {
-    if (tickTimesFilled_ == 0) return 0.0;
-    double total = 0.0;
-    for (std::size_t i = 0; i < tickTimesFilled_; ++i) total += tickTimes_[i];
-    return total / static_cast<double>(tickTimesFilled_);
-}
+double OdysseyGame::tickMilliseconds() const { return tickTimes_.average(); }
 
-double OdysseyGame::worstTickMilliseconds() const {
-    double worst = 0.0;
-    for (std::size_t i = 0; i < tickTimesFilled_; ++i) worst = std::max(worst, tickTimes_[i]);
-    return worst;
-}
+double OdysseyGame::worstTickMilliseconds() const { return tickTimes_.worst(); }
 
 // F3: the numbers a slow game shows first (US-082).
 void OdysseyGame::drawOverlay(luna::engine::Renderer& renderer) const {
@@ -1351,13 +1326,11 @@ bool OdysseyGame::loadAutosave() {
             clanView_.setHidden(life_->personId());
             clanView_.update(*clan_, map_);
         }
-        if (std::ifstream things(saveDirectory_ / "things.json", std::ios::binary); things) {
-            const std::string text((std::istreambuf_iterator<char>(things)), std::istreambuf_iterator<char>());
-            for (const std::string& note : restoreThings(text)) notes += (notes.empty() ? "" : "; ") + note;
+        if (const std::optional<std::string> text = core::readTextFile(saveDirectory_ / "things.json")) {
+            for (const std::string& note : restoreThings(*text)) notes += (notes.empty() ? "" : "; ") + note;
         }
-        if (std::ifstream built(saveDirectory_ / "buildings.json", std::ios::binary); built) {
-            const std::string text((std::istreambuf_iterator<char>(built)), std::istreambuf_iterator<char>());
-            for (const std::string& note : buildings_.loadText(text)) notes += (notes.empty() ? "" : "; ") + note;
+        if (const std::optional<std::string> text = core::readTextFile(saveDirectory_ / "buildings.json")) {
+            for (const std::string& note : buildings_.loadText(*text)) notes += (notes.empty() ? "" : "; ") + note;
             if (runChanges_.of(LevelBaseline::Building).updated.size() + runChanges_.of(LevelBaseline::Building).removed.size() > 0) buildings_.mergeLevel(*this, runChanges_.of(LevelBaseline::Building));
             buildings_.syncObstacles(*this);
         }
@@ -2041,9 +2014,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         life_->update();
         if (life_->phase() == sim::Phase::Ended && runFlow_.screen() != Screen::Ended) runFlow_.openEnded();
     }
-    tickTimes_[tickTimeAt_] = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tickStarted).count();
-    tickTimeAt_ = (tickTimeAt_ + 1) % tickTimes_.size();
-    tickTimesFilled_ = std::min(tickTimesFilled_ + 1, tickTimes_.size());
+    tickTimes_.add(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tickStarted).count());
     if (messageTicks_ > 0 && --messageTicks_ == 0) message_.clear();
     updateDevTools(intents);
     // After a fall the hero waits out a short fade, then starts again at the hero start.
@@ -2111,7 +2082,7 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
     } else if (!fallen && intents.pressed(luna::engine::Intent::Interact) && !heldSlotName.empty()) {
         if (currentWeapon_ == WeaponType::Sword) {
             // Perform sword slash in the direction the hero is facing.
-            sword_.slash(hero_.facing());
+            sword_.slash();
             core::logInfo(std::format("Sword slash facing {}", facingName(hero_.facing())));
         } else {
             // Throw spear (bow).
@@ -2375,9 +2346,7 @@ void OdysseyGame::render(luna::engine::Renderer& output, double alpha) {
     output.measureGpu(overlayOn_ || perfLog_);
     const auto renderStarted = std::chrono::steady_clock::now();
     if (lastRender_.time_since_epoch().count() != 0) {
-        frameTimes_[frameTimeAt_] = std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count();
-        frameTimeAt_ = (frameTimeAt_ + 1) % frameTimes_.size();
-        frameTimesFilled_ = std::min(frameTimesFilled_ + 1, frameTimes_.size());
+        frameTimes_.add(std::chrono::duration<double, std::milli>(renderStarted - lastRender_).count());
     }
     lastRender_ = renderStarted;
     // The world is drawn zoomed and the interface scaled (US-232): each is laid out in its own small pixels.

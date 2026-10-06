@@ -1,6 +1,7 @@
 #include "luna/engine/input.h"
 
 #include <algorithm>
+#include <iterator>
 #include <optional>
 #include <utility>
 
@@ -271,6 +272,21 @@ Intents InputMap::nextTick() {
     pointer_.released.fill(false);
     pointer_.wheel = 0;
     return intents;
+}
+
+// One name per intent, in enum order; the static_assert catches an intent added without its name.
+constexpr std::string_view kIntentNames[] = {
+    "MoveUp", "MoveDown", "MoveLeft", "MoveRight", "Interact", "OpenMenu", "SwitchWeapon",
+    "ModeGame", "ModeEditor", "Undo", "Redo", "Save", "Delete", "ToggleGrid", "Rotate", "Erase", "Confirm",
+    "Slot1", "Slot2", "Slot3", "Slot4", "Slot5", "Slot6", "Slot7", "Slot8", "Slot9",
+    "Attack", "Inspect", "DevTools", "Overlay", "Reload", "ZoomIn", "ZoomOut", "Confront", "Actions", "Build", "Journal",
+    "QuestDebug", "PlayHere", "ListUp", "ListDown", "ListTab", "ListEscape"};
+static_assert(std::size(kIntentNames) == kIntentCount, "every intent needs a name in kIntentNames");
+
+std::optional<Intent> intentFromName(std::string_view name) {
+    const auto found = std::find(std::begin(kIntentNames), std::end(kIntentNames), name);
+    if (found == std::end(kIntentNames)) return std::nullopt;
+    return static_cast<Intent>(found - std::begin(kIntentNames));
 }
 
 } // namespace luna::engine

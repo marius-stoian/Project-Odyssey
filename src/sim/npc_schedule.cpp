@@ -1,5 +1,7 @@
 #include "sim/npc_schedule.h"
 
+#include "core/text.h"
+
 #include "sim/data.h"
 #include "sim/json_data.h"
 
@@ -169,9 +171,7 @@ ScheduleConfig loadScheduleConfig(const std::filesystem::path& file) {
             for (const auto& [key, amount] : effects.items()) {
                 bool known = false;
                 for (std::size_t n = 0; n < kNeedCount; ++n) {
-                    std::string lower = needName(static_cast<Need>(n));
-                    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-                    if (lower == key) {
+                    if (core::lowered(needName(static_cast<Need>(n))) == key) {
                         known = true;
                         if (!amount.is_number_integer() || amount.get<int>() < 0 || amount.get<int>() > 100) throw DataError(file, "activities." + word + "." + key, "must be a whole number from 0 to 100");
                         restore[n] = amount.get<int>();

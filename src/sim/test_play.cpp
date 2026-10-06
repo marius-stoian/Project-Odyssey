@@ -1,9 +1,10 @@
 #include "sim/test_play.h"
 
+#include "core/text.h"
+
 #include "sim/rule_effect.h"
 
 #include <algorithm>
-#include <cctype>
 #include <charconv>
 #include <format>
 #include <sstream>
@@ -12,11 +13,6 @@ namespace odysseus::sim::rules {
 
 namespace {
 
-std::string lower(std::string text) {
-    std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return text;
-}
-
 std::optional<int> wholeNumber(const std::string& text) {
     int value = 0;
     const char* first = text.data();
@@ -24,13 +20,6 @@ std::optional<int> wholeNumber(const std::string& text) {
     const auto [end, error] = std::from_chars(first, last, value);
     if (error != std::errc() || end != last) return std::nullopt;
     return value;
-}
-
-int needIndex(const std::string& name) {
-    for (std::size_t i = 0; i < kNeedCount; ++i) {
-        if (lower(name) == lower(needName(static_cast<Need>(i)))) return static_cast<int>(i);
-    }
-    return -1;
 }
 
 bool isHero(const Value& who) { return who.isText && (who.text == "hero" || who.text == "actor"); }
@@ -59,9 +48,9 @@ bool applyTestState(TestState& state, std::string_view text, std::string& proble
         if (key == "opinion") {
             if (!needNumber(-100, 100)) return false;
             next.opinion = *number;
-        } else if (needIndex(key) >= 0) {
+        } else if (const auto need = needFromName(key)) {
             if (!needNumber(0, 100)) return false;
-            next.needs[static_cast<std::size_t>(needIndex(key))] = *number;
+            next.needs[static_cast<std::size_t>(*need)] = *number;
         } else if (head == "item" && !tail.empty()) {
             if (!needNumber(0, 9999)) return false;
             next.items[tail] = *number;
@@ -103,7 +92,7 @@ std::string testStateText(const TestState& state) {
     const auto add = [&](const std::string& word) { out += (out.empty() ? "" : " ") + word; };
     if (state.opinion != fresh.opinion) add(std::format("opinion={}", state.opinion));
     for (std::size_t i = 0; i < kNeedCount; ++i) {
-        if (state.needs[i] != fresh.needs[i]) add(std::format("{}={}", lower(needName(static_cast<Need>(i))), state.needs[i]));
+        if (state.needs[i] != fresh.needs[i]) add(std::format("{}={}", core::lowered(needName(static_cast<Need>(i))), state.needs[i]));
     }
     for (const auto& [item, n] : state.items) add(std::format("item.{}={}", item, n));
     for (const auto& [skill, n] : state.skills) add(std::format("skill.{}={}", skill, n));
@@ -131,8 +120,8 @@ Value TestWorld::path(const std::string& dotted) const {
 
 Value TestWorld::call(const std::string& name, const std::vector<Value>& args) const {
     if (name == "need" && args.size() == 1 && args[0].isText) {
-        const int index = needIndex(args[0].text);
-        return Value::ofNumber(index < 0 ? 0 : 100 - state_.needs[static_cast<std::size_t>(index)]); // how much is missing, as the game reads it
+        const auto need = needFromName(args[0].text);
+        return Value::ofNumber(need ? 100 - state_.needs[static_cast<std::size_t>(*need)] : 0); // how much is missing, as the game reads it
     }
     if (name == "has") {
         const std::size_t base = args.size() == 3 ? 1 : 0;

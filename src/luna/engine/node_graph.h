@@ -61,7 +61,6 @@ public:
     std::vector<GraphNode>& nodes() { return nodes_; }
     const std::vector<GraphWire>& wires() const { return wires_; }
     int nextId() const { return nextId_; }
-    void setNextId(int id) { nextId_ = id; }
 
     friend bool operator==(const NodeGraph&, const NodeGraph&) = default;
 

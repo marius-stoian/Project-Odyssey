@@ -1,5 +1,7 @@
 #include "game/editor.h"
 
+#include "core/text.h"
+
 #include "core/log.h"
 #include "sim/data.h"
 
@@ -185,12 +187,6 @@ void Editor::buildPanels() {
 
 namespace {
 
-std::string joinNames(const std::vector<std::string>& names) {
-    std::string out;
-    for (const std::string& name : names) out += (out.empty() ? "" : ", ") + name;
-    return out;
-}
-
 std::vector<std::string> splitNames(const std::string& text) {
     std::vector<std::string> out;
     std::size_t start = 0;
@@ -342,16 +338,16 @@ void Editor::buildClassPanel() {
     });
     icon.hint = "Click: the next icon of the built-in set";
     y += 14;
-    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(classDraft_.tags), 60, [this](const std::string& v) { classDraft_.tags = splitNames(v); });
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", core::joined(classDraft_.tags, ", "), 60, [this](const std::string& v) { classDraft_.tags = splitNames(v); });
     y += 14;
     classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", formatDialogues(classDraft_.dialogues), 90, [this](const std::string& v) {
         if (const auto parsed = parseDialogues(v)) classDraft_.dialogues = *parsed;
         else say("talk is partner=file.dlg, for example player=greet.dlg");
     });
     y += 14;
-    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(classDraft_.allow), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", core::joined(classDraft_.allow, ", "), 90, [this](const std::string& v) { classDraft_.allow = splitNames(v); });
     y += 14;
-    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(classDraft_.deny), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
+    classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", core::joined(classDraft_.deny, ", "), 90, [this](const std::string& v) { classDraft_.deny = splitNames(v); });
     y += 14;
     addTradeRows(*classes_, left, width, y, classDraft_.extras.trade, [this](const std::string& field, const std::string& text) { return setClassTrade(field, text); });
     addScheduleRows(*classes_, left, width, y, classDraft_.extras.schedule, [this](const std::string& field, const std::string& text) { return setClassSchedule(field, text); });
@@ -457,16 +453,16 @@ void Editor::buildKindForm(const Rect& box, int y) {
         });
         attitude.hint = "Click: the next attitude word, then none. NPCs of this kind start like this unless they set their own";
         y += 14;
-        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", joinNames(kindDraft_.layer.tags), 60, [this](const std::string& v) { kindDraft_.layer.tags = splitNames(v); });
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Tags", core::joined(kindDraft_.layer.tags, ", "), 60, [this](const std::string& v) { kindDraft_.layer.tags = splitNames(v); });
         y += 14;
         classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Talk", formatDialogues(kindDraft_.layer.dialogues), 90, [this](const std::string& v) {
             if (const auto parsed = parseDialogues(v)) kindDraft_.layer.dialogues = *parsed;
             else say("talk is partner=file.dlg, for example player=greet.dlg");
         });
         y += 14;
-        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", joinNames(kindDraft_.layer.allow), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Allow", core::joined(kindDraft_.layer.allow, ", "), 90, [this](const std::string& v) { kindDraft_.layer.allow = splitNames(v); });
         y += 14;
-        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", joinNames(kindDraft_.layer.deny), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
+        classes_->add<luna::engine::TextField>(Rect{left, y, width, 11}, "Deny", core::joined(kindDraft_.layer.deny, ", "), 90, [this](const std::string& v) { kindDraft_.layer.deny = splitNames(v); });
         y += 14;
         addTradeRows(*classes_, left, width, y, kindDraft_.layer.extras.trade, [this](const std::string& field, const std::string& text) { return setKindTrade(field, text); });
         addScheduleRows(*classes_, left, width, y, kindDraft_.layer.extras.schedule, [this](const std::string& field, const std::string& text) { return setKindSchedule(field, text); });

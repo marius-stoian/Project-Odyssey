@@ -1,5 +1,7 @@
 #include "sim/needs.h"
 
+#include "core/text.h"
+
 #include "sim/calendar.h"
 #include "sim/json_data.h"
 
@@ -15,6 +17,14 @@ const char* needName(Need need) {
     case Need::Social: return "Social";
     default: return "?";
     }
+}
+
+std::optional<Need> needFromName(std::string_view name) {
+    const std::string wanted = core::lowered(std::string(name));
+    for (std::size_t n = 0; n < kNeedCount; ++n) {
+        if (core::lowered(needName(static_cast<Need>(n))) == wanted) return static_cast<Need>(n);
+    }
+    return std::nullopt;
 }
 
 int hourlyDrop(int dailyRate, int hour) {

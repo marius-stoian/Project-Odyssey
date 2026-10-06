@@ -29,15 +29,6 @@ std::string joinNames(const std::vector<std::string>& names) {
     return joined;
 }
 
-const char* eventKindName(EventKind kind) {
-    static constexpr const char* kNames[] = {"note", "birth", "death", "pairing", "parting", "feud", "peace", "theft", "empty store",
-                                             "lean season", "mammoth", "gift", "quarrel", "blame", "revenge", "exile", "sickness",
-                                             "injury", "recovery", "nursing", "sharing", "adoption", "courtship", "jealousy",
-                                             "rejection", "apprentice", "graduation", "hunting party", "rescue", "hero", "coward"};
-    const auto index = static_cast<std::size_t>(kind);
-    return index < sizeof(kNames) / sizeof(kNames[0]) ? kNames[index] : "?";
-}
-
 std::vector<ChronicleEntry> Chronicle::select(int year, int threshold) const {
     std::vector<ChronicleEntry> chosen;
     for (const ChronicleEntry& entry : entries_) {

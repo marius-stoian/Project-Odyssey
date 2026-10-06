@@ -47,8 +47,6 @@ public:
     void openNewGame();
     void openFocus();
     void openPrivacy() { screen_ = Screen::Privacy; }
-    bool tutorialOn() const { return tutorial_; }
-    void setTutorialOn(bool on) { tutorial_ = on; }
     void openMenu();
     void openJournal() { screen_ = Screen::Menu; tab_ = MenuTab::Journal; }
     bool journalOpen() const { return screen_ == Screen::Menu && tab_ == MenuTab::Journal; }

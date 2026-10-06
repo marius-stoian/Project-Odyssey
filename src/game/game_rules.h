@@ -43,7 +43,6 @@ struct ActorRef {
     int index = -1; // the person id, or the animal's id in the level
 };
 ActorRef actorOfRunnerId(int runnerId);
-int runnerIdOf(const ActorRef& actor);
 sim::rules::ThingInfo actorInfo(const OdysseyGame& game, const ActorRef& actor);
 // Where the actor's feet are, world pixels; false when they are gone.
 bool actorPosition(const OdysseyGame& game, const ActorRef& actor, double& x, double& y);
