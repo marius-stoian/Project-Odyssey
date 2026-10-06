@@ -1,4 +1,5 @@
 #include "game/editor.h"
+#include "game/timeline_view.h"
 
 #include "core/text.h"
 
@@ -974,6 +975,20 @@ void Editor::addScheduleRows(Panel& panel, int left, int width, int& y, const si
         const std::string field = fields[i];
         panel.add<luna::engine::TextField>(Rect{left, y, width, 11}, kLabels[i], sim::rules::scheduleFieldText(shown, field), 150, [set, field](const std::string& text) { set(field, text); });
         y += 14;
+    }
+    // The 24 hours as bars (US-196): dragging the start of a block writes the schedule text the form above holds, through the same setter.
+    for (std::size_t i = 0; i < fields.size(); ++i) {
+        const std::string field = fields[i];
+        const std::vector<sim::rules::ScheduleBlock>& blocks = field == "day" ? shown.day : shown.night;
+        if (blocks.empty()) continue;
+        std::vector<TimelineView::Block> bars;
+        for (const sim::rules::ScheduleBlock& block : blocks) bars.push_back({block.minute, block.activity, block.place});
+        panel.add<TimelineView>(Rect{left, y, width, TimelineView::kHeight}, kLabels[i], std::move(bars), [set, field, blocks](std::size_t index, int minute) {
+            std::vector<sim::rules::ScheduleBlock> moved = blocks;
+            moved[index].minute = minute;
+            set(field, sim::rules::scheduleText(moved));
+        });
+        y += TimelineView::kHeight + 4;
     }
 }
 

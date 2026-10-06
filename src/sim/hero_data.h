@@ -2,6 +2,8 @@
 
 #include "boundary.h"
 
+#include "sim/npc_schedule.h"
+
 #include <array>
 #include <cstddef>
 #include <filesystem>
@@ -136,6 +138,7 @@ struct CrossroadsEvent {
 };
 
 struct Profession {
+    rules::Schedule schedule; // US-196: the routine of the profession (`day` and `night` in the file, the schedule format of the NPC classes); empty when the file has none
     std::string id;
     std::string name;
     std::string skill;

@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/editor_help.h"
+#include "game/timeline_view.h"
 #include "luna/engine/input.h"
 #include "luna/engine/ui.h"
 #include "sim/data_document.h"
@@ -126,6 +127,13 @@ private:
     void refuse(const std::string& message);
     void markStale() { stale_ = true; }
     int visibleRows() const;
+    struct Routine {
+        std::string path;  // "professions[0].day"
+        std::string title; // "day"
+        std::vector<TimelineView::Block> blocks;
+    };
+    std::vector<Routine> routinesShown() const;
+    bool moveRoutineBlock(const std::string& listPath, std::size_t index, int minute);
     bool gameRulesPage() const;
     struct EntryInfo {
         bool valid = false;

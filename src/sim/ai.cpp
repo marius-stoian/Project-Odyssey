@@ -69,6 +69,8 @@ std::array<int, kActionCount> scoreActions(const Person& person, const Situation
     for (std::size_t i = 0; i < kActionCount; ++i) {
         if (!available[i]) {
             scores[i] = 0; // cannot be done here and now
+        } else if (situation.routined) {
+            scores[i] = scores[i] * situation.routinePercent[i] / 100; // the routine guides the choice; a weight of 0 takes the action off the list
         }
     }
     return scores;

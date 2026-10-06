@@ -23,6 +23,9 @@ struct Situation {
     bool canGiveGift = true; // someone is awake and no gift was given today
     bool canSteal = false;   // there is food in the store and the last theft is long enough ago
     bool unwell = false;     // sick or injured: no work, no hunting, no stealing (M2b)
+    // US-196: what the active block of the person's profession routine makes of each action, in whole percent (see scoreActions). Only used when `routined`.
+    bool routined = false;
+    std::array<int, kActionCount> routinePercent{};
 };
 
 // Utility AI (US-012): every action gets a whole-number score from the person's needs,

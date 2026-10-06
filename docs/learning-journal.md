@@ -2288,3 +2288,27 @@ if (rulesName != "standard") applyRules(data.config, picked);  // what the picke
 **Try it (5 minutes).** F2, **Data**, `rules/standard.json`, set `systems.weather` to no, Ctrl+S. The line on top says `weather off` and the sky of the running game clears. Put it back to yes.
 
 **Check yourself.** Why does a run keep the rules it began with, even when you change the pick on the New Game screen afterwards?
+
+
+## US-196: a routine guides, it does not command (M11)
+
+**What we built.** A day's routine is a list of time blocks: "06:00 work, 14:00 rest, 21:00 sleep". It already existed for placed characters (US-290). Now a block can also carry **weights**: `"prefer": { "animal": 300 }` means "while this block is in force, anything to do with animals is three times as attractive". A hunter in a work block then chooses animal things more often, but nothing forces them. Professions carry a routine in the same format, and the clan's people take the routine of their profession. Under each schedule there is a bar of 24 hours; drag the left edge of a block to move it.
+
+**The idea: weights over scores (a utility AI).** Every thing a person could do already has a *score* from the rules. A weight multiplies that score: 60 times 300 percent is 180, so the animal choice beats the 60 of a stroll. Because it is a multiplier, a block with no weights changes nothing, and a weight of 0 removes a choice.
+
+```cpp
+for (const std::string& tag : tags)               // each tag of the choice, once
+    if (weight = block->prefer.find(tag)) score = score * weight->second / 100;
+```
+
+**The idea: needs win by order, not by a bigger number.** Instead of making hunger's score big enough to beat any weight, the code asks about needs *first*: a hungry person is sent to eat before any choice is scored, and in the clan the weights are simply left aside while a need is below the danger level. A rule that is decided by the order of the questions is easier to trust than one that depends on numbers staying large enough.
+
+**The idea: one format, many places.** Class files, kind files, a placed character and now a profession all say `day` and `night` the same way, and one function reads them. The tempting alternative was a new `routines.json`; two formats would have meant two readers, two editors and two sets of mistakes.
+
+**The idea: a bar and a form edit one thing.** The timeline holds no data. Dropping a block calls the same function as typing the time into the field; the form then shows the new time, Undo works, and Save patches one line of the file. A view that only calls the existing writer cannot disagree with it.
+
+**Where to look.** `rules::weighted` in `src/sim/npc_schedule.cpp`, `NpcDirector::guided`, `World::routineOf`, `src/game/timeline_view.cpp`, `tests/sim/routine_test.cpp`.
+
+**Try it (5 minutes).** F2, **Data**, `hero/professions.json`, the hunter. Drag the second block of the bar from 14:00 to 12:00, Ctrl+S, then run `git diff assets/data/hero/professions.json`: one line changed.
+
+**Check yourself.** Why does a weight multiply a score instead of adding to it? (Think of a weight of 0.)

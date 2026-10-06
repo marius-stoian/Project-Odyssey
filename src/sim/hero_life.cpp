@@ -49,6 +49,9 @@ SimConfig configForComfort(const HeroData& data, SimConfig base, int comfort) {
     for (int& decay : base.needs.dailyDecay) decay = std::max(1, decay * level.needsPercent / 100);
     base.needs.winterWarmthDecay = std::max(1, base.needs.winterWarmthDecay * level.needsPercent / 100);
     base.clan.startingFood = std::max(0, base.clan.startingFood * level.foodPercent / 100);
+    for (const Profession& profession : data.professions) { // the clan's people take the routine of their profession (US-196)
+        if (!profession.schedule.empty()) base.routines[profession.id] = profession.schedule;
+    }
     return base;
 }
 

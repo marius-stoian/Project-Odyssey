@@ -22,5 +22,6 @@
   "nightSleepBonus": 150,
   "storePressureWeight": 1,
   "traitBonus": 30,
-  "skillPerHours": 8
+  "skillPerHours": 8,
+  "routineDangerBelow": 20
 }

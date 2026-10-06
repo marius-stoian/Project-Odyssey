@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-196 Daily routines as data (Mraw) - 2026-10-06
+
+**State:** On `story/US-196`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 7, game 4).
+
+- **New:** `src/game/timeline_view.*` (the 24-hour bar), `docs/plans/US-196.md`, `docs/evidence/US-196/`; tests `tests/sim/routine_test.cpp`, cases in `tests/game/data_editor_test.cpp` and `tests/game/schedule_editor_test.cpp`.
+- **Changed:** a schedule block may carry `prefer` (weights by tag, 0 to 500 percent) in the one format: `src/sim/npc_schedule.*` (`weighted`, the text `... prefer tag=weight`), `npc_extras.*` (the one reader, now also `scheduleFromJson`), `npc_director.*` (the choice is multiplied by the active block's weights; save and hash); professions carry `day` and `night` in the same format (`hero/professions.json`, `loadHeroData`; `hunter` and `gatherer` ship with a routine); the clan's people take the routine of their profession (`SimConfig::routines` from `configForComfort`, `World::professionOf`, `Situation::routinePercent`, `actionTags`, the new `routineDangerBelow` of `sim/actions.json`: needs below it win); a saved run restores the clan's routines and comfort (`odyssey_game.cpp`); the timeline in the Editor's schedule form (`Editor::addScheduleRows`) and in the Data tab above a routine (`DataEditor::routinesShown`); schemas `npc-class`, `npc-kind`, `hero-professions`, `sim-actions`; `assets/levels/npc-test.json` is level version 7 (the round trip of US-270); guide `docs/guides/npc-data.md`.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-196*`: sim 7 of 7, game 4 of 4; the whole Simulation run 393 of 394 (the one failure is the owner's uncommitted edit of `assets/data/npcs/wanderer.json`, which also breaks `US-290 Walk` in the game run).
+
 ## US-195 Game Rules page (Mraw) - 2026-10-06
 
 **State:** On `story/US-195`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 6, game 5).

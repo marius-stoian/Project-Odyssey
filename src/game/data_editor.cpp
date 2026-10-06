@@ -1,7 +1,9 @@
 #include "game/data_editor.h"
+#include "game/timeline_view.h"
 
 #include "core/text.h"
 #include "sim/json_text.h"
+#include "sim/npc_schedule.h"
 
 #include <algorithm>
 #include <cctype>
@@ -36,6 +38,7 @@ constexpr int kFoldersWidth = 92;
 constexpr int kFilesWidth = 132;
 constexpr int kEntriesWidth = 168;
 constexpr int kProblemTicks = 100; // five seconds
+constexpr int kTimelineRows = 2;     // a routine's bar takes this many rows of the form (22 pixels and a gap)
 constexpr int kRulesHeadingRows = 2; // the heading and the summary above the form of a rules file
 constexpr int kQuickYears = 20;    // the Quick check runs the clan this long
 constexpr int kQuickSliceDays = 30; // and this many days at every update
@@ -250,7 +253,41 @@ void DataEditor::refreshRows() {
     scroll_ = std::clamp(scroll_, 0, most);
 }
 
-int DataEditor::visibleRows() const { return std::max(1, (viewHeight_ - kStatus - kBar - 6) / kRow - (gameRulesPage() ? kRulesHeadingRows : 0)); }
+int DataEditor::visibleRows() const {
+    return std::max(1, (viewHeight_ - kStatus - kBar - 6) / kRow - (gameRulesPage() ? kRulesHeadingRows : 0) - static_cast<int>(routinesShown().size()) * kTimelineRows);
+}
+
+// The routines the chosen entry shows as a timeline (US-196): a `day` or `night` list of schedule blocks (the US-290 format) on the entry itself (a profession) or in its
+// `schedule` group (an NPC class or kind). The bar and the form below it edit the same document, so there is one writer and one format.
+std::vector<DataEditor::Routine> DataEditor::routinesShown() const {
+    std::vector<Routine> found;
+    if (!document_) return found;
+    for (const std::string& holder : {entryPath_, entryPath_.empty() ? std::string("schedule") : entryPath_ + ".schedule"}) {
+        for (const char* part : {"day", "night"}) {
+            const std::string path = holder.empty() ? std::string(part) : holder + "." + part;
+            const sim::OrderedJson* list = document_->find(path);
+            if (list == nullptr || !list->is_array() || list->empty()) continue;
+            Routine routine{path, std::string(part), {}};
+            bool shape = true;
+            for (const sim::OrderedJson& block : *list) {
+                const std::optional<int> minute = block.is_object() && block.contains("from") && block["from"].is_string() ? sim::rules::parseClock(block["from"].get<std::string>()) : std::nullopt;
+                if (!minute) {
+                    shape = false;
+                    break;
+                }
+                routine.blocks.push_back({*minute, block.contains("do") && block["do"].is_string() ? block["do"].get<std::string>() : std::string("idle"),
+                                          block.contains("at") && block["at"].is_string() ? block["at"].get<std::string>() : std::string("home")});
+            }
+            if (shape) found.push_back(std::move(routine));
+        }
+    }
+    return found;
+}
+
+// A block dragged on a timeline: the same edit as typing the time into its field.
+bool DataEditor::moveRoutineBlock(const std::string& listPath, std::size_t index, int minute) {
+    return setField(std::format("{}[{}].from", listPath, index), sim::rules::formatClock(minute));
+}
 
 // The Game Rules page (US-195) is the Data tab opened on a file of rules/: a heading and one line that says what the saved file switches on and off.
 bool DataEditor::gameRulesPage() const { return openFile_.starts_with("rules/") && document_.has_value(); }
@@ -818,6 +855,11 @@ void DataEditor::buildForm(Panel& panel) {
         const std::string summary = gameRulesSummary(); // the saved file: Ctrl+S, then the line follows the form
         panel.add<Label>(Rect{left, top + kRow, viewWidth_ - left - 6, kRow}, summary.substr(0, static_cast<std::size_t>((viewWidth_ - left - 6) / luna::engine::kTextAdvance)), UiColor::Dim);
         top += kRulesHeadingRows * kRow;
+    }
+    for (const Routine& routine : routinesShown()) { // the timeline of a routine above its form (US-196)
+        const std::string list = routine.path;
+        panel.add<TimelineView>(Rect{left, top, right - left, TimelineView::kHeight}, routine.title, routine.blocks, [this, list](std::size_t index, int minute) { moveRoutineBlock(list, index, minute); });
+        top += kTimelineRows * kRow;
     }
     const int visible = visibleRows();
     const int first = std::clamp(scroll_, 0, std::max(0, static_cast<int>(rows_.size()) - visible));

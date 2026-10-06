@@ -1,6 +1,7 @@
 #include "hero_data.h"
 
 #include "json_data.h"
+#include "sim/npc_extras.h"
 #include "sim/play_rules.h"
 
 #include "core/log.h"
@@ -236,6 +237,15 @@ HeroData loadHeroData(const fs::path& dataDirectory, const std::string& rulesNam
             profession.tools.push_back(id);
         }
         for (const json& action : entry.contains("actions") ? entry.at("actions") : json::array()) profession.actions.push_back(action.get<std::string>());
+        if (entry.contains("day") || entry.contains("night")) { // the routine: the same reader as the NPC classes (US-196)
+            json routine = json::object();
+            for (const char* part : {"day", "night"}) {
+                if (entry.contains(part)) routine[part] = entry.at(part);
+            }
+            std::vector<std::string> problems;
+            profession.schedule = rules::scheduleFromJson(routine.dump(), problems);
+            if (!problems.empty()) throw DataError(professionsFile, where + (entry.contains("day") ? ".day" : ".night"), problems.front());
+        }
         if (data.profession(profession.id) != nullptr) throw DataError(professionsFile, where + ".id", "\"" + profession.id + "\" is listed twice");
         data.professions.push_back(profession);
     }
