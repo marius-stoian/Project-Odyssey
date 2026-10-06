@@ -74,6 +74,7 @@ A broken `schemas/` folder is said in the log and never stops the game: the load
 | `weapons.json`, `plants.json`, `objects.json`, `animals.json`, `effects.json`, `weather.json`, `characters.json`, `tiles.json`, `materials.json` | the same name |
 | `sim/<file>.json` (actions, calendar, clan, events, life, names, needs, opinions, partner-types, region, schedule, social, story, trade) | `sim-<file>` |
 | `hero/<file>.json` (hero, items, professions, recipes, activities, tutorial) | `hero-<file>` |
+| `rules/<name>.json` (one set of game rules, US-195: [game-rules.md](game-rules.md)) | `rules` |
 | `light/<file>.json` (lights, sky, celestial-events) | `light-<file>` |
 | `buildings/kinds.json`, `pieces.json`, `prefabs/*.json` | `building-kinds`, `building-pieces`, `building-prefab` |
 | `interactions/*.json`, `interactions/defaults-*.json` | `interaction`, `interaction-defaults` |

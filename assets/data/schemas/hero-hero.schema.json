@@ -54,7 +54,7 @@
     },
     "presets": {
       "type": "array",
-      "description": "The Growing Period presets of a new game",
+      "description": "The Growing Period presets of a new game (older place: they are in rules/standard.json now and are read here only when the rules file has none)",
       "items": {
         "type": "object",
         "description": "One entry of presets",
@@ -79,7 +79,7 @@
     },
     "comforts": {
       "type": "array",
-      "description": "The comfort settings of a new game",
+      "description": "The comfort settings of a new game (older place: they are in rules/standard.json now and are read here only when the rules file has none)",
       "items": {
         "type": "object",
         "description": "One entry of comforts",
@@ -205,7 +205,7 @@
         },
         "winPercent": {
           "type": "integer",
-          "description": "The share of one pillar that wins the region",
+          "description": "The share of one pillar that wins the region (older place: it is in rules/standard.json now and is read here only when the rules file has no victory part)",
           "minimum": 1,
           "maximum": 100,
           "example": "60"

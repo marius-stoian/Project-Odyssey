@@ -561,3 +561,33 @@ TEST_CASE("US-194 Quick check stops with Esc and reports a broken file") {
     CHECK_FALSE(rig.editor.quickRunning());
     CHECK(rig.editor.question().title.find("cannot be read") != std::string::npos);
 }
+
+TEST_CASE("US-195 The Game Rules page: a rules file shows as forms with a one-line summary") {
+    Rig rig;
+    const std::vector<std::string> files = rig.editor.files();
+    CHECK(std::find(files.begin(), files.end(), "rules/standard.json") != files.end());
+    CHECK(std::find(files.begin(), files.end(), "rules/peaceful.json") != files.end());
+    CHECK(rig.editor.gameRulesSummary().empty()); // no file open
+    REQUIRE(rig.editor.open("rules/standard.json"));
+    CHECK_FALSE(rig.editor.rows().empty());
+    CHECK(rig.editor.gameRulesSummary().find("weather on") != std::string::npos);
+    // A switch is a yes or no; after Ctrl+S the summary says what the saved file switches.
+    REQUIRE(rig.editor.setField("systems.weather", "false"));
+    CHECK(rig.editor.gameRulesSummary().find("weather on") != std::string::npos); // the saved file, not the open edit
+    REQUIRE(rig.editor.save());
+    CHECK(rig.editor.gameRulesSummary().find("weather off") != std::string::npos);
+    // A value outside its range is refused with the reason, like in any form.
+    CHECK_FALSE(rig.editor.setField("victory.winPercent", "500"));
+    CHECK_FALSE(rig.editor.problem().empty());
+    REQUIRE(rig.editor.open("rules/peaceful.json"));
+    CHECK(rig.editor.gameRulesSummary().find("combat off") != std::string::npos);
+    // The page draws.
+    luna_ui::Intents idle;
+    rig.editor.update(idle);
+    luna_ui::ImageRenderer renderer(960, 540);
+    renderer.clear({20, 20, 28, 255});
+    const luna_ui::Texture sheet = renderer.createTexture(luna_ui::makeUiSheet());
+    luna_ui::UiPainter painter(renderer, sheet);
+    painter.setScreen({0, 0, 960, 540});
+    rig.editor.draw(painter);
+}

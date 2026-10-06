@@ -69,7 +69,7 @@ void OdysseyGame::registerDataSets() {
     reloads_.add({"catalog",
                   {data / "plants.json", data / "objects.json", data / "characters.json", data / "weapons.json", data / "animals.json", data / "effects.json", data / "weather.json"},
                   [this] { return reloadCatalog(); }});
-    reloads_.add({"mechanics", {data / "sim", data / "hero", data / "story"}, [this] { return reloadMechanics(); }});
+    reloads_.add({"mechanics", {data / "sim", data / "hero", data / "story", data / "rules"}, [this] { return reloadMechanics(); }});
     reloads_.add({"help", {data / "editor" / "help.json"}, [this] { return reloadHelp(); }});
     // What cannot be swapped while a run is loaded (a tile is a number in the map and the buildings are held by the play state): the
     // change is reported, never half-applied, and takes effect at the next start. F5 leaves these alone. The catalogs of weapons, animals, effects and weather
@@ -139,8 +139,9 @@ ReloadResult OdysseyGame::reloadMechanics() {
     ReloadResult result;
     try {
         sim::SimConfig fresh = sim::loadSimConfig(dataDirectory_);
+        sim::PlayRules freshRules = sim::loadPlayRules(dataDirectory_, rulesName_); // the rules in play (US-195)
         std::optional<sim::HeroData> hero;
-        if (heroData_) hero = sim::loadHeroData(dataDirectory_);
+        if (heroData_) hero = sim::loadHeroData(dataDirectory_, rulesName_);
         if (life_ && hero) {
             const sim::NewGame& game = life_->game();
             if (game.preset < 0 || static_cast<std::size_t>(game.preset) >= hero->config.presets.size() || game.comfort < 0 || static_cast<std::size_t>(game.comfort) >= hero->config.comforts.size()) {
@@ -153,6 +154,8 @@ ReloadResult OdysseyGame::reloadMechanics() {
             clan_->replaceConfig(std::move(applied));
         }
         if (hero) *heroData_ = std::move(*hero);
+        rules_ = std::move(freshRules);
+        if (!rules_.systems.weather) weather_.force(0);
     } catch (const std::exception& problem) {
         result.ok = false;
         result.errors.push_back(problem.what());

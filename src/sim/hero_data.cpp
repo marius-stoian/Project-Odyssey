@@ -1,6 +1,9 @@
 #include "hero_data.h"
 
 #include "json_data.h"
+#include "sim/play_rules.h"
+
+#include "core/log.h"
 #include "sim/rule_expr.h"
 
 #include <algorithm>
@@ -123,7 +126,7 @@ static CrossroadsEvent readEvent(const json& entry, const fs::path& eventsFile, 
     return event;
 }
 
-HeroData loadHeroData(const fs::path& dataDirectory) {
+HeroData loadHeroData(const fs::path& dataDirectory, const std::string& rulesName) {
     const fs::path folder = dataDirectory / "hero";
     HeroData data;
 
@@ -138,19 +141,26 @@ HeroData loadHeroData(const fs::path& dataDirectory) {
     data.config.imprint.endAge = number(imprint, heroFile, "imprint", "endAge", data.config.imprint.midAge, 80);
     data.config.imprint.endPercent = number(imprint, heroFile, "imprint", "endPercent", 0, 1000);
     data.config.imprint.settledPercent = number(imprint, heroFile, "imprint", "settledPercent", 0, 1000);
-    for (std::size_t i = 0; i < list(hero, heroFile, "presets").size(); ++i) {
-        const json& entry = hero.at("presets").at(i);
-        const std::string where = std::format("presets[{}]", i);
-        PresetConfig preset;
-        preset.name = text(entry, heroFile, where, "name");
-        preset.startAge = number(entry, heroFile, where, "startAge", 1, 60);
-        preset.mantleAge = number(entry, heroFile, where, "mantleAge", preset.startAge, 80);
-        data.config.presets.push_back(preset);
+    // The growing periods and comforts are in rules/<name>.json since US-195; hero.json may still carry them (read when the rules file does not).
+    const bool oldPresets = hero.contains("presets");
+    const bool oldComforts = hero.contains("comforts");
+    if (oldPresets) {
+        for (std::size_t i = 0; i < list(hero, heroFile, "presets").size(); ++i) {
+            const json& entry = hero.at("presets").at(i);
+            const std::string where = std::format("presets[{}]", i);
+            PresetConfig preset;
+            preset.name = text(entry, heroFile, where, "name");
+            preset.startAge = number(entry, heroFile, where, "startAge", 1, 60);
+            preset.mantleAge = number(entry, heroFile, where, "mantleAge", preset.startAge, 80);
+            data.config.presets.push_back(preset);
+        }
     }
-    for (std::size_t i = 0; i < list(hero, heroFile, "comforts").size(); ++i) {
-        const json& entry = hero.at("comforts").at(i);
-        const std::string where = std::format("comforts[{}]", i);
-        data.config.comforts.push_back({text(entry, heroFile, where, "name"), number(entry, heroFile, where, "needsPercent", 10, 400), number(entry, heroFile, where, "foodPercent", 10, 400)});
+    if (oldComforts) {
+        for (std::size_t i = 0; i < list(hero, heroFile, "comforts").size(); ++i) {
+            const json& entry = hero.at("comforts").at(i);
+            const std::string where = std::format("comforts[{}]", i);
+            data.config.comforts.push_back({text(entry, heroFile, where, "name"), number(entry, heroFile, where, "needsPercent", 10, 400), number(entry, heroFile, where, "foodPercent", 10, 400)});
+        }
     }
     const json& aging = hero.contains("aging") ? hero.at("aging") : json();
     data.config.aging = {number(aging, heroFile, "aging", "fromYears", 20, 100), number(aging, heroFile, "aging", "startPercent", 0, 500), number(aging, heroFile, "aging", "perYearPercent", 0, 100)};
@@ -169,10 +179,14 @@ HeroData loadHeroData(const fs::path& dataDirectory) {
     dc.tradePerPerson = number(dominion, heroFile, "dominion", "tradePerPerson", 0, 1000);
     dc.rivalTradePerPerson = number(dominion, heroFile, "dominion", "rivalTradePerPerson", 0, 1000);
     dc.rivalTradeGrowthPerDay = number(dominion, heroFile, "dominion", "rivalTradeGrowthPerDay", 0, 1000);
-    dc.winPercent = number(dominion, heroFile, "dominion", "winPercent", 1, 100);
-    dc.combinedWinPercent = number(dominion, heroFile, "dominion", "combinedWinPercent", 1, 100);
-    dc.loseBelowPeople = number(dominion, heroFile, "dominion", "loseBelowPeople", 0, 100);
-    dc.rivalFollowerPercent = number(dominion, heroFile, "dominion", "rivalFollowerPercent", 0, 100);
+    // The thresholds of victory are in rules/<name>.json since US-195; the older place is read below when the rules file leaves them out.
+    const bool oldVictory = dominion.is_object() && dominion.contains("winPercent");
+    if (oldVictory) {
+        dc.winPercent = number(dominion, heroFile, "dominion", "winPercent", 1, 100);
+        dc.combinedWinPercent = number(dominion, heroFile, "dominion", "combinedWinPercent", 1, 100);
+        dc.loseBelowPeople = number(dominion, heroFile, "dominion", "loseBelowPeople", 0, 100);
+        dc.rivalFollowerPercent = number(dominion, heroFile, "dominion", "rivalFollowerPercent", 0, 100);
+    }
     const json& trade = hero.contains("trade") ? hero.at("trade") : json();
     TradeConfig& tc = data.config.trade;
     tc.dueDays = number(trade, heroFile, "trade", "dueDays", 1, 365);
@@ -301,6 +315,18 @@ HeroData loadHeroData(const fs::path& dataDirectory) {
             data.events.push_back(std::move(event));
         }
     }
+
+    // The rules: the growing periods, comforts and thresholds of victory (US-195). What hero.json still carries is used only for what the rules file leaves out.
+    const PlayRules rules = loadPlayRules(dataDirectory, "standard");
+    if ((oldPresets && !rules.presets.empty()) || (oldComforts && !rules.comforts.empty()) || (oldVictory && rules.hasVictory)) {
+        core::logWarning(std::format("{}: presets, comforts and the thresholds of victory are read from rules/standard.json; remove them from hero.json", heroFile.string()));
+    } else if ((oldPresets && rules.presets.empty()) || (oldComforts && rules.comforts.empty()) || (oldVictory && !rules.hasVictory)) {
+        core::logWarning(std::format("{}: presets, comforts or thresholds of victory are still in hero.json (read for this version); move them to rules/standard.json", heroFile.string()));
+    }
+    applyRules(data.config, rules);
+    if (rulesName != "standard") applyRules(data.config, loadPlayRules(dataDirectory, rulesName)); // a set of rules changes what it names; the rest is standard's
+    if (data.config.presets.empty()) throw DataError(dataDirectory / "rules" / "standard.json", "newGame.presets", "must list at least one growing period (hero.json has none either)");
+    if (data.config.comforts.empty()) throw DataError(dataDirectory / "rules" / "standard.json", "newGame.comforts", "must list at least one comfort level (hero.json has none either)");
     return data;
 }
 

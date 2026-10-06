@@ -74,6 +74,7 @@ void OdysseyGame::registerCreatures() {
 }
 
 bool OdysseyGame::startFight(int placedId) {
+    if (!rules_.systems.combat) return false; // no fights under rules without combat (US-195)
     for (Enemy& enemy : enemies_) {
         if (enemy.id == placedId && enemy.isAlive()) {
             enemy.provoke();

@@ -34,6 +34,7 @@ struct NewGame {
     std::uint64_t seed = 1;
     int preset = 0;
     int comfort = 1;
+    std::string rules; // the rules file the run plays under (US-195); empty is "standard"
 };
 
 // The clan's world rules for a Comfort level: needs fall faster when harsh, the store starts smaller.
@@ -223,6 +224,8 @@ public:
     // ---- saving the run (US-080): one JSON file next to the clan's world, written safely with backups
     void save(const std::filesystem::path& file) const;
     static HeroLife load(const HeroData& data, World& world, const std::filesystem::path& file);
+    // The rules a saved run plays under ("" for a save from before US-195, or one that cannot be read): the hero data must be read under them before the run is loaded.
+    static std::string savedRules(const std::filesystem::path& file);
 
 private:
     struct RestoreTag {};

@@ -2,6 +2,14 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-195 Game Rules page (Mraw) - 2026-10-06
+
+**State:** On `story/US-195`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 6, game 5).
+
+- **New:** `src/sim/play_rules.*` (`PlayRules`, `loadPlayRules`, `playRuleNames`, `applyRules`, `describeRules`), `assets/data/rules/standard.json` and `peaceful.json`, `assets/data/schemas/rules.schema.json`, `docs/guides/game-rules.md`, `docs/plans/US-195.md`, `docs/evidence/US-195/`; tests `tests/sim/play_rules_test.cpp`, cases in `tests/game/live_catalog_test.cpp` and `tests/game/data_editor_test.cpp`.
+- **Changed:** the presets, comforts and thresholds of victory moved from `hero/hero.json` to the rules (`loadHeroData` takes the rules name; hero.json is still read for what a rules file leaves out, with a warning); switches of weather, combat, rivals, tutorial, markers, chronicle and politics (`OdysseyGame::chooseRules` and the systems); the New Game screen has a Rules row; a level may name `rules` (level version 7); the hero's save carries the rules (version 2); the data set `mechanics` also watches `rules/`; the Data tab shows the Game Rules heading and summary on a rules file; `docs/guides/editor.md`, `schemas.md`; the level tests expect version 7.
+- **Verified:** Debug build of every program and test executable: zero warning lines. `US-195*`: sim 6 of 6, game 5 of 5; the whole Simulation run 386 of 387 (the one failure is the owner's uncommitted edit of `assets/data/npcs/wanderer.json`).
+
 ## US-194 Mechanics and story tuning with a quick check (Mraw) - 2026-10-06
 
 **State:** On `story/US-194`, merged into `qa` after the Debug build (zero warnings). Per D-41 the full verification and CI run at X-M11; its own cases pass (sim 4, game 5 and the US-303 reload cases).

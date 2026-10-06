@@ -190,6 +190,7 @@ private:
     std::string seedText_;
     int preset_ = 0;
     int comfort_ = 1;
+    std::string rules_; // the rules file picked on the New Game screen ("" = standard)
     bool tutorial_ = true;
     // Focus
     std::vector<int> picked_;

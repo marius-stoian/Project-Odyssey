@@ -1,0 +1,67 @@
+{
+  "title": "assets/data/rules/<name>.json",
+  "type": "object",
+  "description": "One set of game rules: how a new game is set up, when it is won or lost, and which whole systems run. The New Game screen offers every file of this folder, and a level may name one.",
+  "properties": {
+    "title": {"type": "string", "description": "The name the New Game screen shows (the file's name when empty)", "example": "Peaceful"},
+    "newGame": {
+      "type": "object",
+      "description": "The choices of the New Game screen; a part left out is the one of rules/standard.json",
+      "properties": {
+        "presets": {
+          "type": "array",
+          "description": "The Growing Period presets: how old the hero starts and when the leader's mantle is taken",
+          "items": {
+            "type": "object",
+            "description": "One growing period",
+            "required": ["name", "startAge", "mantleAge"],
+            "properties": {
+              "name": {"type": "string", "description": "The name of the preset", "example": "Full"},
+              "startAge": {"type": "integer", "description": "The age the hero starts at", "minimum": 1, "maximum": 60, "example": "12"},
+              "mantleAge": {"type": "integer", "description": "The age at which the hero takes the leader's mantle", "minimum": 1, "maximum": 80, "example": "26"}
+            }
+          }
+        },
+        "comforts": {
+          "type": "array",
+          "description": "The comfort levels: how hard the needs press and how full the store starts",
+          "items": {
+            "type": "object",
+            "description": "One comfort level",
+            "required": ["name", "needsPercent", "foodPercent"],
+            "properties": {
+              "name": {"type": "string", "description": "The name of the comfort level", "example": "Gentle"},
+              "needsPercent": {"type": "integer", "description": "How fast needs fall, in percent of the normal rate", "minimum": 10, "maximum": 400, "example": "70"},
+              "foodPercent": {"type": "integer", "description": "The starting store, in percent of the normal one", "minimum": 10, "maximum": 400, "example": "140"}
+            }
+          }
+        }
+      }
+    },
+    "victory": {
+      "type": "object",
+      "description": "When the game is won or lost; a game that reaches a threshold ends at once",
+      "required": ["winPercent", "combinedWinPercent", "loseBelowPeople", "rivalFollowerPercent"],
+      "properties": {
+        "winPercent": {"type": "integer", "description": "The share of Trade or of Religion in the region that wins it", "minimum": 1, "maximum": 100, "example": "60"},
+        "combinedWinPercent": {"type": "integer", "description": "The average of Trade and Religion that wins it by the combined rule", "minimum": 1, "maximum": 100, "example": "50"},
+        "loseBelowPeople": {"type": "integer", "description": "The clan with fewer people than this is defeated", "minimum": 0, "maximum": 100, "example": "3"},
+        "rivalFollowerPercent": {"type": "integer", "description": "The share of a rival clan's people that can follow the hero's faith", "minimum": 0, "maximum": 100, "example": "60"}
+      }
+    },
+    "systems": {
+      "type": "object",
+      "description": "Switches of whole systems: a system that is off does not happen at all. Read once when a game starts. A switch left out is on.",
+      "properties": {
+        "weather": {"type": "boolean", "description": "The weather cycle and its sky", "default": true, "example": "true"},
+        "combat": {"type": "boolean", "description": "Enemies, and the hero's weapons against them", "default": true, "example": "false"},
+        "rivals": {"type": "boolean", "description": "The rival clans of the region", "default": true, "example": "true"},
+        "tutorial": {"type": "boolean", "description": "The first-day quest of a new game", "default": true, "example": "true"},
+        "markers": {"type": "boolean", "description": "The arrow that points at the tracked quest step", "default": true, "example": "true"},
+        "chronicle": {"type": "boolean", "description": "The lines conversations add to the clan's chronicle", "default": true, "example": "true"},
+        "politics": {"type": "boolean", "description": "Politics between clans (read from the politics milestone on)", "default": true, "example": "true"}
+      }
+    }
+  },
+  "loaders": ["src/sim/play_rules.cpp#loadPlayRules"]
+}

@@ -136,7 +136,7 @@ void OdysseyGame::drawQuestTracker(luna::engine::Renderer& renderer) const {
 // A marker over the target of the tracked step, or an arrow at the edge of the screen pointing the way (US-183). Off when the setting says so.
 void OdysseyGame::drawQuestMarker(luna::engine::Renderer& renderer, const luna::engine::Rect& view, double alpha) const {
     (void)alpha;
-    if (!questMarker_.valid || settings_.markers == 0) return;
+    if (!questMarker_.valid || settings_.markers == 0 || !rules_.systems.markers) return;
     luna::engine::UiPainter painter(renderer, uiSheet_);
     const int x = static_cast<int>(std::lround(questMarker_.x)) - view.x;
     const int y = static_cast<int>(std::lround(questMarker_.y)) - view.y;

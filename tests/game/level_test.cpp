@@ -165,7 +165,7 @@ TEST_CASE("US-122 Damaged") {
         CHECK(problem("\"facing\": \"S\"", "\"facing\": \"Up\"").find("characters[0].facing") != std::string::npos);
         CHECK(problem("\"defaultGround\": \"grass\"", "\"defaultGround\": \"cheese\"").find("defaultGround") != std::string::npos);
         CHECK(problem("\"weapon\": \"Sword\"", "\"weapon\": \"Laser\"").find("pickups[0].weapon") != std::string::npos);
-        CHECK(problem("\"levelVersion\": 6", "\"levelVersion\": 9").find("newer version") != std::string::npos);
+        CHECK(problem("\"levelVersion\": 7", "\"levelVersion\": 9").find("newer version") != std::string::npos);
         CHECK(problem("[\n    \"grass\",\n    10\n   ]", "[\n    \"grass\",\n    9\n   ]").find("ground[0]") != std::string::npos);
     }
 }

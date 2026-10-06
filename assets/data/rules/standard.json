@@ -1,0 +1,30 @@
+{
+  "title": "Standard",
+  "newGame": {
+    "presets": [
+      { "name": "Full", "startAge": 12, "mantleAge": 26 },
+      { "name": "Short", "startAge": 20, "mantleAge": 26 },
+      { "name": "Off", "startAge": 26, "mantleAge": 26 }
+    ],
+    "comforts": [
+      { "name": "Gentle", "needsPercent": 70, "foodPercent": 140 },
+      { "name": "Balanced", "needsPercent": 100, "foodPercent": 100 },
+      { "name": "Harsh", "needsPercent": 135, "foodPercent": 70 }
+    ]
+  },
+  "victory": {
+    "winPercent": 60,
+    "combinedWinPercent": 50,
+    "loseBelowPeople": 3,
+    "rivalFollowerPercent": 60
+  },
+  "systems": {
+    "weather": true,
+    "combat": true,
+    "rivals": true,
+    "tutorial": true,
+    "markers": true,
+    "chronicle": true,
+    "politics": true
+  }
+}
