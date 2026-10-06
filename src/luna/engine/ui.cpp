@@ -139,6 +139,40 @@ bool Button::handle(const UiInput& input) {
            input.pointer.isHeld(PointerButton::Left);
 }
 
+namespace {
+
+// A tooltip box by the pointer: the text's lines, each broken at a space before FieldHint::kWrapColumns letters, so a long hint stays whole on screen.
+void drawTip(UiPainter& painter, std::string_view text, int x, int y) {
+    constexpr int kWrapColumns = FieldHint::kWrapColumns;
+    std::vector<std::string> lines;
+    std::string_view rest = text;
+    while (!rest.empty()) {
+        const std::size_t cut = rest.find('\n');
+        std::string_view line = rest.substr(0, cut);
+        rest = cut == std::string_view::npos ? std::string_view() : rest.substr(cut + 1);
+        while (static_cast<int>(line.size()) > kWrapColumns) {
+            std::size_t space = line.rfind(' ', kWrapColumns);
+            if (space == std::string_view::npos || space == 0) space = kWrapColumns;
+            lines.emplace_back(line.substr(0, space));
+            line.remove_prefix(std::min(line.size(), space + (line[space] == ' ' ? 1 : 0)));
+        }
+        lines.emplace_back(line);
+    }
+    if (lines.empty()) return;
+    int widest = 0;
+    for (const std::string& line : lines) widest = std::max(widest, UiPainter::textWidth(line));
+    const Rect box = painter.keepOnScreen({x + 8, y + 10, widest + 6, static_cast<int>(lines.size()) * kLineHeight + 5});
+    painter.fill(box, UiColor::Dark);
+    painter.outline(box, UiColor::Border);
+    int row = box.y + 3;
+    for (const std::string& line : lines) {
+        painter.text(box.x + 3, row, line, UiColor::Text);
+        row += kLineHeight;
+    }
+}
+
+} // namespace
+
 void Button::draw(UiPainter& painter) const {
     painter.fill(bounds, selected ? UiColor::Selected : (hovered_ ? UiColor::Hover : UiColor::PanelLight));
     painter.outline(bounds, selected ? UiColor::Gold : UiColor::Border);
@@ -152,12 +186,7 @@ void Button::draw(UiPainter& painter) const {
 }
 
 void Button::drawOverlay(UiPainter& painter) const {
-    if (!hovered_ || hint.empty()) return;
-    const int width = UiPainter::textWidth(hint) + 6;
-    const Rect box = painter.keepOnScreen({hoverX_ + 8, hoverY_ + 10, width, kGlyphHeight + 6});
-    painter.fill(box, UiColor::Dark);
-    painter.outline(box, UiColor::Border);
-    painter.text(box.x + 3, box.y + 3, hint, UiColor::Text);
+    if (hovered_ && !hint.empty()) drawTip(painter, hint, hoverX_, hoverY_);
 }
 
 // --- FieldHint ---
@@ -177,33 +206,7 @@ void FieldHint::track(bool resting, int x, int y) {
 }
 
 void FieldHint::draw(UiPainter& painter) const {
-    if (!showing()) return;
-    // The text's lines, each broken at a space before kWrapColumns letters so a long purpose stays a readable box.
-    std::vector<std::string> lines;
-    std::string_view rest = text;
-    while (!rest.empty()) {
-        const std::size_t cut = rest.find('\n');
-        std::string_view line = rest.substr(0, cut);
-        rest = cut == std::string_view::npos ? std::string_view() : rest.substr(cut + 1);
-        while (static_cast<int>(line.size()) > kWrapColumns) {
-            std::size_t space = line.rfind(' ', kWrapColumns);
-            if (space == std::string_view::npos || space == 0) space = kWrapColumns;
-            lines.emplace_back(line.substr(0, space));
-            line.remove_prefix(std::min(line.size(), space + (line[space] == ' ' ? 1 : 0)));
-        }
-        lines.emplace_back(line);
-    }
-    if (lines.empty()) return;
-    int widest = 0;
-    for (const std::string& line : lines) widest = std::max(widest, UiPainter::textWidth(line));
-    const Rect box = painter.keepOnScreen({x_ + 8, y_ + 10, widest + 6, static_cast<int>(lines.size()) * kLineHeight + 5});
-    painter.fill(box, UiColor::Dark);
-    painter.outline(box, UiColor::Border);
-    int y = box.y + 3;
-    for (const std::string& line : lines) {
-        painter.text(box.x + 3, y, line, UiColor::Text);
-        y += kLineHeight;
-    }
+    if (showing()) drawTip(painter, text, x_, y_);
 }
 
 // --- ListBox ---
@@ -497,7 +500,10 @@ void TextField::draw(UiPainter& painter) const {
     const Rect inner = box();
     painter.fill(inner, UiColor::Dark);
     painter.outline(inner, focused_ ? UiColor::Gold : UiColor::Border);
-    painter.text(inner.x + 3, inner.y + (inner.height - kGlyphHeight) / 2, focused_ ? editing_ + "_" : value, UiColor::Text);
+    std::string shown = focused_ ? editing_ + "_" : value;
+    const auto fits = static_cast<std::size_t>(std::max(3, (inner.width - 6) / kTextAdvance));
+    if (shown.size() > fits) shown = focused_ ? shown.substr(shown.size() - fits) : shown.substr(0, fits - 2) + ".."; // the end while typing, ".." when it is cut
+    painter.text(inner.x + 3, inner.y + (inner.height - kGlyphHeight) / 2, shown, UiColor::Text);
 }
 
 void TextField::drawOverlay(UiPainter& painter) const {

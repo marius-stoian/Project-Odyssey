@@ -27,7 +27,7 @@ using luna::engine::UiPainter;
 namespace {
 
 constexpr int kBarHeight = 18;
-constexpr int kListWidth = 120;
+constexpr int kListWidth = 176; // the longest file names (26 letters) fit
 constexpr int kPanelWidth = 176;
 constexpr int kStatusHeight = 14;
 constexpr int kRow = 16;
@@ -246,6 +246,15 @@ bool GraphEditor::openQuest(const std::string& name) {
     current_ = &doc;
     bindView();
     return true;
+}
+
+// "new-talk", "new-talk-2"... : the first name of the shown kind no file or open document has.
+std::string GraphEditor::freeName() const {
+    const std::string base = kind_ == Kind::Dialogue ? "new-talk" : (kind_ == Kind::Quest ? "new-quest" : "new-rule");
+    std::string name = base;
+    std::error_code ec;
+    for (int n = 2; fs::exists(fileOf(name), ec) || docs_.count(docKey(kind_, name)) != 0; ++n) name = base + "-" + std::to_string(n);
+    return name;
 }
 
 bool GraphEditor::createNew(const std::string& name) {
@@ -624,11 +633,13 @@ void GraphEditor::buildChrome() {
     });
     button("Tidy", "Put the cards in rows again", [this] { tidy(); });
     x += 6;
+    const int tabsFrom = x;
     {
         button(kind_ == Kind::Dialogue ? "[Talk]" : "Talk", "Conversations (.dlg)", [this] { if (kind_ != Kind::Dialogue) showKind(Kind::Dialogue); });
         button(kind_ == Kind::Interaction ? "[Rules]" : "Rules", "Interactions (.json): who may do what to what", [this] { if (kind_ != Kind::Interaction) showKind(Kind::Interaction); });
         button(kind_ == Kind::Quest ? "[Quests]" : "Quests", "Quests (.json): steps, branches, rewards", [this] { if (kind_ != Kind::Quest) showKind(Kind::Quest); });
     }
+    tabsBox_ = {tabsFrom - 2, 0, x - tabsFrom + 2, kBarHeight};
     x += 6;
     if (kind_ == Kind::Dialogue) button("Test", "Play this conversation with values you choose; nothing is saved", [this] { showTest(!testShown_); });
     if (kind_ == Kind::Dialogue) {
@@ -653,9 +664,11 @@ void GraphEditor::buildChrome() {
         button("+Chronicle", "A line for the chronicle when this happens", [this] { addCard(rule_card::kChronicle); });
     }
     x += 6;
-    chrome_->add<TextField>(Rect{x, 2, 110, kBarHeight - 4}, "name: ", newName_, 40, [this](const std::string& v) { newName_ = v; });
-    x += 114;
-    button("New", "Make a new file of this name in the shown kind; it is written when you press Save", [this] { createNew(newName_); });
+    const int newFrom = x;
+    chrome_->add<TextField>(Rect{x, 2, 150, kBarHeight - 4}, "name: ", newName_, 40, [this](const std::string& v) { newName_ = v; });
+    x += 154;
+    button("New", "Make a new file of this name in the shown kind (no name: new-talk, new-rule or new-quest with a number); it is written when you press Save", [this] { createNew(newName_.empty() ? freeName() : newName_); });
+    newBox_ = {newFrom - 2, 0, x - newFrom + 2, kBarHeight};
     const std::vector<std::string> names = files();
     ListBox& list = chrome_->add<ListBox>(Rect{2, kBarHeight + 4, kListWidth, viewHeight_ - kBarHeight - kStatusHeight - 6}, names, [this, names](int index) {
         if (index >= 0 && index < static_cast<int>(names.size())) open(names[static_cast<std::size_t>(index)]);
@@ -919,6 +932,8 @@ void GraphEditor::draw(UiPainter& painter) const {
     painter.fill({0, 0, viewWidth_, viewHeight_}, UiColor::Dark);
     if (view_) view_->draw(painter);
     chrome_->draw(painter);
+    painter.outline(tabsBox_, UiColor::Gold); // the kinds, and making a new file, are two groups
+    painter.outline(newBox_, UiColor::Border);
     painter.fill({problemList_->bounds.x, problemList_->bounds.y - 1, problemList_->bounds.width, problemList_->bounds.height + 2}, UiColor::Panel);
     problemList_->draw(painter);
     panel_->draw(painter);

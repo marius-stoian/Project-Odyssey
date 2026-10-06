@@ -292,3 +292,27 @@ TEST_CASE("US-300 Screen: resting the pointer on Sword in the NPC panel shows it
         luna::engine::savePng(renderer.image(), fs::path(evidence) / "tooltip-npc-sword.png");
     }
 }
+
+TEST_CASE("Graph editor screen: the kind tabs and the New group are framed, the list shows whole names, a long hint wraps") {
+    const fs::path data = dataCopy("graph-screen");
+    luna::engine::ImageRenderer renderer(960, 540);
+    game::OdysseyGame odyssey(data, ODYSSEUS_DEMO_LEVEL);
+    odyssey.setViewScales(1, 1);
+    odyssey.start(renderer);
+    odyssey.update(pressing(luna::engine::Intent::ModeEditor));
+    odyssey.editor().graphs().showKind(game::GraphEditor::Kind::Interaction);
+    odyssey.update({});
+    odyssey.update({});
+    luna::engine::Pointer pointer;
+    pointer.x = 360; // on the New button
+    pointer.y = 9;
+    luna::engine::Intents resting;
+    resting.setPointer(pointer);
+    for (int tick = 0; tick < 3; ++tick) odyssey.update(resting);
+    renderer.clear({0, 0, 0, 255});
+    odyssey.render(renderer, 0.0);
+    if (const std::string evidence = evidenceFolder(); !evidence.empty()) {
+        fs::create_directories(evidence);
+        luna::engine::savePng(renderer.image(), fs::path(evidence) / "graph-editor-bar.png");
+    }
+}
