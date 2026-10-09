@@ -2334,3 +2334,23 @@ saveAtlas(cutAtlas(cuts, sprites), sprites / "atlas");   // the same three calls
 **Try it (10 minutes).** F2, **Data**, **Cut tool**: choose a sheet, target `icons`, drag round an icon, name it, **Cut**. Then open `weapons.json`, press **...** on the `frame` of a weapon and pick your new icon: it plays in the box.
 
 **Check yourself.** Why does the tool check the rectangle and the name before it writes anything, instead of writing and then looking at what the atlas says?
+
+## US-200: drawing a big world in small pieces (M12)
+
+**What we built.** The Region view shows the whole 256 x 256 land on a map you can zoom and drag, from "all of it on one screen" down to single tiles. A big map is never drawn tile by tile: that would be 65,536 draws a frame.
+
+**The idea: streaming chunks.** The land is cut into 32 x 32 tile *chunks*. Each chunk gets one tiny picture, one pixel for each tile, made the first time you look at that chunk and kept after that. Drawing the world is then "draw the pictures of the chunks on screen, stretched to the zoom": at most 64 draws a layer, however far you zoom. The pictures are made at most four a frame (`kChunkBuildsPerFrame`), so a fast pan shows the old chunks and fills the new ones in over the next frames instead of freezing.
+
+**The idea: level of detail.** The same one-pixel-a-tile picture serves every zoom. The overview in the corner is a second, cached picture of the whole map painted 32 rows a tick (`Minimap::build`), so opening the view costs eight ticks of a little work, not one long pause.
+
+```cpp
+// Only the part of the chunk on screen is drawn, so a close zoom never asks for a huge rectangle.
+const Rect source{tx0 - cx * n, ty0 - cy * n, tx1 - tx0 + 1, ty1 - ty0 + 1};
+renderer.drawStyled(*texture, source, destination, DrawStyle{});
+```
+
+**Where to look.** `RegionView::render` and `chunkTexture` in `src/game/region_view.cpp`, `Minimap` in `src/luna/engine/minimap.cpp`, `tests/game/region_view_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, wheel up over a lake, switch **Plants** off.
+
+**Check yourself.** Why does the view call the region's own `biomeAt` instead of keeping a copy of the land it drew last time?

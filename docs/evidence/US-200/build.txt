@@ -1,0 +1,8 @@
+US-200 build and own tests, 2026-10-09, Debug (windows-x64-debug), targets luna_tests and odysseus_game_tests
+build exit 0, warning lines 0, error lines 0
+[doctest] test cases:  1 |  1 passed | 0 failed | 48 skipped
+[doctest] assertions: 14 | 14 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] test cases:    6 |    6 passed | 0 failed | 484 skipped
+[doctest] assertions: 1093 | 1093 passed | 0 failed |
+[doctest] Status: SUCCESS!

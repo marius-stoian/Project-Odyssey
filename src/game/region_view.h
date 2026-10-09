@@ -1,0 +1,137 @@
+#pragma once
+
+#include "boundary.h"
+
+#include "luna/engine/image.h"
+#include "luna/engine/input.h"
+#include "luna/engine/minimap.h"
+#include "luna/engine/renderer.h"
+#include "luna/engine/ui.h"
+#include "sim/region.h"
+
+#include <array>
+#include <cstdint>
+#include <filesystem>
+#include <functional>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <tuple>
+#include <vector>
+
+namespace odysseus::game {
+
+// The layers of the region view (US-200, EDT-04). Each one is drawn from its own pictures, so hiding one only skips its drawing.
+// People and animals share a layer until people can be placed (US-204); Places and Camps are empty until US-204 and US-205.
+enum class RegionLayer { Terrain, Water, Plants, Things, People, Places, Camps, Count };
+
+inline constexpr int kRegionLayerCount = static_cast<int>(RegionLayer::Count);
+
+const char* regionLayerName(RegionLayer layer);
+
+// The region in the Editor (US-200, design docs/plans/M12-world-editing-design.md section 4): the whole generated land on a zoomable map.
+// It makes its own Region from the same seed and the same region.json as the game, so the two are the same world (the "Same world" test
+// compares them tile for tile). Each 32-tile chunk is drawn from one small picture per layer (one pixel a tile, stretched to the zoom), made
+// the first time the chunk is seen and kept; at most kChunkBuildsPerFrame are made in a frame, so a pan never stalls. A cached overview in
+// the corner shows the whole map and moves the view when clicked. It takes the whole screen like the Data tab; Esc comes back.
+class RegionView {
+public:
+    using Say = std::function<void(const std::string&)>;
+
+    static constexpr int kMinZoom = 0;
+    static constexpr int kMaxZoom = 5;                // tile size on screen = 2 << zoom: 2 px (the whole 256 x 256 map) up to 64 px (single tiles)
+    static constexpr int kChunkBuildsPerFrame = 4;    // chunk pictures made in one drawn frame
+    static constexpr int kOverviewRowsPerTick = 32;   // rows of the overview painted in one tick
+    static constexpr int kBarHeight = 20;
+    static constexpr int kOverviewSize = 96;          // the overview on screen, in pixels
+
+    RegionView(int viewWidth, int viewHeight, Say say);
+
+    // Where the land comes from: region.json, and the seed of the game being edited (called each time the view opens).
+    void setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow);
+
+    bool shown() const { return shown_; }
+    void show(bool shown);
+    // Makes the region for a seed and shows it from the whole-map zoom, centred on the start. False (with a message) when region.json cannot be read.
+    bool open(std::uint64_t seed);
+    void open(std::uint64_t seed, sim::RegionConfig config);
+    bool isOpen() const { return region_ != nullptr; }
+    sim::Region* region() { return region_.get(); }
+    const sim::Region* region() const { return region_.get(); }
+
+    // What lies on a tile (the same data the game builds its level from).
+    struct Cell {
+        sim::Biome biome = sim::Biome::Steppe;
+        std::optional<sim::ResourceKind> resource;
+    };
+    Cell cellAt(int x, int y) const;
+    // The layer a resource is drawn in.
+    static RegionLayer layerOf(sim::ResourceKind kind);
+    // The picture of one chunk in one layer: chunkSize x chunkSize, one pixel a tile, see-through where the layer has nothing.
+    luna::engine::Image chunkImage(int cx, int cy, RegionLayer layer) const;
+
+    // The view.
+    int zoom() const { return zoom_; }
+    void setZoom(int zoom);
+    int tilePixels() const { return 2 << zoom_; }
+    double centreX() const { return centreX_; }
+    double centreY() const { return centreY_; }
+    void centreOn(double tileX, double tileY);
+    // Which tiles are on screen: the first and the last (inclusive), clipped to the region.
+    struct TileRange {
+        int x0 = 0, y0 = 0, x1 = -1, y1 = -1;
+        bool empty() const { return x1 < x0 || y1 < y0; }
+    };
+    TileRange visibleTiles() const;
+    // The tile under a screen point, if it is inside the region.
+    std::optional<luna::engine::Point> tileAtScreen(int screenX, int screenY) const;
+
+    bool layerShown(RegionLayer layer) const { return layers_[static_cast<std::size_t>(layer)]; }
+    void setLayerShown(RegionLayer layer, bool shown);
+
+    void update(const luna::engine::Intents& intents);
+    // Draws the map, the bar and the overview. Chunk pictures are made here (the renderer owns textures), so the caches are mutable.
+    void render(luna::engine::Renderer& renderer, luna::engine::UiPainter& painter) const;
+
+    // For tests and the status line.
+    int chunkBuildsThisFrame() const { return builtThisFrame_; }
+    int chunkPicturesMade() const { return static_cast<int>(textures_.size()); }
+    // The layer a chunk picture (a texture id) belongs to; nothing for other textures (the overview, the UI).
+    std::optional<RegionLayer> layerOfTexture(int id) const;
+    int overviewRowsDone() const { return overview_ ? overview_->rowsDone() : 0; }
+    bool overviewComplete() const { return overview_ && overview_->complete(); }
+    luna::engine::Rect overviewArea() const { return {viewWidth_ - kOverviewSize - 4, viewHeight_ - kOverviewSize - 14, kOverviewSize, kOverviewSize}; }
+    const std::string& hoverText() const { return hover_; }
+
+private:
+    void buildBar();
+    void syncBar();
+    luna::engine::Point origin() const; // screen position of tile (0, 0)
+    void zoomAround(int newZoom, int screenX, int screenY);
+    void clampCentre();
+    const luna::engine::Texture* chunkTexture(luna::engine::Renderer& renderer, int cx, int cy, RegionLayer layer) const;
+
+    int viewWidth_;
+    int viewHeight_;
+    Say say_;
+    std::filesystem::path configFile_;
+    std::function<std::uint64_t()> seedNow_;
+    bool shown_ = false;
+    std::unique_ptr<sim::Region> region_;
+    std::unique_ptr<luna::engine::Minimap> overview_;
+    int zoom_ = kMinZoom;
+    double centreX_ = 0.0; // in tiles
+    double centreY_ = 0.0;
+    std::array<bool, kRegionLayerCount> layers_{};
+    std::optional<luna::engine::Point> dragFrom_;
+    std::string hover_;
+    std::unique_ptr<luna::engine::Panel> bar_;
+    std::vector<luna::engine::Button*> layerButtons_;
+
+    mutable std::map<std::tuple<int, int, int>, luna::engine::Texture> textures_; // (chunk x, chunk y, layer)
+    mutable std::map<int, RegionLayer> textureLayer_;
+    mutable int builtThisFrame_ = 0;
+};
+
+} // namespace odysseus::game

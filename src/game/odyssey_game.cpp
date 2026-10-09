@@ -100,6 +100,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         return renderer_ != nullptr ? renderer_->createTexture(image) : luna::engine::Texture{};
     });
     editor_.data().setQuickSeed([this] { return weatherSeed_; }); // the Quick check runs the clan on the seed of the level in play (US-194)
+    editor_.regionView().setSource(dataDirectory / "sim" / "region.json", [this] { return region_ != nullptr ? region_->seed() : std::uint64_t{1}; }); // the Region view shows the land of the game being edited (US-200)
     editor_.data().setTagsOf([this](const std::string& kind) -> std::vector<std::string> { // the Interactions button finds what targets a kind by its tags (US-193)
         if (const PlantDef* plant = catalogs_.plant(kind)) return plant->tags;
         if (const AnimalDef* animal = catalogs_.animal(kind)) return animal->tags;
