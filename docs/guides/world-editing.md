@@ -32,3 +32,15 @@ Example file (one painted tile in chunk 2,1; coordinates are inside the chunk):
 {"worldVersion": 1, "seed": 1, "generator": {}, "overrides": {"chunks": {"2,1": [{"x": 6, "y": 8, "biome": "Water"}]}, "things": [], "people": [], "places": [], "camps": [], "resources": []}}
 ```
 `generator` lists only the settings that differ from `assets/data/sim/region.json`. The other lists (things, people, places, camps, resources) are for the next stories. The schema is `assets/data/schemas/world.schema.json`.
+
+## Water and mountains (US-203)
+More tools in the row under the bar. They are made of the same painted tiles as the Brush, so they save, undo (one step each) and keep through generator changes like any painting.
+- **River:** press at the source, drag, release at the mouth. The river is as wide as the brush size. **Fords** (the number field next to the size) breaks the river with a crossing of land every that many tiles; 0 means no fords, so nobody can cross. A river that runs edge to edge with no ford cuts the land in two.
+- **Ford:** click a river or lake: the water under the brush becomes land, a place to wade over.
+- **Lake:** press at the middle, drag out to the shore, release.
+- **Ridge:** drag a line of cliffs, as wide as the brush.
+- **Cave:** click a cliff (a mountain tile) to put a cave mouth into it. In the game a cave mouth is a path tile, so people can walk in. A mouth with only mountain around it is sealed: the view warns.
+- **Dry:** click a lake or a river: all the water connected to it becomes meadow. The seed's lake is still in the seed; the meadow is a change on top of it (**Reset** brings the lake back).
+- A warning line appears above the status line when the start has become water or has lost its water and food, or when a cave mouth has no way in. It is only a warning: you may want an island.
+
+Example: to cut the land with a river that can be crossed in one place, choose **River**, size 3, set **Fords** to 60, and drag from the north edge to the south edge. There is a crossing of meadow every 60 tiles, the first one 30 tiles from the source.

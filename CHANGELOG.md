@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-203 Water and mountains (Mraw) - 2026-10-09
+
+**State:** branch `story/US-203`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-203`. Decisions: D-64.
+
+- **New:** River (with fords), Lake, Ridge, Cave, Ford and Dry tools in the Region view, all made of tile edits (one step of Undo each, no new file format); the shape preview while dragging; a warning line for the start without water or food and for a sealed cave mouth (never a block); the Fords field. `sim::line4`, `sim::thicken`, `sim::disc` (`src/sim/region_shapes.*`), `sim::landWarnings`.
+- **Changed:** the generator settings panel sits under the tool row and is smaller.
+- **Tests:** sim `US-203 A line is four-connected ...`, `US-203 Thickening ...`, `US-203 Warnings ...`; game `US-203 River: ...`, `US-203 River in the game ...`, `US-203 Lake and ridge`, `US-203 Cave: ...`, `US-203 A cave mouth in the middle ...`, `US-203 Remove: ...`, `US-203 Ford ...`, `US-203 With the mouse ...`, `US-203 Water over the start ...`. They run at X-M12 (D-41); they were also run here and pass, with the US-200 to US-202, editor, help, schema and US-19x suites and the whole luna suite.
+- **Verified:** Debug build of the sim and game tests, zero warnings (`docs/evidence/US-203/build.txt`). Not run: the full game suite (X-M12). The sim suite has one failure from the owner's uncommitted `wanderer.json` (`npc_kind_test`).
+
 ## US-202 Hand edits on top of the seed (Mraw) - 2026-10-09
 
 **State:** branch `story/US-202`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-202`. Decisions: D-63.

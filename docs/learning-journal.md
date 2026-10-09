@@ -2397,3 +2397,24 @@ This has three good consequences. The file is tiny. Undo is easy, because a step
 **Try it (5 minutes).** F2, **Region**, **Brush**, **Water**, drag across a meadow, Ctrl+Z, Ctrl+Y, **Save**, then open `assets/worlds/default.json` and look at how little is in it.
 
 **Check yourself.** Why would a file that stored the whole painted map be a problem once you change a generator setting and the land underneath changes?
+
+## US-203: shapes made of small steps (M12)
+
+**What we built.** River, Lake, Ridge, Cave, Ford and Dry tools for the Region view. A river is dragged from its source to its mouth; with a Fords number it has crossings of land; a lake is a disc; a cave mouth goes into a cliff; Dry turns a lake back to meadow.
+
+**The idea: composition.** None of these tools has its own data. Each one works out a list of tiles and hands it to the one routine that already knows how to change a tile, record it for Undo and keep it as a difference from the seed (`editTile`). A river is "the tiles of a thick line, minus the fords, as water, plus the ford tiles as meadow"; a lake is "the tiles of a disc, as water". That is why the world file did not change at all in this story, and why Undo, Save and regeneration worked from the first test: a new tool is only a new way to *choose tiles*.
+
+```cpp
+const std::vector<sim::Tile> line = sim::line4(a, b);            // which tiles the river runs over
+const std::vector<sim::Tile> river = sim::thicken(line, width, size);
+...
+for (const sim::Tile& at : river) editTile(at.x, at.y, ford.contains({at.x, at.y}) ? sim::Biome::Steppe : sim::Biome::Water);
+```
+
+**The idea: a line that cannot be squeezed through.** A line of tiles that touch only at their corners lets someone walking in four directions slip through the gap, so `line4` adds the corner tile whenever the line steps diagonally. The test "River" proves it the honest way: it walks a search over the map, once with the river closed round a patch of land (nobody gets out) and once with one ford (everybody can).
+
+**Where to look.** `line4` and `thicken` in `src/sim/region_shapes.cpp`, `RegionView::paintRiver` in `src/game/region_view.cpp`, `landWarnings` in `src/sim/region_edits.cpp`, `tests/game/water_tools_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **River**, size 3, **Fords** 40, drag a river across the meadow, then **Dry** on a lake, then Ctrl+Z twice.
+
+**Check yourself.** Why is a ford made of land instead of a new kind of "shallow water" tile?

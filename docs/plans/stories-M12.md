@@ -81,3 +81,25 @@ Design: docs/plans/M12-world-editing-design.md sections 3, 6, 7 and 15. Decision
 3. **Reset** over the painted tiles gives the seed's land back.
 4. **Save**, **Back**, F2 **Region** again: the painted land is there. Open `assets/worlds/default.json`: only the painted tiles are listed.
 5. Middle button drag pans while the Brush is chosen.
+
+---
+
+<a id="us-203"></a>
+
+## US-203 Water and mountains: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md section 6. Decisions: D-64. Traces to EDT-04. Guide: docs/guides/world-editing.md.
+
+## Built
+- `src/sim/region_shapes.{h,cpp}`: `line4` (the four-connected line, the same from either end), `thicken` (the round brush stamp along tiles), `disc`.
+- `src/sim/region_edits.{h,cpp}`: `landWarnings` (the start without water or food, a sealed cave mouth).
+- `src/game/region_view.{h,cpp}`: tools River, Lake, Ridge, Cave, Ford, Dry and the Fords field; `paintRiver`, `paintLake`, `paintRidge`, `placeCave`, `paintFord`, `dryWater`; the shape preview while dragging; a warning line above the status line. Every tool is one step of Undo and only tile edits (no new format).
+- `GeneratorPanel` moved under the tool row and made smaller.
+- Tests: `tests/sim/region_shapes_test.cpp` (lines, thickening, discs, warnings) and `tests/game/water_tools_test.cpp` (River with a ring that blocks walking and a ford that lets people over, River in the game as solid water and a walkable ford, Lake and Ridge, Cave into a cliff that the game can enter, a sealed cave as a warning, Remove a generated lake as an override that undoes and saves, Ford, River with the mouse, water over the start).
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, **River**, size 3, **Fords** 0: drag a river across a meadow; it appears when you let go. Ctrl+Z removes it.
+2. Play the same land (once US-207 lets the game read it): the river stops the hero; with Fords 60 there is a place to wade over.
+3. **Lake**: press, drag out, release: a round lake. **Ridge**: a line of cliffs.
+4. **Cave** on a cliff next to a meadow: a dark mouth; on a meadow: a message. On a cliff with only mountain around it: the red warning.
+5. **Dry** on a lake: the whole lake turns to meadow; **Reset** on it brings the water back.

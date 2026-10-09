@@ -233,6 +233,7 @@ add_library(odysseus_sim STATIC
     src/sim/region.cpp
     src/sim/rivals.cpp
     src/sim/region_edits.cpp
+    src/sim/region_shapes.cpp
     src/sim/world_file.cpp
     src/sim/region_save.cpp
     src/sim/hero_data.cpp
@@ -524,7 +525,8 @@ add_executable(odysseus_game_tests
     tests/game/live_catalog_test.cpp
     tests/game/region_view_test.cpp
     tests/game/generator_panel_test.cpp
-    tests/game/world_edit_test.cpp)
+    tests/game/world_edit_test.cpp
+    tests/game/water_tools_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -575,6 +577,7 @@ add_executable(odysseus_sim_tests
     tests/sim/region_test.cpp
     tests/sim/region_edits_test.cpp
     tests/sim/world_file_test.cpp
+    tests/sim/region_shapes_test.cpp
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
     tests/sim/npc_class_test.cpp
