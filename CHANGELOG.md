@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-201 Generator settings with live preview (Mraw) - 2026-10-09
+
+**State:** branch `story/US-201`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-201`. Decisions: D-62.
+
+- **New:** the Settings panel of the Region view (14 fields, Preview beside the old map, Apply to `region.json` by patching only the changed lines, Revert); `sim::regionConfigProblems` (the loader's rules for a draft); `sim::RegionEdits`, `effectiveBiome` and `findConflicts` (the model of hand edits and the list of ones the new land does not suit). `src/game/generator_panel.{h,cpp}`, `src/sim/region_edits.{h,cpp}`, `docs/guides/world-editing.md`.
+- **Tests:** `US-201 Settings`, `US-201 Preview`, `US-201 Preview and Apply refuse ...`, `US-201 Apply`, `US-201 Keep edits` (game), `US-201 A number typed ...`, and in the sim tests `US-201 A draft is checked by the same rules as the file`, `US-201 Keep edits ...`, `US-201 A tombstone ...`. They run at X-M12 (D-41); they were also run here and pass, with the US-200 and the editor, help and schema suites.
+- **Verified:** Debug build of `odysseus_sim_tests` and `odysseus_game_tests`, zero warnings (`docs/evidence/US-201/build.txt`). Not run: the full suite (X-M12).
+
+
 ## US-200 The region in the Editor (Mraw) - 2026-10-09
 
 **State:** branch `story/US-200`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-200`. Design: `docs/plans/M12-world-editing-design.md`, D-61.

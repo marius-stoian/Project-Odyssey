@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <format>
 #include <queue>
 #include <stdexcept>
 
@@ -32,6 +33,31 @@ RegionConfig loadRegionConfig(const std::filesystem::path& file) {
     config.berryRegrowDays = requireInt(json, file, "berryRegrowDays", 1, 365);
     config.startNeedWithin = requireInt(json, file, "startNeedWithin", 5, 60);
     return config;
+}
+
+std::vector<std::string> regionConfigProblems(const RegionConfig& config) {
+    std::vector<std::string> problems;
+    const auto range = [&problems](const char* name, int value, int minimum, int maximum) {
+        if (value < minimum || value > maximum) problems.push_back(std::format("{} must be between {} and {} (it is {})", name, minimum, maximum, value));
+    };
+    range("size", config.size, 64, 1024);
+    range("chunkSize", config.chunkSize, 8, 128);
+    if (config.chunkSize > 0 && config.size % config.chunkSize != 0) problems.push_back("size must be a multiple of chunkSize");
+    range("lakeLevel", config.lakeLevel, 0, 1023);
+    range("mountainLevel", config.mountainLevel, config.lakeLevel + 100, 1023);
+    range("riverBand", config.riverBand, 0, 100);
+    range("forestMoisture", config.forestMoisture, 0, 1023);
+    range("caveNoise", config.caveNoise, 0, 1023);
+    range("edgeWall", config.edgeWall, 0, 32);
+    range("flintPerMille", config.flintPerMille, 0, 1000);
+    range("woodPerMille", config.woodPerMille, 0, 1000);
+    range("berriesPerMille", config.berriesPerMille, 0, 1000);
+    range("herdPerMille", config.herdPerMille, 0, 1000);
+    range("herdMinimum", config.herdMinimum, 1, 100);
+    range("herdMaximum", config.herdMaximum, config.herdMinimum, 100);
+    range("berryRegrowDays", config.berryRegrowDays, 1, 365);
+    range("startNeedWithin", config.startNeedWithin, 5, 60);
+    return problems;
 }
 
 Region::Region(std::uint64_t seed, RegionConfig config) : seed_(seed), config_(config) {

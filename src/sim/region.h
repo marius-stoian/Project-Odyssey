@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <map>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace odysseus::sim {
@@ -58,6 +59,9 @@ struct RegionConfig {
 };
 
 RegionConfig loadRegionConfig(const std::filesystem::path& file);
+// Every rule loadRegionConfig enforces, for a configuration made in the Editor (US-201): one plain sentence for each setting out of its range, none when it is fine.
+// A test keeps the two in step.
+std::vector<std::string> regionConfigProblems(const RegionConfig& config);
 
 struct Chunk {
     int cx = 0;
