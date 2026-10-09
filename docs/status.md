@@ -218,7 +218,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-196 | US-196 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-196/; Milestone-149 |
 | S-US-192 | US-192 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-192/; Milestone-150 |
 | X-M11 | - | M11 | Done | 2026-10-06; Debug and Release 22/22 and window 8/8, zero warnings, clean worktree; merged into main, CI on main green (run 37490920810), tag m11-done; docs/gates/M11.md; the on-screen manual checks are open for the owner |
-| K-M12 | - | M12 | To do |  |
+| K-M12 | - | M12 | Done | 2026-10-09; docs/plans/M12-world-editing-design.md; D-61 |
 | S-US-200 | US-200 | M12 | To do |  |
 | S-US-201 | US-201 | M12 | To do |  |
 | S-US-202 | US-202 | M12 | To do |  |
