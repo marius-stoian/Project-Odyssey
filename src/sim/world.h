@@ -131,6 +131,10 @@ public:
     // keeps its own rules: a person by id to change (age, traits), a change of opinion, the store, and a line in the chronicle.
     Person* personMutable(int id) { return id >= 0 && static_cast<std::size_t>(id) < people_.size() ? &people_[static_cast<std::size_t>(id)] : nullptr; }
     void adjustOpinion(int who, int about, int delta);
+    // The owner's setup of the world (US-206): what `who` thinks of `about` is set to `value` as written (not added), and a grudge with its reason: the chronicle writes
+    // the reason as an entry the grudge points to. Returns that entry's id, or -1 when either person does not exist.
+    void setOpinion(int who, int about, int value);
+    int addSetupGrudge(int who, int about, int weight, const std::string& reason);
     // What a conversation leaves in someone's mind (US-164): `holder` remembers that `other` did something, with a feeling (-100..100). It is an ordinary
     // memory (a Gift when the feeling is good, a Quarrel when it is bad, major from 60 either way), so forgetting, gossip at half strength and the chronicle
     // treat it like any other, and it also keeps `text` (what happened, a short clause) for small talk. Returns false for people who do not exist.

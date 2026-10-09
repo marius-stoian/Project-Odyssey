@@ -157,3 +157,27 @@ Design: docs/plans/M12-world-editing-design.md section 9. Decisions: D-66. Trace
 3. **Move** the camp: pick it, click an empty tile with water and food near. Ctrl+Z puts it back.
 4. **Camp**, Kind `player`: the start marker (gold outline) jumps there. Take the camp away: the start goes back.
 5. **Resource**, Kind `flint`, click a flint spot of the seed, **Set** `amount=50`: the entry is saved; in a test run (US-207) 50 flint can be taken. **Take away** on a tree hides it; Ctrl+Z brings it back.
+
+<a id="us-206"></a>
+
+## US-206 Clans and people inspector: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md section 10. Decisions: D-67. Traces to EDT-05, SDC-07, PIL-08. Guide: docs/guides/world-editing.md.
+
+## Built
+- `src/sim/world_setup.{h,cpp}`: the `clans` and `people` sections (`ClanSetup`, `PersonSetup`, `WorldSetup`), their file reading and writing, the text of every field and back (`storeText`, `debtsText`, `opinionsText`, `grudgesText`, `kinText`...), `setupProblems` (the consistency checks), and what a game starts with: `applyClanSetup` (the meals, kin, opinions as written, grudges told by the chronicle), `applyHeroSetup` (store items and debts to rivals), `applyRivalSetup` (a rival's meals).
+- `src/sim/world.*` (`setOpinion`, `addSetupGrudge`), `src/sim/hero_life.*` (`stockItem`, `addDebt`): the small doors the setup comes in by. `src/sim/world_file.*`: `WorldFile::setup`, written and read with the other sections. `assets/data/schemas/world.schema.json`: `clans` and `people`.
+- `src/sim/world_places.cpp` and `src/game/region_level.cpp`: a placed person's `allow`, `deny`, `day`, `night`, `stock` and `does` properties, checked by the Editor's own field rules and applied to the character in the level.
+- `src/game/region_view.{h,cpp}`: the **Inspect** button and panel (Clan and Member targets with their fields, the list of inconsistencies), `setClanField`, `setPersonField`; every change is one step of Undo (`WorldCommand::setup`).
+- Tests: `tests/sim/world_setup_test.cpp` (Social, Kin, Economy for the hero and for a rival, Text fields, Checks, World file) and `US-206 Overrides`, `US-206 Inspector` in `tests/game/place_tool_test.cpp`.
+
+## Technical choices
+- Opinions are set as written, not added, so the owner's -50 is what the game starts with.
+- A grudge is a chronicle entry first and a grudge second, so "the chronicle can tell it" is true by construction.
+- Clan members are addressed by number: they exist only when a game starts.
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, **Inspect**. In **Clan** `player`: Store `food=80 flint=20`, Debts `the Crow Clan: fur=3 value=12 days=10`. The red list under the panel says the Crow Clan is not in the world; place a rival camp named `the Crow Clan` (Place, Camp): the line goes.
+2. **Member** `0`: Opinions `1=-50`, Grudges `1:30:stole the last flint`, Kin `mother=2`. Ctrl+Z undoes the last field; Ctrl+Y does it again. Save and read `assets/worlds/default.json`: the `clans` and `people` sections.
+3. Place two goblins; pick one (Move tool), `Set` `hp=250`, `deny=barter`, `day=06:00 work market; 21:00 sleep home`: only that one is changed; a bad routine text is refused with the reason.
+4. Once US-207 starts a game from the file: the store shows 80 meals, the debt is on the books, member 0 has opinion -50 of member 1, and the chronicle holds the grudge with its reason.

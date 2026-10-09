@@ -1,0 +1,4 @@
+US-206 Debug build, zero warnings (cmake --build --preset windows-x64-debug)
+final build: exit 0, warning lines 0
+tests: US-206: sim 7 passed, game 2 passed
+neighbours US-01x..11x, 18x..20x, 30x: sim 213/213 (after the schema fix), game 165/165

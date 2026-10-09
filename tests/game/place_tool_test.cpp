@@ -9,7 +9,9 @@
 #include "game/region_view.h"
 #include "luna/engine/renderer.h"
 #include "sim/world_file.h"
+#include "sim/world.h"
 #include "sim/world_places.h"
+#include "sim/world_setup.h"
 
 #include <algorithm>
 #include <string>
@@ -385,4 +387,91 @@ TEST_CASE("US-205 Resources: Set amount=50 on a flint spot of the seed gives 50,
     CHECK(rig.view.undo()); // the entry
     CHECK(rig.view.edits().placed.empty());
     CHECK(land.resourcesNear(flint, 0)[0].amount == 1);
+}
+
+// ---- US-206 Clans and people inspector ----
+
+TEST_CASE("US-206 Overrides: removing Barter and changing the HP of one person changes only that person") {
+    Rig rig("overrides");
+    const sim::Tile open = rig.openRun();
+    REQUIRE(open.x >= 0);
+    rig.view.setPlaceGroup(sim::EditGroup::Person);
+    rig.view.setPlaceKind("goblin");
+    rig.view.setPlaceName("Tough Gob");
+    REQUIRE_FALSE(rig.view.placeEntry(open.x, open.y).empty());
+    CHECK(rig.view.setProperty("hp", "250"));
+    CHECK(rig.view.setProperty("deny", "barter"));
+    CHECK(rig.view.setProperty("day", "06:00 work market; 21:00 sleep home"));
+    CHECK_FALSE(rig.view.setProperty("day", "whenever"));
+    rig.view.setPlaceName("Plain Gob");
+    REQUIRE_FALSE(rig.view.placeEntry(open.x + 2, open.y).empty());
+
+    sim::Region land(1, config());
+    std::vector<std::string> problems;
+    const game::Level level = game::levelFromRegion(land, rig.definitions, rig.catalogs, rig.view.edits(), &problems);
+    CHECK(problems.empty());
+    const auto find = [&level](const std::string& name) { return std::find_if(level.characters.begin(), level.characters.end(), [&name](const game::PlacedCharacter& c) { return c.name == name; }); };
+    const auto tough = find("Tough Gob");
+    const auto plain = find("Plain Gob");
+    REQUIRE(tough != level.characters.end());
+    REQUIRE(plain != level.characters.end());
+    CHECK(tough->hp == 250);
+    CHECK(tough->deny == std::vector<std::string>{"barter"});
+    CHECK_FALSE(tough->extras.schedule.empty());
+    CHECK(plain->hp == rig.definitions.character("goblin")->hp);
+    CHECK(plain->deny.empty());
+    CHECK(plain->extras.schedule.empty());
+}
+
+TEST_CASE("US-206 Inspector: a clan's store and debt and a member's opinion and grudge are typed, undone, kept in the file and listed when they do not fit") {
+    Rig rig("inspector");
+    rig.view.showInspector(true);
+    CHECK(rig.view.setClanField("player", "store", "food=80 flint=20"));
+    CHECK(rig.view.setClanField("player", "debts", "the Crow Clan: fur=3 value=12 days=10"));
+    CHECK_FALSE(rig.view.setClanField("player", "store", "food=lots")); // a mistake changes nothing
+    CHECK(rig.view.setup().clans.at("player").food == 80);
+    CHECK(rig.view.setPersonField("0", "opinions", "1=-50"));
+    CHECK(rig.view.setPersonField("0", "grudges", "1:30:stole the last flint"));
+    CHECK_FALSE(rig.view.setPersonField("zero", "opinions", "1=5"));
+    CHECK(rig.view.setPersonField("0", "kin", "mother=1 father=2"));
+
+    // There is no Crow Clan in this world yet: the check says so.
+    REQUIRE_FALSE(rig.view.setupIssues().empty());
+    CHECK(rig.view.setupIssues().front().find("the Crow Clan") != std::string::npos);
+
+    rig.view.setTool(game::RegionTool::Place);
+    rig.view.setPlaceGroup(sim::EditGroup::Camp);
+    rig.view.setPlaceKind("rival");
+    rig.view.setPlaceName("the Crow Clan");
+    sim::Tile site{-1, -1};
+    sim::Region& land = *rig.view.region();
+    for (int y = 30; y < 226 && site.x < 0; y += 3) {
+        for (int x = 30; x < 226 && site.x < 0; x += 3) {
+            if (std::max(std::abs(x - land.start().x), std::abs(y - land.start().y)) >= 60 && land.biomeAt(x, y) == sim::Biome::Steppe && land.goodSite({x, y})) site = {x, y};
+        }
+    }
+    REQUIRE(site.x >= 0);
+    REQUIRE_FALSE(rig.view.placeEntry(site.x, site.y).empty());
+    rig.view.targetClan("player");
+    CHECK(rig.view.setClanField("player", "partners", "the Crow Clan")); // recomputes the list
+    CHECK(rig.view.setupIssues().empty()); // the Crow Clan exists now
+
+    REQUIRE(rig.view.saveWorld());
+    const sim::WorldFile saved = sim::loadWorld(rig.view.worldFile(), config());
+    CHECK(saved.setup == rig.view.setup());
+    CHECK(saved.setup.people.at("0").grudges.front().reason == "stole the last flint");
+
+    // Each change is a step of Undo.
+    CHECK(rig.view.undo()); // the camp's partners... the last change was the partners line
+    CHECK(rig.view.setup().clans.at("player").partners.empty());
+    CHECK(rig.view.redo());
+    CHECK(rig.view.setup().clans.at("player").partners.size() == 1);
+
+    // A world file made again from a saved copy starts the game with the store, the debt and the grudge.
+    sim::World world(1, sim::loadSimConfig(ODYSSEUS_DATA_DIR));
+    std::vector<std::string> problems;
+    sim::applyClanSetup(world, saved.setup, problems);
+    CHECK(problems.empty());
+    CHECK(world.food() == 80);
+    CHECK(world.opinion(0, 1) == -50);
 }

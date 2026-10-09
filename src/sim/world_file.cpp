@@ -102,6 +102,8 @@ OrderedJson toJson(const WorldFile& world, const RegionConfig& base) {
     root["seed"] = world.seed;
     root["generator"] = std::move(generator);
     root["overrides"] = std::move(overrides);
+    OrderedJson sections = setupSectionsToJson(world.setup); // kept in a variable: items() of a temporary would dangle
+    for (auto& [key, section] : sections.items()) root[key] = std::move(section);
     return root;
 }
 
@@ -207,6 +209,7 @@ WorldFile loadWorld(const std::filesystem::path& file, const RegionConfig& base)
             }
         }
         if (world.edits.tiles.size() + world.edits.placed.size() > kMaxWorldEntries) throw DataError(file, "overrides", std::format("holds more than {} edits", kMaxWorldEntries));
+        world.setup = setupFromJson(data, file);
         return world;
     } catch (const json::exception& error) {
         throw DataError(file, "(contents)", std::string("is damaged or incomplete: ") + error.what());

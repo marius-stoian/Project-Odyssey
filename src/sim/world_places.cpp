@@ -1,5 +1,6 @@
 #include "world_places.h"
 
+#include "npc_extras.h"
 #include "world_file.h"
 
 #include <algorithm>
@@ -85,7 +86,25 @@ std::string placedPropertyProblem(EditGroup group, const std::string& key, const
         if (key == "family") return wholeNumber(value, 0, 9999) ? std::string() : "family is a whole number from 0 to 9999";
         if (key == "attitude") return oneWord(value) ? std::string() : "attitude is one word";
         if (key == "tags") return value.empty() || value.find_first_of(":;") == std::string::npos ? std::string() : "tags are words separated by commas";
-        return "a person can set hp, swordDamage, family, attitude or tags";
+        // The rest of an NPC's setup (US-206): what it may and may not do, its routine, what it owns and the actions it does on its own.
+        std::string problem;
+        if (key == "allow" || key == "deny") {
+            const bool fine = !value.empty() && std::all_of(value.begin(), value.end(), [](unsigned char c) { return std::isalnum(c) != 0 || c == '-' || c == '_' || c == ',' || c == ' '; });
+            return fine ? std::string() : key + " is interaction ids separated by commas or spaces";
+        }
+        if (key == "day" || key == "night") {
+            rules::Schedule schedule;
+            return rules::setScheduleField(schedule, key, value, problem) ? std::string() : problem;
+        }
+        if (key == "stock") {
+            rules::TradeProfile trade;
+            return rules::setTradeField(trade, "stock", value, problem) ? std::string() : problem;
+        }
+        if (key == "does") {
+            std::vector<std::string> does;
+            return rules::setDoes(does, value, problem) ? std::string() : problem;
+        }
+        return "a person can set hp, swordDamage, family, attitude, tags, allow, deny, day, night, stock or does";
     }
     if (group == EditGroup::Thing) {
         if (key == "hp") return wholeNumber(value, 1, 10000) ? std::string() : "hp is a whole number from 1 to 10000";

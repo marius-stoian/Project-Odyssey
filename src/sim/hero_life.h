@@ -200,6 +200,10 @@ public:
     bool rivalNeeds(int rival, const std::string& item) const;
     BarterResult barter(int rival, const BarterOffer& offer);
     const std::vector<Debt>& debts() const { return debts_; }
+    // The owner's setup of the world (US-206): the store holds exactly `count` of an item (false: not an item of the game), and a debt to rival `rival` is on the books,
+    // due in `days` days. Neither is a trade, so no quest event, tradePoints or message follows.
+    bool stockItem(const std::string& item, int count);
+    void addDebt(int rival, Goods owe, int value, int days);
     ActionResult payDebt(std::size_t index);
     std::string foundFireBlockedReason() const;
     ActionResult foundFire(const std::string& name, int tileX, int tileY);
