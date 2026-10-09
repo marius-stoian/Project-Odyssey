@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "region.h"
+#include "world_places.h"
 #include "world.h"
 
 #include <cstdint>
@@ -39,7 +40,9 @@ public:
     static constexpr int kMinimumDistanceTiles = 60;
     static constexpr int kMinimumBetweenClansTiles = 40;
 
-    Rivals(Region& region, Tile playerCamp, std::uint64_t seed, const SimConfig& baseConfig);
+    // `placed` are the rival camps the owner put in the world file (US-205): the first clans live there from the start (named and sized as the entry says); the rest are
+    // looked for as before, so there are always at least kClans.
+    Rivals(Region& region, Tile playerCamp, std::uint64_t seed, const SimConfig& baseConfig, const std::vector<CampSite>& placed = {});
 
     // One game tick: each clan advances its world when its tier says so; when the season changes it looks for a better camp.
     void tick(Tile playerCamp);

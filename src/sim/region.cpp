@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <format>
 #include <queue>
 #include <stdexcept>
 
@@ -34,8 +35,34 @@ RegionConfig loadRegionConfig(const std::filesystem::path& file) {
     return config;
 }
 
+std::vector<std::string> regionConfigProblems(const RegionConfig& config) {
+    std::vector<std::string> problems;
+    const auto range = [&problems](const char* name, int value, int minimum, int maximum) {
+        if (value < minimum || value > maximum) problems.push_back(std::format("{} must be between {} and {} (it is {})", name, minimum, maximum, value));
+    };
+    range("size", config.size, 64, 1024);
+    range("chunkSize", config.chunkSize, 8, 128);
+    if (config.chunkSize > 0 && config.size % config.chunkSize != 0) problems.push_back("size must be a multiple of chunkSize");
+    range("lakeLevel", config.lakeLevel, 0, 1023);
+    range("mountainLevel", config.mountainLevel, config.lakeLevel + 100, 1023);
+    range("riverBand", config.riverBand, 0, 100);
+    range("forestMoisture", config.forestMoisture, 0, 1023);
+    range("caveNoise", config.caveNoise, 0, 1023);
+    range("edgeWall", config.edgeWall, 0, 32);
+    range("flintPerMille", config.flintPerMille, 0, 1000);
+    range("woodPerMille", config.woodPerMille, 0, 1000);
+    range("berriesPerMille", config.berriesPerMille, 0, 1000);
+    range("herdPerMille", config.herdPerMille, 0, 1000);
+    range("herdMinimum", config.herdMinimum, 1, 100);
+    range("herdMaximum", config.herdMaximum, config.herdMinimum, 100);
+    range("berryRegrowDays", config.berryRegrowDays, 1, 365);
+    range("startNeedWithin", config.startNeedWithin, 5, 60);
+    return problems;
+}
+
 Region::Region(std::uint64_t seed, RegionConfig config) : seed_(seed), config_(config) {
     start_ = findStart();
+    seedStart_ = start_;
 }
 
 std::uint32_t Region::hash(int x, int y, std::uint32_t salt) const {
@@ -83,11 +110,70 @@ Biome Region::generatedBiome(int x, int y) const {
 
 Biome Region::biomeAt(int x, int y) const {
     if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return Biome::Mountain;
+    if (!edits_.empty()) {
+        const auto painted = edits_.find(key(x, y));
+        if (painted != edits_.end()) return painted->second;
+    }
+    return seedBiomeAt(x, y);
+}
+
+Biome Region::seedBiomeAt(int x, int y) const {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return Biome::Mountain;
     if (!overrides_.empty()) {
         const auto found = overrides_.find(key(x, y));
         if (found != overrides_.end()) return found->second;
     }
     return generatedBiome(x, y);
+}
+
+bool Region::onEdgeWall(int x, int y) const {
+    const int edge = std::min(std::min(x, config_.size - 1 - x), std::min(y, config_.size - 1 - y));
+    return edge < config_.edgeWall;
+}
+
+std::optional<Biome> Region::tileEdit(int x, int y) const {
+    const auto found = edits_.find(key(x, y));
+    if (found == edits_.end()) return std::nullopt;
+    return found->second;
+}
+
+std::vector<std::pair<Tile, Biome>> Region::tileEditList() const {
+    std::vector<std::pair<Tile, Biome>> list;
+    list.reserve(edits_.size());
+    for (const auto& [packed, biome] : edits_) list.push_back({{static_cast<int>(packed >> 32), static_cast<int>(packed & 0xFFFFFFFFU)}, biome}); // key packs x high, y low
+    std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) { return a.first.y != b.first.y ? a.first.y < b.first.y : a.first.x < b.first.x; });
+    return list;
+}
+
+// The chunks a painted tile can change: its own and the ones next to it (berries grow at the edge of a forest, which looks at the neighbours).
+void Region::forgetChunksAround(int x, int y) {
+    for (int dy = -1; dy <= 1; ++dy) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            const int tx = x + dx;
+            const int ty = y + dy;
+            if (tx < 0 || ty < 0 || tx >= config_.size || ty >= config_.size) continue;
+            chunks_.erase(key(tx / config_.chunkSize, ty / config_.chunkSize));
+        }
+    }
+}
+
+bool Region::setTileEdit(int x, int y, Biome biome) {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size || onEdgeWall(x, y)) return false;
+    if (seedBiomeAt(x, y) == biome) {
+        if (edits_.erase(key(x, y)) == 0) return true; // already the seed's own land: nothing to keep
+    } else {
+        const auto found = edits_.find(key(x, y));
+        if (found != edits_.end() && found->second == biome) return true;
+        edits_[key(x, y)] = biome;
+    }
+    forgetChunksAround(x, y);
+    return true;
+}
+
+bool Region::clearTileEdit(int x, int y) {
+    if (edits_.erase(key(x, y)) == 0) return false;
+    forgetChunksAround(x, y);
+    return true;
 }
 
 std::optional<Resource> Region::resourceAt(int x, int y) const {
@@ -139,6 +225,16 @@ const Chunk& Region::chunk(int cx, int cy) {
     for (const Resource& extra : extraResources_) {
         if (extra.x / n == cx && extra.y / n == cy) made.resources.push_back(extra);
     }
+    if (!hidden_.empty()) {
+        made.resources.erase(std::remove_if(made.resources.begin(), made.resources.end(), [this](const Resource& r) { return hidden_.contains(key(r.x, r.y)); }), made.resources.end());
+    }
+    for (Resource& resource : made.resources) {
+        const auto counted = amounts_.find(key(resource.x, resource.y));
+        if (counted != amounts_.end()) resource.amount = counted->second;
+    }
+    for (const Resource& added : added_) {
+        if (added.x / n == cx && added.y / n == cy) made.resources.push_back(added);
+    }
     return chunks_.emplace(key(cx, cy), std::move(made)).first->second;
 }
 
@@ -181,6 +277,11 @@ bool Region::harvest(int x, int y, const Date& today) {
     for (Resource& resource : owner.resources) {
         if (resource.x == x && resource.y == y) {
             if (!available(resource, today)) return false;
+            if (resource.kind != ResourceKind::Herd && resource.kind != ResourceKind::Berries && resource.amount > 1) { // a flint or wood spot of several: one at a time (US-205)
+                --resource.amount;
+                owner.changed = true;
+                return true;
+            }
             resource.takenDay = today.day;
             owner.changed = true;
             return true;
@@ -196,6 +297,18 @@ void Region::restoreTaken(int x, int y, std::int64_t takenDay) {
     for (Resource& resource : owner.resources) {
         if (resource.x == x && resource.y == y) {
             resource.takenDay = takenDay;
+            owner.changed = true;
+        }
+    }
+}
+
+void Region::restoreAmount(int x, int y, int amount) {
+    const Tile where = chunkOf(x, y);
+    chunk(where.x, where.y);
+    Chunk& owner = chunks_.at(key(where.x, where.y));
+    for (Resource& resource : owner.resources) {
+        if (resource.x == x && resource.y == y) {
+            resource.amount = std::max(1, amount);
             owner.changed = true;
         }
     }
@@ -266,7 +379,10 @@ bool Region::startIsGood(Tile tile) {
             for (const Resource& extra : extraResources_) {
                 if (extra.x == at.x && extra.y == at.y && (extra.kind == ResourceKind::Berries || extra.kind == ResourceKind::Herd)) food = true;
             }
-            if (resource && (resource->kind == ResourceKind::Berries || resource->kind == ResourceKind::Herd)) food = true;
+            if (resource && (resource->kind == ResourceKind::Berries || resource->kind == ResourceKind::Herd) && !hidden_.contains(key(at.x, at.y))) food = true;
+            for (const Resource& added : added_) {
+                if (added.x == at.x && added.y == at.y && (added.kind == ResourceKind::Berries || added.kind == ResourceKind::Herd)) food = true;
+            }
         }
     }
     return water && food;
@@ -300,6 +416,46 @@ void Region::carveStartArea(Tile centre) {
     extraResources_.push_back({ResourceKind::Berries, centre.x - 4, centre.y + 6, 1, -1});
     extraResources_.push_back({ResourceKind::Herd, centre.x + 2, centre.y - 6, config_.herdMinimum, -1});
     extraResources_.push_back({ResourceKind::Flint, centre.x + 5, centre.y + 2, 1, -1});
+}
+
+
+// --- Hand edits of what grows (US-205) ---
+
+
+std::optional<Resource> Region::seedResource(int x, int y) const {
+    if (const auto resource = resourceAt(x, y)) return resource;
+    for (const Resource& extra : extraResources_) {
+        if (extra.x == x && extra.y == y) return extra;
+    }
+    return std::nullopt;
+}
+
+void Region::hideResource(int x, int y) {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return;
+    hidden_.insert(key(x, y));
+    chunks_.erase(key(x / config_.chunkSize, y / config_.chunkSize));
+}
+
+void Region::setResourceAmount(int x, int y, int amount) {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return;
+    amounts_[key(x, y)] = std::max(1, amount);
+    chunks_.erase(key(x / config_.chunkSize, y / config_.chunkSize));
+}
+
+void Region::addResource(ResourceKind kind, int x, int y, int amount) {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return;
+    added_.push_back({kind, x, y, std::max(1, amount), -1});
+    chunks_.erase(key(x / config_.chunkSize, y / config_.chunkSize));
+}
+
+void Region::clearPlacedEdits() {
+    for (const std::uint64_t packed : hidden_) chunks_.erase(key(static_cast<int>(packed >> 32) / config_.chunkSize, static_cast<int>(packed & 0xFFFFFFFFU) / config_.chunkSize));
+    for (const auto& [packed, amount] : amounts_) chunks_.erase(key(static_cast<int>(packed >> 32) / config_.chunkSize, static_cast<int>(packed & 0xFFFFFFFFU) / config_.chunkSize));
+    for (const Resource& added : added_) chunks_.erase(key(added.x / config_.chunkSize, added.y / config_.chunkSize));
+    hidden_.clear();
+    amounts_.clear();
+    added_.clear();
+    start_ = seedStart_;
 }
 
 } // namespace odysseus::sim

@@ -167,7 +167,8 @@ add_library(luna_engine STATIC
     src/luna/engine/image_io.cpp
     src/luna/engine/ui.cpp
     src/luna/engine/node_graph.cpp
-    src/luna/engine/effects.cpp)
+    src/luna/engine/effects.cpp
+    src/luna/engine/minimap.cpp)
 target_link_libraries(luna_engine PUBLIC luna_platform luna_physics)
 # PRIVATE and SYSTEM: only image_io.cpp includes the stb headers, and their warnings are not ours.
 target_include_directories(luna_engine SYSTEM PRIVATE ${Stb_INCLUDE_DIR})
@@ -231,6 +232,11 @@ add_library(odysseus_sim STATIC
     src/sim/save.cpp
     src/sim/region.cpp
     src/sim/rivals.cpp
+    src/sim/region_edits.cpp
+    src/sim/region_shapes.cpp
+    src/sim/world_file.cpp
+    src/sim/world_places.cpp
+    src/sim/world_setup.cpp
     src/sim/region_save.cpp
     src/sim/hero_data.cpp
     src/sim/hero_life.cpp
@@ -287,6 +293,10 @@ add_library(odysseus_game STATIC
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
+    src/game/play_world.cpp
+    src/game/generator_panel.cpp
+    src/game/world_history.cpp
+    src/game/region_view.cpp
     src/game/bubbles.cpp
     src/game/run_flow.cpp
     src/game/settings.cpp
@@ -397,6 +407,7 @@ add_executable(luna_tests
     tests/luna/node_graph_test.cpp
     tests/luna/effects_test.cpp
     tests/luna/zoom_test.cpp
+    tests/luna/minimap_test.cpp
     tests/luna/normals_test.cpp)
 target_link_libraries(luna_tests PRIVATE luna_engine doctest::doctest)
 target_compile_definitions(luna_tests PRIVATE ODYSSEUS_LAYER_ENGINE)
@@ -514,7 +525,13 @@ add_executable(odysseus_game_tests
     tests/game/schema_game_test.cpp
     tests/game/data_editor_test.cpp
     tests/game/picture_tool_test.cpp
-    tests/game/live_catalog_test.cpp)
+    tests/game/live_catalog_test.cpp
+    tests/game/region_view_test.cpp
+    tests/game/place_tool_test.cpp
+    tests/game/play_world_test.cpp
+    tests/game/generator_panel_test.cpp
+    tests/game/world_edit_test.cpp
+    tests/game/water_tools_test.cpp)
 target_link_libraries(odysseus_game_tests PRIVATE odysseus_game doctest::doctest nlohmann_json::nlohmann_json)
 target_compile_definitions(odysseus_game_tests PRIVATE ODYSSEUS_LAYER_GAME ODYSSEUS_DATA_DIR="${ODYSSEUS_DATA_DIR}"
     ODYSSEUS_DEMO_LEVEL="${PROJECT_SOURCE_DIR}/assets/levels/demo.json")
@@ -563,6 +580,12 @@ add_executable(odysseus_sim_tests
     tests/sim/story_hunt_test.cpp
     tests/sim/story_episode_test.cpp
     tests/sim/region_test.cpp
+    tests/sim/region_edits_test.cpp
+    tests/sim/world_file_test.cpp
+    tests/sim/world_places_test.cpp
+    tests/sim/world_setup_test.cpp
+    tests/sim/world_run_test.cpp
+    tests/sim/region_shapes_test.cpp
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
     tests/sim/npc_class_test.cpp

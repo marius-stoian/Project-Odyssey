@@ -14,6 +14,7 @@
 #include "game/missing_kind.h"
 #include "game/pickups.h"
 #include "game/plants.h"
+#include "game/region_view.h"
 #include "luna/engine/camera.h"
 #include "luna/engine/input.h"
 #include "luna/engine/renderer.h"
@@ -148,6 +149,8 @@ public:
     StoryEventEditor& storyEvents() { return *storyEvents_; }
     // The Data tab (M11, US-191): any data file as forms built from its schema. Esc comes back.
     DataEditor& data() { return *dataEditor_; }
+    RegionView& regionView() { return *regionView_; } // the region on a zoomable map (US-200)
+    const RegionView& regionView() const { return *regionView_; }
     void setGraphFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved, std::filesystem::path questFolder = {}) { graphEditor_->setFolders(std::move(dialogueFolder), std::move(interactionFolder), std::move(saved), std::move(questFolder)); }
     // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
     // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status
@@ -332,6 +335,7 @@ private:
     std::unique_ptr<BuildingEditor> buildingEditor_;
     std::unique_ptr<StoryEventEditor> storyEvents_; // the Story events list (US-185)
     std::unique_ptr<DataEditor> dataEditor_;        // the Data tab (US-191)
+    std::unique_ptr<RegionView> regionView_;        // the Region view (US-200)
     std::unique_ptr<GraphEditor> graphEditor_; // the dialogue graph (M9)
     std::filesystem::path levelFile_;
     int viewWidth_;

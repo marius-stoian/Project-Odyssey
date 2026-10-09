@@ -15,7 +15,7 @@ Codex v2.13, requirements v2.12.
 | ctest (window group, strict 3 s first frame in Release) | 8 of 8 | 8 of 8 |
 
 - Found and fixed at the exit review: a run in play, the Editor and back to the game read freed memory (older than M11). `docs/gates/M11.md` lists it, with the other details.
-- `qa` merged into `main`; CI on `main` and the tag `m11-done` are recorded below.
+- `qa` merged into `main`; CI on `main` is green (run 37490920810 on cda7d51) after three fixes of time limits and the job timeout, listed in `docs/gates/M11.md`; tag `m11-done` is on that commit.
 
 ### Decisions and Codex issues
 - Decisions Dominus took as delegated in M11: D-60 Q1 to Q18 (listed in `docs/gates/M11.md` for the owner to review).

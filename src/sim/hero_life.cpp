@@ -242,6 +242,17 @@ void HeroLife::give(const std::string& item, int amount) {
     if (itemObserver_) itemObserver_(item, amount, crafting_);
 }
 
+bool HeroLife::stockItem(const std::string& item, int count) {
+    if (std::none_of(data_->items.begin(), data_->items.end(), [&item](const Item& known) { return known.id == item; })) return false;
+    if (count <= 0) inventory_.erase(item);
+    else inventory_[item] = count;
+    return true;
+}
+
+void HeroLife::addDebt(int rival, Goods owe, int value, int days) {
+    debts_.push_back({rival, std::move(owe), value, world_->date().day + std::max(1, days), false, false});
+}
+
 bool HeroLife::take(const std::string& item, int amount) {
     if (count(item) < amount) return false;
     inventory_[item] -= amount;
@@ -711,7 +722,8 @@ void HeroLife::save(const std::filesystem::path& file) const {
     for (const Debt& d : debts_) debts.push_back({{"rival", d.rival}, {"owe", goodsJson(d.owe)}, {"value", d.value}, {"dueDay", d.dueDay}, {"settled", d.settled}, {"defaulted", d.defaulted}});
     json faith = json::array();
     for (const auto& [who, value] : faith_) faith.push_back({who, value});
-    const json data{{"version", 2}, // version 2 (US-195) adds the rules the run plays under
+    const json data{{"version", 3}, // version 2 (US-195) adds the rules the run plays under, version 3 (US-207) the world file it began on
+                    {"world", game_.world}, {"worldHash", game_.worldHash},
                     {"seed", game_.seed}, {"preset", game_.preset}, {"comfort", game_.comfort}, {"rules", game_.rules},
                     {"rng", {{"state", rng_.state()}, {"increment", rng_.increment()}}},
                     {"person", personId_}, {"origin", origin_}, {"phase", static_cast<int>(phase_)}, {"outcome", static_cast<int>(outcome_)}, {"reason", reason_},
@@ -732,11 +744,20 @@ std::string HeroLife::savedRules(const std::filesystem::path& file) {
     }
 }
 
+HeroLife::SavedWorld HeroLife::savedWorld(const std::filesystem::path& file) {
+    try {
+        const json j = readJsonFile(file);
+        return {j.value("world", std::string()), j.value("worldHash", std::string())};
+    } catch (const std::exception&) {
+        return {};
+    }
+}
+
 HeroLife HeroLife::load(const HeroData& data, World& world, const std::filesystem::path& file) {
     const json j = readJsonFile(file);
     HeroLife life(data, world, RestoreTag{});
     try {
-        life.game_ = {j.at("seed").get<std::uint64_t>(), j.at("preset").get<int>(), j.at("comfort").get<int>(), j.value("rules", std::string())}; // a version 1 save has no rules: standard
+        life.game_ = {j.at("seed").get<std::uint64_t>(), j.at("preset").get<int>(), j.at("comfort").get<int>(), j.value("rules", std::string()), j.value("world", std::string()), j.value("worldHash", std::string())}; // a version 1 save has no rules (standard), a version 1 or 2 save no world (generated land)
         life.rng_.restore(j.at("rng").at("state").get<std::uint64_t>(), j.at("rng").at("increment").get<std::uint64_t>());
         life.personId_ = j.at("person").get<int>();
         life.origin_ = j.at("origin").get<std::string>();

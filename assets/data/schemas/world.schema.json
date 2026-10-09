@@ -1,0 +1,90 @@
+{
+  "title": "assets/worlds/<name>.json",
+  "type": "object",
+  "required": ["worldVersion", "seed", "generator", "overrides"],
+  "properties": {
+    "worldVersion": {"type": "integer", "minimum": 1, "maximum": 1, "default": 1, "description": "The version of this file's format; the game refuses a newer one", "example": "1"},
+    "seed": {"type": "integer", "minimum": 0, "description": "The seed of the land. The edits below belong to the land this seed makes; a game with another seed does not apply them", "example": "1"},
+    "clans": {
+      "type": "object",
+      "description": "The setup of each clan, by name: \"player\" or a rival camp's name. Only what differs from what the game would make",
+      "properties": {"player": {"type": "object", "description": "The hero's own clan; the others are named by their rival camp"}},
+      "additionalProperties": {
+        "type": "object",
+        "description": "One clan",
+        "properties": {
+          "leader": {"type": "string", "description": "Who leads the clan: a clan member's number or a name", "example": "3"},
+          "stance": {"type": "string", "description": "A rival's stance towards the player (friendly, wary, hostile...); kept for the politics of M13", "example": "wary"},
+          "store": {"type": "object", "description": "What the clan's store holds: food is the meals; the rest are item ids", "properties": {"food": {"type": "integer", "minimum": 0, "description": "Meals in the store", "example": "80"}}, "additionalProperties": {"type": "integer", "minimum": 0, "description": "How many", "example": "80"}},
+          "debts": {"type": "array", "description": "What the clan owes another clan of the world", "items": {"type": "object", "description": "One debt", "required": ["to"], "properties": {"to": {"type": "string", "description": "The clan owed (a rival camp's name)", "example": "the River Clan"}, "goods": {"type": "object", "description": "What is owed, by item id", "additionalProperties": {"type": "integer", "minimum": 0, "description": "How many", "example": "3"}}, "value": {"type": "integer", "minimum": 0, "description": "What it is worth", "example": "12"}, "days": {"type": "integer", "minimum": 1, "description": "Days until it falls due", "example": "10"}}}},
+          "partners": {"type": "array", "description": "Clans this one trades with", "items": {"type": "string", "description": "A clan of the world", "example": "the River Clan"}},
+          "members": {"type": "array", "description": "Clan members' numbers this clan claims (a check: nobody is in two clans)", "items": {"type": "string", "description": "A member's number", "example": "4"}}
+        }
+      }
+    },
+    "people": {
+      "type": "object",
+      "description": "The setup of clan members, by their number. A placed person is set by its own entry and properties in overrides.people",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One clan member",
+        "properties": {
+          "kin": {"type": "object", "description": "Family and partner, by member number", "properties": {"mother": {"type": "string", "description": "The mother's number", "example": "2"}, "father": {"type": "string", "description": "The father's number", "example": "3"}, "partner": {"type": "string", "description": "The partner's number (they name each other)", "example": "5"}}},
+          "opinions": {"type": "object", "description": "What this member thinks of others, by their number, -100 to 100, set as written", "additionalProperties": {"type": "integer", "minimum": -100, "maximum": 100, "description": "The opinion", "example": "-50"}},
+          "grudges": {"type": "array", "description": "Grudges held, each told in the chronicle", "items": {"type": "object", "description": "One grudge", "required": ["about", "reason"], "properties": {"about": {"type": "string", "description": "The member's number", "example": "5"}, "weight": {"type": "integer", "minimum": 1, "maximum": 100, "description": "How much it counts", "example": "30"}, "reason": {"type": "string", "description": "Why; the chronicle writes it", "example": "stole the last flint"}}}}
+        }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "description": "The generator settings that differ from assets/data/sim/region.json, by their names there. Empty: the settings of region.json",
+      "properties": {
+        "lakeLevel": {"type": "integer", "minimum": 0, "maximum": 1023, "description": "Elevation below this is water", "example": "200"},
+        "mountainLevel": {"type": "integer", "minimum": 100, "maximum": 1023, "description": "Elevation above this is mountain (at least 100 above lakeLevel)", "example": "850"},
+        "riverBand": {"type": "integer", "minimum": 0, "maximum": 100, "description": "How wide the rivers are", "example": "14"},
+        "forestMoisture": {"type": "integer", "minimum": 0, "maximum": 1023, "description": "Wetter than this is forest", "example": "560"},
+        "caveNoise": {"type": "integer", "minimum": 0, "maximum": 1023, "description": "A mountain tile above this is a cave mouth", "example": "920"},
+        "edgeWall": {"type": "integer", "minimum": 0, "maximum": 32, "description": "Tiles of mountain around the region", "example": "8"},
+        "flintPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Flint patches near water and caves, per thousand tiles", "example": "25"},
+        "woodPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Trees on forest tiles, per thousand", "example": "160"},
+        "berriesPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Berry bushes at forest edges, per thousand", "example": "220"},
+        "herdPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Herds on steppe, per thousand tiles", "example": "3"},
+        "herdMinimum": {"type": "integer", "minimum": 1, "maximum": 100, "description": "The fewest animals in a herd", "example": "5"},
+        "herdMaximum": {"type": "integer", "minimum": 1, "maximum": 100, "description": "The most animals in a herd", "example": "12"},
+        "berryRegrowDays": {"type": "integer", "minimum": 1, "maximum": 365, "description": "Days before a picked berry bush bears again", "example": "14"},
+        "startNeedWithin": {"type": "integer", "minimum": 5, "maximum": 60, "description": "Tiles: the start has water and food this close", "example": "20"}
+      }
+    },
+    "overrides": {
+      "type": "object",
+      "description": "What differs from the land the seed makes: painted tiles, and things put on the land or taken off it",
+      "required": ["chunks"],
+      "properties": {
+        "chunks": {
+          "type": "object",
+          "description": "Painted tiles, one list for each chunk the owner painted in, named \"cx,cy\" (chunk column and row). Only tiles that differ from the seed are listed",
+          "additionalProperties": {
+            "type": "array",
+            "description": "The painted tiles of one chunk, in tile order",
+            "items": {
+              "type": "object",
+              "description": "One painted tile",
+              "required": ["x", "y", "biome"],
+              "properties": {
+                "x": {"type": "integer", "minimum": 0, "maximum": 127, "description": "The tile's column inside its chunk (0 to chunkSize - 1)", "example": "5"},
+                "y": {"type": "integer", "minimum": 0, "maximum": 127, "description": "The tile's row inside its chunk (0 to chunkSize - 1)", "example": "7"},
+                "biome": {"type": "string", "enum": ["Steppe", "Forest", "Water", "Mountain", "Cave"], "description": "What the tile is now", "example": "Water"}
+              }
+            }
+          }
+        },
+        "things": {"type": "array", "description": "Plants, animals and objects put on the land, and the seed's own wood, berries, flint or herds taken away", "items": {"type": "object", "description": "One thing", "required": ["id", "kind", "at"], "properties": {"id": {"type": "string", "description": "A stable id, kept through every save and every regeneration of the land", "example": "t-0001"}, "kind": {"type": "string", "description": "A plant, object or animal kind from its catalog (a taken-away seed thing names wood, berries, flint or herd)", "example": "clan-fire"}, "at": {"type": "array", "description": "The tile: column, row", "items": {"type": "integer", "description": "A tile coordinate", "example": "40"}}, "remove": {"type": "boolean", "description": "Take away the seed's own thing at this tile (a tombstone: regeneration cannot bring it back)", "example": "true"},"forced": {"type": "boolean", "description": "Keep an entry where the site check fails (used by camps, US-205)", "example": "true"},  "properties": {"type": "object", "description": "What this one thing sets over its kind: hp (an animal), or <interaction>.duration and <interaction>.delay in whole seconds (a plant)", "additionalProperties": {"type": "string", "description": "The value", "example": "60"}}}}},
+        "people": {"type": "array", "description": "People put on the land; the game makes each one when the region loads, with the same id every time", "items": {"type": "object", "description": "One person", "required": ["id", "kind", "at"], "properties": {"id": {"type": "string", "description": "A stable id, kept through every save and every regeneration of the land", "example": "p-0001"}, "kind": {"type": "string", "description": "A character kind from the characters catalog", "example": "elder"}, "at": {"type": "array", "description": "The tile: column, row", "items": {"type": "integer", "description": "A tile coordinate", "example": "52"}}, "name": {"type": "string", "description": "The person's own name; empty: the name of the kind", "example": "Old Mara"}, "class": {"type": "string", "description": "An NPC Class from assets/data/npc-classes", "example": "elder"}, "properties": {"type": "object", "description": "What this one person sets over its kind: hp, swordDamage, family (whole numbers), attitude (one word), tags (words separated by commas)", "additionalProperties": {"type": "string", "description": "The value", "example": "80"}}}}},
+        "places": {"type": "array", "description": "Named places a quest, a dialogue or a schedule can point to", "items": {"type": "object", "description": "One place", "required": ["id", "kind", "name", "at"], "properties": {"id": {"type": "string", "description": "A stable id, kept through every save and every regeneration of the land", "example": "l-0001"}, "kind": {"type": "string", "description": "What sort of place it is; it becomes the place's first tag (shrine, meeting ground, grave, market, well)", "example": "shrine"}, "name": {"type": "string", "description": "The name a quest marker and a dialogue use; unique in the world, without : , or ;", "example": "Red Cliff"}, "at": {"type": "array", "description": "The tile: column, row", "items": {"type": "integer", "description": "A tile coordinate", "example": "60"}}, "properties": {"type": "object", "description": "What this place sets: tags (words separated by commas)", "additionalProperties": {"type": "string", "description": "The value", "example": "forage,shelter"}}}}},
+        "camps": {"type": "array", "description": "Clan camps: the player's start and the rival clans' starting camps", "items": {"type": "object", "description": "One camp", "required": ["id", "kind", "at"], "properties": {"id": {"type": "string", "description": "A stable id, kept through every save and every regeneration of the land", "example": "c-0001"}, "kind": {"type": "string", "enum": ["player", "rival"], "description": "player: where the hero's clan starts (at most one); rival: a rival clan starts here", "example": "rival"}, "at": {"type": "array", "description": "The tile: column, row", "items": {"type": "integer", "description": "A tile coordinate", "example": "150"}}, "name": {"type": "string", "description": "A rival clan's name; empty: the generator picks one", "example": "the Crow Clan"}, "forced": {"type": "boolean", "description": "Placed anyway where the site check fails (no water and food within reach); it is not a conflict", "example": "true"}, "properties": {"type": "object", "description": "What this camp sets: people, a rival's starting size (1 to 100)", "additionalProperties": {"type": "string", "description": "The value", "example": "14"}}}}},
+        "resources": {"type": "array", "description": "Flint, wood, berries and herds: how many can be taken at a spot of the seed, or a new spot where the seed has none", "items": {"type": "object", "description": "One resource spot", "required": ["id", "kind", "at"], "properties": {"id": {"type": "string", "description": "A stable id, kept through every save and every regeneration of the land", "example": "r-0001"}, "kind": {"type": "string", "enum": ["flint", "wood", "berries", "herd"], "description": "What lies there", "example": "flint"}, "at": {"type": "array", "description": "The tile: column, row", "items": {"type": "integer", "description": "A tile coordinate", "example": "70"}}, "properties": {"type": "object", "description": "What this spot sets: amount (1 to 1000), how many can be taken there; a herd's amount is its animals", "additionalProperties": {"type": "string", "description": "The value", "example": "50"}}}}}
+      }
+    }
+  },
+  "loaders": ["src/sim/world_file.cpp", "src/sim/world_setup.cpp"]
+}

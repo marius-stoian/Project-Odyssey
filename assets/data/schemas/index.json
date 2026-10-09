@@ -30,6 +30,7 @@
     {"match": "sim/opinions.json", "schema": "sim-opinions"},
     {"match": "sim/partner-types.json", "schema": "sim-partner-types"},
     {"match": "sim/region.json", "schema": "sim-region"},
+    {"match": "../worlds/*.json", "schema": "world"},
     {"match": "sim/schedule.json", "schema": "sim-schedule"},
     {"match": "sim/social.json", "schema": "sim-social"},
     {"match": "sim/story.json", "schema": "sim-story"},

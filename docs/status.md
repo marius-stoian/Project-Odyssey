@@ -217,16 +217,16 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-195 | US-195 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-195/; Milestone-148 |
 | S-US-196 | US-196 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-196/; Milestone-149 |
 | S-US-192 | US-192 | M11 | Done | 2026-10-06; Debug zero warnings, own cases pass; full verify at X-M11; docs/evidence/US-192/; Milestone-150 |
-| X-M11 | - | M11 | Done | 2026-10-06; Debug and Release 22/22 and window 8/8, zero warnings, clean worktree; merged into main, tag m11-done; docs/gates/M11.md; the on-screen manual checks are open for the owner |
-| K-M12 | - | M12 | To do |  |
-| S-US-200 | US-200 | M12 | To do |  |
-| S-US-201 | US-201 | M12 | To do |  |
-| S-US-202 | US-202 | M12 | To do |  |
-| S-US-203 | US-203 | M12 | To do |  |
-| S-US-204 | US-204 | M12 | To do |  |
-| S-US-205 | US-205 | M12 | To do |  |
-| S-US-206 | US-206 | M12 | To do |  |
-| S-US-207 | US-207 | M12 | To do |  |
+| X-M11 | - | M11 | Done | 2026-10-06; Debug and Release 22/22 and window 8/8, zero warnings, clean worktree; merged into main, CI on main green (run 37490920810), tag m11-done; docs/gates/M11.md; the on-screen manual checks are open for the owner |
+| K-M12 | - | M12 | Done | 2026-10-09; docs/plans/M12-world-editing-design.md; D-61 |
+| S-US-200 | US-200 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-200/; Milestone-152 |
+| S-US-201 | US-201 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-201/; D-62; Milestone-153 |
+| S-US-202 | US-202 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-202/; D-63; Milestone-154 |
+| S-US-203 | US-203 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-203/; D-64; Milestone-155 |
+| S-US-204 | US-204 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-204/; D-65; Milestone-156 |
+| S-US-205 | US-205 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-205/; D-66; Milestone-157 |
+| S-US-206 | US-206 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-206/; D-67; Milestone-158 |
+| S-US-207 | US-207 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-207/; D-68; Milestone-159 |
 | X-M12 | - | M12 | To do |  |
 | K-M13 | - | M13 | To do |  |
 | S-US-210 | US-210 | M13 | To do |  |

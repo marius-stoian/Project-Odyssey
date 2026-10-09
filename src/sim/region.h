@@ -7,7 +7,9 @@
 #include <cstdint>
 #include <filesystem>
 #include <map>
+#include <set>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace odysseus::sim {
@@ -58,6 +60,9 @@ struct RegionConfig {
 };
 
 RegionConfig loadRegionConfig(const std::filesystem::path& file);
+// Every rule loadRegionConfig enforces, for a configuration made in the Editor (US-201): one plain sentence for each setting out of its range, none when it is fine.
+// A test keeps the two in step.
+std::vector<std::string> regionConfigProblems(const RegionConfig& config);
 
 struct Chunk {
     int cx = 0;
@@ -105,6 +110,28 @@ public:
     std::vector<const Chunk*> changedChunks() const;
     // Restores a harvest when loading (no date check).
     void restoreTaken(int x, int y, std::int64_t takenDay);
+    // Restores what is left of a flint or wood spot of several when loading (US-205).
+    void restoreAmount(int x, int y, int amount);
+
+    // Hand edits (US-202, ADR-010): tiles painted another biome over the seed. Only differences are kept: painting a tile the biome the seed already gives
+    // removes its edit. The outer edgeWall ring is never painted (the world stays closed). A painted tile changes what grows around it, so the chunks within one
+    // tile are made again the next time they are asked for (edit before the land is played: a harvest in such a chunk is forgotten).
+    bool setTileEdit(int x, int y, Biome biome);   // false: outside the region or on the edge wall
+    bool clearTileEdit(int x, int y);               // false: there was no edit
+    std::optional<Biome> tileEdit(int x, int y) const;
+    std::size_t tileEditCount() const { return edits_.size(); }
+    std::vector<std::pair<Tile, Biome>> tileEditList() const; // in tile order (row, then column)
+    Biome seedBiomeAt(int x, int y) const;          // the land before hand edits
+    bool onEdgeWall(int x, int y) const;
+
+    // Hand edits of what grows and where the player starts (US-205, ADR-010): the seed's own thing at a tile taken away, how many can be taken at a tile, a resource put where the seed has none,
+    // the start moved to a camp the owner placed. Only differences are kept; `clearPlacedEdits` gives the seed's own back. A chunk is made again the next time it is asked for.
+    void hideResource(int x, int y);
+    void setResourceAmount(int x, int y, int amount);
+    void addResource(ResourceKind kind, int x, int y, int amount);
+    void setStart(Tile tile) { start_ = tile; }
+    void clearPlacedEdits();
+    std::optional<Resource> seedResource(int x, int y) const; // what the seed (and the carved start) puts at a tile, before hand edits
 
     // One number for the whole region as generated (every chunk), for tests that compare two regions tile for tile.
     std::uint64_t fingerprint();
@@ -116,6 +143,7 @@ private:
     int elevationAt(int x, int y) const;
     int moistureAt(int x, int y) const;
     Biome generatedBiome(int x, int y) const;
+    void forgetChunksAround(int x, int y);
     Tile findStart();
     bool startIsGood(Tile tile);
     void carveStartArea(Tile centre);
@@ -124,7 +152,12 @@ private:
     RegionConfig config_;
     std::map<std::uint64_t, Chunk> chunks_;
     std::map<std::uint64_t, Biome> overrides_;     // the start area carved when the land offered no good start
+    std::map<std::uint64_t, Biome> edits_;         // hand-painted tiles over the seed (US-202)
     std::vector<Resource> extraResources_;         // food and flint put near a carved start
+    std::set<std::uint64_t> hidden_;                // seed resources taken away (US-205)
+    std::map<std::uint64_t, int> amounts_;          // how many can be taken at a tile
+    std::vector<Resource> added_;                   // resources put where the seed has none
+    Tile seedStart_;
     Tile start_;
 };
 

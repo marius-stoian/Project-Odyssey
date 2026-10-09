@@ -2334,3 +2334,169 @@ saveAtlas(cutAtlas(cuts, sprites), sprites / "atlas");   // the same three calls
 **Try it (10 minutes).** F2, **Data**, **Cut tool**: choose a sheet, target `icons`, drag round an icon, name it, **Cut**. Then open `weapons.json`, press **...** on the `frame` of a weapon and pick your new icon: it plays in the box.
 
 **Check yourself.** Why does the tool check the rectangle and the name before it writes anything, instead of writing and then looking at what the atlas says?
+
+## US-200: drawing a big world in small pieces (M12)
+
+**What we built.** The Region view shows the whole 256 x 256 land on a map you can zoom and drag, from "all of it on one screen" down to single tiles. A big map is never drawn tile by tile: that would be 65,536 draws a frame.
+
+**The idea: streaming chunks.** The land is cut into 32 x 32 tile *chunks*. Each chunk gets one tiny picture, one pixel for each tile, made the first time you look at that chunk and kept after that. Drawing the world is then "draw the pictures of the chunks on screen, stretched to the zoom": at most 64 draws a layer, however far you zoom. The pictures are made at most four a frame (`kChunkBuildsPerFrame`), so a fast pan shows the old chunks and fills the new ones in over the next frames instead of freezing.
+
+**The idea: level of detail.** The same one-pixel-a-tile picture serves every zoom. The overview in the corner is a second, cached picture of the whole map painted 32 rows a tick (`Minimap::build`), so opening the view costs eight ticks of a little work, not one long pause.
+
+```cpp
+// Only the part of the chunk on screen is drawn, so a close zoom never asks for a huge rectangle.
+const Rect source{tx0 - cx * n, ty0 - cy * n, tx1 - tx0 + 1, ty1 - ty0 + 1};
+renderer.drawStyled(*texture, source, destination, DrawStyle{});
+```
+
+**Where to look.** `RegionView::render` and `chunkTexture` in `src/game/region_view.cpp`, `Minimap` in `src/luna/engine/minimap.cpp`, `tests/game/region_view_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, wheel up over a lake, switch **Plants** off.
+
+**Check yourself.** Why does the view call the region's own `biomeAt` instead of keeping a copy of the land it drew last time?
+
+## US-201: the land is a pure function of the seed (M12)
+
+**What we built.** A Settings panel in the Region view. You change lake level, mountain level, forest moisture and the rest, press Preview and a small map of the new land appears beside the old one in a fraction of a second. Apply writes the numbers to `region.json` and opens the new land.
+
+**The idea: a pure function.** `Region::biomeAt(x, y)` computes a tile from the seed, the settings and the tile's place, and nothing else: no clock, no stored map, no random state that remembers earlier calls. Call it twice and you get the same answer; call it for the tile you never visited and you still get an answer. That is why Preview is cheap and safe: it makes a *second* `Region` from the same seed and the draft settings, asks it for 16,384 tiles, and throws it away. The land on screen is never touched, and what Preview shows is, tile for tile, what Apply will make, because it is the same function.
+
+```cpp
+previewRegion_ = std::make_unique<sim::Region>(current_->seed(), draft_);
+map.build(kRowsPerTick, [&land](int x, int y) { return colourOf(land.biomeAt(x * size / 128, y * size / 128)); });
+```
+
+**The idea: edits are separate from the function.** Your hand edits will not be written into the land. They live beside it as a list of differences (`RegionEdits`), laid over whatever the function returns. When you change the settings the land changes underneath, the edits stay where they are, and `findConflicts` asks "does the new land still suit this edit?" for each one. A boulder you placed on grass that is now a lake is listed, not moved.
+
+**Where to look.** `GeneratorPanel::preview` and `apply` in `src/game/generator_panel.cpp`, `findConflicts` in `src/sim/region_edits.cpp`, `regionConfigProblems` in `src/sim/region.cpp`, `tests/game/generator_panel_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Settings**, lake level 300, mountain level 900, **Preview**. Then Revert.
+
+**Check yourself.** Why can Preview show a whole new map while the old one stays on screen, without copying the old one first?
+
+## US-202: store the difference, not the copy (M12)
+
+**What we built.** You can paint the land in the Region view: a brush, a rectangle, a fill, and Reset to give tiles back. Ctrl+Z undoes a whole stroke. Save writes `assets/worlds/default.json`, and 100 painted tiles are 100 short lines in it, not the 65,536 tiles of the map.
+
+**The idea: an overlay.** The land is a pure function of the seed (US-201). To keep hand edits we do not copy the land and change the copy. We keep a small list of differences and lay it over what the function returns. In `Region::biomeAt` the first question is "did the owner paint this tile?"; only if not do we ask the seed.
+
+```cpp
+if (!edits_.empty()) {
+    const auto painted = edits_.find(key(x, y));
+    if (painted != edits_.end()) return painted->second;
+}
+return seedBiomeAt(x, y);
+```
+
+This has three good consequences. The file is tiny. Undo is easy, because a step is just "these tiles had this edit before and this edit after". And painting the same biome the seed already gives removes the edit, so the list never holds a change that changes nothing.
+
+**The idea: what depends on a tile.** A tree grows on a forest tile, and berries grow at the edge of a forest, which looks at the four neighbours. So when you paint one tile, the chunks within one tile of it are forgotten and made again the next time they are asked for. Their pictures are rebuilt too; the old picture stays on screen until the new one is ready, and then goes back to the renderer with `destroyTexture`.
+
+**Where to look.** `Region::setTileEdit` in `src/sim/region.cpp`, `WorldFile` in `src/sim/world_file.cpp`, `WorldHistory` in `src/game/world_history.cpp`, `RegionView::handlePaint` in `src/game/region_view.cpp`, `tests/game/world_edit_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Brush**, **Water**, drag across a meadow, Ctrl+Z, Ctrl+Y, **Save**, then open `assets/worlds/default.json` and look at how little is in it.
+
+**Check yourself.** Why would a file that stored the whole painted map be a problem once you change a generator setting and the land underneath changes?
+
+## US-203: shapes made of small steps (M12)
+
+**What we built.** River, Lake, Ridge, Cave, Ford and Dry tools for the Region view. A river is dragged from its source to its mouth; with a Fords number it has crossings of land; a lake is a disc; a cave mouth goes into a cliff; Dry turns a lake back to meadow.
+
+**The idea: composition.** None of these tools has its own data. Each one works out a list of tiles and hands it to the one routine that already knows how to change a tile, record it for Undo and keep it as a difference from the seed (`editTile`). A river is "the tiles of a thick line, minus the fords, as water, plus the ford tiles as meadow"; a lake is "the tiles of a disc, as water". That is why the world file did not change at all in this story, and why Undo, Save and regeneration worked from the first test: a new tool is only a new way to *choose tiles*.
+
+```cpp
+const std::vector<sim::Tile> line = sim::line4(a, b);            // which tiles the river runs over
+const std::vector<sim::Tile> river = sim::thicken(line, width, size);
+...
+for (const sim::Tile& at : river) editTile(at.x, at.y, ford.contains({at.x, at.y}) ? sim::Biome::Steppe : sim::Biome::Water);
+```
+
+**The idea: a line that cannot be squeezed through.** A line of tiles that touch only at their corners lets someone walking in four directions slip through the gap, so `line4` adds the corner tile whenever the line steps diagonally. The test "River" proves it the honest way: it walks a search over the map, once with the river closed round a patch of land (nobody gets out) and once with one ford (everybody can).
+
+**Where to look.** `line4` and `thicken` in `src/sim/region_shapes.cpp`, `RegionView::paintRiver` in `src/game/region_view.cpp`, `landWarnings` in `src/sim/region_edits.cpp`, `tests/game/water_tools_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **River**, size 3, **Fords** 40, drag a river across the meadow, then **Dry** on a lake, then Ctrl+Z twice.
+
+**Check yourself.** Why is a ford made of land instead of a new kind of "shallow water" tile?
+
+## US-204: an id that outlives the land (M12)
+
+**What we built.** Tools to put a thing, a person or a named place on the region, move it, take it away, and give it properties. Everything is saved in the world file as a short entry with an id, and the game's level is made from the seed plus those entries.
+
+**The idea: identity is not position.** A tile coordinate says where something is now; an id says which thing it is. When you change the generator settings the land under a boulder may become a lake. If the boulder were found by "the thing at tile (88, 60)" it would be lost or confused; because it has the id `t-0001`, it is the same boulder, still listed, and the conflict list can say "t-0001 now stands on water" and let you move it. A move changes the entry's tile and keeps its id. A new id is "one more than the largest in use for its group", so an id is never given to two things at once.
+
+```cpp
+std::string nextPlacedId(const RegionEdits& edits, EditGroup group) {
+    int largest = 0;
+    for (const PlacedEdit& entry : edits.placed) { /* read the number after "t-" */ if (number > largest) largest = number; }
+    return std::format("{}-{:04}", prefixOf(group), largest + 1);
+}
+```
+
+**The idea: a change you can run backwards.** Every edit returns a `PlacedChange`, the entry before and after (nothing before means "was not there", nothing after means "is gone"). Doing it is "make the list look like `after`", undoing it is "make the list look like `before`". Add, move, remove, hide and set-a-property are all the same shape, so the Undo history needs to know only one thing. `std::optional` is the C++ way to say "there may be no value".
+
+**Where to look.** `PlacedChange` and `applyPlacedChange` in `src/sim/world_places.cpp`, `RegionView::recordPlaced` in `src/game/region_view.cpp`, the `placed` list in `WorldCommand` (`src/game/world_history.h`), `levelFromRegion` in `src/game/region_level.cpp`, `tests/sim/world_places_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, zoom in, **Place**, **Person**, Kind goblin, Name Old Mara, click; **Move** her; Ctrl+Z twice; **Place** a **Place** named Red Cliff; Save and open `assets/worlds/default.json`.
+
+**Check yourself.** Why does a hidden seed tree need an entry in the file at all, instead of simply not drawing it in the Editor?
+
+## US-205: ask the rules, and say which one said no (M12)
+
+**What we built.** Camps (the player's and the rivals') and resource spots with amounts, as entries in the world file. A rival clan now starts at the camp you put it, and a flint spot you set to 50 gives 50 flint.
+
+**The idea: validate against the rules you already have.** The generator already decides what a fair camp site is (`Region::goodSite`). The Editor does not copy that rule; it calls it. So the generator and the Editor can never disagree. The placement function returns a sentence instead of a yes or no, so the owner is told why: "too close to the camp at (170, 60)", "the site has no water and food within reach". An empty string means "fine". A flag, `forced`, is the owner saying "I know, do it anyway": the rule is still asked, and the answer is overruled on purpose and recorded.
+
+```cpp
+if (!entry.forced && !land.goodSite({entry.x, entry.y})) return "the site has no water and food within reach ...: choose another, or place it anyway";
+```
+
+**The idea: an overlay that can be thrown away.** Resource edits do not change the generated land. The region keeps three small tables (hidden spots, amounts, added spots) laid over the chunks when they are made, and `applyPlacedToRegion` clears them and lays them again from the entries. That is why Undo, Move and a regeneration all just work: the entries are the truth, the region is rebuilt from them.
+
+**Where to look.** The camp rules in `placementProblem` (`src/sim/world_places.cpp`), `Region::chunk` and `Region::harvest` (`src/sim/region.cpp`), the `placed` parameter of `Rivals` (`src/sim/rivals.cpp`), `tests/sim/world_places_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Place**, **Camp**, `rival`, try a lake, then a meadow near water; **Resource**, `flint`, click a flint spot, `Set` `amount=50`.
+
+**Check yourself.** Why is it better that the placement function returns the reason as text than that it just returns true or false?
+
+## US-206: describe the world, then start the game from the description (M12)
+
+**What we built.** An inspector for the social and economic world: a clan's store and debts, a person's opinions, grudges and family, a placed person's allowed actions and routine. It is all written in the world file, and a function per target starts a game from it.
+
+**The idea: data in, small doors to the simulation.** The simulation has rules about itself (who may change an opinion, how a grudge is recorded). The setup does not reach in and poke fields; it goes through a few small, named doors: `setOpinion`, `addSetupGrudge`, `stockItem`, `addDebt`. Each door keeps the rules of the thing it opens: a grudge is a chronicle entry first (with the owner's reason as its text) and a grudge pointing at that entry second, so the chronicle can tell it the same way it tells any other grudge. When the simulation changes inside, only the door changes.
+
+```cpp
+const int event = note(std::format("{} holds a grudge against {}: {}.", nameOf(who), nameOf(about), reason), kImportanceBlame, EventKind::Note, who, about);
+addGrudge(people_[who], about, event, weight);
+```
+
+**The idea: a reference to something that does not exist yet.** The clan's people are made when a game starts, so the Editor cannot list them. The setup names them by number and checks what it can (a member in two clans, a kin cycle); the rest is checked when the game applies the setup, which reports what could not be applied and applies the rest. "Apply what you can and say what you could not" is kinder than refusing the whole file.
+
+**A bug worth knowing.** `for (auto& [key, value] : makeThing().items())` looks right and is not: the temporary object dies before the loop runs, so the loop reads freed memory. The address sanitizer found it at once. Keep the object in a variable, then loop over it.
+
+**Where to look.** `src/sim/world_setup.cpp`, `World::addSetupGrudge` in `src/sim/world.cpp`, `RegionView::setClanField` in `src/game/region_view.cpp`, `tests/sim/world_setup_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Inspect**, Member `0`, Opinions `1=-50`, Grudges `1:30:stole the last flint`, Ctrl+Z, Ctrl+Y, Save and read the file.
+
+**Check yourself.** Why is an opinion of -50 "set" and not "added"? What would happen if you applied the same setup twice?
+
+## US-207: a save file that remembers where it came from (M12)
+
+**The idea: versioned save formats.** A save file is a letter to your future self: the game that reads it may be a newer game. So every save carries a `version`, and the reader follows one rule: *read what you know, and treat what is missing as "the way it was before"*. `hero.json` is now version 3. Version 3 adds two fields, `world` and `worldHash`. A version 2 or version 1 file does not have them, and the reader asks `j.value("world", std::string())`: "the field, or an empty text if it is not there". Empty means "land generated from the seed", which is exactly what those older runs were. No migration program is needed; the default *is* the migration.
+
+```cpp
+life.game_ = {seed, preset, comfort,
+              j.value("rules", std::string()),      // missing in version 1
+              j.value("world", std::string()),      // missing in version 1 and 2
+              j.value("worldHash", std::string())};
+```
+
+**Two ways to keep a promise.** The design said "a run keeps the world it began in". A name and a fingerprint (`worldHash`, FNV-1a: multiply and xor over every byte) can only *notice* that the file changed. To *keep* the world, the run also copies the file next to the save (`world.json`). On load, the game reads the copy and only compares the fingerprint of the live file to print a warning. Remember this when you design a save: if the save must survive a change somewhere else, it has to hold a copy, not a pointer.
+
+**Something that is not saved must be made again.** The rival clans are not in any save: they are rebuilt from the seed on every load. So the rivals' meals and the camps you placed are applied in `resetPlay`, every time the rivals are made. The clan and the hero *are* saved, so their setup is applied once, when the run begins. Ask of every piece of state: "is it in the save, or is it made again?" and apply things at the matching moment.
+
+**Where to look.** `OdysseyGame::loadWorld`, `startNewRun`, `keepWorldCopy`, `loadAutosave` in `src/game/odyssey_game.cpp`; `HeroLife::savedWorld` in `src/sim/hero_life.cpp`; `loadRegion(..., makeBase)` in `src/sim/region_save.cpp`; `tests/game/play_world_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, paint a lake, click **Play here**, walk around, Esc. Then New Game, pick your world, play a day, open `saves/hero.json` and find `world` and `worldHash`.
+
+**Check yourself.** Why is an empty `world` a good default for old saves? What would go wrong if the run kept only the file's name and you later moved the lake?

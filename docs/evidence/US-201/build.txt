@@ -1,0 +1,8 @@
+US-201 build and own tests, 2026-10-09, Debug (windows-x64-debug), targets odysseus_sim_tests and odysseus_game_tests
+build exit 0, warning lines 0, error lines 0
+[doctest] test cases:   3 |   3 passed | 0 failed | 394 skipped
+[doctest] assertions: 108 | 108 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] test cases:   12 |   12 passed | 0 failed | 484 skipped
+[doctest] assertions: 1179 | 1179 passed | 0 failed |
+[doctest] Status: SUCCESS!

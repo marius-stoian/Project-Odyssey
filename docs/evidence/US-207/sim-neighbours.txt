@@ -1,0 +1,505 @@
+[doctest] doctest version is "2.5.3"
+[doctest] run with "--help" for options
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(26):
+TEST CASE:  US-012 Pick best action
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(45): MESSAGE: Gather 144, Hunt 124, Sleep 27, Rest 14
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(86):
+TEST CASE:  US-012 Inspectable
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(91): MESSAGE: Garu (13, Brave Talkative): Hunger 85, Energy 93, Warmth 90, Social 100 -> Gather 1, Hunt -, Sleep 1, WarmByFire 3, Talk 30 (chosen), GiveGift 1, Steal 1, Rest 10, Wander 5
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(102):
+TEST CASE:  US-012 The clan feeds itself through its first year
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\ai_test.cpp(109): MESSAGE: after one year: population 20, food in store 188
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(52):
+TEST CASE:  US-014 Record
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(77): MESSAGE: Spring, year 1: Tavo was born to Arn and Tiru.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(106): MESSAGE: Spring, year 1: A feud broke out between Oda and Sela over stolen meat.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(121):
+TEST CASE:  US-014 Filter
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(146): MESSAGE: year 1: 114 events, 7 worth telling
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(154):
+TEST CASE:  US-014 A clan lives for generations
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\chronicle_test.cpp(164): MESSAGE: after 30 years: 33 people ever, 17 alive, 13 born, 9 died of old age, 0 feuds now, 4 mammoths
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\hero_test.cpp(548):
+TEST CASE:  US-082 Budget
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\hero_test.cpp(562): MESSAGE: 500 people: average tick 0.0679058 ms, worst 41.3628 ms
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\memory_test.cpp(30):
+TEST CASE:  US-013 Memory
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\memory_test.cpp(48): MESSAGE: Arn remembers: Garu gave a gift on day 0, feeling 40
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\memory_test.cpp(115):
+TEST CASE:  US-013 Gifts, thefts and gossip happen in a living clan
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\memory_test.cpp(128): MESSAGE: after a year: 67 gift memories, 21 theft memories, 28 heard second-hand
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\needs_test.cpp(72):
+TEST CASE:  US-011 Consequence
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\needs_test.cpp(96): MESSAGE: Summer, year 1: Garu died of hunger in the dry summer.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\npc_kind_test.cpp(31):
+TEST CASE:  US-261 Shipped kinds: every character kind and animal has a kind file that loads and round-trips
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\npc_kind_test.cpp(41): ERROR: CHECK( kinds.find("wanderer")->layer.attitude == "neutral" ) is NOT correct!
+  values: CHECK( {?} == neutral )
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\npc_scale_test.cpp(171):
+TEST CASE:  US-263 Load: 100,000 persons, one in-game day, within the budget of ADR-022, the same hash in two runs
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\npc_scale_test.cpp(195): MESSAGE: 100,000 persons, one day: total 24.3228 ms and 24.3388 ms; worst tick 18.252 ms and 18.3013 ms
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\npc_scale_test.cpp(208): MESSAGE: save of 100,000 persons: 292.388 ms, 4872 KiB
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\npc_scale_test.cpp(213): MESSAGE: load of 100,000 persons: 6103.3 ms
+
+2026-10-09 18:46:16.869Z [WARNING] C:\Users\Amek\AppData\Local\Temp\odysseus-us195-622891516063200\hero\hero.json: presets, comforts or thresholds of victory are still in hero.json (read for this version); move them to rules/standard.json
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\report_test.cpp(11):
+TEST CASE:  US-015 The report adds up
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\report_test.cpp(31): MESSAGE: Population: 28 alive (20 founders, 10 born, 2 died, 0 exiled)
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\report_test.cpp(31): MESSAGE: Deaths by cause: starvation 0, the cold 0, old age 2, a mammoth's tusks 0, childbirth 0, a fight 0, wounds 0, sickness 0
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\report_test.cpp(31): MESSAGE: Average needs of the living: Hunger 93, Energy 91, Warmth 82, Social 79
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\report_test.cpp(31): MESSAGE: Food in store: 213 meals; couples 4, feuds 3, mammoths 2, chronicle entries 1495
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(48):
+TEST CASE:  US-016 Round trip
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(57): MESSAGE: after 50 years: 20 alive, 43 people ever, 5069 chronicle entries, save 1363 KB
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(66):
+TEST CASE:  US-016 Crash-safe
+  the save itself is cut off halfway: the previous complete save loads
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(92): MESSAGE: skipped clan.json: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/crash-safe/clan.json: (syntax): [json.exception.parse_error.101] parse error at line 4679, column 7: syntax error while parsing object key - invalid string: missing closing quote; last read: '"te'; expected string literal
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(66):
+TEST CASE:  US-016 Crash-safe
+  nothing usable at all: a clear error, never a crash
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(102): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/crash-safe/clan.json: (file): no save could be loaded:
+  C:/Users/Amek/AppData/Local/Temp/odysseus-us016/crash-safe/clan.json: (syntax): [json.exception.parse_error.101] parse error at line 1, column 4: syntax error while parsing object key - invalid literal; last read: '{ no'; expected string literal
+  C:/Users/Amek/AppData/Local/Temp/odysseus-us016/crash-safe/clan.json.bak1: (syntax): [json.exception.parse_error.101] parse error at line 1, column 1: attempting to parse an empty input; check that your input string or stream contains the expected JSON
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(123):
+TEST CASE:  US-016 Old version
+  a version 1 save is upgraded and loads
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(152): MESSAGE: clan.json: upgraded from save version 1 to 3
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(123):
+TEST CASE:  US-016 Old version
+  a save from a newer version explains why it cannot load
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(217): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/old-version/clan.json: saveVersion: is 99: the save was made by a newer version of the game (this one reads up to 3)
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(223):
+TEST CASE:  US-016 A save that does not add up is refused
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\save_test.cpp(234): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us016/inconsistent/clan.json: (file): no save could be loaded:
+  C:/Users/Amek/AppData/Local/Temp/odysseus-us016/inconsistent/clan.json: (contents): is damaged: people[0] names a person who does not exist
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(182):
+TEST CASE:  US-163 Variety: 50 lines from one seed, no line more than twice
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(200): MESSAGE: seed 1: 42 different lines in 50
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 1 [memory] Arn: Mira stealing from the store, 10 days ago. I have not forgotten.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 2 [hero] Voll: Garu, the others are looking at us.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 3 [hero] Mira: Sit by the fire a while, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 4 [season] Arn: Another summer. We keep going.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 5 [memory] Voll: I could tell you about Mira giving me a gift.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 6 [people] Mira: Everyone has heard about Lin stealing from the store by now. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 7 [memory] Arn: I was just thinking about Mira stealing from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 8 [memory] Voll: Mira giving me a gift, yesterday. I have not forgotten.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 9 [people] Mira: Lin stealing from the store, so I heard. That makes me unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 10 [people] Arn: Did you hear? Voll stealing from the store. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 11 [people] Voll: I heard about Lin stealing from the store. I feel uneasy about it.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 12 [people] Mira: Ruk turning Awa down, so I heard. That makes me unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 13 [people] Arn: I should not say it, but I heard about Voll stealing from the store. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 14 [memory] Voll: I keep thinking about Mira giving me a gift.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 15 [people] Mira: Word has spread about Lin stealing from the store. I feel uneasy.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 16 [people] Arn: Everyone has heard about Voll stealing from the store by now. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 17 [memory] Voll: Some things stick. Mira giving me a gift, 2 days ago.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 18 [hero] Mira: I do not have much to tell, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 19 [memory] Arn: 10 days ago, Mira stealing from the store. That is all I will say.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 20 [hero] Voll: Is there something you want of me?
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 21 [people] Mira: Lin stealing from the store, so I heard. That makes me uneasy.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 22 [memory] Arn: I could tell you about Mira stealing from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 23 [season] Voll: There is plenty to do before summer is over.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 24 [people] Mira: Did you hear? Lin stealing from the store. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 25 [people] Arn: I heard about Voll stealing from the store. I feel unsure about it.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 26 [people] Voll: People are talking about Lin stealing from the store. I am uneasy.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 27 [season] Mira: Mind the weather, Garu. This summer is not done with us.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 28 [hero] Arn: I was about to find you, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 29 [hero] Voll: You walk a long way every day, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 30 [hero] Mira: Do not let the work wear you out, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 31 [people] Arn: Did you hear? Lin stealing from the store. I am uneasy.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 32 [memory] Voll: I keep thinking about Mira giving me a gift.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 33 [season] Mira: We tell stories about the summer, you know.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 34 [people] Arn: They keep talking about Voll stealing from the store. It leaves me unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 35 [memory] Voll: Some things stick. Lin stealing from the store, 2 days ago.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 36 [hero] Mira: I am Mira. You know that, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 37 [memory] Arn: I could tell you about Mira stealing from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 38 [memory] Voll: Mira giving me a gift, yesterday. I have not forgotten.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 39 [hero] Mira: There is always something to do, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 40 [people] Arn: I should not say it, but I heard about Voll stealing from the store. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 41 [memory] Voll: I was just thinking about Mira giving me a gift.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 42 [people] Mira: I heard about Lin stealing from the store. I feel unsure about it.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 43 [hero] Arn: Garu, the others are looking at us.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 44 [season] Voll: I have seen worse than this summer.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 45 [people] Mira: People are talking about Ruk turning Awa down. I am unsure.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 46 [people] Arn: Everyone has heard about Lin stealing from the store by now. I am uneasy.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 47 [hero] Voll: Do not let the work wear you out, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 48 [season] Mira: Another summer. We keep going.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 49 [hero] Arn: You walk a long way every day, Garu.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(197): MESSAGE: sample 50 [memory] Voll: I remember Lin stealing from the store. It stays with me.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(200): MESSAGE: seed 7: 42 different lines in 50
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(200): MESSAGE: seed 42: 39 different lines in 50
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\smalltalk_test.cpp(200): MESSAGE: seed 12345: 39 different lines in 50
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(21):
+TEST CASE:  US-112 Sickness
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(37): MESSAGE: Spring, year 1: Garu fell sick, weakened by hunger.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(65):
+TEST CASE:  US-112 A hunting wound
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(76): MESSAGE: Spring, year 1: Oda was hurt hunting.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(80):
+TEST CASE:  US-112 Sickness can kill
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Garu died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Arn died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Lin died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Tiru died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Oda died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Sela died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Hela died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Iva died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Voll died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Ama died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Awa died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Tok died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Ruk died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Pim died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Nara died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Mira died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Tala died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Moru died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Neva died of the sickness, weakened by hunger.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(93): MESSAGE: Spring, year 1: Vena died of the sickness, weakened by hunger.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(102):
+TEST CASE:  US-112 Nursing
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(115): MESSAGE: Spring, year 1: Hela nursed Sela back to health.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(171):
+TEST CASE:  US-112 Sharing food
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(178): MESSAGE: Spring, year 1: Tiru shared food with hungry Oda.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(207):
+TEST CASE:  US-112 Adoption
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(234): MESSAGE: Spring, year 1: Tavo, orphaned by the death of Tiru, was taken in by Pim.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(248):
+TEST CASE:  US-112 Story data is validated
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_care_test.cpp(263): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us112/story.json: sharing.amount: must be between 1 and 100 (is 0)
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_episode_test.cpp(20):
+TEST CASE:  US-115 Episode
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_episode_test.cpp(41): MESSAGE: The Hard Winter of year 2. It began in Summer, year 2: Vena stole from the food store; Tiru saw it. The turn came in Winter, year 2: The food store ran empty after the failed harvest and the thefts of Voll, Mira and Vena; 3 went to bed hungry. It ended in Spring, year 3: Arn got well again, nursed by Oda. Those who lived it: Arn, Tiru, Oda and Voll.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_episode_test.cpp(62):
+TEST CASE:  US-115 Fewer, bigger
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_episode_test.cpp(67): MESSAGE: 24 episodes in 60 years from 9047 events
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(87):
+TEST CASE:  US-114 Apprenticeship
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(95): MESSAGE: Spring, year 1: Ama took Kal as apprentice in gathering.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(111): MESSAGE: skill with lessons 29, without 19
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(119): MESSAGE: Winter, year 1: Kal finished learning gathering from Ama.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(141):
+TEST CASE:  US-114 Hunting party
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(148): MESSAGE: Spring, year 1: A hunting party of 5 (Oda, Ruk, Nara, Mira and Tala) went after a mammoth under Tala, and brought it down.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(158): MESSAGE: Spring, year 1: Oda stood firm against the mammoth.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(159): MESSAGE: Spring, year 1: Nara fled from the mammoth.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(182):
+TEST CASE:  US-114 The party decides the hunt
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(189): MESSAGE: Spring, year 1: A hunting party of 5 (Oda, Ruk, Nara, Mira and Tala) went after a mammoth under Tala, and brought it down.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(189): MESSAGE: Spring, year 1: A hunting party of 5 (Oda, Ruk, Nara, Mira and Tala) went after a mammoth under Tala, but it got away.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(204):
+TEST CASE:  US-114 Rescue
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_hunt_test.cpp(214): MESSAGE: Spring, year 1: Ruk saved Oda from the mammoth.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(86):
+TEST CASE:  US-113 Courtship
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(104): MESSAGE: Spring, year 1: Ruk began courting Tiru.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(121): MESSAGE: Summer, year 1: Tiru and Ruk became partners after Tiru's courtship.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(129):
+TEST CASE:  US-113 Unrequited love
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(145): MESSAGE: Spring, year 1: Tiru turned down Ruk's courtship.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(161):
+TEST CASE:  US-113 Rivals
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(196): MESSAGE: Spring, year 1: Moru grew jealous of Ruk, who won Tiru.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(216): MESSAGE: Spring, year 1: Moru and Ruk quarrelled over their love for Tiru.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(232):
+TEST CASE:  US-113 Parting
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(244): MESSAGE: Spring, year 1: Sela and Hela parted after a bitter quarrel.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(251):
+TEST CASE:  US-113 The one who falls out of love leaves
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(261): MESSAGE: Spring, year 1: Sela and Hela parted over stolen meat.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(289):
+TEST CASE:  US-113 Courtship keeps the clan's rules
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_love_test.cpp(320): MESSAGE: 287 courting days seen in 20 years; 28 courtships begun, 2 rejections, 2 jealousies, 0 partings
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(18):
+TEST CASE:  US-111 Quarrel
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(27): MESSAGE: Spring, year 1: Tiru and Oda quarrelled over stolen meat.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(62):
+TEST CASE:  US-111 Blame
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(77): MESSAGE: Summer, year 1: Hela blamed Tiru for Sela's death, because Tiru had stolen from the store.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(102):
+TEST CASE:  US-111 Revenge ends in a fight
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(113): MESSAGE: Spring, year 1: Oda attacked Sela over stolen meat: Sela lost the fight and was badly hurt.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(157):
+TEST CASE:  US-111 Revenge can end in exile
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_quarrel_test.cpp(166): MESSAGE: Spring, year 1: The clan drove Oda out for attacking Sela over stolen meat.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(24):
+TEST CASE:  US-110 Death with a cause
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Garu died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Arn died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Lin died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Tiru died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Oda died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Sela died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Hela died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Iva died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Voll died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Ama died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Awa died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Tok died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Ruk died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Pim died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Nara died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Mira died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Tala died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Moru died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Neva died of hunger in the dry summer, after Tiru stole from the store.
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(39): MESSAGE: Summer, year 1: Vena died of hunger in the dry summer, after Tiru stole from the store.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(61):
+TEST CASE:  US-110 Feud with a reason
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(70): MESSAGE: Spring, year 1: A feud broke out between Oda and Sela over stolen meat.
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(126):
+TEST CASE:  US-110 Story data is validated
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\story_test.cpp(136): MESSAGE: C:/Users/Amek/AppData/Local/Temp/odysseus-us110/story.json: season.leanAutumnPercent: must be between 0 and 100 (is 150)
+
+===============================================================================
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\world_test.cpp(46):
+TEST CASE:  US-010 Determinism
+
+C:\Users\Amek\.amek-ai\Odysseus\odysseus\tests\sim\world_test.cpp(57): MESSAGE: world hash after 10,000 ticks with seed 42: 8094591555357092430
+
+===============================================================================
+[doctest] test cases:    428 |    427 passed | 1 failed | 1 skipped
+[doctest] assertions: 140493 | 140492 passed | 1 failed |
+[doctest] Status: FAILURE!

@@ -2,6 +2,79 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-207 Play the edited region (Mraw) - 2026-10-09
+
+**State:** branch `story/US-207`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-207`. Decisions: D-68.
+
+- **New:** a World row on the New Game screen and `--world <name>`; `OdysseyGame::loadWorld`; a run that begins on a world file with its seed, its setup (`applyClanSetup`, `applyHeroSetup`, `applyRivalSetup`) and the placed camps; **Play here** in the Region view (button, P key, saves the world first, refuses non-land), Esc and F2 back with the Editor's level kept, no saving in a test run; `hero.json` version 3 (`world`, `worldHash`) and a `world.json` copy in the save folder, a warning and the copy when the file changed; `sim::worldTextHash`, `worldFileHash`; `loadRegion(..., makeBase)`; `game::worldNames`.
+- **Changed:** `startNewRun` returns whether it started; `resetPlay` makes the rivals from the placed camps with their stores; `loadAutosave` rebuilds a world run's land from its copy; older saves (`hero.json` 1 and 2) load as before. docs/guides/world-editing.md has the new section with an example; decisions.md gained the missing D-65..D-67 rows.
+- **Tests:** sim `US-207 Fingerprint ...`, `US-207 Run save ...`, `US-207 Region save ...`; game `US-207 New game ...` (2), `US-207 Play here ...` (2), `US-207 World saves ...`, `US-207 Old saves ...`.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-207/build.txt`); the 9 `US-207` cases pass; neighbours sim 427/428 and game 497/522, every failure an NPC case that follows the owner's uncommitted `wanderer.json` edit. Not run: the full suites (X-M12).
+
+## US-206 Clans and people inspector (Mraw) - 2026-10-09
+
+**State:** branch `story/US-206`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-206`. Decisions: D-67.
+
+- **New:** the Inspect panel of the Region view (clan: leader, stance, store, debts, partners, members; clan member: kin, opinions, grudges), the `clans` and `people` sections of the world file with schema, the consistency list, one step of Undo per change; `sim::world_setup` with the text of every field, `applyClanSetup` (meals, kin, opinions as written, grudges told by a chronicle entry), `applyHeroSetup` (store items, debts to rivals), `applyRivalSetup` (a rival's meals); a placed person's `allow`, `deny`, `day`, `night`, `stock` and `does` properties applied in the level.
+- **Changed:** `World::setOpinion`, `World::addSetupGrudge`, `HeroLife::stockItem`, `HeroLife::addDebt` (small doors for the setup); `WorldFile::setup`; `WorldCommand::setup` (before and after).
+- **Tests:** sim `US-206 Social ...`, `US-206 Kin ...`, `US-206 Economy ...` (2), `US-206 Text fields ...`, `US-206 Checks ...`, `US-206 World file ...`; game `US-206 Overrides ...`, `US-206 Inspector ...`.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-206/build.txt`); the 9 `US-206` cases pass, and so do the 213 sim and 165 game cases of the US-01x to US-11x, US-18x to US-20x and US-30x groups (the older sim run found `US-190 Drift` listing two keys the schema lacked; added). Not run: the full suites (X-M12).
+
+## US-205 Camps and resources (Mraw) - 2026-10-09
+
+**State:** branch `story/US-205`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-205`. Decisions: D-66.
+
+- **New:** Camp and Resource groups in the Place row of the Region view, with the Anyway toggle; camp rules with reasons (kind, one player camp, open ground, 8 tiles apart, the generator's site check unless placed anyway); `Rivals(..., placed)` starts the first rival clans at the placed camps with their name and size; the player camp moves the start; `Region::hideResource`, `setResourceAmount`, `addResource`, `setStart`, `clearPlacedEdits`, `seedResource`; a flint or wood spot of several gives one unit at a time and what is left is kept in the run save (optional `amounts`, same version); `sim::campsOf`, `applyPlacedToRegion`.
+- **Changed:** `makeWorldRegion` applies resource and camp entries (a hidden seed spot is gone from the region); `goodSite` counts a food spot put there; `world.schema.json` describes `camps` and `resources`; the guide has the new section with an example.
+- **Tests:** sim `US-205 Rules ...`, `US-205 Camps ...`, `US-205 Resources ...`, `US-205 Saves ...`; game `US-205 Camps ...`, `US-205 Resources ...`. One US-204 check was adjusted: a region made from the world file no longer has the hidden tree.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-205/build.txt`); the 6 `US-205` cases pass, and so do the 119 sim and 156 game cases of the US-03x, US-04x, US-08x, US-18x, US-19x, US-20x and US-30x groups. Not run: the full suites (X-M12).
+
+## US-204 Things, people and places in the region (Mraw) - 2026-10-09
+
+**State:** branch `story/US-204`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-204`. Decisions: D-65.
+
+- **New:** Place, Move and Take away tools in the Region view with a row for Thing / Person / Place, Kind (the catalog list), Name, Set key=value, Fix: move and Fix: drop; squares for the entries on the map; one step of Undo each (`WorldCommand::placed`). `sim/world_places.{h,cpp}`: the rules for putting, moving, taking away and hiding entries, properties per group, stable ids (`t-0001`, `p-0001`, `l-0001`), the conflict settling (Move to the nearest tile that can hold the entry, Remove). `levelFromRegion(region, definitions, catalogs, edits, &problems)` adds the entries to the level the game plays (a thing as a plant, object or animal, a person as a character with its class and properties, a place as a named spot) and leaves out the seed things the owner took away.
+- **Changed:** `PlacedEdit` has `name`, `npcClass` and `properties`; the world file writes and reads them (a property the group cannot set, or an id used twice, is a DataError naming file and field); `world.schema.json` describes `things`, `people` and `places` with examples. The catalogs `places` and `markers` also list the region's names; new catalogs `people` and `goals`; `help.json` offers them for the quest Giver, the quest Goal and the dialogue Who fields; the quest check accepts the region's names. `docs/guides/world-editing.md` has the new section and an example file.
+- **Tests:** sim `US-204 Place ...`, `US-204 Places ...`, `US-204 Move, take away and Undo ...`, `US-204 Tombstone ...`, `US-204 Stable ids ...`, `US-204 Conflicts ...`, `US-204 Properties ...`, `US-204 Cap ...`; game `US-204 Place: a fire pit and an NPC ...`, `... a click with the Place tool ...`, `US-204 Move and take away ...`, `US-204 Properties ...`, `US-204 Conflicts: Fix: move ...`, `US-204 Pickers and Places ...`, `US-204 Palette ...`.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-204/build.txt`); the 15 `US-204` cases pass, and so do the 104 sim and 142 game cases of the US-18x, US-19x, US-20x and US-30x groups. Not run: the full suites (X-M12).
+
+## US-203 Water and mountains (Mraw) - 2026-10-09
+
+**State:** branch `story/US-203`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-203`. Decisions: D-64.
+
+- **New:** River (with fords), Lake, Ridge, Cave, Ford and Dry tools in the Region view, all made of tile edits (one step of Undo each, no new file format); the shape preview while dragging; a warning line for the start without water or food and for a sealed cave mouth (never a block); the Fords field. `sim::line4`, `sim::thicken`, `sim::disc` (`src/sim/region_shapes.*`), `sim::landWarnings`.
+- **Changed:** the generator settings panel sits under the tool row and is smaller.
+- **Tests:** sim `US-203 A line is four-connected ...`, `US-203 Thickening ...`, `US-203 Warnings ...`; game `US-203 River: ...`, `US-203 River in the game ...`, `US-203 Lake and ridge`, `US-203 Cave: ...`, `US-203 A cave mouth in the middle ...`, `US-203 Remove: ...`, `US-203 Ford ...`, `US-203 With the mouse ...`, `US-203 Water over the start ...`. They run at X-M12 (D-41); they were also run here and pass, with the US-200 to US-202, editor, help, schema and US-19x suites and the whole luna suite.
+- **Verified:** Debug build of the sim and game tests, zero warnings (`docs/evidence/US-203/build.txt`). Not run: the full game suite (X-M12). The sim suite has one failure from the owner's uncommitted `wanderer.json` (`npc_kind_test`).
+
+## US-202 Hand edits on top of the seed (Mraw) - 2026-10-09
+
+**State:** branch `story/US-202`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-202`. Decisions: D-63.
+
+- **New:** painting in the Region view (Brush, Rect, Fill, Reset, five biomes, size 1 to 9, middle or right button pans), one world history of 500 steps (Ctrl+Z, Ctrl+Y), Save to `assets/worlds/<name>.json` (seed plus only the differing tiles, per chunk, chunk-local coordinates; schema `world.schema.json`; guide `docs/guides/world-editing.md`), the world file read when the region opens for the same seed. `sim::Region` tile edits (`setTileEdit`, `clearTileEdit`, `tileEditList`, `seedBiomeAt`, `onEdgeWall`), `sim::WorldFile` (`loadWorld`, `saveWorld`, `makeWorldRegion`), `WorldHistory`.
+- **Renderer:** `Renderer::destroyTexture` (Window, SDL and GPU backends; the GPU backend lets go at the start of the next frame). `Minimap` gives back the picture it replaces. The chunk pictures of a painted chunk are made again, the old one drawn until there is room for the new one.
+- **Changed:** Preview and Now maps are kept and painted again (they no longer leave a texture each); Preview lays the painted tiles over the new land; Apply keeps the painted tiles.
+- **Tests:** sim `US-202 Tile edits ...` (2), `US-202 World file ...` (4), `US-202 Small saves ...`, `US-202 ... refused when saving`; game `US-202 Paint ...`, `... with the mouse ...`, `US-202 Undo ...`, `US-202 Reset ...`, `US-202 The edge wall ...`, `US-202 Opening the region again ...`, `US-202 Changing the generator settings ...`, `US-202 Middle button pans ...`. They run at X-M12 (D-41); they were also run here and pass, with the US-200, US-201, editor, help, schema and US-19x suites and the whole luna suite.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-202/build.txt`). Not run: the full game suite (X-M12). The sim suite has one failure from the owner's uncommitted `wanderer.json` (`npc_kind_test`), as in `Limit.md`.
+
+## US-201 Generator settings with live preview (Mraw) - 2026-10-09
+
+**State:** branch `story/US-201`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-201`. Decisions: D-62.
+
+- **New:** the Settings panel of the Region view (14 fields, Preview beside the old map, Apply to `region.json` by patching only the changed lines, Revert); `sim::regionConfigProblems` (the loader's rules for a draft); `sim::RegionEdits`, `effectiveBiome` and `findConflicts` (the model of hand edits and the list of ones the new land does not suit). `src/game/generator_panel.{h,cpp}`, `src/sim/region_edits.{h,cpp}`, `docs/guides/world-editing.md`.
+- **Tests:** `US-201 Settings`, `US-201 Preview`, `US-201 Preview and Apply refuse ...`, `US-201 Apply`, `US-201 Keep edits` (game), `US-201 A number typed ...`, and in the sim tests `US-201 A draft is checked by the same rules as the file`, `US-201 Keep edits ...`, `US-201 A tombstone ...`. They run at X-M12 (D-41); they were also run here and pass, with the US-200 and the editor, help and schema suites.
+- **Verified:** Debug build of `odysseus_sim_tests` and `odysseus_game_tests`, zero warnings (`docs/evidence/US-201/build.txt`). Not run: the full suite (X-M12).
+
+
+## US-200 The region in the Editor (Mraw) - 2026-10-09
+
+**State:** branch `story/US-200`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-200`. Design: `docs/plans/M12-world-editing-design.md`, D-61.
+
+- **New:** the Region view in the Editor (**Region** button): the whole 256 x 256 land on a map, zoom from the whole map to single tiles, seven layer switches, a cached overview that moves the view, drag to pan. `src/game/region_view.{h,cpp}`, `src/luna/engine/minimap.{h,cpp}` (game-agnostic), `docs/guides/world-editing.md`.
+- **Tests:** `US-200 Open` (two cases: every zoom, and the budget of a few pictures a frame), `US-200 Layers`, `US-200 Same world` (tile for tile against the game's level, three seeds), `US-200 The overview ...`, `US-200 The wheel zooms ...`, `US-200 Minimap ...`. They run at X-M12 (D-41); they were also run here and pass.
+- **Verified:** Debug build of `luna_tests` and `odysseus_game_tests`, zero warnings (`docs/evidence/US-200/build.txt`). Not run: the full test suite (X-M12). An unrelated test fails in this checkout: `US-291 Event: a fire lit...` (it depends on the owner's uncommitted `wanderer.json`, see Limit.md).
+
+
 ## X-M11 Exit review M11 Data editors (Mraw) - 2026-10-06
 
 **State:** `qa` merged into `main`, tag `m11-done`. Gate: `docs/gates/M11.md`.

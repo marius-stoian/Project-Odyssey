@@ -35,6 +35,8 @@ struct NewGame {
     int preset = 0;
     int comfort = 1;
     std::string rules; // the rules file the run plays under (US-195); empty is "standard"
+    std::string world;     // the world file the run began on (US-207, assets/worlds/<name>.json); empty: the land generated from the seed
+    std::string worldHash; // the fingerprint of that file when the run began (sim::worldFileHash)
 };
 
 // The clan's world rules for a Comfort level: needs fall faster when harsh, the store starts smaller.
@@ -200,6 +202,10 @@ public:
     bool rivalNeeds(int rival, const std::string& item) const;
     BarterResult barter(int rival, const BarterOffer& offer);
     const std::vector<Debt>& debts() const { return debts_; }
+    // The owner's setup of the world (US-206): the store holds exactly `count` of an item (false: not an item of the game), and a debt to rival `rival` is on the books,
+    // due in `days` days. Neither is a trade, so no quest event, tradePoints or message follows.
+    bool stockItem(const std::string& item, int count);
+    void addDebt(int rival, Goods owe, int value, int days);
     ActionResult payDebt(std::size_t index);
     std::string foundFireBlockedReason() const;
     ActionResult foundFire(const std::string& name, int tileX, int tileY);
@@ -226,6 +232,12 @@ public:
     static HeroLife load(const HeroData& data, World& world, const std::filesystem::path& file);
     // The rules a saved run plays under ("" for a save from before US-195, or one that cannot be read): the hero data must be read under them before the run is loaded.
     static std::string savedRules(const std::filesystem::path& file);
+    // The world file a saved run began on: its name and the fingerprint it had then; both empty for a run on generated land and for a save from before region editing (US-207).
+    struct SavedWorld {
+        std::string name;
+        std::string hash;
+    };
+    static SavedWorld savedWorld(const std::filesystem::path& file);
 
 private:
     struct RestoreTag {};

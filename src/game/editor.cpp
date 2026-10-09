@@ -72,6 +72,7 @@ Editor::Editor(Level& level, const Definitions& definitions, std::filesystem::pa
     graphEditor_ = std::make_unique<GraphEditor>(viewWidth, viewHeight, [this](std::unique_ptr<Command> command) { history_.record(std::move(command)); }, [this](const std::string& message) { say(message); });
     storyEvents_ = std::make_unique<StoryEventEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
     dataEditor_ = std::make_unique<DataEditor>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
+    regionView_ = std::make_unique<RegionView>(viewWidth, viewHeight, [this](const std::string& message) { say(message); });
     dataEditor_->setOpenInteraction([this](const std::string& id) { // the Interactions button of the Data tab: the interaction graph, on that interaction when there is one
         dataEditor_->show(false);
         graphEditor_->showKind(GraphEditor::Kind::Interaction);
@@ -118,6 +119,7 @@ void Editor::buildPanels() {
     button("Events", "Story events: edit the crossroads events of the hero's youth as forms (Esc comes back)", [this] { storyEvents_->show(true); });
     button("Quests", "Quests: open a quest as a graph of steps, edit it and save it (Esc comes back)", [this] { graphEditor_->showKind(GraphEditor::Kind::Quest); });
     button("Data", "Data: open any data file of the game as forms (weapons, plants, needs, rules...), edit it and save it (Esc comes back)", [this] { dataEditor_->show(true); });
+    button("Region", "Region: the whole generated land on a zoomable map with layer switches (Esc comes back)", [this] { regionView_->show(true); });
     button("#", "Grid: show or hide the cell lines (G)", [this] { grid_ = !grid_; });
     button("Sky", "Preview the light of any time of day with the slider (a view only: not saved)", [this] { setPreviewHour(previewHour_ ? std::nullopt : std::optional<double>(12.0)); });
     button("Undo", "Undo (Ctrl+Z)", [this] { undo(); });
@@ -1572,6 +1574,7 @@ void Editor::applyHelp() {
     buildingEditor_->applyHelp(*help_);
     graphEditor_->applyHelp(*help_);
     storyEvents_->applyHelp(*help_);
+    regionView_->applyHelp(*help_);
 }
 
 void Editor::say(std::string message) {
@@ -2053,6 +2056,11 @@ void Editor::useTool(const luna::engine::Pointer& pointer, bool overPanel) {
 void Editor::update(const Intents& intents) {
     applyHelp();
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
+    if (regionView_->shown()) { // the Region view takes the whole screen too (US-200)
+        regionView_->update(intents);
+        if (intents.pressed(Intent::OpenMenu) && !regionView_->typing()) regionView_->show(false);
+        return;
+    }
     if (dataEditor_->shown()) { // the Data tab takes the whole screen; the map waits behind it (it handles Ctrl+S, Ctrl+Z, Ctrl+Y and Esc itself)
         dataEditor_->update(intents);
         return;
@@ -2123,6 +2131,12 @@ void Editor::update(const Intents& intents) {
 }
 
 void Editor::render(luna::engine::Renderer& renderer, double alpha) const {
+    if (regionView_->shown()) { // the Region view covers everything (US-200)
+        UiPainter regionPainter(renderer, textures_.ui);
+        regionPainter.setScreen({0, 0, viewWidth_, viewHeight_});
+        regionView_->render(renderer, regionPainter);
+        return;
+    }
     // The time-of-day preview (US-247): the ground and everything standing on it are lit as at that hour; the marks, panels and text are not.
     luna::engine::LightFrame preview;
     const bool previewing = previewHour_.has_value() && static_cast<bool>(lightPreview_);

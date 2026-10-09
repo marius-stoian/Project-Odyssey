@@ -71,6 +71,10 @@ public:
         return static_cast<int>(textures_.size()) - 1;
     }
 
+    void destroyTexture(int texture) override {
+        if (texture >= 0 && static_cast<std::size_t>(texture) < textures_.size()) textures_[static_cast<std::size_t>(texture)].reset();
+    }
+
     void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive) override {
         SDL_Texture* picture = textures_.at(static_cast<std::size_t>(texture)).get();
         const bool tinted = !additive && (tint_[0] != 255 || tint_[1] != 255 || tint_[2] != 255);

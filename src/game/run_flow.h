@@ -45,6 +45,9 @@ public:
     bool modal() const { return screen_ != Screen::None; }
 
     void openNewGame();
+    // Picks a world file on the New Game screen (US-207, --world); "" is the land generated from the seed.
+    void pickWorld(const std::string& name) { world_ = name; }
+    const std::string& pickedWorld() const { return world_; }
     void openFocus();
     void openPrivacy() { screen_ = Screen::Privacy; }
     void openMenu();
@@ -191,6 +194,7 @@ private:
     int preset_ = 0;
     int comfort_ = 1;
     std::string rules_; // the rules file picked on the New Game screen ("" = standard)
+    std::string world_; // the world file picked on the New Game screen ("" = land generated from the seed, US-207)
     bool tutorial_ = true;
     // Focus
     std::vector<int> picked_;
