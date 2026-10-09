@@ -1,0 +1,6 @@
+US-204 Debug build, zero warnings (cmake --build --preset windows-x64-debug)
+first build (all targets): exit 0, warning lines 0
+second build (after the fixes): exit 0, warning lines 0
+
+tests: odysseus_sim_tests -tc="US-204*": 8 passed, 0 failed; odysseus_game_tests -tc="US-204*": 7 passed, 0 failed
+neighbours: -tc="US-20*,US-30*,US-19*,US-18*": sim 104/104, game 142/142

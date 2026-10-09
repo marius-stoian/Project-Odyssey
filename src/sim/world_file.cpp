@@ -3,6 +3,7 @@
 #include "json_data.h"
 #include "json_patch.h"
 #include "save.h"
+#include "world_places.h"
 
 #include <algorithm>
 #include <charconv>
@@ -84,6 +85,13 @@ OrderedJson toJson(const WorldFile& world, const RegionConfig& base) {
             OrderedJson item = {{"id", entry.id}, {"kind", entry.kind}, {"at", OrderedJson::array({entry.x, entry.y})}};
             if (entry.removal) item["remove"] = true;
             if (entry.forced) item["forced"] = true;
+            if (!entry.name.empty()) item["name"] = entry.name;
+            if (!entry.npcClass.empty()) item["class"] = entry.npcClass;
+            if (!entry.properties.empty()) {
+                OrderedJson properties = OrderedJson::object();
+                for (const auto& [key, value] : entry.properties) properties[key] = value;
+                item["properties"] = std::move(properties);
+            }
             list.push_back(std::move(item));
         }
         overrides[group.key] = std::move(list);
@@ -181,6 +189,19 @@ WorldFile loadWorld(const std::filesystem::path& file, const RegionConfig& base)
                 entry.y = item.at("at").at(1).get<int>();
                 entry.removal = item.value("remove", false);
                 entry.forced = item.value("forced", false);
+                entry.name = item.value("name", std::string());
+                entry.npcClass = item.value("class", std::string());
+                if (item.contains("properties")) {
+                    const std::string where = std::string("overrides.") + group.key + "." + entry.id + ".properties";
+                    if (!item.at("properties").is_object()) throw DataError(file, where, "must be an object of property: value");
+                    for (const auto& [key, value] : item.at("properties").items()) {
+                        const std::string text = value.is_string() ? value.get<std::string>() : value.dump(); // a number written by hand is as good as a string
+                        if (const std::string problem = placedPropertyProblem(entry.group, key, text); !problem.empty()) throw DataError(file, where + "." + key, problem);
+                        entry.properties.push_back({key, text});
+                    }
+                }
+                const bool repeated = std::any_of(world.edits.placed.begin(), world.edits.placed.end(), [&entry](const PlacedEdit& other) { return other.id == entry.id; });
+                if (repeated) throw DataError(file, std::string("overrides.") + group.key, "the id '" + entry.id + "' is used twice");
                 world.edits.placed.push_back(std::move(entry));
             }
         }

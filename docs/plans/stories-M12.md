@@ -103,3 +103,31 @@ Design: docs/plans/M12-world-editing-design.md section 6. Decisions: D-64. Trace
 3. **Lake**: press, drag out, release: a round lake. **Ridge**: a line of cliffs.
 4. **Cave** on a cliff next to a meadow: a dark mouth; on a meadow: a message. On a cliff with only mountain around it: the red warning.
 5. **Dry** on a lake: the whole lake turns to meadow; **Reset** on it brings the water back.
+
+<a id="us-204"></a>
+
+## US-204 Things, people and places in the region: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md section 8. Decisions: D-65. Traces to EDT-04, STO-04. Guide: docs/guides/world-editing.md.
+
+## Built
+- `src/sim/world_places.{h,cpp}`: the rules for entries put on the land. `addPlaced`, `movePlaced`, `removePlaced`, `hideSeedThing` (a tombstone for the seed's own wood, berries, flint or herd), `setPlacedProperty`, each returning a `PlacedChange` (the entry before and after) that `applyPlacedChange` does and undoes; `placementProblem` (outside, on water or mountain, no kind, a place without a unique name, something of the group on the tile, a bad property); `placedPropertyProblem` (what each group may set); `nextPlacedId`; `placedNames`; `resolveConflicts` (Keep, Move to the nearest tile that can hold the entry, Remove).
+- `src/sim/region_edits.h`: `PlacedEdit` gains `name`, `npcClass` and `properties`.
+- `src/sim/world_file.cpp`: the three new fields are written and read; a property the group cannot set, or an id used twice, is a DataError naming file and field. `assets/data/schemas/world.schema.json`: `things`, `people` and `places` entries described with examples.
+- `src/game/region_level.{h,cpp}`: `levelFromRegion(region, definitions, catalogs, edits, &problems)` leaves out the seed things the edits took away and adds the entries: a thing is a plant or object (with the interaction overrides of its properties) or an animal, a person is a character with its class and properties, a place is a named spot whose first tag is its kind. An entry that cannot be made is named in `problems`.
+- `src/game/region_view.{h,cpp}`: tools Place, Move and Take away; a row under the tools (Thing / Person / Place, Kind with the catalog list, Name, Set key=value, Fix: move, Fix: drop); squares on the map in the Things, People and Places layers, the picked one ringed, names at close zoom; every action is one step of the world history (`WorldCommand::placed`).
+- `src/game/odyssey_game.cpp`: the palette from the catalogs; the catalogs `people` and `goals`; `places` and `markers` also list the region's names; the quest check catalog includes them. `assets/data/editor/help.json`: `graph.quest.giver`, `graph.header.who` and `graph.step.goal` offer them.
+- Tests: `tests/sim/world_places_test.cpp` (Place, Places, Move and Undo, Tombstone, Stable ids, Conflicts, Properties, Cap) and `tests/game/place_tool_test.cpp` (Place with the game's level, Place by a click, Move and take away, Properties in the game, Fix: move, Pickers and a place marker, Palette).
+
+## Technical choices
+- Entries are drawn straight from the list, not from the chunk pictures, so no picture is made again when one is placed, moved or undone.
+- A place's name is free text in the world file and the Editor; the level names it with the quest word of it (`red-cliff`), because level files only hold words and quests say words.
+- The game reads the world file from US-207 (D-63). Until then the level is made from the file by `levelFromRegion` with the edits, which the tests do.
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, zoom in on a meadow, **Place**, **Thing**, Kind: a fire pit (the list shows the kinds), click a tile: a white square. **Ctrl+Z** removes it, **Ctrl+Y** brings it back.
+2. **Person**, Kind: goblin, Name: Old Mara, click: a red square with its name at close zoom. **Place**, Kind: shrine, Name: Red Cliff, click: a gold square. A second place called "red cliff" is refused.
+3. **Move**: click Old Mara (ringed), click an empty tile: she moves, her id (hover) does not change. **Set** `hp=300`, then place nothing else: the entry keeps it; `hp=lots` is refused with the reason.
+4. **Take away** on a seed tree: a grey outline; **Save**; open `assets/worlds/default.json`: a `things` entry with `remove` true. Regenerate (Settings, change the seed's settings, Apply): the tree stays away.
+5. Paint a lake over a placed thing: the Settings panel names it; **Fix: move** puts it on the nearest meadow; Ctrl+Z puts it back.
+6. In the Graph editor, a quest step: the Goal field offers "goto red-cliff" and "talk old-mara", the Marker field offers `place:Red Cliff`, the Giver field offers Old Mara. Once US-207 lets the game read the world file, the marker points at the place in the running game.

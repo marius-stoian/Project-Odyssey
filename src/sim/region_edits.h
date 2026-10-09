@@ -5,6 +5,7 @@
 #include "region.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace odysseus::sim {
@@ -31,6 +32,10 @@ struct PlacedEdit {
     int y = 0;
     bool removal = false; // a tombstone: the seed's own thing at (x, y) is taken away
     bool forced = false;  // a camp the owner placed on purpose where the site check fails
+    std::string name;       // a person's or a place's own name ("Red Cliff"); empty: the kind's name
+    std::string npcClass;   // a person's NPC Class (assets/data/npc-classes), or empty
+    // What this one entry sets over its kind's data (US-204): keys the group allows (see placedPropertyProblem), values as written in the file.
+    std::vector<std::pair<std::string, std::string>> properties;
     friend bool operator==(const PlacedEdit&, const PlacedEdit&) = default;
 };
 

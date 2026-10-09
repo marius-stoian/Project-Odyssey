@@ -223,7 +223,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-201 | US-201 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-201/; D-62; Milestone-153 |
 | S-US-202 | US-202 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-202/; D-63; Milestone-154 |
 | S-US-203 | US-203 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-203/; D-64; Milestone-155 |
-| S-US-204 | US-204 | M12 | To do |  |
+| S-US-204 | US-204 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-204/; D-65; Milestone-156 |
 | S-US-205 | US-205 | M12 | To do |  |
 | S-US-206 | US-206 | M12 | To do |  |
 | S-US-207 | US-207 | M12 | To do |  |
