@@ -20,7 +20,7 @@ using luna::engine::UiPainter;
 
 namespace {
 
-constexpr int kRowPitch = 15;
+constexpr int kRowPitch = 14;
 constexpr int kFirstRow = 16;
 constexpr Color kColours[5] = {{166, 176, 96, 255}, {58, 110, 58, 255}, {52, 98, 160, 255}, {120, 116, 112, 255}, {60, 52, 48, 255}};
 const char* const kBiomeShort[5] = {"steppe", "forest", "water", "mount.", "cave"};
@@ -63,7 +63,7 @@ void GeneratorPanel::build() {
     int y = area.y + kFirstRow;
     for (const GeneratorSetting& setting : generatorSettings()) {
         const std::string key = setting.key;
-        NumberField& field = panel_->add<NumberField>(Rect{area.x + 4, y, area.width - 8, 14}, setting.label, draft_.*setting.member, setting.minimum, setting.maximum,
+        NumberField& field = panel_->add<NumberField>(Rect{area.x + 4, y, area.width - 8, 13}, setting.label, draft_.*setting.member, setting.minimum, setting.maximum,
                                                       [this, setting](int value) { draft_.*setting.member = value; });
         fields_.push_back(&field);
         y += kRowPitch;
@@ -261,7 +261,7 @@ void GeneratorPanel::draw(UiPainter& painter, luna::engine::Renderer& renderer) 
     if (!conflicts_.empty()) {
         painter.text(area.x + 4, y, std::format("{} edit(s) no longer fit:", conflicts_.size()), UiColor::Gold);
         y += luna::engine::kLineHeight;
-        for (std::size_t i = 0; i < std::min<std::size_t>(2, conflicts_.size()); ++i) {
+        for (std::size_t i = 0; i < std::min<std::size_t>(1, conflicts_.size()); ++i) {
             painter.text(area.x + 4, y, (conflicts_[i].id + ": " + conflicts_[i].reason).substr(0, 36), UiColor::Dim);
             y += luna::engine::kLineHeight;
         }

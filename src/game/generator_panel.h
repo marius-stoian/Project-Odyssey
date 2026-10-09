@@ -41,7 +41,7 @@ public:
     using Say = std::function<void(const std::string&)>;
 
     static constexpr int kThumbCells = 128;     // the low-resolution map: 128 x 128 samples of the land, whatever its size
-    static constexpr int kThumbSize = 104;      // and how big it is on screen
+    static constexpr int kThumbSize = 92;       // and how big it is on screen
     static constexpr int kRowsPerTick = 32;     // rows of a thumbnail painted in one tick: a preview is ready in 4 ticks (0.2 s)
     static constexpr int kPanelWidth = 226;
 
@@ -60,7 +60,7 @@ public:
     bool shown() const { return shown_; }
     void show(bool shown) { shown_ = shown; }
     bool typing() const { return shown_ && panel_ && panel_->typing(); }
-    luna::engine::Rect bounds() const { return {viewWidth_ - kPanelWidth - 2, 22, kPanelWidth, 404}; }
+    luna::engine::Rect bounds() const { return {viewWidth_ - kPanelWidth - 2, 40, kPanelWidth, 386}; }
 
     // The draft: what the fields say. Not the land on screen until Apply.
     const sim::RegionConfig& draft() const { return draft_; }

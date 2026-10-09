@@ -1,6 +1,7 @@
 #include "region_edits.h"
 
 #include <format>
+#include <string>
 
 namespace odysseus::sim {
 
@@ -56,6 +57,26 @@ std::vector<EditConflict> findConflicts(Region& land, const RegionEdits& edits) 
         }
     }
     return conflicts;
+}
+
+std::vector<std::string> landWarnings(Region& land) {
+    std::vector<std::string> warnings;
+    const Tile start = land.start();
+    if (!walkable(land.biomeAt(start.x, start.y))) {
+        warnings.push_back(std::format("the start ({}, {}) is now on {}", start.x, start.y, biomeWord(land.biomeAt(start.x, start.y))));
+    } else if (!land.goodSite(start)) {
+        warnings.push_back(std::format("the start ({}, {}) no longer has water and food within reach", start.x, start.y));
+    }
+    for (const auto& [tile, biome] : land.tileEditList()) {
+        if (biome != Biome::Cave) continue;
+        bool open = false; // a cave mouth is entered from a walkable tile next to it
+        for (const Tile next : {Tile{tile.x + 1, tile.y}, Tile{tile.x - 1, tile.y}, Tile{tile.x, tile.y + 1}, Tile{tile.x, tile.y - 1}}) {
+            const Biome there = land.biomeAt(next.x, next.y);
+            if (walkable(there) && there != Biome::Cave) open = true;
+        }
+        if (!open) warnings.push_back(std::format("the cave mouth at ({}, {}) has no walkable tile next to it", tile.x, tile.y));
+    }
+    return warnings;
 }
 
 } // namespace odysseus::sim

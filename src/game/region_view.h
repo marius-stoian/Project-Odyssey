@@ -37,7 +37,7 @@ inline constexpr int kRegionLayerCount = static_cast<int>(RegionLayer::Count);
 const char* regionLayerName(RegionLayer layer);
 
 // What a left click on the map does (US-202). Pan is the default; the others paint the biome chosen on the bar, and then the middle or right button pans.
-enum class RegionTool { Pan, Brush, Rectangle, Fill, Erase };
+enum class RegionTool { Pan, Brush, Rectangle, Fill, Erase, River, Lake, Ridge, Cave, Ford, Dry };
 
 // The region in the Editor (US-200, design docs/plans/M12-world-editing-design.md section 4): the whole generated land on a zoomable map.
 // It makes its own Region from the same seed and the same region.json as the game, so the two are the same world (the "Same world" test
@@ -110,6 +110,20 @@ public:
     int paintBrush(int x, int y);               // stamps the brush (the Erase tool clears) at a tile; returns the tiles that changed
     int paintRectangle(int x0, int y0, int x1, int y1); // one step; returns the tiles that changed
     int paintFill(int x, int y);                // the connected tiles of the same biome, one step; refused (0, with a message) above kMaxFill tiles
+    // Water and mountains (US-203). Each is one step of Undo and only tile edits, so they save, undo and regenerate like any painting.
+    // A river flows along the line from a to b, `width` tiles wide; every `fordEvery` tiles (0: none) it is broken by a ford, a crossing of land. A ridge is the same line of
+    // mountain. A lake is a disc of water. A cave mouth is put into a cliff (a mountain tile); Ford wades a crossing over water under the brush; Dry turns the connected
+    // water (a lake or a river) back into land.
+    int paintRiver(sim::Tile a, sim::Tile b, int width, int fordEvery);
+    int paintRidge(sim::Tile a, sim::Tile b, int width);
+    int paintLake(sim::Tile centre, int radius);
+    bool placeCave(int x, int y);
+    int paintFord(int x, int y);
+    int dryWater(int x, int y);
+    int fordEvery() const { return fordEvery_; }
+    void setFordEvery(int every) { fordEvery_ = std::clamp(every, 0, 64); }
+    // What the land as it is would trouble the owner with (the start without water, a sealed cave mouth); shown in the status line. Never a block.
+    const std::vector<std::string>& warnings() const { return warnings_; }
     bool undo();
     bool redo();
     const WorldHistory& history() const { return history_; }
@@ -157,6 +171,9 @@ private:
     void reopen(const sim::RegionConfig& config); // Apply: the same view over the new land
     void buildTools();
     void finishStepAs(const std::string& label); // a step closed by a tool that is not a stroke
+    int paintTiles(const std::vector<sim::Tile>& tiles, sim::Biome biome, const std::string& label); // the tiles as one step; the number that changed
+    int fillFrom(int x, int y, sim::Biome biome, const std::string& label);
+    void refreshWarnings();
     bool editTile(int x, int y, std::optional<sim::Biome> target); // one tile into the open step; true when it changed
     void finishStep(const std::string& label);                     // the open step into the history, the pictures and the overview
     void applyChanges(const std::vector<TileChange>& changes, bool forward);
@@ -190,6 +207,8 @@ private:
     RegionTool tool_ = RegionTool::Pan;
     sim::Biome paintBiome_ = sim::Biome::Water;
     int brushSize_ = 3;
+    int fordEvery_ = 0;
+    std::vector<std::string> warnings_;
     WorldHistory history_;
     bool strokeOpen_ = false;
     WorldCommand stroke_;
@@ -201,6 +220,7 @@ private:
     std::vector<luna::engine::Button*> toolButtons_;
     std::vector<luna::engine::Button*> biomeButtons_;
     luna::engine::NumberField* sizeField_ = nullptr;
+    luna::engine::NumberField* fordField_ = nullptr;
 
     mutable std::map<std::tuple<int, int, int>, luna::engine::Texture> textures_; // (chunk x, chunk y, layer)
     mutable std::set<std::tuple<int, int, int>> stale_;      // pictures whose land was painted since they were made: made again when there is room in the frame

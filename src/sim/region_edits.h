@@ -57,4 +57,8 @@ Biome effectiveBiome(Region& land, const RegionEdits& edits, int x, int y);
 // - a tombstone where the land no longer has anything to take away.
 std::vector<EditConflict> findConflicts(Region& land, const RegionEdits& edits);
 
+// What the land as it is now would trouble the owner with (US-203, design M12 section 6; warnings, never a block: the owner may want an island): the start
+// has become water or mountain or no longer has water and food within reach, and cave mouths painted into a cliff that nobody can walk up to.
+std::vector<std::string> landWarnings(Region& land);
+
 } // namespace odysseus::sim
