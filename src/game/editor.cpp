@@ -1574,6 +1574,7 @@ void Editor::applyHelp() {
     buildingEditor_->applyHelp(*help_);
     graphEditor_->applyHelp(*help_);
     storyEvents_->applyHelp(*help_);
+    regionView_->applyHelp(*help_);
 }
 
 void Editor::say(std::string message) {
@@ -2057,7 +2058,7 @@ void Editor::update(const Intents& intents) {
     if (statusTicks_ > 0 && --statusTicks_ == 0) status_.clear();
     if (regionView_->shown()) { // the Region view takes the whole screen too (US-200)
         regionView_->update(intents);
-        if (intents.pressed(Intent::OpenMenu)) regionView_->show(false);
+        if (intents.pressed(Intent::OpenMenu) && !regionView_->typing()) regionView_->show(false);
         return;
     }
     if (dataEditor_->shown()) { // the Data tab takes the whole screen; the map waits behind it (it handles Ctrl+S, Ctrl+Z, Ctrl+Y and Esc itself)

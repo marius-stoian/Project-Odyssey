@@ -86,12 +86,14 @@ RegionLayer RegionView::layerOf(sim::ResourceKind kind) {
 
 RegionView::RegionView(int viewWidth, int viewHeight, Say say) : viewWidth_(viewWidth), viewHeight_(viewHeight), say_(std::move(say)) {
     layers_.fill(true);
+    settings_ = std::make_unique<GeneratorPanel>(viewWidth, viewHeight, say_);
     buildBar();
 }
 
-void RegionView::setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow) {
+void RegionView::setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow, std::function<void(const std::filesystem::path&)> saved) {
     configFile_ = std::move(configFile);
     seedNow_ = std::move(seedNow);
+    settings_->setSource(configFile_, std::move(saved), [this](const sim::RegionConfig& config) { reopen(config); });
 }
 
 void RegionView::show(bool shown) {
@@ -121,7 +123,18 @@ void RegionView::open(std::uint64_t seed, sim::RegionConfig config) {
     textureLayer_.clear();
     zoom_ = kMinZoom;
     centreOn(region_->size() / 2.0, region_->size() / 2.0);
+    settings_->bind(region_.get(), &edits_);
     shown_ = true;
+}
+
+// Apply (US-201): the same view, the same seed and the same edits over the land the new settings make.
+void RegionView::reopen(const sim::RegionConfig& config) {
+    const int zoom = zoom_;
+    const double x = centreX_;
+    const double y = centreY_;
+    open(region_->seed(), config);
+    zoom_ = zoom;
+    centreOn(x, y);
 }
 
 RegionView::Cell RegionView::cellAt(int x, int y) const {
@@ -238,6 +251,7 @@ void RegionView::buildBar() {
     add("Start", "Centre the view on where the clan starts", [this] {
         if (region_ != nullptr) centreOn(region_->start().x + 0.5, region_->start().y + 0.5);
     });
+    add("Settings", "The generator settings of the land: change them, Preview a map beside this one, Apply to write region.json", [this] { settings_->show(!settings_->shown()); });
     x += 4;
     for (int i = 0; i < kRegionLayerCount; ++i) {
         const auto layer = static_cast<RegionLayer>(i);
@@ -255,6 +269,9 @@ void RegionView::update(const luna::engine::Intents& intents) {
     const luna::engine::Pointer& pointer = intents.pointer();
     bar_->handle(UiInput::from(intents));
     syncBar();
+    settings_->update(intents);
+    const bool overSettings = settings_->shown() && pointer.inside() && settings_->bounds().contains({pointer.x, pointer.y});
+    const bool typing = settings_->typing();
 
     if (!overview_->complete()) {
         overview_->build(kOverviewRowsPerTick, [this](int x, int y) { return biomeColour(region_->biomeAt(x, y)); });
@@ -263,7 +280,9 @@ void RegionView::update(const luna::engine::Intents& intents) {
     const bool overBar = pointer.inside() && pointer.y < kBarHeight;
     const std::optional<Point> overviewCell = pointer.inside() ? overview_->cellAt(overviewArea(), pointer.x, pointer.y) : std::nullopt;
 
-    if (overviewCell && pointer.isHeld(PointerButton::Left)) {
+    if (overSettings || typing) {
+        dragFrom_.reset(); // the settings panel has the pointer and the keys
+    } else if (overviewCell && pointer.isHeld(PointerButton::Left)) {
         centreOn(overviewCell->x + 0.5, overviewCell->y + 0.5);
         dragFrom_.reset();
     } else if (pointer.inside() && !overBar && (pointer.isHeld(PointerButton::Left) || pointer.isHeld(PointerButton::Middle))) {
@@ -278,6 +297,10 @@ void RegionView::update(const luna::engine::Intents& intents) {
         dragFrom_.reset();
     }
 
+    if (overSettings || typing) {
+        hover_.clear();
+        return;
+    }
     if (pointer.inside() && pointer.wheel != 0) zoomAround(zoom_ + (pointer.wheel > 0 ? 1 : -1), pointer.x, pointer.y);
     if (intents.pressed(Intent::ZoomIn)) zoomAround(zoom_ + 1, viewWidth_ / 2, viewHeight_ / 2);
     if (intents.pressed(Intent::ZoomOut)) zoomAround(zoom_ - 1, viewWidth_ / 2, viewHeight_ / 2);
@@ -363,7 +386,9 @@ void RegionView::render(luna::engine::Renderer& renderer, UiPainter& painter) co
 
     painter.fill({0, viewHeight_ - 11, viewWidth_ - kOverviewSize - 10, 11}, UiColor::Panel);
     painter.text(4, viewHeight_ - 9, std::format("seed {}  zoom {} px a tile  {}", region_->seed(), tile, hover_), UiColor::Text);
+    settings_->draw(painter, renderer);
     bar_->draw(painter);
+    settings_->drawOverlay(painter);
     bar_->drawOverlay(painter); // hints of the buttons
 }
 

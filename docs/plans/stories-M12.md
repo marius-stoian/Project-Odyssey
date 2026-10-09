@@ -31,3 +31,29 @@ Design: docs/plans/M12-world-editing-design.md sections 2 and 4. Decisions: D-61
 4. Switch **Plants**, **People** and **Things** off: only terrain and water remain. Switch them on: they come back.
 5. Compare with the game: **Back**, F1, play. The shape of the lakes and the places of trees match the Region view (the seed in the status line is the run's seed).
 6. Frame rate: pan across the whole map at the closest zoom; it stays smooth (F3 shows the frame rate).
+
+---
+
+<a id="us-201"></a>
+
+## US-201 Generator settings with live preview: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md section 5 (amended in section 15). Decisions: D-62. Traces to EDT-04. Guide: docs/guides/world-editing.md.
+
+## Built
+- `src/game/generator_panel.{h,cpp}`: `GeneratorPanel`, opened by the **Settings** button of the Region view. One number field for each of 14 settings of `assets/data/sim/region.json` (size and chunk size are not offered), with tooltips from the schema's help (`data.sim-region.<key>`). **Preview** makes a `sim::Region` from the draft and paints a 128 x 128 sample of it (32 rows a tick) beside the same sample of the land on screen, with the share of water, mountain and forest. **Apply** patches only the changed lines of `region.json` through `DataDocument` (the same writer as the Data tab, three backups), tells the game the file was written (the sets that watch it read it again), and reopens the Region view over the new land with the same zoom and position. **Revert** and **Close**. A draft that breaks a rule is refused with the reason.
+- `src/sim/region.{h,cpp}`: `regionConfigProblems`, every rule of `loadRegionConfig` for a draft; a test keeps them equal.
+- `src/sim/region_edits.{h,cpp}`: `RegionEdits` (painted tiles, placed things, people, places, camps, resources, tombstones), `effectiveBiome`, `findConflicts`. No file format yet (US-202).
+- `RegionView` holds the edits, shows the panel, gives it the pointer and the keys while the pointer is over it or a field is being typed in.
+- Tests: `tests/game/generator_panel_test.cpp` (Settings, Preview, refusals, Apply, Keep edits, typing in a field) and `tests/sim/region_edits_test.cpp` (the check equals the loader, conflicts, tombstones).
+
+## Technical choices (D-62)
+- Apply writes region.json (not the world file, which does not exist yet); the seed is not a field; the run in play keeps its land.
+- Each Preview uploads one 128 x 128 texture (the renderer cannot release textures; US-202 adds that).
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, **Settings**: 14 fields on the right; hover one: purpose, range, example.
+2. Change the lake level to 300 and the mountain level to 900, **Preview**: a map appears beside "Now" in under a second and the water share rises.
+3. Type a mountain level of 150: Preview says the mountain level must be at least 240; nothing changes.
+4. **Apply**: the big map changes; `assets/data/sim/region.json` differs from before in exactly those two lines (open it in an editor).
+5. **Back**, start a new game: the land follows the new settings. Set the numbers back and Apply to restore the shipped land.

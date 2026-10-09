@@ -2,12 +2,14 @@
 
 #include "boundary.h"
 
+#include "game/generator_panel.h"
 #include "luna/engine/image.h"
 #include "luna/engine/input.h"
 #include "luna/engine/minimap.h"
 #include "luna/engine/renderer.h"
 #include "luna/engine/ui.h"
 #include "sim/region.h"
+#include "sim/region_edits.h"
 
 #include <array>
 #include <cstdint>
@@ -49,7 +51,8 @@ public:
     RegionView(int viewWidth, int viewHeight, Say say);
 
     // Where the land comes from: region.json, and the seed of the game being edited (called each time the view opens).
-    void setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow);
+    // `saved` is called with region.json after the generator settings wrote it (the game reads the sets that watch it again).
+    void setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow, std::function<void(const std::filesystem::path&)> saved = {});
 
     bool shown() const { return shown_; }
     void show(bool shown);
@@ -57,6 +60,12 @@ public:
     bool open(std::uint64_t seed);
     void open(std::uint64_t seed, sim::RegionConfig config);
     bool isOpen() const { return region_ != nullptr; }
+    // The generator settings with Preview and Apply (US-201), and the hand edits laid over the land (empty until US-202): changing the settings keeps them
+    // and lists the ones the new land does not suit.
+    GeneratorPanel& settings() { return *settings_; }
+    sim::RegionEdits& edits() { return edits_; }
+    void applyHelp(EditorHelp& help) { settings_->applyHelp(help); }
+    bool typing() const { return settings_->typing(); } // a settings field is being typed in: the keys belong to it
     sim::Region* region() { return region_.get(); }
     const sim::Region* region() const { return region_.get(); }
 
@@ -110,6 +119,7 @@ private:
     luna::engine::Point origin() const; // screen position of tile (0, 0)
     void zoomAround(int newZoom, int screenX, int screenY);
     void clampCentre();
+    void reopen(const sim::RegionConfig& config); // Apply: the same view over the new land
     const luna::engine::Texture* chunkTexture(luna::engine::Renderer& renderer, int cx, int cy, RegionLayer layer) const;
 
     int viewWidth_;
@@ -128,6 +138,8 @@ private:
     std::string hover_;
     std::unique_ptr<luna::engine::Panel> bar_;
     std::vector<luna::engine::Button*> layerButtons_;
+    std::unique_ptr<GeneratorPanel> settings_;
+    sim::RegionEdits edits_;
 
     mutable std::map<std::tuple<int, int, int>, luna::engine::Texture> textures_; // (chunk x, chunk y, layer)
     mutable std::map<int, RegionLayer> textureLayer_;

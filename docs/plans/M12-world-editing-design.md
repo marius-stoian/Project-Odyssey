@@ -108,3 +108,6 @@ Changing the seed or the generator settings regenerates the land under the overr
 | Placed people and the NPC population disagree on ids | Stable ids in the world file; population reads them; round-trip and reload tests |
 | World file grows without bound | Cap in Game Rules, sorted run lists, tombstones only when needed |
 | Dirty tree: the owner's uncommitted level and NPC edits are in the main checkout | Commit only M12 files; verify in a clean worktree of `qa` (as X-M11 did) |
+
+## 15. Amendments
+- **US-201 (D-62):** Apply writes `assets/data/sim/region.json` (changed lines only), not a `generator` section of the world file; the seed is not a field (it comes with a new game); `size` and `chunkSize` are read-only. Preview is a 128 x 128 sample (section 5 said 1 pixel a tile of the full map).

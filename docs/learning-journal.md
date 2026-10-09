@@ -2354,3 +2354,22 @@ renderer.drawStyled(*texture, source, destination, DrawStyle{});
 **Try it (5 minutes).** F2, **Region**, wheel up over a lake, switch **Plants** off.
 
 **Check yourself.** Why does the view call the region's own `biomeAt` instead of keeping a copy of the land it drew last time?
+
+## US-201: the land is a pure function of the seed (M12)
+
+**What we built.** A Settings panel in the Region view. You change lake level, mountain level, forest moisture and the rest, press Preview and a small map of the new land appears beside the old one in a fraction of a second. Apply writes the numbers to `region.json` and opens the new land.
+
+**The idea: a pure function.** `Region::biomeAt(x, y)` computes a tile from the seed, the settings and the tile's place, and nothing else: no clock, no stored map, no random state that remembers earlier calls. Call it twice and you get the same answer; call it for the tile you never visited and you still get an answer. That is why Preview is cheap and safe: it makes a *second* `Region` from the same seed and the draft settings, asks it for 16,384 tiles, and throws it away. The land on screen is never touched, and what Preview shows is, tile for tile, what Apply will make, because it is the same function.
+
+```cpp
+previewRegion_ = std::make_unique<sim::Region>(current_->seed(), draft_);
+map.build(kRowsPerTick, [&land](int x, int y) { return colourOf(land.biomeAt(x * size / 128, y * size / 128)); });
+```
+
+**The idea: edits are separate from the function.** Your hand edits will not be written into the land. They live beside it as a list of differences (`RegionEdits`), laid over whatever the function returns. When you change the settings the land changes underneath, the edits stay where they are, and `findConflicts` asks "does the new land still suit this edit?" for each one. A boulder you placed on grass that is now a lake is listed, not moved.
+
+**Where to look.** `GeneratorPanel::preview` and `apply` in `src/game/generator_panel.cpp`, `findConflicts` in `src/sim/region_edits.cpp`, `regionConfigProblems` in `src/sim/region.cpp`, `tests/game/generator_panel_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Settings**, lake level 300, mountain level 900, **Preview**. Then Revert.
+
+**Check yourself.** Why can Preview show a whole new map while the old one stays on screen, without copying the old one first?
