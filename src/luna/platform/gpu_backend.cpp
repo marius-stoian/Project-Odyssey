@@ -87,6 +87,11 @@ public:
     void setScalingMode(odysseus::core::ScalingMode mode) override { scaling_ = mode; }
 
     void clear(int red, int green, int blue) override {
+        for (const int texture : pendingRelease_) {
+            if (textures_[static_cast<std::size_t>(texture)].texture != nullptr) SDL_ReleaseGPUTexture(device_, textures_[static_cast<std::size_t>(texture)].texture);
+            textures_[static_cast<std::size_t>(texture)] = {};
+        }
+        pendingRelease_.clear();
         vertices_.clear();
         batches_.clear();
         lightSets_.clear();
@@ -142,6 +147,11 @@ public:
         SDL_SubmitGPUCommandBuffer(commands);
         SDL_ReleaseGPUTransferBuffer(device_, transfer); // released once the card has used it
         return static_cast<int>(textures_.size()) - 1;
+    }
+
+    void destroyTexture(int texture) override {
+        if (texture < 0 || static_cast<std::size_t>(texture) >= textures_.size() || textures_[static_cast<std::size_t>(texture)].texture == nullptr) return;
+        pendingRelease_.push_back(texture); // this frame's batches may still name it: it goes when the next frame starts
     }
 
     void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive) override {
@@ -365,7 +375,10 @@ private:
             return;
         }
         SDL_WaitForGPUIdle(device_); // nothing may still be in flight when its pieces go
-        for (const GpuTexture& texture : textures_) SDL_ReleaseGPUTexture(device_, texture.texture);
+        for (const GpuTexture& texture : textures_) {
+            if (texture.texture != nullptr) SDL_ReleaseGPUTexture(device_, texture.texture);
+        }
+        pendingRelease_.clear();
         textures_.clear();
         if (vertexBuffer_ != nullptr) SDL_ReleaseGPUBuffer(device_, vertexBuffer_);
         if (vertexTransfer_ != nullptr) SDL_ReleaseGPUTransferBuffer(device_, vertexTransfer_);
@@ -610,6 +623,7 @@ private:
     SDL_GPUTransferBuffer* vertexTransfer_ = nullptr;
     Uint32 vertexCapacity_ = 0;
     std::vector<GpuTexture> textures_;   // index = texture number
+    std::vector<int> pendingRelease_;    // textures given back this frame, released when the next one starts
     std::vector<Vertex> vertices_;       // this frame's quads, six corners each, in drawing order
     std::vector<Batch> batches_;
     SDL_FColor clearColor_{0.0F, 0.0F, 0.0F, 1.0F};

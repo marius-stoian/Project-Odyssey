@@ -18,3 +18,17 @@ Press **Settings** in the Region view. The panel on the right has one field for 
 - **Your hand edits** (from the next stories) are never moved or dropped. When the new land does not suit one (a thing now stands in water, a camp has lost its water), the panel lists it so you can decide.
 
 Example: lake level 140 to 300 and mountain level 800 to 900 makes a much wetter region; Preview shows the share of water rising.
+
+## Painting the land (US-202)
+Under the bar of the Region view is a row of tools. **Pan** (the default) drags the map with the left button. **Brush**, **Rect**, **Fill** and **Reset** paint with the left button; then the middle or right button pans. Choose a biome (Steppe, Forest, Water, Mountain, Cave) and the brush size (1 to 9, a round brush).
+- **Brush:** click or drag; a fast drag leaves no gaps. **Rect:** drag from corner to corner; the frame shows where. **Fill:** click; the connected tiles of the same biome change (refused above 20,000 tiles). **Reset:** give tiles back to the land the seed makes.
+- Each stroke, rectangle or fill is one step of Undo: Ctrl+Z, Ctrl+Y (500 steps). The outer ring of mountains (the edge wall) is never painted.
+- What grows follows the land: trees stop at a forest you painted over, and a meadow you painted into a forest has none.
+- **Save** (or Ctrl+S) writes `assets/worlds/default.json`. The status line shows "(unsaved)" until you do. The file holds the seed and only the tiles that differ from it, so 100 painted tiles are 100 short entries, not the map. A world file belongs to one seed: when the region has another seed the file is left alone.
+- Painting a tile the biome the seed already gives is not an edit. If you change the generator settings later, such a tile follows the new land.
+
+Example file (one painted tile in chunk 2,1; coordinates are inside the chunk):
+```json
+{"worldVersion": 1, "seed": 1, "generator": {}, "overrides": {"chunks": {"2,1": [{"x": 6, "y": 8, "biome": "Water"}]}, "things": [], "people": [], "places": [], "camps": [], "resources": []}}
+```
+`generator` lists only the settings that differ from `assets/data/sim/region.json`. The other lists (things, people, places, camps, resources) are for the next stories. The schema is `assets/data/schemas/world.schema.json`.

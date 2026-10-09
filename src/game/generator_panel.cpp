@@ -83,18 +83,22 @@ void GeneratorPanel::bind(sim::Region* current, const sim::RegionEdits* edits) {
     current_ = current;
     edits_ = edits;
     previewRegion_.reset();
-    previewMap_.reset();
     previewMix_ = {};
     conflicts_.clear();
     note_.clear();
-    nowMap_.reset();
+    if (current_ != nullptr) draft_ = current_->config();
+    refreshNow();
+    for (std::size_t i = 0; i < fields_.size(); ++i) fields_[i]->value = draft_.*generatorSettings()[i].member;
+}
+
+// The land on screen changed (a repaint, a new region): its small map is painted again. The maps are kept and painted again, not remade, so the old picture
+// is given back to the renderer when the new one replaces it.
+void GeneratorPanel::refreshNow() {
     nowMix_ = {};
     nowCounts_ = {};
-    if (current_ != nullptr) {
-        draft_ = current_->config();
-        nowMap_ = std::make_unique<Minimap>(kThumbCells, kThumbCells);
-    }
-    for (std::size_t i = 0; i < fields_.size(); ++i) fields_[i]->value = draft_.*generatorSettings()[i].member;
+    if (current_ == nullptr) return;
+    if (!nowMap_) nowMap_ = std::make_unique<Minimap>(kThumbCells, kThumbCells);
+    else nowMap_->invalidate();
 }
 
 void GeneratorPanel::applyHelp(EditorHelp& help) {
@@ -127,7 +131,6 @@ void GeneratorPanel::revert() {
     draft_ = current_->config();
     for (std::size_t i = 0; i < fields_.size(); ++i) fields_[i]->value = draft_.*generatorSettings()[i].member;
     previewRegion_.reset();
-    previewMap_.reset();
     previewMix_ = {};
     conflicts_.clear();
     note_ = "Back to the settings of the land on screen";
@@ -146,7 +149,11 @@ bool GeneratorPanel::preview() {
         return false;
     }
     previewRegion_ = std::make_unique<sim::Region>(current_->seed(), draft_);
-    previewMap_ = std::make_unique<Minimap>(kThumbCells, kThumbCells);
+    if (edits_ != nullptr) { // the owner's painted tiles stay on the new land
+        for (const sim::TileEdit& edit : edits_->tiles) previewRegion_->setTileEdit(edit.x, edit.y, edit.biome);
+    }
+    if (!previewMap_) previewMap_ = std::make_unique<Minimap>(kThumbCells, kThumbCells);
+    else previewMap_->invalidate();
     previewCounts_ = {};
     previewMix_ = {};
     refreshConflicts(*previewRegion_);
@@ -233,7 +240,7 @@ void GeneratorPanel::draw(UiPainter& painter, luna::engine::Renderer& renderer) 
     const Rect source{0, 0, kThumbCells, kThumbCells};
     if (nowMap_ && nowMap_->complete()) renderer.drawStyled(nowMap_->texture(renderer), source, nowBox, DrawStyle{});
     else painter.fill(nowBox, UiColor::Dark);
-    if (previewMap_ && previewMap_->complete()) renderer.drawStyled(previewMap_->texture(renderer), source, previewBox, DrawStyle{});
+    if (previewRegion_ && previewMap_ && previewMap_->complete()) renderer.drawStyled(previewMap_->texture(renderer), source, previewBox, DrawStyle{});
     else painter.fill(previewBox, UiColor::Dark);
 
     int y = thumbY + kThumbSize + 4;

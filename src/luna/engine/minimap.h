@@ -13,7 +13,7 @@ namespace luna::engine {
 // A small picture of a big map, painted a few rows at a time so a frame never stalls, then kept (US-200, game-agnostic).
 // The game decides the colour of each cell; the minimap only holds the picture, uploads it once it is complete, and turns a
 // click on it back into a map cell. `invalidate` starts a new painting; the old texture stays in use until the new one is
-// complete. (The renderer cannot release a texture yet, so every completed painting costs one small texture.)
+// complete. (A new painting gives the old texture back to the renderer when it replaces it.)
 class Minimap {
 public:
     Minimap(int width, int height) : image_(width, height) {}
@@ -30,6 +30,9 @@ public:
     const Image& image() const { return image_; }
     // The picture as a texture: uploaded once, as soon as it is complete. `id` is -1 before the first upload.
     const Texture& texture(Renderer& renderer);
+    // The last uploaded picture, even while a new painting is under way (nothing before the first upload).
+    bool hasPicture() const { return texture_.id >= 0; }
+    const Texture& picture() const { return texture_; }
 
     // The map cell under screen point (screenX, screenY) when the picture is stretched over `area`; nothing outside `area`.
     std::optional<Point> cellAt(const Rect& area, int screenX, int screenY) const;

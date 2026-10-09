@@ -88,6 +88,7 @@ RegionView::RegionView(int viewWidth, int viewHeight, Say say) : viewWidth_(view
     layers_.fill(true);
     settings_ = std::make_unique<GeneratorPanel>(viewWidth, viewHeight, say_);
     buildBar();
+    buildTools();
 }
 
 void RegionView::setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow, std::function<void(const std::filesystem::path&)> saved) {
@@ -116,13 +117,47 @@ bool RegionView::open(std::uint64_t seed) {
     }
 }
 
+void RegionView::setWorldsFolder(std::filesystem::path folder, std::string name) {
+    worldsFolder_ = std::move(folder);
+    worldName_ = std::move(name);
+}
+
 void RegionView::open(std::uint64_t seed, sim::RegionConfig config) {
-    region_ = std::make_unique<sim::Region>(seed, std::move(config));
-    overview_ = std::make_unique<luna::engine::Minimap>(region_->size(), region_->size());
+    baseConfig_ = config;
+    for (const auto& [key, texture] : textures_) pendingDestroy_.push_back(texture); // given back at the next drawn frame
     textures_.clear();
     textureLayer_.clear();
+    stale_.clear();
+    history_.clear();
+    strokeOpen_ = false;
+    painting_ = false;
+    edits_ = {};
+    dirty_ = false;
+
+    // The world file, when there is one for this seed: the land is made from the seed, then the painted tiles are laid over it.
+    std::optional<sim::WorldFile> world;
+    if (!worldsFolder_.empty() && std::filesystem::exists(worldFile())) {
+        try {
+            sim::WorldFile found = sim::loadWorld(worldFile(), config);
+            if (found.seed == seed) {
+                world = std::move(found);
+            } else if (say_) {
+                say_(std::format("{} is for seed {}; this region is seed {}, so it is not applied", worldFile().filename().string(), found.seed, seed));
+            }
+        } catch (const std::exception& error) {
+            if (say_) say_(std::string("The world file cannot be read: ") + error.what());
+        }
+    }
+    if (world) {
+        region_ = std::make_unique<sim::Region>(sim::makeWorldRegion(*world, config));
+        edits_ = world->edits;
+    } else {
+        region_ = std::make_unique<sim::Region>(seed, config);
+    }
+    overview_ = std::make_unique<luna::engine::Minimap>(region_->size(), region_->size());
     zoom_ = kMinZoom;
     centreOn(region_->size() / 2.0, region_->size() / 2.0);
+    syncTileEdits();
     settings_->bind(region_.get(), &edits_);
     shown_ = true;
 }
@@ -132,10 +167,51 @@ void RegionView::reopen(const sim::RegionConfig& config) {
     const int zoom = zoom_;
     const double x = centreX_;
     const double y = centreY_;
-    open(region_->seed(), config);
+    const sim::RegionEdits kept = edits_;
+    const bool wasDirty = dirty_;
+    const std::uint64_t seed = region_->seed();
+    open(seed, config);
+    for (const auto& [tile, biome] : region_->tileEditList()) region_->clearTileEdit(tile.x, tile.y); // what is in memory wins over what the file said
+    for (const sim::TileEdit& edit : kept.tiles) region_->setTileEdit(edit.x, edit.y, edit.biome);
+    edits_ = kept;
+    syncTileEdits();
+    dirty_ = wasDirty;
     zoom_ = zoom;
     centreOn(x, y);
 }
+
+void RegionView::syncTileEdits() {
+    edits_.tiles.clear();
+    if (region_ == nullptr) return;
+    for (const auto& [tile, biome] : region_->tileEditList()) edits_.tiles.push_back({tile.x, tile.y, biome});
+}
+
+bool RegionView::saveWorld() {
+    if (region_ == nullptr || worldsFolder_.empty()) return false;
+    try {
+        if (std::filesystem::exists(worldFile())) { // never over a world made for another seed
+            const sim::WorldFile existing = sim::loadWorld(worldFile(), baseConfig_);
+            if (existing.seed != region_->seed()) {
+                if (say_) say_(std::format("{} is for seed {}: not overwritten", worldFile().filename().string(), existing.seed));
+                return false;
+            }
+        }
+        syncTileEdits();
+        sim::WorldFile world;
+        world.seed = region_->seed();
+        world.generator = sim::generatorDifferences(region_->config(), baseConfig_);
+        world.edits = edits_;
+        std::filesystem::create_directories(worldsFolder_);
+        sim::saveWorld(world, worldFile(), baseConfig_);
+    } catch (const std::exception& error) {
+        if (say_) say_(std::string("The world cannot be saved: ") + error.what());
+        return false;
+    }
+    dirty_ = false;
+    if (say_) say_(std::format("Saved {} ({} painted tiles)", worldFile().filename().string(), region_->tileEditCount()));
+    return true;
+}
+
 
 RegionView::Cell RegionView::cellAt(int x, int y) const {
     Cell cell;
@@ -262,12 +338,16 @@ void RegionView::buildBar() {
 
 void RegionView::syncBar() {
     for (std::size_t i = 0; i < layerButtons_.size(); ++i) layerButtons_[i]->selected = layers_[i];
+    for (std::size_t i = 0; i < toolButtons_.size(); ++i) toolButtons_[i]->selected = static_cast<std::size_t>(tool_) == i;
+    for (std::size_t i = 0; i < biomeButtons_.size(); ++i) biomeButtons_[i]->selected = static_cast<std::size_t>(paintBiome_) == i && tool_ != RegionTool::Pan && tool_ != RegionTool::Erase;
+    if (!sizeField_->focused()) sizeField_->value = brushSize_;
 }
 
 void RegionView::update(const luna::engine::Intents& intents) {
     if (!shown_ || region_ == nullptr) return;
     const luna::engine::Pointer& pointer = intents.pointer();
     bar_->handle(UiInput::from(intents));
+    tools_->handle(UiInput::from(intents));
     syncBar();
     settings_->update(intents);
     const bool overSettings = settings_->shown() && pointer.inside() && settings_->bounds().contains({pointer.x, pointer.y});
@@ -277,15 +357,18 @@ void RegionView::update(const luna::engine::Intents& intents) {
         overview_->build(kOverviewRowsPerTick, [this](int x, int y) { return biomeColour(region_->biomeAt(x, y)); });
     }
 
-    const bool overBar = pointer.inside() && pointer.y < kBarHeight;
+    const bool overBar = pointer.inside() && pointer.y < kTopHeight; // the bar and the row of tools
     const std::optional<Point> overviewCell = pointer.inside() ? overview_->cellAt(overviewArea(), pointer.x, pointer.y) : std::nullopt;
 
     if (overSettings || typing) {
         dragFrom_.reset(); // the settings panel has the pointer and the keys
-    } else if (overviewCell && pointer.isHeld(PointerButton::Left)) {
+    } else if (overviewCell && pointer.isHeld(PointerButton::Left) && !painting_) {
         centreOn(overviewCell->x + 0.5, overviewCell->y + 0.5);
         dragFrom_.reset();
-    } else if (pointer.inside() && !overBar && (pointer.isHeld(PointerButton::Left) || pointer.isHeld(PointerButton::Middle))) {
+    } else if (tool_ != RegionTool::Pan && (painting_ || (pointer.inside() && !overBar && pointer.wasPressed(PointerButton::Left))) && pointer.isHeld(PointerButton::Left)) {
+        handlePaint(pointer);
+        dragFrom_.reset();
+    } else if (pointer.inside() && !overBar && (pointer.isHeld(PointerButton::Middle) || pointer.isHeld(PointerButton::Right) || (tool_ == RegionTool::Pan && pointer.isHeld(PointerButton::Left)))) {
         if (dragFrom_) {
             const int tile = tilePixels();
             centreX_ -= static_cast<double>(pointer.x - dragFrom_->x) / tile;
@@ -296,11 +379,21 @@ void RegionView::update(const luna::engine::Intents& intents) {
     } else {
         dragFrom_.reset();
     }
+    if (painting_ && !pointer.isHeld(PointerButton::Left)) { // the button went up: a brush stroke ends, a rectangle is painted
+        painting_ = false;
+        if (tool_ == RegionTool::Rectangle && rectFrom_ && rectTo_) paintRectangle(rectFrom_->x, rectFrom_->y, rectTo_->x, rectTo_->y);
+        else endStroke();
+        rectFrom_.reset();
+        rectTo_.reset();
+    }
 
     if (overSettings || typing) {
         hover_.clear();
         return;
     }
+    if (intents.pressed(Intent::Undo)) undo();
+    if (intents.pressed(Intent::Redo)) redo();
+    if (intents.pressed(Intent::Save)) saveWorld();
     if (pointer.inside() && pointer.wheel != 0) zoomAround(zoom_ + (pointer.wheel > 0 ? 1 : -1), pointer.x, pointer.y);
     if (intents.pressed(Intent::ZoomIn)) zoomAround(zoom_ + 1, viewWidth_ / 2, viewHeight_ / 2);
     if (intents.pressed(Intent::ZoomOut)) zoomAround(zoom_ - 1, viewWidth_ / 2, viewHeight_ / 2);
@@ -326,8 +419,15 @@ void RegionView::update(const luna::engine::Intents& intents) {
 const Texture* RegionView::chunkTexture(luna::engine::Renderer& renderer, int cx, int cy, RegionLayer layer) const {
     const auto key = std::make_tuple(cx, cy, static_cast<int>(layer));
     const auto found = textures_.find(key);
-    if (found != textures_.end()) return &found->second;
-    if (builtThisFrame_ >= kChunkBuildsPerFrame) return nullptr; // over the frame's budget: it is made in a later frame
+    if (found != textures_.end() && stale_.find(key) == stale_.end()) return &found->second;
+    if (builtThisFrame_ >= kChunkBuildsPerFrame) return found != textures_.end() ? &found->second : nullptr; // the old picture stays until there is room for the new one
+    if (found != textures_.end()) { // painted since: made again, the old one is given back at the start of the next frame
+        pendingDestroy_.push_back(found->second);
+        textureLayer_.erase(found->second.id);
+        textures_.erase(found);
+        stale_.erase(key);
+    }
+    if (false) return nullptr; // over the frame's budget: it is made in a later frame
     ++builtThisFrame_;
     const Texture texture = renderer.createTexture(chunkImage(cx, cy, layer));
     textureLayer_[texture.id] = layer;
@@ -335,6 +435,8 @@ const Texture* RegionView::chunkTexture(luna::engine::Renderer& renderer, int cx
 }
 
 void RegionView::render(luna::engine::Renderer& renderer, UiPainter& painter) const {
+    for (const Texture& old : pendingDestroy_) renderer.destroyTexture(old); // pictures replaced since the last frame; nothing drawn this frame names them
+    pendingDestroy_.clear();
     painter.fill({0, 0, viewWidth_, viewHeight_}, UiColor::Dark);
     if (region_ == nullptr) return;
     builtThisFrame_ = 0;
@@ -366,14 +468,21 @@ void RegionView::render(luna::engine::Renderer& renderer, UiPainter& painter) co
             for (int y = range.y0; y <= range.y1 + 1; ++y) painter.fill({0, at.y + y * tile, viewWidth_, 1}, UiColor::Grid);
         }
     }
+    if (rectFrom_ && rectTo_) { // the rectangle being dragged
+        const int x0 = std::min(rectFrom_->x, rectTo_->x);
+        const int y0 = std::min(rectFrom_->y, rectTo_->y);
+        const int x1 = std::max(rectFrom_->x, rectTo_->x);
+        const int y1 = std::max(rectFrom_->y, rectTo_->y);
+        painter.outline({at.x + x0 * tile, at.y + y0 * tile, (x1 - x0 + 1) * tile, (y1 - y0 + 1) * tile}, UiColor::Gold);
+    }
     const sim::Tile start = region_->start();
     painter.outline({at.x + start.x * tile - 1, at.y + start.y * tile - 1, std::max(tile, 4) + 2, std::max(tile, 4) + 2}, UiColor::Gold);
 
     // The overview: the whole map in the corner, with the part on screen outlined.
     const Rect box = overviewArea();
     painter.fill({box.x - 1, box.y - 1, box.width + 2, box.height + 2}, UiColor::Border);
-    if (overview_->complete()) {
-        renderer.drawStyled(overview_->texture(renderer), {0, 0, overview_->width(), overview_->height()}, box, DrawStyle{});
+    if (overview_->complete() || overview_->hasPicture()) { // while it is painted again after an edit the old picture stays
+        renderer.drawStyled(overview_->complete() ? overview_->texture(renderer) : overview_->picture(), {0, 0, overview_->width(), overview_->height()}, box, DrawStyle{});
         if (!range.empty()) {
             const int size = region_->size();
             painter.outline({box.x + range.x0 * box.width / size, box.y + range.y0 * box.height / size, std::max(2, (range.x1 - range.x0 + 1) * box.width / size),
@@ -385,11 +494,250 @@ void RegionView::render(luna::engine::Renderer& renderer, UiPainter& painter) co
     }
 
     painter.fill({0, viewHeight_ - 11, viewWidth_ - kOverviewSize - 10, 11}, UiColor::Panel);
-    painter.text(4, viewHeight_ - 9, std::format("seed {}  zoom {} px a tile  {}", region_->seed(), tile, hover_), UiColor::Text);
+    painter.text(4, viewHeight_ - 9, std::format("seed {}  zoom {} px  {}{}  {}", region_->seed(), tile, region_->tileEditCount() == 0 ? std::string("no hand edits") : std::format("{} painted tiles", region_->tileEditCount()), dirty_ ? " (unsaved)" : "", hover_), UiColor::Text);
     settings_->draw(painter, renderer);
     bar_->draw(painter);
+    tools_->draw(painter);
     settings_->drawOverlay(painter);
-    bar_->drawOverlay(painter); // hints of the buttons
+    bar_->drawOverlay(painter);
+    tools_->drawOverlay(painter); // hints of the buttons
 }
 
+
+// --- Painting (US-202) ---
+
+namespace {
+
+const char* const kBiomeLabels[5] = {"Steppe", "Forest", "Water", "Mountain", "Cave"};
+
+} // namespace
+
+void RegionView::buildTools() {
+    tools_ = std::make_unique<Panel>(Rect{0, kBarHeight, viewWidth_, kToolRowHeight});
+    toolButtons_.clear();
+    biomeButtons_.clear();
+    int x = 4;
+    auto add = [&](const std::string& label, const std::string& hint, auto action) -> Button& {
+        const int width = UiPainter::textWidth(label) + 8;
+        Button& added = tools_->add<Button>(Rect{x, kBarHeight + 2, width, kToolRowHeight - 4}, label, action);
+        added.hint = hint;
+        x += width + 2;
+        return added;
+    };
+    const struct {
+        RegionTool tool;
+        const char* label;
+        const char* hint;
+    } tools[] = {{RegionTool::Pan, "Pan", "Left drag moves the map (the default)"},
+                 {RegionTool::Brush, "Brush", "Paint the chosen biome: click or drag; the size is next to the biomes"},
+                 {RegionTool::Rectangle, "Rect", "Paint a rectangle: drag from corner to corner"},
+                 {RegionTool::Fill, "Fill", "Paint the connected tiles of the same biome (refused above 20,000 tiles)"},
+                 {RegionTool::Erase, "Reset", "Give the tiles back to the land of the seed: click or drag"}};
+    for (const auto& entry : tools) {
+        const RegionTool tool = entry.tool;
+        toolButtons_.push_back(&add(entry.label, std::string(entry.hint) + " (with a painting tool the middle or right button pans)", [this, tool] { tool_ = tool; }));
+    }
+    x += 4;
+    for (int i = 0; i < 5; ++i) {
+        const auto biome = static_cast<sim::Biome>(i);
+        biomeButtons_.push_back(&add(kBiomeLabels[i], std::string("Paint with ") + kBiomeLabels[i], [this, biome] {
+            paintBiome_ = biome;
+            if (tool_ == RegionTool::Pan || tool_ == RegionTool::Erase) tool_ = RegionTool::Brush;
+        }));
+    }
+    x += 4;
+    sizeField_ = &tools_->add<luna::engine::NumberField>(Rect{x, kBarHeight + 2, 64, kToolRowHeight - 4}, "Size: ", brushSize_, 1, kMaxBrush, [this](int size) { brushSize_ = size; });
+    x += 70;
+    add("Undo", "Undo the last stroke, rectangle or fill (Ctrl+Z)", [this] { undo(); });
+    add("Redo", "Redo (Ctrl+Y)", [this] { redo(); });
+    add("Save", "Write the hand edits to the world file (Ctrl+S)", [this] { saveWorld(); });
+}
+
+void RegionView::markStale(int x, int y) {
+    const int n = region_->config().chunkSize;
+    for (int dy = -1; dy <= 1; ++dy) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            const int tx = x + dx;
+            const int ty = y + dy;
+            if (tx < 0 || ty < 0 || tx >= region_->size() || ty >= region_->size()) continue;
+            for (int layer = 0; layer < kRegionLayerCount; ++layer) {
+                const auto key = std::make_tuple(tx / n, ty / n, layer);
+                if (textures_.contains(key)) stale_.insert(key);
+            }
+        }
+    }
+}
+
+bool RegionView::editTile(int x, int y, std::optional<sim::Biome> target) {
+    const std::optional<sim::Biome> before = region_->tileEdit(x, y);
+    if (target) {
+        if (!before && region_->tileEditCount() + edits_.placed.size() >= sim::kMaxWorldEntries) {
+            if (say_) say_(std::format("A world keeps at most {} edits", sim::kMaxWorldEntries));
+            return false;
+        }
+        if (!region_->setTileEdit(x, y, *target)) return false;
+    } else if (!region_->clearTileEdit(x, y)) {
+        return false;
+    }
+    const std::optional<sim::Biome> after = region_->tileEdit(x, y);
+    if (before == after) return false;
+    stroke_.changes.push_back({x, y, before, after});
+    markStale(x, y);
+    return true;
+}
+
+void RegionView::beginStroke() {
+    if (strokeOpen_ || region_ == nullptr) return;
+    strokeOpen_ = true;
+    stroke_ = {};
+}
+
+void RegionView::endStroke() {
+    if (!strokeOpen_) return;
+    strokeOpen_ = false;
+    lastDab_.reset();
+    finishStep(tool_ == RegionTool::Erase ? "reset to the seed" : "paint");
+}
+
+void RegionView::finishStep(const std::string& label) {
+    if (stroke_.changes.empty()) return;
+    stroke_.label = label;
+    history_.record(std::move(stroke_));
+    stroke_ = {};
+    syncTileEdits();
+    dirty_ = true;
+    overview_->invalidate();
+    settings_->refreshNow();
+}
+
+void RegionView::finishStepAs(const std::string& label) {
+    strokeOpen_ = false;
+    lastDab_.reset();
+    finishStep(label);
+}
+
+int RegionView::paintBrush(int x, int y) {
+    if (region_ == nullptr) return 0;
+    const bool own = !strokeOpen_;
+    if (own) beginStroke();
+    const std::optional<sim::Biome> target = tool_ == RegionTool::Erase ? std::nullopt : std::optional<sim::Biome>(paintBiome_);
+    const std::size_t before = stroke_.changes.size();
+    const int radiusSquared = brushSize_ * brushSize_ / 4;
+    const int reach = (brushSize_ + 1) / 2;
+    for (int dy = -reach; dy <= reach; ++dy) {
+        for (int dx = -reach; dx <= reach; ++dx) {
+            if (dx * dx + dy * dy <= radiusSquared) editTile(x + dx, y + dy, target);
+        }
+    }
+    const int changed = static_cast<int>(stroke_.changes.size() - before);
+    if (own) endStroke();
+    return changed;
+}
+
+int RegionView::paintRectangle(int x0, int y0, int x1, int y1) {
+    if (region_ == nullptr) return 0;
+    beginStroke();
+    const std::optional<sim::Biome> target = tool_ == RegionTool::Erase ? std::nullopt : std::optional<sim::Biome>(paintBiome_);
+    for (int y = std::min(y0, y1); y <= std::max(y0, y1); ++y) {
+        for (int x = std::min(x0, x1); x <= std::max(x0, x1); ++x) editTile(x, y, target);
+    }
+    const int changed = static_cast<int>(stroke_.changes.size());
+    finishStepAs("rectangle");
+    return changed;
+}
+
+int RegionView::paintFill(int x, int y) {
+    if (region_ == nullptr || x < 0 || y < 0 || x >= region_->size() || y >= region_->size()) return 0;
+    const sim::Biome from = region_->biomeAt(x, y);
+    if (from == paintBiome_) return 0;
+    // The connected tiles (four neighbours) of the same biome; the edge wall is not painted and not crossed.
+    std::vector<Point> found;
+    std::set<std::pair<int, int>> seen{{x, y}};
+    std::vector<Point> open{{x, y}};
+    while (!open.empty()) {
+        const Point at = open.back();
+        open.pop_back();
+        if (region_->onEdgeWall(at.x, at.y)) continue;
+        found.push_back(at);
+        if (static_cast<int>(found.size()) > kMaxFill) {
+            if (say_) say_(std::format("Fill refused: more than {} tiles are connected", kMaxFill));
+            return 0;
+        }
+        for (const Point next : {Point{at.x + 1, at.y}, Point{at.x - 1, at.y}, Point{at.x, at.y + 1}, Point{at.x, at.y - 1}}) {
+            if (next.x < 0 || next.y < 0 || next.x >= region_->size() || next.y >= region_->size()) continue;
+            if (region_->biomeAt(next.x, next.y) != from || !seen.insert({next.x, next.y}).second) continue;
+            open.push_back(next);
+        }
+    }
+    beginStroke();
+    for (const Point at : found) editTile(at.x, at.y, paintBiome_);
+    const int changed = static_cast<int>(stroke_.changes.size());
+    finishStepAs("fill");
+    return changed;
+}
+
+void RegionView::applyChanges(const std::vector<TileChange>& changes, bool forward) {
+    const auto apply = [this, forward](const TileChange& change) {
+        const std::optional<sim::Biome> wanted = forward ? change.after : change.before;
+        if (wanted) region_->setTileEdit(change.x, change.y, *wanted);
+        else region_->clearTileEdit(change.x, change.y);
+        markStale(change.x, change.y);
+    };
+    if (forward) {
+        for (const TileChange& change : changes) apply(change);
+    } else {
+        for (auto it = changes.rbegin(); it != changes.rend(); ++it) apply(*it); // the last thing done is the first undone
+    }
+    syncTileEdits();
+    dirty_ = true;
+    overview_->invalidate();
+    settings_->refreshNow();
+}
+
+bool RegionView::undo() {
+    if (strokeOpen_ || region_ == nullptr) return false;
+    const WorldCommand* step = history_.undo();
+    if (step == nullptr) return false;
+    applyChanges(step->changes, false);
+    return true;
+}
+
+bool RegionView::redo() {
+    if (strokeOpen_ || region_ == nullptr) return false;
+    const WorldCommand* step = history_.redo();
+    if (step == nullptr) return false;
+    applyChanges(step->changes, true);
+    return true;
+}
+
+// The left button with a painting tool: a brush leaves a line of dabs from the last tile to this one; a rectangle waits for the button to go up; a fill acts at once.
+void RegionView::handlePaint(const luna::engine::Pointer& pointer) {
+    const std::optional<Point> tile = tileAtScreen(pointer.x, pointer.y);
+    if (!painting_) {
+        if (!pointer.wasPressed(PointerButton::Left) || !tile) return;
+        painting_ = true;
+        if (tool_ == RegionTool::Rectangle) {
+            rectFrom_ = tile;
+            rectTo_ = tile;
+        } else if (tool_ == RegionTool::Fill) {
+            paintFill(tile->x, tile->y);
+            return;
+        } else {
+            beginStroke();
+        }
+    }
+    if (tool_ == RegionTool::Rectangle) {
+        if (tile) rectTo_ = tile;
+    } else if (tool_ == RegionTool::Brush || tool_ == RegionTool::Erase) {
+        if (!tile) return;
+        const Point from = lastDab_ ? *lastDab_ : *tile;
+        const int steps = std::max(std::abs(tile->x - from.x), std::abs(tile->y - from.y));
+        for (int i = 0; i <= steps; ++i) {
+            const int px = steps == 0 ? tile->x : from.x + (tile->x - from.x) * i / steps;
+            const int py = steps == 0 ? tile->y : from.y + (tile->y - from.y) * i / steps;
+            paintBrush(px, py);
+        }
+        lastDab_ = tile;
+    }
+}
 } // namespace odysseus::game

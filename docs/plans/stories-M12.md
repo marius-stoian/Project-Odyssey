@@ -57,3 +57,27 @@ Design: docs/plans/M12-world-editing-design.md section 5 (amended in section 15)
 3. Type a mountain level of 150: Preview says the mountain level must be at least 240; nothing changes.
 4. **Apply**: the big map changes; `assets/data/sim/region.json` differs from before in exactly those two lines (open it in an editor).
 5. **Back**, start a new game: the land follows the new settings. Set the numbers back and Apply to restore the shipped land.
+
+---
+
+<a id="us-202"></a>
+
+## US-202 Hand edits on top of the seed: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md sections 3, 6, 7 and 15. Decisions: D-63. Traces to EDT-04, ADR-010. Guide: docs/guides/world-editing.md.
+
+## Built
+- `src/sim/region.{h,cpp}`: tile edits over the seed (`setTileEdit`, `clearTileEdit`, `tileEdit`, `tileEditList`, `seedBiomeAt`, `onEdgeWall`). `biomeAt` reads the edits first; a painted tile makes the chunks within one tile be made again.
+- `src/sim/world_file.{h,cpp}`: `WorldFile`, `loadWorld`, `saveWorld` (safe write, three backups), `makeWorldRegion`, `worldConfig`, `generatorDifferences`, `kMaxWorldEntries`. Format: `assets/worlds/<name>.json`, schema `assets/data/schemas/world.schema.json` (index entry `../worlds/*.json`).
+- `src/game/world_history.{h,cpp}`: the world history (500 steps).
+- `src/game/region_view.{h,cpp}`: the tool row (Pan, Brush, Rect, Fill, Reset, five biomes, size, Undo, Redo, Save), painting with the mouse, Ctrl+Z, Ctrl+Y, Ctrl+S, the world file read on open and written by Save, chunk pictures made again when painted (the old one drawn until room), the overview painted again.
+- `Renderer::destroyTexture` through `Window` and both backends (the GPU backend lets go at the start of the next frame); `Minimap` gives back the picture it replaces and keeps the old one on screen while it is painted again.
+- `GeneratorPanel`: the Preview and Now maps are kept and painted again; Preview lays the painted tiles over the new land; Apply keeps the edits.
+- Tests: `tests/sim/world_file_test.cpp` (tile edits, tile order, round trip, chunk-local coordinates, small saves, refusals, cap) and `tests/game/world_edit_test.cpp` (Paint, mouse stroke and Undo, rectangle and fill steps, Reset, edge wall and refused fill, reopen with the file, settings keep the paint, middle-button pan).
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, **Brush**, **Water**, size 5: drag across a meadow; a lake appears at once and the overview follows within a second.
+2. **Forest** with **Rect**: drag a rectangle; **Fill** with **Mountain** inside a lake; Ctrl+Z three times returns the seed's land, Ctrl+Y brings it back.
+3. **Reset** over the painted tiles gives the seed's land back.
+4. **Save**, **Back**, F2 **Region** again: the painted land is there. Open `assets/worlds/default.json`: only the painted tiles are listed.
+5. Middle button drag pans while the Brush is chosen.

@@ -14,6 +14,7 @@ bool Minimap::build(int rows, const std::function<Color(int, int)>& colourAt) {
 
 const Texture& Minimap::texture(Renderer& renderer) {
     if (complete() && !uploaded_) {
+        if (texture_.id >= 0) renderer.destroyTexture(texture_); // the picture it replaces
         texture_ = renderer.createTexture(image_);
         uploaded_ = true;
     }

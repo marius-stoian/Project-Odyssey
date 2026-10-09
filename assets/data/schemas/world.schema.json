@@ -1,0 +1,60 @@
+{
+  "title": "assets/worlds/<name>.json",
+  "type": "object",
+  "required": ["worldVersion", "seed", "generator", "overrides"],
+  "properties": {
+    "worldVersion": {"type": "integer", "minimum": 1, "maximum": 1, "default": 1, "description": "The version of this file's format; the game refuses a newer one", "example": "1"},
+    "seed": {"type": "integer", "minimum": 0, "description": "The seed of the land. The edits below belong to the land this seed makes; a game with another seed does not apply them", "example": "1"},
+    "generator": {
+      "type": "object",
+      "description": "The generator settings that differ from assets/data/sim/region.json, by their names there. Empty: the settings of region.json",
+      "properties": {
+        "lakeLevel": {"type": "integer", "minimum": 0, "maximum": 1023, "description": "Elevation below this is water", "example": "200"},
+        "mountainLevel": {"type": "integer", "minimum": 100, "maximum": 1023, "description": "Elevation above this is mountain (at least 100 above lakeLevel)", "example": "850"},
+        "riverBand": {"type": "integer", "minimum": 0, "maximum": 100, "description": "How wide the rivers are", "example": "14"},
+        "forestMoisture": {"type": "integer", "minimum": 0, "maximum": 1023, "description": "Wetter than this is forest", "example": "560"},
+        "caveNoise": {"type": "integer", "minimum": 0, "maximum": 1023, "description": "A mountain tile above this is a cave mouth", "example": "920"},
+        "edgeWall": {"type": "integer", "minimum": 0, "maximum": 32, "description": "Tiles of mountain around the region", "example": "8"},
+        "flintPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Flint patches near water and caves, per thousand tiles", "example": "25"},
+        "woodPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Trees on forest tiles, per thousand", "example": "160"},
+        "berriesPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Berry bushes at forest edges, per thousand", "example": "220"},
+        "herdPerMille": {"type": "integer", "minimum": 0, "maximum": 1000, "description": "Herds on steppe, per thousand tiles", "example": "3"},
+        "herdMinimum": {"type": "integer", "minimum": 1, "maximum": 100, "description": "The fewest animals in a herd", "example": "5"},
+        "herdMaximum": {"type": "integer", "minimum": 1, "maximum": 100, "description": "The most animals in a herd", "example": "12"},
+        "berryRegrowDays": {"type": "integer", "minimum": 1, "maximum": 365, "description": "Days before a picked berry bush bears again", "example": "14"},
+        "startNeedWithin": {"type": "integer", "minimum": 5, "maximum": 60, "description": "Tiles: the start has water and food this close", "example": "20"}
+      }
+    },
+    "overrides": {
+      "type": "object",
+      "description": "What differs from the land the seed makes: painted tiles, and things put on the land or taken off it",
+      "required": ["chunks"],
+      "properties": {
+        "chunks": {
+          "type": "object",
+          "description": "Painted tiles, one list for each chunk the owner painted in, named \"cx,cy\" (chunk column and row). Only tiles that differ from the seed are listed",
+          "additionalProperties": {
+            "type": "array",
+            "description": "The painted tiles of one chunk, in tile order",
+            "items": {
+              "type": "object",
+              "description": "One painted tile",
+              "required": ["x", "y", "biome"],
+              "properties": {
+                "x": {"type": "integer", "minimum": 0, "maximum": 127, "description": "The tile's column inside its chunk (0 to chunkSize - 1)", "example": "5"},
+                "y": {"type": "integer", "minimum": 0, "maximum": 127, "description": "The tile's row inside its chunk (0 to chunkSize - 1)", "example": "7"},
+                "biome": {"type": "string", "enum": ["Steppe", "Forest", "Water", "Mountain", "Cave"], "description": "What the tile is now", "example": "Water"}
+              }
+            }
+          }
+        },
+        "things": {"type": "array", "description": "Things put on the land (later stories)", "items": {"type": "object", "description": "One placed entry", "properties": {"id": {"type": "string", "description": "A stable id", "example": "t-0001"}, "kind": {"type": "string", "description": "A kind from its catalog", "example": "boulder"}, "at": {"type": "array", "description": "The tile: column, row", "items": {"type": "integer", "description": "A tile coordinate", "example": "40"}}, "remove": {"type": "boolean", "description": "Take away the seed's own thing at this tile", "example": "true"}, "forced": {"type": "boolean", "description": "Keep it where the site check fails", "example": "true"}}}},
+        "people": {"type": "array", "description": "People put on the land (later stories)", "items": {"type": "object", "description": "One placed entry"}},
+        "places": {"type": "array", "description": "Named places (later stories)", "items": {"type": "object", "description": "One placed entry"}},
+        "camps": {"type": "array", "description": "Camps (later stories)", "items": {"type": "object", "description": "One placed entry"}},
+        "resources": {"type": "array", "description": "Resources put on the land or taken off it (later stories)", "items": {"type": "object", "description": "One placed entry"}}
+      }
+    }
+  },
+  "loaders": ["src/sim/world_file.cpp"]
+}

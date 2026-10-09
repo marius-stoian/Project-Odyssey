@@ -2,6 +2,16 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-202 Hand edits on top of the seed (Mraw) - 2026-10-09
+
+**State:** branch `story/US-202`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-202`. Decisions: D-63.
+
+- **New:** painting in the Region view (Brush, Rect, Fill, Reset, five biomes, size 1 to 9, middle or right button pans), one world history of 500 steps (Ctrl+Z, Ctrl+Y), Save to `assets/worlds/<name>.json` (seed plus only the differing tiles, per chunk, chunk-local coordinates; schema `world.schema.json`; guide `docs/guides/world-editing.md`), the world file read when the region opens for the same seed. `sim::Region` tile edits (`setTileEdit`, `clearTileEdit`, `tileEditList`, `seedBiomeAt`, `onEdgeWall`), `sim::WorldFile` (`loadWorld`, `saveWorld`, `makeWorldRegion`), `WorldHistory`.
+- **Renderer:** `Renderer::destroyTexture` (Window, SDL and GPU backends; the GPU backend lets go at the start of the next frame). `Minimap` gives back the picture it replaces. The chunk pictures of a painted chunk are made again, the old one drawn until there is room for the new one.
+- **Changed:** Preview and Now maps are kept and painted again (they no longer leave a texture each); Preview lays the painted tiles over the new land; Apply keeps the painted tiles.
+- **Tests:** sim `US-202 Tile edits ...` (2), `US-202 World file ...` (4), `US-202 Small saves ...`, `US-202 ... refused when saving`; game `US-202 Paint ...`, `... with the mouse ...`, `US-202 Undo ...`, `US-202 Reset ...`, `US-202 The edge wall ...`, `US-202 Opening the region again ...`, `US-202 Changing the generator settings ...`, `US-202 Middle button pans ...`. They run at X-M12 (D-41); they were also run here and pass, with the US-200, US-201, editor, help, schema and US-19x suites and the whole luna suite.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-202/build.txt`). Not run: the full game suite (X-M12). The sim suite has one failure from the owner's uncommitted `wanderer.json` (`npc_kind_test`), as in `Limit.md`.
+
 ## US-201 Generator settings with live preview (Mraw) - 2026-10-09
 
 **State:** branch `story/US-201`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-201`. Decisions: D-62.
