@@ -1,6 +1,7 @@
 #include "game/region_level.h"
 
 #include "game/game_rules.h"
+#include "sim/npc_extras.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -144,6 +145,29 @@ Level levelFromRegion(sim::Region& region, const Definitions& definitions, const
                 if (const std::string* attitude = property("attitude")) character.attitude = *attitude;
                 if (const std::string* tags = property("tags")) character.tags = words(*tags);
                 character.family = number("family", 0);
+                // The rest of this person's setup (US-206): what it may do, its routine, what it owns, what it does on its own. A value the rules refuse is named in `problems`.
+                const auto ids = [](const std::string& text) {
+                    std::vector<std::string> found;
+                    std::string id;
+                    for (const char c : text + " ") {
+                        if (c == ' ' || c == ',') {
+                            if (!id.empty()) found.push_back(id);
+                            id.clear();
+                        } else {
+                            id += c;
+                        }
+                    }
+                    return found;
+                };
+                for (const auto& [key, value] : entry.properties) {
+                    std::string problem;
+                    if (key == "allow") character.allow = ids(value);
+                    else if (key == "deny") character.deny = ids(value);
+                    else if (key == "day" || key == "night") sim::rules::setScheduleField(character.extras.schedule, key, value, problem);
+                    else if (key == "stock") sim::rules::setTradeField(character.extras.trade, "stock", value, problem);
+                    else if (key == "does") sim::rules::setDoes(character.extras.does, value, problem);
+                    if (!problem.empty()) skip(entry, key + ": " + problem);
+                }
                 level.characters.push_back(std::move(character));
             } else {
                 skip(entry, "no such kind in the catalogs");

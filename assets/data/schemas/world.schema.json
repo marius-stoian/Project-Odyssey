@@ -5,6 +5,36 @@
   "properties": {
     "worldVersion": {"type": "integer", "minimum": 1, "maximum": 1, "default": 1, "description": "The version of this file's format; the game refuses a newer one", "example": "1"},
     "seed": {"type": "integer", "minimum": 0, "description": "The seed of the land. The edits below belong to the land this seed makes; a game with another seed does not apply them", "example": "1"},
+    "clans": {
+      "type": "object",
+      "description": "The setup of each clan, by name: \"player\" or a rival camp's name. Only what differs from what the game would make",
+      "properties": {"player": {"type": "object", "description": "The hero's own clan; the others are named by their rival camp"}},
+      "additionalProperties": {
+        "type": "object",
+        "description": "One clan",
+        "properties": {
+          "leader": {"type": "string", "description": "Who leads the clan: a clan member's number or a name", "example": "3"},
+          "stance": {"type": "string", "description": "A rival's stance towards the player (friendly, wary, hostile...); kept for the politics of M13", "example": "wary"},
+          "store": {"type": "object", "description": "What the clan's store holds: food is the meals; the rest are item ids", "properties": {"food": {"type": "integer", "minimum": 0, "description": "Meals in the store", "example": "80"}}, "additionalProperties": {"type": "integer", "minimum": 0, "description": "How many", "example": "80"}},
+          "debts": {"type": "array", "description": "What the clan owes another clan of the world", "items": {"type": "object", "description": "One debt", "required": ["to"], "properties": {"to": {"type": "string", "description": "The clan owed (a rival camp's name)", "example": "the River Clan"}, "goods": {"type": "object", "description": "What is owed, by item id", "additionalProperties": {"type": "integer", "minimum": 0, "description": "How many", "example": "3"}}, "value": {"type": "integer", "minimum": 0, "description": "What it is worth", "example": "12"}, "days": {"type": "integer", "minimum": 1, "description": "Days until it falls due", "example": "10"}}}},
+          "partners": {"type": "array", "description": "Clans this one trades with", "items": {"type": "string", "description": "A clan of the world", "example": "the River Clan"}},
+          "members": {"type": "array", "description": "Clan members' numbers this clan claims (a check: nobody is in two clans)", "items": {"type": "string", "description": "A member's number", "example": "4"}}
+        }
+      }
+    },
+    "people": {
+      "type": "object",
+      "description": "The setup of clan members, by their number. A placed person is set by its own entry and properties in overrides.people",
+      "additionalProperties": {
+        "type": "object",
+        "description": "One clan member",
+        "properties": {
+          "kin": {"type": "object", "description": "Family and partner, by member number", "properties": {"mother": {"type": "string", "description": "The mother's number", "example": "2"}, "father": {"type": "string", "description": "The father's number", "example": "3"}, "partner": {"type": "string", "description": "The partner's number (they name each other)", "example": "5"}}},
+          "opinions": {"type": "object", "description": "What this member thinks of others, by their number, -100 to 100, set as written", "additionalProperties": {"type": "integer", "minimum": -100, "maximum": 100, "description": "The opinion", "example": "-50"}},
+          "grudges": {"type": "array", "description": "Grudges held, each told in the chronicle", "items": {"type": "object", "description": "One grudge", "required": ["about", "reason"], "properties": {"about": {"type": "string", "description": "The member's number", "example": "5"}, "weight": {"type": "integer", "minimum": 1, "maximum": 100, "description": "How much it counts", "example": "30"}, "reason": {"type": "string", "description": "Why; the chronicle writes it", "example": "stole the last flint"}}}}
+        }
+      }
+    },
     "generator": {
       "type": "object",
       "description": "The generator settings that differ from assets/data/sim/region.json, by their names there. Empty: the settings of region.json",
@@ -56,5 +86,5 @@
       }
     }
   },
-  "loaders": ["src/sim/world_file.cpp"]
+  "loaders": ["src/sim/world_file.cpp", "src/sim/world_setup.cpp"]
 }

@@ -4,6 +4,7 @@
 #include "sim/region_shapes.h"
 
 #include <algorithm>
+#include <charconv>
 #include <cmath>
 #include <format>
 
@@ -91,6 +92,7 @@ RegionView::RegionView(int viewWidth, int viewHeight, Say say) : viewWidth_(view
     buildBar();
     buildTools();
     buildPlaceRow();
+    buildInspector();
 }
 
 void RegionView::setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow, std::function<void(const std::filesystem::path&)> saved) {
@@ -134,6 +136,8 @@ void RegionView::open(std::uint64_t seed, sim::RegionConfig config) {
     strokeOpen_ = false;
     painting_ = false;
     edits_ = {};
+    setup_ = {};
+    setupIssues_.clear();
     dirty_ = false;
 
     // The world file, when there is one for this seed: the land is made from the seed, then the painted tiles are laid over it.
@@ -153,6 +157,7 @@ void RegionView::open(std::uint64_t seed, sim::RegionConfig config) {
     if (world) {
         region_ = std::make_unique<sim::Region>(sim::makeWorldRegion(*world, config));
         edits_ = world->edits;
+        setup_ = world->setup;
     } else {
         region_ = std::make_unique<sim::Region>(seed, config);
     }
@@ -161,6 +166,7 @@ void RegionView::open(std::uint64_t seed, sim::RegionConfig config) {
     centreOn(region_->size() / 2.0, region_->size() / 2.0);
     syncTileEdits();
     settings_->bind(region_.get(), &edits_);
+    refreshSetupIssues();
     shown_ = true;
 }
 
@@ -170,12 +176,14 @@ void RegionView::reopen(const sim::RegionConfig& config) {
     const double x = centreX_;
     const double y = centreY_;
     const sim::RegionEdits kept = edits_;
+    const sim::WorldSetup keptSetup = setup_;
     const bool wasDirty = dirty_;
     const std::uint64_t seed = region_->seed();
     open(seed, config);
     for (const auto& [tile, biome] : region_->tileEditList()) region_->clearTileEdit(tile.x, tile.y); // what is in memory wins over what the file said
     for (const sim::TileEdit& edit : kept.tiles) region_->setTileEdit(edit.x, edit.y, edit.biome);
     edits_ = kept;
+    setup_ = keptSetup;
     syncTileEdits();
     sim::applyPlacedToRegion(*region_, edits_);
     dirty_ = wasDirty;
@@ -204,6 +212,7 @@ bool RegionView::saveWorld() {
         world.seed = region_->seed();
         world.generator = sim::generatorDifferences(region_->config(), baseConfig_);
         world.edits = edits_;
+        world.setup = setup_;
         std::filesystem::create_directories(worldsFolder_);
         sim::saveWorld(world, worldFile(), baseConfig_);
     } catch (const std::exception& error) {
@@ -331,6 +340,7 @@ void RegionView::buildBar() {
         if (region_ != nullptr) centreOn(region_->start().x + 0.5, region_->start().y + 0.5);
     });
     add("Settings", "The generator settings of the land: change them, Preview a map beside this one, Apply to write region.json", [this] { settings_->show(!settings_->shown()); });
+    add("Inspect", "The inspector: set up a clan (store, debts, leader, stance, partners) and a clan member (kin, opinions, grudges)", [this] { inspectorShown_ = !inspectorShown_; });
     x += 4;
     for (int i = 0; i < kRegionLayerCount; ++i) {
         const auto layer = static_cast<RegionLayer>(i);
@@ -347,6 +357,11 @@ void RegionView::syncBar() {
     static constexpr sim::EditGroup kGroupOrder[] = {sim::EditGroup::Thing, sim::EditGroup::Person, sim::EditGroup::Place, sim::EditGroup::Camp, sim::EditGroup::Resource};
     for (std::size_t i = 0; i < groupButtons_.size(); ++i) groupButtons_[i]->selected = kGroupOrder[i] == placeGroup_;
     if (forcedButton_ != nullptr) forcedButton_->selected = placeForced_;
+    for (InspectorRow& row : inspectorRows_) {
+        if (!row.field->focused()) row.field->value = row.text();
+    }
+    if (clanField_ != nullptr && !clanField_->focused()) clanField_->value = clanKey_;
+    if (memberField_ != nullptr && !memberField_->focused()) memberField_->value = memberKey_;
     if (kindField_ != nullptr && !kindField_->focused()) kindField_->value = placeKind_;
     if (nameField_ != nullptr && !nameField_->focused()) nameField_->value = placeName_;
     if (!fordField_->focused()) fordField_->value = fordEvery_;
@@ -358,6 +373,7 @@ void RegionView::update(const luna::engine::Intents& intents) {
     bar_->handle(UiInput::from(intents));
     tools_->handle(UiInput::from(intents));
     if (placing()) placeRow_->handle(UiInput::from(intents));
+    if (inspectorShown_) inspector_->handle(UiInput::from(intents));
     syncBar();
     settings_->update(intents);
     const bool overSettings = settings_->shown() && pointer.inside() && settings_->bounds().contains({pointer.x, pointer.y});
@@ -367,7 +383,7 @@ void RegionView::update(const luna::engine::Intents& intents) {
         overview_->build(kOverviewRowsPerTick, [this](int x, int y) { return biomeColour(region_->biomeAt(x, y)); });
     }
 
-    const bool overBar = pointer.inside() && pointer.y < topHeight(); // the bar and the rows of tools
+    const bool overBar = pointer.inside() && (pointer.y < topHeight() || (inspectorShown_ && inspectorArea().contains({pointer.x, pointer.y}))); // the bar, the rows of tools and the inspector
     const std::optional<Point> overviewCell = pointer.inside() ? overview_->cellAt(overviewArea(), pointer.x, pointer.y) : std::nullopt;
 
     if (overSettings || typing) {
@@ -549,10 +565,18 @@ void RegionView::render(luna::engine::Renderer& renderer, UiPainter& painter) co
     bar_->draw(painter);
     tools_->draw(painter);
     if (placing()) placeRow_->draw(painter);
+    if (inspectorShown_) {
+        const Rect area = inspectorArea();
+        painter.fill({area.x - 1, area.y - 1, area.width + 2, area.height + 2}, UiColor::Border);
+        inspector_->draw(painter);
+        int line = area.y + area.height + 2;
+        for (std::size_t i = 0; i < std::min<std::size_t>(3, setupIssues_.size()); ++i, line += 10) painter.text(area.x, line, setupIssues_[i].substr(0, 42), UiColor::Red);
+    }
     settings_->drawOverlay(painter);
     bar_->drawOverlay(painter);
     tools_->drawOverlay(painter); // hints of the buttons
     if (placing()) placeRow_->drawOverlay(painter);
+    if (inspectorShown_) inspector_->drawOverlay(painter);
 }
 
 
@@ -767,6 +791,10 @@ bool RegionView::undo() {
     if (step == nullptr) return false;
     applyChanges(step->changes, false);
     for (auto it = step->placed.rbegin(); it != step->placed.rend(); ++it) sim::applyPlacedChange(edits_, *it, false);
+    if (step->setup) {
+        setup_ = step->setup->first;
+        refreshSetupIssues();
+    }
     refreshPlaced(step->placed);
     if (!selected_.empty() && sim::findPlaced(edits_, selected_) == nullptr) selected_.clear();
     settings_->refreshNow(); // the conflicts list reads the entries as they are now
@@ -779,6 +807,10 @@ bool RegionView::redo() {
     if (step == nullptr) return false;
     applyChanges(step->changes, true);
     for (const sim::PlacedChange& change : step->placed) sim::applyPlacedChange(edits_, change, true);
+    if (step->setup) {
+        setup_ = step->setup->second;
+        refreshSetupIssues();
+    }
     refreshPlaced(step->placed);
     if (!selected_.empty() && sim::findPlaced(edits_, selected_) == nullptr) selected_.clear();
     settings_->refreshNow(); // the conflicts list reads the entries as they are now
@@ -926,6 +958,7 @@ const char* const kDefaultPlaceKinds[] = {"shrine", "meeting-ground", "grave", "
 
 bool RegionView::typing() const {
     if (settings_->typing()) return true;
+    if (inspectorShown_ && inspector_ != nullptr && inspector_->typing()) return true;
     return placing() && placeRow_ != nullptr && ((kindField_ != nullptr && kindField_->focused()) || (nameField_ != nullptr && nameField_->focused()) || (propertyField_ != nullptr && propertyField_->focused()));
 }
 
@@ -1023,6 +1056,7 @@ void RegionView::recordPlaced(const std::string& label, std::vector<sim::PlacedC
     history_.record(std::move(command));
     dirty_ = true;
     refreshPlaced(changes);
+    refreshSetupIssues(); // a camp put or taken away changes which clans the setup may name
     settings_->refreshNow();
 }
 
@@ -1137,6 +1171,127 @@ void RegionView::handlePlace(int x, int y) {
         if (hit != nullptr && hit->id != selected_) select(hit->id);
         else if (hit == nullptr && !selected_.empty()) moveSelectedTo(x, y);
     }
+}
+
+
+// --- The inspector: clans and clan members (US-206) ---
+
+void RegionView::refreshSetupIssues() { setupIssues_ = sim::setupProblems(setup_, edits_); }
+
+void RegionView::recordSetup(const std::string& label, const sim::WorldSetup& before) {
+    WorldCommand command;
+    command.label = label;
+    command.setup = std::make_pair(before, setup_);
+    history_.record(std::move(command));
+    dirty_ = true;
+    refreshSetupIssues();
+}
+
+bool RegionView::setClanField(const std::string& clan, const std::string& field, const std::string& text) {
+    if (clan.empty()) {
+        if (say_) say_("Choose the clan first: player, or the name of a rival camp");
+        return false;
+    }
+    const sim::WorldSetup before = setup_;
+    sim::ClanSetup next = setup_.clans.contains(clan) ? setup_.clans.at(clan) : sim::ClanSetup{};
+    std::string problem;
+    bool fine = true;
+    if (field == "leader") next.leader = text;
+    else if (field == "stance") next.stance = text;
+    else if (field == "store") fine = sim::setStoreText(next, text, problem);
+    else if (field == "debts") fine = sim::setDebtsText(next, text, problem);
+    else if (field == "partners") next.partners = sim::parseList(text);
+    else if (field == "members") next.members = sim::parseList(text);
+    else {
+        fine = false;
+        problem = "a clan has leader, stance, store, debts, partners and members";
+    }
+    if (!fine) {
+        if (say_) say_("Not set: " + problem);
+        return false;
+    }
+    if (next.empty()) setup_.clans.erase(clan);
+    else setup_.clans[clan] = std::move(next);
+    if (setup_ == before) return false;
+    recordSetup("set " + field + " of " + clan, before);
+    return true;
+}
+
+bool RegionView::setPersonField(const std::string& member, const std::string& field, const std::string& text) {
+    int id = -1;
+    const auto parsed = std::from_chars(member.data(), member.data() + member.size(), id);
+    if (member.empty() || parsed.ec != std::errc{} || parsed.ptr != member.data() + member.size() || id < 0) {
+        if (say_) say_("Choose the clan member first: their number");
+        return false;
+    }
+    const sim::WorldSetup before = setup_;
+    sim::PersonSetup next = setup_.people.contains(member) ? setup_.people.at(member) : sim::PersonSetup{};
+    std::string problem;
+    bool fine = true;
+    if (field == "kin") fine = sim::setKinText(next, text, problem);
+    else if (field == "opinions") fine = sim::setOpinionsText(next, text, problem);
+    else if (field == "grudges") fine = sim::setGrudgesText(next, text, problem);
+    else {
+        fine = false;
+        problem = "a member has kin, opinions and grudges";
+    }
+    if (!fine) {
+        if (say_) say_("Not set: " + problem);
+        return false;
+    }
+    if (next.empty()) setup_.people.erase(member);
+    else setup_.people[member] = std::move(next);
+    if (setup_ == before) return false;
+    recordSetup("set " + field + " of member " + member, before);
+    return true;
+}
+
+void RegionView::buildInspector() {
+    using luna::engine::Rect;
+    using luna::engine::TextField;
+    const Rect area = inspectorArea();
+    inspector_ = std::make_unique<luna::engine::Panel>(area);
+    inspectorRows_.clear();
+    int y = area.y + 3;
+    const int width = area.width - 8;
+    const int x = area.x + 4;
+    const auto row = [&](const std::string& label, std::function<std::string()> text, std::function<void(const std::string&)> commit, const std::string& tip) {
+        TextField& field = inspector_->add<TextField>(Rect{x, y, width, 14}, label, "", 120, std::move(commit));
+        field.tip.text = tip;
+        inspectorRows_.push_back({&field, std::move(text)});
+        y += 16;
+        return &field;
+    };
+    clanField_ = &inspector_->add<TextField>(Rect{x, y, width, 14}, "Clan: ", clanKey_, 40, [this](const std::string& value) { clanKey_ = value; });
+    clanField_->suggest = [this](const std::string&) {
+        std::vector<std::string> names = {"player"};
+        for (const sim::CampSite& camp : sim::campsOf(edits_)) {
+            if (!camp.player && !camp.clan.empty()) names.push_back(camp.clan);
+        }
+        return names;
+    };
+    y += 16;
+    const auto clan = [this]() -> const sim::ClanSetup& {
+        static const sim::ClanSetup none;
+        const auto found = setup_.clans.find(clanKey_);
+        return found == setup_.clans.end() ? none : found->second;
+    };
+    row("Leader: ", [clan] { return clan().leader; }, [this](const std::string& v) { setClanField(clanKey_, "leader", v); }, "A member's number or a name");
+    row("Stance: ", [clan] { return clan().stance; }, [this](const std::string& v) { setClanField(clanKey_, "stance", v); }, "A rival's stance towards you: friendly, wary, hostile...");
+    row("Store: ", [clan] { return sim::storeText(clan()); }, [this](const std::string& v) { setClanField(clanKey_, "store", v); }, "food=80 flint=20 (food is the meals; the player's items go in the hero's store)");
+    row("Debts: ", [clan] { return sim::debtsText(clan()); }, [this](const std::string& v) { setClanField(clanKey_, "debts", v); }, "the River Clan: fur=3 value=12 days=10; ...");
+    row("Partners: ", [clan] { return sim::listText(clan().partners); }, [this](const std::string& v) { setClanField(clanKey_, "partners", v); }, "Clans it trades with, separated by commas");
+    row("Members: ", [clan] { return sim::listText(clan().members); }, [this](const std::string& v) { setClanField(clanKey_, "members", v); }, "Member numbers this clan claims, separated by commas");
+    memberField_ = &inspector_->add<TextField>(Rect{x, y, width, 14}, "Member: ", memberKey_, 8, [this](const std::string& value) { memberKey_ = value; });
+    y += 16;
+    const auto person = [this]() -> const sim::PersonSetup& {
+        static const sim::PersonSetup none;
+        const auto found = setup_.people.find(memberKey_);
+        return found == setup_.people.end() ? none : found->second;
+    };
+    row("Kin: ", [person] { return sim::kinText(person()); }, [this](const std::string& v) { setPersonField(memberKey_, "kin", v); }, "mother=2 father=3 partner=4");
+    row("Opinions: ", [person] { return sim::opinionsText(person()); }, [this](const std::string& v) { setPersonField(memberKey_, "opinions", v); }, "What they think of others: 5=-50 7=20 (-100 to 100)");
+    row("Grudges: ", [person] { return sim::grudgesText(person()); }, [this](const std::string& v) { setPersonField(memberKey_, "grudges", v); }, "member:weight:reason; ... The chronicle tells each reason");
 }
 
 } // namespace odysseus::game

@@ -4,6 +4,7 @@
 
 #include "region.h"
 #include "region_edits.h"
+#include "world_setup.h"
 
 #include <filesystem>
 #include <string>
@@ -25,6 +26,7 @@ struct WorldFile {
     std::uint64_t seed = 1;
     std::vector<std::pair<std::string, int>> generator; // settings that differ from region.json, by their key in that file
     RegionEdits edits;
+    WorldSetup setup; // the clans and people sections (US-206)
     friend bool operator==(const WorldFile&, const WorldFile&) = default;
 };
 

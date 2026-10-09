@@ -78,3 +78,18 @@ Example (a rival camp, the player camp and two resource entries):
 "resources": [{"id": "r-0001", "kind": "flint", "at": [70, 90], "properties": {"amount": "50"}},
               {"id": "r-0002", "kind": "berries", "at": [104, 98]}]
 ```
+
+## Clans and people (US-206)
+**Inspect** (in the bar) opens the inspector at the right. Type a value and press Enter; a value that does not fit is refused and says why. Every change is a step of Undo.
+- **Clan** is `player` or the name of a rival camp (click the field for the list). **Leader**: a member's number or a name. **Stance**: a word such as friendly, wary, hostile (read by Politics later). **Store**: `food=80 flint=20` (`food` is the meals; the rest are items). **Debts**: `the River Clan: fur=3 value=12 days=10; ...` (what the clan owes, what it is worth, days until due). **Partners**, **Members**: names or numbers separated by commas.
+- **Member** is the number of a person the clan starts with. **Kin**: `mother=2 father=3 partner=4` (a partner is set both ways). **Opinions**: `5=-50 7=20`: what this member thinks of others, from -100 to 100, **exactly as written**. **Grudges**: `5:30:stole the last flint; ...`: member, weight 1 to 100, and the reason. The chronicle writes the reason, so the story can tell it.
+- The red lines under the panel are warnings, never refusals: a debt or partner naming a clan that is not in the world, a member in two clans, a kin cycle, a partner who does not name them back.
+- A **placed person** (Place tool) is set with **Set** in the placing row: `hp`, `swordDamage`, `family`, `attitude`, `tags`, and `allow` / `deny` (interaction ids, e.g. `deny=barter`), `day` / `night` (the routine, `06:00 work market; 21:00 sleep home`), `stock` (what it owns and trades, `fur=2`), `does` (what it does on its own). Only that person changes; `key=` clears one.
+- A game starts from these when the edited region is played (Play here). The player's store, debts and the members' opinions, kin and grudges are applied; leader, stance and partners are kept for Politics.
+
+Example (two sections of the file):
+```json
+"clans": {"player": {"store": {"food": 80, "flint": 20}, "debts": [{"to": "the Crow Clan", "goods": {"fur": 3}, "value": 12, "days": 10}]},
+          "the Crow Clan": {"stance": "wary", "store": {"food": 60}}},
+"people": {"0": {"kin": {"mother": "1"}, "opinions": {"1": -50}, "grudges": [{"about": "1", "weight": 30, "reason": "stole the last flint"}]}}
+```

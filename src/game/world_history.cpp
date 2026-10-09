@@ -3,7 +3,7 @@
 namespace odysseus::game {
 
 void WorldHistory::record(WorldCommand command) {
-    if (command.changes.empty() && command.placed.empty()) return;
+    if (command.changes.empty() && command.placed.empty() && !command.setup) return;
     steps_.resize(next_); // what could have been redone is gone
     steps_.push_back(std::move(command));
     if (steps_.size() > kMaxSteps) steps_.erase(steps_.begin());

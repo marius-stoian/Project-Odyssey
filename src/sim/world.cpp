@@ -513,6 +513,18 @@ void World::adjustOpinion(int who, int about, int delta) {
     changeOpinion(people_[static_cast<std::size_t>(who)], about, delta);
 }
 
+void World::setOpinion(int who, int about, int value) {
+    if (who < 0 || about < 0 || static_cast<std::size_t>(who) >= people_.size() || static_cast<std::size_t>(about) >= people_.size()) return;
+    changeOpinion(people_[static_cast<std::size_t>(who)], about, std::clamp(value, -100, 100) - opinion(who, about));
+}
+
+int World::addSetupGrudge(int who, int about, int weight, const std::string& reason) {
+    if (who < 0 || about < 0 || who == about || static_cast<std::size_t>(who) >= people_.size() || static_cast<std::size_t>(about) >= people_.size()) return -1;
+    const int event = note(std::format("{} holds a grudge against {}: {}.", nameOf(who), nameOf(about), reason), kImportanceBlame, EventKind::Note, who, about);
+    addGrudge(people_[static_cast<std::size_t>(who)], about, event, std::clamp(weight, 1, 100));
+    return event;
+}
+
 int World::note(const std::string& text, int importance, EventKind kind, int who, int other) {
     return chronicle_.record(date(), importance, kind, who, other, -1, {}, text);
 }
@@ -987,5 +999,6 @@ std::uint64_t World::hash() const {
     }
     return hasher.value();
 }
+
 
 } // namespace odysseus::sim

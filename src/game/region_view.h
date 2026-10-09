@@ -160,6 +160,20 @@ public:
     int settleConflicts(sim::ConflictChoice choice);
     const sim::PlacedEdit* entryAt(int x, int y) const { return sim::placedAt(edits_, x, y); }
 
+    // The inspector (US-206, design M12 section 10): the setup of a clan ("player" or a rival camp's name) and of a clan member (a number), saved in the `clans` and `people`
+    // sections of the world file and applied when a game starts. Each field is the text the owner types (see sim/world_setup.h); a mistake changes nothing and says what is
+    // wrong. Every change is one step of Undo. Inconsistencies (a debt to a clan that is not there, a kin cycle...) are listed, never refused.
+    sim::WorldSetup& setup() { return setup_; }
+    const sim::WorldSetup& setup() const { return setup_; }
+    bool setClanField(const std::string& clan, const std::string& field, const std::string& text);        // leader, stance, store, debts, partners, members
+    bool setPersonField(const std::string& member, const std::string& field, const std::string& text); // kin, opinions, grudges
+    const std::vector<std::string>& setupIssues() const { return setupIssues_; }
+    bool inspectorShown() const { return inspectorShown_; }
+    void showInspector(bool shown) { inspectorShown_ = shown; }
+    void targetClan(const std::string& clan) { clanKey_ = clan; }
+    void targetMember(const std::string& member) { memberKey_ = member; }
+    luna::engine::Rect inspectorArea() const { return {viewWidth_ - 262, kTopHeight + kPlaceRowHeight + 4, 258, 206}; }
+
     bool undo();
     bool redo();
     const WorldHistory& history() const { return history_; }
@@ -253,6 +267,22 @@ private:
     std::optional<luna::engine::Point> rectFrom_;  // the first corner of a rectangle being dragged
     std::optional<luna::engine::Point> rectTo_;
     void buildPlaceRow();
+    void buildInspector();
+    void recordSetup(const std::string& label, const sim::WorldSetup& before);
+    void refreshSetupIssues();
+    struct InspectorRow {
+        luna::engine::TextField* field = nullptr;
+        std::function<std::string()> text; // what the field shows for the target now
+    };
+    sim::WorldSetup setup_;
+    std::vector<std::string> setupIssues_;
+    std::unique_ptr<luna::engine::Panel> inspector_;
+    std::vector<InspectorRow> inspectorRows_;
+    bool inspectorShown_ = false;
+    std::string clanKey_ = "player";
+    std::string memberKey_;
+    luna::engine::TextField* clanField_ = nullptr;
+    luna::engine::TextField* memberField_ = nullptr;
     void recordPlaced(const std::string& label, std::vector<sim::PlacedChange> changes);
     void handlePlace(int x, int y);
     void refreshPlaced(const std::vector<sim::PlacedChange>& changes); // the region and the pictures follow the entries (resources, hidden spots, the start)

@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-206 Clans and people inspector (Mraw) - 2026-10-09
+
+**State:** branch `story/US-206`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-206`. Decisions: D-67.
+
+- **New:** the Inspect panel of the Region view (clan: leader, stance, store, debts, partners, members; clan member: kin, opinions, grudges), the `clans` and `people` sections of the world file with schema, the consistency list, one step of Undo per change; `sim::world_setup` with the text of every field, `applyClanSetup` (meals, kin, opinions as written, grudges told by a chronicle entry), `applyHeroSetup` (store items, debts to rivals), `applyRivalSetup` (a rival's meals); a placed person's `allow`, `deny`, `day`, `night`, `stock` and `does` properties applied in the level.
+- **Changed:** `World::setOpinion`, `World::addSetupGrudge`, `HeroLife::stockItem`, `HeroLife::addDebt` (small doors for the setup); `WorldFile::setup`; `WorldCommand::setup` (before and after).
+- **Tests:** sim `US-206 Social ...`, `US-206 Kin ...`, `US-206 Economy ...` (2), `US-206 Text fields ...`, `US-206 Checks ...`, `US-206 World file ...`; game `US-206 Overrides ...`, `US-206 Inspector ...`.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-206/build.txt`); the 9 `US-206` cases pass, and so do the 213 sim and 165 game cases of the US-01x to US-11x, US-18x to US-20x and US-30x groups (the older sim run found `US-190 Drift` listing two keys the schema lacked; added). Not run: the full suites (X-M12).
+
 ## US-205 Camps and resources (Mraw) - 2026-10-09
 
 **State:** branch `story/US-205`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-205`. Decisions: D-66.

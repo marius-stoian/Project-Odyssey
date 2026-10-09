@@ -2458,3 +2458,24 @@ if (!entry.forced && !land.goodSite({entry.x, entry.y})) return "the site has no
 **Try it (5 minutes).** F2, **Region**, **Place**, **Camp**, `rival`, try a lake, then a meadow near water; **Resource**, `flint`, click a flint spot, `Set` `amount=50`.
 
 **Check yourself.** Why is it better that the placement function returns the reason as text than that it just returns true or false?
+
+## US-206: describe the world, then start the game from the description (M12)
+
+**What we built.** An inspector for the social and economic world: a clan's store and debts, a person's opinions, grudges and family, a placed person's allowed actions and routine. It is all written in the world file, and a function per target starts a game from it.
+
+**The idea: data in, small doors to the simulation.** The simulation has rules about itself (who may change an opinion, how a grudge is recorded). The setup does not reach in and poke fields; it goes through a few small, named doors: `setOpinion`, `addSetupGrudge`, `stockItem`, `addDebt`. Each door keeps the rules of the thing it opens: a grudge is a chronicle entry first (with the owner's reason as its text) and a grudge pointing at that entry second, so the chronicle can tell it the same way it tells any other grudge. When the simulation changes inside, only the door changes.
+
+```cpp
+const int event = note(std::format("{} holds a grudge against {}: {}.", nameOf(who), nameOf(about), reason), kImportanceBlame, EventKind::Note, who, about);
+addGrudge(people_[who], about, event, weight);
+```
+
+**The idea: a reference to something that does not exist yet.** The clan's people are made when a game starts, so the Editor cannot list them. The setup names them by number and checks what it can (a member in two clans, a kin cycle); the rest is checked when the game applies the setup, which reports what could not be applied and applies the rest. "Apply what you can and say what you could not" is kinder than refusing the whole file.
+
+**A bug worth knowing.** `for (auto& [key, value] : makeThing().items())` looks right and is not: the temporary object dies before the loop runs, so the loop reads freed memory. The address sanitizer found it at once. Keep the object in a variable, then loop over it.
+
+**Where to look.** `src/sim/world_setup.cpp`, `World::addSetupGrudge` in `src/sim/world.cpp`, `RegionView::setClanField` in `src/game/region_view.cpp`, `tests/sim/world_setup_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Inspect**, Member `0`, Opinions `1=-50`, Grudges `1:30:stole the last flint`, Ctrl+Z, Ctrl+Y, Save and read the file.
+
+**Check yourself.** Why is an opinion of -50 "set" and not "added"? What would happen if you applied the same setup twice?

@@ -242,6 +242,17 @@ void HeroLife::give(const std::string& item, int amount) {
     if (itemObserver_) itemObserver_(item, amount, crafting_);
 }
 
+bool HeroLife::stockItem(const std::string& item, int count) {
+    if (std::none_of(data_->items.begin(), data_->items.end(), [&item](const Item& known) { return known.id == item; })) return false;
+    if (count <= 0) inventory_.erase(item);
+    else inventory_[item] = count;
+    return true;
+}
+
+void HeroLife::addDebt(int rival, Goods owe, int value, int days) {
+    debts_.push_back({rival, std::move(owe), value, world_->date().day + std::max(1, days), false, false});
+}
+
 bool HeroLife::take(const std::string& item, int amount) {
     if (count(item) < amount) return false;
     inventory_[item] -= amount;
