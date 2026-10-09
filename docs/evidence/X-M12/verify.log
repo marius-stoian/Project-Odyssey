@@ -1,0 +1,21 @@
+Set-PSReadLineOption: C:\Users\Amek\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1:669
+Line |
+ 669 |  Set-PSReadLineOption -PredictionSource History
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | The predictive suggestion feature cannot be enabled because the console output doesn't support virtual terminal
+     | processing or it's redirected.
+Set-PSReadLineOption: C:\Users\Amek\OneDrive\Documents\PowerShell\Microsoft.PowerShell_profile.ps1:670
+Line |
+ 670 |  Set-PSReadLineOption -PredictionViewStyle ListView
+     |  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | The handle is invalid.
+build debug exit 0, warning lines 0
+build release exit 0, warning lines 0
+ctest debug exit 0
+  100% tests passed out of 22
+  100% tests passed out of 8
+ctest release exit 0
+  100% tests passed out of 22
+  100% tests passed out of 8
+VERIFIED X-M12
+exit 0
