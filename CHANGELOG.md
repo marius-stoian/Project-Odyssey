@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-207 Play the edited region (Mraw) - 2026-10-09
+
+**State:** branch `story/US-207`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-207`. Decisions: D-68.
+
+- **New:** a World row on the New Game screen and `--world <name>`; `OdysseyGame::loadWorld`; a run that begins on a world file with its seed, its setup (`applyClanSetup`, `applyHeroSetup`, `applyRivalSetup`) and the placed camps; **Play here** in the Region view (button, P key, saves the world first, refuses non-land), Esc and F2 back with the Editor's level kept, no saving in a test run; `hero.json` version 3 (`world`, `worldHash`) and a `world.json` copy in the save folder, a warning and the copy when the file changed; `sim::worldTextHash`, `worldFileHash`; `loadRegion(..., makeBase)`; `game::worldNames`.
+- **Changed:** `startNewRun` returns whether it started; `resetPlay` makes the rivals from the placed camps with their stores; `loadAutosave` rebuilds a world run's land from its copy; older saves (`hero.json` 1 and 2) load as before. docs/guides/world-editing.md has the new section with an example; decisions.md gained the missing D-65..D-67 rows.
+- **Tests:** sim `US-207 Fingerprint ...`, `US-207 Run save ...`, `US-207 Region save ...`; game `US-207 New game ...` (2), `US-207 Play here ...` (2), `US-207 World saves ...`, `US-207 Old saves ...`.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-207/build.txt`); the 9 `US-207` cases pass; neighbours sim 427/428 and game 497/522, every failure an NPC case that follows the owner's uncommitted `wanderer.json` edit. Not run: the full suites (X-M12).
+
 ## US-206 Clans and people inspector (Mraw) - 2026-10-09
 
 **State:** branch `story/US-206`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-206`. Decisions: D-67.

@@ -17,6 +17,7 @@
 #include "luna/engine/image_ops.h"
 #include "game/placeholder_art.h"
 #include "game/region_level.h"
+#include "game/play_world.h"
 #include "luna/engine/physics_view.h"
 #include "luna/engine/ui.h"
 
@@ -101,7 +102,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
     });
     editor_.data().setQuickSeed([this] { return weatherSeed_; }); // the Quick check runs the clan on the seed of the level in play (US-194)
     syncRegionPalette();
-    editor_.regionView().setWorldsFolder((dataDirectory / ".." / "worlds").lexically_normal()); // the hand edits of the region (US-202)
+    editor_.regionView().setWorldsFolder(worldsFolder(dataDirectory)); // the hand edits of the region (US-202)
     editor_.regionView().setSource(dataDirectory / "sim" / "region.json", [this] { return region_ != nullptr ? region_->seed() : std::uint64_t{1}; }, [this](const std::filesystem::path& file) { dataFileSaved(file); }); // the Region view shows the land of the game being edited (US-200)
     editor_.data().setTagsOf([this](const std::string& kind) -> std::vector<std::string> { // the Interactions button finds what targets a kind by its tags (US-193)
         if (const PlantDef* plant = catalogs_.plant(kind)) return plant->tags;
@@ -249,7 +250,14 @@ void OdysseyGame::resetPlay() {
     runFlow_.close();
     if (clanEnabled_) startClan();
     if (region_ && rules_.systems.rivals) {
-        rivals_ = std::make_unique<sim::Rivals>(*region_, region_->start(), region_->seed() ^ 0x5151ULL, sim::loadSimConfig(dataDirectory_));
+        // The camps the owner placed (US-205) start the rival clans; their stores are the ones the world file's setup gives (US-206, US-207).
+        const std::vector<sim::CampSite> placed = world_ ? sim::campsOf(world_->edits) : std::vector<sim::CampSite>{};
+        rivals_ = std::make_unique<sim::Rivals>(*region_, region_->start(), region_->seed() ^ 0x5151ULL, sim::loadSimConfig(dataDirectory_), placed);
+        if (world_) {
+            std::vector<std::string> problems;
+            sim::applyRivalSetup(*rivals_, world_->setup, problems);
+            for (const std::string& problem : problems) core::logWarning("World setup: " + problem);
+        }
     }
     projectiles_.clear();
     arcShots_.clear();
@@ -654,8 +662,8 @@ void OdysseyGame::drawClanHud(luna::engine::Renderer& renderer) const {
 }
 
 // Starts a run (US-050): the region of the seed, a clan made for the Comfort level, a hero of it at the preset's age.
-void OdysseyGame::startNewRun(const sim::NewGame& picked, bool useRegion, bool tutorial) {
-    if (!heroData_) return;
+bool OdysseyGame::startNewRun(const sim::NewGame& picked, bool useRegion, bool tutorial) {
+    if (!heroData_) return false;
     // The rules of the run (US-195): the level's, else the pick of the New Game screen. The hero data is read again under them, so the preset and comfort numbers
     // are the ones of that set.
     pickedRules_ = picked.rules;
@@ -663,11 +671,22 @@ void OdysseyGame::startNewRun(const sim::NewGame& picked, bool useRegion, bool t
     chooseRules(pickedRules_);
     sim::NewGame game = picked;
     game.rules = rulesName_;
-    if (useRegion) loadRegion(game.seed);
+    if (!game.world.empty()) { // a world file (US-207): its seed is the land's, its fingerprint is kept with the run
+        if (!loadWorld(game.world)) {
+            startingRun_ = false;
+            return false;
+        }
+        game.seed = world_->seed;
+        game.worldHash = worldHash_;
+    } else if (useRegion) {
+        loadRegion(game.seed);
+    }
     startingRun_ = false;
     clan_ = std::make_unique<sim::World>(game.seed, sim::configForComfort(*heroData_, sim::loadSimConfig(dataDirectory_), game.comfort));
     life_ = std::make_unique<sim::HeroLife>(*heroData_, *clan_, game);
     watchHeroItems();
+    applyWorldSetup(game);
+    keepWorldCopy();
     clanEnabled_ = true;
     clanView_ = ClanView(clanView_.camp());
     clanView_.setHidden(life_->personId());
@@ -690,6 +709,26 @@ void OdysseyGame::startNewRun(const sim::NewGame& picked, bool useRegion, bool t
     }
     core::logInfo(std::format("New run: seed {}, {} preset, {} comfort; the hero is {}, age {}, {}", game.seed, life_->preset().name, heroData_->config.comforts.at(static_cast<std::size_t>(life_->game().comfort)).name,
                               life_->name(), life_->ageYears(), life_->origin()));
+    return true;
+}
+
+// The run keeps the world it began on (US-207, D-68): a copy of the file as it was lies next to the saves, and the run save names the file and its fingerprint. When the file
+// is changed later, a load warns and plays the copy. A run on generated land removes an older copy; a test run (Play here) writes nothing.
+void OdysseyGame::keepWorldCopy() {
+    if (worldPlay_ || saveDirectory_.empty()) return;
+    std::error_code ignored;
+    const std::filesystem::path copy = saveDirectory_ / "world.json";
+    if (!world_) {
+        std::filesystem::remove(copy, ignored);
+        return;
+    }
+    if (const std::optional<std::string> text = core::readTextFile(worldFilePath(dataDirectory_, worldName_))) {
+        try {
+            sim::writeSaveText(copy, *text);
+        } catch (const std::exception& error) {
+            core::logWarning(std::string("The copy of the world could not be kept: ") + error.what());
+        }
+    }
 }
 
 void OdysseyGame::setStatistics(bool agreed) {
@@ -1324,21 +1363,118 @@ void OdysseyGame::say(const std::string& text) {
 
 // A generated region (US-040): the land, the level made from it, the clan at its start and two rivals far away.
 void OdysseyGame::loadRegion(std::uint64_t seed) {
+    world_.reset(); // generated land: no world file
+    worldName_.clear();
+    worldHash_.clear();
     region_ = std::make_unique<sim::Region>(seed, sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json"));
     level_ = levelFromRegion(*region_, definitions_, catalogs_);
+    enterRegion();
+    core::logInfo(std::format("Region {}: start at tile ({}, {}), {} chunks made for the start", seed, region_->start().x, region_->start().y, region_->loadedChunks()));
+}
+
+void OdysseyGame::enterRegion() {
     clanEnabled_ = true;
     weatherSeed_ = WeatherCycle::seedFromText(level_.name);
     editor_.levelChanged();
     switchMode(Mode::Game);
     resetPlay();
     lastSavedDay_ = -1;
-    core::logInfo(std::format("Region {}: start at tile ({}, {}), {} chunks made for the start", seed, region_->start().x, region_->start().y, region_->loadedChunks()));
+}
+
+// A world file as the land (US-207): everything is made first and only then put in place, so a file that cannot be used changes nothing.
+bool OdysseyGame::loadWorld(const std::string& name) {
+    const std::filesystem::path file = worldFilePath(dataDirectory_, name);
+    try {
+        const sim::RegionConfig base = sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json");
+        sim::WorldFile world = sim::loadWorld(file, base);
+        std::string hash = sim::worldFileHash(file);
+        auto region = std::make_unique<sim::Region>(sim::makeWorldRegion(world, base));
+        std::vector<std::string> problems;
+        Level level = levelFromRegion(*region, definitions_, catalogs_, world.edits, &problems);
+        world_ = std::move(world);
+        worldName_ = name;
+        worldHash_ = std::move(hash);
+        region_ = std::move(region);
+        level_ = std::move(level);
+        enterRegion();
+        for (const std::string& problem : problems) core::logWarning("World " + name + ": " + problem);
+        if (!problems.empty()) say(std::format("{} things of the world could not be placed (see the log)", problems.size()));
+        core::logInfo(std::format("World {}: seed {}, start at tile ({}, {}), {} edits", name, world_->seed, region_->start().x, region_->start().y, world_->edits.placed.size() + world_->edits.tiles.size()));
+        return true;
+    } catch (const std::exception& error) {
+        say(std::format("The world \"{}\" cannot be played: {}", name, error.what()));
+        return false;
+    }
+}
+
+// What the world file says about the clans and people, put into a run that has just begun (US-206, US-207): the clan's store, opinions, kin and grudges, and the hero's items and
+// debts. (The rivals' stores are set when they are made, in resetPlay.) Anything that does not fit is named in the log and the rest still applies.
+void OdysseyGame::applyWorldSetup(const sim::NewGame& game) {
+    if (!world_ || game.world.empty()) return;
+    std::vector<std::string> problems;
+    if (clan_) sim::applyClanSetup(*clan_, world_->setup, problems);
+    if (life_) sim::applyHeroSetup(*life_, world_->setup, problems);
+    for (const std::string& problem : problems) core::logWarning("World setup: " + problem);
+    if (!problems.empty()) say(std::format("{} lines of the world's setup could not be applied (see the log)", problems.size()));
+}
+
+// Play here in the Region view (US-207): the world file as a run with a grown hero on the chosen tile. The Editor's own level is kept for the way back.
+bool OdysseyGame::playWorldHere(const std::string& name, int tileX, int tileY) {
+    if (!heroData_ || worldPlay_) return false;
+    const auto& presets = heroData_->config.presets;
+    if (presets.empty()) return false;
+    int grown = static_cast<int>(presets.size()) - 1; // the preset where the hero starts grown ("Off": no growing years), else the last one
+    for (std::size_t i = 0; i < presets.size(); ++i) {
+        if (presets[i].name == "Off") grown = static_cast<int>(i);
+    }
+    sim::NewGame game;
+    game.world = name;
+    game.preset = grown;
+    game.comfort = 1;
+    auto keptLevel = std::make_unique<Level>(level_);
+    worldPlay_ = true; // the run is a test: it is not saved and its world.json copy is not written
+    if (!startNewRun(game, true, false)) {
+        worldPlay_ = false;
+        return false;
+    }
+    editorLevel_ = std::move(keptLevel);
+    runFlow_.close();
+    hero_ = Hero(static_cast<double>(tileX * kTileSize + kTileSize / 2), static_cast<double>(tileY * kTileSize + kTileSize - 4));
+    camera_.centreOn(hero_.feetX(), hero_.feetY());
+    playHere_ = true;
+    core::logInfo(std::format("Play here on world {} at tile ({}, {})", name, tileX, tileY));
+    return true;
+}
+
+void OdysseyGame::leaveWorldPlay() {
+    if (!worldPlay_) return;
+    worldPlay_ = false;
+    playHere_ = false;
+    rivals_.reset();
+    life_.reset();
+    clan_.reset();
+    region_.reset();
+    world_.reset();
+    worldName_.clear();
+    worldHash_.clear();
+    runFlow_.close();
+    if (editorLevel_) {
+        level_ = std::move(*editorLevel_);
+        editorLevel_.reset();
+    }
+    clanEnabled_ = level_.clan;
+    weatherSeed_ = WeatherCycle::seedFromText(level_.name);
+    editor_.levelChanged();
+    switchMode(Mode::Editor);
+    editor_.regionView().show(true); // the Region view comes back with its edits as they were
+    core::logInfo("Left the world: back in the Editor");
 }
 
 // Saves the clan's world, and the region's changes when there is a region: safely, with backups, and quickly (US-080 wants
 // under 200 ms; the time is logged and kept).
 bool OdysseyGame::autosave() {
     if (!clan_) return false;
+    if (worldPlay_) return true; // a Play here from the Region view is a test: it never touches the saves
     const auto started = std::chrono::steady_clock::now();
     try {
         sim::saveWorld(*clan_, saveDirectory_ / "clan.json");
@@ -1367,16 +1503,45 @@ bool OdysseyGame::loadAutosave() {
     runLoaded_ = false;
     levelSavedSinceRun_ = false;
     try {
-        if (std::filesystem::exists(regionFile) || std::filesystem::exists(regionFile.string() + ".bak1")) {
-            sim::LoadedRegion loaded = sim::loadRegion(regionFile, sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json"));
-            for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
-            region_ = std::make_unique<sim::Region>(std::move(loaded.region));
-            level_ = levelFromRegion(*region_, definitions_, catalogs_);
-            clanEnabled_ = true;
-            weatherSeed_ = WeatherCycle::seedFromText(level_.name);
-            editor_.levelChanged();
-            switchMode(Mode::Game);
-            resetPlay();
+        // A run on a world file (US-207) names it in hero.json: the land is made again from the copy kept when the run began, so a world file changed since then does not change
+        // the run (it is a warning). A save from before region editing names no world and loads as it always did.
+        const std::filesystem::path heroFile = saveDirectory_ / "hero.json";
+        const sim::HeroLife::SavedWorld savedWorld = std::filesystem::exists(heroFile) ? sim::HeroLife::savedWorld(heroFile) : sim::HeroLife::SavedWorld{};
+        const bool regionSaved = std::filesystem::exists(regionFile) || std::filesystem::exists(regionFile.string() + ".bak1");
+        if (regionSaved || !savedWorld.name.empty()) {
+            const sim::RegionConfig base = sim::loadRegionConfig(dataDirectory_ / "sim" / "region.json");
+            std::optional<sim::WorldFile> world;
+            if (!savedWorld.name.empty()) {
+                const std::filesystem::path copy = saveDirectory_ / "world.json";
+                const std::filesystem::path live = worldFilePath(dataDirectory_, savedWorld.name);
+                if (std::filesystem::exists(copy)) {
+                    world = sim::loadWorld(copy, base);
+                } else if (std::filesystem::exists(live)) {
+                    world = sim::loadWorld(live, base);
+                    notes += (notes.empty() ? "" : "; ") + std::format("the copy of the world \"{}\" is missing, so the world file is used", savedWorld.name);
+                } else {
+                    throw std::runtime_error(std::format("the world \"{}\" this run began on is gone", savedWorld.name));
+                }
+                const std::string now = sim::worldFileHash(live);
+                if (!now.empty() && !savedWorld.hash.empty() && now != savedWorld.hash) {
+                    notes += (notes.empty() ? "" : "; ") + std::format("the world file \"{}\" was changed after this run began; the run keeps the world it began in", savedWorld.name);
+                }
+            }
+            if (regionSaved) {
+                const std::function<sim::Region()> makeBase = world ? std::function<sim::Region()>([&world, &base] { return sim::makeWorldRegion(*world, base); }) : std::function<sim::Region()>();
+                sim::LoadedRegion loaded = sim::loadRegion(regionFile, world ? sim::worldConfig(*world, base) : base, makeBase);
+                for (const std::string& note : loaded.notes) notes += (notes.empty() ? "" : "; ") + note;
+                region_ = std::make_unique<sim::Region>(std::move(loaded.region));
+            } else {
+                region_ = std::make_unique<sim::Region>(sim::makeWorldRegion(*world, base)); // nothing of the land had changed yet
+            }
+            std::vector<std::string> problems;
+            level_ = world ? levelFromRegion(*region_, definitions_, catalogs_, world->edits, &problems) : levelFromRegion(*region_, definitions_, catalogs_);
+            for (const std::string& problem : problems) core::logWarning("World " + savedWorld.name + ": " + problem);
+            world_ = std::move(world);
+            worldName_ = savedWorld.name;
+            worldHash_ = savedWorld.hash;
+            enterRegion();
         }
         if (!std::filesystem::exists(clanFile) && !std::filesystem::exists(clanFile.string() + ".bak1")) {
             if (!notes.empty()) say(notes);
@@ -2024,12 +2189,13 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         reloadEverything(); // F5 reads every data set again (US-303): the interactions, the NPC classes, the lights, the catalogs, the help
     }
     if (intents.pressed(luna::engine::Intent::ModeEditor)) {
-        switchMode(Mode::Editor);
+        if (worldPlay_) leaveWorldPlay(); // F2 in a world played from the Region view comes back to it like Esc (US-207)
+        else switchMode(Mode::Editor);
     } else if (intents.pressed(luna::engine::Intent::ModeGame)) {
         switchMode(Mode::Game);
     }
     if (mode_ == Mode::Editor) {
-        if (intents.pressed(luna::engine::Intent::PlayHere) && intents.pointer().inside()) { // Play here (US-186): the hero starts at the cursor; F2 returns to the Editor, which has not changed
+        if (intents.pressed(luna::engine::Intent::PlayHere) && intents.pointer().inside() && !editor_.regionView().shown()) { // Play here (US-186): the hero starts at the cursor; F2 returns to the Editor, which has not changed. (The Region view has its own Play here, US-207.)
             const auto [wx, wy] = editor_.worldUnder(intents.pointer());
             switchMode(Mode::Game);
             hero_ = Hero(wx, wy);
@@ -2038,6 +2204,10 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
             return;
         }
         editor_.update(intents); // the world stands still
+        if (const std::optional<sim::Tile> at = editor_.regionView().takePlayRequest()) { // Play here in the Region view (US-207): the world file, saved first, as a run from that tile
+            if (!editor_.regionView().saveBeforePlay()) return; // the reason has been said
+            if (playWorldHere(editor_.regionView().worldName(), at->x, at->y)) return;
+        }
         return;
     }
     // The screens of the run (New Game, Focus, menu, crafting...) stop the world while they are open.
@@ -2048,6 +2218,10 @@ void OdysseyGame::update(const luna::engine::Intents& intents) {
         if (settings_.statistics == 0) runFlow_.openPrivacy();
     }
     if (playHere_ && !runFlow_.modal() && intents.pressed(luna::engine::Intent::OpenMenu)) { // Esc ends a Play here session (US-186)
+        if (worldPlay_) {
+            leaveWorldPlay(); // a world played from the Region view: back to the Region view (US-207)
+            return;
+        }
         playHere_ = false;
         switchMode(Mode::Editor);
         return;

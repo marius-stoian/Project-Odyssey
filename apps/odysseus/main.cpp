@@ -8,6 +8,7 @@
 //   --no-watch               do not watch the data files for changes made outside the game (they are still read on F5 and on an Editor save)
 //   --new-game               start at the New Game screen (seed, Growing Period, Comfort)
 //   --region <seed>          play a generated region: land, resources, the clan at its start and two rival clans
+//   --world <name>           play the world file assets/worlds/<name>.json made in the Editor's Region view: the land with every edit, and with --new-game it is the world picked on the screen
 //   --save-dir <folder>      where the autosaves go (default: the user's save folder); --load brings the autosave back
 //   --clan-speed <n>         run the clan's simulation n ticks per game tick (fast forward for demos)
 //   --clan                   run the simulated clan in this level (levels marked "clan": true do it by themselves)
@@ -58,6 +59,7 @@ struct Arguments {
     bool perf = false;                 // a performance run: overlay on, GPU time measured, figures logged each minute (US-234)
     int people = 0;                    // start the clan with this many people (performance runs)
     std::optional<std::uint64_t> region; // play a generated region
+    std::string world;                 // play this world file (assets/worlds/<name>.json)
     std::filesystem::path saveDirectory; // where autosaves go
     bool load = false;                 // load the autosave at start
     bool newGame = false;              // open the New Game screen
@@ -120,6 +122,8 @@ Arguments parseArguments(int argc, char* argv[]) {
             arguments.logDirectory = argv[++i];
         } else if (name == "--region") {
             arguments.region = std::stoull(argv[++i]);
+        } else if (name == "--world") {
+            arguments.world = argv[++i];
         } else if (name == "--save-dir") {
             arguments.saveDirectory = argv[++i];
         } else if (name == "--people") {
@@ -201,11 +205,15 @@ int main(int argc, char* argv[]) {
         if (arguments.region) {
             game.loadRegion(*arguments.region);
         }
+        if (!arguments.world.empty() && !arguments.newGame && !game.loadWorld(arguments.world)) {
+            odysseus::core::logWarning("--world could not be played");
+        }
         if (arguments.load && !game.loadAutosave()) {
             odysseus::core::logWarning("--load found nothing to load");
         }
         if (arguments.newGame) {
             game.run().openNewGame();
+            if (!arguments.world.empty()) game.run().pickWorld(arguments.world);
         }
         game.setStartingPeople(arguments.people);
         game.setPerformanceLog(arguments.perf);

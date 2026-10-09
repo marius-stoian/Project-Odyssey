@@ -2,6 +2,7 @@
 
 #include "game/game_rules.h"
 #include "game/odyssey_game.h"
+#include "game/play_world.h"
 
 #include <algorithm>
 #include <chrono>
@@ -19,7 +20,7 @@ constexpr int kRowHeight = 12;
 constexpr int kTalkWrap = 56; // characters of a line of speech in the conversation panel (the design of M8)
 
 enum ScreenIds {
-    kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kRulesBase = 40, kActivityBase = 100, kOptionBase = 200,
+    kStart = 1, kLive = 2, kBegin = 3, kNewGameButton = 4, kStatsYes = 5, kStatsNo = 6, kTutorialToggle = 7, kPresetBase = 10, kComfortBase = 20, kRulesBase = 40, kWorldNone = 50, kWorldBase = 51, kActivityBase = 100, kOptionBase = 200,
     kTabBase = 300, kResolutionBase = 320, kWindowed = 330, kVolumeDown = 331, kVolumeUp = 332, kBorderless = 333, kExclusive = 334,
     kScalingWhole = 335, kScalingFill = 336, kZoomOut = 337, kZoomIn = 338, kUiSmall = 339, kUiLarge = 343, kMarkersToggle = 344, kFoundFire = 340, kRitual = 341, kTendFire = 342,
     kApprenticeBase = 350, kRecipeBase = 400, kGiveBase = 500, kGiveLessBase = 520, kWantBase = 540, kWantLessBase = 560, kPayLater = 580, kPropose = 581,
@@ -98,6 +99,7 @@ void RunFlow::openNewGame() {
     preset_ = 0;
     comfort_ = 1;
     rules_.clear();
+    world_.clear();
 }
 
 // The hero's numbers under a set of rules (US-195): the presets and comforts the New Game screen offers are the ones of the picked rules.
@@ -168,8 +170,17 @@ void RunFlow::build(OdysseyGame& game) {
 void RunFlow::buildNewGame(OdysseyGame& game) {
     const sim::HeroConfig config = configUnder(game, rules_);
     title("NEW GAME");
-    line(std::format("Seed: {}{}   (type digits; empty = random)", seedText_.empty() ? "random" : seedText_, seedText_.size() < 18 ? "_" : ""));
+    if (world_.empty()) line(std::format("Seed: {}{}   (type digits; empty = random)", seedText_.empty() ? "random" : seedText_, seedText_.size() < 18 ? "_" : ""));
+    else line("Seed: from the world file " + world_, UiColor::Gold);
     gap();
+    const std::vector<std::string> worlds = worldNames(game.dataDirectory());
+    if (!worlds.empty()) { // world files were made in the Region view (US-207): play the land generated from the seed, or one of them with every edit in it
+        line("World:", UiColor::Dim);
+        button("Generated", kWorldNone, true, world_.empty());
+        for (std::size_t i = 0; i < worlds.size() && i < 9; ++i) button(worlds[i], kWorldBase + static_cast<int>(i), true, worlds[i] == world_);
+        newRow();
+        cursorY_ += kRowHeight + 6;
+    }
     const std::vector<std::string> ruleNames = sim::playRuleNames(game.dataDirectory());
     if (ruleNames.size() > 1) { // more than one set of rules: the player picks (a level that names its own rules overrides the pick)
         line("Rules:", UiColor::Dim);
@@ -886,6 +897,11 @@ void RunFlow::act(OdysseyGame& game, int id) {
         if (id == kTutorialToggle) tutorial_ = !tutorial_;
         else if (id >= kPresetBase && id < kPresetBase + 10) preset_ = id - kPresetBase;
         else if (id >= kComfortBase && id < kComfortBase + 10) comfort_ = id - kComfortBase;
+        else if (id == kWorldNone) world_.clear();
+        else if (id >= kWorldBase && id < kWorldBase + 9) {
+            const std::vector<std::string> worlds = worldNames(game.dataDirectory());
+            if (static_cast<std::size_t>(id - kWorldBase) < worlds.size()) world_ = worlds[static_cast<std::size_t>(id - kWorldBase)];
+        }
         else if (id >= kRulesBase && id < kRulesBase + 10) {
             const std::vector<std::string> names = sim::playRuleNames(game.dataDirectory());
             if (static_cast<std::size_t>(id - kRulesBase) < names.size()) rules_ = names[static_cast<std::size_t>(id - kRulesBase)];
@@ -898,7 +914,8 @@ void RunFlow::act(OdysseyGame& game, int id) {
             newGame.preset = preset_;
             newGame.comfort = comfort_;
             newGame.rules = rules_;
-            game.startNewRun(newGame, true, tutorial_);
+            newGame.world = world_;
+            if (!game.startNewRun(newGame, true, tutorial_)) setMessage("That world cannot be played; the reason is in the log"); // the New Game screen stays open
         }
         break;
     }

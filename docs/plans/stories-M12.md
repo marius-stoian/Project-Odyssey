@@ -181,3 +181,27 @@ Design: docs/plans/M12-world-editing-design.md section 10. Decisions: D-67. Trac
 2. **Member** `0`: Opinions `1=-50`, Grudges `1:30:stole the last flint`, Kin `mother=2`. Ctrl+Z undoes the last field; Ctrl+Y does it again. Save and read `assets/worlds/default.json`: the `clans` and `people` sections.
 3. Place two goblins; pick one (Move tool), `Set` `hp=250`, `deny=barter`, `day=06:00 work market; 21:00 sleep home`: only that one is changed; a bad routine text is refused with the reason.
 4. Once US-207 starts a game from the file: the store shows 80 meals, the debt is on the books, member 0 has opinion -50 of member 1, and the chronicle holds the grudge with its reason.
+
+<a id="us-207"></a>
+
+## US-207 Play the edited region: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md sections 11 and 12. Decisions: D-68. Traces to EDT-04, EDT-06. Guide: docs/guides/world-editing.md (Playing the world).
+
+## Built
+- `src/game/play_world.{h,cpp}`: where the world files are (`worldsFolder`, `worldFilePath`, `worldNames`).
+- `src/sim/world_file.*`: `worldTextHash`, `worldFileHash` (FNV-1a, 16 hex digits). `src/sim/region_save.*`: `loadRegion(..., makeBase)` lays a run's region changes onto the world's land instead of the seed's. `src/sim/hero_life.*`: `NewGame::world` and `worldHash`, `hero.json` version 3 (`world`, `worldHash`), `HeroLife::savedWorld`.
+- `src/game/odyssey_game.*`: `loadWorld`, `startNewRun` with a world (the file's seed, the setup applied by `applyWorldSetup`, a copy of the file kept by `keepWorldCopy`), the rivals made from the placed camps with their stores (`resetPlay`), `playWorldHere` and `leaveWorldPlay` (Esc and F2), no autosave during a test run, `loadAutosave` that rebuilds the land from the run's copy and warns about a changed file.
+- `src/game/region_view.*`: the **Play here** button, the P key, `takePlayRequest`, `saveBeforePlay`. `src/game/run_flow.*`: the World row of the New Game screen, `pickWorld`. `apps/odysseus/main.cpp`: `--world <name>`.
+- Tests: `tests/sim/world_run_test.cpp` (Fingerprint, Run save, Region save) and `tests/game/play_world_test.cpp` (New game, a world that cannot be played, Play here, the Region view's request, World saves, Old saves).
+
+## Technical choices
+- A run is made, not an Editor session: the setup of US-206 needs a clan and a hero life, so Play here starts a new run with a grown hero.
+- The run keeps a copy of the world file: a name and a fingerprint can warn, only a copy can keep the world the run began in.
+- The rivals are made again from the seed on every load, so their stores and camps are applied in `resetPlay`, not once.
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, paint a lake near the start, place a person and a rival camp named `the Crow Clan`, **Inspect**: player Store `food=80`. Click **Play here**: the game starts, the clan's store shows 80 meals, the lake is water, the person stands where placed. Esc: back in the Region view, the edits are there.
+2. Over the map press **P** on a tile of water: refused with the reason. On a meadow tile: the hero stands on that tile.
+3. Quit, start the game, **New Game**: the World row offers `default`; pick it, Start: every edit is there. Play a day (the autosave is written), change the world file in the Region view and save it, then `--load`: the message says the file was changed after the run began, and the lake is still there.
+4. Load a run saved by an older build (no `world` in `hero.json`): it loads and plays as before.

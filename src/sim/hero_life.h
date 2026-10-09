@@ -35,6 +35,8 @@ struct NewGame {
     int preset = 0;
     int comfort = 1;
     std::string rules; // the rules file the run plays under (US-195); empty is "standard"
+    std::string world;     // the world file the run began on (US-207, assets/worlds/<name>.json); empty: the land generated from the seed
+    std::string worldHash; // the fingerprint of that file when the run began (sim::worldFileHash)
 };
 
 // The clan's world rules for a Comfort level: needs fall faster when harsh, the store starts smaller.
@@ -230,6 +232,12 @@ public:
     static HeroLife load(const HeroData& data, World& world, const std::filesystem::path& file);
     // The rules a saved run plays under ("" for a save from before US-195, or one that cannot be read): the hero data must be read under them before the run is loaded.
     static std::string savedRules(const std::filesystem::path& file);
+    // The world file a saved run began on: its name and the fingerprint it had then; both empty for a run on generated land and for a save from before region editing (US-207).
+    struct SavedWorld {
+        std::string name;
+        std::string hash;
+    };
+    static SavedWorld savedWorld(const std::filesystem::path& file);
 
 private:
     struct RestoreTag {};

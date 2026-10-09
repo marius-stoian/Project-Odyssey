@@ -1,0 +1,3 @@
+US-207 Debug build, zero warnings
+US-207 cases: sim 3 passed, game 6 passed
+neighbours US-0*..US-3*: sim 427/428, game 497/522 (failures are NPC cases caused by the uncommitted wanderer.json edit)

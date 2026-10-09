@@ -5,6 +5,7 @@
 #include "region.h"
 
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -25,7 +26,8 @@ struct LoadedRegion {
 
 // `config` is today's content (assets/data/sim/region.json); the save keeps only the seed, so a changed region.json
 // would change the land: the save also stores the size and chunk size and refuses to load on a mismatch.
-LoadedRegion loadRegion(const std::filesystem::path& file, const RegionConfig& config);
+// `makeBase`, when given, makes the region the changes are laid onto (a world file's land with its edits, US-207) instead of the plain land of the seed; its seed must be the saved one.
+LoadedRegion loadRegion(const std::filesystem::path& file, const RegionConfig& config, const std::function<Region()>& makeBase = {});
 
 // The number of chunks a save of this region would store (the changed ones).
 std::size_t savedChunkCount(const Region& region);
