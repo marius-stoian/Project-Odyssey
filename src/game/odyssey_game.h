@@ -349,6 +349,7 @@ public:
     void removeDeadFigures(); // the figures of the persons the director says are dead leave the world (after a death, after a load)
     void syncEditorActions();
     void syncGraphCatalog();
+    void syncRegionPalette(); // the kinds the Place tool of the Region view offers (US-204)
     // US-303: the data sets and what follows each of them (odyssey_reload.cpp).
     void registerDataSets();
     void reported(const std::vector<ReloadOutcome>& outcomes);

@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "sim/region.h"
+#include "sim/world_places.h"
 
 #include <cstddef>
 #include <optional>
@@ -24,6 +25,7 @@ struct TileChange {
 struct WorldCommand {
     std::string label;
     std::vector<TileChange> changes;
+    std::vector<sim::PlacedChange> placed; // things, people and places put, moved or taken off in the same step (US-204)
 };
 
 // The way back for the world tools (D-61 Q5): one history for all of them, up to kMaxSteps steps; a new step drops what could have been redone.

@@ -24,7 +24,7 @@ int lineOf(const std::string& text, std::size_t position) {
 // The names `catalog:` may use (the sources of US-302).
 bool knownCatalog(const std::string& name) {
     static const std::set<std::string> names = {"npc-classes", "npc-kinds", "partner-types", "interactions", "interaction-fields", "light-kinds", "objects",
-                                                "plants", "characters", "items", "building-kinds", "prefabs", "quests", "levels", "tags", "places", "markers"};
+                                                "plants", "characters", "items", "building-kinds", "prefabs", "quests", "levels", "tags", "places", "markers", "people", "goals"};
     return names.contains(name);
 }
 

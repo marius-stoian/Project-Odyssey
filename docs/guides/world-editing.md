@@ -44,3 +44,23 @@ More tools in the row under the bar. They are made of the same painted tiles as 
 - A warning line appears above the status line when the start has become water or has lost its water and food, or when a cave mouth has no way in. It is only a warning: you may want an island.
 
 Example: to cut the land with a river that can be crossed in one place, choose **River**, size 3, set **Fords** to 60, and drag from the north edge to the south edge. There is a crossing of meadow every 60 tiles, the first one 30 tiles from the source.
+
+## Things, people and places (US-204)
+Three more tools in the row of tools: **Place**, **Move** and **Take away**. A second row appears under them while one is chosen.
+- **Thing / Person / Place** chooses what **Place** puts down. **Kind** is the catalog entry (click the field for the list): a plant, an object such as a fire pit or an animal for a thing, a character kind for a person, a sort of place (shrine, meeting-ground, grave, camp-site, market, well). **Name** is needed for a place (a quest points to it by this name; two places cannot have the same name) and optional for a person (up to 18 letters).
+- **Place:** click a tile. It must be land people can stand on, and hold nothing else of the same group. The new entry is picked (ringed).
+- **Move:** click an entry to pick it, then click an empty tile to put it there. It keeps its id.
+- **Take away:** click one of your own entries to remove it, or one of the seed's own trees, bushes, flint or herds to hide it (a hidden thing stays hidden when the land is made again; Ctrl+Z brings it back).
+- **Set** in the row sets a property of the picked entry as `key=value` and Enter (`key=` clears it). A property wins over the kind's own data. A person can set `hp`, `swordDamage`, `family`, `attitude`, `tags`; an animal `hp`; a plant `<interaction>.duration` and `<interaction>.delay` in whole seconds; a place `tags`. Anything else is refused.
+- **Fix: move** and **Fix: drop** settle every entry the changed land no longer suits (the Settings panel lists them): move to the nearest tile where it can stand, or take it off. One step of Undo each.
+- Every action is a step of Undo (Ctrl+Z, Ctrl+Y). **Save** (Ctrl+S) writes the world file. Ids (`t-0001`, `p-0001`, `l-0001`) never change once made, through saving, loading, moving and regenerating the land.
+- Pickers: the places and people you put on the region are offered in the quest Marker (`place:Red Cliff`, `npc:old-mara`), the quest Goal (`goto red-cliff`, `talk old-mara`), the quest Giver and the dialogue Who fields.
+
+Example (a thing, a person with two properties and a place, and a seed tree taken away):
+```json
+"overrides": {"chunks": {},
+  "things": [{"id": "t-0001", "kind": "clan-fire", "at": [88, 60]}, {"id": "t-0002", "kind": "wood", "at": [91, 62], "remove": true}],
+  "people": [{"id": "p-0001", "kind": "goblin", "at": [90, 60], "name": "Old Mara", "class": "elder", "properties": {"hp": "120", "attitude": "friendly"}}],
+  "places": [{"id": "l-0001", "kind": "shrine", "name": "Red Cliff", "at": [95, 64], "properties": {"tags": "shelter"}}],
+  "camps": [], "resources": []}
+```

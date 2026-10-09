@@ -2418,3 +2418,25 @@ for (const sim::Tile& at : river) editTile(at.x, at.y, ford.contains({at.x, at.y
 **Try it (5 minutes).** F2, **Region**, **River**, size 3, **Fords** 40, drag a river across the meadow, then **Dry** on a lake, then Ctrl+Z twice.
 
 **Check yourself.** Why is a ford made of land instead of a new kind of "shallow water" tile?
+
+## US-204: an id that outlives the land (M12)
+
+**What we built.** Tools to put a thing, a person or a named place on the region, move it, take it away, and give it properties. Everything is saved in the world file as a short entry with an id, and the game's level is made from the seed plus those entries.
+
+**The idea: identity is not position.** A tile coordinate says where something is now; an id says which thing it is. When you change the generator settings the land under a boulder may become a lake. If the boulder were found by "the thing at tile (88, 60)" it would be lost or confused; because it has the id `t-0001`, it is the same boulder, still listed, and the conflict list can say "t-0001 now stands on water" and let you move it. A move changes the entry's tile and keeps its id. A new id is "one more than the largest in use for its group", so an id is never given to two things at once.
+
+```cpp
+std::string nextPlacedId(const RegionEdits& edits, EditGroup group) {
+    int largest = 0;
+    for (const PlacedEdit& entry : edits.placed) { /* read the number after "t-" */ if (number > largest) largest = number; }
+    return std::format("{}-{:04}", prefixOf(group), largest + 1);
+}
+```
+
+**The idea: a change you can run backwards.** Every edit returns a `PlacedChange`, the entry before and after (nothing before means "was not there", nothing after means "is gone"). Doing it is "make the list look like `after`", undoing it is "make the list look like `before`". Add, move, remove, hide and set-a-property are all the same shape, so the Undo history needs to know only one thing. `std::optional` is the C++ way to say "there may be no value".
+
+**Where to look.** `PlacedChange` and `applyPlacedChange` in `src/sim/world_places.cpp`, `RegionView::recordPlaced` in `src/game/region_view.cpp`, the `placed` list in `WorldCommand` (`src/game/world_history.h`), `levelFromRegion` in `src/game/region_level.cpp`, `tests/sim/world_places_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, zoom in, **Place**, **Person**, Kind goblin, Name Old Mara, click; **Move** her; Ctrl+Z twice; **Place** a **Place** named Red Cliff; Save and open `assets/worlds/default.json`.
+
+**Check yourself.** Why does a hidden seed tree need an entry in the file at all, instead of simply not drawing it in the Editor?

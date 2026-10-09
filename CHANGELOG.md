@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-204 Things, people and places in the region (Mraw) - 2026-10-09
+
+**State:** branch `story/US-204`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-204`. Decisions: D-65.
+
+- **New:** Place, Move and Take away tools in the Region view with a row for Thing / Person / Place, Kind (the catalog list), Name, Set key=value, Fix: move and Fix: drop; squares for the entries on the map; one step of Undo each (`WorldCommand::placed`). `sim/world_places.{h,cpp}`: the rules for putting, moving, taking away and hiding entries, properties per group, stable ids (`t-0001`, `p-0001`, `l-0001`), the conflict settling (Move to the nearest tile that can hold the entry, Remove). `levelFromRegion(region, definitions, catalogs, edits, &problems)` adds the entries to the level the game plays (a thing as a plant, object or animal, a person as a character with its class and properties, a place as a named spot) and leaves out the seed things the owner took away.
+- **Changed:** `PlacedEdit` has `name`, `npcClass` and `properties`; the world file writes and reads them (a property the group cannot set, or an id used twice, is a DataError naming file and field); `world.schema.json` describes `things`, `people` and `places` with examples. The catalogs `places` and `markers` also list the region's names; new catalogs `people` and `goals`; `help.json` offers them for the quest Giver, the quest Goal and the dialogue Who fields; the quest check accepts the region's names. `docs/guides/world-editing.md` has the new section and an example file.
+- **Tests:** sim `US-204 Place ...`, `US-204 Places ...`, `US-204 Move, take away and Undo ...`, `US-204 Tombstone ...`, `US-204 Stable ids ...`, `US-204 Conflicts ...`, `US-204 Properties ...`, `US-204 Cap ...`; game `US-204 Place: a fire pit and an NPC ...`, `... a click with the Place tool ...`, `US-204 Move and take away ...`, `US-204 Properties ...`, `US-204 Conflicts: Fix: move ...`, `US-204 Pickers and Places ...`, `US-204 Palette ...`.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-204/build.txt`); the 15 `US-204` cases pass, and so do the 104 sim and 142 game cases of the US-18x, US-19x, US-20x and US-30x groups. Not run: the full suites (X-M12).
+
 ## US-203 Water and mountains (Mraw) - 2026-10-09
 
 **State:** branch `story/US-203`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-203`. Decisions: D-64.

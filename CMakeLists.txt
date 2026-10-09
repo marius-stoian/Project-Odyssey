@@ -235,6 +235,7 @@ add_library(odysseus_sim STATIC
     src/sim/region_edits.cpp
     src/sim/region_shapes.cpp
     src/sim/world_file.cpp
+    src/sim/world_places.cpp
     src/sim/region_save.cpp
     src/sim/hero_data.cpp
     src/sim/hero_life.cpp
@@ -524,6 +525,7 @@ add_executable(odysseus_game_tests
     tests/game/picture_tool_test.cpp
     tests/game/live_catalog_test.cpp
     tests/game/region_view_test.cpp
+    tests/game/place_tool_test.cpp
     tests/game/generator_panel_test.cpp
     tests/game/world_edit_test.cpp
     tests/game/water_tools_test.cpp)
@@ -577,6 +579,7 @@ add_executable(odysseus_sim_tests
     tests/sim/region_test.cpp
     tests/sim/region_edits_test.cpp
     tests/sim/world_file_test.cpp
+    tests/sim/world_places_test.cpp
     tests/sim/region_shapes_test.cpp
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp

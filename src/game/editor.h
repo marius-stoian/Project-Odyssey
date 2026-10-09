@@ -150,6 +150,7 @@ public:
     // The Data tab (M11, US-191): any data file as forms built from its schema. Esc comes back.
     DataEditor& data() { return *dataEditor_; }
     RegionView& regionView() { return *regionView_; } // the region on a zoomable map (US-200)
+    const RegionView& regionView() const { return *regionView_; }
     void setGraphFolders(std::filesystem::path dialogueFolder, std::filesystem::path interactionFolder, std::function<void()> saved, std::filesystem::path questFolder = {}) { graphEditor_->setFolders(std::move(dialogueFolder), std::move(interactionFolder), std::move(saved), std::move(questFolder)); }
     // The region's economy (US-280, D-54 Q1-Q2): the Economy panel (the Economy button of the Level panel) sets which items are money here, the market's base
     // prices and the goods the region delivers to its traders, each as text "item=number item=number". Each is one step of Undo; a mistake is said in the status

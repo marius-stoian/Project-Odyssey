@@ -12,6 +12,7 @@
 #include "sim/region.h"
 #include "sim/region_edits.h"
 #include "sim/world_file.h"
+#include "sim/world_places.h"
 
 #include <algorithm>
 #include <array>
@@ -37,7 +38,7 @@ inline constexpr int kRegionLayerCount = static_cast<int>(RegionLayer::Count);
 const char* regionLayerName(RegionLayer layer);
 
 // What a left click on the map does (US-202). Pan is the default; the others paint the biome chosen on the bar, and then the middle or right button pans.
-enum class RegionTool { Pan, Brush, Rectangle, Fill, Erase, River, Lake, Ridge, Cave, Ford, Dry };
+enum class RegionTool { Pan, Brush, Rectangle, Fill, Erase, River, Lake, Ridge, Cave, Ford, Dry, Place, Move, Take };
 
 // The region in the Editor (US-200, design docs/plans/M12-world-editing-design.md section 4): the whole generated land on a zoomable map.
 // It makes its own Region from the same seed and the same region.json as the game, so the two are the same world (the "Same world" test
@@ -55,6 +56,8 @@ public:
     static constexpr int kBarHeight = 20;
     static constexpr int kToolRowHeight = 18;         // the row of tools under the bar
     static constexpr int kTopHeight = kBarHeight + kToolRowHeight;
+    static constexpr int kPlaceRowTop = kTopHeight;   // the row of the placing tools (US-204) sits under the tools and shows only while one of them is chosen
+    static constexpr int kPlaceRowHeight = kToolRowHeight;
     static constexpr int kMaxBrush = 9;
     static constexpr int kOverviewSize = 96;          // the overview on screen, in pixels
 
@@ -81,8 +84,9 @@ public:
     // and lists the ones the new land does not suit.
     GeneratorPanel& settings() { return *settings_; }
     sim::RegionEdits& edits() { return edits_; }
+    const sim::RegionEdits& edits() const { return edits_; }
     void applyHelp(EditorHelp& help) { settings_->applyHelp(help); }
-    bool typing() const { return settings_->typing(); } // a settings field is being typed in: the keys belong to it
+    bool typing() const; // a settings field or a field of the placing row is being typed in: the keys belong to it
     sim::Region* region() { return region_.get(); }
     const sim::Region* region() const { return region_.get(); }
 
@@ -124,6 +128,36 @@ public:
     void setFordEvery(int every) { fordEvery_ = std::clamp(every, 0, 64); }
     // What the land as it is would trouble the owner with (the start without water, a sealed cave mouth); shown in the status line. Never a block.
     const std::vector<std::string>& warnings() const { return warnings_; }
+    // Things, people and named places (US-204, design M12 section 8). The Place tool puts the chosen kind (and name) on a clicked tile; Move picks an entry with a click and
+    // puts it on the next empty tile clicked; Take away removes the entry under the click, or hides the seed's own wood, berries, flint or herd there. Each is one step of
+    // Undo, saved in the world file with a stable id. A place needs a name (quests and dialogue point to it); a person may have a name, a class and properties.
+    struct PlacePalette {
+        std::vector<std::string> things; // plants, objects and animals
+        std::vector<std::string> people; // character kinds
+        std::vector<std::string> places;  // sorts of place; empty: the built-in ones
+        std::vector<std::string> classes; // NPC Class ids
+    };
+    void setPalette(PlacePalette palette);
+    const PlacePalette& palette() const { return palette_; }
+    sim::EditGroup placeGroup() const { return placeGroup_; }
+    void setPlaceGroup(sim::EditGroup group); // Thing, Person or Place
+    const std::string& placeKind() const { return placeKind_; }
+    void setPlaceKind(std::string kind) { placeKind_ = std::move(kind); }
+    const std::string& placeName() const { return placeName_; }
+    void setPlaceName(std::string name) { placeName_ = std::move(name); }
+    const std::string& placeClass() const { return placeClass_; }
+    void setPlaceClass(std::string npcClass) { placeClass_ = std::move(npcClass); }
+    std::string placeEntry(int x, int y);        // puts the chosen kind on a tile and selects it; returns its id, or nothing (with the reason said)
+    bool select(const std::string& id);
+    bool selectAt(int x, int y);                  // the entry standing on a tile
+    const std::string& selected() const { return selected_; }
+    bool moveSelectedTo(int x, int y);
+    bool takeAway(int x, int y);                  // the entry at a tile goes; a seed thing is hidden instead
+    bool setProperty(const std::string& key, const std::string& value); // on the selected entry; an empty value clears it
+    // Settles the entries the land no longer suits (the list of the Settings panel): Move puts each on the nearest tile where it can stand, Remove takes them off. One step of Undo.
+    int settleConflicts(sim::ConflictChoice choice);
+    const sim::PlacedEdit* entryAt(int x, int y) const { return sim::placedAt(edits_, x, y); }
+
     bool undo();
     bool redo();
     const WorldHistory& history() const { return history_; }
@@ -216,6 +250,23 @@ private:
     std::optional<luna::engine::Point> lastDab_;   // the previous tile of a brush stroke, so a fast drag leaves no gaps
     std::optional<luna::engine::Point> rectFrom_;  // the first corner of a rectangle being dragged
     std::optional<luna::engine::Point> rectTo_;
+    void buildPlaceRow();
+    void recordPlaced(const std::string& label, std::vector<sim::PlacedChange> changes);
+    void handlePlace(int x, int y);
+    bool placing() const { return tool_ == RegionTool::Place || tool_ == RegionTool::Move || tool_ == RegionTool::Take; }
+    int topHeight() const { return placing() ? kTopHeight + kPlaceRowHeight : kTopHeight; }
+    std::vector<std::string> kindSuggestions() const;
+    PlacePalette palette_;
+    sim::EditGroup placeGroup_ = sim::EditGroup::Thing;
+    std::string placeKind_;
+    std::string placeName_;
+    std::string placeClass_;
+    std::string selected_;
+    std::unique_ptr<luna::engine::Panel> placeRow_;
+    std::vector<luna::engine::Button*> groupButtons_;
+    luna::engine::TextField* kindField_ = nullptr;
+    luna::engine::TextField* nameField_ = nullptr;
+    luna::engine::TextField* propertyField_ = nullptr;
     std::unique_ptr<luna::engine::Panel> tools_;
     std::vector<luna::engine::Button*> toolButtons_;
     std::vector<luna::engine::Button*> biomeButtons_;

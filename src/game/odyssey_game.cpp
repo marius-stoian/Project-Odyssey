@@ -100,6 +100,7 @@ OdysseyGame::OdysseyGame(const std::filesystem::path& dataDirectory, const std::
         return renderer_ != nullptr ? renderer_->createTexture(image) : luna::engine::Texture{};
     });
     editor_.data().setQuickSeed([this] { return weatherSeed_; }); // the Quick check runs the clan on the seed of the level in play (US-194)
+    syncRegionPalette();
     editor_.regionView().setWorldsFolder((dataDirectory / ".." / "worlds").lexically_normal()); // the hand edits of the region (US-202)
     editor_.regionView().setSource(dataDirectory / "sim" / "region.json", [this] { return region_ != nullptr ? region_->seed() : std::uint64_t{1}; }, [this](const std::filesystem::path& file) { dataFileSaved(file); }); // the Region view shows the land of the game being edited (US-200)
     editor_.data().setTagsOf([this](const std::string& kind) -> std::vector<std::string> { // the Interactions button finds what targets a kind by its tags (US-193)
@@ -839,10 +840,21 @@ std::vector<std::string> OdysseyGame::suggestionNames(const std::string& catalog
         names.insert(tags.begin(), tags.end());
     } else if (catalog == "places") {
         for (const PlacedPlace& place : level_.places) names.insert(place.name);
+        for (const std::string& name : sim::placedNames(editor_.regionView().edits(), sim::EditGroup::Place)) names.insert(name); // the places put on the region (US-204)
+    } else if (catalog == "people") { // who a quest or a dialogue may name: the people of the level and the people put on the region (US-204)
+        for (const PlacedCharacter& placed : level_.characters) names.insert(placed.name);
+        for (const std::string& name : sim::placedNames(editor_.regionView().edits(), sim::EditGroup::Person)) names.insert(name);
+    } else if (catalog == "goals") { // whole goals for a quest step that point at a place or a person
+        for (const PlacedPlace& place : level_.places) names.insert("goto " + questWord(place.name));
+        for (const std::string& name : sim::placedNames(editor_.regionView().edits(), sim::EditGroup::Place)) names.insert("goto " + questWord(name));
+        for (const PlacedCharacter& placed : level_.characters) names.insert("talk " + questWord(placed.name));
+        for (const std::string& name : sim::placedNames(editor_.regionView().edits(), sim::EditGroup::Person)) names.insert("talk " + questWord(name));
     } else if (catalog == "markers") { // what a quest step's marker may point to
         for (const std::string& tag : knownTags()) names.insert("tag:" + tag);
         for (const PlacedCharacter& placed : level_.characters) names.insert("npc:" + questWord(placed.name));
         for (const PlacedPlace& place : level_.places) names.insert("place:" + place.name);
+        for (const std::string& name : sim::placedNames(editor_.regionView().edits(), sim::EditGroup::Place)) names.insert("place:" + name);
+        for (const std::string& name : sim::placedNames(editor_.regionView().edits(), sim::EditGroup::Person)) names.insert("npc:" + questWord(name));
         for (const std::string& object : definitions_.objects) names.insert("object:" + object);
     }
     return {names.begin(), names.end()};
@@ -856,7 +868,22 @@ EditorHelp::Sources OdysseyGame::suggestionSources() const {
     return sources;
 }
 
+// The kinds the Place tool of the Region view offers (US-204): plants and objects (objects ride on the plant machinery), animals, the people kinds, the NPC Classes.
+void OdysseyGame::syncRegionPalette() {
+    RegionView::PlacePalette palette;
+    for (const PlantDef& plant : catalogs_.plants) palette.things.push_back(plant.name);
+    for (const CharacterKindDef& kind : definitions_.characters) {
+        const bool tagged = std::find(kind.tags.begin(), kind.tags.end(), "animal") != kind.tags.end();
+        const bool hero = std::find(kind.tags.begin(), kind.tags.end(), "hero") != kind.tags.end();
+        if (tagged || catalogs_.animal(kind.name) != nullptr) palette.things.push_back(kind.name);
+        else if (!hero) palette.people.push_back(kind.name);
+    }
+    for (const std::string& id : npcClasses_.catalog().ids()) palette.classes.push_back(id);
+    editor_.regionView().setPalette(std::move(palette));
+}
+
 void OdysseyGame::syncGraphCatalog() {
+    syncRegionPalette(); // runs whenever the data is read again, so the Place tool always offers the kinds in use
     sim::rules::GraphCatalog catalog;
     if (heroData_) {
         for (const sim::Item& item : heroData_->items) catalog.items.insert(item.id);
@@ -866,13 +893,24 @@ void OdysseyGame::syncGraphCatalog() {
     for (const sim::rules::Interaction& interaction : interactions_.all()) catalog.interactions.insert(interaction.id);
     catalog.tags = knownTags();
     // What a quest may name (US-187): the people, kinds and places of the loaded level, and the quests themselves.
-    if (!level_.characters.empty()) { // a generated region makes its people at run time: nothing to check them against
+    const sim::RegionEdits& placedInRegion = editor_.regionView().edits(); // the people and places put on the region (US-204)
+    if (!level_.characters.empty() || !placedInRegion.placed.empty()) { // a generated region makes its people at run time: nothing to check them against, unless some are put on it
         for (const PlacedCharacter& placed : level_.characters) {
             catalog.people.insert(questWord(placed.name));
             catalog.people.insert(questWord(placed.kind));
             catalog.kinds.insert(questWord(placed.kind));
         }
         for (const PlacedPlace& place : level_.places) catalog.places.insert(questWord(place.name));
+        for (const sim::PlacedEdit& entry : placedInRegion.placed) {
+            if (entry.removal) continue;
+            if (entry.group == sim::EditGroup::Place) {
+                catalog.places.insert(questWord(entry.name.empty() ? entry.kind : entry.name));
+            } else if (entry.group == sim::EditGroup::Person) {
+                catalog.people.insert(questWord(entry.name.empty() ? entry.kind : entry.name));
+                catalog.people.insert(questWord(entry.kind));
+                catalog.kinds.insert(questWord(entry.kind));
+            }
+        }
     }
     for (const sim::rules::Quest& quest : quests_.quests()) catalog.quests.insert(quest.id);
     questCatalog_ = catalog;
