@@ -127,6 +127,7 @@ std::vector<std::pair<std::string, int>> generatorDifferences(const RegionConfig
 Region makeWorldRegion(const WorldFile& world, const RegionConfig& base) {
     Region region(world.seed, worldConfig(world, base));
     for (const TileEdit& edit : world.edits.tiles) region.setTileEdit(edit.x, edit.y, edit.biome);
+    applyPlacedToRegion(region, world.edits); // hidden spots, amounts, new spots and the start at the player's camp (US-205)
     return region;
 }
 

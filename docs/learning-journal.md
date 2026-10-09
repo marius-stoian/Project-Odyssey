@@ -2440,3 +2440,21 @@ std::string nextPlacedId(const RegionEdits& edits, EditGroup group) {
 **Try it (5 minutes).** F2, **Region**, zoom in, **Place**, **Person**, Kind goblin, Name Old Mara, click; **Move** her; Ctrl+Z twice; **Place** a **Place** named Red Cliff; Save and open `assets/worlds/default.json`.
 
 **Check yourself.** Why does a hidden seed tree need an entry in the file at all, instead of simply not drawing it in the Editor?
+
+## US-205: ask the rules, and say which one said no (M12)
+
+**What we built.** Camps (the player's and the rivals') and resource spots with amounts, as entries in the world file. A rival clan now starts at the camp you put it, and a flint spot you set to 50 gives 50 flint.
+
+**The idea: validate against the rules you already have.** The generator already decides what a fair camp site is (`Region::goodSite`). The Editor does not copy that rule; it calls it. So the generator and the Editor can never disagree. The placement function returns a sentence instead of a yes or no, so the owner is told why: "too close to the camp at (170, 60)", "the site has no water and food within reach". An empty string means "fine". A flag, `forced`, is the owner saying "I know, do it anyway": the rule is still asked, and the answer is overruled on purpose and recorded.
+
+```cpp
+if (!entry.forced && !land.goodSite({entry.x, entry.y})) return "the site has no water and food within reach ...: choose another, or place it anyway";
+```
+
+**The idea: an overlay that can be thrown away.** Resource edits do not change the generated land. The region keeps three small tables (hidden spots, amounts, added spots) laid over the chunks when they are made, and `applyPlacedToRegion` clears them and lays them again from the entries. That is why Undo, Move and a regeneration all just work: the entries are the truth, the region is rebuilt from them.
+
+**Where to look.** The camp rules in `placementProblem` (`src/sim/world_places.cpp`), `Region::chunk` and `Region::harvest` (`src/sim/region.cpp`), the `placed` parameter of `Rivals` (`src/sim/rivals.cpp`), `tests/sim/world_places_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Place**, **Camp**, `rival`, try a lake, then a meadow near water; **Resource**, `flint`, click a flint spot, `Set` `amount=50`.
+
+**Check yourself.** Why is it better that the placement function returns the reason as text than that it just returns true or false?

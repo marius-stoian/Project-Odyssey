@@ -8,7 +8,9 @@
 
 #include <doctest/doctest.h>
 
+#include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -300,4 +302,193 @@ TEST_CASE("US-204 Cap: a world keeps at most kMaxWorldEntries edits") {
     std::string problem;
     CHECK_FALSE(sim::addPlaced(land, edits, entryOf(sim::EditGroup::Thing, "boulder", {30, 30}), problem));
     CHECK(problem.find("at most") != std::string::npos);
+}
+
+// ---- US-205 Camps and resources ----
+
+#include "sim/region_save.h"
+#include "sim/rivals.h"
+#include "sim/world.h"
+
+namespace {
+
+// A tile at least `far` tiles from the start where the site check passes and the ground is open.
+sim::Tile goodFarSite(sim::Region& land, int far, int skipFrom = 0) {
+    for (int y = 30; y < 226; y += 3) {
+        for (int x = 30 + skipFrom; x < 226; x += 3) {
+            if (std::max(std::abs(x - land.start().x), std::abs(y - land.start().y)) < far) continue;
+            const sim::Biome biome = land.biomeAt(x, y);
+            if ((biome == sim::Biome::Steppe || biome == sim::Biome::Forest) && land.goodSite({x, y})) return {x, y};
+        }
+    }
+    return {-1, -1};
+}
+
+sim::Tile findResource(sim::Region& land, sim::ResourceKind kind) {
+    for (int cy = 1; cy < 7; ++cy) {
+        for (int cx = 1; cx < 7; ++cx) {
+            for (const sim::Resource& resource : land.chunk(cx, cy).resources) {
+                if (resource.kind == kind) return {resource.x, resource.y};
+            }
+        }
+    }
+    return {-1, -1};
+}
+
+} // namespace
+
+TEST_CASE("US-205 Rules: a camp in water, on poor ground, too close or doubled is refused with the reason; placing anyway is allowed") {
+    sim::Region land(1, config());
+    sim::RegionEdits edits;
+    const sim::Tile water = findTile(land, sim::Biome::Water);
+    const sim::Tile site = goodFarSite(land, 60);
+    REQUIRE(site.x >= 0);
+    std::string problem;
+    sim::PlacedEdit rival = entryOf(sim::EditGroup::Camp, "rival", water, "the Crow Clan");
+    CHECK_FALSE(sim::addPlaced(land, edits, rival, problem));
+    CHECK(problem.find("water") != std::string::npos);
+
+    rival.x = site.x;
+    rival.y = site.y;
+    REQUIRE(sim::addPlaced(land, edits, rival, problem));
+    CHECK(sim::findPlaced(edits, "c-0001")->name == "the Crow Clan");
+    CHECK_FALSE(sim::addPlaced(land, edits, entryOf(sim::EditGroup::Camp, "rival", {site.x + 3, site.y}), problem));
+    CHECK(problem.find("too close") != std::string::npos);
+    CHECK_FALSE(sim::addPlaced(land, edits, entryOf(sim::EditGroup::Camp, "tribe", {site.x + 40, site.y}), problem));
+    REQUIRE(sim::addPlaced(land, edits, entryOf(sim::EditGroup::Camp, "player", land.start()), problem));
+    CHECK_FALSE(sim::addPlaced(land, edits, entryOf(sim::EditGroup::Camp, "player", {site.x, site.y + 30}), problem)); // one player camp
+    CHECK(problem.find("already") != std::string::npos);
+
+    // A tile with no water and food within reach: refused, unless placed anyway.
+    sim::Tile bare{-1, -1};
+    for (int y = 30; y < 226 && bare.x < 0; y += 5) {
+        for (int x = 30; x < 226 && bare.x < 0; x += 5) {
+            if (land.biomeAt(x, y) == sim::Biome::Steppe && !land.goodSite({x, y}) && std::abs(x - site.x) > 20 && std::abs(x - land.start().x) > 20) bare = {x, y};
+        }
+    }
+    REQUIRE(bare.x >= 0);
+    sim::PlacedEdit poor = entryOf(sim::EditGroup::Camp, "rival", bare);
+    CHECK_FALSE(sim::addPlaced(land, edits, poor, problem));
+    CHECK(problem.find("water and food") != std::string::npos);
+    poor.forced = true;
+    const auto forced = sim::addPlaced(land, edits, poor, problem);
+    REQUIRE(forced);
+    CHECK(forced->after->forced);
+    CHECK(sim::findConflicts(land, edits).empty()); // a forced camp is not a conflict
+}
+
+TEST_CASE("US-205 Camps: the rival clan lives at the placed camp, the player starts at theirs, and the file round-trips") {
+    sim::Region land(1, config());
+    sim::RegionEdits edits;
+    const sim::Tile site = goodFarSite(land, 60);
+    REQUIRE(site.x >= 0);
+    std::string problem;
+    sim::PlacedEdit rival = entryOf(sim::EditGroup::Camp, "rival", site, "the Crow Clan");
+    rival.properties.push_back({"people", "14"});
+    REQUIRE(sim::addPlaced(land, edits, rival, problem));
+    sim::Tile home{-1, -1};
+    for (int y = 30; y < 226 && home.x < 0; y += 3) {
+        for (int x = 30; x < 226 && home.x < 0; x += 3) {
+            if (std::max(std::abs(x - site.x), std::abs(y - site.y)) >= 20 && land.biomeAt(x, y) == sim::Biome::Steppe && land.goodSite({x, y}) && (x != land.start().x || y != land.start().y)) home = {x, y};
+        }
+    }
+    REQUIRE(home.x >= 0);
+    REQUIRE(sim::addPlaced(land, edits, entryOf(sim::EditGroup::Camp, "player", {home.x, home.y}), problem));
+
+    Folder folder;
+    sim::WorldFile world;
+    world.seed = 1;
+    world.edits = edits;
+    sim::saveWorld(world, folder.path / "w.json", config());
+    const sim::WorldFile loaded = sim::loadWorld(folder.path / "w.json", config());
+    CHECK(loaded.edits == edits);
+
+    sim::Region played = sim::makeWorldRegion(loaded, config());
+    CHECK(played.start().x == home.x);
+    CHECK(played.start().y == home.y);
+    const std::vector<sim::CampSite> camps = sim::campsOf(loaded.edits);
+    REQUIRE(camps.size() == 2);
+    CHECK(camps[0].player); // the player first
+    const sim::Rivals rivals(played, played.start(), 1 ^ 0x5151ULL, sim::loadSimConfig(ODYSSEUS_DATA_DIR), camps);
+    REQUIRE(rivals.clans().size() >= 2);
+    CHECK(rivals.clans()[0].camp.x == site.x);
+    CHECK(rivals.clans()[0].camp.y == site.y);
+    CHECK(rivals.clans()[0].name == "the Crow Clan");
+    CHECK(rivals.clans()[0].world->population() == 14);
+    CHECK(sim::Rivals::distanceTiles(rivals.clans()[1].camp, site) >= sim::Rivals::kMinimumBetweenClansTiles); // the other clan keeps away from it
+
+    // Taking the camp off gives the generator start back.
+    sim::RegionEdits without = loaded.edits;
+    REQUIRE(sim::removePlaced(without, "c-0002", problem));
+    sim::applyPlacedToRegion(played, without);
+    sim::Region plain(1, config());
+    CHECK(played.start().x == plain.start().x);
+}
+
+TEST_CASE("US-205 Resources: a flint spot set to 50 gives 50 flint, a hidden spot is gone, a new spot is there") {
+    sim::Region probe(1, config());
+    const sim::Tile flint = findResource(probe, sim::ResourceKind::Flint);
+    const sim::Tile tree = findResource(probe, sim::ResourceKind::Wood);
+    REQUIRE(flint.x >= 0);
+    REQUIRE(tree.x >= 0);
+    sim::RegionEdits edits;
+    std::string problem;
+    sim::PlacedEdit spot = entryOf(sim::EditGroup::Resource, "flint", flint);
+    spot.properties.push_back({"amount", "50"});
+    REQUIRE(sim::addPlaced(probe, edits, spot, problem));
+    CHECK_FALSE(sim::setPlacedProperty(edits, "r-0001", "amount", "0", problem));
+    CHECK_FALSE(sim::setPlacedProperty(edits, "r-0001", "people", "3", problem));
+    REQUIRE(sim::hideSeedThing(probe, edits, tree.x, tree.y, problem));
+    const sim::Tile grass = findTile(probe, sim::Biome::Steppe);
+    sim::PlacedEdit fresh = entryOf(sim::EditGroup::Resource, "berries", {grass.x + 1, grass.y});
+    REQUIRE(sim::addPlaced(probe, edits, fresh, problem));
+    CHECK_FALSE(sim::addPlaced(probe, edits, entryOf(sim::EditGroup::Resource, "gold", {grass.x + 2, grass.y}), problem));
+
+    Folder folder;
+    sim::WorldFile world;
+    world.seed = 1;
+    world.edits = edits;
+    sim::saveWorld(world, folder.path / "w.json", config());
+    const sim::WorldFile loaded = sim::loadWorld(folder.path / "w.json", config());
+    REQUIRE(loaded.edits.placed.size() == edits.placed.size()); // the file lists the groups in turn, so the order may differ
+    for (const sim::PlacedEdit& entry : edits.placed) {
+        REQUIRE(sim::findPlaced(loaded.edits, entry.id) != nullptr);
+        CHECK(*sim::findPlaced(loaded.edits, entry.id) == entry);
+    }
+    sim::Region land = sim::makeWorldRegion(loaded, config());
+
+    CHECK(land.resourcesNear(flint, 0).size() == 1);
+    CHECK(land.resourcesNear(flint, 0)[0].amount == 50);
+    sim::Date today;
+    int taken = 0;
+    while (land.harvest(flint.x, flint.y, today) && taken < 100) ++taken;
+    CHECK(taken == 50);
+    CHECK_FALSE(land.harvest(flint.x, flint.y, today)); // nothing left
+
+    CHECK(land.resourcesNear(tree, 0).empty()); // the hidden tree is gone
+    const auto berries = land.resourcesNear({grass.x + 1, grass.y}, 0);
+    REQUIRE(berries.size() == 1);
+    CHECK(berries[0].kind == sim::ResourceKind::Berries);
+    CHECK(sim::findConflicts(land, loaded.edits).empty());
+
+    // Taking every entry away gives the seed own resources back.
+    sim::applyPlacedToRegion(land, sim::RegionEdits{});
+    CHECK(land.resourcesNear(tree, 0).size() == 1);
+    CHECK(land.resourcesNear(flint, 0)[0].amount == 1);
+}
+
+TEST_CASE("US-205 Saves: what is left of a spot of 50 is kept in the run save") {
+    sim::Region probe(1, config());
+    const sim::Tile flint = findResource(probe, sim::ResourceKind::Flint);
+    REQUIRE(flint.x >= 0);
+    sim::Region land(1, config());
+    land.setResourceAmount(flint.x, flint.y, 50);
+    sim::Date today;
+    for (int i = 0; i < 3; ++i) REQUIRE(land.harvest(flint.x, flint.y, today));
+    Folder folder;
+    sim::saveRegion(land, folder.path / "region.json");
+    sim::LoadedRegion loaded = sim::loadRegion(folder.path / "region.json", config());
+    int rest = 0;
+    while (loaded.region.harvest(flint.x, flint.y, today) && rest < 100) ++rest;
+    CHECK(rest == 47);
 }

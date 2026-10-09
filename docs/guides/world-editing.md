@@ -64,3 +64,17 @@ Example (a thing, a person with two properties and a place, and a seed tree take
   "places": [{"id": "l-0001", "kind": "shrine", "name": "Red Cliff", "at": [95, 64], "properties": {"tags": "shelter"}}],
   "camps": [], "resources": []}
 ```
+
+## Camps and resources (US-205)
+Two more kinds in the **Place** row: **Camp** and **Resource**.
+- **Camp:** Kind `player` (where your clan starts; only one) or `rival` (a rival clan starts there; Name is the clan's name; `Set people=14` sets its starting size). A camp must be on open ground (not water, mountain or a cave mouth), at least 8 tiles from any other camp, and pass the same site check the generator uses: water and food within reach and a walk to both. A refused camp says which rule it broke. **Anyway** (the button) places a camp where the site check fails; it is saved as `forced` and is not listed as a conflict. **Move** and Ctrl+Z work as for any entry.
+- The first rival clans live at the rival camps you placed; the generator adds clans until there are two, away from them. After the start they move with the seasons as before. The player camp moves the start; taking it away gives the generated start back.
+- **Resource:** Kind `flint`, `wood`, `berries` or `herd`. Click a spot of the seed (a flint patch, a tree) and `Set amount=50`: 50 can be taken there, one at a time. Click where the seed has nothing: a new spot. A herd's amount is its animals. **Take away** on a seed spot hides it (it stays hidden when the land is made again).
+
+Example (a rival camp, the player camp and two resource entries):
+```json
+"camps": [{"id": "c-0001", "kind": "player", "at": [100, 100]},
+          {"id": "c-0002", "kind": "rival", "at": [170, 60], "name": "the Crow Clan", "properties": {"people": "14"}}],
+"resources": [{"id": "r-0001", "kind": "flint", "at": [70, 90], "properties": {"amount": "50"}},
+              {"id": "r-0002", "kind": "berries", "at": [104, 98]}]
+```

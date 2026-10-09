@@ -23,6 +23,9 @@ Region parse(const std::filesystem::path& file, const RegionConfig& config) {
         }
         Region region(data.at("seed").get<std::uint64_t>(), config);
         for (const json& chunk : data.at("chunks")) {
+            if (chunk.contains("amounts")) {
+                for (const json& left : chunk.at("amounts")) region.restoreAmount(left.at(0).get<int>(), left.at(1).get<int>(), left.at(2).get<int>());
+            }
             for (const json& taken : chunk.at("taken")) {
                 region.restoreTaken(taken.at(0).get<int>(), taken.at(1).get<int>(), taken.at(2).get<std::int64_t>());
             }
@@ -44,7 +47,11 @@ void saveRegion(const Region& region, const std::filesystem::path& file) {
         for (const Resource& resource : chunk->resources) {
             if (resource.takenDay >= 0) taken.push_back({resource.x, resource.y, resource.takenDay});
         }
-        chunks.push_back({{"cx", chunk->cx}, {"cy", chunk->cy}, {"taken", taken}});
+        json amounts = json::array(); // what is left of a flint or wood spot of several (US-205)
+        for (const Resource& resource : chunk->resources) {
+            if (resource.kind != ResourceKind::Herd && resource.kind != ResourceKind::Berries && resource.amount > 1) amounts.push_back({resource.x, resource.y, resource.amount});
+        }
+        chunks.push_back({{"cx", chunk->cx}, {"cy", chunk->cy}, {"taken", taken}, {"amounts", amounts}});
     }
     const json data{{"version", kRegionSaveVersion},
                     {"seed", region.seed()},

@@ -177,6 +177,7 @@ void RegionView::reopen(const sim::RegionConfig& config) {
     for (const sim::TileEdit& edit : kept.tiles) region_->setTileEdit(edit.x, edit.y, edit.biome);
     edits_ = kept;
     syncTileEdits();
+    sim::applyPlacedToRegion(*region_, edits_);
     dirty_ = wasDirty;
     zoom_ = zoom;
     centreOn(x, y);
@@ -343,7 +344,9 @@ void RegionView::syncBar() {
     for (std::size_t i = 0; i < toolButtons_.size(); ++i) toolButtons_[i]->selected = static_cast<std::size_t>(tool_) == i;
     for (std::size_t i = 0; i < biomeButtons_.size(); ++i) biomeButtons_[i]->selected = static_cast<std::size_t>(paintBiome_) == i && tool_ != RegionTool::Pan && tool_ != RegionTool::Erase;
     if (!sizeField_->focused()) sizeField_->value = brushSize_;
-    for (std::size_t i = 0; i < groupButtons_.size(); ++i) groupButtons_[i]->selected = (i == 0 && placeGroup_ == sim::EditGroup::Thing) || (i == 1 && placeGroup_ == sim::EditGroup::Person) || (i == 2 && placeGroup_ == sim::EditGroup::Place);
+    static constexpr sim::EditGroup kGroupOrder[] = {sim::EditGroup::Thing, sim::EditGroup::Person, sim::EditGroup::Place, sim::EditGroup::Camp, sim::EditGroup::Resource};
+    for (std::size_t i = 0; i < groupButtons_.size(); ++i) groupButtons_[i]->selected = kGroupOrder[i] == placeGroup_;
+    if (forcedButton_ != nullptr) forcedButton_->selected = placeForced_;
     if (kindField_ != nullptr && !kindField_->focused()) kindField_->value = placeKind_;
     if (nameField_ != nullptr && !nameField_->focused()) nameField_->value = placeName_;
     if (!fordField_->focused()) fordField_->value = fordEvery_;
@@ -489,14 +492,14 @@ void RegionView::render(luna::engine::Renderer& renderer, UiPainter& painter) co
     // What the owner put on the land (US-204): a square for each entry, in the colour of its layer; a seed thing taken away is a crossed outline; the picked one is ringed.
     // These are drawn straight from the list, so a move, a removal or an Undo shows at once and no chunk picture is made again for them.
     for (const sim::PlacedEdit& entry : edits_.placed) {
-        const RegionLayer layer = entry.group == sim::EditGroup::Person ? RegionLayer::People : entry.group == sim::EditGroup::Place ? RegionLayer::Places : RegionLayer::Things;
+        const RegionLayer layer = entry.group == sim::EditGroup::Person ? RegionLayer::People : entry.group == sim::EditGroup::Place ? RegionLayer::Places : entry.group == sim::EditGroup::Camp ? RegionLayer::Camps : RegionLayer::Things;
         if (!layers_[static_cast<std::size_t>(layer)] || entry.x < range.x0 || entry.x > range.x1 || entry.y < range.y0 || entry.y > range.y1) continue;
         const int size = std::max(tile, 3);
         const Rect box{at.x + entry.x * tile + (tile - size) / 2, at.y + entry.y * tile + (tile - size) / 2, size, size};
         if (entry.removal) {
             painter.outline(box, UiColor::Dim);
         } else {
-            painter.fill(box, entry.group == sim::EditGroup::Person ? UiColor::Red : entry.group == sim::EditGroup::Place ? UiColor::Gold : UiColor::Text);
+            painter.fill(box, entry.group == sim::EditGroup::Person ? UiColor::Red : entry.group == sim::EditGroup::Place ? UiColor::Gold : entry.group == sim::EditGroup::Camp ? UiColor::Hover : entry.group == sim::EditGroup::Resource ? UiColor::Dim : UiColor::Text);
             painter.outline({box.x - 1, box.y - 1, box.width + 2, box.height + 2}, UiColor::Dark);
         }
         if (entry.id == selected_) painter.outline({box.x - 2, box.y - 2, box.width + 4, box.height + 4}, UiColor::Selected);
@@ -764,6 +767,7 @@ bool RegionView::undo() {
     if (step == nullptr) return false;
     applyChanges(step->changes, false);
     for (auto it = step->placed.rbegin(); it != step->placed.rend(); ++it) sim::applyPlacedChange(edits_, *it, false);
+    refreshPlaced(step->placed);
     if (!selected_.empty() && sim::findPlaced(edits_, selected_) == nullptr) selected_.clear();
     settings_->refreshNow(); // the conflicts list reads the entries as they are now
     return true;
@@ -775,6 +779,7 @@ bool RegionView::redo() {
     if (step == nullptr) return false;
     applyChanges(step->changes, true);
     for (const sim::PlacedChange& change : step->placed) sim::applyPlacedChange(edits_, change, true);
+    refreshPlaced(step->placed);
     if (!selected_.empty() && sim::findPlaced(edits_, selected_) == nullptr) selected_.clear();
     settings_->refreshNow(); // the conflicts list reads the entries as they are now
     return true;
@@ -930,7 +935,6 @@ void RegionView::setPalette(PlacePalette palette) {
 }
 
 void RegionView::setPlaceGroup(sim::EditGroup group) {
-    if (group != sim::EditGroup::Thing && group != sim::EditGroup::Person && group != sim::EditGroup::Place) return;
     if (group != placeGroup_) placeKind_.clear(); // a kind of one group means nothing in another
     placeGroup_ = group;
 }
@@ -939,6 +943,8 @@ std::vector<std::string> RegionView::kindSuggestions() const {
     switch (placeGroup_) {
     case sim::EditGroup::Person: return palette_.people;
     case sim::EditGroup::Place: return palette_.places;
+    case sim::EditGroup::Camp: return {"player", "rival"};
+    case sim::EditGroup::Resource: return {"flint", "wood", "berries", "herd"};
     default: return palette_.things;
     }
 }
@@ -958,7 +964,9 @@ void RegionView::buildPlaceRow() {
         const char* hint;
     } groups[] = {{sim::EditGroup::Thing, "Thing", "Plants, objects and animals"},
                   {sim::EditGroup::Person, "Person", "A character kind from the characters catalog; the game makes it when the region loads"},
-                  {sim::EditGroup::Place, "Place", "A named spot a quest marker or a dialogue can point to"}};
+                  {sim::EditGroup::Place, "Place", "A named spot a quest marker or a dialogue can point to"},
+                  {sim::EditGroup::Camp, "Camp", "A clan seat: kind player (where you start) or rival (a rival clan starts there; Name is its clan)"},
+                  {sim::EditGroup::Resource, "Resource", "Flint, wood, berries or herd: on a spot of the seed Set amount=50 sets how many can be taken; elsewhere it puts a new spot"}};
     for (const auto& entry : groups) {
         const sim::EditGroup group = entry.group;
         const int width = luna::engine::UiPainter::textWidth(entry.label) + 8;
@@ -968,12 +976,12 @@ void RegionView::buildPlaceRow() {
         x += width + 2;
     }
     x += 4;
-    kindField_ = &placeRow_->add<TextField>(Rect{x, y, 190, height}, "Kind: ", "", 40, [this](const std::string& value) { placeKind_ = value; });
+    kindField_ = &placeRow_->add<TextField>(Rect{x, y, 150, height}, "Kind: ", "", 40, [this](const std::string& value) { placeKind_ = value; });
     kindField_->suggest = [this](const std::string&) { return kindSuggestions(); };
-    x += 196;
-    nameField_ = &placeRow_->add<TextField>(Rect{x, y, 170, height}, "Name: ", "", 40, [this](const std::string& value) { placeName_ = value; });
-    x += 176;
-    propertyField_ = &placeRow_->add<TextField>(Rect{x, y, 190, height}, "Set: ", "", 60, [this](const std::string& value) {
+    x += 156;
+    nameField_ = &placeRow_->add<TextField>(Rect{x, y, 130, height}, "Name: ", "", 40, [this](const std::string& value) { placeName_ = value; });
+    x += 136;
+    propertyField_ = &placeRow_->add<TextField>(Rect{x, y, 150, height}, "Set: ", "", 60, [this](const std::string& value) {
         if (value.empty()) return;
         const std::size_t equals = value.find('=');
         if (equals == std::string::npos) {
@@ -985,13 +993,19 @@ void RegionView::buildPlaceRow() {
         }
         propertyField_->value.clear();
     });
-    x += 196;
+    x += 156;
     const struct {
         const char* label;
         sim::ConflictChoice choice;
         const char* hint;
     } fixes[] = {{"Fix: move", sim::ConflictChoice::Move, "Put every entry the land no longer suits on the nearest tile where it can stand"},
                  {"Fix: drop", sim::ConflictChoice::Remove, "Take off every entry the land no longer suits"}};
+    {
+        const int width = luna::engine::UiPainter::textWidth("Anyway") + 8;
+        forcedButton_ = &placeRow_->add<Button>(Rect{x, y, width, height}, "Anyway", [this] { placeForced_ = !placeForced_; });
+        forcedButton_->hint = "A camp placed anyway stays where the site check fails (no water and food within reach); it is listed as forced";
+        x += width + 2;
+    }
     for (const auto& fix : fixes) {
         const sim::ConflictChoice which = fix.choice;
         const int width = luna::engine::UiPainter::textWidth(fix.label) + 8;
@@ -1005,10 +1019,20 @@ void RegionView::recordPlaced(const std::string& label, std::vector<sim::PlacedC
     if (changes.empty()) return;
     WorldCommand command;
     command.label = label;
-    command.placed = std::move(changes);
+    command.placed = changes;
     history_.record(std::move(command));
     dirty_ = true;
+    refreshPlaced(changes);
     settings_->refreshNow();
+}
+
+void RegionView::refreshPlaced(const std::vector<sim::PlacedChange>& changes) {
+    if (region_ == nullptr) return;
+    sim::applyPlacedToRegion(*region_, edits_); // the resources, hidden spots and the start follow the entries
+    for (const sim::PlacedChange& change : changes) {
+        if (change.before) markStale(change.before->x, change.before->y);
+        if (change.after) markStale(change.after->x, change.after->y);
+    }
 }
 
 std::string RegionView::placeEntry(int x, int y) {
@@ -1018,6 +1042,7 @@ std::string RegionView::placeEntry(int x, int y) {
     entry.kind = placeKind_;
     entry.name = placeName_;
     if (placeGroup_ == sim::EditGroup::Person) entry.npcClass = placeClass_;
+    entry.forced = placeGroup_ == sim::EditGroup::Camp && placeForced_;
     entry.x = x;
     entry.y = y;
     std::string problem;

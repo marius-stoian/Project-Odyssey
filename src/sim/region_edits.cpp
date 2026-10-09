@@ -20,13 +20,7 @@ const char* biomeWord(Biome biome) {
 
 bool inside(const Region& land, int x, int y) { return x >= 0 && y >= 0 && x < land.size() && y < land.size(); }
 
-bool seedHasResource(Region& land, int x, int y) {
-    const Tile chunk = land.chunkOf(x, y);
-    for (const Resource& resource : land.chunk(chunk.x, chunk.y).resources) {
-        if (resource.x == x && resource.y == y) return true;
-    }
-    return false;
-}
+bool seedHasResource(Region& land, int x, int y) { return land.seedResource(x, y).has_value(); }
 
 } // namespace
 

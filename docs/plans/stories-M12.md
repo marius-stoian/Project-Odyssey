@@ -131,3 +131,29 @@ Design: docs/plans/M12-world-editing-design.md section 8. Decisions: D-65. Trace
 4. **Take away** on a seed tree: a grey outline; **Save**; open `assets/worlds/default.json`: a `things` entry with `remove` true. Regenerate (Settings, change the seed's settings, Apply): the tree stays away.
 5. Paint a lake over a placed thing: the Settings panel names it; **Fix: move** puts it on the nearest meadow; Ctrl+Z puts it back.
 6. In the Graph editor, a quest step: the Goal field offers "goto red-cliff" and "talk old-mara", the Marker field offers `place:Red Cliff`, the Giver field offers Old Mara. Once US-207 lets the game read the world file, the marker points at the place in the running game.
+
+<a id="us-205"></a>
+
+## US-205 Camps and resources: plan and checks
+
+Design: docs/plans/M12-world-editing-design.md section 9. Decisions: D-66. Traces to EDT-04, MVP-10. Guide: docs/guides/world-editing.md.
+
+## Built
+- `src/sim/region.{h,cpp}`: hand edits of what grows: `hideResource`, `setResourceAmount`, `addResource`, `setStart`, `clearPlacedEdits`, `seedResource`, `restoreAmount`; `harvest` takes one unit at a time from a flint or wood spot of several; `goodSite` counts a food spot that was put there. `src/sim/region_save.cpp`: what is left of a spot is kept in `amounts` (optional, version unchanged).
+- `src/sim/world_places.{h,cpp}`: the camp rules (kind, one player camp, open ground, 8 tiles apart, the site check unless forced) and the resource rules (kind, `amount`), the property `people` of a camp, `campsOf`, `applyPlacedToRegion`. `makeWorldRegion` applies the resource and camp entries.
+- `src/sim/rivals.{h,cpp}`: `Rivals(..., placed)` starts the first clans at the placed rival camps, with their name and size; the generator fills up to two.
+- `src/game/region_view.{h,cpp}`: groups Camp and Resource in the placing row, the Anyway toggle, the camps and resources drawn in the Camps and Things layers, the region follows every placement, move, removal and Undo (`refreshPlaced`).
+- `assets/data/schemas/world.schema.json`: `camps` and `resources` described; guide section with an example.
+- Tests: sim `US-205 Rules ...`, `US-205 Camps ...`, `US-205 Resources ...`, `US-205 Saves ...` (in `tests/sim/world_places_test.cpp`); game `US-205 Camps ...`, `US-205 Resources ...` (in `tests/game/place_tool_test.cpp`).
+
+## Technical choices
+- A camp is checked with the same function the generator uses, so the Editor cannot accept a site the generator would refuse unless the owner says "anyway".
+- A herd's `amount` is its animals; a flint or wood spot of several gives one unit each time.
+- The game reads the world file from US-207 (D-63); the running level still draws one plant a spot.
+
+## Manual checks (to run at X-M12)
+1. F2, **Region**, **Place**, **Camp**, Kind `rival`, Name `the Crow Clan`, click on a meadow near water far from your start: a square. Click on a lake: refused, the message says water.
+2. Click on a dry plain with no water and food near: refused with the reason; press **Anyway**, click again: placed.
+3. **Move** the camp: pick it, click an empty tile with water and food near. Ctrl+Z puts it back.
+4. **Camp**, Kind `player`: the start marker (gold outline) jumps there. Take the camp away: the start goes back.
+5. **Resource**, Kind `flint`, click a flint spot of the seed, **Set** `amount=50`: the entry is saved; in a test run (US-207) 50 flint can be taken. **Take away** on a tree hides it; Ctrl+Z brings it back.

@@ -147,6 +147,8 @@ public:
     void setPlaceName(std::string name) { placeName_ = std::move(name); }
     const std::string& placeClass() const { return placeClass_; }
     void setPlaceClass(std::string npcClass) { placeClass_ = std::move(npcClass); }
+    bool placeForced() const { return placeForced_; }
+    void setPlaceForced(bool forced) { placeForced_ = forced; }
     std::string placeEntry(int x, int y);        // puts the chosen kind on a tile and selects it; returns its id, or nothing (with the reason said)
     bool select(const std::string& id);
     bool selectAt(int x, int y);                  // the entry standing on a tile
@@ -253,6 +255,7 @@ private:
     void buildPlaceRow();
     void recordPlaced(const std::string& label, std::vector<sim::PlacedChange> changes);
     void handlePlace(int x, int y);
+    void refreshPlaced(const std::vector<sim::PlacedChange>& changes); // the region and the pictures follow the entries (resources, hidden spots, the start)
     bool placing() const { return tool_ == RegionTool::Place || tool_ == RegionTool::Move || tool_ == RegionTool::Take; }
     int topHeight() const { return placing() ? kTopHeight + kPlaceRowHeight : kTopHeight; }
     std::vector<std::string> kindSuggestions() const;
@@ -261,6 +264,8 @@ private:
     std::string placeKind_;
     std::string placeName_;
     std::string placeClass_;
+    bool placeForced_ = false;                       // a camp placed anyway where the site check fails (US-205)
+    luna::engine::Button* forcedButton_ = nullptr;
     std::string selected_;
     std::unique_ptr<luna::engine::Panel> placeRow_;
     std::vector<luna::engine::Button*> groupButtons_;
