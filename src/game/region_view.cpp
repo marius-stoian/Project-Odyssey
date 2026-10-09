@@ -224,6 +224,21 @@ bool RegionView::saveWorld() {
     return true;
 }
 
+bool RegionView::saveBeforePlay() {
+    if (region_ == nullptr) return false;
+    if (!dirty_ && std::filesystem::exists(worldFile())) return true;
+    return saveWorld();
+}
+
+void RegionView::askToPlay(int x, int y) {
+    if (region_ == nullptr) return;
+    if (x < 0 || y < 0 || x >= region_->size() || y >= region_->size() || !sim::walkable(sim::effectiveBiome(*region_, edits_, x, y))) {
+        if (say_) say_("Play here needs land to stand on: pick a tile that is not water, mountain or the edge of the map");
+        return;
+    }
+    playRequest_ = sim::Tile{x, y};
+}
+
 
 RegionView::Cell RegionView::cellAt(int x, int y) const {
     Cell cell;
@@ -341,6 +356,7 @@ void RegionView::buildBar() {
     });
     add("Settings", "The generator settings of the land: change them, Preview a map beside this one, Apply to write region.json", [this] { settings_->show(!settings_->shown()); });
     add("Inspect", "The inspector: set up a clan (store, debts, leader, stance, partners) and a clan member (kin, opinions, grudges)", [this] { inspectorShown_ = !inspectorShown_; });
+    add("Play here", "Play this world as a new game with the hero in the middle of the view (or press P over a tile to play from it); the world is saved first, and Esc comes back here", [this] { askToPlay(static_cast<int>(centreX_), static_cast<int>(centreY_)); });
     x += 4;
     for (int i = 0; i < kRegionLayerCount; ++i) {
         const auto layer = static_cast<RegionLayer>(i);
@@ -428,6 +444,9 @@ void RegionView::update(const luna::engine::Intents& intents) {
     if (intents.pressed(Intent::Undo)) undo();
     if (intents.pressed(Intent::Redo)) redo();
     if (intents.pressed(Intent::Save)) saveWorld();
+    if (intents.pressed(Intent::PlayHere) && pointer.inside() && !overBar) {
+        if (const std::optional<Point> at = tileAtScreen(pointer.x, pointer.y)) askToPlay(at->x, at->y);
+    }
     if (pointer.inside() && pointer.wheel != 0) zoomAround(zoom_ + (pointer.wheel > 0 ? 1 : -1), pointer.x, pointer.y);
     if (intents.pressed(Intent::ZoomIn)) zoomAround(zoom_ + 1, viewWidth_ / 2, viewHeight_ / 2);
     if (intents.pressed(Intent::ZoomOut)) zoomAround(zoom_ - 1, viewWidth_ / 2, viewHeight_ / 2);

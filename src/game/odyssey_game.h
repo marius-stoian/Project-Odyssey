@@ -62,6 +62,7 @@
 #include "sim/region_save.h"
 #include "sim/rivals.h"
 #include "sim/save.h"
+#include "sim/world_file.h"
 #include "sim/world.h"
 
 #include <array>
@@ -288,7 +289,8 @@ public:
     RunFlow& run() { return runFlow_; }
     const RunFlow& run() const { return runFlow_; }
     // useRegion false starts the run in the level already loaded (a hand-made camp) instead of a generated region.
-    void startNewRun(const sim::NewGame& game, bool useRegion = true, bool tutorial = false);
+    // `game.world` names a world file (US-207): the run begins on it, with its setup applied, and the seed of the file replaces the seed given. False, with the reason said, when the world cannot be played.
+    bool startNewRun(const sim::NewGame& game, bool useRegion = true, bool tutorial = false);
     // The elder's first-day guidance (US-090) and the opt-in session statistics (US-092).
     SessionStats& stats() { return stats_; }
     void setStatistics(bool agreed);
@@ -390,6 +392,18 @@ public:
     // A generated region (US-040..US-042, D-31): the land is made from the seed and played as a 256-tile level, with the
     // clan at the start and two rival clans far away. The Editor is off in a region (it is for hand-made levels).
     void loadRegion(std::uint64_t seed);
+    // A world file as the land of the game (US-207, D-68): assets/worlds/<name>.json is read, the land made from its seed and settings with the painted tiles laid over it, and the
+    // level made from that with the things, people, places, camps and resources put on it. False, with the reason said, when the file cannot be used (nothing changes then).
+    bool loadWorld(const std::string& name);
+    // The world file the game is on ("" for generated land), and the fingerprint it had when it was read.
+    const std::string& worldName() const { return worldName_; }
+    const std::string& worldHash() const { return worldHash_; }
+    // Play here from the Region view: the world file `name` (saved by the Region view first) as a run with a grown hero standing on `at`. Esc returns to the Editor and the Region view
+    // with the edits as they were; nothing of the session is saved. False, with the reason said, when the world cannot be played.
+    bool playWorldHere(const std::string& name, int tileX, int tileY);
+    bool playingWorld() const { return worldPlay_; }
+    // Esc in a world played from the Region view: the Editor comes back with its own level and the Region view open.
+    void leaveWorldPlay();
     const sim::Region* region() const { return region_.get(); }
     const sim::Rivals* rivals() const { return rivals_.get(); }
     // Saves (US-080): the clan's world (and the region's changes) are written each time an in-game day ends, into this folder
@@ -626,6 +640,14 @@ private:
     int clanSpeed_ = 1;
     std::unique_ptr<sim::Region> region_;
     std::unique_ptr<sim::Rivals> rivals_;
+    void enterRegion();                       // the part of loadRegion and loadWorld that is the same: weather, the Editor told, the play state made again
+    std::optional<sim::WorldFile> world_;     // the world file the land came from (US-207); its setup is applied when a run starts and its camps go to the rivals
+    std::string worldName_;
+    std::string worldHash_;
+    bool worldPlay_ = false;                  // a Play here from the Region view: no saving, Esc goes back to the Editor
+    std::unique_ptr<Level> editorLevel_;      // the Editor's level, kept while a world is played
+    void applyWorldSetup(const sim::NewGame& game);
+    void keepWorldCopy();
     struct OutsideWorld;                      // what stands outside while the hero is inside a building
     std::shared_ptr<OutsideWorld> outside_;
     std::filesystem::path saveDirectory_;

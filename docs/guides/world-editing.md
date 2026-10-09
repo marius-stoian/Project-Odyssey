@@ -93,3 +93,17 @@ Example (two sections of the file):
           "the Crow Clan": {"stance": "wary", "store": {"food": 60}}},
 "people": {"0": {"kin": {"mother": "1"}, "opinions": {"1": -50}, "grudges": [{"about": "1", "weight": 30, "reason": "stole the last flint"}]}}
 ```
+
+## Playing the world (US-207)
+Your world file is the land of a game. There are two ways in.
+- **New Game.** When `assets/worlds` holds world files, the New Game screen has a **World** row: **Generated** (the land made from the seed, as before) and one button per file. Pick one and the seed line says "from the world file": the file's seed is the land's, and every edit is in it: the painted tiles, the things, people and places, the camps and resources. The clan starts with the store, opinions, kin and grudges of the `clans` and `people` sections, the hero with the items and debts, the rival clans at the camps you placed with their own stores. From the command line: `odysseus.exe --world default` (with `--new-game` it picks the button).
+- **Play here.** In the Region view, **Play here** (the bar) starts a game with a grown hero in the middle of the view; **P** over the map starts it on the tile under the pointer. Water, mountain and the edge of the map are refused (the line at the bottom says why). The world is **saved first** if it has unsaved edits or does not exist yet, so the game plays exactly what the file says. **Esc** (or **F2**) comes back to the Region view with your edits as they were. A Play here is a test: it never touches the autosave of your real run. The Quick check does not run on a world yet.
+
+**What a saved run remembers.** `hero.json` (version 3) names the world and the fingerprint its file had when the run began, and a copy of the file as it was lies next to it as `world.json` in the save folder. Change the world file later and load the run: the game says "the world file ... was changed after this run began; the run keeps the world it began in" and plays the copy. A run on generated land has an empty `world`. Runs saved before region editing (`hero.json` version 1 or 2) have no such fields and load as they always did.
+
+Example (the new lines of `hero.json`; `world.json` is a plain copy of `assets/worlds/default.json`):
+```json
+"version": 3,
+"world": "default",
+"worldHash": "af63dc4c8601ec8c",
+```

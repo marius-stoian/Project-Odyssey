@@ -2479,3 +2479,24 @@ addGrudge(people_[who], about, event, weight);
 **Try it (5 minutes).** F2, **Region**, **Inspect**, Member `0`, Opinions `1=-50`, Grudges `1:30:stole the last flint`, Ctrl+Z, Ctrl+Y, Save and read the file.
 
 **Check yourself.** Why is an opinion of -50 "set" and not "added"? What would happen if you applied the same setup twice?
+
+## US-207: a save file that remembers where it came from (M12)
+
+**The idea: versioned save formats.** A save file is a letter to your future self: the game that reads it may be a newer game. So every save carries a `version`, and the reader follows one rule: *read what you know, and treat what is missing as "the way it was before"*. `hero.json` is now version 3. Version 3 adds two fields, `world` and `worldHash`. A version 2 or version 1 file does not have them, and the reader asks `j.value("world", std::string())`: "the field, or an empty text if it is not there". Empty means "land generated from the seed", which is exactly what those older runs were. No migration program is needed; the default *is* the migration.
+
+```cpp
+life.game_ = {seed, preset, comfort,
+              j.value("rules", std::string()),      // missing in version 1
+              j.value("world", std::string()),      // missing in version 1 and 2
+              j.value("worldHash", std::string())};
+```
+
+**Two ways to keep a promise.** The design said "a run keeps the world it began in". A name and a fingerprint (`worldHash`, FNV-1a: multiply and xor over every byte) can only *notice* that the file changed. To *keep* the world, the run also copies the file next to the save (`world.json`). On load, the game reads the copy and only compares the fingerprint of the live file to print a warning. Remember this when you design a save: if the save must survive a change somewhere else, it has to hold a copy, not a pointer.
+
+**Something that is not saved must be made again.** The rival clans are not in any save: they are rebuilt from the seed on every load. So the rivals' meals and the camps you placed are applied in `resetPlay`, every time the rivals are made. The clan and the hero *are* saved, so their setup is applied once, when the run begins. Ask of every piece of state: "is it in the save, or is it made again?" and apply things at the matching moment.
+
+**Where to look.** `OdysseyGame::loadWorld`, `startNewRun`, `keepWorldCopy`, `loadAutosave` in `src/game/odyssey_game.cpp`; `HeroLife::savedWorld` in `src/sim/hero_life.cpp`; `loadRegion(..., makeBase)` in `src/sim/region_save.cpp`; `tests/game/play_world_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, paint a lake, click **Play here**, walk around, Esc. Then New Game, pick your world, play a day, open `saves/hero.json` and find `world` and `worldHash`.
+
+**Check yourself.** Why is an empty `world` a good default for old saves? What would go wrong if the run kept only the file's name and you later moved the lake?

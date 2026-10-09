@@ -48,4 +48,10 @@ WorldFile loadWorld(const std::filesystem::path& file, const RegionConfig& base)
 // The text saveWorld writes (for tests and for the size check).
 std::string worldText(const WorldFile& world, const RegionConfig& base);
 
+// A fingerprint of a world file's text (US-207, D-68): 16 hex digits, the same text always giving the same digits. A run save keeps it beside the world's name, so the game can
+// tell that the file was changed after the run began.
+std::string worldTextHash(const std::string& text);
+// The same for the file as it lies on disk; empty when it cannot be read.
+std::string worldFileHash(const std::filesystem::path& file);
+
 } // namespace odysseus::sim

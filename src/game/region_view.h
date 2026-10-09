@@ -73,6 +73,16 @@ public:
     // Writes the hand edits (and the generator settings that differ from region.json) to the world file. False, with the reason said, when it cannot.
     bool saveWorld();
     bool worldDirty() const { return dirty_; }
+    const std::string& worldName() const { return worldName_; }
+    // Play here (US-207, design M12 section 11): the button of the bar, or the P key over the map, asks the game to play this world from a tile (the tile under the pointer, or the middle of the
+    // view for the button). The request is taken once. Water, mountain and the map's edge are not land to stand on: the tile is refused and the reason said.
+    std::optional<sim::Tile> takePlayRequest() {
+        std::optional<sim::Tile> taken = playRequest_;
+        playRequest_.reset();
+        return taken;
+    }
+    // Writes the world file when it has unsaved edits or does not exist yet, so the game plays what the Editor shows. False (with the reason said) when it cannot be written.
+    bool saveBeforePlay();
 
     bool shown() const { return shown_; }
     void show(bool shown);
@@ -254,6 +264,8 @@ private:
     std::filesystem::path worldsFolder_;
     std::string worldName_ = "default";
     bool dirty_ = false;                           // edits not yet in the world file
+    std::optional<sim::Tile> playRequest_;        // Play here asked for (US-207)
+    void askToPlay(int x, int y);
     RegionTool tool_ = RegionTool::Pan;
     sim::Biome paintBiome_ = sim::Biome::Water;
     int brushSize_ = 3;

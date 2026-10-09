@@ -4,6 +4,7 @@
 #include "save.h"
 
 #include <format>
+#include <functional>
 #include <fstream>
 #include <sstream>
 
@@ -13,7 +14,7 @@ namespace {
 
 using nlohmann::json;
 
-Region parse(const std::filesystem::path& file, const RegionConfig& config) {
+Region parse(const std::filesystem::path& file, const RegionConfig& config, const std::function<Region()>& makeBase) {
     const json data = readJsonFile(file);
     try {
         const int version = data.at("version").get<int>();
@@ -21,7 +22,8 @@ Region parse(const std::filesystem::path& file, const RegionConfig& config) {
         if (data.at("size").get<int>() != config.size || data.at("chunkSize").get<int>() != config.chunkSize) {
             throw DataError(file, "size", "the region was saved with a different size than assets/data/sim/region.json says");
         }
-        Region region(data.at("seed").get<std::uint64_t>(), config);
+        Region region = makeBase ? makeBase() : Region(data.at("seed").get<std::uint64_t>(), config); // a run on a world file starts from the land with the owner's edits laid over it (US-207)
+        if (region.seed() != data.at("seed").get<std::uint64_t>()) throw DataError(file, "seed", "the region was saved for another seed than the world it is loaded onto");
         for (const json& chunk : data.at("chunks")) {
             if (chunk.contains("amounts")) {
                 for (const json& left : chunk.at("amounts")) region.restoreAmount(left.at(0).get<int>(), left.at(1).get<int>(), left.at(2).get<int>());
@@ -61,7 +63,7 @@ void saveRegion(const Region& region, const std::filesystem::path& file) {
     writeSaveText(file, data.dump(1));
 }
 
-LoadedRegion loadRegion(const std::filesystem::path& file, const RegionConfig& config) {
+LoadedRegion loadRegion(const std::filesystem::path& file, const RegionConfig& config, const std::function<Region()>& makeBase) {
     std::vector<std::string> notes;
     std::vector<std::filesystem::path> candidates{file};
     for (int number = 1; number <= kSaveBackups; ++number) candidates.push_back(backupPath(file, number));
@@ -69,7 +71,7 @@ LoadedRegion loadRegion(const std::filesystem::path& file, const RegionConfig& c
     for (const auto& candidate : candidates) {
         if (!std::filesystem::exists(candidate)) continue;
         try {
-            Region region = parse(candidate, config);
+            Region region = parse(candidate, config, makeBase);
             if (candidate != file) notes.push_back(std::format("{} was damaged; the newest intact backup, {}, was loaded instead", file.filename().string(), candidate.filename().string()));
             return {std::move(region), candidate, notes};
         } catch (const DataError& error) {

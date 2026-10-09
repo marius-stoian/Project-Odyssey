@@ -1,5 +1,6 @@
 #include "world_file.h"
 
+#include "core/text.h"
 #include "json_data.h"
 #include "json_patch.h"
 #include "save.h"
@@ -135,6 +136,20 @@ Region makeWorldRegion(const WorldFile& world, const RegionConfig& base) {
 
 std::string worldText(const WorldFile& world, const RegionConfig& base) {
     return writeJsonText(toJson(world, base), 100);
+}
+
+std::string worldTextHash(const std::string& text) {
+    std::uint64_t hash = 14695981039346656037ULL; // FNV-1a, 64 bit: small, fixed by its definition, and the same on every machine
+    for (const char c : text) {
+        hash ^= static_cast<unsigned char>(c);
+        hash *= 1099511628211ULL;
+    }
+    return std::format("{:016x}", hash);
+}
+
+std::string worldFileHash(const std::filesystem::path& file) {
+    const std::optional<std::string> text = core::readTextFile(file);
+    return text ? worldTextHash(*text) : std::string();
 }
 
 void saveWorld(const WorldFile& world, const std::filesystem::path& file, const RegionConfig& base) {

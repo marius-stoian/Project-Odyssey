@@ -293,6 +293,7 @@ add_library(odysseus_game STATIC
     src/game/clan_art.cpp
     src/game/clan_view.cpp
     src/game/region_level.cpp
+    src/game/play_world.cpp
     src/game/generator_panel.cpp
     src/game/world_history.cpp
     src/game/region_view.cpp
@@ -527,6 +528,7 @@ add_executable(odysseus_game_tests
     tests/game/live_catalog_test.cpp
     tests/game/region_view_test.cpp
     tests/game/place_tool_test.cpp
+    tests/game/play_world_test.cpp
     tests/game/generator_panel_test.cpp
     tests/game/world_edit_test.cpp
     tests/game/water_tools_test.cpp)
@@ -582,6 +584,7 @@ add_executable(odysseus_sim_tests
     tests/sim/world_file_test.cpp
     tests/sim/world_places_test.cpp
     tests/sim/world_setup_test.cpp
+    tests/sim/world_run_test.cpp
     tests/sim/region_shapes_test.cpp
     tests/sim/hero_test.cpp
     tests/sim/rules_test.cpp
