@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-200 The region in the Editor (Mraw) - 2026-10-09
+
+**State:** branch `story/US-200`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-200`. Design: `docs/plans/M12-world-editing-design.md`, D-61.
+
+- **New:** the Region view in the Editor (**Region** button): the whole 256 x 256 land on a map, zoom from the whole map to single tiles, seven layer switches, a cached overview that moves the view, drag to pan. `src/game/region_view.{h,cpp}`, `src/luna/engine/minimap.{h,cpp}` (game-agnostic), `docs/guides/world-editing.md`.
+- **Tests:** `US-200 Open` (two cases: every zoom, and the budget of a few pictures a frame), `US-200 Layers`, `US-200 Same world` (tile for tile against the game's level, three seeds), `US-200 The overview ...`, `US-200 The wheel zooms ...`, `US-200 Minimap ...`. They run at X-M12 (D-41); they were also run here and pass.
+- **Verified:** Debug build of `luna_tests` and `odysseus_game_tests`, zero warnings (`docs/evidence/US-200/build.txt`). Not run: the full test suite (X-M12). An unrelated test fails in this checkout: `US-291 Event: a fire lit...` (it depends on the owner's uncommitted `wanderer.json`, see Limit.md).
+
+
 ## X-M11 Exit review M11 Data editors (Mraw) - 2026-10-06
 
 **State:** `qa` merged into `main`, tag `m11-done`. Gate: `docs/gates/M11.md`.
