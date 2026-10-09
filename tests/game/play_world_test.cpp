@@ -359,3 +359,50 @@ TEST_CASE("US-207 Old saves: a run saved before region editing still loads, whet
         CHECK(second.odyssey->clan()->population() > 0);
     }
 }
+
+// ---- X-M12: the exit demonstration
+
+TEST_CASE("X-M12 Exit: an edited region (terrain, a river, a camp moved, a clan's store and a grudge set) is saved as a small world file and a new game starts on it") {
+    Studio studio("xm12-exit");
+    const MadeWorld made = makeWorld(studio.data, "default"); // a lake, a person, a rival camp, the player's store and a grudge, saved
+    const fs::path file = game::worldFilePath(studio.data, "default");
+
+    // The owner opens the region again (the file is read back), draws a river, moves the camp and changes the Crow Clan's store.
+    std::vector<std::string> said;
+    game::RegionView view(960, 540, [&said](const std::string& text) { said.push_back(text); });
+    view.setWorldsFolder(game::worldsFolder(studio.data), "default");
+    view.open(1, config(studio.data));
+    REQUIRE_FALSE(view.edits().placed.empty()); // the person and the camp came back from the file
+    sim::Region& land = *view.region();
+    const sim::Tile from{made.person.x - 3, made.person.y - 2};
+    CHECK(view.paintRiver(from, {from.x, from.y + 6}, 1, 0) > 0);
+    view.setTool(game::RegionTool::Move);
+    REQUIRE(view.selectAt(made.camp.x, made.camp.y));
+    int step = 1;
+    while (step < 12 && !(land.biomeAt(made.camp.x + step, made.camp.y) == sim::Biome::Steppe && land.goodSite({made.camp.x + step, made.camp.y}))) ++step;
+    REQUIRE(view.moveSelectedTo(made.camp.x + step, made.camp.y));
+    REQUIRE(view.setClanField("the Crow Clan", "store", "food=90"));
+    REQUIRE(view.saveWorld());
+
+    // The file is small: differences from the seed only.
+    CHECK(fs::file_size(file) < 20000);
+    CHECK(fs::file_size(file) < 5000 + 200 * view.edits().tiles.size());
+
+    // A new game on it has the river, the camp where it was moved, the stores and the grudge.
+    game::OdysseyGame& odyssey = *studio.odyssey;
+    REQUIRE(odyssey.startNewRun({5, 2, 1, "", "default"}, true, false));
+    odyssey.run().close();
+    CHECK(odyssey.region()->biomeAt(from.x, from.y + 3) == sim::Biome::Water);
+    CHECK(odyssey.region()->biomeAt(made.lake.x, made.lake.y) == sim::Biome::Water);
+    const auto& rivals = odyssey.rivals()->clans();
+    const auto crow = std::find_if(rivals.begin(), rivals.end(), [](const sim::RivalClan& clan) { return clan.name == "the Crow Clan"; });
+    REQUIRE(crow != rivals.end());
+    CHECK(crow->camp.x == made.camp.x + step);
+    CHECK(crow->world->food() == 90);
+    CHECK(odyssey.clan()->food() == 80);
+    const sim::Grudge* grudge = sim::heaviestGrudge(odyssey.clan()->people()[0], 1);
+    REQUIRE(grudge != nullptr);
+    CHECK(odyssey.clan()->chronicle().find(grudge->event)->text.find("stole the last flint") != std::string::npos);
+    const auto& characters = odyssey.level().characters;
+    CHECK(std::any_of(characters.begin(), characters.end(), [](const game::PlacedCharacter& c) { return c.name == "Tough Gob"; }));
+}
