@@ -58,6 +58,21 @@ std::optional<PlacedChange> setPlacedProperty(RegionEdits& edits, const std::str
 // The name of the seed's kind of resource as a tombstone writes it: "flint", "wood", "berries" or "herd".
 const char* resourceWord(ResourceKind kind);
 
+// Camps and resources (US-205, design M12 section 9). A camp is a clan seat: kind `player` (where the hero's clan starts; at most one) or `rival` (a rival clan starts
+// there; `name` is the clan's name). The same site check as the generated camps (`Region::goodSite`: water and food within reach and a walk to both) applies, unless the
+// owner placed it anyway (`forced`). A resource entry names flint, wood, berries or herd: where the seed has that kind of spot it sets how many can be taken there
+// (property `amount`), where it has none it puts a new spot (a herd's amount is its animals). Taking away a seed spot is a tombstone, as for any thing.
+struct CampSite {
+    bool player = false;
+    std::string clan; // a rival's name; empty: the generator's name
+    Tile at;
+    int people = 0;   // property `people`: the rival's starting size; 0: the generator decides
+};
+// The camps of the edits: the player's first (if placed), then the rivals in file order.
+std::vector<CampSite> campsOf(const RegionEdits& edits);
+// Lays the resource and camp entries over a region (clearing what was laid before): hidden spots, amounts, new spots, and the start at the player's camp.
+void applyPlacedToRegion(Region& land, const RegionEdits& edits);
+
 // Do (forward) or take back one change.
 void applyPlacedChange(RegionEdits& edits, const PlacedChange& change, bool forward);
 

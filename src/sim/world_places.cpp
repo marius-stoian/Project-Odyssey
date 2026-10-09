@@ -98,7 +98,12 @@ std::string placedPropertyProblem(EditGroup group, const std::string& key, const
         if (key == "tags") return value.empty() || value.find_first_of(":;") == std::string::npos ? std::string() : "tags are words separated by commas";
         return "a place can set tags";
     }
-    return std::format("a {} has no properties yet", groupWord(group));
+    if (group == EditGroup::Camp) {
+        if (key == "people") return wholeNumber(value, 1, 100) ? std::string() : "people is a whole number from 1 to 100";
+        return "a camp can set people (a rival's starting size)";
+    }
+    if (key == "amount") return wholeNumber(value, 1, 1000) ? std::string() : "amount is a whole number from 1 to 1000";
+    return "a resource can set amount (how many can be taken there)";
 }
 
 const PlacedEdit* findPlaced(const RegionEdits& edits, const std::string& id) {
@@ -139,6 +144,20 @@ std::string placementProblem(Region& land, const RegionEdits& edits, const Place
         }
     }
     if (entry.group == EditGroup::Person && entry.name.size() > 18) return "a person's name is at most 18 letters";
+    if (entry.group == EditGroup::Camp) {
+        if (entry.kind != "player" && entry.kind != "rival") return "a camp is a 'player' camp or a 'rival' camp";
+        if (entry.name.size() > 30) return "a clan name is at most 30 letters";
+        if (biome == Biome::Cave) return std::format("({}, {}) is a cave mouth: a camp needs open ground", entry.x, entry.y);
+        for (const PlacedEdit& other : edits.placed) {
+            if (other.id == entry.id || other.group != EditGroup::Camp || other.removal) continue;
+            if (entry.kind == "player" && other.kind == "player") return "the player camp is placed already: move it instead";
+            if (std::max(std::abs(other.x - entry.x), std::abs(other.y - entry.y)) < 8) return std::format("too close to the camp at ({}, {}): camps are at least 8 tiles apart", other.x, other.y);
+        }
+        if (!entry.forced && !land.goodSite({entry.x, entry.y})) return "the site has no water and food within reach (and a walk to both): choose another, or place it anyway";
+    }
+    if (entry.group == EditGroup::Resource && entry.kind != "flint" && entry.kind != "wood" && entry.kind != "berries" && entry.kind != "herd") {
+        return "a resource is flint, wood, berries or herd";
+    }
     for (const PlacedEdit& other : edits.placed) {
         if (other.id != entry.id && other.group == entry.group && !other.removal && other.x == entry.x && other.y == entry.y) {
             return std::format("({}, {}) already holds {} '{}'", entry.x, entry.y, groupWord(entry.group), displayName(other));
@@ -218,11 +237,8 @@ std::optional<PlacedChange> hideSeedThing(Region& land, RegionEdits& edits, int 
         problem = std::format("({}, {}) is outside the region", x, y);
         return std::nullopt;
     }
-    const Tile chunk = land.chunkOf(x, y);
-    const Resource* seed = nullptr;
-    for (const Resource& resource : land.chunk(chunk.x, chunk.y).resources) {
-        if (resource.x == x && resource.y == y) seed = &resource;
-    }
+    const std::optional<Resource> seedThing = land.seedResource(x, y);
+    const Resource* seed = seedThing ? &*seedThing : nullptr;
     if (seed == nullptr) {
         problem = std::format("the seed has nothing at ({}, {}) to take away", x, y);
         return std::nullopt;
@@ -298,6 +314,47 @@ std::vector<PlacedChange> resolveConflicts(Region& land, RegionEdits& edits, con
         }
     }
     return made;
+}
+
+
+std::vector<CampSite> campsOf(const RegionEdits& edits) {
+    std::vector<CampSite> camps;
+    for (const PlacedEdit& entry : edits.placed) {
+        if (entry.group != EditGroup::Camp || entry.removal) continue;
+        CampSite site;
+        site.player = entry.kind == "player";
+        site.clan = entry.name;
+        site.at = {entry.x, entry.y};
+        for (const auto& [key, value] : entry.properties) {
+            if (key == "people") site.people = std::atoi(value.c_str());
+        }
+        if (site.player) camps.insert(camps.begin(), site);
+        else camps.push_back(site);
+    }
+    return camps;
+}
+
+void applyPlacedToRegion(Region& land, const RegionEdits& edits) {
+    land.clearPlacedEdits();
+    for (const PlacedEdit& entry : edits.placed) {
+        if (entry.x < 0 || entry.y < 0 || entry.x >= land.size() || entry.y >= land.size()) continue;
+        if (entry.removal) {
+            if (entry.group == EditGroup::Thing || entry.group == EditGroup::Resource) land.hideResource(entry.x, entry.y);
+        } else if (entry.group == EditGroup::Resource) {
+            int amount = 0;
+            for (const auto& [key, value] : entry.properties) {
+                if (key == "amount") amount = std::atoi(value.c_str());
+            }
+            if (land.seedResource(entry.x, entry.y)) {
+                if (amount > 0) land.setResourceAmount(entry.x, entry.y, amount); // a spot of the seed: how many can be taken there
+            } else {
+                const ResourceKind kind = entry.kind == "wood" ? ResourceKind::Wood : entry.kind == "berries" ? ResourceKind::Berries : entry.kind == "herd" ? ResourceKind::Herd : ResourceKind::Flint;
+                land.addResource(kind, entry.x, entry.y, amount > 0 ? amount : (kind == ResourceKind::Herd ? land.config().herdMinimum : 1));
+            }
+        } else if (entry.group == EditGroup::Camp && entry.kind == "player" && walkable(land.biomeAt(entry.x, entry.y))) {
+            land.setStart({entry.x, entry.y});
+        }
+    }
 }
 
 } // namespace odysseus::sim

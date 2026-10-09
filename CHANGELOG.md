@@ -2,6 +2,15 @@
 
 Record every pull request's full change set here before opening or updating it. Entries describe the final changes and their verification; update an entry when its PR changes rather than leaving an outdated description.
 
+## US-205 Camps and resources (Mraw) - 2026-10-09
+
+**State:** branch `story/US-205`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-205`. Decisions: D-66.
+
+- **New:** Camp and Resource groups in the Place row of the Region view, with the Anyway toggle; camp rules with reasons (kind, one player camp, open ground, 8 tiles apart, the generator's site check unless placed anyway); `Rivals(..., placed)` starts the first rival clans at the placed camps with their name and size; the player camp moves the start; `Region::hideResource`, `setResourceAmount`, `addResource`, `setStart`, `clearPlacedEdits`, `seedResource`; a flint or wood spot of several gives one unit at a time and what is left is kept in the run save (optional `amounts`, same version); `sim::campsOf`, `applyPlacedToRegion`.
+- **Changed:** `makeWorldRegion` applies resource and camp entries (a hidden seed spot is gone from the region); `goodSite` counts a food spot put there; `world.schema.json` describes `camps` and `resources`; the guide has the new section with an example.
+- **Tests:** sim `US-205 Rules ...`, `US-205 Camps ...`, `US-205 Resources ...`, `US-205 Saves ...`; game `US-205 Camps ...`, `US-205 Resources ...`. One US-204 check was adjusted: a region made from the world file no longer has the hidden tree.
+- **Verified:** Debug build of all targets, zero warnings (`docs/evidence/US-205/build.txt`); the 6 `US-205` cases pass, and so do the 119 sim and 156 game cases of the US-03x, US-04x, US-08x, US-18x, US-19x, US-20x and US-30x groups. Not run: the full suites (X-M12).
+
 ## US-204 Things, people and places in the region (Mraw) - 2026-10-09
 
 **State:** branch `story/US-204`, merged into `qa`. Plan and manual checks: `docs/plans/stories-M12.md#us-204`. Decisions: D-65.

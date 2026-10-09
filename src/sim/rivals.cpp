@@ -27,15 +27,25 @@ int Rivals::distanceTiles(Tile a, Tile b) {
     return static_cast<int>(std::lround(std::sqrt(dx * dx + dy * dy)));
 }
 
-Rivals::Rivals(Region& region, Tile playerCamp, std::uint64_t seed, const SimConfig& baseConfig) : region_(region) {
+Rivals::Rivals(Region& region, Tile playerCamp, std::uint64_t seed, const SimConfig& baseConfig, const std::vector<CampSite>& placed) : region_(region) {
+    std::vector<CampSite> given;
+    for (const CampSite& camp : placed) {
+        if (!camp.player) given.push_back(camp);
+    }
     core::Pcg32 random(seed, 41); // the stream "rivals" (Charter rule 6)
     const int margin = region.config().edgeWall + 6;
     const int span = region.size() - 2 * margin;
     static const char* const kNames[] = {"the River Clan", "the Stone Clan", "the Wind Clan", "the Ash Clan"};
-    for (int index = 0; index < kClans; ++index) {
+    const int count = std::max(kClans, static_cast<int>(given.size()));
+    for (int index = 0; index < count; ++index) {
         // Looking for a fair place far from everybody; after 400 tries, any walkable place far enough.
         Tile site{};
         bool found = false;
+        const bool fixed = index < static_cast<int>(given.size()); // the owner put this clan's camp
+        if (fixed) {
+            site = given[static_cast<std::size_t>(index)].at;
+            found = true;
+        }
         for (int attempt = 0; attempt < 800 && !found; ++attempt) {
             const Tile candidate{margin + static_cast<int>(random.below(static_cast<std::uint32_t>(span))), margin + static_cast<int>(random.below(static_cast<std::uint32_t>(span)))};
             if (distanceTiles(candidate, playerCamp) < kMinimumDistanceTiles) continue;
@@ -52,6 +62,10 @@ Rivals::Rivals(Region& region, Tile playerCamp, std::uint64_t seed, const SimCon
         config.clan.startingPeople = 10 + static_cast<int>(random.below(11)); // 10 to 20 people
         RivalClan clan;
         clan.name = kNames[index % 4];
+        if (fixed) {
+            if (!given[static_cast<std::size_t>(index)].clan.empty()) clan.name = given[static_cast<std::size_t>(index)].clan;
+            if (given[static_cast<std::size_t>(index)].people > 0) config.clan.startingPeople = given[static_cast<std::size_t>(index)].people;
+        }
         clan.world = std::make_unique<World>(seed ^ (0xA5A5A5A5ULL * static_cast<std::uint64_t>(index + 1)), config);
         clan.camp = found ? site : Tile{region.size() - margin - index * 10, region.size() - margin};
         clan.lastSeason = clan.world->date().season;

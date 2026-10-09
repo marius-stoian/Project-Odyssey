@@ -182,7 +182,8 @@ TEST_CASE("US-204 Move and take away: each is one step of Undo, a seed tree is h
     const sim::WorldFile saved = sim::loadWorld(rig.view.worldFile(), config());
     sim::Region regenerated = sim::makeWorldRegion(saved, config());
     CHECK_FALSE(hasTree(game::levelFromRegion(regenerated, rig.definitions, rig.catalogs, saved.edits))); // the tree stays away
-    CHECK(hasTree(game::levelFromRegion(regenerated, rig.definitions, rig.catalogs)));                    // and without the file it is there
+    sim::Region seedOnly(1, config());
+    CHECK(hasTree(game::levelFromRegion(seedOnly, rig.definitions, rig.catalogs)));                       // and without the file it is there
     CHECK(rig.view.undo());
     CHECK(rig.view.edits().placed.size() == 1);
 
@@ -312,4 +313,76 @@ TEST_CASE("US-204 Palette: the Place tool offers the plants, objects, animals, p
     CHECK(std::find(palette.people.begin(), palette.people.end(), "goblin") != palette.people.end());
     CHECK(std::find(palette.classes.begin(), palette.classes.end(), "trader") != palette.classes.end());
     for (const std::string& object : definitions.objects) CHECK(std::find(palette.things.begin(), palette.things.end(), object) != palette.things.end());
+}
+
+// ---- US-205 Camps and resources ----
+
+TEST_CASE("US-205 Camps: a rival camp placed with the tool is refused in water, allowed anyway on poor ground, and moved with Move") {
+    Rig rig("camps");
+    sim::Region& land = *rig.view.region();
+    sim::Tile site{-1, -1};
+    for (int y = 30; y < 226 && site.x < 0; y += 3) {
+        for (int x = 30; x < 226 && site.x < 0; x += 3) {
+            if (std::max(std::abs(x - land.start().x), std::abs(y - land.start().y)) >= 60 && land.biomeAt(x, y) == sim::Biome::Steppe && land.goodSite({x, y})) site = {x, y};
+        }
+    }
+    REQUIRE(site.x >= 0);
+    sim::Tile water{-1, -1};
+    for (int y = 30; y < 226 && water.x < 0; ++y) {
+        for (int x = 30; x < 226 && water.x < 0; ++x) {
+            if (land.biomeAt(x, y) == sim::Biome::Water) water = {x, y};
+        }
+    }
+    rig.view.setPlaceGroup(sim::EditGroup::Camp);
+    rig.view.setPlaceKind("rival");
+    rig.view.setPlaceName("the Crow Clan");
+    CHECK(rig.view.placeEntry(water.x, water.y).empty()); // refused
+    REQUIRE_FALSE(rig.said.empty());
+    CHECK(rig.said.back().find("water") != std::string::npos);
+    CHECK(rig.view.edits().placed.empty());
+
+    REQUIRE(rig.view.placeEntry(site.x, site.y) == "c-0001");
+    rig.view.setTool(game::RegionTool::Move);
+    CHECK(rig.view.selectAt(site.x, site.y));
+    int step = 1; // the next tile along that passes the site check too (a moved camp is checked like a new one)
+    while (step < 12 && !(land.biomeAt(site.x + step, site.y) == sim::Biome::Steppe && land.goodSite({site.x + step, site.y}))) ++step;
+    CHECK(rig.view.moveSelectedTo(site.x + step, site.y)); // moved: the rival clan starts there now
+    REQUIRE_FALSE(sim::campsOf(rig.view.edits()).empty());
+    CHECK(sim::campsOf(rig.view.edits())[0].at.x == site.x + step);
+    CHECK(rig.view.undo());
+    REQUIRE_FALSE(sim::campsOf(rig.view.edits()).empty());
+    CHECK(sim::campsOf(rig.view.edits())[0].at.x == site.x);
+}
+
+TEST_CASE("US-205 Resources: Set amount=50 on a flint spot of the seed gives 50, the view and Undo follow") {
+    Rig rig("resources");
+    sim::Region& land = *rig.view.region();
+    sim::Tile flint{-1, -1};
+    for (int cy = 1; cy < 7 && flint.x < 0; ++cy) {
+        for (int cx = 1; cx < 7 && flint.x < 0; ++cx) {
+            for (const sim::Resource& resource : land.chunk(cx, cy).resources) {
+                if (resource.kind == sim::ResourceKind::Flint) flint = {resource.x, resource.y};
+            }
+        }
+    }
+    REQUIRE(flint.x >= 0);
+    rig.view.setPlaceGroup(sim::EditGroup::Resource);
+    rig.view.setPlaceKind("flint");
+    REQUIRE(rig.view.placeEntry(flint.x, flint.y) == "r-0001");
+    CHECK(rig.view.setProperty("amount", "50"));
+    CHECK_FALSE(rig.view.setProperty("amount", "many"));
+    CHECK(land.resourcesNear(flint, 0)[0].amount == 50);
+    REQUIRE(rig.view.saveWorld());
+    const sim::WorldFile saved = sim::loadWorld(rig.view.worldFile(), config());
+    sim::Region played = sim::makeWorldRegion(saved, config());
+    sim::Date today;
+    int taken = 0;
+    while (played.harvest(flint.x, flint.y, today) && taken < 100) ++taken;
+    CHECK(taken == 50);
+
+    CHECK(rig.view.undo()); // the amount
+    CHECK(land.resourcesNear(flint, 0)[0].amount == 1);
+    CHECK(rig.view.undo()); // the entry
+    CHECK(rig.view.edits().placed.empty());
+    CHECK(land.resourcesNear(flint, 0)[0].amount == 1);
 }
