@@ -88,6 +88,8 @@ public:
     // Uploads an image (4 bytes per pixel: red, green, blue, alpha) and returns its number.
     // Textures are sampled nearest-neighbour: pixels stay square when scaled up.
     int createTexture(int width, int height, const std::uint8_t* rgba);
+    // Gives a texture back to the card (US-202).
+    void destroyTexture(int texture);
 
     // Draws part of a texture at a position on the virtual screen (virtual pixels).
     void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination);

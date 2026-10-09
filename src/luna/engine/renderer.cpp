@@ -20,6 +20,10 @@ Texture WindowRenderer::createTexture(const Image& image) {
     return {window_.createTexture(image.width(), image.height(), image.data()), image.width(), image.height()};
 }
 
+void WindowRenderer::destroyTexture(const Texture& texture) {
+    window_.destroyTexture(texture.id);
+}
+
 void WindowRenderer::draw(const Texture& texture, const Rect& source, Point at) {
     window_.drawTexture(texture.id, source, {at.x, at.y, source.width, source.height});
 }

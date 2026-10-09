@@ -3,6 +3,7 @@
 #include "boundary.h"
 
 #include "game/generator_panel.h"
+#include "game/world_history.h"
 #include "luna/engine/image.h"
 #include "luna/engine/input.h"
 #include "luna/engine/minimap.h"
@@ -10,13 +11,16 @@
 #include "luna/engine/ui.h"
 #include "sim/region.h"
 #include "sim/region_edits.h"
+#include "sim/world_file.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <map>
 #include <memory>
+#include <set>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -32,6 +36,9 @@ inline constexpr int kRegionLayerCount = static_cast<int>(RegionLayer::Count);
 
 const char* regionLayerName(RegionLayer layer);
 
+// What a left click on the map does (US-202). Pan is the default; the others paint the biome chosen on the bar, and then the middle or right button pans.
+enum class RegionTool { Pan, Brush, Rectangle, Fill, Erase };
+
 // The region in the Editor (US-200, design docs/plans/M12-world-editing-design.md section 4): the whole generated land on a zoomable map.
 // It makes its own Region from the same seed and the same region.json as the game, so the two are the same world (the "Same world" test
 // compares them tile for tile). Each 32-tile chunk is drawn from one small picture per layer (one pixel a tile, stretched to the zoom), made
@@ -46,6 +53,9 @@ public:
     static constexpr int kChunkBuildsPerFrame = 4;    // chunk pictures made in one drawn frame
     static constexpr int kOverviewRowsPerTick = 32;   // rows of the overview painted in one tick
     static constexpr int kBarHeight = 20;
+    static constexpr int kToolRowHeight = 18;         // the row of tools under the bar
+    static constexpr int kTopHeight = kBarHeight + kToolRowHeight;
+    static constexpr int kMaxBrush = 9;
     static constexpr int kOverviewSize = 96;          // the overview on screen, in pixels
 
     RegionView(int viewWidth, int viewHeight, Say say);
@@ -53,6 +63,13 @@ public:
     // Where the land comes from: region.json, and the seed of the game being edited (called each time the view opens).
     // `saved` is called with region.json after the generator settings wrote it (the game reads the sets that watch it again).
     void setSource(std::filesystem::path configFile, std::function<std::uint64_t()> seedNow, std::function<void(const std::filesystem::path&)> saved = {});
+
+    // Where the world file lives (assets/worlds) and its name (US-202). When the view opens a region it reads <folder>/<name>.json if that file is for the same seed.
+    void setWorldsFolder(std::filesystem::path folder, std::string name = "default");
+    std::filesystem::path worldFile() const { return worldsFolder_ / (worldName_ + ".json"); }
+    // Writes the hand edits (and the generator settings that differ from region.json) to the world file. False, with the reason said, when it cannot.
+    bool saveWorld();
+    bool worldDirty() const { return dirty_; }
 
     bool shown() const { return shown_; }
     void show(bool shown);
@@ -79,6 +96,24 @@ public:
     static RegionLayer layerOf(sim::ResourceKind kind);
     // The picture of one chunk in one layer: chunkSize x chunkSize, one pixel a tile, see-through where the layer has nothing.
     luna::engine::Image chunkImage(int cx, int cy, RegionLayer layer) const;
+
+    // Painting (US-202): the tools of the second row. Every stroke, rectangle and fill is one step of Undo (Ctrl+Z, Ctrl+Y) in the world history. A tile painted
+    // the biome the seed already gives is not an edit at all, so the file holds only differences.
+    RegionTool tool() const { return tool_; }
+    void setTool(RegionTool tool) { tool_ = tool; }
+    sim::Biome paintBiome() const { return paintBiome_; }
+    void setPaintBiome(sim::Biome biome) { paintBiome_ = biome; }
+    int brushSize() const { return brushSize_; }
+    void setBrushSize(int size) { brushSize_ = std::clamp(size, 1, kMaxBrush); }
+    void beginStroke();                         // the brush dabs until endStroke are one step
+    void endStroke();
+    int paintBrush(int x, int y);               // stamps the brush (the Erase tool clears) at a tile; returns the tiles that changed
+    int paintRectangle(int x0, int y0, int x1, int y1); // one step; returns the tiles that changed
+    int paintFill(int x, int y);                // the connected tiles of the same biome, one step; refused (0, with a message) above kMaxFill tiles
+    bool undo();
+    bool redo();
+    const WorldHistory& history() const { return history_; }
+    static constexpr int kMaxFill = 20000;
 
     // The view.
     int zoom() const { return zoom_; }
@@ -120,6 +155,14 @@ private:
     void zoomAround(int newZoom, int screenX, int screenY);
     void clampCentre();
     void reopen(const sim::RegionConfig& config); // Apply: the same view over the new land
+    void buildTools();
+    void finishStepAs(const std::string& label); // a step closed by a tool that is not a stroke
+    bool editTile(int x, int y, std::optional<sim::Biome> target); // one tile into the open step; true when it changed
+    void finishStep(const std::string& label);                     // the open step into the history, the pictures and the overview
+    void applyChanges(const std::vector<TileChange>& changes, bool forward);
+    void syncTileEdits();                                          // edits_.tiles from the region
+    void markStale(int x, int y);
+    void handlePaint(const luna::engine::Pointer& pointer);
     const luna::engine::Texture* chunkTexture(luna::engine::Renderer& renderer, int cx, int cy, RegionLayer layer) const;
 
     int viewWidth_;
@@ -140,8 +183,28 @@ private:
     std::vector<luna::engine::Button*> layerButtons_;
     std::unique_ptr<GeneratorPanel> settings_;
     sim::RegionEdits edits_;
+    sim::RegionConfig baseConfig_;                 // region.json as it was read: the world file stores the settings that differ from it
+    std::filesystem::path worldsFolder_;
+    std::string worldName_ = "default";
+    bool dirty_ = false;                           // edits not yet in the world file
+    RegionTool tool_ = RegionTool::Pan;
+    sim::Biome paintBiome_ = sim::Biome::Water;
+    int brushSize_ = 3;
+    WorldHistory history_;
+    bool strokeOpen_ = false;
+    WorldCommand stroke_;
+    bool painting_ = false;                        // the left button is down with a painting tool
+    std::optional<luna::engine::Point> lastDab_;   // the previous tile of a brush stroke, so a fast drag leaves no gaps
+    std::optional<luna::engine::Point> rectFrom_;  // the first corner of a rectangle being dragged
+    std::optional<luna::engine::Point> rectTo_;
+    std::unique_ptr<luna::engine::Panel> tools_;
+    std::vector<luna::engine::Button*> toolButtons_;
+    std::vector<luna::engine::Button*> biomeButtons_;
+    luna::engine::NumberField* sizeField_ = nullptr;
 
     mutable std::map<std::tuple<int, int, int>, luna::engine::Texture> textures_; // (chunk x, chunk y, layer)
+    mutable std::set<std::tuple<int, int, int>> stale_;      // pictures whose land was painted since they were made: made again when there is room in the frame
+    mutable std::vector<luna::engine::Texture> pendingDestroy_; // pictures given back at the start of the next drawn frame
     mutable std::map<int, RegionLayer> textureLayer_;
     mutable int builtThisFrame_ = 0;
 };

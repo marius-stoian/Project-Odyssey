@@ -59,6 +59,9 @@ public:
 
     virtual Texture createTexture(const Image& image) = 0;
 
+    // Gives a texture back (US-202): a picture that is made again when its content changes, so the old one does not pile up. The texture is not drawn afterwards.
+    virtual void destroyTexture(const Texture& /*texture*/) {}
+
     // Draws the `source` part of `texture` with its top-left corner at `at`.
     virtual void draw(const Texture& texture, const Rect& source, Point at) = 0;
 
@@ -83,6 +86,7 @@ public:
     explicit WindowRenderer(platform::Window& window);
 
     Texture createTexture(const Image& image) override;
+    void destroyTexture(const Texture& texture) override;
     void draw(const Texture& texture, const Rect& source, Point at) override;
     void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) override;
     void measureGpu(bool on) override;
@@ -108,6 +112,7 @@ public:
     };
 
     Texture createTexture(const Image& image) override;
+    void destroyTexture(const Texture& texture) override { destroyed_.push_back(texture.id); }
     void draw(const Texture& texture, const Rect& source, Point at) override;
     void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) override;
 
@@ -118,6 +123,7 @@ public:
     void setNormalMap(const Texture& texture, const Texture& normals) override { normalMaps_.emplace_back(texture.id, normals.id); }
 
     const std::vector<Draw>& draws() const { return draws_; }
+    const std::vector<int>& destroyed() const { return destroyed_; } // the numbers of the textures given back (US-202)
     void clear() { draws_.clear(); }
     const LightFrame& lighting() const { return lastLighting_; } // the last frame set
     bool lightingOn() const { return lighting_; }
@@ -129,6 +135,7 @@ private:
     std::vector<std::pair<int, int>> normalMaps_;
     int nextTexture_ = 0;
     std::vector<Draw> draws_;
+    std::vector<int> destroyed_;
 };
 
 // The largest whole-number scale at which the virtual screen fits the window, and where

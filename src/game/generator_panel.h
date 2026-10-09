@@ -52,6 +52,8 @@ public:
     void setSource(std::filesystem::path configFile, std::function<void(const std::filesystem::path&)> saved, std::function<void(const sim::RegionConfig&)> applied);
     // The land on screen and the hand edits laid over it; the draft starts from its settings. Call when the view opens a region.
     void bind(sim::Region* current, const sim::RegionEdits* edits);
+    // The land on screen was painted: its small map is painted again.
+    void refreshNow();
     // Gives the fields their tooltips from the schema's help (the entries "data.sim-region.<key>").
     void applyHelp(EditorHelp& help);
 
@@ -69,7 +71,7 @@ public:
     // Preview: false when the draft breaks a rule (the first problem is said). Otherwise the preview region is made and its map painted over the next ticks.
     bool preview();
     bool previewStarted() const { return previewRegion_ != nullptr; }
-    bool previewComplete() const { return previewMap_ && previewMap_->complete(); }
+    bool previewComplete() const { return previewRegion_ && previewMap_ && previewMap_->complete(); }
     const sim::Region* previewRegion() const { return previewRegion_.get(); }
 
     // Apply: writes region.json by patching only the settings that changed, then reopens the region. False (with the reason said) when it cannot.

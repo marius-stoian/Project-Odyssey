@@ -129,6 +129,10 @@ int Window::createTexture(int width, int height, const std::uint8_t* rgba) {
     return backend_->createTexture(width, height, rgba);
 }
 
+void Window::destroyTexture(int texture) {
+    backend_->destroyTexture(texture);
+}
+
 void Window::drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination) {
     backend_->drawTexture(texture, source, destination, 255, false);
 }

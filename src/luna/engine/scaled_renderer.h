@@ -15,6 +15,7 @@ public:
     ScaledRenderer(Renderer& inner, int scale) : inner_(inner), scale_(scale < 1 ? 1 : scale) {}
 
     Texture createTexture(const Image& image) override { return inner_.createTexture(image); }
+    void destroyTexture(const Texture& texture) override { inner_.destroyTexture(texture); }
     void draw(const Texture& texture, const Rect& source, Point at) override;
     void drawStyled(const Texture& texture, const Rect& source, const Rect& destination, DrawStyle style) override;
 

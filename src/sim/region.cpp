@@ -109,11 +109,70 @@ Biome Region::generatedBiome(int x, int y) const {
 
 Biome Region::biomeAt(int x, int y) const {
     if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return Biome::Mountain;
+    if (!edits_.empty()) {
+        const auto painted = edits_.find(key(x, y));
+        if (painted != edits_.end()) return painted->second;
+    }
+    return seedBiomeAt(x, y);
+}
+
+Biome Region::seedBiomeAt(int x, int y) const {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size) return Biome::Mountain;
     if (!overrides_.empty()) {
         const auto found = overrides_.find(key(x, y));
         if (found != overrides_.end()) return found->second;
     }
     return generatedBiome(x, y);
+}
+
+bool Region::onEdgeWall(int x, int y) const {
+    const int edge = std::min(std::min(x, config_.size - 1 - x), std::min(y, config_.size - 1 - y));
+    return edge < config_.edgeWall;
+}
+
+std::optional<Biome> Region::tileEdit(int x, int y) const {
+    const auto found = edits_.find(key(x, y));
+    if (found == edits_.end()) return std::nullopt;
+    return found->second;
+}
+
+std::vector<std::pair<Tile, Biome>> Region::tileEditList() const {
+    std::vector<std::pair<Tile, Biome>> list;
+    list.reserve(edits_.size());
+    for (const auto& [packed, biome] : edits_) list.push_back({{static_cast<int>(packed >> 32), static_cast<int>(packed & 0xFFFFFFFFU)}, biome}); // key packs x high, y low
+    std::sort(list.begin(), list.end(), [](const auto& a, const auto& b) { return a.first.y != b.first.y ? a.first.y < b.first.y : a.first.x < b.first.x; });
+    return list;
+}
+
+// The chunks a painted tile can change: its own and the ones next to it (berries grow at the edge of a forest, which looks at the neighbours).
+void Region::forgetChunksAround(int x, int y) {
+    for (int dy = -1; dy <= 1; ++dy) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            const int tx = x + dx;
+            const int ty = y + dy;
+            if (tx < 0 || ty < 0 || tx >= config_.size || ty >= config_.size) continue;
+            chunks_.erase(key(tx / config_.chunkSize, ty / config_.chunkSize));
+        }
+    }
+}
+
+bool Region::setTileEdit(int x, int y, Biome biome) {
+    if (x < 0 || y < 0 || x >= config_.size || y >= config_.size || onEdgeWall(x, y)) return false;
+    if (seedBiomeAt(x, y) == biome) {
+        if (edits_.erase(key(x, y)) == 0) return true; // already the seed's own land: nothing to keep
+    } else {
+        const auto found = edits_.find(key(x, y));
+        if (found != edits_.end() && found->second == biome) return true;
+        edits_[key(x, y)] = biome;
+    }
+    forgetChunksAround(x, y);
+    return true;
+}
+
+bool Region::clearTileEdit(int x, int y) {
+    if (edits_.erase(key(x, y)) == 0) return false;
+    forgetChunksAround(x, y);
+    return true;
 }
 
 std::optional<Resource> Region::resourceAt(int x, int y) const {

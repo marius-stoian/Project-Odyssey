@@ -1,0 +1,11 @@
+US-202 build and own tests, 2026-10-09, Debug (windows-x64-debug), all targets
+build exit 0, warning lines 0, error lines 0
+[doctest] test cases:  7 |  7 passed | 0 failed | 397 skipped
+[doctest] assertions: 56 | 56 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] test cases:   20 |   20 passed | 0 failed | 484 skipped
+[doctest] assertions: 1516 | 1516 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] test cases:    49 |    49 passed | 0 failed | 0 skipped
+[doctest] assertions: 30804 | 30804 passed | 0 failed |
+[doctest] Status: SUCCESS!

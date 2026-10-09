@@ -111,3 +111,4 @@ Changing the seed or the generator settings regenerates the land under the overr
 
 ## 15. Amendments
 - **US-201 (D-62):** Apply writes `assets/data/sim/region.json` (changed lines only), not a `generator` section of the world file; the seed is not a field (it comes with a new game); `size` and `chunkSize` are read-only. Preview is a 128 x 128 sample (section 5 said 1 pixel a tile of the full map).
+- **US-202 (D-63):** the world file is read by the Region view and the sim loader (`sim::loadWorld`, `makeWorldRegion`); the game reads it from US-207. A painted tile that equals the seed biome is not an edit. `Renderer::destroyTexture` exists (section 4 had no way to release a chunk picture). Per-conflict choices (section 7, rule 3) move to US-204 and US-205, where placed things exist.

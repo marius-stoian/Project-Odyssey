@@ -37,6 +37,9 @@ public:
     virtual void present() = 0;
 
     virtual int createTexture(int width, int height, const std::uint8_t* rgba) = 0;
+    // Gives a texture back (US-202). The number is not used again; drawing it afterwards is a mistake. Safe to call at any time: a backend that batches
+    // draws lets go of the texture when the next frame starts.
+    virtual void destroyTexture(int /*texture*/) {}
     virtual void drawTexture(int texture, const odysseus::core::Rect& source, const odysseus::core::Rect& destination, std::uint8_t alpha, bool additive) = 0;
 
     virtual odysseus::core::Rect presentationRect() const = 0; // where the virtual screen lands in the window, in real pixels

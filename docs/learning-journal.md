@@ -2373,3 +2373,27 @@ map.build(kRowsPerTick, [&land](int x, int y) { return colourOf(land.biomeAt(x *
 **Try it (5 minutes).** F2, **Region**, **Settings**, lake level 300, mountain level 900, **Preview**. Then Revert.
 
 **Check yourself.** Why can Preview show a whole new map while the old one stays on screen, without copying the old one first?
+
+## US-202: store the difference, not the copy (M12)
+
+**What we built.** You can paint the land in the Region view: a brush, a rectangle, a fill, and Reset to give tiles back. Ctrl+Z undoes a whole stroke. Save writes `assets/worlds/default.json`, and 100 painted tiles are 100 short lines in it, not the 65,536 tiles of the map.
+
+**The idea: an overlay.** The land is a pure function of the seed (US-201). To keep hand edits we do not copy the land and change the copy. We keep a small list of differences and lay it over what the function returns. In `Region::biomeAt` the first question is "did the owner paint this tile?"; only if not do we ask the seed.
+
+```cpp
+if (!edits_.empty()) {
+    const auto painted = edits_.find(key(x, y));
+    if (painted != edits_.end()) return painted->second;
+}
+return seedBiomeAt(x, y);
+```
+
+This has three good consequences. The file is tiny. Undo is easy, because a step is just "these tiles had this edit before and this edit after". And painting the same biome the seed already gives removes the edit, so the list never holds a change that changes nothing.
+
+**The idea: what depends on a tile.** A tree grows on a forest tile, and berries grow at the edge of a forest, which looks at the four neighbours. So when you paint one tile, the chunks within one tile of it are forgotten and made again the next time they are asked for. Their pictures are rebuilt too; the old picture stays on screen until the new one is ready, and then goes back to the renderer with `destroyTexture`.
+
+**Where to look.** `Region::setTileEdit` in `src/sim/region.cpp`, `WorldFile` in `src/sim/world_file.cpp`, `WorldHistory` in `src/game/world_history.cpp`, `RegionView::handlePaint` in `src/game/region_view.cpp`, `tests/game/world_edit_test.cpp`.
+
+**Try it (5 minutes).** F2, **Region**, **Brush**, **Water**, drag across a meadow, Ctrl+Z, Ctrl+Y, **Save**, then open `assets/worlds/default.json` and look at how little is in it.
+
+**Check yourself.** Why would a file that stored the whole painted map be a problem once you change a generator setting and the land underneath changes?
