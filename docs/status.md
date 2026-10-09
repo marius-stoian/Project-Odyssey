@@ -227,7 +227,7 @@ Codex v2.4. Edited only by mraw-orchestrator.
 | S-US-205 | US-205 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-205/; D-66; Milestone-157 |
 | S-US-206 | US-206 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-206/; D-67; Milestone-158 |
 | S-US-207 | US-207 | M12 | Done | 2026-10-09; Debug zero warnings, own cases pass; full verify at X-M12; docs/evidence/US-207/; D-68; Milestone-159 |
-| X-M12 | - | M12 | To do |  |
+| X-M12 | - | M12 | Done | 2026-10-10; Debug and Release 22/22 + 8/8, zero warnings; CI on main green; m12-done; docs/gates/M12.md; Milestone-160 |
 | K-M13 | - | M13 | To do |  |
 | S-US-210 | US-210 | M13 | To do |  |
 | S-US-211 | US-211 | M13 | To do |  |
